@@ -46,3 +46,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 
 在不同系统直接运行 Swoft
 ![image](https://user-images.githubusercontent.com/20330940/116053161-f16d7400-a6ac-11eb-87b8-e510c6454861.png)
+
+## 正在进行的项目
+- [ ] curl 扩展静态编译
+- [ ] php.ini 附带
