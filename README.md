@@ -8,7 +8,9 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - WSL2 也是支持的
 
 ## 开始
+可以直接带走此仓库中的编译好的二进制（`./php`），版本 7.4.16（swoole 版本 4.6.6）。
 ```bash
+# 自己编译
 ./static-compile-php.sh
 ```
 完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
