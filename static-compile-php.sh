@@ -165,7 +165,7 @@ apk add oniguruma-dev
 # php的openssl支持
 apk add openssl-libs-static openssl-dev openssl
 # php的gd支持，如果不需要gd则去掉--enable-gd和下面的依赖
-apk add libpng-dev
+apk add libpng-dev libpng-static
 
 
 downloadAll && compileLiblzma && compileLibxml2 && \
