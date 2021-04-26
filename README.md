@@ -39,5 +39,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - tokenizer
 
 ## 运行示例
+编译后的状态
+![image](https://user-images.githubusercontent.com/20330940/116053556-68a30800-a6ad-11eb-88f8-aba015899e43.png)
+
 在不同系统直接运行 Swoft
 ![image](https://user-images.githubusercontent.com/20330940/116053161-f16d7400-a6ac-11eb-87b8-e510c6454861.png)
