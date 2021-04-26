@@ -24,6 +24,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - mbstring
 - phar
 - pdo
+- gd
 - pdo_mysql
 - mysqlnd
 - sockets
