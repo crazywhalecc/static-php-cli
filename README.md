@@ -14,7 +14,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 ```bash
 # 自己编译
 ./static-compile-php.sh
-完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
+# 完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
 ```
 
 ## 包含扩展
