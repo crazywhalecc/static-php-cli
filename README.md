@@ -50,3 +50,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 ## 正在进行的项目
 - [ ] curl 扩展静态编译
 - [ ] php.ini 附带
+
+## 参考资料
+- <https://blog.terrywh.net/post/2019/php-static-openssl/>
+- <https://stackoverflow.com/a/37245653>
+- <http://blog.gaoyuan.xyz/2014/04/09/statically-compile-php/>
