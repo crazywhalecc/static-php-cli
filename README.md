@@ -2,7 +2,7 @@
 Compile A Statically Linked PHP With Swoole and other Extensions
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展（CLI 模式，暂不支持 CGI 和 FPM 模式）
 
-[![作者QQ](https://img.shields.io/badge/version-1.0.0-green.svg)]()
+[![版本](https://img.shields.io/badge/version-1.1.0-green.svg)]()
 
 ## 环境需求
 - 目前在 x86_64 平台试验成功，其他架构需自行测试
@@ -10,14 +10,15 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - WSL2 也是支持的
 
 ## 开始
-可以直接带走此仓库中的编译好的二进制（`./php`），版本 7.4.16（swoole 版本 4.6.6）。
+可以直接在旁边的 Release 中下载编译好的二进制，也可以自己编译。
 ```bash
 # 自己编译
 ./static-compile-php.sh
-```
 完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
+```
 
 ## 包含扩展
+- bcmath
 - calendar
 - ctype
 - filter
@@ -27,6 +28,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - json
 - mbstring
 - phar
+- curl
 - pdo
 - gd
 - pdo_mysql
