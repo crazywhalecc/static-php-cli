@@ -47,9 +47,11 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 在不同系统直接运行 Swoft
 ![image](https://user-images.githubusercontent.com/20330940/116053161-f16d7400-a6ac-11eb-87b8-e510c6454861.png)
 
-## 正在进行的项目
-- [ ] curl 扩展静态编译
-- [ ] php.ini 附带
+## Todo List
+- [X] curl/libcurl 扩展静态编译
+- [ ] 可自行选择不需要编译进入的扩展
+- [ ] php.ini 内嵌或分发
+- [ ] 尝试带进去个 composer（其实自己下完全可以）
 
 ## 参考资料
 - <https://blog.terrywh.net/post/2019/php-static-openssl/>
