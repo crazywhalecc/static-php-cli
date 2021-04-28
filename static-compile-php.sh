@@ -23,7 +23,7 @@ function downloadIt() {
   return 0
 }
 
-_script_ver="1.1.0"
+_script_ver="1.1.1"
 
 _php_ver="7.4.16"
 _swoole_ver="4.6.6"
