@@ -33,7 +33,7 @@ function download_file() {
 # 获取要下载的源码的版本号
 function lib_ver() {
     case $1 in
-    "phpver"|"php") echo "7.3.28" ;;
+    "phpver"|"php") echo "7.4.18" ;;
     "swoole")       echo "4.6.6" ;;
     "hash")         echo "1.5" ;;
     "inotify")      echo "3.0.0" ;;
@@ -263,6 +263,7 @@ function php_get_configure_args() {
     case $(lib_ver php) in
     7.3.*)
         _php_arg="$_php_arg --with-gd"
+        _php_arg="$_php_arg --enable-libxml"
         _php_arg="$_php_arg --with-libxml-dir=$_opt_dir/libxml2"
         _php_arg="$_php_arg --enable-hash"
         ;;
