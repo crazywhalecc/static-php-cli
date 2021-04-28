@@ -13,7 +13,7 @@ do
         "$_main_dir""static-compile-php.sh" && \
         cp "$_main_dir""php-dist/bin/php" "$_build_dir/" && \
         cd "$_build_dir/" && \
-        tar -zcvf "php-$loop-static-bin.tar.gz" "./php" && \
+        tar -zcvf "php-$loop-static-bin-"$(uname -m)".tar.gz" "./php" && \
         mv "./php" "./php-$loop" && \
         cd "$_main_dir"
     if [ $? -ne 0 ]; then
