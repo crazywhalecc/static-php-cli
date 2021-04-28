@@ -167,6 +167,7 @@ function compilePHPWithSwoole() {
         cat "$_home_dir""ac_override_1" "$_home_dir""source/php-""$_php_ver/ext/curl/config.m4" "$_home_dir""ac_override_2" > /tmp/aa && \
         mv /tmp/aa "$_home_dir""source/php-""$_php_ver/ext/curl/config.m4" && \
         ./buildconf --force && \
+        PKG_CONFIG_PATH="$PKG_CONFIG_PATH:""$_home_dir""opt/libxml2/lib/pkgconfig" && \
         PKG_CONFIG_PATH="$PKG_CONFIG_PATH:""$_home_dir""opt/curl/lib/pkgconfig" ./configure LDFLAGS=-static \
             --prefix="$_home_dir""php-dist" \
             --disable-all \
@@ -231,6 +232,9 @@ apk add oniguruma-dev
 apk add openssl-libs-static openssl-dev openssl
 # php的gd支持，如果不需要gd则去掉--enable-gd和下面的依赖
 apk add libpng-dev libpng-static
+# curl的c-ares支持，如果不需要curl则去掉
+apk add c-ares-static c-ares-dev
+
 
 downloadAll && \
     compileLiblzma && \
