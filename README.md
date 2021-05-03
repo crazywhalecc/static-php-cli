@@ -56,6 +56,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - [ ] 可自行选择不需要编译进入的扩展
 - [ ] php.ini 内嵌或分发
 - [ ] 尝试带进去个 composer（其实自己下完全可以）
+- [ ] i18n（国际化脚本本身和 README）
 
 ## 参考资料
 - <https://blog.terrywh.net/post/2019/php-static-openssl/>
