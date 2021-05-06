@@ -1,4 +1,4 @@
-# static-php-swoole
+# static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. [English README](/README-en.md)
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展（CLI 模式，暂不支持 CGI 和 FPM 模式）
@@ -9,6 +9,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 - 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
 - 需要 Alpine Linux（测试环境为 3.13 版本，其他版本未测试）系统（也就是说需要 musl）
 - WSL2 也是支持的
+- 脚本支持编译的 PHP 版本 >= 7.3
 
 ## 开始
 可以直接在旁边的 Release 中下载编译好的二进制，也可以自己编译。
@@ -16,6 +17,10 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 # 自己编译
 ./static-compile-php.sh
 # 完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
+
+# 多 PHP 版本一键编译
+./multi-version-compile.sh
+# 结束后多个 PHP 版本的二进制文件会在 build/ 目录下。
 ```
 
 ## 主分支版本
