@@ -17,6 +17,11 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 # 完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
 ```
 
+## 主分支版本
+- php：7.4.18
+- libxml2: 2.9.10
+- curl: 7.76.1
+
 ## 包含扩展
 - bcmath
 - calendar
@@ -25,6 +30,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - openssl
 - pcntl
 - iconv
+- inotify (3.0.0)
 - json
 - mbstring
 - phar
@@ -34,8 +40,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions
 - pdo_mysql
 - mysqlnd
 - sockets
-- swoole
-- redis
+- swoole (4.6.6)
+- redis (5.3.4)
 - simplexml
 - dom
 - xml
