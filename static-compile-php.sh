@@ -1,6 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 
-function downloadIt() {
+_script_ver="1.2.0"
+_use_backup="no"
+
+_home_dir=$(pwd)"/" 
+_source_dir="$_home_dir""source"
+_opt_dir="$_home_dir""opt"
+
+function download_file() {
   downloader="wget"
   type wget >/dev/null 2>&1 || { downloader="curl"; }
   if [ "$downloader" = "wget" ]; then
@@ -11,7 +18,7 @@ function downloadIt() {
   _down_symbol=0
   if [ ! -f "$2" ]; then
     $downloader "$1" -$_down_prefix "$2" >/dev/null 2>&1 && \
-    echo "$1 完成！" && _down_symbol=1
+    echo "$1 完成！ $2" && _down_symbol=1
   else
     echo "$1 已存在！" && _down_symbol=1
   fi
@@ -23,33 +30,99 @@ function downloadIt() {
   return 0
 }
 
-_script_ver="1.1.1"
+# 获取要下载的源码的版本号
+function lib_ver() {
+    case $1 in
+    "phpver"|"php") echo "7.3.28" ;;
+    "swoole")       echo "4.6.6" ;;
+    "hash")         echo "1.5" ;;
+    "inotify")      echo "3.0.0" ;;
+    "redis")        echo "5.3.4" ;;
+    "libxml2")      echo "2.9.10" ;;
+    "curl")         echo "7.76.1" ;;
+    "liblzma")      echo "master" ;;
+    *)              echo "unknown" ;;
+    esac
+}
 
-_php_ver="7.4.16"
-_swoole_ver="4.6.6"
-_redis_ver="5.3.4"
-_libxml2_ver="2.9.10"
-_curl_ver="7.76.1"
+# 获取解压后的源码根目录
+function lib_x_dirname() {
+    case $1 in
+        "php"|"swoole"|"hash"|"inotify"|"redis"|"libxml2"|"curl")
+            if [ "$2" = "file" ]; then _name_prefix=".tar.gz"; else _name_prefix=""; fi
+            echo "$1-$(lib_ver $1)$_name_prefix"
+            ;;
+        "liblzma")
+            if [ "$_use_backup" = "yes" ]; then 
+                if [ "$2" = "file" ]; then _name_prefix=".zip"; else _name_prefix=""; fi
+                echo "$1-$(lib_ver $1)$_name_prefix" 
+            else
+                if [ "$2" = "file" ]; then _name_prefix=".tar.gz"; else _name_prefix=""; fi
+                echo "$1""$_name_prefix"
+            fi
+            ;;
+        *)
+            echo "unknown" 
+            ;;
+    esac
+}
 
-# 默认编译在脚本当前目录
-_home_dir=$(pwd)"/"
+# 获取要下载的源码的链接地址
+function lib_download_link() {
+    if [ "$_use_backup" = "yes" ]; then
+        case $1 in
+        "php")          echo "https://www.php.net/distributions/php-$(lib_ver $1).tar.gz" ;;
+        "swoole")       echo "https://pecl.php.net/get/swoole-$(lib_ver $1).tgz" ;;
+        "hash")         echo "https://pecl.php.net/get/hash-$(lib_ver $1).tgz" ;;
+        "inotify")      echo "https://pecl.php.net/get/inotify-$(lib_ver $1).tgz" ;;
+        "redis")        echo "https://pecl.php.net/get/redis-$(lib_ver $1).tgz" ;;
+        "libxml2")      echo "http://xmlsoft.org/sources//libxml2-$(lib_ver $1).tar.gz" ;;
+        "liblzma")      echo "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip" ;;
+        "curl")         echo "https://curl.haxx.se/download/curl-$(lib_ver $1).tar.gz" ;;
+        *)              echo "unknown" ;;
+        esac
+    else 
+        case $1 in
+        "php")          echo "http://mirrors.sohu.com/php/php-$(lib_ver $1).tar.gz" ;;
+        "swoole")       echo "https://dl.zhamao.me/swoole/swoole-$(lib_ver $1).tgz" ;;
+        "hash")         echo "https://pecl.php.net/get/hash-$(lib_ver $1).tgz" ;;
+        "inotify")      echo "https://pecl.php.net/get/inotify-$(lib_ver $1).tgz" ;;
+        "redis")        echo "https://dl.zhamao.me/phpredis/redis-$(lib_ver $1).tgz" ;;
+        "libxml2")      echo "https://dl.zhamao.me/libxml2/libxml2-$(lib_ver $1).tar.gz" ;;
+        "liblzma")      echo "https://dl.zhamao.me/liblzma/liblzma.tar.gz" ;;
+        "curl")         echo "https://dl.zhamao.me/curl/curl-$(lib_ver $1).tar.gz" ;;
+        *)              echo "unknown" ;;
+        esac
+    fi
+}
 
-# PHP使用国内的搜狐镜像
-_php_down_link="http://mirrors.sohu.com/php/php-$_php_ver.tar.gz"
-# swoole使用自建的炸毛服务器的分发，因为pecl有时候在国内奇慢
-_swoole_down_link="https://dl.zhamao.me/swoole/swoole-$_swoole_ver.tgz"
-_swoole_down_link_bak="https://pecl.php.net/get/swoole-$_swoole_ver.tgz"
-# phpredis也使用自建的炸毛服务器分发
-_redis_down_link="https://dl.zhamao.me/phpredis/redis-$_redis_ver.tgz"
-_redis_down_link_bak="https://pecl.php.net/get/redis-$_redis_ver.tgz"
-# libxml2也使用自建的服务器
-_libxml2_down_link="https://dl.zhamao.me/libxml2/libxml2-$_libxml2_ver.tar.gz"
-_libxml2_down_link_bak="http://xmlsoft.org/sources/libxml2-$_libxml2_ver.tar.gz"
-# liblzma是自建的服务器，如果需要找原始位置，在GitHub搜索liblzma即可
-_liblzma_down_link="https://dl.zhamao.me/liblzma/liblzma.tar.gz"
-# curl/libcurl使用自建的服务器，bak是源地址
-_curl_down_link="https://dl.zhamao.me/curl/curl-$_curl_ver.tar.gz"
-_curl_down_link_bak="https://curl.haxx.se/download/curl-$_curl_ver.tar.gz"
+# 获取下载后源码包的解压命令
+function lib_x_cmd() {
+    case $1 in
+        "php"|"swoole"|"hash"|"inotify"|"redis"|"libxml2"|"curl")
+            _x_cmd="tar"
+            ;;
+        "liblzma") if [ "$_use_backup" = "yes" ]; then _x_cmd="unzip"; else _x_cmd="tar"; fi ;;
+        *) _x_cmd="unknown" ;;
+    esac
+    case $2 in
+    "cmd")
+        echo $_x_cmd
+        ;;
+    "file-prefix")
+        case $_x_cmd in
+        "tar") echo "-xf" ;;
+        "unzip") echo "" ;;
+        esac
+        ;;
+    "out-prefix")
+        case $_x_cmd in
+        "tar") echo "-C" ;;
+        "unzip") echo "-d" ;;
+        esac
+        ;;
+    esac
+}
 
 _curl_override_1='
 AC_DEFUN([PHP_CHECK_LIBRARY], [
@@ -78,52 +151,47 @@ AC_DEFUN([PHP_CHECK_LIBRARY], [
 ])
 '
 
-function downloadAll() {
-    mkdir "$_home_dir""source" > /dev/null 2>&1
+function lib_x() {
+    $(lib_x_cmd $1 cmd) $(lib_x_cmd $1 file-prefix) "$_source_dir/$(lib_x_dirname $1 file)" $(lib_x_cmd $1 out-prefix) "$_source_dir/"
+}
 
-    echo "正在下载 php 源码 "$_php_down_link" ..."
-    downloadIt $_php_down_link "$_home_dir""source/php.tar.gz" || { exit 1; } &
+function lib_move_ext() {
+    _src_dir="$_source_dir/$(lib_x_dirname $1)"
+    _dst_dir="$_source_dir/$(lib_x_dirname php)/ext/$1"
+    mv $_src_dir $_dst_dir
+}
 
-    #echo "正在下载 openssl 源码 "$_openssl_down_link" ..."
-    #downloadIt $_openssl_down_link "$_home_dir""source/openssl.tar.gz" || { exit; } &
+function download_all() {
+    mkdir "$_source_dir" > /dev/null 2>&1
 
-    echo "正在下载 swoole 源码 "$_swoole_down_link" ..."
-    downloadIt $_swoole_down_link "$_home_dir""source/swoole.tar.gz" || { exit 1; } &
-
-    echo "正在下载 redis 源码 "$_redis_down_link" ..."
-    downloadIt $_redis_down_link "$_home_dir""source/redis.tar.gz" || { exit 1; } &
-
-    echo "正在下载 libxml2 源码 ..."
-    downloadIt $_libxml2_down_link "$_home_dir""source/libxml2.tar.gz" || { exit 1; } &
-
-    echo "正在下载 liblzma 源码 ..."
-    downloadIt $_liblzma_down_link "$_home_dir""source/liblzma.tar.gz" || { exit 1; } &
-
-    echo "正在下载 curl 源码 ..."
-    downloadIt $_curl_down_link "$_home_dir""source/curl.tar.gz" || { exit 1; } &
+    for loop in "php" "swoole" "inotify" "hash" "redis" "libxml2" "liblzma" "curl"
+    do
+        echo "正在下载 $loop 源码 ..."
+        download_file $(lib_download_link $loop) "$_source_dir/$(lib_x_dirname $loop file)" || { exit 1; } &
+    done
 
     wait
 }
 
-function compileLiblzma() {
-    if [ -f "$_home_dir""opt/liblzma/lib/liblzma.so" ]; then
+function compile_liblzma() {
+    if [ -f "$_opt_dir/liblzma/lib/liblzma.so" ]; then
       echo "已编译 liblzma！" && return
     fi
-    tar -xf "$_home_dir""source/liblzma.tar.gz" -C "$_home_dir""source/" && \
-        cd "$_home_dir""source/liblzma" && \
-        ./configure --prefix="$_home_dir""opt/liblzma" && \
+    tar -xf "$_source_dir/$(lib_x_dirname liblzma file)" -C "$_source_dir/" && \
+        cd "$_source_dir/$(lib_x_dirname liblzma)" && \
+        ./configure --prefix="$_opt_dir/liblzma" && \
         make -j4 && \
         make install && \
         echo "编译 liblzma 完成！"
 }
 
-function compileCurl() {
-    if [ -f "$_home_dir""opt/curl/bin/curl" ]; then
+function compile_curl() {
+    if [ -f "$_opt_dir/curl/bin/curl" ]; then
       echo "已编译 curl！" && return
     fi
-    tar -xf "$_home_dir""source/curl.tar.gz" -C "$_home_dir""source/" && \
-        cd "$_home_dir""source/curl-""$_curl_ver" && \
-        CC=gcc CXX=g++ CFLAGS=-fPIC CPPFLAGS=-fPIC ./configure --prefix="$_home_dir""opt/curl" \
+    lib_x curl && \
+        cd "$_source_dir/$(lib_x_dirname curl)" && \
+        CC=gcc CXX=g++ CFLAGS=-fPIC CPPFLAGS=-fPIC ./configure --prefix="$_opt_dir/curl" \
             --without-nghttp2 \
             --with-ssl=/usr \
             --with-pic=pic \
@@ -139,83 +207,101 @@ function compileCurl() {
         echo "编译 curl 完成！"
 }
 
-function compileLibxml2() {
-    if [ -f "$_home_dir""opt/libxml2/lib/libxml2.so" ]; then
+function compile_libxml2() {
+    if [ -f "$_opt_dir/libxml2/lib/libxml2.so" ]; then
       echo "已编译 libxml2！" && return
     fi
-    tar -xf "$_home_dir""source/libxml2.tar.gz" -C "$_home_dir""source/" && \
-        cd "$_home_dir""source/libxml2-""$_libxml2_ver" && \
-        ./configure --with-lzma="$_home_dir""opt/liblzma" --prefix="$_home_dir""opt/libxml2" --exec-prefix="$_home_dir""opt/libxml2" --without-python && \
+    lib_x libxml2 && \
+        cd "$_source_dir/$(lib_x_dirname libxml2)" && \
+        ./configure --with-lzma="$_opt_dir/liblzma" --prefix="$_opt_dir/libxml2" --exec-prefix="$_opt_dir/libxml2" --without-python && \
         make -j4 && \
         make install && \
         echo "编译 libxml2 完成！"
 }
 
-function compilePHPWithSwoole() {
+function php_get_configure_args() {
+    _php_arg="--prefix=$_home_dir""php-dist"
+    _php_arg="$_php_arg --disable-all"
+    _php_arg="$_php_arg --enable-shared=no"
+    _php_arg="$_php_arg --enable-static=yes"
+    _php_arg="$_php_arg --enable-inline-optimization"
+    _php_arg="$_php_arg --with-layout=GNU"
+    _php_arg="$_php_arg --enable-calendar"
+    _php_arg="$_php_arg --enable-ctype"
+    _php_arg="$_php_arg --enable-filter"
+    _php_arg="$_php_arg --enable-openssl"
+    _php_arg="$_php_arg --enable-bcmath"
+    _php_arg="$_php_arg --with-openssl-dir=/usr"
+    _php_arg="$_php_arg --enable-pcntl"
+    _php_arg="$_php_arg --enable-openssl"
+    _php_arg="$_php_arg --with-openssl"
+    _php_arg="$_php_arg --with-iconv"
+    _php_arg="$_php_arg --enable-json"
+    _php_arg="$_php_arg --enable-mbstring"
+    _php_arg="$_php_arg --enable-phar"
+    _php_arg="$_php_arg --enable-pdo"
+    _php_arg="$_php_arg --with-pdo-mysql=mysqlnd"
+    _php_arg="$_php_arg --enable-sockets"
+    _php_arg="$_php_arg --enable-swoole"
+    _php_arg="$_php_arg --enable-inotify"
+    _php_arg="$_php_arg --enable-redis"
+    _php_arg="$_php_arg --disable-redis-session"
+    _php_arg="$_php_arg --enable-simplexml"
+    _php_arg="$_php_arg --enable-dom"
+    _php_arg="$_php_arg --enable-xml"
+    _php_arg="$_php_arg --enable-xmlwriter"
+    _php_arg="$_php_arg --enable-xmlreader"
+    _php_arg="$_php_arg --with-zlib"
+    _php_arg="$_php_arg --enable-posix"
+    _php_arg="$_php_arg --enable-mysqlnd"
+    _php_arg="$_php_arg --enable-tokenizer"
+    _php_arg="$_php_arg --with-curl"
+    _php_arg="$_php_arg --with-pear=no"
+    _php_arg="$_php_arg --disable-cgi"
+    _php_arg="$_php_arg --disable-phpdbg"
+
+    case $(lib_ver php) in
+    7.3.*)
+        _php_arg="$_php_arg --with-gd"
+        _php_arg="$_php_arg --with-libxml-dir=$_opt_dir/libxml2"
+        _php_arg="$_php_arg --enable-hash"
+        ;;
+    *)
+        _php_arg="$_php_arg --enable-gd"
+        _php_arg="$_php_arg --with-libxml"
+        ;;
+    esac
+    echo $_php_arg
+}
+
+function compile_php() {
     echo "正在编译 php ..." && \
-        rm -rf "$_home_dir""source/php-""$_php_ver" && \
-        tar -xf "$_home_dir""source/php.tar.gz" -C "$_home_dir""source/" && \
-        #git clone --depth=1 https://fgit.zhamao.me/swoole/swoole-src.git "$_home_dir""source/"swoole-$_swoole_ver && \
-        tar -xf "$_home_dir""source/swoole.tar.gz" -C "$_home_dir""source/" && \
-        mv "$_home_dir""source/swoole-""$_swoole_ver" "$_home_dir""source/php-""$_php_ver/ext/swoole" && \
-        "$_home_dir""source/php-""$_php_ver/ext/swoole/clear.sh" && \
-        tar -xf "$_home_dir""source/redis.tar.gz" -C "$_home_dir""source/" && \
-        mv "$_home_dir""source/redis-""$_redis_ver" "$_home_dir""source/php-""$_php_ver/ext/redis" && \
-        cd "$_home_dir""source/php-""$_php_ver/" && \
+        rm -rf "$_source_dir/$(lib_x_dirname php)" && \
+        lib_x php && \
+        lib_x swoole && \
+        lib_move_ext swoole && \
+        "$_source_dir/$(lib_x_dirname php)/ext/swoole/clear.sh" && \
+        lib_x redis && \
+        lib_move_ext redis && \
+        lib_x inotify && \
+        lib_move_ext inotify && \
+        cd "$_source_dir/$(lib_x_dirname php)/" && \
         echo "$_curl_override_1" > "$_home_dir""ac_override_1" && \
         echo "$_curl_override_2" > "$_home_dir""ac_override_2" && \
-        cat "$_home_dir""ac_override_1" "$_home_dir""source/php-""$_php_ver/ext/curl/config.m4" "$_home_dir""ac_override_2" > /tmp/aa && \
-        mv /tmp/aa "$_home_dir""source/php-""$_php_ver/ext/curl/config.m4" && \
+        cat "$_home_dir""ac_override_1" "ext/curl/config.m4" "$_home_dir""ac_override_2" > /tmp/aa && \
+        mv /tmp/aa "ext/curl/config.m4" && \
+        rm -rf "$_home_dir""ac_override_1" "$_home_dir""ac_override_2" && \
+        PKG_CONFIG_PATH="$PKG_CONFIG_PATH:""$_opt_dir/libxml2/lib/pkgconfig" && \
+        PKG_CONFIG_PATH="$PKG_CONFIG_PATH:""$_opt_dir/curl/lib/pkgconfig" && \
         ./buildconf --force && \
-        PKG_CONFIG_PATH="$PKG_CONFIG_PATH:""$_home_dir""opt/libxml2/lib/pkgconfig" && \
-        PKG_CONFIG_PATH="$PKG_CONFIG_PATH:""$_home_dir""opt/curl/lib/pkgconfig" ./configure LDFLAGS=-static \
-            --prefix="$_home_dir""php-dist" \
-            --disable-all \
-            --enable-shared=no \
-            --enable-static=yes \
-            --enable-inline-optimization \
-            --with-layout=GNU \
-            --enable-calendar \
-            --enable-ctype \
-            --enable-filter \
-            --enable-openssl \
-            --enable-bcmath \
-            --with-openssl-dir="/usr" \
-            --enable-pcntl \
-            --enable-openssl \
-            --with-openssl \
-            --with-iconv \
-            --enable-json \
-            --enable-mbstring \
-            --enable-phar \
-            --enable-pdo \
-            --with-pdo-mysql=mysqlnd \
-            --enable-sockets \
-            --enable-swoole \
-            --enable-gd \
-            --enable-redis \
-            --disable-redis-session \
-            --enable-simplexml \
-            --enable-dom \
-            --with-libxml="$_home_dir""opt/libxml2" \
-            --enable-xml \
-            --enable-xmlwriter \
-            --enable-xmlreader \
-            --with-zlib \
-            --enable-posix \
-            --enable-mysqlnd \
-            --enable-tokenizer \
-            --with-curl="$_home_dir""opt/curl" \
-            --with-pear=no \
-            --disable-pear \
-            --disable-cgi \
-            --disable-phpdbg && \
-        sed -ie 's/-export-dynamic//g' "$_home_dir""source/php-""$_php_ver/Makefile" && \
-        sed -ie 's/-o $(SAPI_CLI_PATH)/-all-static -o $(SAPI_CLI_PATH)/g' "$_home_dir""source/php-""$_php_ver/Makefile" && \
-        sed -ie 's/swoole_clock_gettime(CLOCK_REALTIME/clock_gettime(CLOCK_REALTIME/g' "$_home_dir""source/php-""$_php_ver/ext/swoole/include/swoole.h" && \
+        PKG_CONFIG_PATH=$PKG_CONFIG_PATH ./configure LDFLAGS=-static $(php_get_configure_args) && \
+        sed -ie 's/-export-dynamic//g' "$_source_dir/$(lib_x_dirname php)/Makefile" && \
+        sed -ie 's/-o $(SAPI_CLI_PATH)/-all-static -o $(SAPI_CLI_PATH)/g' "$_source_dir/$(lib_x_dirname php)/Makefile" && \
+        sed -ie 's/swoole_clock_gettime(CLOCK_REALTIME/clock_gettime(CLOCK_REALTIME/g' "$_source_dir/$(lib_x_dirname php)/ext/swoole/include/swoole.h" && \
         make LDFLAGS=-ldl -j4 && \
         make install && \
-        strip "$_home_dir""php-dist/bin/php"
+        strip "$_home_dir""php-dist/bin/php" && \
+        cd $_home_dir
 }
 
 #apk add g++ pkgconf autoconf nghttp2 libcurl \
@@ -236,10 +322,10 @@ apk add libpng-dev libpng-static
 apk add c-ares-static c-ares-dev
 
 
-downloadAll && \
-    compileLiblzma && \
-    compileLibxml2 && \
-    compileCurl && \
-    compilePHPWithSwoole && \
+download_all && \
+    compile_liblzma && \
+    compile_libxml2 && \
+    compile_curl && \
+    compile_php && \
     echo "完成！见 php-dist/bin/php"
 
