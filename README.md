@@ -19,7 +19,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 ```
 
 ## 主分支版本
-- php：7.4.18
+- php: 7.4.18
 - libxml2: 2.9.10
 - curl: 7.76.1
 
