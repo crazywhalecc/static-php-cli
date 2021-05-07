@@ -261,7 +261,7 @@ function php_get_configure_args() {
     _php_arg="$_php_arg --disable-phpdbg"
 
     case $(lib_ver php) in
-    7.3.*)
+    7.3.*|7.2.*)
         _php_arg="$_php_arg --with-gd"
         _php_arg="$_php_arg --enable-libxml"
         _php_arg="$_php_arg --with-libxml-dir=$_opt_dir/libxml2"
