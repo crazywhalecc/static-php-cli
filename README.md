@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展（CLI 模式，暂不支持 CGI 和 FPM 模式）
 
-[![版本](https://img.shields.io/badge/version-1.1.1-green.svg)]()
+[![版本](https://img.shields.io/badge/version-1.2.0-green.svg)]()
 
 ## 环境需求
 - 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
