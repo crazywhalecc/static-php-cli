@@ -1,4 +1,4 @@
-# static-php-swoole
+# static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. [English README](/README-en.md)
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展（CLI 模式，暂不支持 CGI 和 FPM 模式）
