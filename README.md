@@ -17,6 +17,10 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 # 自己编译
 ./static-compile-php.sh
 # 完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
+
+# 多 PHP 版本一键编译
+./multi-version-compile.sh
+# 结束后多个 PHP 版本的二进制文件会在 build/ 目录下。
 ```
 
 ## 主分支版本
