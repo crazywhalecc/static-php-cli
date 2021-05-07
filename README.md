@@ -9,7 +9,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 - 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
 - 需要 Alpine Linux（测试环境为 3.13 版本，其他版本未测试）系统（也就是说需要 musl）
 - WSL2 也是支持的
-- 脚本支持编译的 PHP 版本 >= 7.3
+- 脚本支持编译的 PHP 版本 >= 7.2
 
 ## 开始
 可以直接在旁边的 Release 中下载编译好的二进制，也可以自己编译。
