@@ -33,8 +33,8 @@ function download_file() {
 # 获取要下载的源码的版本号
 function lib_ver() {
     case $1 in
-    "phpver"|"php") echo "7.4.19" ;;
-    "swoole")       echo "4.6.6" ;;
+    "phpver"|"php") echo "7.3.28" ;;
+    "swoole")       echo "4.6.7" ;;
     "hash")         echo "1.5" ;;
     "inotify")      echo "3.0.0" ;;
     "redis")        echo "5.3.4" ;;
