@@ -1,6 +1,6 @@
 #!/bin/sh
 
-_script_ver="1.2.0"
+_script_ver="1.2.1"
 _use_backup="no"
 
 _home_dir=$(pwd)"/" 
@@ -20,10 +20,10 @@ function download_file() {
     $downloader "$1" -$_down_prefix "$2" >/dev/null 2>&1 && \
     echo "$1 完成！ $2" && _down_symbol=1
   else
-    echo "$1 已存在！" && _down_symbol=1
+    echo "$2 已存在！" && _down_symbol=1
   fi
   if [ $_down_symbol == 0 ]; then
-    echo "失败！请检查网络连接！"
+    echo "下载 $1 失败！请检查网络连接！"
     rm -rf "$2"
     return 1
   fi
@@ -33,7 +33,7 @@ function download_file() {
 # 获取要下载的源码的版本号
 function lib_ver() {
     case $1 in
-    "phpver"|"php") echo "7.4.18" ;;
+    "phpver"|"php") echo "7.4.19" ;;
     "swoole")       echo "4.6.6" ;;
     "hash")         echo "1.5" ;;
     "inotify")      echo "3.0.0" ;;
@@ -83,11 +83,11 @@ function lib_download_link() {
         esac
     else 
         case $1 in
-        "php")          echo "http://mirrors.sohu.com/php/php-$(lib_ver $1).tar.gz" ;;
-        "swoole")       echo "https://dl.zhamao.me/swoole/swoole-$(lib_ver $1).tgz" ;;
-        "hash")         echo "https://pecl.php.net/get/hash-$(lib_ver $1).tgz" ;;
-        "inotify")      echo "https://pecl.php.net/get/inotify-$(lib_ver $1).tgz" ;;
-        "redis")        echo "https://dl.zhamao.me/phpredis/redis-$(lib_ver $1).tgz" ;;
+        "php")          echo "http://mirrors.zhamao.xin/php/php-$(lib_ver $1).tar.gz" ;;
+        "swoole")       echo "http://mirrors.zhamao.xin/pecl/swoole-$(lib_ver $1).tgz" ;;
+        "hash")         echo "http://mirrors.zhamao.xin/pecl/hash-$(lib_ver $1).tgz" ;;
+        "inotify")      echo "http://mirrors.zhamao.xin/pecl/inotify-$(lib_ver $1).tgz" ;;
+        "redis")        echo "http://mirrors.zhamao.xin/pecl/redis-$(lib_ver $1).tgz" ;;
         "libxml2")      echo "https://dl.zhamao.me/libxml2/libxml2-$(lib_ver $1).tar.gz" ;;
         "liblzma")      echo "https://dl.zhamao.me/liblzma/liblzma.tar.gz" ;;
         "curl")         echo "https://dl.zhamao.me/curl/curl-$(lib_ver $1).tar.gz" ;;
