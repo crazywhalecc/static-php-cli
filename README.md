@@ -3,13 +3,13 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展（CLI 模式，暂不支持 CGI 和 FPM 模式）
 
-[![版本](https://img.shields.io/badge/version-1.2.0-green.svg)]()
+[![版本](https://img.shields.io/badge/script--version-1.2.1-green.svg)]()
 
 ## 环境需求
 - 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
-- 需要 Alpine Linux（测试环境为 3.13 版本，其他版本未测试）系统（也就是说需要 musl）
+- 需要 Alpine Linux（测试环境为 3.13 版本，其他版本未测试）系统（也就是说需要 musl）或 Docker（Dockerfile 正在完善）
 - WSL2 也是支持的
-- 脚本支持编译的 PHP 版本 >= 7.2
+- 脚本支持编译的 PHP 版本（7.2 ~ 8.0）
 
 ## 开始
 可以直接在旁边的 Release 中下载编译好的二进制，也可以自己编译。
@@ -28,33 +28,34 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 - libxml2: 2.9.10
 - curl: 7.76.1
 
-## 包含扩展
-- bcmath
-- calendar
-- ctype
-- filter
-- openssl
-- pcntl
-- iconv
-- inotify (3.0.0)
-- json
-- mbstring
-- phar
-- curl
-- pdo
-- gd
-- pdo_mysql
-- mysqlnd
-- sockets
-- swoole (4.6.6)
-- redis (5.3.4)
-- simplexml
-- dom
-- xml
-- xmlwriter
-- xmlreader
-- posix
-- tokenizer
+## 支持的扩展（对勾为已支持的扩展，未打勾的正在努力兼容）
+- [X] bcmath
+- [X] calendar
+- [X] ctype
+- [X] filter
+- [X] openssl
+- [X] pcntl
+- [X] iconv
+- [X] inotify
+- [X] json
+- [X] mbstring
+- [X] phar
+- [X] curl
+- [X] pdo
+- [X] gd
+- [X] pdo_mysql
+- [X] mysqlnd
+- [X] sockets
+- [X] swoole
+- [X] redis
+- [X] simplexml
+- [X] dom
+- [X] xml
+- [X] xmlwriter
+- [X] xmlreader
+- [X] posix
+- [X] tokenizer
+- [ ] zip
 
 ## 运行示例
 编译后的状态
