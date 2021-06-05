@@ -1,27 +1,36 @@
 # static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. [English README](/README-en.md)
 
-编译纯静态的 PHP Binary 二进制文件，带有各种扩展（CLI 模式，暂不支持 CGI 和 FPM 模式）
+编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！
+
+注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
 [![版本](https://img.shields.io/badge/script--version-1.2.1-green.svg)]()
 
 ## 环境需求
 - 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
-- 需要 Alpine Linux（测试环境为 3.13 版本，其他版本未测试）系统（也就是说需要 musl）或 Docker（Dockerfile 正在完善）
-- WSL2 也是支持的
+- 需要 Docker（或等我将脚本提出来也可以直接在 Alpine Linux 上使用）
 - 脚本支持编译的 PHP 版本（7.2 ~ 8.0）
 
 ## 开始
-可以直接在旁边的 Release 中下载编译好的二进制，也可以自己编译。
-```bash
-# 自己编译
-./static-compile-php.sh
-# 完事后在 `php-dist/bin/php` 这个二进制文件可以随意拿着去任何一个 Linux 系统运行了！
+可以直接在旁边的 Release 中下载编译好的二进制。
 
-# 多 PHP 版本一键编译
-./multi-version-compile.sh
-# 结束后多个 PHP 版本的二进制文件会在 build/ 目录下。
+也可以自己使用 Dockerfile 进行编译构建：
+```bash
+git clone https://github.com/crazywhalecc/static-php-cli.git
+cd static-php-cli/docker
+docker build -t static-php .
 ```
+
+编译之后可以使用下方命令将二进制 PHP 提取出来，用以下方式：
+```bash
+mkdir dist
+docker run --rm -v $(pwd)/dist:/dist/ -it static cp php-dist/bin/php /dist/
+```
+
+如果要选择安装的扩展，可以修改 `docker/extensions.txt` 文件，具体规则如下：
+- 文件内使用 `#` 可以注释，表示不安装
+- 扩展名一律使用小写，目前默认状态下文件内所列的扩展为支持的扩展，其他扩展暂不支持，如有需求请提 Issue 添加
 
 ## 支持的扩展（对勾为已支持的扩展，未打勾的正在努力兼容）
 - [X] bcmath
