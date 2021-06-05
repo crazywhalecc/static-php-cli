@@ -70,7 +70,7 @@ docker run --rm -v $(pwd)/dist:/dist/ -it static cp php-dist/bin/php /dist/
 |          | zip          |          |                                                         |
 | yes      | zlib         | *        |                                                         |
 
-## 目前的问题
+## 目前的问题（对勾为已解决）
 - [ ] 不支持 event(libevent) 扩展，event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序，同时其本身也不支持静态编译。
 - [ ] Swoole 扩展不支持 `--enable-swoole-curl`，也是因为编译顺序和加载顺序的问题。
 - [ ] 不支持 readline 扩展，readline 扩展安装后无法正常使用 `php -a`，原因还没有弄清楚，可能是静态编译造成的 ncurses 库出现了问题。
@@ -78,6 +78,8 @@ docker run --rm -v $(pwd)/dist:/dist/ -it static cp php-dist/bin/php /dist/
 - [X] 可自行选择不需要编译进入的扩展
 - [ ] php.ini 内嵌或分发
 - [ ] i18n（国际化脚本本身和 README）
+
+如果你对以上问题有解决方案，请提出 Issue 或 PR！
 
 ## 运行示例
 编译后的状态
