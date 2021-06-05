@@ -32,41 +32,48 @@ docker run --rm -v $(pwd)/dist:/dist/ -it static cp php-dist/bin/php /dist/
 - 文件内使用 `#` 可以注释，表示不安装
 - 扩展名一律使用小写，目前默认状态下文件内所列的扩展为支持的扩展，其他扩展暂不支持，如有需求请提 Issue 添加
 
-## 支持的扩展（对勾为已支持的扩展，未打勾的正在努力兼容）
-- [X] bcmath
-- [X] calendar
-- [X] ctype
-- [X] filter
-- [X] openssl
-- [X] pcntl
-- [X] iconv
-- [X] inotify
-- [X] json
-- [X] mbstring
-- [X] phar
-- [X] curl
-- [X] pdo
-- [X] gd
-- [X] pdo_mysql
-- [X] mysqlnd
-- [X] sockets
-- [X] swoole
-- [X] redis
-- [X] simplexml
-- [X] dom
-- [X] xml
-- [X] xmlwriter
-- [X] xmlreader
-- [X] posix
-- [X] tokenizer
-- [ ] zip
+## 支持的扩展表
+| 是否支持 | PHP 扩展名称 | 支持版本 | 备注                                                    |
+| -------- | ------------ | -------- | ------------------------------------------------------- |
+| yes      | bcmath       | *        |                                                         |
+| yes      | calendar     | *        |                                                         |
+| yes      | ctype        | *        |                                                         |
+| yes      | curl         | *        |                                                         |
+| yes      | dom          | *        |                                                         |
+|          | event        |          |                                                         |
+| yes      | filter       | *        |                                                         |
+| yes      | gd           | *        |                                                         |
+| yes      | hash         | *        | PHP7.3及以下版本需指定 `--enable-hash`，7.4以上默认开启 |
+| yes      | iconv        | *        |                                                         |
+| yes      | inotify      | 3.0.0    |                                                         |
+| yes      | json         | *        |                                                         |
+| yes      | libxml       | *        |                                                         |
+| yes      | mbstring     | *        |                                                         |
+|          | mongodb      |          |                                                         |
+|          | mysqli       |          |                                                         |
+| yes      | mysqlnd      | *        |                                                         |
+| yes      | openssl      | *        |                                                         |
+| yes      | pcntl        | *        |                                                         |
+| yes      | pdo          | *        |                                                         |
+| yes      | pdo_mysql    | *        |                                                         |
+|          | pdo_pgsql    | *        |                                                         |
+| yes      | phar         | *        |                                                         |
+| yes      | posix        | *        |                                                         |
+| yes      | redis        | *        |                                                         |
+| yes      | simplexml    | *        |                                                         |
+| yes      | sockets      | *        |                                                         |
+| yes      | swoole       | >=4.6.6  | 默认支持mysqlnd, sockets, openssl, redis                |
+| yes      | tokenizer    | *        |                                                         |
+| yes      | xml          | *        |                                                         |
+| yes      | xmlreader    | *        |                                                         |
+| yes      | xmlwriter    | *        |                                                         |
+|          | zip          |          |                                                         |
+| yes      | zlib         | *        |                                                         |
 
-## 目前的问题（待解决的）
-- [ ] event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序。
+## 目前的问题
+- [ ] 不支持 event(libevent) 扩展，event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序，同时其本身也不支持静态编译。
 - [ ] Swoole 扩展不支持 `--enable-swoole-curl`，也是因为编译顺序和加载顺序的问题。
-- [ ] readline 扩展安装后无法正常使用 `php -a`，原因还没有弄清楚，可能是静态编译造成的 ncurses 库出现了问题。
-
-## Todo List
+- [ ] 不支持 readline 扩展，readline 扩展安装后无法正常使用 `php -a`，原因还没有弄清楚，可能是静态编译造成的 ncurses 库出现了问题。
 - [X] curl/libcurl 扩展静态编译
 - [X] 可自行选择不需要编译进入的扩展
 - [ ] php.ini 内嵌或分发
