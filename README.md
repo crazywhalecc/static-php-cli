@@ -23,11 +23,6 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 # 结束后多个 PHP 版本的二进制文件会在 build/ 目录下。
 ```
 
-## 主分支版本
-- php: 7.4.18
-- libxml2: 2.9.10
-- curl: 7.76.1
-
 ## 支持的扩展（对勾为已支持的扩展，未打勾的正在努力兼容）
 - [X] bcmath
 - [X] calendar
@@ -57,19 +52,23 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 - [X] tokenizer
 - [ ] zip
 
+## 目前的问题（待解决的）
+- [ ] event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序。
+- [ ] Swoole 扩展不支持 `--enable-swoole-curl`，也是因为编译顺序和加载顺序的问题。
+- [ ] readline 扩展安装后无法正常使用 `php -a`，原因还没有弄清楚，可能是静态编译造成的 ncurses 库出现了问题。
+
+## Todo List
+- [X] curl/libcurl 扩展静态编译
+- [X] 可自行选择不需要编译进入的扩展
+- [ ] php.ini 内嵌或分发
+- [ ] i18n（国际化脚本本身和 README）
+
 ## 运行示例
 编译后的状态
 ![image](https://user-images.githubusercontent.com/20330940/116291663-6df47580-a7c7-11eb-8df3-6340c6f87055.png)
 
 在不同系统直接运行 Swoft
 ![image](https://user-images.githubusercontent.com/20330940/116053161-f16d7400-a6ac-11eb-87b8-e510c6454861.png)
-
-## Todo List
-- [X] curl/libcurl 扩展静态编译
-- [ ] 可自行选择不需要编译进入的扩展
-- [ ] php.ini 内嵌或分发
-- [ ] 尝试带进去个 composer（其实自己下完全可以）
-- [ ] i18n（国际化脚本本身和 README）
 
 ## 参考资料
 - <https://blog.terrywh.net/post/2019/php-static-openssl/>
