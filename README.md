@@ -5,6 +5,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
+**这个分支是旧版本的纯 shell 脚本版本，新版本在 master 分支，换成了 Dockerfile 版本，可以更加便捷地在不同系统下进行构建了！**
+
 [![版本](https://img.shields.io/badge/script--version-1.2.1-green.svg)]()
 
 ## 环境需求
