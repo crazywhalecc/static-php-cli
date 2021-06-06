@@ -70,6 +70,14 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 |          | zip          |          |                                                         |
 | yes      | zlib         | *        |                                                         |
 
+## Customization
+- `docker/Dockerfile` edit `VER_PHP=x.x.x` to switch PHP version.
+- `docker/Dockerfile` edit `USE_BACKUP=yes` to use backup download address (download faster if you are not in mainland China).
+- `docker/extensions.txt` edit extensions.
+- `docker/compile-php.sh` file `php_compile_args` function to adjust PHP configure arguments.
+- `docker/check-extensions.sh` file `check_in_configure` function to adjust extensions' configure arguments.
+- `docker/config.json` edit extensions and dependencies version and download links.
+
 ## Current Issue
 - [ ] Not support event(libevent), because of its `config.m4` and code.
 - [ ] Swoole not support `--enable-swoole-curl`.
