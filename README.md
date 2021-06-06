@@ -90,6 +90,9 @@ file ./php
 在不同系统直接运行 Swoft
 ![image](https://user-images.githubusercontent.com/20330940/116053161-f16d7400-a6ac-11eb-87b8-e510c6454861.png)
 
+直接运行 Workerman
+![image](https://user-images.githubusercontent.com/20330940/120911280-b2254080-c6b8-11eb-8c09-5c749b685b5d.png)
+
 ## 参考资料
 - <https://blog.terrywh.net/post/2019/php-static-openssl/>
 - <https://stackoverflow.com/a/37245653>
