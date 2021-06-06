@@ -1,4 +1,4 @@
-# static-php-swoole
+# static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. 
 
 BTW, It's only for CLI mode.
