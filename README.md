@@ -51,7 +51,7 @@ file ./php
 | yes      | json         | *        |                                                         |
 | yes      | libxml       | *        |                                                         |
 | yes      | mbstring     | *        |                                                         |
-|          | mongodb      |          |                                                         |
+| yes      | mongodb      | >=1.9.1  | not tested                                              |
 |          | mysqli       |          |                                                         |
 | yes      | mysqlnd      | *        |                                                         |
 | yes      | openssl      | *        |                                                         |
@@ -85,13 +85,12 @@ file ./php
 
 ## 运行示例
 编译后的状态
-![image](https://user-images.githubusercontent.com/20330940/116291663-6df47580-a7c7-11eb-8df3-6340c6f87055.png)
 
-在不同系统直接运行 Swoft
-![image](https://user-images.githubusercontent.com/20330940/116053161-f16d7400-a6ac-11eb-87b8-e510c6454861.png)
+![image](https://user-images.githubusercontent.com/20330940/120911319-219b3000-c6b9-11eb-82d1-b4309cfca8b3.png)
 
 直接运行 Workerman
-![image](https://user-images.githubusercontent.com/20330940/120911280-b2254080-c6b8-11eb-8c09-5c749b685b5d.png)
+
+![image](https://user-images.githubusercontent.com/20330940/120911301-f7e20900-c6b8-11eb-99eb-ebc84ab95df0.png)
 
 ## 参考资料
 - <https://blog.terrywh.net/post/2019/php-static-openssl/>
