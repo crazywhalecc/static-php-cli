@@ -72,6 +72,14 @@ file ./php
 |          | zip          |          |                                                         |
 | yes      | zlib         | *        |                                                         |
 
+## 自定义
+- `docker/Dockerfile` 中修改 `VER_PHP=x.x.x` 来更换 PHP 版本。
+- `docker/Dockerfile` 中修改 `USE_BACKUP=yes` 使用备用下载源码地址（不在中国大陆可以使用备用地址）。
+- `docker/extensions.txt` 指定要编译安装的扩展。
+- `docker/compile-php.sh` 中的 `php_compile_args` 函数来调整 PHP 编译参数。
+- `docker/check-extensions.sh` 中的 `check_in_configure` 函数可调整 PHP 扩展编译的参数 。
+- `docker/config.json` 可调整要下载的扩展和依赖库版本和链接。
+
 ## 目前的问题（对勾为已解决）
 - [ ] 不支持 event(libevent) 扩展，event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序，同时其本身也不支持静态编译。
 - [ ] Swoole 扩展不支持 `--enable-swoole-curl`，也是因为编译顺序和加载顺序的问题。
