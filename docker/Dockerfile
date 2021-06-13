@@ -8,7 +8,7 @@ ENV SCRIPT_VERSION=1.3.0
 ENV USE_BACKUP=no
 
 # Version of some manually-installed package
-ENV VER_PHP=7.4.19
+ENV VER_PHP=7.4.20
 
 # APK repositories mirror address, if u r not in China, consider set USE_BACKUP=yes to boost
 ENV LINK_APK_REPO='mirrors.ustc.edu.cn'
