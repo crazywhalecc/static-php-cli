@@ -2,13 +2,13 @@ FROM alpine:latest
 
 # define script basic information
 # Version of this Dockerfile
-ENV SCRIPT_VERSION=1.3.0
+ENV SCRIPT_VERSION=1.3.1
 # Download address uses backup address 
 # (if downloading slowly, consider set it to yes)
 ENV USE_BACKUP=no
 
 # Version of some manually-installed package
-ENV VER_PHP=7.4.20
+ENV VER_PHP=7.4.21
 
 # APK repositories mirror address, if u r not in China, consider set USE_BACKUP=yes to boost
 ENV LINK_APK_REPO='mirrors.ustc.edu.cn'
