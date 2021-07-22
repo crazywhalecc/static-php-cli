@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.3.0-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.3.2-green.svg)]()
 
 ## Requirements
 - Tested on `x86_64` and `aarch64` platform, others have not tested.
@@ -33,42 +33,43 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 - extensions name uses lower case, and default file contains all supported extensions, if u need other extensions, consider write an Issue
 
 ## Supported PHP extensions
-| Support  | PHP Ext Name | Version  | Comments                                                |
-| -------- | ------------ | -------- | ------------------------------------------------------- |
-| yes      | bcmath       | *        |                                                         |
-| yes      | calendar     | *        |                                                         |
-| yes      | ctype        | *        |                                                         |
-| yes      | curl         | *        |                                                         |
-| yes      | dom          | *        |                                                         |
-|          | event        |          |                                                         |
-| yes      | filter       | *        |                                                         |
-| yes      | gd           | *        |                                                         |
-| yes      | hash         | *        | PHP7.3 or older uses `--enable-hash`                    |
-| yes      | iconv        | *        |                                                         |
-| yes      | inotify      | 3.0.0    |                                                         |
-| yes      | json         | *        |                                                         |
-| yes      | libxml       | *        |                                                         |
-| yes      | mbstring     | *        |                                                         |
-| yes      | mongodb      | >=1.9.1  | not tested                                              |
-|          | mysqli       |          |                                                         |
-| yes      | mysqlnd      | *        |                                                         |
-| yes      | openssl      | *        |                                                         |
-| yes      | pcntl        | *        |                                                         |
-| yes      | pdo          | *        |                                                         |
-| yes      | pdo_mysql    | *        |                                                         |
-|          | pdo_pgsql    | *        |                                                         |
-| yes      | phar         | *        |                                                         |
-| yes      | posix        | *        |                                                         |
-| yes      | redis        | *        |                                                         |
-| yes      | simplexml    | *        |                                                         |
-| yes      | sockets      | *        |                                                         |
-| yes      | swoole       | >=4.6.6  | support mysqlnd, sockets, openssl, redis                |
-| yes      | tokenizer    | *        |                                                         |
-| yes      | xml          | *        |                                                         |
-| yes      | xmlreader    | *        |                                                         |
-| yes      | xmlwriter    | *        |                                                         |
-|          | zip          |          |                                                         |
-| yes      | zlib         | *        |                                                         |
+| Support | PHP Ext Name | Version | Comments                                 |
+| ------- | ------------ | ------- | ---------------------------------------- |
+| yes     | bcmath       | *       |                                          |
+| yes     | calendar     | *       |                                          |
+| yes     | ctype        | *       |                                          |
+| yes     | curl         | *       |                                          |
+| yes     | dom          | *       |                                          |
+|         | event        |         |                                          |
+| yes     | filter       | *       |                                          |
+| yes     | gd           | *       |                                          |
+| yes     | hash         | *       | PHP7.3 or older uses `--enable-hash`     |
+| yes     | iconv        | *       |                                          |
+| yes     | inotify      | 3.0.0   |                                          |
+| yes     | json         | *       |                                          |
+| yes     | libxml       | *       |                                          |
+| yes     | mbstring     | *       |                                          |
+| yes     | mongodb      | >=1.9.1 | not tested                               |
+|         | mysqli       |         |                                          |
+| yes     | mysqlnd      | *       |                                          |
+| yes     | openssl      | *       |                                          |
+| yes     | pcntl        | *       |                                          |
+| yes     | pdo          | *       |                                          |
+| yes     | pdo_mysql    | *       |                                          |
+|         | pdo_pgsql    | *       |                                          |
+| yes     | phar         | *       |                                          |
+| yes     | posix        | *       |                                          |
+| yes     | redis        | *       |                                          |
+| yes     | simplexml    | *       |                                          |
+| yes     | sockets      | *       |                                          |
+| yes     | sqlite3      | *       | not tested                               |
+| yes     | swoole       | >=4.6.6 | support mysqlnd, sockets, openssl, redis |
+| yes     | tokenizer    | *       |                                          |
+| yes     | xml          | *       |                                          |
+| yes     | xmlreader    | *       |                                          |
+| yes     | xmlwriter    | *       |                                          |
+|         | zip          |         |                                          |
+| yes     | zlib         | *       |                                          |
 
 ## Customization
 - `docker/Dockerfile` edit `VER_PHP=x.x.x` to switch PHP version.

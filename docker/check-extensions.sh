@@ -73,6 +73,7 @@ function check_before_configure() {
         phar) ;;
         posix) ;;
         sockets) ;;
+        sqlite3) ;;
         tokenizer) ;;
         zlib) ;;
         curl)
@@ -187,6 +188,8 @@ function check_in_configure() {
         redis)              php_configure="$php_configure --enable-redis --disable-redis-session" ;;
         simplexml)          php_configure="$php_configure --enable-simplexml" ;;
         sockets)            php_configure="$php_configure --enable-sockets" ;;
+        sqlite3)            php_configure="$php_configure --with-sqlite3" ;;
+        
         swoole)
             php_configure="$php_configure --enable-swoole"
             have_openssl=$(echo $list | grep openssl)

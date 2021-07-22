@@ -1,46 +1,47 @@
 {
-  "php": {
-    "link": "http://mirrors.zhamao.xin/php/php-{version}.tar.gz",
-    "link_2": "https://www.php.net/distributions/php-{version}.tar.gz"
-  },
-  "swoole": {
-    "version": "4.6.7",
-    "link": "http://mirrors.zhamao.xin/pecl/swoole-{version}.tgz",
-    "link_2": "https://pecl.php.net/get/swoole-{version}.tgz"
-  },
-  "mongodb": {
-    "version": "1.9.1",
-    "link": "http://mirrors.zhamao.xin/pecl/mongodb-{version}.tgz",
-    "link_2": "https://pecl.php.net/get/mongodb-{version}.tgz"
-  },
-  "inotify": {
-    "version": "3.0.0",
-    "link": "http://mirrors.zhamao.xin/pecl/inotify-{version}.tgz",
-    "link_2": "https://pecl.php.net/get/inotify-{version}.tgz"
-  },
-  "event": {
-    "version": "3.0.4",
-    "link": "http://mirrors.zhamao.xin/pecl/event-{version}.tgz",
-    "link_2": "https://pecl.php.net/get/event-{version}.tgz"
-  },
-  "redis": {
-    "version": "5.3.4",
-    "link": "http://mirrors.zhamao.xin/pecl/redis-{version}.tgz",
-    "link_2": "https://pecl.php.net/get/redis-{version}.tgz"
-  },
-  "libxml2": {
-    "version": "2.9.10",
-    "link": "https://dl.zhamao.me/libxml2/libxml2-{version}.tar.gz",
-    "link_2": "http://xmlsoft.org/sources/libxml2-{version}.tar.gz"
-  },
-  "liblzma": {
-    "version": "master",
-    "link": "https://dl.zhamao.me/liblzma/liblzma.tar.gz",
-    "link_2": "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip"
-  },
-  "curl": {
-    "version": "7.77.0",
-    "link": "https://dl.zhamao.me/curl/curl-{version}.tar.gz",
-    "link_2": "https://curl.haxx.se/download/curl-{version}.tar.gz"
-  }
+    "php": {
+        "link": "http://mirrors.zhamao.xin/php/php-{version}.tar.gz",
+        "link_2": "https://www.php.net/distributions/php-{version}.tar.gz"
+    },
+    "swoole": {
+        "version": "4.7.0",
+        "link": "http://mirrors.zhamao.xin/pecl/swoole-{version}.tgz",
+        "link_2": "https://pecl.php.net/get/swoole-{version}.tgz"
+    },
+    "mongodb": {
+        "version": "1.9.1",
+        "link": "http://mirrors.zhamao.xin/pecl/mongodb-{version}.tgz",
+        "link_2": "https://pecl.php.net/get/mongodb-{version}.tgz"
+    },
+    "inotify": {
+        "version": "3.0.0",
+        "link": "http://mirrors.zhamao.xin/pecl/inotify-{version}.tgz",
+        "link_2": "https://pecl.php.net/get/inotify-{version}.tgz"
+    },
+    "event": {
+        "version": "3.0.4",
+        "link": "http://mirrors.zhamao.xin/pecl/event-{version}.tgz",
+        "link_2": "https://pecl.php.net/get/event-{version}.tgz"
+    },
+    "redis": {
+        "version": "5.3.4",
+        "link": "http://mirrors.zhamao.xin/pecl/redis-{version}.tgz",
+        "link_2": "https://pecl.php.net/get/redis-{version}.tgz"
+    },
+    "libxml2": {
+        "version": "2.9.10",
+        "link": "https://dl.zhamao.me/libxml2/libxml2-{version}.tar.gz",
+        "link_2": "http://xmlsoft.org/sources/libxml2-{version}.tar.gz"
+    },
+    "liblzma": {
+        "version": "master",
+        "link": "https://dl.zhamao.me/liblzma/liblzma.tar.gz",
+        "link_2": "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip",
+        "alt_name": "master"
+    },
+    "curl": {
+        "version": "7.78.0",
+        "link": "https://dl.zhamao.me/curl/curl-{version}.tar.gz",
+        "link_2": "https://curl.haxx.se/download/curl-{version}.tar.gz"
+    }
 }

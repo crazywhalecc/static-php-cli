@@ -2,7 +2,7 @@ FROM alpine:latest
 
 # define script basic information
 # Version of this Dockerfile
-ENV SCRIPT_VERSION=1.3.1
+ENV SCRIPT_VERSION=1.3.2
 # Download address uses backup address 
 # (if downloading slowly, consider set it to yes)
 ENV USE_BACKUP=no
@@ -23,7 +23,7 @@ RUN if [ "${USE_BACKUP}" = "yes" ]; then \
 RUN sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories
 
 # build requirements
-RUN apk add wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses
+RUN apk add bash wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses
 # php zlib dependencies
 RUN apk add zlib-dev zlib-static
 # php mbstring dependencies
@@ -36,6 +36,8 @@ RUN apk add libpng-dev libpng-static
 RUN apk add c-ares-static c-ares-dev
 # php event dependencies
 RUN apk add libevent libevent-dev libevent-static
+# php sqlite3 dependencies
+RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static
 
 RUN mkdir /app
 
