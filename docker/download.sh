@@ -29,10 +29,10 @@ archive_find_zip=$(find cache/ -name "$1.*" | grep -E ".zip" | tail -n1)
 
 if [ "$archive_find_tar" != "" ]; then
     echo "Using cache for $1 ($archive_find_tar)"
-    tar -zxvf $archive_file_tar -C $SELF_DIR/source
+    tar -zxvf "$archive_find_tar"
 elif [ "$archive_find_zip" != "" ]; then
     echo "Using cache for $1 ($archive_find_zip)"
-    unzip $archive_find_zip -d $SELF_DIR/source
+    unzip $archive_find_zip -d "$SELF_DIR/source"
 else
     if [ "$3" != "" ]; then
         wget -q --show-progress "$(readconf ".$1.link$_use_backup" | sed 's/{version}/'$3'/g')"

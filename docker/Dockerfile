@@ -2,7 +2,7 @@ FROM alpine:latest
 
 # define script basic information
 # Version of this Dockerfile
-ENV SCRIPT_VERSION=1.3.2
+ENV SCRIPT_VERSION=1.3.3
 # Download address uses backup address 
 # (if downloading slowly, consider set it to yes)
 ENV USE_BACKUP=no

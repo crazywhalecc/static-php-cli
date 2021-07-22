@@ -36,8 +36,7 @@
     "liblzma": {
         "version": "master",
         "link": "https://dl.zhamao.me/liblzma/liblzma.tar.gz",
-        "link_2": "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip",
-        "alt_name": "master"
+        "link_2": "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip"
     },
     "curl": {
         "version": "7.78.0",

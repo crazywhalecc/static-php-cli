@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# This script needs alpine linux system.
-
-VER_PHP="7.4.21"
 USE_BACKUP="no"
 
 LINK_APK_REPO='mirrors.ustc.edu.cn'
@@ -43,8 +40,27 @@ chmod +x download.sh check-extensions.sh compile-php.sh
     ./download.sh redis ${USE_BACKUP} && \
     ./download.sh libxml2 ${USE_BACKUP} && \
     ./download.sh liblzma ${USE_BACKUP} && \
-    ./download.sh curl ${USE_BACKUP} && \
-    ./download.sh php ${USE_BACKUP} ${VER_PHP} && \
-    ./check-extensions.sh check_before_configure && \
-    ./compile-php.sh ${VER_PHP}
+    ./download.sh curl ${USE_BACKUP}
 
+if [ ! -d "multi-build" ]; then
+    mkdir ./multi-build
+fi
+
+for VER_PHP in "7.2.34" "7.3.29" "7.4.21" "8.0.8"
+do
+    ./download.sh swoole ${USE_BACKUP} && \
+        ./download.sh inotify ${USE_BACKUP} && \
+        ./download.sh mongodb ${USE_BACKUP} && \
+        ./download.sh event ${USE_BACKUP} && \
+        ./download.sh redis ${USE_BACKUP} && \
+        ./download.sh libxml2 ${USE_BACKUP} && \
+        ./download.sh liblzma ${USE_BACKUP} && \
+        ./download.sh curl ${USE_BACKUP} && \
+        ./download.sh php ${USE_BACKUP} ${VER_PHP} && \
+        ./check-extensions.sh check_before_configure && \
+        ./compile-php.sh ${VER_PHP} && \
+        cp ./php-dist/bin/php ./multi-build/php-${VER_PHP} && \
+        rm -rf ./source
+done
+
+    
