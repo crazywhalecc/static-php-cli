@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.3.2-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.3.3-green.svg)]()
 
 ## Requirements
 - Tested on `x86_64` and `aarch64` platform, others have not tested.
