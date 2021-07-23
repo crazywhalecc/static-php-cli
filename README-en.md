@@ -62,7 +62,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 | yes     | redis        | *       |                                          |
 | yes     | simplexml    | *       |                                          |
 | yes     | sockets      | *       |                                          |
-| yes     | sqlite3      | *       | not tested                               |
+| yes     | sqlite3      | *       |                                          |
 | yes     | swoole       | >=4.6.6 | support mysqlnd, sockets, openssl, redis |
 | yes     | tokenizer    | *       |                                          |
 | yes     | xml          | *       |                                          |
