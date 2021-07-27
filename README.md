@@ -40,18 +40,18 @@ file ./php
 | yes      | bcmath       | *        |                                                         |
 | yes      | calendar     | *        |                                                         |
 | yes      | ctype        | *        |                                                         |
-| yes      | curl         | *        |                                                         |
+| yes      | curl         | *        | 自带下载编译 curl 库                                    |
 | yes      | dom          | *        |                                                         |
 |          | event        |          |                                                         |
 | yes      | filter       | *        |                                                         |
 | yes      | gd           | *        |                                                         |
-| yes      | hash         | *        | PHP7.3及以下版本需指定 `--enable-hash`，7.4以上默认开启 |
+| yes      | hash         | *        |                                                         |
 | yes      | iconv        | *        |                                                         |
-| yes      | inotify      | 3.0.0    |                                                         |
+| yes      | inotify      | 3.0.0    | 从 pecl 或镜像站下载的源码                                |
 | yes      | json         | *        |                                                         |
-| yes      | libxml       | *        |                                                         |
+| yes      | libxml       | *        | 自带下载编译 libxml2 库                                  |
 | yes      | mbstring     | *        |                                                         |
-| yes      | mongodb      | >=1.9.1  | not tested                                              |
+| yes      | mongodb      | >=1.9.1  | 未测试，从 pecl 或镜像站下载的源码                        |
 |          | mysqli       |          |                                                         |
 | yes      | mysqlnd      | *        |                                                         |
 | yes      | openssl      | *        |                                                         |
@@ -61,11 +61,11 @@ file ./php
 |          | pdo_pgsql    | *        |                                                         |
 | yes      | phar         | *        |                                                         |
 | yes      | posix        | *        |                                                         |
-| yes      | redis        | *        |                                                         |
+| yes      | redis        | *        | 从 pecl 或镜像站下载的源码                                |
 | yes      | simplexml    | *        |                                                         |
 | yes      | sockets      | *        |                                                         |
 | yes      | sqlite3      | *        |                                                         |
-| yes      | swoole       | >=4.6.6  | 默认支持mysqlnd, sockets, openssl, redis                |
+| yes      | swoole       | >=4.6.6  | 使用参数 `--enable-openssl --with-openssl --with-openssl-dir=/usr`，从 pecl 或镜像站下载的源码 |
 | yes      | tokenizer    | *        |                                                         |
 | yes      | xml          | *        |                                                         |
 | yes      | xmlreader    | *        |                                                         |
@@ -75,11 +75,13 @@ file ./php
 
 ## 自定义
 - `docker/Dockerfile` 中修改 `VER_PHP=x.x.x` 来更换 PHP 版本。
-- `docker/Dockerfile` 中修改 `USE_BACKUP=yes` 使用备用下载源码地址（不在中国大陆可以使用备用地址）。
+- `docker/Dockerfile` 中修改 `USE_BACKUP=yes` 使用备用下载源码地址（建议**不在中国大陆的用户**使用备用地址）。
 - `docker/extensions.txt` 指定要编译安装的扩展。
 - `docker/compile-php.sh` 中的 `php_compile_args` 函数来调整 PHP 编译参数。
 - `docker/check-extensions.sh` 中的 `check_in_configure` 函数可调整 PHP 扩展编译的参数 。
 - `docker/config.json` 可调整要下载的扩展和依赖库版本和链接。
+- `docker/fast-compiler.sh` 可以在 Alpine Linux 系统下直接运行。
+- `docker/multi-version-compiler.sh` 可以同时编译多个版本的 PHP。
 
 ## 目前的问题（对勾为已解决）
 - [ ] 不支持 event(libevent) 扩展，event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序，同时其本身也不支持静态编译。
@@ -88,7 +90,7 @@ file ./php
 - [X] curl/libcurl 扩展静态编译
 - [X] 可自行选择不需要编译进入的扩展
 - [ ] php.ini 内嵌或分发
-- [ ] i18n（国际化脚本本身和 README）
+- [X] i18n（国际化脚本本身和 README）
 
 如果你对以上问题有解决方案，请提出 Issue 或 PR！
 
