@@ -73,7 +73,7 @@ file ./php
 | yes      | xml          | *        |                                                         |
 | yes      | xmlreader    | *        |                                                         |
 | yes      | xmlwriter    | *        |                                                         |
-|          | zip          |          |                                                         |
+|          | zip          |          | 已经支持，但是脚本搞丢了，需要重新写                       |
 | yes      | zlib         | *        |                                                         |
 
 ## 自定义
