@@ -7,7 +7,7 @@ BTW, It's only for CLI mode.
 
 ## Compilation Requirements
 - Tested on `x86_64` and `aarch64` platform, others have not tested.
-- Docker required (or alpine linux when I write single script file)
+- Docker required (or alpine linux 3.12+)
 - Supporting PHP version from 7.2 to 8.0
 
 ## Running Requirements
@@ -46,7 +46,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 |         | event        |         |                                          |
 | yes     | filter       | *       |                                          |
 | yes     | gd           | *       |                                          |
-| yes     | hash         | *       | PHP7.3 or older uses `--enable-hash`     |
+| yes     | hash         | *       |                                          |
 | yes     | iconv        | *       |                                          |
 | yes     | inotify      | 3.0.0   |                                          |
 | yes     | json         | *       |                                          |
