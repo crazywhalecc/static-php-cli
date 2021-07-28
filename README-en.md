@@ -5,10 +5,13 @@ BTW, It's only for CLI mode.
 
 [![version](https://img.shields.io/badge/version-1.3.3-green.svg)]()
 
-## Requirements
+## Compilation Requirements
 - Tested on `x86_64` and `aarch64` platform, others have not tested.
 - Docker required (or alpine linux when I write single script file)
 - Supporting PHP version from 7.2 to 8.0
+
+## Running Requirements
+Linux
 
 ## Start
 You can directly download static binary in Release.
