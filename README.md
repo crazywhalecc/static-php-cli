@@ -7,10 +7,13 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 [![版本](https://img.shields.io/badge/script--version-1.3.3-green.svg)]()
 
-## 环境需求
+## 编译环境需求
 - 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
 - 需要 Docker（或等我将脚本提出来也可以直接在 Alpine Linux 上使用）
 - 脚本支持编译的 PHP 版本（7.2 ~ 8.0）
+
+## 运行环境需求
+Linux
 
 ## 开始
 可以直接在旁边的 Release 中下载编译好的二进制。
