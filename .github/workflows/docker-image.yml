@@ -16,8 +16,17 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build the Docker image
       run: cd docker/ && docker build . --file Dockerfile --tag static-php
-    - name: Push binary into new branch
+    - name: Push binary into dl server
       run: |
         mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-        chmod a+x action-deploy.sh
-        ./action-deploy.sh
+        mkdir dist/7.4
+        mv dist/php dist/7.4/
+    - name: Deploy to Zhamao Server
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+        ARGS: "-rltgoDzvO --delete"
+        SOURCE: "dist/"
+        REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+        REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+        TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
