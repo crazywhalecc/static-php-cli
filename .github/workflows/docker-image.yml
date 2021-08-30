@@ -13,20 +13,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.23
-    - name: Push binary into dl server
-      run: |
-        mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-        mkdir dist/7.4
-        mv dist/php dist/7.4/
-    - name: Deploy to Zhamao Server
-      uses: easingthemes/ssh-deploy@main
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-        ARGS: "-rltgoDzvO --delete"
-        SOURCE: "dist/"
-        REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-        REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-        TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - uses: actions/checkout@v2
+      - name: Build PHP 7.2
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php:7.2 --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.2.34
+      - name: Push PHP 7.2 to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php:7.2 cp php-dist/bin/php /dist/
+          mkdir dist/7.2 && mv dist/php dist/7.2/
+      - name: Build PHP 7.3
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php:7.3 --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.3.30
+      - name: Push PHP 7.3 to dist
+        run: |
+          docker run --rm -v $(pwd)/dist:/dist/ static-php:7.3 cp php-dist/bin/php /dist/
+          mkdir dist/7.3 && mv dist/php dist/7.3/
+      - name: Build PHP 7.4
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php:7.4 --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.23
+      - name: Push PHP 7.4 to dist
+        run: |
+          docker run --rm -v $(pwd)/dist:/dist/ static-php:7.4 cp php-dist/bin/php /dist/
+          mkdir dist/7.4 && mv dist/php dist/7.4/
+      - name: Build PHP 8.0
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php:8.0 --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=8.0.10
+      - name: Push PHP 8.0 to dist
+        run: |
+          docker run --rm -v $(pwd)/dist:/dist/ static-php:8.0 cp php-dist/bin/php /dist/
+          mkdir dist/8.0 && mv dist/php dist/8.0/
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
