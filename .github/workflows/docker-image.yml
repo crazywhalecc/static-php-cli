@@ -19,4 +19,5 @@ jobs:
     - name: Push binary into new branch
       run: |
         mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+        chmod a+x action-deploy.sh
         ./action-deploy.sh
