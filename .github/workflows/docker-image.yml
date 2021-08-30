@@ -15,4 +15,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: cd docker/ && docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: cd docker/ && docker build . --file Dockerfile --tag static-php
+    - name: Push binary into new branch
+      run: |
+        mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ -it static-php cp php-dist/bin/php /dist/
+        ./action-deploy.sh
