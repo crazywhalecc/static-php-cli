@@ -24,6 +24,7 @@ git add .
 
 git commit -m "automatic deployment"
 
+git remote rm origin
 git remote add origin "${remote_repo}"
 
 git push -u origin deploy --force
