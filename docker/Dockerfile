@@ -5,10 +5,10 @@ FROM alpine:latest
 ENV SCRIPT_VERSION=1.3.3
 # Download address uses backup address 
 # (if downloading slowly, consider set it to yes)
-ENV USE_BACKUP=no
+ENV USE_BACKUP="${USE_BACKUP_ADDRESS}"
 
 # Version of some manually-installed package
-ENV VER_PHP=7.4.21
+ENV VER_PHP="${COMPILE_PHP_VERSION}"
 
 # APK repositories mirror address, if u r not in China, consider set USE_BACKUP=yes to boost
 ENV LINK_APK_REPO='mirrors.ustc.edu.cn'
