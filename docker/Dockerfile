@@ -4,6 +4,10 @@ FROM alpine:latest
 # Version of this Dockerfile
 ENV SCRIPT_VERSION=1.3.3
 # Download address uses backup address 
+
+ARG USE_BACKUP_ADDRESS
+ARG COMPILE_PHP_VERSION
+
 # (if downloading slowly, consider set it to yes)
 ENV USE_BACKUP="${USE_BACKUP_ADDRESS}"
 
