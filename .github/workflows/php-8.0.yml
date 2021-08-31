@@ -1,0 +1,40 @@
+name: Build PHP 8.0.10
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build PHP 8.0.10
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=8.0.10
+      - name: Push PHP 8.0.10 to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-8.0.10-static-bin-x86_64.tar.gz" ./php && rm ./php
+      - name: Change Dockerfile to aarch64
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - name: Build PHP 8.0.10 arm
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php-arm --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=8.0.10
+      - name: Push PHP 8.0.10 arm to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php-arm cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-8.0.10-static-bin-aarch64.tar.gz" ./php && rm ./php
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
