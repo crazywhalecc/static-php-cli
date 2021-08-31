@@ -6,6 +6,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
 [![版本](https://img.shields.io/badge/script--version-1.3.3-green.svg)]()
+![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/php-8.0.yml/badge.svg)
 
 ## 编译环境需求
 - 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
