@@ -25,7 +25,7 @@ Linux
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
-docker build -t static-php . 
+docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.23
 ```
 
 编译之后可以使用下方命令将二进制 PHP 提取出来，用以下方式：
