@@ -4,6 +4,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 BTW, It's only for CLI mode.
 
 [![version](https://img.shields.io/badge/version-1.3.3-green.svg)]()
+![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## Compilation Requirements
 - Tested on `x86_64` and `aarch64` platform, others have not tested.
@@ -14,13 +15,15 @@ BTW, It's only for CLI mode.
 Linux
 
 ## Start
-You can directly download static binary in Release.
+You can directly download static binary from this link.
+
+<https://dl.zhamao.me/php-bin/file/>
 
 Here's help command to compile it yourself:
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
-docker build -t static-php .
+docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.23
 ```
 
 After compilation you can use command to get static php binary file:
