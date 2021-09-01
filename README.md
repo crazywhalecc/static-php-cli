@@ -17,13 +17,15 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 Linux
 
 ## 开始
-可以直接在旁边的 Release 中下载编译好的二进制。
+可以直接下面的地址下载 Actions 构建的文件。
+
+<https://dl.zhamao.me/php-bin/file/>
 
 也可以自己使用 Dockerfile 进行编译构建：
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
-docker build -t static-php .
+docker build -t static-php . 
 ```
 
 编译之后可以使用下方命令将二进制 PHP 提取出来，用以下方式：
