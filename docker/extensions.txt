@@ -11,7 +11,7 @@ inotify
 json
 libxml
 mbstring
-#mongodb
+mongodb
 mysqlnd
 openssl
 pcntl
