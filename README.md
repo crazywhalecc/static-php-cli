@@ -43,41 +43,41 @@ file ./php
 ## 支持的扩展表
 | 是否支持 | PHP 扩展名称 | 支持版本 | 备注                                                    |
 | -------- | ------------ | -------- | ------------------------------------------------------- |
-| yes      | bcmath       | *        |                                                         |
-| yes      | calendar     | *        |                                                         |
-| yes      | ctype        | *        |                                                         |
-| yes      | curl         | *        | 自带下载编译 curl 库                                    |
-| yes      | dom          | *        |                                                         |
+| yes, enabled      | bcmath       | *        |                                                         |
+| yes, enabled      | calendar     | *        |                                                         |
+| yes, enabled      | ctype        | *        |                                                         |
+| yes, enabled      | curl         | *        | 自带下载编译 curl 库                                    |
+| yes, enabled      | dom          | *        |                                                         |
 |          | event        |          |                                                         |
-| yes      | filter       | *        |                                                         |
-| yes      | gd           | *        |                                                         |
-| yes      | hash         | *        |                                                         |
-| yes      | iconv        | *        |                                                         |
-| yes      | inotify      | 3.0.0    | 从 pecl 或镜像站下载的源码                                |
-| yes      | json         | *        |                                                         |
-| yes      | libxml       | *        | 自带下载编译 libxml2 库                                  |
-| yes      | mbstring     | *        |                                                         |
-| yes      | mongodb      | >=1.9.1  | 未测试，从 pecl 或镜像站下载的源码                        |
+| yes, enabled      | filter       | *        |                                                         |
+| yes, enabled      | gd           | *        |                                                         |
+| yes, enabled      | hash         | *        |                                                         |
+| yes, enabled      | iconv        | *        |                                                         |
+| yes, enabled      | inotify      | 3.0.0    | 从 pecl 或镜像站下载的源码                                |
+| yes, enabled      | json         | *        |                                                         |
+| yes, enabled      | libxml       | *        | 自带下载编译 libxml2 库                                  |
+| yes, enabled      | mbstring     | *        |                                                         |
+| yes, enabled      | mongodb      | >=1.9.1  | 未测试，从 pecl 或镜像站下载的源码                        |
 |          | mysqli       |          |                                                         |
-| yes      | mysqlnd      | *        |                                                         |
-| yes      | openssl      | *        |                                                         |
-| yes      | pcntl        | *        |                                                         |
-| yes      | pdo          | *        |                                                         |
-| yes      | pdo_mysql    | *        |                                                         |
+| yes, enabled      | mysqlnd      | *        |                                                         |
+| yes, enabled      | openssl      | *        |                                                         |
+| yes, enabled      | pcntl        | *        |                                                         |
+| yes, enabled      | pdo          | *        |                                                         |
+| yes, enabled      | pdo_mysql    | *        |                                                         |
 |          | pdo_pgsql    | *        |                                                         |
-| yes      | phar         | *        |                                                         |
-| yes      | posix        | *        |                                                         |
-| yes      | redis        | *        | 从 pecl 或镜像站下载的源码                                |
-| yes      | simplexml    | *        |                                                         |
-| yes      | sockets      | *        |                                                         |
-| yes      | sqlite3      | *        |                                                         |
-| yes      | swoole       | >=4.6.6  | 使用参数 `--enable-openssl --with-openssl --with-openssl-dir=/usr`，从 pecl 或镜像站下载的源码 |
-| yes      | tokenizer    | *        |                                                         |
-| yes      | xml          | *        |                                                         |
-| yes      | xmlreader    | *        |                                                         |
-| yes      | xmlwriter    | *        |                                                         |
+| yes, enabled      | phar         | *        |                                                         |
+| yes, enabled      | posix        | *        |                                                         |
+| yes, enabled      | redis        | *        | 从 pecl 或镜像站下载的源码                                |
+| yes, enabled      | simplexml    | *        |                                                         |
+| yes, enabled      | sockets      | *        |                                                         |
+| yes, enabled      | sqlite3      | *        |                                                         |
+| yes, enabled      | swoole       | >=4.6.6  | 使用参数 `--enable-openssl --with-openssl --with-openssl-dir=/usr`，从 pecl 或镜像站下载的源码 |
+| yes, enabled      | tokenizer    | *        |                                                         |
+| yes, enabled      | xml          | *        |                                                         |
+| yes, enabled      | xmlreader    | *        |                                                         |
+| yes, enabled      | xmlwriter    | *        |                                                         |
 |          | zip          |          | 已经支持，但是脚本搞丢了，需要重新写                       |
-| yes      | zlib         | *        |                                                         |
+| yes, enabled      | zlib         | *        |                                                         |
 
 ## 自定义
 - `docker/Dockerfile` 中修改 `VER_PHP=x.x.x` 来更换 PHP 版本。
