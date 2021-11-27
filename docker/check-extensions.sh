@@ -77,7 +77,10 @@ function check_before_configure() {
         tokenizer) ;;
         zlib) ;;
         curl)
-            do_curl_compiler
+            if [ ! -f "$self_dir/source/.curl_compiled" ]; then
+                do_curl_compiler
+                touch "$self_dir/source/.curl_compiled"
+            fi
             if [ $? != 0 ]; then
                 echo "Compile curl error!"
                 exit 1
@@ -85,9 +88,12 @@ function check_before_configure() {
             ;;
         dom|xml|libxml|xmlreader|xmlwriter|simplexml)
             if [ "$xml_sign" = "no" ]; then
-                do_xml_compiler
+                if [ ! -f "$self_dir/source/.xml_compiled" ]; then
+                    do_xml_compiler
+                    touch "$self_dir/source/.xml_compiled"
+                fi
                 if [ $? != 0 ]; then
-                echo "Compile curl error!"
+                echo "Compile xml error!"
                 exit 1
             fi
                 xml_sign="yes"
