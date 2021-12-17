@@ -45,7 +45,7 @@ else
         archive_file_tar=$(find . -name "$1*.*" | grep -E ".tar|.gz|.tgz" | tail -n1)
         archive_file_zip=$(find . -name "*.zip" | tail -n1)
         if [ "$archive_file_tar" != "" ]; then
-            tar -zxvf $archive_file_tar && mv $archive_file_tar $SELF_DIR/source/cache/$1.tgz
+            tar -zxf $archive_file_tar && mv $archive_file_tar $SELF_DIR/source/cache/$1.tgz
         elif [ "$archive_file_zip" != "" ]; then
             unzip $archive_file_zip && mv $archive_file_zip $SELF_DIR/source/cache/$1.zip
         else
