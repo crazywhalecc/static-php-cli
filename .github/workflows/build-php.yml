@@ -35,8 +35,8 @@ jobs:
     env:
       PHP_VERSION: 7.2.34
     runs-on: [self-hosted, ARM64]
-      - uses: actions/checkout@v2
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
       - name: Build PHP ${{ env.PHP_VERSION }}
         run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
@@ -84,7 +84,6 @@ jobs:
     env:
       PHP_VERSION: 7.3.33
     runs-on: [self-hosted, ARM64]
-      - uses: actions/checkout@v2
     steps:
       - uses: actions/checkout@v2
       - name: Build PHP ${{ env.PHP_VERSION }}
@@ -133,7 +132,6 @@ jobs:
     env:
       PHP_VERSION: 7.4.27
     runs-on: [self-hosted, ARM64]
-      - uses: actions/checkout@v2
     steps:
       - uses: actions/checkout@v2
       - name: Build PHP ${{ env.PHP_VERSION }}
@@ -182,7 +180,6 @@ jobs:
     env:
       PHP_VERSION: 8.0.14
     runs-on: [self-hosted, ARM64]
-      - uses: actions/checkout@v2
     steps:
       - uses: actions/checkout@v2
       - name: Build PHP ${{ env.PHP_VERSION }}
