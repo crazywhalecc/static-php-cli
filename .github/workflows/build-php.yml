@@ -30,7 +30,9 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
   build-72-arm64:
     env:
       PHP_VERSION: 7.2.34
@@ -55,7 +57,9 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
   build-73:
     env:
       PHP_VERSION: 7.3.33
@@ -79,7 +83,9 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
   build-73-arm64:
     env:
       PHP_VERSION: 7.3.33
@@ -103,7 +109,9 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
   build-74:
     env:
       PHP_VERSION: 7.4.27
@@ -127,7 +135,9 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
   build-74-arm64:
     env:
       PHP_VERSION: 7.4.27
@@ -151,7 +161,9 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
   build-80:
     env:
       PHP_VERSION: 8.0.14
@@ -175,7 +187,9 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
   build-80-arm64:
     env:
       PHP_VERSION: 8.0.14
@@ -199,4 +213,6 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
       - name: Remove dist directory
-        run: rm -rf dist/
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
