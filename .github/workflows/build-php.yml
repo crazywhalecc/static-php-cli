@@ -8,23 +8,17 @@ on:
 
 jobs:
   build-72:
-    runs-on: self-hosted
+    env:
+      PHP_VERSION: 7.2.34
+    runs-on: [self-hosted, X64]
     steps:
       - uses: actions/checkout@v2
-      - name: Build PHP 7.2.34
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=7.2.34
-      - name: Push PHP 7.2.34 to dist
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-7.2.34-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Change Dockerfile to aarch64
-        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-v3.14/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - name: Build PHP 7.2.34 arm
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php-arm --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=7.2.34
-      - name: Push PHP 7.2.34 arm to dist
-        run: |
-          docker run --rm -v $(pwd)/dist:/dist/ static-php-arm cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-7.2.34-static-bin-aarch64.tar.gz" ./php && rm ./php
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
         env:
@@ -35,24 +29,45 @@ jobs:
           REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
+  build-72-arm64:
+    env:
+      PHP_VERSION: 7.2.34
+    runs-on: [self-hosted, ARM64]
+      - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-aarch64.tar.gz" ./php && rm ./php
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
   build-73:
-    runs-on: self-hosted
+    env:
+      PHP_VERSION: 7.3.33
+    runs-on: [self-hosted, X64]
     steps:
       - uses: actions/checkout@v2
-      - name: Build PHP 7.3.31
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=7.3.31
-      - name: Push PHP 7.3.31 to dist
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-7.3.31-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Change Dockerfile to aarch64
-        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-v3.14/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - name: Build PHP 7.3.31 arm
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php-arm --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=7.3.31
-      - name: Push PHP 7.3.31 arm to dist
-        run: |
-          docker run --rm -v $(pwd)/dist:/dist/ static-php-arm cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-7.3.31-static-bin-aarch64.tar.gz" ./php && rm ./php
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
         env:
@@ -63,24 +78,45 @@ jobs:
           REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
+  build-73-arm64:
+    env:
+      PHP_VERSION: 7.3.33
+    runs-on: [self-hosted, ARM64]
+      - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-aarch64.tar.gz" ./php && rm ./php
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
   build-74:
-    runs-on: self-hosted
+    env:
+      PHP_VERSION: 7.4.27
+    runs-on: [self-hosted, X64]
     steps:
       - uses: actions/checkout@v2
-      - name: Build PHP 7.4.25
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=7.4.25
-      - name: Push PHP 7.4.25 to dist
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-7.4.25-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Change Dockerfile to aarch64
-        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-v3.14/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - name: Build PHP 7.4.25 arm
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php-arm --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=7.4.25
-      - name: Push PHP 7.4.25 arm to dist
-        run: |
-          docker run --rm -v $(pwd)/dist:/dist/ static-php-arm cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-7.4.25-static-bin-aarch64.tar.gz" ./php && rm ./php
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
         env:
@@ -91,24 +127,45 @@ jobs:
           REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
+  build-74-arm64:
+    env:
+      PHP_VERSION: 7.4.27
+    runs-on: [self-hosted, ARM64]
+      - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-aarch64.tar.gz" ./php && rm ./php
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
   build-80:
-    runs-on: self-hosted
+    env:
+      PHP_VERSION: 8.0.14
+    runs-on: [self-hosted, X64]
     steps:
       - uses: actions/checkout@v2
-      - name: Build PHP 8.0.12
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=8.0.12
-      - name: Push PHP 8.0.12 to dist
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-8.0.12-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Change Dockerfile to aarch64
-        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-v3.14/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - name: Build PHP 8.0.12 arm
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php-arm --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=8.0.12
-      - name: Push PHP 8.0.12 arm to dist
-        run: |
-          docker run --rm -v $(pwd)/dist:/dist/ static-php-arm cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-8.0.12-static-bin-aarch64.tar.gz" ./php && rm ./php
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
         env:
@@ -119,3 +176,30 @@ jobs:
           REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
+  build-80-arm64:
+    env:
+      PHP_VERSION: 8.0.14
+    runs-on: [self-hosted, ARM64]
+      - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-aarch64.tar.gz" ./php && rm ./php
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: rm -rf dist/
