@@ -27,6 +27,6 @@ cd $php_dir && \
     $self_dir/check-extensions.sh check_after_configure && \
     sed -ie 's/-export-dynamic//g' "Makefile" && \
     sed -ie 's/-o $(SAPI_CLI_PATH)/-all-static -o $(SAPI_CLI_PATH)/g' "Makefile" && \
-    make LDFLAGS=-ldl -j4 && \
+    make LDFLAGS=-ldl -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
     make install && \
     strip $self_dir/php-dist/bin/php
