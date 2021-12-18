@@ -4,12 +4,12 @@
         "link_2": "https://www.php.net/distributions/php-{version}.tar.gz"
     },
     "swoole": {
-        "version": "4.7.1",
+        "version": "4.8.4",
         "link": "http://mirrors.zhamao.xin/pecl/swoole-{version}.tgz",
         "link_2": "https://pecl.php.net/get/swoole-{version}.tgz"
     },
     "mongodb": {
-        "version": "1.10.0",
+        "version": "1.12.0",
         "link": "http://mirrors.zhamao.xin/pecl/mongodb-{version}.tgz",
         "link_2": "https://pecl.php.net/get/mongodb-{version}.tgz"
     },
