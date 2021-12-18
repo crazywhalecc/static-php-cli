@@ -32,7 +32,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-72-arm64:
     env:
       PHP_VERSION: 7.2.34
@@ -59,7 +59,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-73:
     env:
       PHP_VERSION: 7.3.33
@@ -85,7 +85,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-73-arm64:
     env:
       PHP_VERSION: 7.3.33
@@ -111,7 +111,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-74:
     env:
       PHP_VERSION: 7.4.27
@@ -137,7 +137,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-74-arm64:
     env:
       PHP_VERSION: 7.4.27
@@ -163,7 +163,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-80:
     env:
       PHP_VERSION: 8.0.14
@@ -189,7 +189,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-80-arm64:
     env:
       PHP_VERSION: 8.0.14
@@ -215,7 +215,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-81:
     env:
       PHP_VERSION: 8.1.1
@@ -241,7 +241,7 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-81-arm64:
     env:
       PHP_VERSION: 8.1.1
@@ -267,4 +267,4 @@ jobs:
       - name: Remove dist directory
         run: |
           rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
