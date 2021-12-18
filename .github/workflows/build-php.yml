@@ -216,3 +216,55 @@ jobs:
         run: |
           rm -rf dist/
           docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+  build-81:
+    env:
+      PHP_VERSION: 8.1.1
+    runs-on: [self-hosted, X64]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
+  build-81-arm64:
+    env:
+      PHP_VERSION: 8.1.1
+    runs-on: [self-hosted, ARM64]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build PHP ${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+      - name: Push PHP ${{ env.PHP_VERSION }} to dist
+        run: |
+          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
+          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-aarch64.tar.gz" ./php && rm ./php
+      - name: Deploy to Zhamao Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+      - name: Remove dist directory
+        run: |
+          rm -rf dist/
+          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi
