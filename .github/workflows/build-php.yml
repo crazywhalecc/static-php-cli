@@ -9,7 +9,7 @@ on:
 jobs:
   build-81:
     env:
-      PHP_VERSION: 8.1.1
+      PHP_VERSION: 8.1.2
     runs-on: [self-hosted, X64]
     steps:
       - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
           docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   build-80:
     env:
-      PHP_VERSION: 8.0.14
+      PHP_VERSION: 8.0.15
     runs-on: [self-hosted, X64]
     steps:
       - uses: actions/checkout@v2
