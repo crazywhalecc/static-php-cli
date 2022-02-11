@@ -1,4 +1,4 @@
-name: Build PHP for ARM64
+name: Build PHP for ARM64 in self-hosted Machine
 
 on:
   push:
