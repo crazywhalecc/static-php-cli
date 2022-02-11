@@ -4,7 +4,7 @@
         "link_2": "https://www.php.net/distributions/php-{version}.tar.gz"
     },
     "swoole": {
-        "version": "4.8.4",
+        "version": "4.8.6",
         "link": "http://mirrors.zhamao.xin/pecl/swoole-{version}.tgz",
         "link_2": "https://pecl.php.net/get/swoole-{version}.tgz"
     },
@@ -24,7 +24,7 @@
         "link_2": "https://pecl.php.net/get/event-{version}.tgz"
     },
     "redis": {
-        "version": "5.3.4",
+        "version": "5.3.6",
         "link": "http://mirrors.zhamao.xin/pecl/redis-{version}.tgz",
         "link_2": "https://pecl.php.net/get/redis-{version}.tgz"
     },
@@ -39,7 +39,7 @@
         "link_2": "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip"
     },
     "curl": {
-        "version": "7.78.0",
+        "version": "7.81.0",
         "link": "https://dl.zhamao.me/curl/curl-{version}.tar.gz",
         "link_2": "https://curl.haxx.se/download/curl-{version}.tar.gz"
     }
