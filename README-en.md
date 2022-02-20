@@ -9,7 +9,7 @@ BTW, It's only for CLI mode.
 ## Compilation Requirements
 - Tested on `x86_64` and `aarch64` platform, others have not tested.
 - Docker required (or alpine linux 3.12+)
-- Supporting PHP version from 7.2 to 8.0
+- Supporting PHP version from 7.2 to 8.1
 
 ## Running Requirements
 Linux
