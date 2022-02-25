@@ -10,12 +10,13 @@ jobs:
   build-72-arm64:
     env:
       PHP_VERSION: 7.2.34
-    runs-on: [self-hosted, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - name: Change Dockerfile to aarch64
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
       - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
@@ -37,11 +38,13 @@ jobs:
   build-73-arm64:
     env:
       PHP_VERSION: 7.3.33
-    runs-on: [self-hosted, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Change Dockerfile to aarch64
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
       - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
@@ -63,11 +66,13 @@ jobs:
   build-74-arm64:
     env:
       PHP_VERSION: 7.4.27
-    runs-on: [self-hosted, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Change Dockerfile to aarch64
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
       - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
@@ -89,11 +94,13 @@ jobs:
   build-80-arm64:
     env:
       PHP_VERSION: 8.0.15
-    runs-on: [self-hosted, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Change Dockerfile to aarch64
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
       - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
@@ -115,11 +122,13 @@ jobs:
   build-81-arm64:
     env:
       PHP_VERSION: 8.1.2
-    runs-on: [self-hosted, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Change Dockerfile to aarch64
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
       - name: Push PHP ${{ env.PHP_VERSION }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
