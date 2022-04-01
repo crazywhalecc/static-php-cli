@@ -38,7 +38,7 @@ jobs:
   build-73-arm64:
     env:
       PHP_VERSION: 7.3.33
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     steps:
       - uses: actions/checkout@v2
       - name: Change Dockerfile to aarch64
@@ -66,7 +66,7 @@ jobs:
   build-74-arm64:
     env:
       PHP_VERSION: 7.4.27
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     steps:
       - uses: actions/checkout@v2
       - name: Change Dockerfile to aarch64
@@ -94,7 +94,7 @@ jobs:
   build-80-arm64:
     env:
       PHP_VERSION: 8.0.15
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     steps:
       - uses: actions/checkout@v2
       - name: Change Dockerfile to aarch64
@@ -122,7 +122,7 @@ jobs:
   build-81-arm64:
     env:
       PHP_VERSION: 8.1.4
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     steps:
       - uses: actions/checkout@v2
       - name: Change Dockerfile to aarch64
