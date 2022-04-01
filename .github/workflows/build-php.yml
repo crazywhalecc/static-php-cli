@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Change Dockerfile to armv7l
-        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:armv7l-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:armv7-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Build PHP ${{ matrix.php-versions }}
         run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ matrix.php-versions }}
       - name: Push PHP ${{ matrix.php-versions }} to dist
