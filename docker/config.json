@@ -30,17 +30,17 @@
     },
     "libxml2": {
         "version": "2.9.12",
-        "link": "https://dl.zhamao.me/libxml2/libxml2-{version}.tar.gz",
+        "link": "http://mirrors.zhamao.xin/library/libxml2/libxml2-{version}.tar.gz",
         "link_2": "http://xmlsoft.org/sources/libxml2-{version}.tar.gz"
     },
     "liblzma": {
         "version": "master",
-        "link": "https://dl.zhamao.me/liblzma/liblzma.tar.gz",
+        "link": "https://mirrors.zhamao.xin/library/liblzma/liblzma.tar.gz",
         "link_2": "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip"
     },
     "curl": {
-        "version": "7.81.0",
-        "link": "https://dl.zhamao.me/curl/curl-{version}.tar.gz",
+        "version": "7.82.0",
+        "link": "https://mirrors.zhamao.xin/library/curl/curl-{version}.tar.gz",
         "link_2": "https://curl.haxx.se/download/curl-{version}.tar.gz"
     }
 }
