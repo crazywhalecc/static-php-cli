@@ -7,18 +7,20 @@ on:
     branches: [ master ]
 
 jobs:
-  build-81:
-    env:
-      PHP_VERSION: 8.1.2
+  integration:
+    name: Build PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: [ "7.2.34", "7.3.33", "7.4.27", "8.0.15", "8.1.4" ]
     steps:
       - uses: actions/checkout@v2
-      - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
-      - name: Push PHP ${{ env.PHP_VERSION }} to dist
+      - name: Build PHP ${{ matrix.php-versions }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ matrix.php-versions }}
+      - name: Push PHP ${{ matrix.php-versions }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
+          cd dist && tar -zcvf "php-${{ matrix.php-versions }}-static-bin-x86_64.tar.gz" ./php && rm ./php
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
         env:
@@ -33,108 +35,3 @@ jobs:
         run: |
           rm -rf dist/
           docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
-  build-80:
-    env:
-      PHP_VERSION: 8.0.15
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
-      - name: Push PHP ${{ env.PHP_VERSION }} to dist
-        run: |
-          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Deploy to Zhamao Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
-          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
-      - name: Remove dist directory
-        run: |
-          rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
-  build-74:
-    env:
-      PHP_VERSION: 7.4.27
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
-      - name: Push PHP ${{ env.PHP_VERSION }} to dist
-        run: |
-          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Deploy to Zhamao Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
-          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
-      - name: Remove dist directory
-        run: |
-          rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
-  build-73:
-    env:
-      PHP_VERSION: 7.3.33
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
-      - name: Push PHP ${{ env.PHP_VERSION }} to dist
-        run: |
-          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Deploy to Zhamao Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
-          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
-      - name: Remove dist directory
-        run: |
-          rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
-  build-72:
-    env:
-      PHP_VERSION: 7.2.34
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build PHP ${{ env.PHP_VERSION }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ env.PHP_VERSION }}
-      - name: Push PHP ${{ env.PHP_VERSION }} to dist
-        run: |
-          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-${{ env.PHP_VERSION }}-static-bin-x86_64.tar.gz" ./php && rm ./php
-      - name: Deploy to Zhamao Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
-          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
-      - name: Remove dist directory
-        run: |
-          rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
-  
