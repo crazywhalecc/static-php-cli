@@ -11,12 +11,12 @@ php_dir=$(find $self_dir/source -name "php-*" -type d | tail -n1)
 function do_xml_compiler() {
     cd $self_dir/source/liblzma-* && \
         ./configure && \
-        make -j4 && \
+        make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
         echo "liblzma compiled!" && sleep 2s && \
         cd ../libxml2-* && \
         ./configure --prefix=/usr --with-lzma --without-python && \
-        make -j4 && \
+        make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
         echo "libxml2 compiled!" && sleep 2s
 }
@@ -34,7 +34,7 @@ function do_curl_compiler() {
             --without-libpsl \
             --without-lber \
             --enable-ares && \
-        make -j4 && \
+        make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
         echo "curl compiled!" && \
         cat "$self_dir/ac_override_1" "$php_dir/ext/curl/config.m4" "$self_dir/ac_override_2" > /tmp/aa && \
