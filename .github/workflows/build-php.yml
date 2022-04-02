@@ -36,51 +36,22 @@ jobs:
           rm -rf dist/
           docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
   integration2:
-    name: Build PHP ${{ matrix.php-versions }} for aarch64
+    name: Build PHP ${{ matrix.php-versions }} for ${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         php-versions: [ "7.2.34", "7.3.33", "7.4.27", "8.0.15", "8.1.4" ]
+        arch: [ "aarch64", "armv7", "i386" ]
     steps:
       - uses: actions/checkout@v2
-      - name: Change Dockerfile to aarch64
-        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:aarch64-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - name: Change Dockerfile to ${{ matrix.arch }}
+        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:${{ matrix.arch }}-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Build PHP ${{ matrix.php-versions }}
         run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ matrix.php-versions }}
       - name: Push PHP ${{ matrix.php-versions }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-${{ matrix.php-versions }}-static-bin-aarch64.tar.gz" ./php && rm ./php
-      - name: Deploy to Zhamao Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
-          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
-      - name: Remove dist directory
-        run: |
-          rm -rf dist/
-          docker images | grep -v REPOSITORY | awk '{print $3}' | xargs docker rmi --force
-  integration3:
-    name: Build PHP ${{ matrix.php-versions }} for armv7l
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: [ "7.2.34", "7.3.33", "7.4.27", "8.0.15", "8.1.4" ]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Change Dockerfile to armv7l
-        run: cd docker/ && sed -ie 's/alpine:latest/multiarch\/alpine:armv7-edge/g' Dockerfile && docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      - name: Build PHP ${{ matrix.php-versions }}
-        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ matrix.php-versions }}
-      - name: Push PHP ${{ matrix.php-versions }} to dist
-        run: |
-          mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
-          cd dist && tar -zcvf "php-${{ matrix.php-versions }}-static-bin-armv7l.tar.gz" ./php && rm ./php
+          cd dist && tar -zcvf "php-${{ matrix.php-versions }}-static-bin-${{ matrix.arch }}.tar.gz" ./php && rm ./php
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
         env:
