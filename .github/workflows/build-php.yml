@@ -8,11 +8,11 @@ on:
 
 jobs:
   integration:
-    name: Build PHP ${{ matrix.php-versions }}
+    name: Build PHP ${{ matrix.php-versions }} for ${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ "7.2.34", "7.3.33", "7.4.27", "8.0.15", "8.1.4" ]
+        php-versions: [ "7.2.34", "7.3.33", "7.4.28", "8.0.17", "8.1.4" ]
         arch: [ "x86_64", "aarch64", "armv7l" ]
     steps:
       - uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
             fi
             docker run --rm --privileged multiarch/qemu-user-static:register --reset
           fi
-      - name: Build PHP ${{ matrix.php-versions }}
+      - name: Build PHP ${{ matrix.php-versions }} for ${{ matrix.arch }}
         run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ matrix.php-versions }}
       - name: Push PHP ${{ matrix.php-versions }} to dist
         run: |
