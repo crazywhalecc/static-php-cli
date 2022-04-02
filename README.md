@@ -5,13 +5,13 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
-[![版本](https://img.shields.io/badge/script--version-1.3.3-green.svg)]()
+[![版本](https://img.shields.io/badge/script--version-1.4.0-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## 编译环境需求
-- 目前在 x86_64 和 aarch64(arm64) 架构上编译成功，其他架构需自行测试
-- 需要 Docker（或等我将脚本提出来也可以直接在 Alpine Linux 上使用）
+- 目前支持 arm64、x86_64、armv7l 架构
+- 需要 Docker（也可以直接在 Alpine Linux 上使用）
 - 脚本支持编译的 PHP 版本（7.2 ~ 8.1）
 
 ## 运行环境需求
@@ -20,13 +20,13 @@ Linux
 ## 开始
 可以直接下面的地址下载 Actions 构建的文件。
 
-<https://dl.zhamao.me/php-bin/file/>
+<https://dl.zhamao.xin/php-bin/file/>
 
 也可以自己使用 Dockerfile 进行编译构建：
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
-docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.23
+docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPILE_PHP_VERSION=7.4.28
 ```
 
 编译之后可以使用下方命令将二进制 PHP 提取出来，用以下方式：
