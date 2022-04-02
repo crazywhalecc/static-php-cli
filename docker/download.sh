@@ -29,16 +29,16 @@ archive_find_zip=$(find cache/ -name "$1.*" | grep -E ".zip" | tail -n1)
 
 if [ "$archive_find_tar" != "" ]; then
     echo "Using cache for $1 ($archive_find_tar)"
-    tar -zxvf "$archive_find_tar"
+    tar -zxf "$archive_find_tar"
 elif [ "$archive_find_zip" != "" ]; then
     echo "Using cache for $1 ($archive_find_zip)"
-    unzip $archive_find_zip -d "$SELF_DIR/source"
+    unzip $archive_find_zip -d "$SELF_DIR/source" > /dev/null
 else
     if [ "$3" != "" ]; then
-        wget -q --show-progress "$(readconf ".$1.link$_use_backup" | sed 's/{version}/'$3'/g')"
+        wget -q "$(readconf ".$1.link$_use_backup" | sed 's/{version}/'$3'/g')"
     else
         echo "Downloading"
-        wget -q --show-progress "$(readconf ".$1.link$_use_backup" | sed 's/{version}/'$(readconf ".$1.version")'/g')"
+        wget -q "$(readconf ".$1.link$_use_backup" | sed 's/{version}/'$(readconf ".$1.version")'/g')"
     fi
 
     if [ $? == 0 ]; then
@@ -47,7 +47,7 @@ else
         if [ "$archive_file_tar" != "" ]; then
             tar -zxf $archive_file_tar && mv $archive_file_tar $SELF_DIR/source/cache/$1.tgz
         elif [ "$archive_file_zip" != "" ]; then
-            unzip $archive_file_zip && mv $archive_file_zip $SELF_DIR/source/cache/$1.zip
+            unzip $archive_file_zip && mv $archive_file_zip $SELF_DIR/source/cache/$1.zip > /dev/null
         else
             echo "Unable to find downloaded file, only support '.tar.gz', '.tgz', '.zip' file!"
             exit 1
