@@ -4,12 +4,12 @@
         "link_2": "https://www.php.net/distributions/php-{version}.tar.gz"
     },
     "swoole": {
-        "version": "4.8.6",
+        "version": "4.8.8",
         "link": "http://mirrors.zhamao.xin/pecl/swoole-{version}.tgz",
         "link_2": "https://pecl.php.net/get/swoole-{version}.tgz"
     },
     "mongodb": {
-        "version": "1.12.0",
+        "version": "1.13.0",
         "link": "http://mirrors.zhamao.xin/pecl/mongodb-{version}.tgz",
         "link_2": "https://pecl.php.net/get/mongodb-{version}.tgz"
     },
@@ -24,7 +24,7 @@
         "link_2": "https://pecl.php.net/get/event-{version}.tgz"
     },
     "redis": {
-        "version": "5.3.6",
+        "version": "5.3.7",
         "link": "http://mirrors.zhamao.xin/pecl/redis-{version}.tgz",
         "link_2": "https://pecl.php.net/get/redis-{version}.tgz"
     },
