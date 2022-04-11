@@ -51,6 +51,7 @@ file ./php
 | yes, enabled      | dom          | *        |                                                         |
 |          | event        |          |                                                         |
 | yes, enabled      | filter       | *        |                                                         |
+| yes, enabled      | fileinfo     | *        |                                                         |
 | yes, enabled      | gd           | *        |                                                         |
 | yes, enabled      | hash         | *        |                                                         |
 | yes, enabled      | iconv        | *        |                                                         |

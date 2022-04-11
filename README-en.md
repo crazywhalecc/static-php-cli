@@ -48,6 +48,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 | yes     | dom          | *       |                                          |
 |         | event        |         |                                          |
 | yes     | filter       | *       |                                          |
+| yes     | fileinfo     | *       |                                          |
 | yes     | gd           | *       |                                          |
 | yes     | hash         | *       |                                          |
 | yes     | iconv        | *       |                                          |
