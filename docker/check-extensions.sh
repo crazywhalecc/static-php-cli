@@ -60,6 +60,7 @@ function check_before_configure() {
         calendar) ;;
         ctype) ;;
         filter) ;;
+        fileinfo) ;;
         gd) ;;
         hash) ;;
         iconv) ;;
@@ -158,6 +159,7 @@ function check_in_configure() {
         dom)                php_configure="$php_configure --enable-dom" ;;
         event)              php_configure="$php_configure --with-event-core --with-event-extra --with-event-openssl --with-event-extra --disable-event-sockets" ;;
         filter)             php_configure="$php_configure --enable-filter" ;;
+        fileinfo)           php_configure="$php_configure --enable-fileinfo" ;;
         gd)
             case $1 in
             7.3.*|7.2.*)    php_configure="$php_configure --with-gd" ;;
