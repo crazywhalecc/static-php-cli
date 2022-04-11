@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.4.0-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.4.2-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## Compilation Requirements
@@ -47,6 +47,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 | yes     | curl         | *       |                                          |
 | yes     | dom          | *       |                                          |
 |         | event        |         |                                          |
+| yes     | exif         | *       |                                          |
 | yes     | filter       | *       |                                          |
 | yes     | fileinfo     | *       |                                          |
 | yes     | gd           | *       |                                          |
@@ -63,11 +64,14 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 | yes     | pcntl        | *       |                                          |
 | yes     | pdo          | *       |                                          |
 | yes     | pdo_mysql    | *       |                                          |
+| yes     | pdo_sqlite   | *       |                                          |
 |         | pdo_pgsql    | *       |                                          |
 | yes     | phar         | *       |                                          |
 | yes     | posix        | *       |                                          |
 | yes     | redis        | *       |                                          |
+| yes     | shmop        | *       |                                          |
 | yes     | simplexml    | *       |                                          |
+| yes     | soap         | *       |                                          |
 | yes     | sockets      | *       |                                          |
 | yes     | sqlite3      | *       |                                          |
 | yes     | swoole       | >=4.6.6 | support mysqlnd, sockets, openssl, redis |

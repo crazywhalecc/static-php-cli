@@ -37,7 +37,7 @@ else
     if [ "$3" != "" ]; then
         wget -q "$(readconf ".$1.link$_use_backup" | sed 's/{version}/'$3'/g')"
     else
-        echo "Downloading"
+        echo "Downloading $1"
         wget -q "$(readconf ".$1.link$_use_backup" | sed 's/{version}/'$(readconf ".$1.version")'/g')"
     fi
 

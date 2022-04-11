@@ -5,7 +5,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
-[![版本](https://img.shields.io/badge/script--version-1.4.0-green.svg)]()
+[![版本](https://img.shields.io/badge/script--version-1.4.2-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
@@ -50,6 +50,7 @@ file ./php
 | yes, enabled      | curl         | *        | 自带下载编译 curl 库                                    |
 | yes, enabled      | dom          | *        |                                                         |
 |          | event        |          |                                                         |
+| yes, enabled      | exif         | *        |                                                         |
 | yes, enabled      | filter       | *        |                                                         |
 | yes, enabled      | fileinfo     | *        |                                                         |
 | yes, enabled      | gd           | *        |                                                         |
@@ -66,11 +67,14 @@ file ./php
 | yes, enabled      | pcntl        | *        |                                                         |
 | yes, enabled      | pdo          | *        |                                                         |
 | yes, enabled      | pdo_mysql    | *        |                                                         |
+| yes, enabled      | pdo_sqlite   | *        |                                                         |
 |          | pdo_pgsql    | *        |                                                         |
 | yes, enabled      | phar         | *        |                                                         |
 | yes, enabled      | posix        | *        |                                                         |
 | yes, enabled      | redis        | *        | 从 pecl 或镜像站下载的源码                                |
+| yes, enabled      | shmop        | *        |                                                         |
 | yes, enabled      | simplexml    | *        |                                                         |
+| yes, enabled      | soap         | *        |                                                         |
 | yes, enabled      | sockets      | *        |                                                         |
 | yes, enabled      | sqlite3      | *        |                                                         |
 | yes, enabled      | swoole       | >=4.6.6  | 使用参数 `--enable-openssl --with-openssl --with-openssl-dir=/usr`，从 pecl 或镜像站下载的源码 |

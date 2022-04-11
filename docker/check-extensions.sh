@@ -59,6 +59,7 @@ function check_before_configure() {
         bcmath) ;;
         calendar) ;;
         ctype) ;;
+        exif) ;;
         filter) ;;
         fileinfo) ;;
         gd) ;;
@@ -71,8 +72,10 @@ function check_before_configure() {
         pcntl) ;;
         pdo) ;;
         pdo_mysql) ;;
+        pdo_sqlite) ;;
         phar) ;;
         posix) ;;
+        shmop) ;;
         sockets) ;;
         sqlite3) ;;
         tokenizer) ;;
@@ -87,7 +90,7 @@ function check_before_configure() {
                 exit 1
             fi
             ;;
-        dom|xml|libxml|xmlreader|xmlwriter|simplexml)
+        dom|xml|libxml|xmlreader|xmlwriter|simplexml|soap)
             if [ "$xml_sign" = "no" ]; then
                 if [ ! -f "$self_dir/source/.xml_compiled" ]; then
                     do_xml_compiler
@@ -157,6 +160,7 @@ function check_in_configure() {
         ctype)              php_configure="$php_configure --enable-ctype" ;;
         curl)               php_configure="$php_configure --with-curl" ;;
         dom)                php_configure="$php_configure --enable-dom" ;;
+        exif)               php_configure="$php_configure --enable-exif" ;;
         event)              php_configure="$php_configure --with-event-core --with-event-extra --with-event-openssl --with-event-extra --disable-event-sockets" ;;
         filter)             php_configure="$php_configure --enable-filter" ;;
         fileinfo)           php_configure="$php_configure --enable-fileinfo" ;;
@@ -194,9 +198,12 @@ function check_in_configure() {
         phar)               php_configure="$php_configure --enable-phar" ;;
         posix)              php_configure="$php_configure --enable-posix" ;;
         redis)              php_configure="$php_configure --enable-redis --disable-redis-session" ;;
+        shmop)              php_configure="$php_configure --enable-shmop" ;;
         simplexml)          php_configure="$php_configure --enable-simplexml" ;;
         sockets)            php_configure="$php_configure --enable-sockets" ;;
+        soap)               php_configure="$php_configure --enable-soap" ;;
         sqlite3)            php_configure="$php_configure --with-sqlite3" ;;
+        pdo_sqlite)         php_configure="$php_configure --with-pdo-sqlite" ;;
         
         swoole)
             php_configure="$php_configure --enable-swoole"

@@ -2,7 +2,7 @@
 
 # This script needs alpine linux system.
 
-VER_PHP="7.4.23"
+VER_PHP="7.4.28"
 USE_BACKUP="no"
 
 LINK_APK_REPO='mirrors.ustc.edu.cn'

@@ -3,6 +3,7 @@ calendar
 ctype
 curl
 dom
+exif
 fileinfo
 filter
 gd
@@ -18,10 +19,13 @@ openssl
 pcntl
 pdo
 pdo_mysql
+pdo_sqlite
 phar
 posix
 redis
+shmop
 simplexml
+soap
 sockets
 sqlite3
 swoole

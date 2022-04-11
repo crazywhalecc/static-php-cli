@@ -2,7 +2,7 @@ FROM alpine:latest
 
 # define script basic information
 # Version of this Dockerfile
-ENV SCRIPT_VERSION=1.4.1
+ENV SCRIPT_VERSION=1.4.2
 # Download address uses backup address 
 
 ARG USE_BACKUP_ADDRESS
