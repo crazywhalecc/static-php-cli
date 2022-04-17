@@ -18,11 +18,20 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 Linux
 
 ## 开始
-可以直接下面的地址下载 Actions 构建的文件。
+
+1. 可以直接下面的地址下载 Actions 构建的文件。
 
 <https://dl.zhamao.xin/php-bin/file/>
 
-也可以自己使用 Dockerfile 进行编译构建：
+2. 可以直接使用快速脚本 `install-runtime.sh`，将静态 PHP 二进制及 Composer 下载到当前目录的 `runtime/` 子目录下：
+
+```bash
+# 可以使用 export ZM_DOWN_PHP_VERION=8.0 来切换 PHP 版本
+bash -c "`curl -fsSL https://dl.zhamao.xin/php-bin/install-runtime.sh`"
+```
+
+3. 也可以自己使用 Dockerfile 进行编译构建：
+
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
