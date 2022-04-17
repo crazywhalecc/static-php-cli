@@ -15,11 +15,20 @@ BTW, It's only for CLI mode.
 Linux
 
 ## Start
-You can directly download static binary from this link.
+1. Directly download static binary from this link.
 
 <https://dl.zhamao.xin/php-bin/file/>
 
-Here's help command to compile it yourself:
+2. Use fast install script `install-runtime.sh` to download static php and composer distribution into `runtime/` directory
+
+But this script has some Chinese comments and prompts, if you cannot understand or have to use it in English, I will make an pure international version! :)
+
+```bash
+bash -c "`curl -fsSL https://raw.githubusercontent.com/crazywhalecc/static-php-cli/master/install-runtime.sh`"
+```
+
+3. Here's help command to compile it yourself:
+
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
