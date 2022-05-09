@@ -27,7 +27,7 @@ Linux
 
 ```bash
 # 可以使用 export ZM_DOWN_PHP_VERION=8.0 来切换 PHP 版本
-bash -c "`curl -fsSL https://dl.zhamao.xin/php-bin/install-runtime.sh`"
+bash <(curl -fsSL https://dl.zhamao.xin/php-bin/install-runtime.sh)
 ```
 
 3. 也可以自己使用 Dockerfile 进行编译构建：
