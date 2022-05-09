@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.4.2-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.4.3-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## Compilation Requirements
@@ -32,7 +32,7 @@ bash -c "`curl -fsSL https://raw.githubusercontent.com/crazywhalecc/static-php-c
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
-docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.28
+docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.29
 ```
 
 After compilation you can use command to get static php binary file:
@@ -88,7 +88,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 | yes     | xml          | *       |                                          |
 | yes     | xmlreader    | *       |                                          |
 | yes     | xmlwriter    | *       |                                          |
-|         | zip          |         |                                          |
+| yes     | zip          | *       | not support `bzip2`, `lzma` compression  |
 | yes     | zlib         | *       |                                          |
 
 ## Customization
