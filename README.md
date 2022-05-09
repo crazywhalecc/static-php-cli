@@ -5,7 +5,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
-[![版本](https://img.shields.io/badge/script--version-1.4.2-green.svg)]()
+[![版本](https://img.shields.io/badge/script--version-1.4.3-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
@@ -91,7 +91,7 @@ file ./php
 | yes, enabled      | xml          | *        |                                                         |
 | yes, enabled      | xmlreader    | *        |                                                         |
 | yes, enabled      | xmlwriter    | *        |                                                         |
-|          | zip          |          | 已经支持，但是脚本搞丢了，需要重新写                       |
+| yes, enabled      | zip          | *        | 因链接库原因已关闭 `libzip` 库的 `bzip2` 和 `lzma` 支持      |
 | yes, enabled      | zlib         | *        |                                                         |
 
 ## 自定义
