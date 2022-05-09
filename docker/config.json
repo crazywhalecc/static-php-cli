@@ -46,6 +46,6 @@
     "libzip": {
         "version": "1.8.0",
         "link": "https://mirrors.zhamao.xin/library/libzip/libzip-{version}.tar.gz",
-        "link_2": "ttps://libzip.org/download/libzip-{version}.tar.gz"
+        "link_2": "https://libzip.org/download/libzip-{version}.tar.gz"
     }
 }
