@@ -2,8 +2,8 @@
 
 # This script needs alpine linux system.
 
-VER_PHP="7.4.28"
-USE_BACKUP="no"
+test "$VER_PHP" = "" && VER_PHP="7.4.28"
+test "$USE_BACKUP" = "" && USE_BACKUP="no"
 
 LINK_APK_REPO='mirrors.ustc.edu.cn'
 LINK_APK_REPO_BAK='dl-cdn.alpinelinux.org'
@@ -18,7 +18,7 @@ fi
 sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories
 
 # build requirements
-apk add bash wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses
+apk add bash file wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses
 # php zlib dependencies
 apk add zlib-dev zlib-static
 # php mbstring dependencies
@@ -33,6 +33,8 @@ apk add c-ares-static c-ares-dev
 apk add libevent libevent-dev libevent-static
 # php sqlite3 dependencies
 apk add sqlite sqlite-dev sqlite-libs sqlite-static
+# php libzip dependencies
+apk add bzip2-dev bzip2-static bzip2
 
 chmod +x download.sh check-extensions.sh compile-php.sh
 
@@ -42,8 +44,9 @@ chmod +x download.sh check-extensions.sh compile-php.sh
     ./download.sh event ${USE_BACKUP} && \
     ./download.sh redis ${USE_BACKUP} && \
     ./download.sh libxml2 ${USE_BACKUP} && \
-    ./download.sh liblzma ${USE_BACKUP} && \
+    ./download.sh xz ${USE_BACKUP} && \
     ./download.sh curl ${USE_BACKUP} && \
+    ./download.sh libzip ${USE_BACKUP} && \
     ./download.sh php ${USE_BACKUP} ${VER_PHP} && \
     ./check-extensions.sh check_before_configure && \
     ./compile-php.sh ${VER_PHP}

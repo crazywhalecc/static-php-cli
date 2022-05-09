@@ -2,7 +2,7 @@ FROM alpine:latest
 
 # define script basic information
 # Version of this Dockerfile
-ENV SCRIPT_VERSION=1.4.2
+ENV SCRIPT_VERSION=1.4.3
 # Download address uses backup address 
 
 ARG USE_BACKUP_ADDRESS
@@ -42,6 +42,8 @@ RUN apk add c-ares-static c-ares-dev > /dev/null
 RUN apk add libevent libevent-dev libevent-static > /dev/null
 # php sqlite3 dependencies
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static > /dev/null
+# php libzip dependencies
+RUN apk add bzip2-dev bzip2-static bzip2
 
 RUN mkdir /app
 
@@ -61,8 +63,9 @@ RUN ./download.sh swoole ${USE_BACKUP} > /dev/null && \
     ./download.sh event ${USE_BACKUP} > /dev/null && \
     ./download.sh redis ${USE_BACKUP} > /dev/null && \
     ./download.sh libxml2 ${USE_BACKUP} > /dev/null && \
-    ./download.sh liblzma ${USE_BACKUP} > /dev/null && \
-    ./download.sh curl ${USE_BACKUP} > /dev/null 
+    ./download.sh xz ${USE_BACKUP} > /dev/null && \
+    ./download.sh curl ${USE_BACKUP} > /dev/null && \
+    ./download.sh libzip ${USE_BACKUP} > /dev/null
 
 RUN echo "Downloading PHP ${VER_PHP} ..."
 RUN ./download.sh php ${USE_BACKUP} ${VER_PHP} > /dev/null

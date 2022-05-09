@@ -33,14 +33,19 @@
         "link": "http://mirrors.zhamao.xin/library/libxml2/libxml2-{version}.tar.gz",
         "link_2": "http://xmlsoft.org/sources/libxml2-{version}.tar.gz"
     },
-    "liblzma": {
-        "version": "master",
-        "link": "https://mirrors.zhamao.xin/library/liblzma/liblzma.tar.gz",
-        "link_2": "https://github.com/kobolabs/liblzma/archive/refs/heads/master.zip"
-    },
     "curl": {
         "version": "7.82.0",
         "link": "https://mirrors.zhamao.xin/library/curl/curl-{version}.tar.gz",
         "link_2": "https://curl.haxx.se/download/curl-{version}.tar.gz"
+    },
+    "xz": {
+        "version": "5.2.5",
+        "link": "https://mirrors.zhamao.xin/library/xz/xz-{version}.tar.gz",
+        "link_2": "https://tukaani.org/xz/xz-{version}.tar.gz"
+    },
+    "libzip": {
+        "version": "1.8.0",
+        "link": "https://mirrors.zhamao.xin/library/libzip/libzip-{version}.tar.gz",
+        "link_2": "ttps://libzip.org/download/libzip-{version}.tar.gz"
     }
 }

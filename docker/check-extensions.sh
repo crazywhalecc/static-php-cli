@@ -9,16 +9,26 @@ self_dir=$(cd "$(dirname "$0")";pwd)
 php_dir=$(find $self_dir/source -name "php-*" -type d | tail -n1)
 
 function do_xml_compiler() {
-    cd $self_dir/source/liblzma-* && \
-        ./configure && \
+    cd $self_dir/source/xz-* && \
+        ./configure --enable-static=yes  && \
         make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
-        echo "liblzma compiled!" && sleep 2s && \
+        echo "xz compiled!" && sleep 2s && \
         cd ../libxml2-* && \
         ./configure --prefix=/usr --with-lzma --without-python && \
         make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
         echo "libxml2 compiled!" && sleep 2s
+}
+
+function do_libzip_compiler() {
+    cd $self_dir/source/libzip-* && \
+        mkdir build && \
+        cd build && \
+        cmake -DBUILD_SHARED_LIBS=no .. -Wno-dev -DENABLE_BZIP2=no -DENABLE_LZMA=no && \
+        make LDFLAGS="-llzma -lbz2" -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
+        make install && \
+        echo "libzip compiled!" && sleep 2s
 }
 
 function do_curl_compiler() {
@@ -80,6 +90,16 @@ function check_before_configure() {
         sqlite3) ;;
         tokenizer) ;;
         zlib) ;;
+        zip)
+            if [ ! -f "$self_dir/source/.libzip_compiled" ]; then
+                do_libzip_compiler
+                touch "$self_dir/source/.libzip_compiled"
+            fi
+            if [ $? != 0 ]; then
+                echo "Compile libzip error!"
+                exit 1
+            fi
+            ;;
         curl)
             if [ ! -f "$self_dir/source/.curl_compiled" ]; then
                 do_curl_compiler
@@ -223,6 +243,7 @@ function check_in_configure() {
         xmlreader)          php_configure="$php_configure --enable-xmlreader" ;;
         xmlwriter)          php_configure="$php_configure --enable-xmlwriter" ;;
         zlib)               php_configure="$php_configure --with-zlib" ;;
+        zip)                php_configure="$php_configure --with-zip" ;;
         *)
             echo "Unsupported extension '$loop' !" >&2
             exit 1

@@ -34,3 +34,4 @@ xml
 xmlreader
 xmlwriter
 zlib
+zip
