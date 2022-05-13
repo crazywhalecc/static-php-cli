@@ -4,7 +4,7 @@
         "link_2": "https://www.php.net/distributions/php-{version}.tar.gz"
     },
     "swoole": {
-        "version": "4.8.8",
+        "version": "4.8.9",
         "link": "http://mirrors.zhamao.xin/pecl/swoole-{version}.tgz",
         "link_2": "https://pecl.php.net/get/swoole-{version}.tgz"
     },
@@ -34,7 +34,7 @@
         "link_2": "http://xmlsoft.org/sources/libxml2-{version}.tar.gz"
     },
     "curl": {
-        "version": "7.82.0",
+        "version": "7.83.1",
         "link": "https://mirrors.zhamao.xin/library/curl/curl-{version}.tar.gz",
         "link_2": "https://curl.haxx.se/download/curl-{version}.tar.gz"
     },
