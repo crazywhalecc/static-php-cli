@@ -20,11 +20,12 @@ ENV LINK_APK_REPO_BAK='dl-cdn.alpinelinux.org'
 
 RUN if [ "${USE_BACKUP}" = "yes" ]; then \
         echo "Using backup address..." && sleep 3s; \
+        sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories ; \
     else \
         echo "Using original address..." && sleep 3s; \
+        sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO_BAK}'/g' /etc/apk/repositories ; \
     fi
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories
 
 # build requirements
 RUN apk add bash wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses > /dev/null
