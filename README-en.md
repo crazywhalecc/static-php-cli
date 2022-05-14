@@ -14,7 +14,8 @@ BTW, It's only for CLI mode.
 ## Running Requirements
 Linux
 
-## Start
+## Usage
+
 1. Directly download static binary from this link.
 
 <https://dl.zhamao.xin/php-bin/file/>
@@ -27,7 +28,9 @@ But this script has some Chinese comments and prompts, if you cannot understand 
 bash -c "`curl -fsSL https://raw.githubusercontent.com/crazywhalecc/static-php-cli/master/install-runtime.sh`"
 ```
 
-3. Here's help command to compile it yourself:
+## Compiling
+
+Here's help command to compile it yourself:
 
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
@@ -41,6 +44,17 @@ mkdir dist
 docker run --rm -v $(pwd)/dist:/dist/ -it static-php cp php-dist/bin/php /dist/
 cd dist
 file ./php
+```
+
+If you don't want to use docker, a single script for compiling:
+
+```bash
+cd docker
+# Change PHP Version
+export VER_PHP="8.1.6"
+# Use Original download link (Default is China mainland mirror link, for others please use 'yes' for original link)
+export USE_BACKUP="yes"
+./fast-compiler.sh
 ```
 
 To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
