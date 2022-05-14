@@ -3,8 +3,9 @@ name: Build PHP
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    paths:
+      - ".github/workflows/**.yml"
+      - "docker/**"
 
 jobs:
   integration:
