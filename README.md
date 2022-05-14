@@ -17,7 +17,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 ## 运行环境需求
 Linux
 
-## 开始
+## 直接使用
 
 1. 可以直接下面的地址下载 Actions 构建的文件。
 
@@ -30,7 +30,9 @@ Linux
 bash <(curl -fsSL https://dl.zhamao.xin/php-bin/install-runtime.sh)
 ```
 
-3. 也可以自己使用 Dockerfile 进行编译构建：
+## 自行编译
+
+可以自己使用 Dockerfile 进行编译构建：
 
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
@@ -39,11 +41,21 @@ docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=no --build-arg COMPI
 ```
 
 编译之后可以使用下方命令将二进制 PHP 提取出来，用以下方式：
+
 ```bash
 mkdir dist
 docker run --rm -v $(pwd)/dist:/dist/ -it static-php cp php-dist/bin/php /dist/
 cd dist
 file ./php
+```
+
+如果你不想使用 Docker，想从Alpine环境直接编译，可以使用预置相同编译配置的脚本 `fast-compiler.sh`：
+
+```bash
+cd docker
+# 用于切换编译的PHP版本
+export VER_PHP="8.1.6"
+./fast-compiler.sh
 ```
 
 如果要选择安装的扩展，可以修改 `docker/extensions.txt` 文件，具体规则如下：
