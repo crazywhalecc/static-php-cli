@@ -131,13 +131,8 @@ export VER_PHP="8.1.6"
 如果你对此脚本比较感兴趣，未来会在此编写脚本中涉及内容的解析和说明。
 
 ## 运行示例
-编译后的状态
 
-![image](https://user-images.githubusercontent.com/20330940/120911319-219b3000-c6b9-11eb-82d1-b4309cfca8b3.png)
-
-直接运行 Workerman
-
-![image](https://user-images.githubusercontent.com/20330940/120911301-f7e20900-c6b8-11eb-99eb-ebc84ab95df0.png)
+<img width="881" alt="未命名" src="https://user-images.githubusercontent.com/20330940/168441751-e62cb8d4-a3c8-42d9-b34e-d804b39756a1.png">
 
 ## 原理
 
