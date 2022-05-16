@@ -78,6 +78,7 @@ RUN ./download.sh php ${USE_BACKUP} ${VER_PHP} > /dev/null
 COPY extensions.txt /app/
 COPY check-extensions.sh /app/
 COPY compile-php.sh /app/
+COPY cpmpile-micro.sh /app/
 
 RUN chmod +x ./check-extensions.sh && \
     chmod +x ./compile-php.sh && \
