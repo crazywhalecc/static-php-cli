@@ -26,7 +26,6 @@ RUN if [ "${USE_BACKUP}" = "yes" ]; then \
         sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories ; \
     else \
         echo "Using original address..." && sleep 3s; \
-        sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO_BAK}'/g' /etc/apk/repositories ; \
     fi
 
 
