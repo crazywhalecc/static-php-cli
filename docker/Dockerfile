@@ -30,7 +30,7 @@ RUN if [ "${USE_BACKUP}" = "yes" ]; then \
 
 
 # build requirements
-RUN apk add bash wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses > /dev/null
+RUN apk add bash file wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses > /dev/null
 # php zlib dependencies
 RUN apk add zlib-dev zlib-static > /dev/null
 # php mbstring dependencies
@@ -89,7 +89,7 @@ RUN ./check-extensions.sh check_before_configure > /dev/null
 
 RUN echo "Compiling PHP ..."
 RUN if [ "${ENABLE_MICRO}" = "yes" ]; then \
-        ./compile-micro.sh ${VER_PHP} > /dev/null 2>&1 ; \
+        ./compile-micro.sh ${VER_PHP} ; \
     else \
         ./compile-php.sh ${VER_PHP} > /dev/null 2>&1 ; \
     fi
