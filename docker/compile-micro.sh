@@ -36,6 +36,6 @@ cd $php_dir && \
     sed -ie 's/-o $(SAPI_MICRO_PATH)/-all-static -o $(SAPI_MICRO_PATH)/g' "Makefile" && \
     #sed -ie 's/$(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_MICRO_OBJS)/$(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_BINARY_OBJS:.lo=.o) $(PHP_MICRO_OBJS:.lo=.o)/g' "Makefile" && \
     sed -ie 's/$(EXTRA_LIBS:-lresolv=-Wl,-Bstatic,-lresolv,-Bdynamic)/$(EXTRA_LIBS)/g' "Makefile" && \
-    make LDFLAGS="-ldl -static" micro -j$(cat /proc/cpuinfo | grep processor | wc -l)
+    make LDFLAGS="-ldl" micro -j$(cat /proc/cpuinfo | grep processor | wc -l)
     #make install
     #strip $self_dir/php-dist/bin/php
