@@ -3,15 +3,17 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.4.3-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.5.0-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## Compilation Requirements
+
 - Supporting architecture: `x86_64`, `arm64(aarch64)`, `armv7(armv7l)` 
 - Docker required (or alpine linux 3.13+)
 - Supporting PHP version from 7.2 to 8.1
 
 ## Running Requirements
+
 Linux
 
 ## Usage
@@ -27,6 +29,24 @@ But this script has some Chinese comments and prompts, if you cannot understand 
 ```bash
 bash -c "`curl -fsSL https://raw.githubusercontent.com/crazywhalecc/static-php-cli/master/install-runtime.sh`"
 ```
+
+## Packing PHP Code into a Static Binary
+
+From v1.5.0, we support packing PHP code into a static binary. You can pack your PHP code into a static binary by micro.
+
+You can directly download `micro-` prefix file, untar it and you will get file `micro.sfx`.
+
+Here's a simple example to use it:
+
+```bash
+echo "<?php echo 'Hello world' . PHP_EOL;" > code.php
+cat micro.sfx code.php > single-app && chmod +x single-app
+./single-app
+
+# If packing phar into a static binary, just change code.php to your phar path.
+```
+
+> Thanks <https://github.com/dixyes/phpmicro>
 
 ## Compiling
 
@@ -124,7 +144,13 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 
 ## Running preview
 
+### Using static binary
+
 <img width="881" alt="未命名" src="https://user-images.githubusercontent.com/20330940/168441751-e62cb8d4-a3c8-42d9-b34e-d804b39756a1.png">
+
+### Using swoole application packed with micro
+
+
 
 ## References
 - <https://blog.terrywh.net/post/2019/php-static-openssl/>

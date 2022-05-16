@@ -3,18 +3,22 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！
 
+同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！
+
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
-[![版本](https://img.shields.io/badge/script--version-1.4.3-green.svg)]()
+[![版本](https://img.shields.io/badge/script--version-1.5.0-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## 编译环境需求
+
 - 目前支持 arm64、x86_64、armv7l 架构
 - 需要 Docker（也可以直接在 Alpine Linux 上使用）
 - 脚本支持编译的 PHP 版本（7.2 ~ 8.1）
 
 ## 运行环境需求
+
 Linux
 
 ## 直接使用
@@ -29,6 +33,22 @@ Linux
 # 可以使用 export ZM_DOWN_PHP_VERION=8.0 来切换 PHP 版本
 bash <(curl -fsSL https://dl.zhamao.xin/php-bin/install-runtime.sh)
 ```
+
+## PHP 代码打包使用
+
+v1.5.0 脚本开始，脚本新增了对 PHP 代码打包的支持，可以将 PHP 代码打包为一个文件分发，方便在 Linux 系统使用。（仅支持 PHP >= 8.0）
+
+1. 可以直接在上面的下载链接中下载 `micro-` 开头的文件并解压，获得 `micro.sfx` 文件后，使用以下命令和 PHP 源码或 PHAR 结合：
+
+```bash
+echo "<?php echo 'Hello world' . PHP_EOL;" > code.php
+cat micro.sfx code.php > single-app && chmod +x single-app
+./single-app
+
+# 如果打包 PHAR 文件，仅需把 code.php 更换为 phar 文件路径即可
+```
+
+> 感谢 <https://github.com/dixyes/phpmicro> 项目提供的支持
 
 ## 自行编译
 
@@ -132,7 +152,13 @@ export VER_PHP="8.1.6"
 
 ## 运行示例
 
+### 静态 PHP 运行脚本
+
 <img width="881" alt="未命名" src="https://user-images.githubusercontent.com/20330940/168441751-e62cb8d4-a3c8-42d9-b34e-d804b39756a1.png">
+
+### micro 打包运行 Swoole
+
+
 
 ## 原理
 
