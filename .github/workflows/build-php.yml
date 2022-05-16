@@ -37,7 +37,7 @@ jobs:
             fi
           fi
       - name: Build PHP ${{ matrix.php-versions }} for ${{ matrix.arch }}
-          run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ matrix.php-versions }}
+        run: cd docker/ && docker build . --file Dockerfile --tag static-php --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=${{ matrix.php-versions }}
       - name: Push PHP ${{ matrix.php-versions }} to dist
         run: |
           mkdir dist && docker run --rm -v $(pwd)/dist:/dist/ static-php cp php-dist/bin/php /dist/
