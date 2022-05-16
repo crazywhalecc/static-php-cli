@@ -150,7 +150,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 
 ### Using swoole application packed with micro
 
-
+<img width="937" alt="all" src="https://user-images.githubusercontent.com/20330940/168557743-b8f92263-712f-490e-9fe0-831597741595.png">
 
 ## References
 - <https://blog.terrywh.net/post/2019/php-static-openssl/>
