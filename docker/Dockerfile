@@ -21,7 +21,7 @@ ENV ENABLE_MICRO="${COMPILE_MICRO}"
 ENV LINK_APK_REPO='mirrors.ustc.edu.cn'
 ENV LINK_APK_REPO_BAK='dl-cdn.alpinelinux.org'
 
-RUN if [ "${USE_BACKUP}" = "yes" ]; then \
+RUN if [ "${USE_BACKUP}" = "no" ]; then \
         echo "Using backup address..." && sleep 3s; \
         sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories ; \
     else \
@@ -89,7 +89,7 @@ RUN ./check-extensions.sh check_before_configure > /dev/null
 
 RUN echo "Compiling PHP ..."
 RUN if [ "${ENABLE_MICRO}" = "yes" ]; then \
-        ./compile-micro.sh ${VER_PHP} ; \
+        ./compile-micro.sh ${VER_PHP} ${USE_BACKUP} ; \
     else \
         ./compile-php.sh ${VER_PHP} > /dev/null 2>&1 ; \
     fi

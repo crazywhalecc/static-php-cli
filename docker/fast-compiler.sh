@@ -51,5 +51,4 @@ chmod +x download.sh check-extensions.sh compile-php.sh compile-micro.sh
     ./download.sh libzip ${USE_BACKUP} && \
     ./download.sh php ${USE_BACKUP} ${VER_PHP} && \
     ./check-extensions.sh check_before_configure && \
-    ./compile-micro.sh ${VER_PHP}
-
+    ./compile-php.sh ${VER_PHP}
