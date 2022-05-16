@@ -158,7 +158,7 @@ export VER_PHP="8.1.6"
 
 ### micro 打包运行 Swoole
 
-
+<img width="937" alt="all" src="https://user-images.githubusercontent.com/20330940/168557743-b8f92263-712f-490e-9fe0-831597741595.png">
 
 ## 原理
 
