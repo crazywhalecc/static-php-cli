@@ -2,7 +2,7 @@
 
 # This script needs alpine linux system.
 
-test "$VER_PHP" = "" && VER_PHP="7.4.28"
+test "$VER_PHP" = "" && VER_PHP="8.1.6"
 test "$USE_BACKUP" = "" && USE_BACKUP="no"
 
 LINK_APK_REPO='mirrors.ustc.edu.cn'
@@ -35,8 +35,10 @@ apk add libevent libevent-dev libevent-static
 apk add sqlite sqlite-dev sqlite-libs sqlite-static
 # php libzip dependencies
 apk add bzip2-dev bzip2-static bzip2
+# php micro ffi dependencies
+apk add libffi libffi-dev
 
-chmod +x download.sh check-extensions.sh compile-php.sh
+chmod +x download.sh check-extensions.sh compile-php.sh compile-micro.sh
 
 ./download.sh swoole ${USE_BACKUP} && \
     ./download.sh inotify ${USE_BACKUP} && \
@@ -49,5 +51,5 @@ chmod +x download.sh check-extensions.sh compile-php.sh
     ./download.sh libzip ${USE_BACKUP} && \
     ./download.sh php ${USE_BACKUP} ${VER_PHP} && \
     ./check-extensions.sh check_before_configure && \
-    ./compile-php.sh ${VER_PHP}
+    ./compile-micro.sh ${VER_PHP}
 

@@ -2,17 +2,20 @@ FROM alpine:latest
 
 # define script basic information
 # Version of this Dockerfile
-ENV SCRIPT_VERSION=1.4.3
+ENV SCRIPT_VERSION=1.5.0
 # Download address uses backup address 
 
 ARG USE_BACKUP_ADDRESS
 ARG COMPILE_PHP_VERSION
+ARG COMPILE_MICRO
 
 # (if downloading slowly, consider set it to yes)
 ENV USE_BACKUP="${USE_BACKUP_ADDRESS}"
 
 # Version of some manually-installed package
 ENV VER_PHP="${COMPILE_PHP_VERSION}"
+
+ENV ENABLE_MICRO="${COMPILE_MICRO}"
 
 # APK repositories mirror address, if u r not in China, consider set USE_BACKUP=yes to boost
 ENV LINK_APK_REPO='mirrors.ustc.edu.cn'
@@ -45,6 +48,8 @@ RUN apk add libevent libevent-dev libevent-static > /dev/null
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static > /dev/null
 # php libzip dependencies
 RUN apk add bzip2-dev bzip2-static bzip2
+# php micro ffi dependencies
+RUN apk add libffi libffi-dev
 
 RUN mkdir /app
 
@@ -76,10 +81,15 @@ COPY check-extensions.sh /app/
 COPY compile-php.sh /app/
 
 RUN chmod +x ./check-extensions.sh && \
-    chmod +x ./compile-php.sh
+    chmod +x ./compile-php.sh && \
+    chmod +x ./compile-micro.sh
 
 RUN echo "Checking and Compiling Dependencies ..."
 RUN ./check-extensions.sh check_before_configure > /dev/null
 
 RUN echo "Compiling PHP ..."
-RUN ./compile-php.sh ${VER_PHP} > /dev/null 2>&1
+RUN if [ "${ENABLE_MICRO}" = "yes" ]; then \
+        ./compile-micro.sh ${VER_PHP} > /dev/null 2>&1 ; \
+    else \
+        ./compile-php.sh ${VER_PHP} > /dev/null 2>&1 ; \
+    fi

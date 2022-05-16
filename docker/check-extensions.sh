@@ -260,6 +260,7 @@ function check_after_configure() {
         case $loop in
         swoole)
             sed -ie 's/swoole_clock_gettime(CLOCK_REALTIME/clock_gettime(CLOCK_REALTIME/g' "$php_dir/ext/swoole/include/swoole.h"
+            sed -ie 's/strcmp("cli", sapi_module.name) == 0/strcmp("cli", sapi_module.name) == 0 || strcmp("micro", sapi_module.name) == 0/g' "$php_dir/ext/swoole/ext-src/php_swoole.cc"
             ;;
         esac
     done
