@@ -48,6 +48,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 # 如果打包 PHAR 文件，仅需把 code.php 更换为 phar 文件路径即可
 ```
 
+2. 如果打包项目，可以先将项目打包为 phar + entry，然后结合打包 micro 与 phar 文件即可。关于如何将项目打包为 phar，后续有时间会提供一个脚本。
+
 > 感谢 <https://github.com/dixyes/phpmicro> 项目提供的支持
 
 ## 自行编译
