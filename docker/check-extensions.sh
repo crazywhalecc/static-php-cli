@@ -7,18 +7,19 @@
 
 self_dir=$(cd "$(dirname "$0")";pwd)
 php_dir=$(find $self_dir/source -name "php-*" -type d | tail -n1)
+test -f "$self_dir/extensions_install.txt" && EXT_LIST_FILE="$self_dir/extensions_install.txt" || EXT_LIST_FILE="$self_dir/extensions.txt"
 
 function do_xml_compiler() {
     cd $self_dir/source/xz-* && \
         ./configure --enable-static=yes  && \
         make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
-        echo "xz compiled!" && sleep 2s && \
+        echo "xz compiled!" && \
         cd ../libxml2-* && \
         ./configure --prefix=/usr --with-lzma --without-python && \
         make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
-        echo "libxml2 compiled!" && sleep 2s
+        echo "libxml2 compiled!"
 }
 
 function do_libzip_compiler() {
@@ -28,7 +29,7 @@ function do_libzip_compiler() {
         cmake -DBUILD_SHARED_LIBS=no .. -Wno-dev -DENABLE_BZIP2=no -DENABLE_LZMA=no && \
         make LDFLAGS="-llzma -lbz2" -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
-        echo "libzip compiled!" && sleep 2s
+        echo "libzip compiled!"
 }
 
 function do_curl_compiler() {
@@ -47,8 +48,7 @@ function do_curl_compiler() {
         make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
         echo "curl compiled!" && \
-        cat "$self_dir/ac_override_1" "$php_dir/ext/curl/config.m4" "$self_dir/ac_override_2" > /tmp/aa && \
-        mv /tmp/aa "$php_dir/ext/curl/config.m4"
+        
 }
 
 function do_copy_extension() {
@@ -61,7 +61,7 @@ function do_copy_extension() {
 }
 
 function check_before_configure() {
-    list=$(cat "$self_dir/extensions.txt" | grep -v "^#" | grep -v "^$")
+    list=$(cat "$EXT_LIST_FILE" | grep -v "^#" | grep -v "^$")
     xml_sign="no"
     for loop in $list
     do
@@ -90,39 +90,9 @@ function check_before_configure() {
         sqlite3) ;;
         tokenizer) ;;
         zlib) ;;
-        zip)
-            if [ ! -f "$self_dir/source/.libzip_compiled" ]; then
-                do_libzip_compiler
-                touch "$self_dir/source/.libzip_compiled"
-            fi
-            if [ $? != 0 ]; then
-                echo "Compile libzip error!"
-                exit 1
-            fi
-            ;;
-        curl)
-            if [ ! -f "$self_dir/source/.curl_compiled" ]; then
-                do_curl_compiler
-                touch "$self_dir/source/.curl_compiled"
-            fi
-            if [ $? != 0 ]; then
-                echo "Compile curl error!"
-                exit 1
-            fi
-            ;;
-        dom|xml|libxml|xmlreader|xmlwriter|simplexml|soap)
-            if [ "$xml_sign" = "no" ]; then
-                if [ ! -f "$self_dir/source/.xml_compiled" ]; then
-                    do_xml_compiler
-                    touch "$self_dir/source/.xml_compiled"
-                fi
-                if [ $? != 0 ]; then
-                echo "Compile xml error!"
-                exit 1
-            fi
-                xml_sign="yes"
-            fi
-            ;;
+        zip) ;;
+        curl) cat "$self_dir/ac_override_1" "$php_dir/ext/curl/config.m4" "$self_dir/ac_override_2" > /tmp/aa && mv /tmp/aa "$php_dir/ext/curl/config.m4" ;;
+        dom|xml|libxml|xmlreader|xmlwriter|simplexml|soap) ;;
         inotify) do_copy_extension inotify ;;
         redis) do_copy_extension redis ;;
         swoole) do_copy_extension swoole ;;
@@ -130,11 +100,17 @@ function check_before_configure() {
         event) do_copy_extension event ;;
         esac
     done
+    case $1 in
+    8.*)
+        mv $self_dir/source/micro $php_dir/sapi/ && \
+            sed -ie 's/#include "php.h"/#include "php.h"\n#define PHP_MICRO_FAKE_CLI 1/g' $php_dir/sapi/micro/php_micro.c
+        ;;
+    esac
 }
 
 function check_in_configure() {
     php_configure=""
-    list=$(cat "$self_dir/extensions.txt" | sed 's/#.*//g' | sed -e 's/[ ]*$//g' | grep -v "^\s*$")
+    list=$(cat "$EXT_LIST_FILE" | sed 's/#.*//g' | sed -e 's/[ ]*$//g' | grep -v "^\s*$")
     for loop in $list
     do
         case $loop in
@@ -213,11 +189,14 @@ function check_in_configure() {
             ;;
         esac
     done
+    case $1 in
+    8.*) php_configure="$php_configure --with-ffi --enable-micro=all-static" ;;
+    esac
     echo $php_configure
 }
 
 function check_after_configure() {
-    list=$(cat "$self_dir/extensions.txt" | grep -v "^#" | grep -v "^$")
+    list=$(cat "$EXT_LIST_FILE" | grep -v "^#" | grep -v "^$")
     for loop in $list
     do
         case $loop in
@@ -227,6 +206,9 @@ function check_after_configure() {
             ;;
         esac
     done
+    case $1 in
+    8.*) sed -ie 's/$(EXTRA_LIBS:-lresolv=-Wl,-Bstatic,-lresolv,-Bdynamic)/$(EXTRA_LIBS)/g' "$php_dir/Makefile" ;;
+    esac
 }
 
 $1 $2

@@ -2,8 +2,11 @@
 
 # This script needs alpine linux system.
 
+self_dir=$(cd "$(dirname "$0")";pwd)
+
 test "$VER_PHP" = "" && VER_PHP="8.1.7"
 test "$USE_BACKUP" = "" && USE_BACKUP="no"
+test "$ALL_EXTENSIONS" = "" && ALL_EXTENSIONS="no"
 
 LINK_APK_REPO='mirrors.ustc.edu.cn'
 LINK_APK_REPO_BAK='dl-cdn.alpinelinux.org'
@@ -38,17 +41,17 @@ apk add bzip2-dev bzip2-static bzip2
 # php micro ffi dependencies
 apk add libffi libffi-dev
 
-chmod +x download.sh check-extensions.sh compile-php.sh compile-micro.sh
+test "$USE_BACKUP" = "no" && PROMPT_1="mirror" || PROMPT_1="original"
 
-./download.sh swoole ${USE_BACKUP} && \
-    ./download.sh inotify ${USE_BACKUP} && \
-    ./download.sh mongodb ${USE_BACKUP} && \
-    ./download.sh event ${USE_BACKUP} && \
-    ./download.sh redis ${USE_BACKUP} && \
-    ./download.sh libxml2 ${USE_BACKUP} && \
-    ./download.sh xz ${USE_BACKUP} && \
-    ./download.sh curl ${USE_BACKUP} && \
-    ./download.sh libzip ${USE_BACKUP} && \
-    ./download.sh php ${USE_BACKUP} ${VER_PHP} && \
-    ./check-extensions.sh check_before_configure && \
-    ./compile-php.sh ${VER_PHP}
+$self_dir/download.sh swoole ${USE_BACKUP} && \
+    $self_dir/download.sh inotify ${USE_BACKUP} && \
+    $self_dir/download.sh mongodb ${USE_BACKUP} && \
+    $self_dir/download.sh event ${USE_BACKUP} && \
+    $self_dir/download.sh redis ${USE_BACKUP} && \
+    $self_dir/download.sh libxml2 ${USE_BACKUP} && \
+    $self_dir/download.sh xz ${USE_BACKUP} && \
+    $self_dir/download.sh curl ${USE_BACKUP} && \
+    $self_dir/download.sh libzip ${USE_BACKUP} && \
+    $self_dir/download-git.sh dixyes/phpmicro micro ${USE_BACKUP} && \
+    $self_dir/compile-deps.sh && \
+    $self_dir/compile-php.sh $PROMPT_1 $VER_PHP $ALL_EXTENSIONS /dist/
