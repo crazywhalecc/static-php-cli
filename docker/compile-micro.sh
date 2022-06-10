@@ -17,7 +17,7 @@ function php_compile_args() {
     _php_arg="$_php_arg --disable-cgi"
     _php_arg="$_php_arg --disable-phpdbg"
     _php_arg="$_php_arg --with-ffi"
-    _php_arg="$_php_arg --enable-micro"
+    _php_arg="$_php_arg --enable-micro=all-static"
     _php_arg="$_php_arg $($self_dir/check-extensions.sh check_in_configure $1)"
     echo $_php_arg
 }
@@ -33,7 +33,6 @@ cd $php_dir && \
     $self_dir/check-extensions.sh check_after_configure && \
     sed -ie 's/-export-dynamic//g' "Makefile" && \
     sed -ie 's/-o $(SAPI_CLI_PATH)/-all-static -o $(SAPI_CLI_PATH)/g' "Makefile" && \
-    sed -ie 's/-o $(SAPI_MICRO_PATH)/-all-static -o $(SAPI_MICRO_PATH)/g' "Makefile" && \
     #sed -ie 's/$(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_MICRO_OBJS)/$(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_BINARY_OBJS:.lo=.o) $(PHP_MICRO_OBJS:.lo=.o)/g' "Makefile" && \
     sed -ie 's/$(EXTRA_LIBS:-lresolv=-Wl,-Bstatic,-lresolv,-Bdynamic)/$(EXTRA_LIBS)/g' "Makefile" && \
     make LDFLAGS="-ldl" micro -j$(cat /proc/cpuinfo | grep processor | wc -l)
