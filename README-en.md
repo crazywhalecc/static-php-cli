@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.5.1-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.6.0-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## Compilation Requirements
@@ -55,18 +55,21 @@ Here's help command to compile it yourself:
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
-docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --build-arg COMPILE_PHP_VERSION=7.4.29
+docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes
+# Making a directory to put binary files
+mkdir dist
+# It will ask you for PHP version, extensions, and compile static binaries
+docker run --rm -v $(pwd)/dist:/dist/ -it static-php build-php
 ```
 
-After compilation you can use command to get static php binary file:
+After compilation you can use command to get static php binary file.
+
 ```bash
-mkdir dist
-docker run --rm -v $(pwd)/dist:/dist/ -it static-php cp php-dist/bin/php /dist/
 cd dist
 file ./php
 ```
 
-If you don't want to use docker, a single script for compiling:
+If you don't want to use docker, a single script for compiling in **Alpine Linux**:
 
 ```bash
 cd docker
@@ -126,8 +129,18 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 | yes     | zlib         | *       |                                          |
 
 ## Customization
-- `docker/Dockerfile` edit `VER_PHP=x.x.x` to switch PHP version.
-- `docker/Dockerfile` edit `USE_BACKUP=yes` to use backup download address (download faster if you are not in mainland China).
+- If you are going to run without prompt, Just add it to the end of `docker run xxx` cmd according to the parameters given below.
+
+> 1st parameter `original` represents that you are using global original download address to fetch dependencies, if you are in mainland China, use `mirror`.
+> 
+> 2nd parameter `8.1.7` is your PHP version you are compiling.
+> 
+> 3rd parameter `all` represents that you will compile all supported extensions.
+> 
+> 4th parameter `/dist/` is your binary output directory.
+> 
+> For example, `docker run --rm -v $(pwd)/dist:/dist/ -it static-php build-php original 8.1.7 all /dist/`
+
 - `docker/extensions.txt` edit extensions.
 - `docker/compile-php.sh` file `php_compile_args` function to adjust PHP configure arguments.
 - `docker/check-extensions.sh` file `check_in_configure` function to adjust extensions' configure arguments.
@@ -139,7 +152,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 - [ ] Not support readline, maybe caused by ncurses library.
 - [X] Not support curl (solved)
 - [X] Customize extensions to compile
-- [ ] php.ini integration
+- [X] php.ini integration
 - [X] i18n (including README and scripts)
 
 ## Running preview
