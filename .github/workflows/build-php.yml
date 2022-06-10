@@ -38,7 +38,7 @@ jobs:
           cd dist
           tar -zcvf "php-${{ matrix.php-versions }}-static-bin-${{ matrix.arch }}.tar.gz" ./php && rm ./php
           if [ -f "./micro.sfx" ]; then
-            tar -zcvf "php-${{ matrix.php-versions }}-${{ matrix.arch }}.tar.gz" ./micro.sfx && rm ./micro.sfx
+            tar -zcvf "micro-${{ matrix.php-versions }}-${{ matrix.arch }}.tar.gz" ./micro.sfx && rm ./micro.sfx
           fi
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
