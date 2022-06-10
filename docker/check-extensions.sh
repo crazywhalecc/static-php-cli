@@ -47,8 +47,7 @@ function do_curl_compiler() {
             --enable-ares && \
         make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
         make install && \
-        echo "curl compiled!" && \
-        
+        echo "curl compiled!"
 }
 
 function do_copy_extension() {
