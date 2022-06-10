@@ -11,8 +11,9 @@ jobs:
   alpine-php-env:
     name: alpine-env-job-${{ matrix.arch }}
     runs-on: ubuntu-latest
-    matrix:
-      arch: [ "x86_64", "aarch64", "armv7l" ]
+    strategy:
+      matrix:
+        arch: [ "x86_64", "aarch64", "armv7l" ]
     steps:
       - uses: actions/checkout@v2
       - name: Check Dockerfile to ${{ matrix.arch }}
