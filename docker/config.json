@@ -19,9 +19,9 @@
         "link_2": "https://pecl.php.net/get/inotify-{version}.tgz"
     },
     "event": {
-        "version": "3.0.4",
-        "link": "http://mirrors.zhamao.xin/pecl/event-{version}.tgz",
-        "link_2": "https://pecl.php.net/get/event-{version}.tgz"
+        "version": "3.0.8",
+        "link": "https://mirrors.zhamao.xin/library/php-event/event-{version}.tar.gz",
+        "link_2": "https://bitbucket.org/osmanov/pecl-event/get/{version}.tar.gz"
     },
     "redis": {
         "version": "5.3.7",

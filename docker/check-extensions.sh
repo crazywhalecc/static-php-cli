@@ -52,7 +52,7 @@ function do_curl_compiler() {
 }
 
 function do_copy_extension() {
-    ext_dir=$(find $self_dir/source -name "$1-*" -type d | tail -n1)
+    ext_dir=$(find $self_dir/source -name "*$1-*" -type d | tail -n1)
     mv $ext_dir $php_dir/ext/$1
     if [ $? != 0 ]; then
         echo "Compile error! ext: $1, ext_dir=$ext_dir"
@@ -127,44 +127,7 @@ function check_before_configure() {
         redis) do_copy_extension redis ;;
         swoole) do_copy_extension swoole ;;
         mongodb) do_copy_extension mongodb ;;
-        event)
-            PHP_EVENT='                     PHP_EVENT_PHP_VERSION=$PHP_VERSION                           '
-            PHP_EVENT="$PHP_EVENT"'\n    PHP_EVENT_PHP_VERSION_ID=$PHP_VERSION_ID                     '
-            PHP_EVENT="$PHP_EVENT"'\n    if test -z "$PHP_EVENT_PHP_VERSION"; then                    '
-            PHP_EVENT="$PHP_EVENT"'\n      AC_MSG_ERROR(\[unknown source with no php version\])         '
-            PHP_EVENT="$PHP_EVENT"'\n      PHP_EVENT_SUBDIR="."                                       '
-            PHP_EVENT="$PHP_EVENT"'\n    fi                                                           '
-            PHP_EVENT="$PHP_EVENT"'\n    if test "$PHP_EVENT_PHP_VERSION_ID" -ge "80000"; then        '
-            PHP_EVENT="$PHP_EVENT"'\n      PHP_EVENT_SUBDIR=php8                                      '
-            PHP_EVENT="$PHP_EVENT"'\n      AC_MSG_RESULT(\[PHP 8.x\])                                   '
-            PHP_EVENT="$PHP_EVENT"'\n    elif test "$PHP_EVENT_PHP_VERSION_ID" -ge "70000"; then      '
-            PHP_EVENT="$PHP_EVENT"'\n      PHP_EVENT_SUBDIR=php7                                      '
-            PHP_EVENT="$PHP_EVENT"'\n      AC_MSG_RESULT(\[PHP 7.x\])                                   '
-            PHP_EVENT="$PHP_EVENT"'\n    elif test "$PHP_EVENT_PHP_VERSION_ID" -ge "50000"; then      '
-            PHP_EVENT="$PHP_EVENT"'\n      PHP_EVENT_SUBDIR=php5                                      '
-            PHP_EVENT="$PHP_EVENT"'\n      AC_MSG_RESULT(\[PHP 5.x\])                                   '
-            PHP_EVENT="$PHP_EVENT"'\n    else                                                         '
-            PHP_EVENT="$PHP_EVENT"'\n      AC_MSG_ERROR(\[unknown source lol\])                         '
-            PHP_EVENT="$PHP_EVENT"'\n      PHP_EVENT_SUBDIR="."                                       '
-            PHP_EVENT="$PHP_EVENT"'\n    fi                                                           '
-            PHP_EVENT="$PHP_EVENT"'\n    echo PHP_EXT_SRCDIR(event)\/$PHP_EVENT_SUBDIR                                                           '
-            PHP_EVENT="$PHP_EVENT"'\n    echo PHP_EXT_BUILDDIR(event)\/$PHP_EVENT_SUBDIR                                                           '
-            PHP_EVENT="$PHP_EVENT"'\n    if test "$PHP_EVENT_SUBDIR" -ne "."; then                    '
-            PHP_EVENT="$PHP_EVENT"'\n    PHP_ADD_BUILD_DIR(PHP_EXT_SRCDIR(event)\/$PHP_EVENT_SUBDIR, 1)       '
-            PHP_EVENT="$PHP_EVENT"'\n    PHP_ADD_BUILD_DIR(PHP_EXT_SRCDIR(event)\/$PHP_EVENT_SUBDIR\/classes, 1)       '
-            PHP_EVENT="$PHP_EVENT"'\n    PHP_ADD_BUILD_DIR(PHP_EXT_SRCDIR(event)\/$PHP_EVENT_SUBDIR\/src, 1)       '
-            PHP_EVENT="$PHP_EVENT"'\n    PHP_ADD_INCLUDE(PHP_EXT_SRCDIR(event)\/\[$PHP_EVENT_SUBDIR\])            '
-            PHP_EVENT="$PHP_EVENT"'\n    PHP_ADD_INCLUDE(PHP_EXT_SRCDIR(event)\/\[$PHP_EVENT_SUBDIR\/classes\])            '
-            PHP_EVENT="$PHP_EVENT"'\n    PHP_ADD_INCLUDE(PHP_EXT_SRCDIR(event)\/\[$PHP_EVENT_SUBDIR\/src\])            '
-            PHP_EVENT="$PHP_EVENT"'\n    fi                                                           '
-
-            do_copy_extension event && \
-                sed -ie 's/PHP_EVENT_SUBDIR="."//g' $php_dir/ext/event/config.m4 && \
-                sed -ie 's/AC_MSG_ERROR(\[unknown source\])/'"$PHP_EVENT"'/g' $php_dir/ext/event/config.m4
-            if [ $? != 0 ]; then
-                exit 1
-            fi
-            ;;
+        event) do_copy_extension event ;;
         esac
     done
 }
@@ -181,7 +144,7 @@ function check_in_configure() {
         curl)               php_configure="$php_configure --with-curl" ;;
         dom)                php_configure="$php_configure --enable-dom" ;;
         exif)               php_configure="$php_configure --enable-exif" ;;
-        event)              php_configure="$php_configure --with-event-core --with-event-extra --with-event-openssl --with-event-extra --disable-event-sockets" ;;
+        event)              php_configure="$php_configure --with-event-core --with-event-extra --with-event-openssl" ;;
         filter)             php_configure="$php_configure --enable-filter" ;;
         fileinfo)           php_configure="$php_configure --enable-fileinfo" ;;
         gd)

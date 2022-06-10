@@ -3,6 +3,7 @@ calendar
 ctype
 curl
 dom
+event
 exif
 fileinfo
 filter

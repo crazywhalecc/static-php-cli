@@ -42,13 +42,14 @@ else
     fi
 
     if [ $? == 0 ]; then
-        archive_file_tar=$(find . -name "$1*.*" | grep -E ".tar|.gz|.tgz" | tail -n1)
-        archive_file_zip=$(find . -name "*.zip" | tail -n1)
+        archive_file_tar=$(find . -name "*.*" -maxdepth 1 | grep -E ".tar|.gz|.tgz" | tail -n1)
+        archive_file_zip=$(find . -name "*.zip" -maxdepth 1 | tail -n1)
         if [ "$archive_file_tar" != "" ]; then
             tar -zxf $archive_file_tar && mv $archive_file_tar $SELF_DIR/source/cache/$1.tgz
         elif [ "$archive_file_zip" != "" ]; then
             unzip $archive_file_zip && mv $archive_file_zip $SELF_DIR/source/cache/$1.zip > /dev/null
         else
+            find . -name "*$1*.*"
             echo "Unable to find downloaded file, only support '.tar.gz', '.tgz', '.zip' file!"
             exit 1
         fi

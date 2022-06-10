@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.5.0-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.5.1-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## Compilation Requirements
@@ -71,7 +71,7 @@ If you don't want to use docker, a single script for compiling:
 ```bash
 cd docker
 # Change PHP Version
-export VER_PHP="8.1.6"
+export VER_PHP="8.1.7"
 # Use Original download link (Default is China mainland mirror link, for others please use 'yes' for original link)
 export USE_BACKUP="yes"
 ./fast-compiler.sh
@@ -89,7 +89,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 | yes     | ctype        | *       |                                          |
 | yes     | curl         | *       |                                          |
 | yes     | dom          | *       |                                          |
-|         | event        |         |                                          |
+| yes     | event        | >=3.0.8 | author's bitbucket version, not pecl     |
 | yes     | exif         | *       |                                          |
 | yes     | filter       | *       |                                          |
 | yes     | fileinfo     | *       |                                          |
@@ -134,7 +134,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 - `docker/config.json` edit extensions and dependencies version and download links.
 
 ## Current Issue
-- [ ] Not support event(libevent), because of its `config.m4` and code.
+- [X] Not support event(libevent), because of its `config.m4` and code.
 - [ ] Swoole not support `--enable-swoole-curl`.
 - [ ] Not support readline, maybe caused by ncurses library.
 - [X] Not support curl (solved)

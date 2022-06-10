@@ -7,7 +7,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
-[![版本](https://img.shields.io/badge/script--version-1.5.0-green.svg)]()
+[![版本](https://img.shields.io/badge/script--version-1.5.1-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
@@ -78,7 +78,7 @@ file ./php
 ```bash
 cd docker
 # 用于切换编译的PHP版本
-export VER_PHP="8.1.6"
+export VER_PHP="8.1.7"
 ./fast-compiler.sh
 ```
 
@@ -94,7 +94,7 @@ export VER_PHP="8.1.6"
 | yes, enabled      | ctype        | *        |                                                         |
 | yes, enabled      | curl         | *        | 自带下载编译 curl 库                                    |
 | yes, enabled      | dom          | *        |                                                         |
-|          | event        |          |                                                         |
+| yes, enabled      | event        | >=3.0.8  | 从 BitBucket 作者仓库下载，非 pecl 版本                     |
 | yes, enabled      | exif         | *        |                                                         |
 | yes, enabled      | filter       | *        |                                                         |
 | yes, enabled      | fileinfo     | *        |                                                         |
@@ -141,7 +141,7 @@ export VER_PHP="8.1.6"
 - `docker/multi-version-compiler.sh` 可以同时编译多个版本的 PHP。
 
 ## 目前的问题（对勾为已解决）
-- [ ] 不支持 event(libevent) 扩展，event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序，同时其本身也不支持静态编译。
+- [X] 不支持 event(libevent) 扩展，event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序，同时其本身也不支持静态编译。
 - [ ] Swoole 扩展不支持 `--enable-swoole-curl`，也是因为编译顺序和加载顺序的问题。
 - [ ] 不支持 readline 扩展，readline 扩展安装后无法正常使用 `php -a`，原因还没有弄清楚，可能是静态编译造成的 ncurses 库出现了问题。
 - [X] curl/libcurl 扩展静态编译

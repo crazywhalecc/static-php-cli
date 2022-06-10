@@ -2,7 +2,7 @@
 
 # This script needs alpine linux system.
 
-test "$VER_PHP" = "" && VER_PHP="8.1.6"
+test "$VER_PHP" = "" && VER_PHP="8.1.7"
 test "$USE_BACKUP" = "" && USE_BACKUP="no"
 
 LINK_APK_REPO='mirrors.ustc.edu.cn'
