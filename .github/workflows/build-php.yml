@@ -8,13 +8,11 @@ on:
       - "docker/**"
 
 jobs:
-  integration:
-    name: Build PHP ${{ matrix.php-versions }} for ${{ matrix.arch }}
+  alpine-php-env:
+    name: alpine-env-job-${{ matrix.arch }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: [ "7.2.34", "7.3.33", "7.4.30", "8.0.20", "8.1.7" ]
-        arch: [ "x86_64", "aarch64", "armv7l" ]
+    matrix:
+      arch: [ "x86_64", "aarch64", "armv7l" ]
     steps:
       - uses: actions/checkout@v2
       - name: Check Dockerfile to ${{ matrix.arch }}
@@ -28,11 +26,21 @@ jobs:
             fi
             docker run --rm --privileged multiarch/qemu-user-static:register --reset
           fi
+      - name: Build Docker container for preparing PHP compile environment
+        run: cd docker/ && docker build . --tag static-php --build-arg USE_BACKUP_ADDRESS=yes
+  integration:
+    name: Build PHP ${{ matrix.php-versions }} for ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: [ "7.2.34", "7.3.33", "7.4.30", "8.0.20", "8.1.7" ]
+        arch: [ "x86_64", "aarch64", "armv7l" ]
+    needs: alpine-env-job-${{ matrix.arch }}
+    steps:
       - name: Build micro and PHP distribution ${{ matrix.php-versions }} for ${{ matrix.arch }}
         run: |
-          cd docker/ && docker build . --tag static-php --build-arg USE_BACKUP_ADDRESS=yes && \
-            mkdir ../dist && \
-            docker run --rm -v $(pwd)/../dist:/dist/ static-php build-php original ${{ matrix.php-versions }} all /dist/
+          mkdir ./dist && \
+          docker run --rm -v $(pwd)/dist:/dist/ static-php build-php original ${{ matrix.php-versions }} all /dist/
       - name: Pack PHP ${{ matrix.php-versions }} to archive
         run: |
           cd dist
