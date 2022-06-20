@@ -10,7 +10,7 @@ if [ -d "$self_dir/source/cache/$2" ]; then
     echo "Using cache for $2"
     cp -r "$self_dir/source/cache/$2" "$self_dir/source/"
 else
-    curl -o $self_dir/source/master.zip "$GITHUB_ADDR""https://github.com/$1/archive/master.zip" && \
+    wget -O $self_dir/source/master.zip "$GITHUB_ADDR""https://github.com/$1/archive/master.zip" && \
         cd $self_dir/source/ && \
         unzip master.zip && \
 	mv $2-master/ cache/$2 && \
