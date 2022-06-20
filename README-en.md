@@ -114,6 +114,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 |         | pdo_pgsql    | *       |                                          |
 | yes     | phar         | *       |                                          |
 | yes     | posix        | *       |                                          |
+| yes     | readline     | *       | Not support `./php -a`                   |
 | yes     | redis        | *       |                                          |
 | yes     | shmop        | *       |                                          |
 | yes     | simplexml    | *       |                                          |
@@ -149,7 +150,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 ## Current Issue
 - [X] Not support event(libevent), because of its `config.m4` and code.
 - [ ] Swoole not support `--enable-swoole-curl`.
-- [ ] Not support readline, maybe caused by ncurses library.
+- [X] Not support readline, maybe caused by ncurses library.
 - [X] Not support curl (solved)
 - [X] Customize extensions to compile
 - [X] php.ini integration

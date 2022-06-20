@@ -120,6 +120,7 @@ export VER_PHP="8.1.7"
 |          | pdo_pgsql    | *        |                                                         |
 | yes, enabled      | phar         | *        |                                                         |
 | yes, enabled      | posix        | *        |                                                         |
+| yes, enabled      | readline     | *        | 不支持 `./php -a`                                        |
 | yes, enabled      | redis        | *        | 从 pecl 或镜像站下载的源码                                |
 | yes, enabled      | shmop        | *        |                                                         |
 | yes, enabled      | simplexml    | *        |                                                         |
@@ -157,7 +158,7 @@ export VER_PHP="8.1.7"
 ## 目前的问题（对勾为已解决）
 - [X] 不支持 event(libevent) 扩展，event 扩展的 sockets 支持不能在静态编译中使用，因为静态内嵌编译暂时没办法调整扩展编译顺序，同时其本身也不支持静态编译。
 - [ ] Swoole 扩展不支持 `--enable-swoole-curl`，也是因为编译顺序和加载顺序的问题。
-- [ ] 不支持 readline 扩展，readline 扩展安装后无法正常使用 `php -a`，原因还没有弄清楚，可能是静态编译造成的 ncurses 库出现了问题。
+- [X] 不支持 readline 扩展，readline 扩展安装后无法正常使用 `php -a`，原因还没有弄清楚，可能是静态编译造成的 ncurses 库出现了问题。
 - [X] curl/libcurl 扩展静态编译
 - [X] 可自行选择不需要编译进入的扩展
 - [X] php.ini 内嵌或分发
