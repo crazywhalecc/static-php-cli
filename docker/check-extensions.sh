@@ -101,7 +101,7 @@ function check_before_configure() {
     done
     case $1 in
     8.*)
-        mv $self_dir/source/micro $php_dir/sapi/ && \
+        mv $self_dir/source/phpmicro $php_dir/sapi/micro && \
             sed -ie 's/#include "php.h"/#include "php.h"\n#define PHP_MICRO_FAKE_CLI 1/g' $php_dir/sapi/micro/php_micro.c
         ;;
     esac
