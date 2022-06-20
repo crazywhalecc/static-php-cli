@@ -84,7 +84,12 @@ if [ ! -d "$OUT_DIR" ]; then
 fi
 
 # 下载 PHP
+
+
 echo "All done. Downloading PHP ..."
+if [ -d "$self_dir/source/php-$VER_PHP" ]; then
+    rm -rf "$self_dir/source/php-$VER_PHP"
+fi
 $self_dir/download.sh php ${USE_BACKUP} ${VER_PHP} || { echo "Download PHP failed!" && exit 1 ; }
 # 选择性编译依赖的库、移动需要安装的扩展到 PHP 目录
 $self_dir/check-extensions.sh check_before_configure ${VER_PHP} || { echo "Install required library failed!" && exit 1 ; }
@@ -100,6 +105,7 @@ cd $php_dir && \
     #sed -ie 's/$(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_MICRO_OBJS)/$(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_BINARY_OBJS:.lo=.o) $(PHP_MICRO_OBJS:.lo=.o)/g' "Makefile" && \
     make LDFLAGS="-ldl" -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
     make install-cli && \
+    $self_dir/check-extensions.sh finish_compile && \
     strip $self_dir/php-dist/bin/php && \
     echo "Copying php binary to $OUT_DIR ..." && \
     cp $self_dir/php-dist/bin/php $OUT_DIR/ && \

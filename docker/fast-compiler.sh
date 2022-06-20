@@ -6,7 +6,7 @@ self_dir=$(cd "$(dirname "$0")";pwd)
 
 test "$VER_PHP" = "" && VER_PHP="8.1.7"
 test "$USE_BACKUP" = "" && USE_BACKUP="no"
-test "$ALL_EXTENSIONS" = "" && ALL_EXTENSIONS="no"
+test "$ALL_EXTENSIONS" = "" && ALL_EXTENSIONS="all"
 
 LINK_APK_REPO='mirrors.ustc.edu.cn'
 LINK_APK_REPO_BAK='dl-cdn.alpinelinux.org'
@@ -21,7 +21,7 @@ fi
 sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories
 
 # build requirements
-apk add bash file wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses
+apk add bash file wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses dialog
 # php zlib dependencies
 apk add zlib-dev zlib-static
 # php mbstring dependencies
@@ -40,6 +40,10 @@ apk add sqlite sqlite-dev sqlite-libs sqlite-static
 apk add bzip2-dev bzip2-static bzip2
 # php micro ffi dependencies
 apk add libffi libffi-dev
+# php gd event parent dependencies
+apk add zstd-static
+# php readline dependencies
+apk add readline-static ncurses-static readline-dev
 
 test "$USE_BACKUP" = "no" && PROMPT_1="mirror" || PROMPT_1="original"
 
@@ -52,6 +56,6 @@ $self_dir/download.sh swoole ${USE_BACKUP} && \
     $self_dir/download.sh xz ${USE_BACKUP} && \
     $self_dir/download.sh curl ${USE_BACKUP} && \
     $self_dir/download.sh libzip ${USE_BACKUP} && \
-    $self_dir/download-git.sh dixyes/phpmicro micro ${USE_BACKUP} && \
+    $self_dir/download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP} && \
     $self_dir/compile-deps.sh && \
     $self_dir/compile-php.sh $PROMPT_1 $VER_PHP $ALL_EXTENSIONS /dist/

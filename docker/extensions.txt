@@ -23,6 +23,7 @@ pdo_mysql
 pdo_sqlite
 phar
 posix
+readline
 redis
 shmop
 simplexml

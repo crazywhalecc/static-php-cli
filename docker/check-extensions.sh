@@ -9,46 +9,6 @@ self_dir=$(cd "$(dirname "$0")";pwd)
 php_dir=$(find $self_dir/source -name "php-*" -type d | tail -n1)
 test -f "$self_dir/extensions_install.txt" && EXT_LIST_FILE="$self_dir/extensions_install.txt" || EXT_LIST_FILE="$self_dir/extensions.txt"
 
-function do_xml_compiler() {
-    cd $self_dir/source/xz-* && \
-        ./configure --enable-static=yes  && \
-        make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
-        make install && \
-        echo "xz compiled!" && \
-        cd ../libxml2-* && \
-        ./configure --prefix=/usr --with-lzma --without-python && \
-        make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
-        make install && \
-        echo "libxml2 compiled!"
-}
-
-function do_libzip_compiler() {
-    cd $self_dir/source/libzip-* && \
-        mkdir build && \
-        cd build && \
-        cmake -DBUILD_SHARED_LIBS=no .. -Wno-dev -DENABLE_BZIP2=no -DENABLE_LZMA=no && \
-        make LDFLAGS="-llzma -lbz2" -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
-        make install && \
-        echo "libzip compiled!"
-}
-
-function do_curl_compiler() {
-    cd $self_dir/source/curl-* && \
-        CC=gcc CXX=g++ CFLAGS=-fPIC CPPFLAGS=-fPIC ./configure \
-            --without-nghttp2 \
-            --with-ssl=/usr \
-            --with-pic=pic \
-            --enable-ipv6 \
-            --enable-shared=no \
-            --without-libidn2 \
-            --disable-ldap \
-            --without-libpsl \
-            --without-lber \
-            --enable-ares && \
-        make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
-        make install && \
-        echo "curl compiled!"
-}
 
 function do_copy_extension() {
     ext_dir=$(find $self_dir/source -name "*$1-*" -type d | tail -n1)
@@ -84,6 +44,13 @@ function check_before_configure() {
         pdo_sqlite) ;;
         phar) ;;
         posix) ;;
+        readline)
+            if [ ! -d "/nom" ]; then
+                mkdir /nom
+            fi
+            mv /usr/lib/libreadline.so* /nom/ && \
+                mv /usr/lib/libncurses*.so* /nom
+            ;;
         shmop) ;;
         sockets) ;;
         sqlite3) ;;
@@ -119,7 +86,7 @@ function check_in_configure() {
         curl)               php_configure="$php_configure --with-curl" ;;
         dom)                php_configure="$php_configure --enable-dom" ;;
         exif)               php_configure="$php_configure --enable-exif" ;;
-        event)              php_configure="$php_configure --with-event-core --with-event-extra --with-event-openssl" ;;
+        event)              php_configure="$php_configure --with-event-libevent-dir=/usr --with-event-core --with-event-extra --with-event-openssl" ;;
         filter)             php_configure="$php_configure --enable-filter" ;;
         fileinfo)           php_configure="$php_configure --enable-fileinfo" ;;
         gd)
@@ -155,6 +122,7 @@ function check_in_configure() {
         pdo_mysql)          php_configure="$php_configure --with-pdo-mysql=mysqlnd" ;;
         phar)               php_configure="$php_configure --enable-phar" ;;
         posix)              php_configure="$php_configure --enable-posix" ;;
+        readline)           php_configure="$php_configure --with-readline" ;;
         redis)              php_configure="$php_configure --enable-redis --disable-redis-session" ;;
         shmop)              php_configure="$php_configure --enable-shmop" ;;
         simplexml)          php_configure="$php_configure --enable-simplexml" ;;
@@ -208,6 +176,13 @@ function check_after_configure() {
     case $1 in
     8.*) sed -ie 's/$(EXTRA_LIBS:-lresolv=-Wl,-Bstatic,-lresolv,-Bdynamic)/$(EXTRA_LIBS)/g' "$php_dir/Makefile" ;;
     esac
+}
+
+function finish_compile() {
+    if [ -d "/nom" ]; then
+        mv /nom/* /usr/lib/ || echo "Empty directory"
+        rm -rf /nom/
+    fi
 }
 
 $1 $2

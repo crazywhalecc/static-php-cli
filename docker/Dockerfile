@@ -43,9 +43,13 @@ RUN apk add libevent libevent-dev libevent-static > /dev/null
 # php sqlite3 dependencies
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static > /dev/null
 # php libzip dependencies
-RUN apk add bzip2-dev bzip2-static bzip2
+RUN apk add bzip2-dev bzip2-static bzip2 > /dev/null
 # php micro ffi dependencies
-RUN apk add libffi libffi-dev
+RUN apk add libffi libffi-dev > /dev/null
+# php gd event parent dependencies
+RUN apk add zstd-static > /dev/null
+# php readline dependencies
+RUN apk add readline-static ncurses-static readline-dev > /dev/null
 
 RUN mkdir /app
 
@@ -64,7 +68,7 @@ RUN ./download.sh swoole ${USE_BACKUP} && \
     ./download.sh xz ${USE_BACKUP} && \
     ./download.sh curl ${USE_BACKUP} && \
     ./download.sh libzip ${USE_BACKUP} && \
-    ./download-git.sh dixyes/phpmicro micro ${USE_BACKUP}
+    ./download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP}
 
 RUN ./compile-deps.sh
 RUN echo -e "#!/usr/bin/env bash\n/app/compile-php.sh \$@" > /bin/build-php && chmod +x /bin/build-php

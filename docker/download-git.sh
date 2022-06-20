@@ -13,7 +13,7 @@ else
     curl -o $self_dir/source/master.zip "$GITHUB_ADDR""https://github.com/$1/archive/master.zip" && \
         cd $self_dir/source/ && \
         unzip master.zip && \
-	mv $2-master/ cache/$2/ && \
+	mv $2-master/ cache/$2 && \
 	cp -r cache/$2 ./
 fi
 
