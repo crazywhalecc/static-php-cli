@@ -43,4 +43,8 @@ function do_curl_compiler() {
         echo "curl compiled!"
 }
 
-do_xml_compiler && do_curl_compiler && do_libzip_compiler
+if [ ! -f "$self_dir/source/.deps-compiled" ]; then
+    do_xml_compiler && do_curl_compiler && do_libzip_compiler && touch "$self_dir/source/.deps-compiled"
+else
+    echo "Skip compilation for dependencies"
+fi
