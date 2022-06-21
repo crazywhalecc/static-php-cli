@@ -54,6 +54,7 @@ $self_dir/download.sh swoole ${USE_BACKUP} && \
     $self_dir/download.sh redis ${USE_BACKUP} && \
     $self_dir/download.sh libxml2 ${USE_BACKUP} && \
     $self_dir/download.sh xz ${USE_BACKUP} && \
+    $self_dir/download.sh protobuf ${USE_BACKUP} && \
     $self_dir/download.sh curl ${USE_BACKUP} && \
     $self_dir/download.sh libzip ${USE_BACKUP} && \
     $self_dir/download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP} && \

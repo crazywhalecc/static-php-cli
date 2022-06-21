@@ -3,6 +3,11 @@
         "link": "http://mirrors.zhamao.xin/php/php-{version}.tar.gz",
         "link_2": "https://www.php.net/distributions/php-{version}.tar.gz"
     },
+    "protobuf": {
+        "version": "3.21.1",
+        "link": "http://mirrors.zhamao.xin/pecl/protobuf-{version}.tgz",
+        "link_2": "https://pecl.php.net/get/protobuf-{version}.tgz"
+    },
     "swoole": {
         "version": "4.8.9",
         "link": "http://mirrors.zhamao.xin/pecl/swoole-{version}.tgz",

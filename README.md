@@ -7,7 +7,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式
 
-[![版本](https://img.shields.io/badge/script--version-1.6.0-green.svg)]()
+[![版本](https://img.shields.io/badge/script--version-1.5.2-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
@@ -87,7 +87,7 @@ export VER_PHP="8.1.7"
 ```
 
 如果要选择安装的扩展，可以修改 `docker/extensions.txt` 文件，具体规则如下：
-- 文件内使用 `#` 可以注释，表示不安装
+- 文件内使用 `^` 可以表示默认不安装该扩展，`#` 开头可以编写注释
 - 扩展名一律使用小写，目前默认状态下文件内所列的扩展为支持的扩展，其他扩展暂不支持，如有需求请提 Issue 添加
 
 ## 支持的扩展表
@@ -120,6 +120,7 @@ export VER_PHP="8.1.7"
 |          | pdo_pgsql    | *        |                                                         |
 | yes, enabled      | phar         | *        |                                                         |
 | yes, enabled      | posix        | *        |                                                         |
+| yes, not enabled  | protobuf     | *        | 默认不编译                                             |
 | yes, enabled      | readline     | *        | 不支持 `./php -a`                                        |
 | yes, enabled      | redis        | *        | 从 pecl 或镜像站下载的源码                                |
 | yes, enabled      | shmop        | *        |                                                         |
@@ -143,13 +144,14 @@ export VER_PHP="8.1.7"
 > 
 > `参数2`: `8.1.7` 是你要编译的 PHP 版本。
 > 
-> `参数3`: `all` 代表你要编译所有支持的扩展，不询问。
+> `参数3`: `all` 代表你要编译所有非反选的扩展，不询问。
 > 
 > `参数4`: `/dist/` 是你编译后输出二进制 PHP 和 micro 的文件夹
 > 
 > 基本例子: `docker run --rm -v $(pwd)/dist:/dist/ -it static-php build-php original 8.1.7 all /dist/`
 
 - `docker/extensions.txt` 指定要编译安装的扩展。
+- `docker/extensions.txt` 中，`^` 开头的扩展名为反选，反选的扩展将出现在编译的扩展列表中，但默认不选中。
 - `docker/compile-php.sh` 中的 `php_compile_args` 函数来调整 PHP 编译参数。
 - `docker/check-extensions.sh` 中的 `check_in_configure` 函数可调整 PHP 扩展编译的参数。
 - `docker/config.json` 可调整要下载的扩展和依赖库版本和链接。

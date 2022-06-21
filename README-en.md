@@ -3,7 +3,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 BTW, It's only for CLI mode.
 
-[![version](https://img.shields.io/badge/version-1.6.0-green.svg)]()
+[![version](https://img.shields.io/badge/version-1.5.2-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
 ## Compilation Requirements
@@ -46,7 +46,7 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 # If packing phar into a static binary, just change code.php to your phar path.
 ```
 
-> Thanks <https://github.com/dixyes/phpmicro>
+> Special thanks: <https://github.com/dixyes/phpmicro>
 
 ## Compiling
 
@@ -81,7 +81,7 @@ export USE_BACKUP="yes"
 ```
 
 To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
-- Use `#` as comment, to mark not install
+- Use `^` as deselect, to mark not install. Use `#` as comments.
 - extensions name uses lower case, and default file contains all supported extensions, if u need other extensions, consider write an Issue
 
 ## Supported PHP extensions
@@ -114,6 +114,7 @@ To customize PHP extensions, edit `docker/extensions.txt` file, and rules below:
 |         | pdo_pgsql    | *       |                                          |
 | yes     | phar         | *       |                                          |
 | yes     | posix        | *       |                                          |
+| yes, not compiled | protobuf        | *       | Not compiled and enabled as default |
 | yes     | readline     | *       | Not support `./php -a`                   |
 | yes     | redis        | *       |                                          |
 | yes     | shmop        | *       |                                          |

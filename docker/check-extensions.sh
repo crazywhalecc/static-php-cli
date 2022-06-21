@@ -20,7 +20,7 @@ function do_copy_extension() {
 }
 
 function check_before_configure() {
-    list=$(cat "$EXT_LIST_FILE" | grep -v "^#" | grep -v "^$")
+    list=$(cat "$EXT_LIST_FILE" | grep -v "^#" | grep -v "^$" | grep -v "^\^")
     xml_sign="no"
     for loop in $list
     do
@@ -44,6 +44,17 @@ function check_before_configure() {
         pdo_sqlite) ;;
         phar) ;;
         posix) ;;
+        protobuf) 
+            do_copy_extension protobuf
+            echo '#ifndef PHP_PROTOBUF_H' >> $php_dir/ext/protobuf/php_protobuf.h && \
+            echo '# define PHP_PROTOBUF_H' >> $php_dir/ext/protobuf/php_protobuf.h && \
+            echo '#ifdef HAVE_CONFIG_H' >> $php_dir/ext/protobuf/php_protobuf.h && \
+            echo '# include "config.h"' >> $php_dir/ext/protobuf/php_protobuf.h && \
+            echo '#endif' >> $php_dir/ext/protobuf/php_protobuf.h && \
+            echo 'extern zend_module_entry protobuf_module_entry;' >> $php_dir/ext/protobuf/php_protobuf.h && \
+            echo '# define phpext_protobuf_ptr &protobuf_module_entry' >> $php_dir/ext/protobuf/php_protobuf.h && \
+            echo '#endif' >> $php_dir/ext/protobuf/php_protobuf.h
+            ;;
         readline)
             if [ ! -d "/nom" ]; then
                 mkdir /nom
@@ -76,7 +87,7 @@ function check_before_configure() {
 
 function check_in_configure() {
     php_configure=""
-    list=$(cat "$EXT_LIST_FILE" | sed 's/#.*//g' | sed -e 's/[ ]*$//g' | grep -v "^\s*$")
+    list=$(cat "$EXT_LIST_FILE" | sed 's/#.*//g' | sed 's/\^.*//g' | sed -e 's/[ ]*$//g' | grep -v "^\s*$")
     for loop in $list
     do
         case $loop in
@@ -122,6 +133,7 @@ function check_in_configure() {
         pdo_mysql)          php_configure="$php_configure --with-pdo-mysql=mysqlnd" ;;
         phar)               php_configure="$php_configure --enable-phar" ;;
         posix)              php_configure="$php_configure --enable-posix" ;;
+        protobuf)           php_configure="$php_configure --enable-protobuf" ;;
         readline)           php_configure="$php_configure --with-readline" ;;
         redis)              php_configure="$php_configure --enable-redis --disable-redis-session" ;;
         shmop)              php_configure="$php_configure --enable-shmop" ;;

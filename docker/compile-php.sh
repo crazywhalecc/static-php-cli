@@ -8,7 +8,13 @@ function generate_ext_dialog_cmd() {
     echo -n "dialog --backtitle \"static-php-cli Compile Options\" --checklist \"Please select the extension you don't want to compile.\n\nNOTE: Use <space> to select or deselect items\n\n** Default is compiling all **\" 24 60 20 " > $self_dir/.ask_cmd.sh
     for loop in $list
     do
-        echo -n "$loop '$loop Extension' on " >> $self_dir/.ask_cmd.sh
+        case $loop in
+        ^*)
+            loop=$(echo ${loop:1} | xargs)
+            echo -n "$loop '$loop Extension' off " >> $self_dir/.ask_cmd.sh 
+	    ;;
+        *) echo -n "$loop '$loop Extension' on " >> $self_dir/.ask_cmd.sh ;;
+        esac
     done
     echo "2>$self_dir/extensions_install.txt" >> $self_dir/.ask_cmd.sh
 }
