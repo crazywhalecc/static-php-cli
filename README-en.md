@@ -1,7 +1,7 @@
 # static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. 
 
-BTW, It's only for CLI mode.
+Compile A Single Binary With PHP Code.
 
 [![version](https://img.shields.io/badge/version-1.5.2-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
@@ -45,7 +45,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 # If packing phar into a static binary, just change code.php to your phar path.
 ```
-
+> Note: It means that your PHP code won't be compiled and you can't protect your source code by using micro! 
+>
 > Special thanks: <https://github.com/dixyes/phpmicro>
 
 ## Compiling
