@@ -1,5 +1,6 @@
 # static-php-cli
-Compile A Statically Linked PHP With Swoole and other Extensions. 
+
+Compile A Statically Linked PHP With Swoole and other Popular Extensions. 
 
 Compile A Single Binary With PHP Code.
 
@@ -10,7 +11,8 @@ Compile A Single Binary With PHP Code.
 
 - Supporting architecture: `x86_64`, `arm64(aarch64)`, `armv7(armv7l)` 
 - Docker required (or alpine linux 3.13+)
-- Supporting PHP version from 7.2 to 8.1
+- PHP version from 7.2 to 8.1
+- Micro Package requires PHP >= 8.0
 
 ## Running Requirements
 
