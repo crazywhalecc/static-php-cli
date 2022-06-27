@@ -45,7 +45,9 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 # If packing phar into a static binary, just change code.php to your phar path.
 ```
-> Note: It means that your PHP code won't be compiled and you can't protect your source code by using micro! 
+> Note: It means that your PHP code won't be compiled and you can't protect your source code by using micro!
+>
+> If you are looking for compiling PHP code or encrypting code, here's not your solution.
 >
 > Special thanks: <https://github.com/dixyes/phpmicro>
 
