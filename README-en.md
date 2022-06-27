@@ -14,7 +14,7 @@ Compile A Single Binary With PHP Code.
 - PHP version from 7.2 to 8.1
 - Micro Package requires PHP >= 8.0
 
-## Running Requirements
+## Runtime Requirements
 
 Linux
 
