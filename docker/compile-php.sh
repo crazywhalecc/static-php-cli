@@ -112,8 +112,12 @@ cd $php_dir && \
     make LDFLAGS="-ldl" -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
     make install-cli && \
     $self_dir/check-extensions.sh finish_compile && \
-    strip $self_dir/php-dist/bin/php && \
-    echo "Copying php binary to $OUT_DIR ..." && \
+    strip $self_dir/php-dist/bin/php
+if [ $? != 0 ]; then
+    exit $?
+fi
+# 将 PHP 和 micro 输出到指定目录
+echo "Copying php binary to $OUT_DIR ..." && \
     cp $self_dir/php-dist/bin/php $OUT_DIR/ && \
     test -f $php_dir/sapi/micro/micro.sfx && \
     echo "Copying micro.sfx binary to $OUT_DIR ..." && \
