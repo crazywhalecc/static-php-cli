@@ -68,6 +68,7 @@ RUN ./download.sh swoole ${USE_BACKUP} && \
     ./download.sh xz ${USE_BACKUP} && \
     ./download.sh curl ${USE_BACKUP} && \
     ./download.sh libzip ${USE_BACKUP} && \
+    ./download.sh libiconv ${USE_BACKUP} && \
     ./download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP}
 
 RUN ./compile-deps.sh

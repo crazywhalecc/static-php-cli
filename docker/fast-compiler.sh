@@ -57,6 +57,7 @@ $self_dir/download.sh swoole ${USE_BACKUP} && \
     $self_dir/download.sh protobuf ${USE_BACKUP} && \
     $self_dir/download.sh curl ${USE_BACKUP} && \
     $self_dir/download.sh libzip ${USE_BACKUP} && \
+    $self_dir/download.sh libiconv ${USE_BACKUP} && \
     $self_dir/download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP} && \
     $self_dir/compile-deps.sh && \
     $self_dir/compile-php.sh $PROMPT_1 $VER_PHP $ALL_EXTENSIONS /dist/
