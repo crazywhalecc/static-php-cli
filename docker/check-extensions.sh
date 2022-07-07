@@ -111,7 +111,7 @@ function check_in_configure() {
             7.3.*|7.2.*)    php_configure="$php_configure --enable-hash" ;;
             esac
             ;;
-        iconv)              php_configure="$php_configure --with-iconv" ;;
+        iconv)              php_configure="$php_configure --with-iconv=/usr" ;;
         inotify)            php_configure="$php_configure --enable-inotify" ;;
         json)
             case $1 in

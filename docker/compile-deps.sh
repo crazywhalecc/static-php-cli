@@ -43,8 +43,20 @@ function do_curl_compiler() {
         echo "curl compiled!"
 }
 
+function do_iconv_compiler() {
+    cd $self_dir/source/libiconv-* && \
+        ./configure --enable-static=yes --prefix=/usr && \
+        make -j$(cat /proc/cpuinfo | grep processor | wc -l) && \
+        make install && \
+        echo "libiconv compiled!"
+}
+
 if [ ! -f "$self_dir/source/.deps-compiled" ]; then
-    do_xml_compiler && do_curl_compiler && do_libzip_compiler && touch "$self_dir/source/.deps-compiled"
+    do_xml_compiler && \
+        do_curl_compiler && \
+        do_libzip_compiler && \
+        do_iconv_compiler && \
+        touch "$self_dir/source/.deps-compiled"
 else
     echo "Skip compilation for dependencies"
 fi

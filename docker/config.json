@@ -52,5 +52,10 @@
         "version": "1.8.0",
         "link": "https://mirrors.zhamao.xin/library/libzip/libzip-{version}.tar.gz",
         "link_2": "https://libzip.org/download/libzip-{version}.tar.gz"
+    },
+    "libiconv": {
+        "version": "1.17",
+        "link": "https://mirrors.zhamao.xin/library/libiconv/libiconv-{version}.tar.gz",
+        "link_2": "https://ftp.gnu.org/gnu/libiconv/libiconv-{version}.tar.gz"
     }
 }
