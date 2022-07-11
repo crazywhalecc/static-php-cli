@@ -39,7 +39,7 @@
         "link_2": "http://xmlsoft.org/sources/libxml2-{version}.tar.gz"
     },
     "curl": {
-        "version": "7.84.0",
+        "version": "7.83.1",
         "link": "https://mirrors.zhamao.xin/library/curl/curl-{version}.tar.gz",
         "link_2": "https://curl.haxx.se/download/curl-{version}.tar.gz"
     },
