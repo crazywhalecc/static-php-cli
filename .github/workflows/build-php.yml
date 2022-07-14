@@ -40,6 +40,12 @@ jobs:
           if [ -f "./micro.sfx" ]; then
             tar -zcvf "micro-${{ matrix.php-versions }}-${{ matrix.arch }}.tar.gz" ./micro.sfx && rm ./micro.sfx
           fi
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: static-php-cli_${{ matrix.php-versions }}_${{ matrix.arch }}
+          path: |
+            dist
       - name: Deploy to Zhamao Server
         uses: easingthemes/ssh-deploy@main
         env:
