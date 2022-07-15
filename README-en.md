@@ -20,7 +20,7 @@ Linux
 
 ## Usage
 
-1. Directly download static binary from this link.
+1. Directly download static binary from this link or [Actions uploaded artifacts](https://github.com/crazywhalecc/static-php-cli/actions).
 
 <https://dl.zhamao.xin/php-bin/file/>
 
