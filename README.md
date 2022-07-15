@@ -23,7 +23,7 @@ Linux
 
 ## 直接使用
 
-1. 可以直接下面的地址下载 Actions 构建的文件。
+1. 可以直接下面的托管服务器或到 `Actions` 找到最新的构建项目下载 Actions 构建的文件。
 
 <https://dl.zhamao.xin/php-bin/file/>
 
