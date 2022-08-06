@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ "7.2.34", "7.3.33", "7.4.30", "8.0.21", "8.1.8" ]
+        php-versions: [ "7.2.34", "7.3.33", "7.4.30", "8.0.22", "8.1.9" ]
         arch: [ "x86_64", "aarch64", "armv7l" ]
     steps:
       - uses: actions/checkout@v2
