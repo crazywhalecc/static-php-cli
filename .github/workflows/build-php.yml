@@ -29,10 +29,15 @@ jobs:
             docker run --rm --privileged multiarch/qemu-user-static:register --reset
           fi
       - name: Build micro and PHP distribution ${{ matrix.php-versions }} for ${{ matrix.arch }}
+        id: buildphp
         run: |
           cd docker/ && docker build . --tag static-php --build-arg USE_BACKUP_ADDRESS=yes && \
             mkdir ../dist && \
             docker run --rm -v $(pwd)/../dist:/dist/ static-php build-php original ${{ matrix.php-versions }} all /dist/
+      - name: Fail if anything failed
+        if: steps.buildphp == 'failure'
+        run: |
+          false
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
