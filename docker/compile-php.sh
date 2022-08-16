@@ -114,7 +114,7 @@ cd $php_dir && \
     $self_dir/check-extensions.sh finish_compile && \
     strip $self_dir/php-dist/bin/php
 if [ $? != 0 ]; then
-    exit $?
+    exit 1
 fi
 # 将 PHP 和 micro 输出到指定目录
 echo "Copying php binary to $OUT_DIR ..." && \
