@@ -30,6 +30,7 @@ function php_compile_args() {
     _php_arg="$_php_arg --with-pear=no"
     _php_arg="$_php_arg --disable-cgi"
     _php_arg="$_php_arg --disable-phpdbg"
+    _php_arg="$_php_arg --with-config-file-path=/etc"
     _php_arg="$_php_arg $($self_dir/check-extensions.sh check_in_configure $1)"
     echo $_php_arg
 }
