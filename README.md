@@ -1,6 +1,8 @@
 # static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. [English README](README-en.md)
 
+> Migrating from lwmbs...
+
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！
 
 同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！
