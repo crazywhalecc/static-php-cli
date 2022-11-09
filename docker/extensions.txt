@@ -28,7 +28,7 @@ pdo_sqlite
 phar
 posix
 ^protobuf
-readline
+^readline
 redis
 shmop
 simplexml
