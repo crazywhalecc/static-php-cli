@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.16
 
 # define script basic information
 # Version of this Dockerfile
