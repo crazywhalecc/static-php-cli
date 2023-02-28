@@ -1,7 +1,7 @@
 # static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. [English README](README-en.md)
 
-> 我没有思绪了，最近有点懒，过节后再提更新和重构的事情。
+> 别慌，作者一直在的，不会弃坑！
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！
 
