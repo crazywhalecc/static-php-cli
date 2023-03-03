@@ -11,7 +11,7 @@ __DIR__=$(
 )
 cd ${__DIR__}
 
-# cpu 核数 ，前面为mac 后面为macos
+# cpu 核数 ，前面为linux 后面为macos
 cpu_nums=`nproc 2> /dev/null || sysctl -n hw.ncpu`
 # cpu_nums=`grep "processor" /proc/cpuinfo | sort -u | wc -l`
 
