@@ -61,8 +61,10 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 可以自己使用 Dockerfile 进行编译构建：
 
 ```bash
+
 git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli/docker
+export DOCKER_BUILDKIT=1
 docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=no
 # 新建一个用于放置构建好的二进制的文件夹
 mkdir dist

@@ -1,0 +1,22 @@
+https://pecl.php.net/get/redis-5.3.7.tgz
+ out=redis-5.3.7.tgz
+https://pecl.php.net/get/yaml-2.2.2.tgz
+ out=yaml-2.2.2.tgz
+https://pecl.php.net/get/imagick-3.6.0.tgz
+ out=imagick-3.6.0.tgz
+https://pecl.php.net/get/mongodb-1.14.2.tgz
+ out=mongodb-1.14.2.tgz
+https://pecl.php.net/get/apcu-5.1.22.tgz
+ out=apcu-5.1.22.tgz
+https://pecl.php.net/get/ds-1.4.0.tgz
+ out=ds-1.4.0.tgz
+https://pecl.php.net/get/inotify-3.0.0.tgz
+ out=inotify-3.0.0.tgz
+https://pecl.php.net/get/xlswriter-1.5.2.tgz
+ out=xlswriter-1.5.2.tgz
+https://pecl.php.net/get/zstd-0.12.1.tgz
+ out=zstd-0.12.1.tgz
+https://pecl.php.net/get/event-3.0.8.tgz
+ out=event-3.0.8.tgz
+https://pecl.php.net/get/mcrypt-1.0.5.tgz
+ out=mcrypt-1.0.5.tgz
