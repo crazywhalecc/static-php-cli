@@ -19,13 +19,10 @@ RUN if [ "${USE_BACKUP}" = "" ]; then \
         export USE_BACKUP="no" ; \
     fi
 
-RUN if [ "${USE_BACKUP}" = "yes" ]; then \
-        echo "Using backup original address..." ; \
-    else \
-        echo "Using mirror address..." && \
-        sed -i 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories ; \
-    fi
+RUN sed -i.backup 's/dl-cdn.alpinelinux.org/'${LINK_APK_REPO}'/g' /etc/apk/repositories ;
 
+RUN if [ "${USE_BACKUP}" = "no" ]; then cp -f /etc/apk/repositories.backup /etc/apk/repositories; fi
+RUN cat /etc/apk/repositories
 # build requirements
 RUN apk add bash file wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils ncurses dialog > /dev/null
 # php zlib dependencies
@@ -50,26 +47,43 @@ RUN apk add libffi libffi-dev > /dev/null
 RUN apk add zstd-static > /dev/null
 # php readline dependencies
 RUN apk add readline-static ncurses-static readline-dev > /dev/null
+RUN apk add aria2
 
 RUN mkdir /app
 
 WORKDIR /app
 
-COPY ./* /app/
+ADD  ./ /app/
 
-RUN chmod +x /app/*.sh
+# RUN chmod +x /app/*.sh
 
-RUN ./download.sh swoole ${USE_BACKUP} && \
-    ./download.sh inotify ${USE_BACKUP} && \
-    ./download.sh mongodb ${USE_BACKUP} && \
-    ./download.sh event ${USE_BACKUP} && \
-    ./download.sh redis ${USE_BACKUP} && \
-    ./download.sh libxml2 ${USE_BACKUP} && \
-    ./download.sh xz ${USE_BACKUP} && \
-    ./download.sh curl ${USE_BACKUP} && \
-    ./download.sh libzip ${USE_BACKUP} && \
-    ./download.sh libiconv ${USE_BACKUP} && \
-    ./download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP}
+# use proxy
+# ENV http_proxy=http://192.168.3.26:8015
+# ENV https_proxy=http://192.168.3.26:8015
 
-RUN ./compile-deps.sh
+# 提前下载好，就可以跳过两步
+# (容器外提前执行 下面两个命令）
+RUN sh ./download-library-batch-aria2.sh
+RUN sh ./download-extension-batch-aria2.sh
+
+#ENV http_proxy=''
+#ENV https_proxy=''
+RUN ls -lh source/libraries
+RUN ls -lh source/extensions
+# quick test complie
+# RUN bash ./compile-deps.sh
+
+RUN sh ./download.sh swoole ${USE_BACKUP} && \
+    sh ./download.sh inotify ${USE_BACKUP} && \
+    sh ./download.sh mongodb ${USE_BACKUP} && \
+    sh ./download.sh event ${USE_BACKUP} && \
+    sh ./download.sh redis ${USE_BACKUP} && \
+    sh ./download.sh libxml2 ${USE_BACKUP} && \
+    sh ./download.sh xz ${USE_BACKUP} && \
+    sh ./download.sh curl ${USE_BACKUP} && \
+    sh ./download.sh libzip ${USE_BACKUP} && \
+    sh ./download.sh libiconv ${USE_BACKUP} && \
+    sh ./download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP}
+
+RUN bash ./compile-deps.sh
 RUN echo -e "#!/usr/bin/env bash\n/app/compile-php.sh \$@" > /bin/build-php && chmod +x /bin/build-php

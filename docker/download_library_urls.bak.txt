@@ -1,0 +1,72 @@
+https://www.openssl.org/source/openssl-1.1.1p.tar.gz
+ out=openssl-1.1.1p.tar.gz
+https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz
+ out=libiconv-1.16.tar.gz
+https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.10/libxml2-v2.9.10.tar.gz
+ out=libxml2-v2.9.10.tar.gz
+https://gitlab.gnome.org/GNOME/libxslt/-/archive/v1.1.34/libxslt-v1.1.34.tar.gz
+ out=libxslt-v1.1.34.tar.gz
+https://github.com/google/brotli/archive/refs/tags/v1.0.9.tar.gz
+ out=brotli-1.0.9.tar.gz
+https://c-ares.org/download/c-ares-1.19.0.tar.gz
+ out=c-ares-1.19.0.tar.gz
+https://gmplib.org/download/gmp/gmp-6.2.1.tar.lz
+ out=gmp-6.2.1.tar.lz
+https://mirrors.tuna.tsinghua.edu.cn/gnu/ncurses/ncurses-6.3.tar.gz	https://mirrors.ustc.edu.cn/gnu/ncurses/ncurses-6.3.tar.gz	https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.3.tar.gz
+ out=ncurses-6.3.tar.gz
+https://mirrors.tuna.tsinghua.edu.cn/gnu/readline/readline-8.2.tar.gz	https://mirrors.ustc.edu.cn/gnu/readline/readline-8.2.tar.gz	https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz
+ out=readline-8.2.tar.gz
+https://pyyaml.org/download/libyaml/yaml-0.2.5.tar.gz
+ out=yaml-0.2.5.tar.gz
+https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
+ out=libsodium-1.0.18.tar.gz
+https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
+ out=bzip2-1.0.8.tar.gz
+https://udomain.dl.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.gz
+ out=zlib-1.2.11.tar.gz
+https://github.com/lz4/lz4/archive/refs/tags/v1.9.4.tar.gz
+ out=lz4-v1.9.4.tar.gz
+https://github.com/tukaani-project/xz/releases/download/v5.4.1/xz-5.4.1.tar.gz
+ out=xz-5.4.1.tar.gz
+https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-1.5.2.tar.gz
+ out=zstd-1.5.2.tar.gz
+https://libzip.org/download/libzip-1.9.2.tar.gz
+ out=libzip-1.9.2.tar.gz
+https://www.sqlite.org/2021/sqlite-autoconf-3370000.tar.gz
+ out=sqlite-autoconf-3370000.tar.gz
+https://github.com/unicode-org/icu/releases/download/release-60-3/icu4c-60_3-src.tgz
+ out=icu4c-60_3-src.tgz
+https://codeload.github.com/kkos/oniguruma/tar.gz/refs/tags/v6.9.7
+ out=oniguruma-6.9.7.tar.gz
+https://github.com/microsoft/mimalloc/archive/refs/tags/v2.0.7.tar.gz
+ out=mimalloc-2.0.7.tar.gz
+https://codeload.github.com/libjpeg-turbo/libjpeg-turbo/tar.gz/refs/tags/2.1.2
+ out=libjpeg-turbo-2.1.2.tar.gz
+https://nchc.dl.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz
+ out=giflib-5.2.1.tar.gz
+https://nchc.dl.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.gz
+ out=libpng-1.6.37.tar.gz
+https://codeload.github.com/webmproject/libwebp/tar.gz/refs/tags/v1.2.1
+ out=libwebp-1.2.1.tar.gz
+https://download.savannah.gnu.org/releases/freetype/freetype-2.10.4.tar.gz
+ out=freetype-2.10.4.tar.gz
+https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.0-62.tar.gz
+ out=ImageMagick-v7.1.0-62.tar.gz
+https://ftp.gnu.org/gnu/libidn/libidn2-2.3.4.tar.gz
+ out=libidn2-2.3.4.tar.gz
+https://curl.se/download/curl-7.88.0.tar.gz
+ out=curl-7.88.0.tar.gz
+https://ftp.postgresql.org/pub/source/v15.1/postgresql-15.1.tar.gz
+ out=postgresql-15.1.tar.gz
+https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz
+ out=libffi-3.4.4.tar.gz
+https://github.com/winlibs/libmcrypt/archive/refs/tags/libmcrypt-2.5.8-3.4.tar.gz
+ out=libmcrypt-2.5.8-3.4.tar.gz
+https://github.com/jmcnamara/libxlsxwriter/archive/refs/tags/RELEASE_1.1.5.tar.gz
+ out=libxlsxwriter-1.1.5.tar.gz
+https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
+ out=libevent-2.1.12-stable.tar.gz
+https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz
+ out=libuv-v1.44.2.tar.gz
+https://github.com/php/php-src/archive/refs/tags/php-8.1.12.tar.gz
+ out=php-8.1.12.tar.gz

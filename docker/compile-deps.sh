@@ -52,7 +52,9 @@ function do_iconv_compiler() {
 }
 
 if [ ! -f "$self_dir/source/.deps-compiled" ]; then
-    do_xml_compiler && \
+        source ${self_dir}/deps-modules/libmcrypt.sh
+        source ${self_dir}/deps-modules/gmp.sh
+        do_xml_compiler && \
         do_curl_compiler && \
         do_libzip_compiler && \
         do_iconv_compiler && \
