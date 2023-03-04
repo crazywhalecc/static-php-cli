@@ -4,6 +4,8 @@ Compile A Statically Linked PHP With Swoole and other Popular Extensions.
 
 Compile A Single Binary With PHP Code.
 
+**If you are intrested in this project, don't miss this discussion: <https://github.com/crazywhalecc/static-php-cli/discussions/29>**
+
 [![version](https://img.shields.io/badge/version-1.5.2-green.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
 
