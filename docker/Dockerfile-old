@@ -53,4 +53,37 @@ RUN mkdir /app
 
 WORKDIR /app
 
+ADD  ./ /app/
 
+# RUN chmod +x /app/*.sh
+
+# use proxy
+# ENV http_proxy=http://192.168.3.26:8015
+# ENV https_proxy=http://192.168.3.26:8015
+
+# 提前下载好，就可以跳过两步
+# (容器外提前执行 下面两个命令）
+RUN sh ./download-library-batch-aria2.sh
+RUN sh ./download-extension-batch-aria2.sh
+
+#ENV http_proxy=''
+#ENV https_proxy=''
+RUN ls -lh source/libraries
+RUN ls -lh source/extensions
+# quick test complie
+# RUN bash ./compile-deps.sh
+
+RUN sh ./download.sh swoole ${USE_BACKUP} && \
+    sh ./download.sh inotify ${USE_BACKUP} && \
+    sh ./download.sh mongodb ${USE_BACKUP} && \
+    sh ./download.sh event ${USE_BACKUP} && \
+    sh ./download.sh redis ${USE_BACKUP} && \
+    sh ./download.sh libxml2 ${USE_BACKUP} && \
+    sh ./download.sh xz ${USE_BACKUP} && \
+    sh ./download.sh curl ${USE_BACKUP} && \
+    sh ./download.sh libzip ${USE_BACKUP} && \
+    sh ./download.sh libiconv ${USE_BACKUP} && \
+    sh ./download-git.sh dixyes/phpmicro phpmicro ${USE_BACKUP}
+
+RUN bash ./compile-deps.sh
+RUN echo -e "#!/usr/bin/env bash\n/app/compile-php.sh \$@" > /bin/build-php && chmod +x /bin/build-php

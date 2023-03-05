@@ -2,7 +2,7 @@ name: Build PHP
 
 on:
   push:
-    branches: [ master ]
+    branches: [ release ]
     paths:
       - ".github/workflows/**.yml"
       - "docker/**"

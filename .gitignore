@@ -1,5 +1,5 @@
 .idea
 runtime/
-docker/libraries/
-docker/extensions/
+docker/download-script/libraries/
+docker/download-script/extensions/
 docker/source/

@@ -51,14 +51,18 @@ function do_iconv_compiler() {
         echo "libiconv compiled!"
 }
 
+
 if [ ! -f "$self_dir/source/.deps-compiled" ]; then
-        source ${self_dir}/deps-modules/libmcrypt.sh
-        source ${self_dir}/deps-modules/gmp.sh
+        bash ${self_dir}/deps-library-modules/gmp.sh
+        bash ${self_dir}/deps-library-modules/libmcrypt.sh
         do_xml_compiler && \
         do_curl_compiler && \
         do_libzip_compiler && \
-        do_iconv_compiler && \
+        do_iconv_compiler
         touch "$self_dir/source/.deps-compiled"
 else
     echo "Skip compilation for dependencies"
 fi
+
+# 准备扩展源代码
+ bash ${self_dir}/deps-extension-modules/swow.sh

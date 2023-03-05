@@ -5,7 +5,7 @@ __DIR__=$(
   cd "$(dirname "$0")"
   pwd
 )
-
+__ROOT__=$(cd ${__DIR__}/../;pwd)
 cd ${__DIR__}
 
 # https://aria2.github.io/manual/en/html/aria2c.html#http-ftp-segmented-downloads
@@ -27,8 +27,10 @@ EOF
 user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'
 
 
-test -f download_library_urls.txt  && aria2c -c -j 10 -s 10 -x 8 -k 10M --allow-overwrite=true --max-tries=30  --retry-wait=15 --user-agent=$user_agent \
- -d libraries --input-file=download_library_urls.txt
+test -f download_extension_urls.txt  && aria2c -c -j 10 -s 10 -x 8 -k 10M --allow-overwrite=true --max-tries=30  --retry-wait=15 --user-agent=$user_agent \
+ -d extensions --input-file=download_extension_urls.txt
 
-mkdir -p source/libraries
-awk 'BEGIN { cmd="cp -ri libraries/* source/libraries/"  ; print "n" |cmd; }'
+mkdir -p ${__ROOT__}/source/extensions/
+awk 'BEGIN { cmd="cp -ri extensions/* ${__ROOT__}/source/extensions/"  ; print "n" |cmd; }'
+
+cd ${__DIR__}

@@ -69,7 +69,23 @@ docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=no
 # 新建一个用于放置构建好的二进制的文件夹
 mkdir dist
 # 终端会引导你进行编译安装，可选择 PHP 版本、要编译的扩展
-docker run --rm -v $(pwd)/dist:/dist/ -it static-php build-php
+# docker run --rm -v $(pwd)/dist:/dist/ -it static-php build-php
+
+# 启用容器，并自动进入容器
+docker run --rm --name static-php-cli  -v $(pwd):/app -it --init  static-php 
+
+bash download-script/download-library-batch-aria2.sh
+bash download-script/download-extension-batch-aria2.sh
+bash download-script/download-old.sh
+bash compile-php.sh
+
+# 假如不进入容器 执行如下命令即可
+docker exec -i static-php-cli bash download-script/download-library-batch-aria2.sh
+docker exec -i static-php-cli bash download-script/download-library-batch-aria2.sh
+docker exec -i static-php-cli bash download-script/download-extension-batch-aria2.sh
+docker exec -i static-php-cli bash download-script/download-old.sh
+docker exec -i static-php-cli bash compile-php.sh
+
 ```
 
 编译之后可以使用下方命令将二进制 PHP 提取出来，用以下方式：
