@@ -59,6 +59,7 @@ if [ ! -f "$self_dir/source/.deps-compiled" ]; then
         do_curl_compiler && \
         do_libzip_compiler && \
         do_iconv_compiler
+        # bash ${self_dir}/deps-library-modules/cares.sh
         touch "$self_dir/source/.deps-compiled"
 else
     echo "Skip compilation for dependencies"

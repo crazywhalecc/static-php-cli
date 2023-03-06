@@ -72,11 +72,12 @@ mkdir dist
 # docker run --rm -v $(pwd)/dist:/dist/ -it static-php build-php
 
 # 启用容器，并自动进入容器
-docker run --rm --name static-php-cli  -v $(pwd):/app -it --init  static-php 
+docker run --rm --name static-php-cli  -v $(pwd)/dist:/dist/  -v $(pwd):/app -it --init  static-php 
 
 bash download-script/download-library-batch-aria2.sh
 bash download-script/download-extension-batch-aria2.sh
 bash download-script/download-old.sh
+
 bash compile-php.sh
 
 # 假如不进入容器 执行如下命令即可
@@ -84,6 +85,7 @@ docker exec -i static-php-cli bash download-script/download-library-batch-aria2.
 docker exec -i static-php-cli bash download-script/download-library-batch-aria2.sh
 docker exec -i static-php-cli bash download-script/download-extension-batch-aria2.sh
 docker exec -i static-php-cli bash download-script/download-old.sh
+
 docker exec -i static-php-cli bash compile-php.sh
 
 ```

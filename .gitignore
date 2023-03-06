@@ -3,3 +3,5 @@ runtime/
 docker/download-script/libraries/
 docker/download-script/extensions/
 docker/source/
+docker/extensions_install.txt
+docker/php-dist/

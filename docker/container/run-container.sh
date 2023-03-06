@@ -6,7 +6,8 @@ __DIR__=$(
   pwd
 )
 
-cd ${__DIR__}
+__ROOT__=$(cd ${__DIR__}/../;pwd)
+cd ${__ROOT__}
 
 # 新建一个用于放置构建好的二进制的文件夹
 mkdir -p dist
@@ -17,7 +18,7 @@ mkdir -p dist
 } || {
   echo $?
 }
-docker run --rm --name static-php-dev -v $(pwd):/app -it --init  static-php
+docker run --rm --name static-php-dev -v $(pwd)/dist:/dist/ -v $(pwd):/app -it --init  static-php
 
 # 接下来的步骤
 #    下载依赖库
@@ -27,3 +28,8 @@ docker run --rm --name static-php-dev -v $(pwd):/app -it --init  static-php
 
 # 终端会引导你进行编译安装，可选择 PHP 版本、要编译的扩展
 
+bash download-script/download-library-batch-aria2.sh
+bash download-script/download-extension-batch-aria2.sh
+bash download-script/download-old.sh
+
+bash compile-php.sh
