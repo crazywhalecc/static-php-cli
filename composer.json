@@ -1,0 +1,55 @@
+{
+    "require": {
+        "php": ">= 8.0",
+        "ext-tokenizer": "*",
+        "ext-iconv": "*",
+        "symfony/console": "^6 || ^5 || ^4",
+        "zhamao/logger": "^1.0",
+        "crazywhalecc/cli-helper": "^0.1.0",
+        "nunomaduro/collision": "*"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.2 != 3.7.0",
+        "phpstan/phpstan": "^1.1",
+        "captainhook/captainhook": "^5.10",
+        "captainhook/plugin-composer": "^5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "SPC\\": "src/SPC"
+        },
+        "files": [
+            "src/globals/defines.php",
+            "src/globals/functions.php"
+        ]
+    },
+    "extra": {
+        "hooks": {
+            "post-merge": "composer install",
+            "pre-commit": [
+                "echo committing as $(git config user.name)",
+                "composer cs-fix -- --diff"
+            ],
+            "pre-push": [
+                "composer cs-fix -- --dry-run --diff",
+                "composer analyse"
+            ]
+        }
+    },
+    "bin": [
+        "bin/static-php-cli"
+    ],
+    "scripts": {
+        "analyse": "phpstan analyse --memory-limit 300M",
+        "cs-fix": "php-cs-fixer fix",
+        "test": "bin/phpunit --no-coverage"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "captainhook/plugin-composer": true
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

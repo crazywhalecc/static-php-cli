@@ -3,3 +3,16 @@ runtime/
 docker/libraries/
 docker/extensions/
 docker/source/
+
+# Composer file
+composer.lock
+/vendor/
+
+# source extract directory
+/source/
+
+# source download directory
+/downloads/
+
+# source build root directory
+/buildroot/

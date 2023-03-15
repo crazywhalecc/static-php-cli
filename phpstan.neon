@@ -1,0 +1,12 @@
+parameters:
+  reportUnmatchedIgnoredErrors: false
+  level: 4
+  paths:
+    - ./src/
+  ignoreErrors:
+    - '#Constant .* not found#'
+    - '#Unsafe usage of new static#'
+    - '#class Fiber#'
+    - '#Attribute class JetBrains\\PhpStorm\\ArrayShape does not exist#'
+  dynamicConstantNames:
+    - PHP_OS_FAMILY
