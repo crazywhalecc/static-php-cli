@@ -68,6 +68,18 @@
             "SystemConfiguration"
         ]
     },
+    "gmp": {
+        "source": "gmp",
+        "static-libs-unix": [
+            "libgmp.a"
+        ],
+        "static-libs-windows": [
+            "libgmp.lib"
+        ],
+        "headers": [
+            "gmp.h"
+        ]
+    },
     "libffi": {
         "source": "libffi",
         "static-libs-unix": [

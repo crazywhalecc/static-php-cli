@@ -182,6 +182,9 @@ class Extension
                     $arg .= ' --with-event-openssl --with-openssl-dir="' . BUILD_ROOT_PATH . '"';
                 }
                 break;*/
+            case 'gmp':
+                $arg = ' --with-gmp="' . BUILD_ROOT_PATH . '" ';
+                break;
             case 'sqlite3':
                 $arg = ' --with-sqlite3="' . BUILD_ROOT_PATH . '" ' .
                 'SQLITE_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .

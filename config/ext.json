@@ -100,7 +100,7 @@
     },
     "gmp": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "none",
         "lib-depends": [
             "gmp"
         ]

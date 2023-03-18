@@ -35,6 +35,15 @@
             "path": "LICENSE"
         }
     },
+    "gmp": {
+        "type": "filelist",
+        "url": "https://gmplib.org/download/gmp/",
+        "regex": "/href=\"(?<file>gmp-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "license": {
+            "type": "text",
+            "text": "Since version 6, GMP is distributed under the dual licenses, GNU LGPL v3 and GNU GPL v2. These licenses make the library free to use, share, and improve, and allow you to pass on the result. The GNU licenses give freedoms, but also set firm restrictions on the use with non-free programs."
+        }
+    },
     "libffi": {
         "type": "ghrel",
         "repo": "libffi/libffi",
