@@ -214,6 +214,10 @@ class FetchSourceCommand extends BaseCommand
      */
     private function doPatch(): void
     {
+        // swow 需要软链接内部的文件夹才能正常编译
+        if (!file_exists(SOURCE_PATH . '/php-src/ext/swow')) {
+            Patcher::patchSwow();
+        }
         // patch 一些 PHP 的资源，以便编译
         Patcher::patchPHPDepFiles();
 
@@ -226,11 +230,6 @@ class FetchSourceCommand extends BaseCommand
         // @see: https://github.com/openssl/openssl/issues/18720
         if ($this->input->getOption('with-openssl11') && file_exists(SOURCE_PATH . '/openssl/test/v3ext.c') && PHP_OS_FAMILY === 'Darwin') {
             Patcher::patchDarwinOpenssl11();
-        }
-
-        // swow 需要软链接内部的文件夹才能正常编译
-        if (!file_exists(SOURCE_PATH . '/php-src/ext/swow')) {
-            Patcher::patchSwow();
         }
 
         // 标记 patch 完成，避免重复 patch
