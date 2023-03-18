@@ -142,6 +142,7 @@ class FetchSourceCommand extends BaseCommand
             f_mkdir(DOWNLOAD_PATH);
 
             // 下载 PHP
+            logger()->info('Fetching PHP source');
             Downloader::fetchSource('php-src', Downloader::getLatestPHPInfo($ver));
 
             // 下载别的依赖资源

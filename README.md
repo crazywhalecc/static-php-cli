@@ -17,7 +17,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 - Linux
     - 支持架构: aarch64, amd64
     - 支持发行版: alpine, ubuntu, centos
-    - 依赖工具: (TODO)
+    - 依赖工具: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, gzip, bzip2, cmake
 - macOS
     - 支持架构: arm64, x86_64
     - 依赖工具: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, xz, gzip, bzip2, cmake

@@ -182,6 +182,41 @@ class Downloader
         }
     }
 
+    public static function downloadGit(string $name, string $url, string $branch, ?string $path = null): void
+    {
+        if ($path) {
+            $path = SOURCE_PATH . "/{$path}";
+        } else {
+            $path = DOWNLOAD_PATH . "/{$name}";
+        }
+        $download_path = DOWNLOAD_PATH . "/{$name}";
+        if (file_exists($download_path)) {
+            logger()->notice("{$name} git source already fetched");
+        } else {
+            logger()->debug("cloning {$name} source");
+            $check = !defined('DEBUG_MODE') ? ' -q' : '';
+            f_passthru(
+                'git clone' . $check .
+                ' --config core.autocrlf=false ' .
+                "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
+            );
+        }
+        // 复制目录过去
+        if ($path !== $download_path) {
+            $dst_path = FileSystem::convertPath($path);
+            $src_path = FileSystem::convertPath($download_path);
+            switch (PHP_OS_FAMILY) {
+                case 'Windows':
+                    f_passthru('xcopy "' . $src_path . '" "' . $dst_path . '" /s/e/v/y/i');
+                    break;
+                case 'Linux':
+                case 'Darwin':
+                    f_passthru('cp -r "' . $src_path . '" "' . $dst_path . '"');
+                    break;
+            }
+        }
+    }
+
     /**
      * 拉取资源
      *
@@ -226,22 +261,7 @@ class Downloader
                     self::downloadUrl($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'git':             // 通过拉回 Git 仓库的形式拉取
-                    if ($source['path'] ?? null) {
-                        $path = SOURCE_PATH . "/{$source['path']}";
-                    } else {
-                        $path = SOURCE_PATH . "/{$name}";
-                    }
-                    if (file_exists($path)) {
-                        logger()->notice("{$name} source already exists");
-                        break;
-                    }
-                    logger()->debug("cloning {$name} source");
-                    $check = !defined('DEBUG_MODE') ? ' -q' : '';
-                    f_passthru(
-                        'git clone' . $check .
-                        ' --config core.autocrlf=false ' .
-                        "--branch \"{$source['rev']}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$source['url']}\" \"{$path}\""
-                    );
+                    self::downloadGit($name, $source['url'], $source['rev'], $source['path'] ?? null);
                     break;
                 default:
                     throw new DownloaderException('unknown source type: ' . $source['type']);
