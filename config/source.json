@@ -53,12 +53,20 @@
             "path": "LICENSE"
         }
     },
-    "libmcrypt": {
+    "mcrypt": {
         "type": "url",
-        "url": "https://github.com/winlibs/libmcrypt/archive/refs/tags/libmcrypt-2.5.8-3.4.tar.gz",
+        "url": "https://jaist.dl.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
         "license": {
             "type": "file",
-            "path": "COPYING.LIB"
+            "path": "COPYING"
+        }
+    },
+    "libmcrypt": {
+        "type": "url",
+        "url": "https://nchc.dl.sourceforge.net/project/mcrypt/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "libpng": {

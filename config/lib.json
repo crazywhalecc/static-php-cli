@@ -98,12 +98,7 @@
             "ffitarget.h"
         ]
     },
-    "libmcrypt": {
-        "source": "libmcrypt",
-        "static-libs-unix": [
-            "libmcrypt.a"
-        ]
-    },
+
     "libpng": {
         "source": "libpng",
         "static-libs-unix": [
@@ -206,6 +201,18 @@
             "xz",
             "zstd",
             "openssl"
+        ]
+    },
+    "libmcrypt": {
+        "source": "libmcrypt",
+        "static-libs-unix": [
+            "libmcrypt.a"
+        ]
+    },
+    "mcrypt": {
+        "source": "mcrypt",
+        "static-libs-unix": [
+            "libmcrypt.a"
         ]
     },
     "nghttp2": {

@@ -57,3 +57,13 @@
 | xmlwriter  |       |          |         |
 | zip        |       |          |         |
 | zlib       |       |          |         |
+
+## Additional Requirements
+
+- phpmicro requires PHP >= 8.0
+- swoole >= 5.0 requires PHP >= 8.0
+- swow requires PHP >= 8.0
+
+## Bugs
+
+See #32.
