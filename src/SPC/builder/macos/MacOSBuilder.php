@@ -256,7 +256,7 @@ class MacOSBuilder extends BuilderBase
             'cd ' . SOURCE_PATH . '/php-src && ' .
             "make -j{$this->concurrency} " .
             'EXTRA_CFLAGS="-g -Os -fno-ident" ' . // 生成调试信息、优化编译后的尺寸、禁用标识符（如变量、函数名）缩短
-            "EXTRA_LIBS=\"{$extra_libs} -lresolv -lsqlite3\" " .
+            "EXTRA_LIBS=\"{$extra_libs} -lresolv\" " .
             // TODO: comment things
             'cli &&' .
             'dsymutil -f sapi/cli/php &&' .
