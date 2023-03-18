@@ -98,6 +98,12 @@
             "ffitarget.h"
         ]
     },
+    "libmcrypt": {
+        "source": "libmcrypt",
+        "static-libs-unix": [
+            "libmcrypt.a"
+        ]
+    },
     "libpng": {
         "source": "libpng",
         "static-libs-unix": [
