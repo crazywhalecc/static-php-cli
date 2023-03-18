@@ -75,11 +75,11 @@
             "libwebp",
             "libjpeg",
             "xpm",
-            "libfreetype"
+            "freetype"
         ],
         "lib-depends-windows": [
             "libiconv",
-            "libfreetype",
+            "freetype",
             "libjpeg",
             "zlib",
             "libpng",

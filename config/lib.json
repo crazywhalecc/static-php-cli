@@ -215,6 +215,16 @@
             "libmcrypt.a"
         ]
     },
+    "freetype": {
+        "source": "freetype",
+        "static-libs-unix": [
+            "libfreetype.a"
+        ],
+        "headers-unix": [
+            "freetype2/freetype/freetype.h",
+            "freetype2/ft2build.h"
+        ]
+    },
     "nghttp2": {
         "source": "nghttp2",
         "static-libs-unix": [

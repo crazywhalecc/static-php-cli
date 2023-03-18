@@ -35,6 +35,15 @@
             "path": "LICENSE"
         }
     },
+    "freetype": {
+        "type": "filelist",
+        "url": "https://download.savannah.gnu.org/releases/freetype/",
+        "regex": "/href=\"(?<file>freetype-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "license": {
+            "type": "file",
+            "path": "LICENSE.TXT"
+        }
+    },
     "gmp": {
         "type": "filelist",
         "url": "https://gmplib.org/download/gmp/",

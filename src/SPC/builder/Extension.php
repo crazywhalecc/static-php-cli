@@ -216,6 +216,11 @@ class Extension
                     'CURL_LIBS="' . $this->getLibFilesString() . '" ';
                 break;
             case 'gd':
+                if ($this->builder->getLib('freetype')) {
+                    $arg .= ' --with-freetype ' .
+                    'FREETYPE2_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '/freetype2" ' .
+                    'FREETYPE2_LIBS="' . $this->getLibFilesString() . '" ';
+                }
                 $arg .= ' ' .
                     'PNG_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
                     'PNG_LIBS="' . $this->getLibFilesString() . '" ';
