@@ -8,11 +8,14 @@ docker/source/
 composer.lock
 /vendor/
 
-# source extract directory
+# default source extract directory
 /source/
 
-# source download directory
+# default source download directory
 /downloads/
 
-# source build root directory
+# default source build root directory
 /buildroot/
+
+# php cs fixer cache file
+.php-cs-fixer.cache
