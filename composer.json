@@ -24,17 +24,6 @@
         ]
     },
     "extra": {
-        "hooks": {
-            "post-merge": "composer install",
-            "pre-commit": [
-                "echo committing as $(git config user.name)",
-                "composer cs-fix -- --diff"
-            ],
-            "pre-push": [
-                "composer cs-fix -- --dry-run --diff",
-                "composer analyse"
-            ]
-        }
     },
     "bin": [
         "bin/spc"

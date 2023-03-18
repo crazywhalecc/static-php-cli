@@ -59,8 +59,8 @@ chmod +x spc
 
 本项目依据旧版本惯例采用 MIT License 开源，新版本采用了部分项目的源代码做参考，特别感谢：
 
-- dixyes/lwmbs（木兰宽松许可证）
-- swoole/swoole-cli（Apache 2.0 LICENSE+SWOOLE-CLI LICENSE）
+- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)（木兰宽松许可证）
+- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE+SWOOLE-CLI LICENSE）
 
 因本项目的特殊性，使用项目编译过程中会使用很多其他开源项目，例如 curl、protobuf 等，它们都有各自的开源协议。
 请在编译完成后，使用命令 `dump-license`(TODO) 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。

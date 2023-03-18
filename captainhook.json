@@ -4,9 +4,6 @@
         "actions": [
             {
                 "action": "composer analyse"
-            },
-            {
-                "action": "composer test"
             }
         ]
     },

@@ -58,9 +58,9 @@ This project is based on the tradition of using the MIT License for old versions
 while the new version references source code from some other projects. 
 Special thanks to:
 
-- dixyes/lwmbs (Mulun Permissive License)
-- swoole/swoole-cli (Apache 2.0 LICENSE+SWOOLE-CLI LICENSE)
-- 
+- [dixyes/lwmbs](https://github.com/dixyes/lwmbs) (Mulun Permissive License)
+- [swoole/swoole-cli](https://github.com/swoole/swoole-cli) (Apache 2.0 LICENSE+SWOOLE-CLI LICENSE)
+
 Due to the special nature of this project, 
 many other open source projects such as curl and protobuf will be used during the project compilation process, 
 and they all have their own open source licenses.
