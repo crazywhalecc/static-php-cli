@@ -143,8 +143,6 @@ class MacOSBuilder extends BuilderBase
             );
         }
 
-        $extra_libs .= ' /Users/jerry/project/git-project/static-php-cli/buildroot/lib/libsqlite3.a';
-
         // patch before configure
         Patcher::patchPHPBeforeConfigure($this);
 
@@ -157,7 +155,7 @@ class MacOSBuilder extends BuilderBase
         Patcher::patchPHPConfigure($this);
 
         if ($this->getLib('libxml2') || $this->getExt('iconv')) {
-            $extra_libs .= ' /Users/jerry/project/git-project/static-php-cli/buildroot/lib/libcrypto.a -liconv';
+            $extra_libs .= ' -liconv';
         }
 
         f_passthru(

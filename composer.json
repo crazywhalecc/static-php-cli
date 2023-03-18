@@ -37,7 +37,7 @@
         }
     },
     "bin": [
-        "bin/static-php-cli"
+        "bin/spc"
     ],
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",

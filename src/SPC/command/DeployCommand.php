@@ -84,7 +84,7 @@ class DeployCommand extends BaseCommand
                 str_replace(
                     '/../vendor/autoload.php',
                     '/vendor/autoload.php',
-                    file_get_contents(ROOT_DIR . '/bin/static-php-cli')
+                    file_get_contents(ROOT_DIR . '/bin/spc')
                 )
             );
             $stub = '.phar-entry.php';
