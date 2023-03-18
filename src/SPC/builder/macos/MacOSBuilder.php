@@ -219,6 +219,9 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildMicro(string $extra_libs): void
     {
+        if ($this->getPHPVersionID() < 80000) {
+            throw new RuntimeException('phpmicro only support PHP >= 8.0!');
+        }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
             try {
@@ -259,5 +262,12 @@ class MacOSBuilder extends BuilderBase
             'dsymutil -f sapi/cli/php &&' .
             'strip sapi/cli/php'
         );
+    }
+
+    public function getPHPVersionID(): int
+    {
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        preg_match('/PHP_VERSION_ID (\d+)/', $file, $match);
+        return intval($match[1]);
     }
 }

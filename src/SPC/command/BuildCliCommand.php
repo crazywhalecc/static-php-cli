@@ -77,8 +77,8 @@ class BuildCliCommand extends BuildCommand
             if ($input->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
             } else {
-                logger()->emergency('Build failed, please check terminal output, or build with --debug option to see more details.');
-                logger()->emergency($e->getMessage());
+                logger()->critical('Build failed, please check terminal output, or build with --debug option to see more details.');
+                logger()->critical($e->getMessage());
             }
             return 1;
         }

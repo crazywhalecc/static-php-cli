@@ -46,7 +46,7 @@ chmod +x spc
 - [X] macOS support
 - [X] Exception handler
 - [ ] Windows support
-- [ ] PHP 7.4 support
+- [X] PHP 7.4 support
 
 ## Supported Extensions (WIP)
 

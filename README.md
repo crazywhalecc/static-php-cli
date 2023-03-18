@@ -49,7 +49,7 @@ chmod +x spc
 - [X] macOS 支持
 - [ ] Windows 支持
 - [ ] Linux 支持
-- [ ] PHP 7.4 支持
+- [X] PHP 7.4 支持
 
 ## 支持的扩展情况（WIP）
 

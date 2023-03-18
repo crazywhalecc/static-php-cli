@@ -66,4 +66,4 @@
 
 ## Bugs
 
-See #32.
+See [#32](https://github.com/crazywhalecc/static-php-cli/issues/32).
