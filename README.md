@@ -35,74 +35,25 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 未来会提供一个直接可使用的 phar 包和一个 phpmicro 打包的二进制文件，你可以直接从 Release 中获取并使用：
 
 ```bash
-chmod +x static-php-cli
+chmod +x spc
 # 拉取所有依赖库
-./static-php-cli fetch --all
-# 构建包含 bcmath 扩展的 php-cli 和 micro.sfx
-./static-php-cli build "bcmath" "" --build-all
+./spc fetch --all
+# 构建包含 bcmath,openssl,swoole 扩展的 php-cli 和 micro.sfx
+./spc build "bcmath,openssl,swoole" --build-all
 ```
 
 ## 项目支持情况（WIP）
 
 - [X] 基础结构编写（采用 symfony/console`）
 - [X] 错误处理
+- [X] macOS 支持
 - [ ] Windows 支持
 - [ ] Linux 支持
 - [ ] PHP 7.4 支持
 
 ## 支持的扩展情况（WIP）
 
-> Yes 代表已支持，Pending 代表支持但未经测试，空白代表暂不支持.
-
-|            | Linux | macOS    | Windows |
-|------------|-------|----------|---------|
-| bcmath     |       | yes      |         |
-| calendar   |       |          |         |
-| ctype      |       |          |         |
-| curl       |       |          |         |
-| date       |       | yes      |         | 
-| dom        |       |          |         |
-| event      |       |          |         |
-| exif       |       |          |         |
-| filter     |       |          |         |
-| fileinfo   |       |          |         |
-| ftp        |       |          |         |
-| gd         |       | untested |         |
-| hash       |       | yes      |         |
-| iconv      |       |          |         |
-| inotify    |       |          |         |
-| json       |       | yes      |         |
-| libxml     |       |          |         |
-| mbstring   |       |          |         |
-| mongodb    |       |          |         |
-| mysqli     |       |          |         |
-| mysqlnd    |       |          |         |
-| openssl    |       | yes      |         |
-| pcntl      |       | untested |         |
-| pcre       |       | yes      |         |
-| pdo        |       | yes      |         |
-| pdo_mysql  |       |          |         |
-| pdo_sqlite |       | yes      |         |
-| pdo_pgsql  |       |          |         |
-| phar       |       |          |         |
-| posix      |       |          |         |
-| protobuf   |       |          |         |
-| readline   |       |          |         |
-| redis      |       |          |         |
-| Reflection |       | yes      |         |
-| shmop      |       |          |         |
-| simplexml  |       |          |         |
-| soap       |       |          |         |
-| sockets    |       |          |         |
-| sqlite3    |       | untested |         |
-| swow       |       |          |         |
-| swoole     |       | yes      |         |
-| tokenizer  |       |          |         |
-| xml        |       |          |         |
-| xmlreader  |       |          |         |
-| xmlwriter  |       |          |         |
-| zip        |       |          |         |
-| zlib       |       |          |         |
+[扩展支持列表](/ext-support.md)
 
 ## 开源协议
 
@@ -112,4 +63,4 @@ chmod +x static-php-cli
 - swoole/swoole-cli（Apache 2.0 LICENSE+SWOOLE-CLI LICENSE）
 
 因本项目的特殊性，使用项目编译过程中会使用很多其他开源项目，例如 curl、protobuf 等，它们都有各自的开源协议。
-请在编译完成后，使用命令 `dump-license` 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。
+请在编译完成后，使用命令 `dump-license`(TODO) 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。

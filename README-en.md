@@ -32,77 +32,25 @@ After stable release for this project, a single phar and single binary for this 
 And currently you may need to clone this branch and edit GitHub Action to build.
 
 ```bash
-chmod +x static-php-cli
-# 拉取所有依赖库
-./static-php-cli fetch --all
-# 构建包含 bcmath 扩展的 php-cli 和 micro.sfx
-./static-php-cli build "bcmath" "" --build-all
+chmod +x spc
+# fetch all libraries
+./spc fetch --all
+# with bcmath,openssl,swoole extension, build both CLI and phpmicro SAPI
+./spc build "bcmath,openssl,swoole" --build-all
 ```
 
 ## Current Status
 
 - [X] Basic CLI framework (by symfony/console)
 - [ ] Linux support
-- [ ] macOS support
+- [X] macOS support
 - [X] Exception handler
 - [ ] Windows support
 - [ ] PHP 7.4 support
 
-## Supported Extensions
+## Supported Extensions (WIP)
 
-> - yes: supported and tested
-> - untested: supported but not tested
-> - empty: not supported yet
-
-|            | Linux | macOS    | Windows |
-|------------|-------|----------|---------|
-| bcmath     |       | yes      |         |
-| calendar   |       |          |         |`
-| ctype      |       |          |         |
-| curl       |       |          |         |
-| date       |       | yes      |         | 
-| dom        |       |          |         |
-| event      |       |          |         |
-| exif       |       |          |         |
-| filter     |       |          |         |
-| fileinfo   |       |          |         |
-| ftp        |       |          |         |
-| gd         |       | untested |         |
-| hash       |       | yes      |         |
-| iconv      |       |          |         |
-| inotify    |       |          |         |
-| json       |       | yes      |         |
-| libxml     |       |          |         |
-| mbstring   |       |          |         |
-| mongodb    |       |          |         |
-| mysqli     |       |          |         |
-| mysqlnd    |       |          |         |
-| openssl    |       | yes      |         |
-| pcntl      |       | untested |         |
-| pcre       |       | yes      |         |
-| pdo        |       | yes      |         |
-| pdo_mysql  |       |          |         |
-| pdo_sqlite |       | yes      |         |
-| pdo_pgsql  |       |          |         |
-| phar       |       |          |         |
-| posix      |       |          |         |
-| protobuf   |       |          |         |
-| readline   |       |          |         |
-| redis      |       |          |         |
-| Reflection |       | yes      |         |
-| shmop      |       |          |         |
-| simplexml  |       |          |         |
-| soap       |       |          |         |
-| sockets    |       |          |         |
-| sqlite3    |       | untested |         |
-| swow       |       |          |         |
-| swoole     |       | yes      |         |
-| tokenizer  |       |          |         |
-| xml        |       |          |         |
-| xmlreader  |       |          |         |
-| xmlwriter  |       |          |         |
-| zip        |       |          |         |
-| zlib       |       |          |         |
+[Support Extension List](/ext-support.md)
 
 ## Open-Source LICENSE
 
@@ -117,5 +65,5 @@ Due to the special nature of this project,
 many other open source projects such as curl and protobuf will be used during the project compilation process, 
 and they all have their own open source licenses.
 
-Please use the `dump-license` command to export the open source licenses used in the project after compilation, 
+Please use the `dump-license`(TODO) command to export the open source licenses used in the project after compilation, 
 and comply with the corresponding project's LICENSE.
