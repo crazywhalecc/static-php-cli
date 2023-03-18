@@ -1,4 +1,0 @@
-https://pecl.php.net/get/mcrypt-1.0.5.tgz
- out=mcrypt-1.0.5.tgz
-https://pecl.php.net/get/apcu-5.1.22.tgz
- out=apcu-5.1.22.tgz

@@ -1,3 +1,0 @@
-AC_DEFUN([PHP_CHECK_LIBRARY], [
-  $3
-])

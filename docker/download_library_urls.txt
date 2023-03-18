@@ -1,4 +1,0 @@
-https://github.com/winlibs/libmcrypt/archive/refs/tags/libmcrypt-2.5.8-3.4.tar.gz
- out=libmcrypt-2.5.8-3.4.tar.gz
-https://gmplib.org/download/gmp/gmp-6.2.1.tar.lz
- out=gmp-6.2.1.tar.lz
