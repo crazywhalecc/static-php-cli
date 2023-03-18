@@ -1,0 +1,220 @@
+{
+    "brotli": {
+        "type": "ghtar",
+        "repo": "google/brotli",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "bzip2": {
+        "type": "filelist",
+        "url": "https://sourceware.org/pub/bzip2/",
+        "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "text",
+            "text": "This program, \"bzip2\", the associated library \"libbzip2\", and all documentation, are copyright (C) 1996-2010 Julian R Seward. All rights reserved.\n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n    2. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.\n    3. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.\n    4. The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nJulian Seward, jseward@bzip.org bzip2/libbzip2 version 1.0.6 of 6 September 2010\n\nPATENTS: To the best of my knowledge, bzip2 and libbzip2 do not use any patented algorithms. However, I do not have the resources to carry out a patent search. Therefore I cannot give any guarantee of the above statement."
+        }
+    },
+    "curl": {
+        "type": "ghrel",
+        "repo": "curl/curl",
+        "match": "curl.+\\.tar\\.xz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "ext-zstd": {
+        "type": "git",
+        "path": "php-src/ext/zstd",
+        "rev": "master",
+        "url": "https://github.com/kjdev/php-ext-zstd",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "libffi": {
+        "type": "ghrel",
+        "repo": "libffi/libffi",
+        "match": "libffi.+\\.tar\\.gz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "libpng": {
+        "type": "git",
+        "url": "https://git.code.sf.net/p/libpng/code",
+        "rev": "libpng16",
+        "license": {
+            "type": "text",
+            "text": "COPYRIGHT NOTICE, DISCLAIMER, and LICENSE\n=========================================\n\nPNG Reference Library License version 2\n---------------------------------------\n\n * Copyright (c) 1995-2019 The PNG Reference Library Authors.\n * Copyright (c) 2018-2019 Cosmin Truta.\n * Copyright (c) 2000-2002, 2004, 2006-2018 Glenn Randers-Pehrson.\n * Copyright (c) 1996-1997 Andreas Dilger.\n * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.\n\nThe software is supplied \"as is\", without warranty of any kind,\nexpress or implied, including, without limitation, the warranties\nof merchantability, fitness for a particular purpose, title, and\nnon-infringement.  In no event shall the Copyright owners, or\nanyone distributing the software, be liable for any damages or\nother liability, whether in contract, tort or otherwise, arising\nfrom, out of, or in connection with the software, or the use or\nother dealings in the software, even if advised of the possibility\nof such damage.\n\nPermission is hereby granted to use, copy, modify, and distribute\nthis software, or portions hereof, for any purpose, without fee,\nsubject to the following restrictions:\n\n 1. The origin of this software must not be misrepresented; you\n    must not claim that you wrote the original software.  If you\n    use this software in a product, an acknowledgment in the product\n    documentation would be appreciated, but is not required.\n\n 2. Altered source versions must be plainly marked as such, and must\n    not be misrepresented as being the original software.\n\n 3. This Copyright notice may not be removed or altered from any\n    source or altered source distribution.\n\n\nPNG Reference Library License version 1 (for libpng 0.5 through 1.6.35)\n-----------------------------------------------------------------------\n\nlibpng versions 1.0.7, July 1, 2000, through 1.6.35, July 15, 2018 are\nCopyright (c) 2000-2002, 2004, 2006-2018 Glenn Randers-Pehrson, are\nderived from libpng-1.0.6, and are distributed according to the same\ndisclaimer and license as libpng-1.0.6 with the following individuals\nadded to the list of Contributing Authors:\n\n    Simon-Pierre Cadieux\n    Eric S. Raymond\n    Mans Rullgard\n    Cosmin Truta\n    Gilles Vollant\n    James Yu\n    Mandar Sahastrabuddhe\n    Google Inc.\n    Vadim Barkov\n\nand with the following additions to the disclaimer:\n\n    There is no warranty against interference with your enjoyment of\n    the library or against infringement.  There is no warranty that our\n    efforts or the library will fulfill any of your particular purposes\n    or needs.  This library is provided with all faults, and the entire\n    risk of satisfactory quality, performance, accuracy, and effort is\n    with the user.\n\nSome files in the \"contrib\" directory and some configure-generated\nfiles that are distributed with libpng have other copyright owners, and\nare released under other open source licenses.\n\nlibpng versions 0.97, January 1998, through 1.0.6, March 20, 2000, are\nCopyright (c) 1998-2000 Glenn Randers-Pehrson, are derived from\nlibpng-0.96, and are distributed according to the same disclaimer and\nlicense as libpng-0.96, with the following individuals added to the\nlist of Contributing Authors:\n\n    Tom Lane\n    Glenn Randers-Pehrson\n    Willem van Schaik\n\nlibpng versions 0.89, June 1996, through 0.96, May 1997, are\nCopyright (c) 1996-1997 Andreas Dilger, are derived from libpng-0.88,\nand are distributed according to the same disclaimer and license as\nlibpng-0.88, with the following individuals added to the list of\nContributing Authors:\n\n    John Bowler\n    Kevin Bracey\n    Sam Bushell\n    Magnus Holmgren\n    Greg Roelofs\n    Tom Tanner\n\nSome files in the \"scripts\" directory have other copyright owners,\nbut are released under this license.\n\nlibpng versions 0.5, May 1995, through 0.88, January 1996, are\nCopyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.\n\nFor the purposes of this copyright and license, \"Contributing Authors\"\nis defined as the following set of individuals:\n\n    Andreas Dilger\n    Dave Martindale\n    Guy Eric Schalnat\n    Paul Schmidt\n    Tim Wegner\n\nThe PNG Reference Library is supplied \"AS IS\".  The Contributing\nAuthors and Group 42, Inc. disclaim all warranties, expressed or\nimplied, including, without limitation, the warranties of\nmerchantability and of fitness for any purpose.  The Contributing\nAuthors and Group 42, Inc. assume no liability for direct, indirect,\nincidental, special, exemplary, or consequential damages, which may\nresult from the use of the PNG Reference Library, even if advised of\nthe possibility of such damage.\n\nPermission is hereby granted to use, copy, modify, and distribute this\nsource code, or portions hereof, for any purpose, without fee, subject\nto the following restrictions:\n\n 1. The origin of this source code must not be misrepresented.\n\n 2. Altered versions must be plainly marked as such and must not\n    be misrepresented as being the original source.\n\n 3. This Copyright notice may not be removed or altered from any\n    source or altered source distribution.\n\nThe Contributing Authors and Group 42, Inc. specifically permit,\nwithout fee, and encourage the use of this source code as a component\nto supporting the PNG file format in commercial products.  If you use\nthis source code in a product, acknowledgment is not required but would\nbe appreciated.\n"
+        }
+    },
+    "libressl": {
+        "type": "filelist",
+        "url": "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/",
+        "regex": "/href=\"(?<file>libressl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "libssh2": {
+        "type": "ghrel",
+        "repo": "libssh2/libssh2",
+        "match": "libssh2.+\\.tar\\.gz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "libxml2": {
+        "type": "url",
+        "url": "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.14/libxml2-v2.9.14.tar.gz",
+        "license": {
+            "type": "file",
+            "path": "Copyright"
+        }
+    },
+    "libyaml": {
+        "type": "ghrel",
+        "repo": "yaml/libyaml",
+        "match": "yaml-.+\\.tar\\.gz",
+        "license": {
+            "type": "file",
+            "path": "License"
+        }
+    },
+    "libzip": {
+        "type": "ghrel",
+        "repo": "nih-at/libzip",
+        "match": "libzip.+\\.tar\\.xz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "micro": {
+        "type": "git",
+        "path": "php-src/sapi/micro",
+        "rev": "master",
+        "url": "https://github.com/dixyes/phpmicro",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "nghttp2": {
+        "type": "ghrel",
+        "repo": "nghttp2/nghttp2",
+        "match": "nghttp2.+\\.tar\\.xz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "onig": {
+        "type": "ghrel",
+        "repo": "kkos/oniguruma",
+        "match": "onig-.+\\.tar\\.gz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "openssl": {
+        "type": "filelist",
+        "url": "https://www.openssl.org/source/",
+        "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "LICENSE.txt"
+        }
+    },
+    "pthreads4w": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://git.code.sf.net/p/pthreads4w/code",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "redis": {
+        "type": "git",
+        "path": "php-src/ext/redis",
+        "rev": "5.3.7",
+        "url": "https://github.com/phpredis/phpredis",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "sqlite": {
+        "type": "url",
+        "url": "https://www.sqlite.org/2023/sqlite-autoconf-3410100.tar.gz",
+        "license": {
+            "type": "text",
+            "path": "The author disclaims copyright to this source code.  In place of\na legal notice, here is a blessing:\n\n  *   May you do good and not evil.\n  *   May you find forgiveness for yourself and forgive others.\n  *   May you share freely, never taking more than you give."
+        }
+    },
+    "swoole": {
+        "type": "ghtar",
+        "path": "php-src/ext/swoole",
+        "repo": "swoole/swoole-src",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "swow": {
+        "type": "git",
+        "path": "php-src/ext/swow-src",
+        "rev": "ci",
+        "url": "https://github.com/swow/swow",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "xz": {
+        "type": "filelist",
+        "url": "https://tukaani.org/xz/",
+        "regex": "/href=\"(?<file>xz-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "yaml": {
+        "type": "git",
+        "path": "php-src/ext/yaml",
+        "rev": "php7",
+        "url": "https://github.com/php/pecl-file_formats-yaml",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "zlib": {
+        "type": "filelist",
+        "url": "https://zlib.net/",
+        "regex": "/href=\"(?<file>zlib-(?<version>[^\"]+)\\.tar\\.gz)\"/i",
+        "license": {
+            "type": "text",
+            "text": "(C) 1995-2022 Jean-loup Gailly and Mark Adler\n\nThis software is provided 'as-is', without any express or implied\nwarranty.  In no event will the authors be held liable for any damages\narising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\n claim that you wrote the original software. If you use this software\n in a product, an acknowledgment in the product documentation would be\n appreciated but is not required.\n2. Altered source versions must be plainly marked as such, and must not be\n misrepresented as being the original software.\n3. This notice may not be removed or altered from any source distribution.\n\nJean-loup Gailly        Mark Adler\njloup@gzip.org          madler@alumni.caltech.edu"
+        }
+    },
+    "zstd": {
+        "type": "ghrel",
+        "repo": "facebook/zstd",
+        "match": "zstd.+\\.tar\\.gz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    }
+}

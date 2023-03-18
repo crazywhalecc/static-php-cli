@@ -1,0 +1,330 @@
+{
+    "brotli": {
+        "source": "brotli",
+        "static-libs-unix": [
+            "libbrotlidec-static.a",
+            "libbrotlienc-static.a",
+            "libbrotlicommon-static.a"
+        ],
+        "static-libs-windows": [
+            "brotlicommon-static.lib",
+            "brotlienc-static.lib",
+            "brotlidec-static.lib"
+        ],
+        "headers": [
+            "brotli"
+        ]
+    },
+    "bzip2": {
+        "source": "bzip2",
+        "static-libs-unix": [
+            "libbz2.a"
+        ],
+        "static-libs-windows": [
+            [
+                "libbz2.lib",
+                "libbz2_a.lib"
+            ]
+        ],
+        "headers": [
+            "bzlib.h"
+        ]
+    },
+    "curl": {
+        "source": "curl",
+        "static-libs-unix": [
+            "libcurl.a"
+        ],
+        "static-libs-windows": [
+            "libcurl.lib"
+        ],
+        "headers": [
+            "curl"
+        ],
+        "lib-depends-unix": [
+            "zlib"
+        ],
+        "lib-suggests": [
+            "libssh2",
+            "brotli",
+            "nghttp2",
+            "zstd",
+            "openssl",
+            "idn2",
+            "psl"
+        ],
+        "lib-suggests-windows": [
+            "zlib",
+            "libssh2",
+            "brotli",
+            "nghttp2",
+            "zstd",
+            "openssl",
+            "idn2",
+            "psl"
+        ],
+        "frameworks": [
+            "CoreFoundation",
+            "SystemConfiguration"
+        ]
+    },
+    "libffi": {
+        "source": "libffi",
+        "static-libs-unix": [
+            "libffi.a"
+        ],
+        "static-libs-windows": [
+            "libffi.lib"
+        ],
+        "headers-unix": [
+            "ffi.h",
+            "ffitarget.h"
+        ],
+        "headers-windows": [
+            "ffi.h",
+            "fficonfig.h",
+            "ffitarget.h"
+        ]
+    },
+    "libpng": {
+        "source": "libpng",
+        "static-libs-unix": [
+            "libpng.a"
+        ],
+        "static-libs-windows": [
+            "libpng16_static.lib"
+        ],
+        "headers-unix": [
+            "png.h",
+            "pngconf.h",
+            "pnglibconf.h"
+        ],
+        "headers-windows": [
+            "png.h",
+            "pngconf.h"
+        ],
+        "lib-depends": [
+            "zlib"
+        ]
+    },
+    "libssh2": {
+        "source": "libssh2",
+        "static-libs-unix": [
+            "libssh2.a"
+        ],
+        "static-libs-windows": [
+            "libssh2.lib"
+        ],
+        "headers": [
+            "libssh2.h",
+            "libssh2_publickey.h",
+            "libssh2_sftp.h"
+        ],
+        "lib-depends": [
+            "openssl"
+        ],
+        "lib-suggests": [
+            "zlib"
+        ]
+    },
+    "libxml2": {
+        "source": "libxml2",
+        "static-libs-unix": [
+            "libxml2.a"
+        ],
+        "static-libs-windows": [
+            [
+                "libxml2s.lib",
+                "libxml2_a.lib"
+            ]
+        ],
+        "headers": [
+            "libxml2"
+        ],
+        "lib-suggests": [
+            "icu",
+            "xz",
+            "zlib"
+        ],
+        "lib-suggests-windows": [
+            "icu",
+            "xz",
+            "zlib",
+            "pthreads4w"
+        ]
+    },
+    "libyaml": {
+        "source": "libyaml",
+        "static-libs-unix": [
+            "libyaml.a"
+        ],
+        "static-libs-windows": [
+            "yaml.lib"
+        ],
+        "headers": [
+            "yaml.h"
+        ]
+    },
+    "libzip": {
+        "source": "libzip",
+        "static-libs-unix": [
+            "libzip.a"
+        ],
+        "static-libs-windows": [
+            [
+                "zip.lib",
+                "libzip_a.lib"
+            ]
+        ],
+        "headers": [
+            "zip.h",
+            "zipconf.h"
+        ],
+        "lib-depends": [
+            "zlib"
+        ],
+        "lib-suggests": [
+            "bzip2",
+            "xz",
+            "zstd",
+            "openssl"
+        ]
+    },
+    "nghttp2": {
+        "source": "nghttp2",
+        "static-libs-unix": [
+            "libnghttp2.a"
+        ],
+        "static-libs-windows": [
+            "nghttp2.lib"
+        ],
+        "headers": [
+            "nghttp2"
+        ],
+        "lib-depends": [
+            "zlib",
+            "openssl"
+        ],
+        "lib-suggests": [
+            "libxml2",
+            "libev",
+            "libcares",
+            "libngtcp2",
+            "libnghttp3",
+            "libbpf",
+            "libevent-openssl",
+            "jansson",
+            "jemalloc",
+            "systemd",
+            "cunit"
+        ]
+    },
+    "onig": {
+        "source": "onig",
+        "static-libs-unix": [
+            "libonig.a"
+        ],
+        "static-libs-windows": [
+            [
+                "onig.lib",
+                "onig_a.lib"
+            ]
+        ],
+        "headers": [
+            "oniggnu.h",
+            "oniguruma.h"
+        ]
+    },
+    "openssl": {
+        "source": "openssl",
+        "static-libs-unix": [
+            "libssl.a",
+            "libcrypto.a"
+        ],
+        "static-libs-windows": [
+            "libssl.lib",
+            "libcrypto.lib"
+        ],
+        "headers": [
+            "openssl"
+        ],
+        "lib-suggests": [
+            "zlib"
+        ]
+    },
+    "pthreads4w": {
+        "source": "pthreads4w",
+        "static-libs-windows": [
+            "libpthreadVC3.lib"
+        ],
+        "headers-windows": [
+            "_ptw32.h",
+            "pthread.h",
+            "sched.h",
+            "semaphore.h"
+        ]
+    },
+    "sqlite": {
+        "source": "sqlite",
+        "static-libs-unix": [
+            "libsqlite3.a"
+        ],
+        "headers-unix": [
+            "sqlite3.h",
+            "sqlite3ext.h"
+        ]
+    },
+    "xz": {
+        "source": "xz",
+        "static-libs-unix": [
+            "liblzma.a"
+        ],
+        "static-libs-windows": [
+            [
+                "liblzma.lib",
+                "liblzma_a.lib"
+            ]
+        ],
+        "headers-unix": [
+            "lzma"
+        ],
+        "headers-windows": [
+            "lzma",
+            "lzma.h"
+        ]
+    },
+    "zlib": {
+        "source": "zlib",
+        "static-libs-unix": [
+            "libz.a"
+        ],
+        "static-libs-windows": [
+            "zlib_a.lib"
+        ],
+        "headers": [
+            "zlib.h",
+            "zconf.h"
+        ]
+    },
+    "zstd": {
+        "source": "zstd",
+        "static-libs-unix": [
+            "libzstd.a"
+        ],
+        "static-libs-windows": [
+            [
+                "zstd.lib",
+                "zstd_static.lib"
+            ]
+        ],
+        "headers-unix": [
+            "zdict.h",
+            "zstd.h",
+            "zstd_errors.h"
+        ],
+        "headers-windows": [
+            "zstd.h",
+            "zstd_errors.h"
+        ]
+    }
+}

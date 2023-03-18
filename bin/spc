@@ -1,0 +1,16 @@
+#!php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// 防止 Micro 打包状态下不支持中文的显示（虽然这个项目目前好像没输出过中文？）
+if (PHP_OS_FAMILY === 'Windows' && Phar::running()) {
+    exec('CHCP 65001');
+}
+
+// 跑，反正一条命令跑就对了
+try {
+    (new \SPC\ConsoleApplication())->run();
+} catch (Exception $e) {
+    \SPC\exception\ExceptionHandler::getInstance()->handle($e);
+}

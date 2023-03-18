@@ -35,9 +35,14 @@ const REPLACE_FILE_STR = 1;
 const REPLACE_FILE_PREG = 2;
 const REPLACE_FILE_USER = 3;
 
+// 编译输出类型
 const BUILD_MICRO_NONE = 0;
 const BUILD_MICRO_ONLY = 1;
-
 const BUILD_MICRO_BOTH = 2;
+
+// 编译状态
+const BUILD_STATUS_OK = 0;
+const BUILD_STATUS_ALREADY = 1;
+const BUILD_STATUS_FAILED = 2;
 
 ConsoleLogger::$date_format = 'H:i:s';

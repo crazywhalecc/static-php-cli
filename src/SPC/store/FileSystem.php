@@ -10,8 +10,6 @@ use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 class FileSystem
 {
-    private static $source_cache;
-
     /**
      * @throws FileSystemException
      */
@@ -291,11 +289,15 @@ class FileSystem
     }
 
     /**
-     * @param  null|mixed          $rule
-     * @param  mixed               $return_path_value
+     * 获取该路径下的所有类名，根据 psr-4 方式
+     *
+     * @param  string              $dir               目录
+     * @param  string              $base_namespace    基类命名空间
+     * @param  null|mixed          $rule              规则回调
+     * @param  bool|string         $return_path_value 是否返回路径对应的数组，默认只返回类名列表
      * @throws FileSystemException
      */
-    public static function getClassesPsr4(string $dir, string $base_namespace, $rule = null, $return_path_value = false): array
+    public static function getClassesPsr4(string $dir, string $base_namespace, mixed $rule = null, bool|string $return_path_value = false): array
     {
         $classes = [];
         // 扫描目录，使用递归模式，相对路径模式，因为下面此路径要用作转换成namespace

@@ -1,0 +1,227 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SPC\builder;
+
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\store\Config;
+use SPC\store\FileSystem;
+use SPC\util\DependencyUtil;
+
+abstract class BuilderBase
+{
+    /** @var bool 是否启用 ZTS 线程安全 */
+    public bool $zts = false;
+
+    /** @var string 编译目标架构 */
+    public string $arch;
+
+    /** @var string GNU 格式的编译目标架构 */
+    public string $gnu_arch;
+
+    /** @var int 编译进程数 */
+    public int $concurrency = 1;
+
+    /** @var array<string, LibraryBase> 要编译的 libs 列表 */
+    protected array $libs = [];
+
+    /** @var array<string, Extension> 要编译的扩展列表 */
+    protected array $exts = [];
+
+    /** @var bool 本次编译是否只编译 libs，不编译 PHP */
+    protected bool $libs_only = false;
+
+    /**
+     * 构建指定列表的 libs
+     *
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public function buildLibs(array $libraries): void
+    {
+        // 通过扫描目录查找 lib
+        $support_lib_list = [];
+        $classes = FileSystem::getClassesPsr4(
+            ROOT_DIR . '/src/SPC/builder/' . osfamily2dir() . '/library',
+            'SPC\\builder\\' . osfamily2dir() . '\\library'
+        );
+        foreach ($classes as $class) {
+            if (defined($class . '::NAME') && $class::NAME !== 'unknown' && Config::getLib($class::NAME) !== null) {
+                $support_lib_list[$class::NAME] = $class;
+            }
+        }
+
+        // 如果传入了空，则默认检查和安置所有支持的lib，libraries为要build的，support_lib_list为支持的列表
+        if ($libraries === [] && $this->isLibsOnly()) {
+            $libraries = array_keys($support_lib_list);
+        }
+
+        // 排序 libs，根据依赖计算一个新的列表出来
+        $libraries = DependencyUtil::getLibsByDeps($libraries);
+
+        // 这里筛选 libraries，比如纯静态模式排除掉ffi
+        if (defined('BUILD_ALL_STATIC') && BUILD_ALL_STATIC) {
+            $k = array_search('libffi', $libraries, true);
+            $k !== false && array_splice($libraries, $k, 1);
+        }
+
+        // 过滤不支持的库后添加
+        foreach ($libraries as $library) {
+            if (!isset($support_lib_list[$library])) {
+                throw new RuntimeException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
+            }
+            $lib = new ($support_lib_list[$library])($this);
+            $this->addLib($lib);
+        }
+
+        // 统计还没 fetch 到本地的库
+        $this->checkLibsSource();
+
+        // 计算依赖，经过这里的遍历，如果没有抛出异常，说明依赖符合要求，可以继续下面的
+        foreach ($this->libs as $lib) {
+            $lib->calcDependency();
+        }
+        foreach ($this->libs as $lib) {
+            match ($lib->tryBuild()) {
+                BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
+                BUILD_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
+                BUILD_STATUS_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
+                default => logger()->warning('lib [' . $lib::NAME . '] build status unknown'),
+            };
+        }
+    }
+
+    /**
+     * 添加要编译的 Lib 库
+     *
+     * @param LibraryBase $library Lib 库对象
+     */
+    public function addLib(LibraryBase $library): void
+    {
+        $this->libs[$library::NAME] = $library;
+    }
+
+    /**
+     * 获取要编译的 Lib 库对象
+     *
+     * @param string $name 库名称
+     */
+    public function getLib(string $name): ?LibraryBase
+    {
+        return $this->libs[$name] ?? null;
+    }
+
+    /**
+     * 添加要编译的扩展
+     *
+     * @param Extension $extension 扩展对象
+     */
+    public function addExt(Extension $extension): void
+    {
+        $this->exts[$extension->getName()] = $extension;
+    }
+
+    /**
+     * 获取要编译的扩展对象
+     *
+     * @param string $name 扩展名称
+     */
+    public function getExt(string $name): ?Extension
+    {
+        return $this->exts[$name] ?? null;
+    }
+
+    /**
+     * 设置本次 Builder 是否为仅编译库的模式
+     */
+    public function setLibsOnly(bool $status = true): void
+    {
+        $this->libs_only = $status;
+    }
+
+    /**
+     * 检验 ext 扩展列表是否合理，并声明 Extension 对象，检查扩展的依赖
+     *
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    public function proveExts(array $extensions): void
+    {
+        if (defined('BUILD_ALL_STATIC') && BUILD_ALL_STATIC) {
+            $k = array_search('ffi', $extensions, true);
+            $k !== false && array_splice($extensions, $k, 1);
+        }
+        foreach ($extensions as $extension) {
+            $ext = new Extension($extension, $this);
+            $this->addExt($ext);
+        }
+
+        foreach ($this->exts as $ext) {
+            // 检查下依赖就行了，作用是导入依赖给 Extension 对象，今后可以对库依赖进行选择性处理
+            $ext->checkDependency();
+        }
+    }
+
+    /**
+     * 开始构建 PHP
+     * 构建 micro 的规则：
+     * - BUILD_MICRO_NONE(默认)：只编译 cli
+     * - BUILD_MICRO_ONLY：只编译 micro
+     * - BUILD_MICRO_BOTH：同时编译 micro 和 cli
+     *
+     * @param int  $build_micro_rule 规则
+     * @param bool $with_clean       是否为新构建？
+     * @param bool $bloat            保留
+     */
+    abstract public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $with_clean = false, bool $bloat = false);
+
+    /**
+     * 生成依赖的扩展编译启用参数
+     * 例如 --enable-mbstring 等
+     *
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public function makeExtensionArgs(): string
+    {
+        $ret = [];
+        foreach ($this->exts as $ext) {
+            $ret[] = $ext->getConfigureArg();
+        }
+        logger()->info('Using configure: ' . implode(' ', $ret));
+        return implode(' ', $ret);
+    }
+
+    /**
+     * 返回是否只编译 libs 的模式
+     */
+    public function isLibsOnly(): bool
+    {
+        return $this->libs_only;
+    }
+
+    /**
+     * 检查是否存在 lib 库对应的源码，如果不存在，则抛出异常
+     *
+     * @throws RuntimeException
+     */
+    protected function checkLibsSource(): void
+    {
+        $not_downloaded = [];
+        foreach ($this->libs as $lib) {
+            if (!file_exists($lib->getSourceDir())) {
+                $not_downloaded[] = $lib::NAME;
+            }
+        }
+        if ($not_downloaded !== []) {
+            throw new RuntimeException(
+                '"' . implode(', ', $not_downloaded) .
+                '" totally ' . count($not_downloaded) .
+                ' source' . (count($not_downloaded) === 1 ? '' : 's') .
+                ' not downloaded, maybe you need to "fetch" ' . (count($not_downloaded) === 1 ? 'it' : 'them') . ' first?'
+            );
+        }
+    }
+}
