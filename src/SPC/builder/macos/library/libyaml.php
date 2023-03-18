@@ -2,7 +2,7 @@
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
- * static-php-cli is licensed under Mulan PSL v2. You can use this
+ * lwmbs is licensed under Mulan PSL v2. You can use this
  * software according to the terms and conditions of the
  * Mulan PSL v2. You may obtain a copy of Mulan PSL v2 at:
  *
