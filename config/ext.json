@@ -30,7 +30,8 @@
         "type": "builtin",
         "arg-type-windows": "with",
         "lib-depends": [
-            "libxml2"
+            "libxml2",
+            "zlib"
         ]
     },
     "enchant": {

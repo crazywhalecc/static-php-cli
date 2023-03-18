@@ -10,53 +10,54 @@
 | bcmath     |       | yes      |         |
 | bz2        |       | untested |         |
 | calendar   |       | yes      |         |
-| ctype      |       |          |         |
+| ctype      |       | yes      |         |
 | curl       |       | yes      |         |
 | date       |       | yes      |         | 
-| dom        |       |          |         |
+| dom        |       | untested |         |
 | event      |       |          |         |
-| exif       |       |          |         |
-| filter     |       |          |         |
+| exif       |       | yes      |         |
+| filter     |       | yes      |         |
 | fileinfo   |       |          |         |
-| ftp        |       |          |         |
+| ftp        |       | yes      |         |
 | gd         |       | untested |         |
 | gmp        |       | untested |         |
 | hash       |       | yes      |         |
 | iconv      |       |          |         |
 | inotify    |       |          |         |
 | json       |       | yes      |         |
-| libxml     |       |          |         |
-| mbstring   |       |          |         |
+| libxml     |       | yes      |         |
+| mbstring   |       | yes      |         |
 | mcrypt     |       |          |         |
 | mongodb    |       |          |         |
 | mysqli     |       |          |         |
-| mysqlnd    |       |          |         |
+| mysqlnd    |       | yes      |         |
 | openssl    |       | yes      |         |
 | pcntl      |       | untested |         |
 | pcre       |       | yes      |         |
 | pdo        |       | yes      |         |
-| pdo_mysql  |       |          |         |
+| pdo_mysql  |       | yes      |         |
 | pdo_sqlite |       | yes      |         |
 | pdo_pgsql  |       |          |         |
-| phar       |       |          |         |
-| posix      |       |          |         |
+| phar       |       | yes      |         |
+| posix      |       | yes      |         |
 | protobuf   |       |          |         |
 | readline   |       |          |         |
-| redis      |       |          |         |
+| redis      |       | yes      |         |
 | Reflection |       | yes      |         |
+| session    |       | yes      |         |
 | shmop      |       |          |         |
-| simplexml  |       |          |         |
+| simplexml  |       | untested |         |
 | soap       |       |          |         |
 | sockets    |       |          |         |
 | sqlite3    |       | untested |         |
 | swow       |       |          |         |
 | swoole     |       | yes      |         |
-| tokenizer  |       |          |         |
-| xml        |       |          |         |
-| xmlreader  |       |          |         |
-| xmlwriter  |       |          |         |
-| zip        |       |          |         |
-| zlib       |       |          |         |
+| tokenizer  |       | yes      |         |
+| xml        |       | yes      |         |
+| xmlreader  |       | untested |         |
+| xmlwriter  |       | untested |         |
+| zip        |       | yes      |         |
+| zlib       |       | yes      |         |
 
 ## Additional Requirements
 

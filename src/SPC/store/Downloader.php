@@ -184,7 +184,7 @@ class Downloader
 
     public static function downloadGit(string $name, string $url, string $branch, ?string $path = null): void
     {
-        if ($path) {
+        if ($path !== null) {
             $path = SOURCE_PATH . "/{$path}";
         } else {
             $path = DOWNLOAD_PATH . "/{$name}";
@@ -229,7 +229,7 @@ class Downloader
     public static function fetchSource(string $name, array $source): void
     {
         // 避免重复 fetch
-        if (is_dir(FileSystem::convertPath(SOURCE_PATH . "/{$name}")) || isset($source['path']) && is_dir(FileSystem::convertPath(SOURCE_PATH . "/{$source['path']}"))) {
+        if (!isset($source['path']) && !is_dir(FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}")) || isset($source['path']) && is_dir(FileSystem::convertPath(SOURCE_PATH . "/{$source['path']}"))) {
             logger()->notice("{$name} source already extracted");
             return;
         }
@@ -291,7 +291,8 @@ class Downloader
         // 从官网直接下载
         return [
             'type' => 'url',
-            'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
+            // 'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
+            'url' => "https://mirrors.zhamao.xin/php/php-{$version}.tar.gz",
         ];
     }
 
@@ -316,6 +317,24 @@ class Downloader
         $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
 
         $cmd = "curl -sfSL {$methodArg} {$headerArg} \"{$url}\"";
+        if (getenv('CACHE_API_EXEC') === 'yes') {
+            if (!file_exists(SOURCE_PATH . '/.curl_exec_cache')) {
+                $cache = [];
+            } else {
+                $cache = json_decode(file_get_contents(SOURCE_PATH . '/.curl_exec_cache'), true);
+            }
+            if (isset($cache[$cmd]) && $cache[$cmd]['expire'] >= time()) {
+                return $cache[$cmd]['cache'];
+            }
+            f_exec($cmd, $output, $ret);
+            if ($ret !== 0) {
+                throw new DownloaderException('failed http fetch');
+            }
+            $cache[$cmd]['cache'] = implode("\n", $output);
+            $cache[$cmd]['expire'] = time() + 3600;
+            file_put_contents(SOURCE_PATH . '/.curl_exec_cache', json_encode($cache));
+            return $cache[$cmd]['cache'];
+        }
         f_exec($cmd, $output, $ret);
         if ($ret !== 0) {
             throw new DownloaderException('failed http fetch');
