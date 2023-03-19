@@ -298,6 +298,9 @@
     "swow": {
         "type": "external",
         "source": "swow",
+        "lib-depends": [
+            "libuv"
+        ],
         "lib-suggests": [
             "openssl",
             "curl"

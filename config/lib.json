@@ -254,6 +254,15 @@
             "cunit"
         ]
     },
+    "libuv": {
+        "source": "libuv",
+        "static-libs-unix": [
+            "libuv.a"
+        ],
+        "headers": [
+            "uv.h"
+        ]
+    },
     "onig": {
         "source": "onig",
         "static-libs-unix": [
