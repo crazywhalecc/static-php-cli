@@ -41,8 +41,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 chmod +x spc
 # 拉取所有依赖库
 ./spc fetch --all
-# 构建包含 bcmath,openssl,swoole 扩展的 php-cli 和 micro.sfx
-./spc build "bcmath,openssl,swoole" --build-all
+# 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
+./spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-all
 ```
 
 ### 使用 php-cli

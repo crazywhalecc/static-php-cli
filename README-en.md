@@ -38,8 +38,8 @@ And currently you may need to clone this branch and edit GitHub Action to build.
 chmod +x spc
 # fetch all libraries
 ./spc fetch --all
-# with bcmath,openssl,swoole extension, build both CLI and phpmicro SAPI
-./spc build "bcmath,openssl,swoole" --build-all
+# with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
+./spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-all
 ```
 
 ### php-cli Usage
