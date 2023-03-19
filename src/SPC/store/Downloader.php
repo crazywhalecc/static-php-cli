@@ -229,7 +229,7 @@ class Downloader
     public static function fetchSource(string $name, array $source): void
     {
         // 避免重复 fetch
-        if (!isset($source['path']) && !is_dir(FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}")) || isset($source['path']) && is_dir(FileSystem::convertPath(SOURCE_PATH . "/{$source['path']}"))) {
+        if (!isset($source['path']) && is_dir(FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}")) || isset($source['path']) && is_dir(FileSystem::convertPath(SOURCE_PATH . "/{$source['path']}"))) {
             logger()->notice("{$name} source already extracted");
             return;
         }
