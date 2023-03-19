@@ -1,4 +1,13 @@
 {
+    "name": "crazywhalecc/static-php-cli",
+    "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "jerry",
+            "email": "admin@zhamao.me"
+        }
+    ],
     "require": {
         "php": ">= 8.0",
         "ext-tokenizer": "*",
@@ -22,8 +31,6 @@
             "src/globals/defines.php",
             "src/globals/functions.php"
         ]
-    },
-    "extra": {
     },
     "bin": [
         "bin/spc"
