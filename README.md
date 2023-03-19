@@ -1,4 +1,5 @@
 # static-php-cli
+
 Compile A Statically Linked PHP With Swoole and other Extensions. [English README](README-en.md)
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！
@@ -34,6 +35,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 未来会提供一个直接可使用的 phar 包和一个 phpmicro 打包的二进制文件，你可以直接从 Release 中获取并使用：
 
+### 编译
+
 ```bash
 chmod +x spc
 # 拉取所有依赖库
@@ -41,6 +44,34 @@ chmod +x spc
 # 构建包含 bcmath,openssl,swoole 扩展的 php-cli 和 micro.sfx
 ./spc build "bcmath,openssl,swoole" --build-all
 ```
+
+### 使用 php-cli
+
+采用参数 `--build-all` 或不添加 `--build-micro` 参数时，最后编译结果会输出一个 `./php` 的二进制文件，此文件可分发、可直接使用。
+该文件编译后会存放在 `source/php-src/sapi/cli/` 目录中，拷贝出来即可。
+
+```bash
+./php -v
+./php -m
+./php your_code.php
+```
+
+### 使用 micro.sfx
+
+采用项目参数 `--build-all` 或 `--build-micro` 时，最后编译结果会输出一个 `./micro.sfx` 的文件，此文件需要配合你的 PHP 源码使用。
+该文件编译后会存放在 `source/php-src/sapi/micro/` 目录中，拷贝出来即可。
+
+使用时应准备好你的项目源码文件，可以是单个 PHP 文件，也可以是 Phar 文件。
+
+```bash
+echo "<?php echo 'Hello world' . PHP_EOL;" > code.php
+cat micro.sfx code.php > single-app && chmod +x single-app
+./single-app
+
+# 如果打包 PHAR 文件，仅需把 code.php 更换为 phar 文件路径即可
+```
+
+> 有些情况下的 phar 文件可能无法在 micro 环境下运行。
 
 ## 项目支持情况（WIP）
 
@@ -54,6 +85,17 @@ chmod +x spc
 ## 支持的扩展情况（WIP）
 
 [扩展支持列表](/ext-support.md)
+
+## 贡献
+
+目前支持的扩展较少，如果缺少你需要的扩展，可发起 Issue。如果你对本项目较熟悉，也欢迎为本项目发起 Pull Request。
+
+贡献基本原则如下：
+
+- 项目采用了 php-cs-fixer、phpstan 作为代码规范工具，贡献前请对更新的代码执行 `composer analyze` 和 `composer cs-fix`。
+- 涉及到其他开源库的部分应提供对应库的协议，同时对配置文件在修改后采用命令 `sort-config` 排序。有关排序的命令，见文档。
+- 应遵循命名规范，例如扩展名称应采取 PHP 内注册的扩展名本身，外部库名应遵循项目本身的名称，内部逻辑的函数、类名、变量等应遵循驼峰、下划线等格式，禁止同一模块混用。
+- 涉及编译外部库的命令和 Patch 时应注意兼容不同操作系统。
 
 ## 开源协议
 

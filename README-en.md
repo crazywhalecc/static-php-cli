@@ -1,4 +1,5 @@
 # static-php-cli
+
 Compile A Statically Linked PHP With Swoole and other Extensions.
 
 Compile a purely static PHP binary file with various extensions to make PHP-cli applications more portable! 
@@ -31,6 +32,8 @@ After stable release for this project, a single phar and single binary for this 
 
 And currently you may need to clone this branch and edit GitHub Action to build.
 
+### Compilation
+
 ```bash
 chmod +x spc
 # fetch all libraries
@@ -38,6 +41,38 @@ chmod +x spc
 # with bcmath,openssl,swoole extension, build both CLI and phpmicro SAPI
 ./spc build "bcmath,openssl,swoole" --build-all
 ```
+
+### php-cli Usage
+
+When using the parameter `--build-all` or not adding the `--build-micro` parameter, 
+the final compilation result will output a binary file named `./php`, 
+which can be distributed and used directly. 
+This file will be located in the directory `source/php-src/sapi/cli/`, simply copy it out for use.
+
+```bash
+./php -v
+./php -m
+./php your_code.php
+```
+
+### micro.sfx Usage
+
+When using the parameter `--build-all` or `--build-micro`, 
+the final compilation result will output a file named `./micro.sfx`, 
+which needs to be used with your PHP source code like `code.php`. 
+This file will be located in the directory `source/php-src/sapi/micro/`, simply copy it out for use.
+
+Prepare your project source code, which can be a single PHP file or a Phar file, for use.
+
+```bash
+echo "<?php echo 'Hello world' . PHP_EOL;" > code.php
+cat micro.sfx code.php > single-app && chmod +x single-app
+./single-app
+
+# If packing a PHAR file, simply replace code.php with the Phar file path.
+```
+
+> In some cases, PHAR files may not run in a micro environment.
 
 ## Current Status
 
@@ -52,7 +87,24 @@ chmod +x spc
 
 [Support Extension List](/ext-support.md)
 
-## Open-Source LICENSE
+## Contribution
+
+Currently, there are only a few supported extensions. 
+If the extension you need is missing, you can create an issue. 
+If you are familiar with this project, you are also welcome to initiate a pull request.
+
+The basic principles for contributing are as follows:
+
+- This project uses php-cs-fixer and phpstan as code formatting tools. Before contributing, please run `composer analyze` and `composer cs-fix` on the updated code.
+- If other open source libraries are involved, the corresponding licenses should be provided. 
+    Also, configuration files should be sorted using the command `sort-config` after modification.
+    For more information about sorting commands, see the documentation.
+- Naming conventions should be followed, such as using the extension name registered in PHP for the extension name itself, 
+    and external library names should follow the project's own naming conventions. For internal logic functions, class names, variables, etc., 
+    camelCase and underscore formats should be followed, and mixing within the same module is prohibited.
+- When compiling external libraries and creating patches, compatibility with different operating systems should be considered.
+
+## Open-Source License
 
 This project is based on the tradition of using the MIT License for old versions, 
 while the new version references source code from some other projects. 
