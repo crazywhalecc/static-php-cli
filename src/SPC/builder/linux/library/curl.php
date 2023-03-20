@@ -77,15 +77,15 @@ EOF
         // lib:openssl
         $openssl = $this->builder->getLib('openssl');
         if ($openssl instanceof LinuxLibraryBase) {
-            $extra .= '-DCURL_USE_OPENSSL=ON ';
+            $extra .= '-DCURL_USE_OPENSSL=ON -DCURL_ENABLE_SSL=ON ';
         } else {
             $extra .= '-DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF ';
         }
         // lib:zlib
         $zlib = $this->builder->getLib('zlib');
         if ($zlib instanceof LinuxLibraryBase) {
-            $extra .= '-DZLIB_LIBRARY="' . $zlib->getStaticLibFiles(style: 'cmake') . '" ' .
-                '-DZLIB_INCLUDE_DIR=' . BUILD_INCLUDE_PATH . ' ';
+            $extra .= '-DZLIB_LIBRARIES="' . $zlib->getStaticLibFiles(style: 'cmake') . '" ' .
+                '-DZLIB_INCLUDE_DIRS="' . BUILD_INCLUDE_PATH . '" ';
         }
         // lib:libssh2
         $libssh2 = $this->builder->getLib('libssh2');
