@@ -7,6 +7,7 @@ namespace SPC\builder\traits;
 use SPC\builder\LibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\FileSystem;
 
 trait UnixLibraryTrait
 {
@@ -33,7 +34,7 @@ trait UnixLibraryTrait
         foreach ($libs as $lib) {
             $libFiles = [];
             foreach ($lib->getStaticLibs() as $name) {
-                $name = str_replace(' ', '\ ', realpath(BUILD_LIB_PATH . "/{$name}"));
+                $name = str_replace(' ', '\ ', FileSystem::convertPath(BUILD_LIB_PATH . "/{$name}"));
                 $name = str_replace('"', '\"', $name);
                 $libFiles[] = $name;
             }
