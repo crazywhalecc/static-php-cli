@@ -7,11 +7,11 @@
 
 |            | Linux | macOS                                                              | Windows |
 |------------|-------|--------------------------------------------------------------------|---------|
-| bcmath     |       | yes                                                                |         |
-| bz2        |       | untested                                                           |         |
+| bcmath     | yes   | yes                                                                |         |
+| bz2        | yes   | untested                                                           |         |
 | calendar   |       | yes                                                                |         |
 | ctype      |       | yes                                                                |         |
-| curl       |       | yes                                                                |         |
+| curl       | yes   | yes                                                                |         |
 | date       |       | yes                                                                |         | 
 | dom        |       | untested                                                           |         |
 | event      |       |                                                                    |         |

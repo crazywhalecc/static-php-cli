@@ -31,12 +31,12 @@ class BuilderProvider
                 cxx: $input->getOption('cxx'),
                 arch: $input->getOption('arch'),
             ),
-            // 'Linux' => new LinuxBuilder(
-            //    cc: $input->getOption('cc'),
-            //    cxx: $input->getOption('cxx'),
-            //    arch: $input->getOption('arch'),
-            // ),
-            default => throw new RuntimeException('Current OS is not supported yet'),
+            'Linux' => new LinuxBuilder(
+                cc: $input->getOption('cc'),
+                cxx: $input->getOption('cxx'),
+                arch: $input->getOption('arch'),
+            ),
+            default => throw new RuntimeException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
     }
 }

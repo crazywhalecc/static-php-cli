@@ -44,6 +44,10 @@ SET(CMAKE_C_FLAGS "{$cflags}")
 SET(CMAKE_CXX_FLAGS "{$cflags}")
 SET(CMAKE_FIND_ROOT_PATH "{$root}")
 CMAKE;
+        // 有时候系统的 cmake 找不到 ar 命令，真奇怪
+        if (PHP_OS_FAMILY === 'Linux') {
+            $toolchain .= "\nSET(CMAKE_AR \"ar\")";
+        }
         file_put_contents(SOURCE_PATH . '/toolchain.cmake', $toolchain);
         return realpath(SOURCE_PATH . '/toolchain.cmake');
     }
