@@ -154,6 +154,9 @@
         "headers": [
             "libxml2"
         ],
+        "lib-depends": [
+            "libiconv"
+        ],
         "lib-suggests": [
             "icu",
             "xz",
@@ -164,6 +167,17 @@
             "xz",
             "zlib",
             "pthreads4w"
+        ]
+    },
+    "libiconv": {
+        "source": "libiconv",
+        "static-libs-unix": [
+            "libiconv.a"
+        ],
+        "headers": [
+            "iconv.h",
+            "libcharset.h",
+            "localcharset.h"
         ]
     },
     "libyaml": {

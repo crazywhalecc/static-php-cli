@@ -223,6 +223,15 @@
             "path": "LICENSE"
         }
     },
+    "libiconv":{
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/gnu/libiconv/",
+        "regex": "/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "text",
+            "text": "TODO"
+        }
+    },
     "xz": {
         "type": "filelist",
         "url": "https://tukaani.org/xz/",
