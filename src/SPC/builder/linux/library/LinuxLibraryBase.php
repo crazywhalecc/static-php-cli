@@ -7,11 +7,8 @@ namespace SPC\builder\linux\library;
 use SPC\builder\BuilderBase;
 use SPC\builder\LibraryBase;
 use SPC\builder\linux\LinuxBuilder;
-use SPC\builder\linux\SystemUtil;
 use SPC\builder\traits\UnixLibraryTrait;
 use SPC\exception\RuntimeException;
-use SPC\store\FileSystem;
-use SPC\util\Patcher;
 
 abstract class LinuxLibraryBase extends LibraryBase
 {
@@ -76,60 +73,5 @@ abstract class LinuxLibraryBase extends LibraryBase
         foreach ($this->pkgconfs as $name => $content) {
             file_put_contents(BUILD_LIB_PATH . "/pkgconfig/{$name}", "prefix={$workspace}\n" . $content);
         }
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    private function _make(bool $forceBuild = false, bool $fresh = false)
-    {
-        if ($forceBuild || php_uname('m') !== $this->builder->arch) {
-            $this->build();
-            return;
-        }
-        $static_lib_patches = SystemUtil::findStaticLibs($this->static_libs);
-        $header_patches = SystemUtil::findHeaders($this->headers);
-        if (!$static_lib_patches || !$header_patches) {
-            $this->build();
-        } else {
-            if ($this->builder->libc === 'musl_wrapper') {
-                logger()->warning('libc type may not match, this may cause strange symbol missing');
-            }
-            $this->copyExist($static_lib_patches, $header_patches);
-        }
-        $this->fixPkgConfigs();
-    }
-
-    private function fixPkgConfigs()
-    {
-        foreach ($this->pkgconfs as $name => $_) {
-            Patcher::patchLinuxPkgConfig(BUILD_LIB_PATH . "/pkgconfig/{$name}");
-        }
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    private function copyExist(array $static_lib_patches, array $header_patches): void
-    {
-        if (!$static_lib_patches || !$header_patches) {
-            throw new RuntimeException('??? staticLibPathes or headerPathes is null');
-        }
-        logger()->info('using system ' . static::NAME);
-        foreach ($static_lib_patches as [$path, $staticLib]) {
-            @f_mkdir(BUILD_LIB_PATH . '/' . dirname($staticLib), recursive: true);
-            logger()->info("copy {$path}/{$staticLib} to " . BUILD_LIB_PATH . "/{$staticLib}");
-            copy("{$path}/{$staticLib}", BUILD_LIB_PATH . '/' . $staticLib);
-        }
-        foreach ($header_patches as [$path, $header]) {
-            @f_mkdir(BUILD_INCLUDE_PATH . '/' . dirname($header), recursive: true);
-            logger()->info("copy {$path}/{$header} to " . BUILD_INCLUDE_PATH . "/{$header}");
-            if (is_dir("{$path}/{$header}")) {
-                FileSystem::copyDir("{$path}/{$header}", BUILD_INCLUDE_PATH . "/{$header}");
-            } else {
-                copy("{$path}/{$header}", BUILD_INCLUDE_PATH . "/{$header}");
-            }
-        }
-        $this->makeFakePkgconfs();
     }
 }
