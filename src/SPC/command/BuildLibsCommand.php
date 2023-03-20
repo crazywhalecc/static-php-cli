@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
+use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -30,6 +31,7 @@ class BuildLibsCommand extends BuildCommand
         if ($input->getOption('all')) {
             $input->setArgument('libraries', '');
         }
+        parent::initialize($input, $output);
     }
 
     /**
@@ -55,15 +57,25 @@ class BuildLibsCommand extends BuildCommand
             }
         }
 
-        // 构建对象
-        $builder = BuilderProvider::makeBuilderByInput($input);
-        // 只编译 library 的情况下，标记
-        $builder->setLibsOnly();
-        // 编译和检查库完整
-        $builder->buildLibs($libraries);
+        try {
+            // 构建对象
+            $builder = BuilderProvider::makeBuilderByInput($input);
+            // 只编译 library 的情况下，标记
+            $builder->setLibsOnly();
+            // 编译和检查库完整
+            $builder->buildLibs($libraries);
 
-        $time = round(microtime(true) - START_TIME, 3);
-        logger()->info('Build libs complete, used ' . $time . ' s !');
-        return 0;
+            $time = round(microtime(true) - START_TIME, 3);
+            logger()->info('Build libs complete, used ' . $time . ' s !');
+            return 0;
+        } catch (\Throwable $e) {
+            if ($input->getOption('debug')) {
+                ExceptionHandler::getInstance()->handle($e);
+            } else {
+                logger()->critical('Build failed with ' . get_class($e) . ': ' . $e->getMessage());
+                logger()->critical('Please check with --debug option to see more details.');
+            }
+            return 1;
+        }
     }
 }
