@@ -24,7 +24,6 @@ class DeployCommand extends BaseCommand
         $this->addArgument('target', InputArgument::OPTIONAL, 'The file or directory to pack.');
         $this->addOption('auto-phar-fix', null, InputOption::VALUE_NONE, 'Automatically fix ini option.');
         $this->addOption('overwrite', 'W', InputOption::VALUE_NONE, 'Overwrite existing files.');
-        // $this->addOption('disable-gzip', 'z', InputOption::VALUE_NONE, 'disable gzip archive mode');
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -38,11 +37,19 @@ class DeployCommand extends BaseCommand
             } else {
                 $ask = $prompt->requireBool('<comment>pack command needs "phar.readonly" = "Off" !</comment>' . PHP_EOL . 'If you want to automatically set it and continue, just Enter', true);
             }
-            $output->writeln('<info>Now running command in child process.</info>');
             if ($ask) {
                 global $argv;
-                passthru(PHP_BINARY . ' -d phar.readonly=0 ' . implode(' ', $argv), $retcode);
-                exit($retcode);
+                $args = array_merge(['-d', 'phar.readonly=0'], $_SERVER['argv']);
+                if (function_exists('pcntl_exec')) {
+                    $output->writeln('<info>Changing to phar.readonly=0 mode ...</info>');
+                    if (pcntl_exec(PHP_BINARY, $args) === false) {
+                        throw new \PharException('切换到读写模式失败，请检查环境。');
+                    }
+                } else {
+                    $output->writeln('<info>Now running command in child process.</info>');
+                    passthru(PHP_BINARY . ' -d phar.readonly=0 ' . implode(' ', $argv), $retcode);
+                    exit($retcode);
+                }
             }
         }
         // 获取路径
@@ -97,24 +104,20 @@ class DeployCommand extends BaseCommand
             return 1;
         }
         $phar->addFromString('.prod', 'true');
-        // disable gzip compression due to phpmicro bug
-        // if (!$input->getOption('disable-gzip')) {
-        //    $phar->compressFiles(\Phar::GZ);
-        // }
         $phar->stopBuffering();
         $output->writeln(PHP_EOL . 'Done! Phar file is generated at "' . $phar_path . '".');
         if (file_exists(SOURCE_PATH . '/php-src/sapi/micro/micro.sfx')) {
             $output->writeln('Detected you have already compiled micro binary, I will make executable now for you!');
             file_put_contents(
-                $phar_path . '.exe',
+                pathinfo($phar_path, PATHINFO_DIRNAME) . '/spc',
                 file_get_contents(SOURCE_PATH . '/php-src/sapi/micro/micro.sfx') .
                 file_get_contents($phar_path)
             );
-            chmod($phar_path . '.exe', 0755);
-            $output->writeln('<info>Static: ' . $phar_path . '.exe</info>');
+            chmod(pathinfo($phar_path, PATHINFO_DIRNAME) . '/spc', 0755);
+            $output->writeln('<info>Binary Executable: ' . pathinfo($phar_path, PATHINFO_DIRNAME) . '/spc</info>');
         }
         chmod($phar_path, 0755);
-        $output->writeln('<info>Phar: ' . $phar_path . '</info>');
+        $output->writeln('<info>Phar Executable: ' . $phar_path . '</info>');
         return 0;
     }
 
