@@ -158,45 +158,34 @@ class LinuxBuilder extends BuilderBase
 
         Patcher::patchPHPBeforeConfigure($this);
 
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            './buildconf --force'
-        );
+        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
         Patcher::patchPHPConfigure($this);
 
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            './configure ' .
-            '--prefix= ' .
-            '--with-valgrind=no ' .
-            '--enable-shared=no ' .
-            '--enable-static=yes ' .
-            "--host={$this->gnu_arch}-unknown-linux " .
-            '--disable-all ' .
-            '--disable-cgi ' .
-            '--disable-phpdbg ' .
-            '--enable-cli ' .
-            '--enable-micro=all-static ' .
-            ($this->zts ? '--enable-zts' : '') . ' ' .
-            $this->makeExtensionArgs() . ' ' .
-            $envs
-        );
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec(
+                './configure ' .
+                '--prefix= ' .
+                '--with-valgrind=no ' .
+                '--enable-shared=no ' .
+                '--enable-static=yes ' .
+                "--host={$this->gnu_arch}-unknown-linux " .
+                '--disable-all ' .
+                '--disable-cgi ' .
+                '--disable-phpdbg ' .
+                '--enable-cli ' .
+                '--enable-micro=all-static ' .
+                ($this->zts ? '--enable-zts' : '') . ' ' .
+                $this->makeExtensionArgs() . ' ' .
+                $envs
+            );
 
         $extra_libs .= $this->generateExtraLibs();
 
         file_put_contents('/tmp/comment', $this->note_section);
 
-        if ($with_clean) {
-            logger()->info('cleaning up');
-            f_passthru(
-                $this->set_x . ' && ' .
-                'cd ' . SOURCE_PATH . '/php-src && ' .
-                'make clean'
-            );
-        }
+        // 清理
+        $this->cleanMake();
 
         if ($bloat) {
             logger()->info('bloat linking');
@@ -224,7 +213,7 @@ class LinuxBuilder extends BuilderBase
         }
 
         if ($this->phar_patched) {
-            f_passthru('cd ' . SOURCE_PATH . '/php-src && patch -p1 -R < sapi/micro/patches/phar.patch');
+            shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 -R < sapi/micro/patches/phar.patch');
         }
     }
 
@@ -233,23 +222,22 @@ class LinuxBuilder extends BuilderBase
      */
     public function buildCli(string $extra_libs, string $use_lld): void
     {
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            'sed -i "s|//lib|/lib|g" Makefile && ' .
-            "make -j{$this->concurrency} " .
-            'EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
-            "EXTRA_LIBS=\"{$extra_libs}\" " .
-            "EXTRA_LDFLAGS_PROGRAM='{$use_lld}" .
-            ' -all-static' .
-            "' " .
-            'cli && ' .
-            'cd sapi/cli && ' .
-            "{$this->cross_compile_prefix}objcopy --only-keep-debug php php.debug && " .
-            'elfedit --output-osabi linux php && ' .
-            "{$this->cross_compile_prefix}strip --strip-all php && " .
-            "{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php"
-        );
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            ->exec(
+                'make -j' . $this->concurrency .
+                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
+                "EXTRA_LIBS=\"{$extra_libs}\" " .
+                "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
+                'cli'
+            );
+
+        shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
+            ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php php.debug")
+            ->exec('elfedit --output-osabi linux php')
+            ->exec("{$this->cross_compile_prefix}strip --strip-all php")
+            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php");
+        $this->deployBinary(BUILD_TYPE_CLI);
     }
 
     /**
@@ -260,39 +248,30 @@ class LinuxBuilder extends BuilderBase
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
             try {
-                f_passthru('cd ' . SOURCE_PATH . '/php-src && patch -p1 < sapi/micro/patches/phar.patch');
+                shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 < sapi/micro/patches/phar.patch');
             } catch (RuntimeException $e) {
                 logger()->error('failed to patch phat due to patch exit with code ' . $e->getCode());
                 $this->phar_patched = false;
             }
         }
 
-        $vars = [
-            'EXTRA_CFLAGS' => quote('-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags))),
-            'EXTRA_LIBS' => quote($extra_libs),
-            'EXTRA_LDFLAGS_PROGRAM' => quote("{$cflags} {$use_lld}" . ' -all-static', "'"),
-            'POST_MICRO_BUILD_COMMANDS' => quote(
-                "sh -xc '" .
-                'cd sapi/micro && ' .
-                "{$this->cross_compile_prefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug && " .
-                'elfedit --output-osabi linux micro.sfx && ' .
-                "{$this->cross_compile_prefix}strip --strip-all micro.sfx && " .
-                "{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx'"
-            ),
-        ];
-        $var_cmdline = '';
-        foreach ($vars as $k => $v) {
-            $var_cmdline .= $k . '=' . $v . ' ';
-        }
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            ->exec(
+                "make -j{$this->concurrency} " .
+                'EXTRA_CFLAGS=' . quote('-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags))) . ' ' .
+                'EXTRA_LIBS=' . quote($extra_libs) . ' ' .
+                'EXTRA_LDFLAGS_PROGRAM=' . quote("{$cflags} {$use_lld}" . ' -all-static', "'") . ' ' .
+                'micro'
+            );
 
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            'sed -i "s|//lib|/lib|g" Makefile && ' .
-            "make -j{$this->concurrency} " .
-            $var_cmdline .
-            'micro'
-        );
+        shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')
+            ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug")
+            ->exec('elfedit --output-osabi linux micro.sfx')
+            ->exec("{$this->cross_compile_prefix}strip --strip-all micro.sfx")
+            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx'");
+
+        $this->deployBinary(BUILD_TYPE_MICRO);
     }
 
     /**

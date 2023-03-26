@@ -70,6 +70,9 @@
             "zlib",
             "libpng"
         ],
+        "ext-depends": [
+            "zlib"
+        ],
         "lib-suggests": [
             "gd",
             "libavif",
@@ -147,6 +150,10 @@
         "lib-depends": [
             "onig"
         ]
+    },
+    "mongodb": {
+        "type": "external",
+        "source": "mongodb"
     },
     "mysqli": {
         "type": "builtin",
@@ -284,8 +291,7 @@
         "type": "external",
         "source": "swoole",
         "lib-depends": [
-            "openssl",
-            "curl"
+            "openssl"
         ],
         "ext-depends": [
             "openssl"
@@ -356,6 +362,10 @@
         "lib-depends": [
             "libxslt"
         ]
+    },
+    "protobuf": {
+        "type": "external",
+        "source": "protobuf"
     },
     "yaml": {
         "type": "external",

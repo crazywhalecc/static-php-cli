@@ -278,6 +278,8 @@ class Extension
                 } else {
                     $arg .= ' --disable-openssl --without-openssl';
                 }
+                // curl hook is buggy for static php
+                $arg .= ' --disable-swoole-curl';
         }
         return $arg;
     }

@@ -76,11 +76,8 @@ EOF
         $extra = '';
         // lib:openssl
         $openssl = $this->builder->getLib('openssl');
-        if ($openssl instanceof LinuxLibraryBase) {
-            $extra .= '-DCURL_USE_OPENSSL=ON -DCURL_ENABLE_SSL=ON ';
-        } else {
-            $extra .= '-DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF ';
-        }
+        $use_openssl = $openssl instanceof LinuxLibraryBase ? 'ON' : 'OFF';
+        $extra .= "-DCURL_USE_OPENSSL={$use_openssl} -DCURL_ENABLE_SSL={$use_openssl} ";
         // lib:zlib
         $zlib = $this->builder->getLib('zlib');
         if ($zlib instanceof LinuxLibraryBase) {
@@ -140,24 +137,21 @@ EOF
 
         [$lib, $include, $destdir] = SEPARATED_PATH;
         // compile！
-        f_passthru(
-            $this->builder->set_x . ' && ' .
-            "cd {$this->source_dir} && " .
-            'rm -rf build && ' .
-            'mkdir -p build && ' .
-            'cd build && ' .
-            "{$this->builder->configure_env} " . ' cmake ' .
-            // '--debug-find ' .
-            '-DCMAKE_BUILD_TYPE=Release ' .
-            '-DBUILD_SHARED_LIBS=OFF ' .
-            $extra .
-            '-DCMAKE_INSTALL_PREFIX=/ ' .
-            "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-            "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
-            "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-            '.. && ' .
-            "make -j{$this->builder->concurrency} && " .
-            'make install DESTDIR="' . $destdir . '"'
-        );
+        shell()
+            ->cd($this->source_dir)
+            ->exec('rm -rf build')
+            ->exec('mkdir -p build')
+            ->cd($this->source_dir . '/build')
+            ->exec("{$this->builder->configure_env} cmake " .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DBUILD_SHARED_LIBS=OFF ' .
+                $extra .
+                '-DCMAKE_INSTALL_PREFIX=/ ' .
+                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
+                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '..')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec("make install DESTDIR='{$destdir}'");
     }
 }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\builder\traits;
 
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\FileSystem;
 
 trait UnixBuilderTrait
 {
@@ -60,23 +62,18 @@ trait UnixBuilderTrait
     {
         logger()->info('running sanity check');
         if ($build_micro_rule !== BUILD_MICRO_ONLY) {
-            f_exec(
-                $this->set_x . ' && ' .
-                SOURCE_PATH . '/php-src/sapi/cli/php -r "echo \"hello\";"',
-                $output,
-                $ret
-            );
+            [$ret, $output] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "echo \"hello\";"');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new RuntimeException('cli failed sanity check');
             }
             foreach ($this->exts as $ext) {
-                logger()->debug('checking ext: ' . $ext->getName());
+                logger()->debug('testing ext: ' . $ext->getName());
+                [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri ' . $ext->getName(), false);
+                if ($ret !== 0) {
+                    throw new RuntimeException('extension ' . $ext->getName() . ' failed compile check');
+                }
                 if (file_exists(ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php')) {
-                    f_exec(
-                        $this->set_x . ' && ' . SOURCE_PATH . '/php-src/sapi/cli/php ' . ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php',
-                        $output,
-                        $ret
-                    );
+                    [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php ' . ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php');
                     if ($ret !== 0) {
                         throw new RuntimeException('extension ' . $ext->getName() . ' failed sanity check');
                     }
@@ -93,10 +90,41 @@ trait UnixBuilderTrait
                 '<?php echo "hello";'
             );
             chmod(SOURCE_PATH . '/hello.exe', 0755);
-            f_exec(SOURCE_PATH . '/hello.exe', $output2, $ret);
+            [$ret, $output2] = shell()->execWithResult(SOURCE_PATH . '/hello.exe');
             if ($ret !== 0 || trim($out = implode('', $output2)) !== 'hello') {
                 throw new RuntimeException('micro failed sanity check, ret[' . $ret . '], out[' . ($out ?? 'NULL') . ']');
             }
         }
+    }
+
+    /**
+     * 将编译好的二进制文件发布到 buildroot
+     *
+     * @param  int                 $type 发布类型
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public function deployBinary(int $type): bool
+    {
+        $src = match ($type) {
+            BUILD_TYPE_CLI => SOURCE_PATH . '/php-src/sapi/cli/php',
+            BUILD_TYPE_MICRO => SOURCE_PATH . '/php-src/sapi/micro/micro.sfx',
+            default => throw new RuntimeException('Deployment does not accept type ' . $type),
+        };
+        logger()->info('Deploying ' . ($type === BUILD_TYPE_CLI ? 'cli' : 'micro') . ' file');
+        FileSystem::createDir(BUILD_ROOT_PATH . '/bin');
+        shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '/bin/'));
+        return true;
+    }
+
+    /**
+     * 清理编译好的文件
+     *
+     * @throws RuntimeException
+     */
+    public function cleanMake(): void
+    {
+        logger()->info('cleaning up');
+        shell()->cd(SOURCE_PATH . '/php-src')->exec('make clean');
     }
 }

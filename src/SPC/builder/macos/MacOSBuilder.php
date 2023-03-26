@@ -127,7 +127,7 @@ class MacOSBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $with_clean = false, bool $bloat = false): void
+    public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $bloat = false): void
     {
         $extra_libs = $this->getFrameworks(true) . ' ' . ($this->getExt('swoole') ? '-lc++ ' : '');
         if (!$bloat) {
@@ -178,14 +178,7 @@ class MacOSBuilder extends BuilderBase
             $this->configure_env
         );
 
-        if ($with_clean) {
-            logger()->info('cleaning up');
-            f_passthru(
-                $this->set_x . ' && ' .
-                'cd ' . SOURCE_PATH . '/php-src && ' .
-                'make clean'
-            );
-        }
+        $this->cleanMake();
 
         switch ($build_micro_rule) {
             case BUILD_MICRO_NONE:

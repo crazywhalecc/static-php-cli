@@ -349,6 +349,9 @@
         "headers-windows": [
             "lzma",
             "lzma.h"
+        ],
+        "lib-depends": [
+            "libiconv"
         ]
     },
     "zlib": {

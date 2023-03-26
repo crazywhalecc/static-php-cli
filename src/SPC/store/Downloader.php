@@ -228,6 +228,10 @@ class Downloader
      */
     public static function fetchSource(string $name, array $source): void
     {
+        // 如果是 git 类型，且没有设置 path，那我就需要指定一下 path
+        if ($source['type'] === 'git' && !isset($source['path'])) {
+            $source['path'] = $name;
+        }
         // 避免重复 fetch
         if (!isset($source['path']) && is_dir(FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}")) || isset($source['path']) && is_dir(FileSystem::convertPath(SOURCE_PATH . "/{$source['path']}"))) {
             logger()->notice("{$name} source already extracted");

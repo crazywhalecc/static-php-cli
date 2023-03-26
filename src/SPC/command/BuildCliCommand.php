@@ -62,15 +62,15 @@ class BuildCliCommand extends BuildCommand
             // 执行扩展检测
             $builder->proveExts($extensions);
             // 构建
-            $builder->buildPHP($rule, $input->getOption('with-clean'), $input->getOption('bloat'));
+            $builder->buildPHP($rule, $input->getOption('bloat'));
             // 统计时间
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build complete, used ' . $time . ' s !');
             if ($rule !== BUILD_MICRO_ONLY) {
-                logger()->info('Static php binary path: ' . SOURCE_PATH . '/php-src/sapi/cli/php');
+                logger()->info('Static php binary path: ' . BUILD_ROOT_PATH . '/bin/php');
             }
             if ($rule !== BUILD_MICRO_NONE) {
-                logger()->info('phpmicro binary path: ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx');
+                logger()->info('phpmicro binary path: ' . BUILD_ROOT_PATH . '/bin/micro.sfx');
             }
             return 0;
         } catch (\Throwable $e) {

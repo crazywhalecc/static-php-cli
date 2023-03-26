@@ -19,7 +19,7 @@ class SystemUtil
      */
     public static function getCpuCount(): int
     {
-        f_exec('sysctl -n hw.ncpu', $output, $ret);
+        [$ret, $output] = shell()->execWithResult('sysctl -n hw.ncpu');
         if ($ret !== 0) {
             throw new RuntimeException('Failed to get cpu count');
         }

@@ -22,11 +22,9 @@ namespace SPC\builder\linux\library;
 
 use SPC\exception\RuntimeException;
 
-class libiconv extends LinuxLibraryBase
+class sqlite extends LinuxLibraryBase
 {
-    public const NAME = 'libiconv';
-
-    protected array $dep_names = [];
+    public const NAME = 'sqlite';
 
     /**
      * @throws RuntimeException
@@ -44,6 +42,6 @@ class libiconv extends LinuxLibraryBase
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . $destdir);
+            ->exec("make install DESTDIR={$destdir}");
     }
 }

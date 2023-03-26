@@ -172,10 +172,9 @@ abstract class BuilderBase
      * - BUILD_MICRO_BOTH：同时编译 micro 和 cli
      *
      * @param int  $build_micro_rule 规则
-     * @param bool $with_clean       是否为新构建？
      * @param bool $bloat            保留
      */
-    abstract public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $with_clean = false, bool $bloat = false);
+    abstract public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $bloat = false);
 
     /**
      * 生成依赖的扩展编译启用参数

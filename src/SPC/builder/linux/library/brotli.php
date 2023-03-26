@@ -32,28 +32,28 @@ class brotli extends LinuxLibraryBase
     public function build()
     {
         [$lib, $include, $destdir] = SEPARATED_PATH;
-        f_passthru(
-            "{$this->builder->set_x} && " .
-            "cd {$this->source_dir} && " .
-            'rm -rf build && ' .
-            'mkdir -p build && ' .
-            'cd build && ' .
-            "{$this->builder->configure_env} " . ' cmake ' .
-            // '--debug-find ' .
-            '-DCMAKE_BUILD_TYPE=Release ' .
-            '-DBUILD_SHARED_LIBS=OFF ' .
-            '-DCMAKE_INSTALL_PREFIX=/ ' .
-            "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-            "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
-            "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-            '.. && ' .
-            "cmake --build . -j {$this->builder->concurrency} --target brotlicommon-static && " .
-            "cmake --build . -j {$this->builder->concurrency} --target brotlidec-static && " .
-            "cmake --build . -j {$this->builder->concurrency} --target brotlienc-static && " .
-            'cp libbrotlidec-static.a ' . BUILD_LIB_PATH . ' && ' .
-            'cp libbrotlienc-static.a ' . BUILD_LIB_PATH . ' && ' .
-            'cp libbrotlicommon-static.a ' . BUILD_LIB_PATH . ' && ' .
-            'cp -r ../c/include/brotli ' . BUILD_INCLUDE_PATH
-        );
+        // 清理旧的编译文件
+        shell()->cd($this->source_dir)
+            ->exec('rm -rf build')
+            ->exec('mkdir -p build');
+        // 使用 cmake 编译
+        shell()->cd($this->source_dir . '/build')
+            ->exec(
+                $this->builder->configure_env . ' cmake ' .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DCMAKE_INSTALL_PREFIX=/ ' .
+                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
+                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '..'
+            )
+            ->exec("cmake --build . -j {$this->builder->concurrency} --target brotlicommon-static")
+            ->exec("cmake --build . -j {$this->builder->concurrency} --target brotlidec-static")
+            ->exec("cmake --build . -j {$this->builder->concurrency} --target brotlienc-static")
+            ->exec('cp libbrotlidec-static.a ' . BUILD_LIB_PATH)
+            ->exec('cp libbrotlienc-static.a ' . BUILD_LIB_PATH)
+            ->exec('cp libbrotlicommon-static.a ' . BUILD_LIB_PATH)
+            ->exec('cp -r ../c/include/brotli ' . BUILD_INCLUDE_PATH);
     }
 }

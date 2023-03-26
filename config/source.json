@@ -141,6 +141,16 @@
             "path": "LICENSE"
         }
     },
+    "mongodb": {
+        "type": "ghrel",
+        "repo": "mongodb/mongo-php-driver",
+        "path": "php-src/ext/mongodb",
+        "match": "mongodb.+\\.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "nghttp2": {
         "type": "ghrel",
         "repo": "nghttp2/nghttp2",
@@ -153,6 +163,16 @@
     "libuv": {
         "type": "ghtar",
         "repo": "libuv/libuv",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "protobuf": {
+        "type": "url",
+        "url": "http://pecl.php.net/get/protobuf",
+        "path": "php-src/ext/protobuf",
+        "filename": "protobuf.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"

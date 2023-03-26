@@ -22,11 +22,9 @@ namespace SPC\builder\linux\library;
 
 use SPC\exception\RuntimeException;
 
-class libiconv extends LinuxLibraryBase
+class onig extends LinuxLibraryBase
 {
-    public const NAME = 'libiconv';
-
-    protected array $dep_names = [];
+    public const NAME = 'onig';
 
     /**
      * @throws RuntimeException
@@ -40,10 +38,11 @@ class libiconv extends LinuxLibraryBase
                 "{$this->builder->configure_env} ./configure " .
                 '--enable-static ' .
                 '--disable-shared ' .
+                "--host={$this->builder->arch}-unknown-linux " .
                 '--prefix='
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . $destdir);
+            ->exec("make install DESTDIR={$destdir}");
     }
 }

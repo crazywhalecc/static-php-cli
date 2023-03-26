@@ -28,53 +28,6 @@ class openssl extends LinuxLibraryBase
 {
     public const NAME = 'openssl';
 
-    protected array $static_libs = [
-        'libssl.a',
-        'libcrypto.a',
-    ];
-
-    protected array $headers = ['openssl'];
-
-    protected array $pkgconfs = [
-        'openssl.pc' => <<<'EOF'
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
-
-Name: OpenSSL
-Description: Secure Sockets Layer and cryptography libraries and tools
-Version: 3.0.3
-Requires: libssl libcrypto
-EOF,
-        'libssl.pc' => <<<'EOF'
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
-
-Name: OpenSSL-libssl
-Description: Secure Sockets Layer and cryptography libraries
-Version: 3.0.3
-Requires.private: libcrypto
-Libs: -L${libdir} -lssl
-Cflags: -I${includedir}
-EOF,
-        'libcrypto.pc' => <<<'EOF'
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
-enginesdir=${libdir}/engines-3
-
-Name: OpenSSL-libcrypto
-Description: OpenSSL cryptography library
-Version: 3.0.3
-Libs: -L${libdir} -lcrypto
-Libs.private: -lz -ldl -pthread 
-Cflags: -I${includedir}
-EOF,
-    ];
-
-    protected array $dep_names = ['zlib' => true];
-
     /**
      * @throws RuntimeException
      * @throws FileSystemException
@@ -107,21 +60,18 @@ EOF,
 
         $clang_postfix = SystemUtil::getCCType($this->builder->cc) === 'clang' ? '-clang' : '';
 
-        f_passthru(
-            $this->builder->set_x . ' && ' .
-            "cd {$this->source_dir} && " .
-            "{$this->builder->configure_env} {$env} ./Configure no-shared {$extra} " .
-            '--prefix=/ ' . // use prefix=/
-            "--libdir={$lib} " .
-            '--static -static ' .
-            "{$zlib_extra}" .
-            'no-legacy ' .
-            "linux-{$this->builder->arch}{$clang_postfix} && " .
-            'make clean && ' .
-            "make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\" && " .
-            'make install_sw DESTDIR=' . $destdir
-            // remove liblegacy
-            // 'ar t lib/libcrypto.a | grep -e \'^liblegacy-\' | xargs ar d lib/libcrypto.a'
-        );
+        shell()->cd($this->source_dir)
+            ->exec(
+                "{$this->builder->configure_env} {$env} ./Configure no-shared {$extra} " .
+                '--prefix=/ ' .
+                "--libdir={$lib} " .
+                '--static -static ' .
+                "{$zlib_extra}" .
+                'no-legacy ' .
+                "linux-{$this->builder->arch}{$clang_postfix}"
+            )
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
+            ->exec("make install_sw DESTDIR={$destdir}");
     }
 }

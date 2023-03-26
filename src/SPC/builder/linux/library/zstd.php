@@ -22,28 +22,24 @@ namespace SPC\builder\linux\library;
 
 use SPC\exception\RuntimeException;
 
-class libiconv extends LinuxLibraryBase
+class zstd extends LinuxLibraryBase
 {
-    public const NAME = 'libiconv';
-
-    protected array $dep_names = [];
+    public const NAME = 'zstd';
 
     /**
      * @throws RuntimeException
      */
     public function build()
     {
-        [,,$destdir] = SEPARATED_PATH;
-
         shell()->cd($this->source_dir)
+            ->exec("make {$this->builder->configure_env} PREFIX='" . BUILD_ROOT_PATH . "' clean")
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--prefix='
+                "make -j{$this->builder->concurrency} " .
+                "{$this->builder->configure_env} " .
+                "PREFIX='" . BUILD_ROOT_PATH . "' " .
+                '-C lib libzstd.a CPPFLAGS_STATLIB=-DZSTD_MULTITHREAD'
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . $destdir);
+            ->exec('cp lib/libzstd.a ' . BUILD_LIB_PATH)
+            ->exec('cp lib/zdict.h lib/zstd_errors.h lib/zstd.h ' . BUILD_INCLUDE_PATH);
     }
 }

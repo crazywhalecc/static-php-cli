@@ -42,6 +42,7 @@ abstract class LinuxLibraryBase extends LibraryBase
     {
         // 传入 true，表明直接编译
         if ($force_build) {
+            logger()->info('Building required library ' . static::NAME);
             $this->build();
             return BUILD_STATUS_OK;
         }

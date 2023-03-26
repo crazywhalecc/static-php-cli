@@ -21,20 +21,18 @@ declare(strict_types=1);
 namespace SPC\builder\linux\library;
 
 use SPC\exception\RuntimeException;
-use SPC\store\FileSystem;
 
-class libxml2 extends LinuxLibraryBase
+class libssh2 extends LinuxLibraryBase
 {
-    public const NAME = 'libxml2';
+    public const NAME = 'libssh2';
 
     /**
      * @throws RuntimeException
      */
     public function build()
     {
-        $enable_zlib = $this->builder->getLib('zlib') ? 'ON' : 'OFF';
-        $enable_icu = $this->builder->getLib('icu') ? 'ON' : 'OFF';
-        $enable_xz = $this->builder->getLib('xz') ? 'ON' : 'OFF';
+        // lib:zlib
+        $enable_zlib = $this->builder->getLib('zlib') !== null ? 'ON' : 'OFF';
 
         [$lib, $include, $destdir] = SEPARATED_PATH;
 
@@ -47,30 +45,16 @@ class libxml2 extends LinuxLibraryBase
                 // '--debug-find ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DLIBXML2_WITH_ICONV=ON ' .
-                '-DIconv_IS_BUILT_IN=OFF ' .
-                "-DLIBXML2_WITH_ZLIB={$enable_zlib} " .
-                "-DLIBXML2_WITH_ICU={$enable_icu} " .
-                "-DLIBXML2_WITH_LZMA={$enable_xz} " .
-                '-DLIBXML2_WITH_PYTHON=OFF ' .
-                '-DLIBXML2_WITH_PROGRAMS=OFF ' .
-                '-DLIBXML2_WITH_TESTS=OFF ' .
+                '-DBUILD_EXAMPLES=OFF ' .
+                '-DBUILD_TESTING=OFF ' .
+                "-DENABLE_ZLIB_COMPRESSION={$enable_zlib} " .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 "-DCMAKE_INSTALL_LIBDIR={$lib} " .
                 "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '..'
             )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
+            ->exec("cmake --build . -j {$this->builder->concurrency} --target libssh2")
             ->exec('make install DESTDIR="' . $destdir . '"');
-
-        if (is_dir(BUILD_INCLUDE_PATH . '/libxml2/libxml')) {
-            if (is_dir(BUILD_INCLUDE_PATH . '/libxml')) {
-                shell()->exec('rm -rf "' . BUILD_INCLUDE_PATH . '/libxml"');
-            }
-            $path = FileSystem::convertPath(BUILD_INCLUDE_PATH . '/libxml2/libxml');
-            $dst_path = FileSystem::convertPath(BUILD_INCLUDE_PATH . '/');
-            shell()->exec('mv "' . $path . '" "' . $dst_path . '"');
-        }
     }
 }

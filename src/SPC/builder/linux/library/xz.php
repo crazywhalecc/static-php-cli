@@ -22,11 +22,9 @@ namespace SPC\builder\linux\library;
 
 use SPC\exception\RuntimeException;
 
-class libiconv extends LinuxLibraryBase
+class xz extends LinuxLibraryBase
 {
-    public const NAME = 'libiconv';
-
-    protected array $dep_names = [];
+    public const NAME = 'xz';
 
     /**
      * @throws RuntimeException
@@ -36,14 +34,23 @@ class libiconv extends LinuxLibraryBase
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
+            // ->exec('autoreconf -i --force')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
                 '--enable-static ' .
                 '--disable-shared ' .
+                "--host={$this->builder->gnu_arch}-unknown-linux " .
+                '--disable-xz ' .
+                '--disable-xzdec ' .
+                '--disable-lzmadec ' .
+                '--disable-lzmainfo ' .
+                '--disable-scripts ' .
+                '--disable-doc ' .
+                '--with-libiconv ' .
                 '--prefix='
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . $destdir);
+            ->exec("make install DESTDIR={$destdir}");
     }
 }

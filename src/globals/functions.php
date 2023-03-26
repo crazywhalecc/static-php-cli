@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Psr\Log\LoggerInterface;
+use SPC\util\UnixShell;
 use ZM\Logger\ConsoleLogger;
 
 /**
@@ -94,4 +95,9 @@ function f_mkdir(string $directory, int $permissions = 0777, bool $recursive = f
     }
     logger()->debug('Making new directory ' . ($recursive ? 'recursive' : '') . ': ' . $directory);
     return mkdir($directory, $permissions, $recursive);
+}
+
+function shell(): UnixShell
+{
+    return new UnixShell();
 }

@@ -45,4 +45,8 @@ const BUILD_STATUS_OK = 0;
 const BUILD_STATUS_ALREADY = 1;
 const BUILD_STATUS_FAILED = 2;
 
+// 编译类型
+const BUILD_TYPE_CLI = 1;
+const BUILD_TYPE_MICRO = 2;
+
 ConsoleLogger::$date_format = 'H:i:s';
