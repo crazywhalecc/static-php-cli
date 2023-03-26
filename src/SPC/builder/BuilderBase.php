@@ -30,6 +30,9 @@ abstract class BuilderBase
     /** @var array<string, Extension> 要编译的扩展列表 */
     protected array $exts = [];
 
+    /** @var array<int, string> 要编译的扩展列表（仅名字列表，用于最后生成编译的扩展列表给 micro） */
+    protected array $plain_extensions = [];
+
     /** @var bool 本次编译是否只编译 libs，不编译 PHP */
     protected bool $libs_only = false;
 
@@ -149,10 +152,6 @@ abstract class BuilderBase
      */
     public function proveExts(array $extensions): void
     {
-        if (defined('BUILD_ALL_STATIC') && BUILD_ALL_STATIC) {
-            $k = array_search('ffi', $extensions, true);
-            $k !== false && array_splice($extensions, $k, 1);
-        }
         foreach ($extensions as $extension) {
             $ext = new Extension($extension, $this);
             $this->addExt($ext);
@@ -162,6 +161,8 @@ abstract class BuilderBase
             // 检查下依赖就行了，作用是导入依赖给 Extension 对象，今后可以对库依赖进行选择性处理
             $ext->checkDependency();
         }
+
+        $this->plain_extensions = $extensions;
     }
 
     /**

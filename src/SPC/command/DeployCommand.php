@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /** @noinspection PhpUnused */
 class DeployCommand extends BaseCommand
 {
-    protected static $defaultName = 'deploy-self';
+    protected static $defaultName = 'deploy';
 
     public function configure()
     {
@@ -24,7 +24,7 @@ class DeployCommand extends BaseCommand
         $this->addArgument('target', InputArgument::OPTIONAL, 'The file or directory to pack.');
         $this->addOption('auto-phar-fix', null, InputOption::VALUE_NONE, 'Automatically fix ini option.');
         $this->addOption('overwrite', 'W', InputOption::VALUE_NONE, 'Overwrite existing files.');
-        $this->addOption('disable-gzip', 'z', InputOption::VALUE_NONE, 'disable gzip archive mode');
+        // $this->addOption('disable-gzip', 'z', InputOption::VALUE_NONE, 'disable gzip archive mode');
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -67,7 +67,7 @@ class DeployCommand extends BaseCommand
         $all = DataProvider::scanDirFiles($path, true, true);
 
         $all = array_filter($all, function ($x) {
-            $dirs = preg_match('/(^(bin|config|src|vendor)\\/|^(composer\\.json|README\\.md|source\\.json|LICENSE|README-en\\.md)$)/', $x);
+            $dirs = preg_match('/(^(config|src|vendor)\\/|^(composer\\.json|README\\.md|source\\.json|LICENSE|README-en\\.md)$)/', $x);
             return !($dirs !== 1);
         });
         sort($all);
@@ -78,7 +78,10 @@ class DeployCommand extends BaseCommand
 
         $output->writeln('<info>Start packing files...</info>');
         try {
-            $phar->buildFromIterator(new SeekableArrayIterator($map, new ProgressBar($output)));
+            foreach ($this->progress($output)->iterate($map) as $file => $origin_file) {
+                $phar->addFromString($file, php_strip_whitespace($origin_file));
+            }
+            // $phar->buildFromIterator(new SeekableArrayIterator($map, new ProgressBar($output)));
             $phar->addFromString(
                 '.phar-entry.php',
                 str_replace(
@@ -94,9 +97,10 @@ class DeployCommand extends BaseCommand
             return 1;
         }
         $phar->addFromString('.prod', 'true');
-        if (!$input->getOption('disable-gzip')) {
-            $phar->compressFiles(\Phar::GZ);
-        }
+        // disable gzip compression due to phpmicro bug
+        // if (!$input->getOption('disable-gzip')) {
+        //    $phar->compressFiles(\Phar::GZ);
+        // }
         $phar->stopBuffering();
         $output->writeln(PHP_EOL . 'Done! Phar file is generated at "' . $phar_path . '".');
         if (file_exists(SOURCE_PATH . '/php-src/sapi/micro/micro.sfx')) {
@@ -112,5 +116,17 @@ class DeployCommand extends BaseCommand
         chmod($phar_path, 0755);
         $output->writeln('<info>Phar: ' . $phar_path . '</info>');
         return 0;
+    }
+
+    private function progress(OutputInterface $output, int $max = 0): ProgressBar
+    {
+        $progress = new ProgressBar($output, $max);
+        $progress->setBarCharacter('<fg=green>⚬</>');
+        $progress->setEmptyBarCharacter('<fg=red>⚬</>');
+        $progress->setProgressCharacter('<fg=green>➤</>');
+        $progress->setFormat(
+            "%current%/%max% [%bar%] %percent:3s%%\n🪅 %estimated:-20s%  %memory:20s%" . PHP_EOL
+        );
+        return $progress;
     }
 }

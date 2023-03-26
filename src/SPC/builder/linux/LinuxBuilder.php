@@ -215,6 +215,8 @@ class LinuxBuilder extends BuilderBase
         if ($this->phar_patched) {
             shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 -R < sapi/micro/patches/phar.patch');
         }
+
+        file_put_contents(SOURCE_PATH . '/php-src/.extensions.json', json_encode($this->plain_extensions, JSON_PRETTY_PRINT));
     }
 
     /**
@@ -265,11 +267,7 @@ class LinuxBuilder extends BuilderBase
                 'micro'
             );
 
-        shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')
-            ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug")
-            ->exec('elfedit --output-osabi linux micro.sfx')
-            ->exec("{$this->cross_compile_prefix}strip --strip-all micro.sfx")
-            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx'");
+        shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec("{$this->cross_compile_prefix}strip --strip-all micro.sfx");
 
         $this->deployBinary(BUILD_TYPE_MICRO);
     }
