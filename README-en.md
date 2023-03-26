@@ -16,7 +16,7 @@ But php-static-cli only requires an environment above PHP 8.0.
 - Linux
   - Supported arch: aarch64, amd64
   - Supported distributions: alpine, ubuntu, centos
-  - Requirements: (TODO)
+  - Requirements: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, gzip, bzip2, cmake
 - macOS
   - Supported arch: arm64, x86_64
   - Requirements: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, xz, gzip, bzip2, cmake
@@ -24,9 +24,9 @@ But php-static-cli only requires an environment above PHP 8.0.
   - Supported arch: x86_64
   - Requirements: (TODO)
 - PHP
-  - Supported version: 8.0, 8.1, 8.2
+  - Supported version: 7.4, 8.0, 8.1, 8.2
 
-## Usage (WIP)
+## Usage
 
 After stable release for this project, a single phar and single binary for this tool will be published.
 
@@ -76,14 +76,14 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 ## Current Status
 
-- [X] Basic CLI framework (by symfony/console)
-- [ ] Linux support
+- [X] Basic CLI framework (by `symfony/console`)
+- [X] Linux support
 - [X] macOS support
 - [X] Exception handler
 - [ ] Windows support
 - [X] PHP 7.4 support
 
-## Supported Extensions (WIP)
+## Supported Extensions
 
 [Support Extension List](/ext-support.md)
 

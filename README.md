@@ -26,7 +26,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
     - 支持架构: x86_64
     - 依赖工具: (TODO)
 - PHP
-    - 支持版本: 8.0, 8.1, 8.2
+    - 支持版本: 7.4, 8.0, 8.1, 8.2
 
 ## 使用（WIP）
 
@@ -73,16 +73,16 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 > 有些情况下的 phar 文件可能无法在 micro 环境下运行。
 
-## 项目支持情况（WIP）
+## 项目支持情况
 
-- [X] 基础结构编写（采用 symfony/console`）
+- [X] 基础结构编写（采用 `symfony/console`）
 - [X] 错误处理
 - [X] macOS 支持
 - [ ] Windows 支持
-- [ ] Linux 支持
+- [X] Linux 支持
 - [X] PHP 7.4 支持
 
-## 支持的扩展情况（WIP）
+## 支持的扩展情况
 
 [扩展支持列表](/ext-support.md)
 
