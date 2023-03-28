@@ -1,8 +1,6 @@
 # static-php-cli
 Compile A Statically Linked PHP With Swoole and other Extensions. [English README](README-en.md)
 
-**如果你对本项目有兴趣，请看讨论进行投票：<https://github.com/crazywhalecc/static-php-cli/discussions/29>，重构分支：[refactor](https://github.com/crazywhalecc/static-php-cli/tree/refactor)**
-
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！
 
 同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！
@@ -12,6 +10,14 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 [![版本](https://img.shields.io/badge/script--version-1.5.2-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 ![Build Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build-php.yml/badge.svg)
+
+## 重构
+
+当前项目正在重构中，本分支为旧版。重构版支持很多新特性。下面是目前重构的进度：
+
+- **关于重构版的讨论：https://github.com/crazywhalecc/static-php-cli/discussions/29**
+- **重构的分支：[refactor](https://github.com/crazywhalecc/static-php-cli/tree/refactor)**
+- **重构的问题和待办：https://github.com/crazywhalecc/static-php-cli/issues/32**
 
 ## 编译环境需求
 
