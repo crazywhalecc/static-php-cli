@@ -385,4 +385,13 @@ class FileSystem
             throw new FileSystemException(sprintf('无法建立目录：%s', $path));
         }
     }
+
+    public static function writeFile(string $path, $content, ...$args): bool|string|int
+    {
+        $dir = pathinfo($path, PATHINFO_DIRNAME);
+        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+            throw new FileSystemException('Write file failed, cannot create parent directory: ' . $dir);
+        }
+        return file_put_contents($path, $content, ...$args);
+    }
 }

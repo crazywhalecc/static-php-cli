@@ -6,6 +6,7 @@ namespace SPC\builder;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 
 class Extension
@@ -62,7 +63,7 @@ class Extension
             'enable' => '--enable-' . $_name,
             'with' => '--with-' . $_name,
             'none', 'custom' => '',
-            default => throw new RuntimeException("argType does not accept {$arg_type}, use [enable/with] ."),
+            default => throw new WrongUsageException("argType does not accept {$arg_type}, use [enable/with] ."),
         };
     }
 

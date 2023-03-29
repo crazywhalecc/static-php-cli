@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use Psr\Log\LoggerInterface;
+use SPC\exception\WrongUsageException;
 use SPC\util\UnixShell;
 use ZM\Logger\ConsoleLogger;
 
 /**
  * 判断传入的数组是否为关联数组
+ *
  * @param mixed $array
  */
 function is_assoc_array($array): bool
@@ -28,7 +30,8 @@ function logger(): LoggerInterface
 }
 
 /**
- * @throws \SPC\exception\RuntimeException
+ * @param  string              $arch 架构名称转换为 GNU 标准形式
+ * @throws WrongUsageException
  */
 function arch2gnu(string $arch): string
 {
@@ -36,7 +39,7 @@ function arch2gnu(string $arch): string
     return match ($arch) {
         'x86_64', 'x64', 'amd64' => 'x86_64',
         'arm64', 'aarch64' => 'aarch64',
-        default => throw new \SPC\exception\RuntimeException('Not support arch: ' . $arch),
+        default => throw new WrongUsageException('Not support arch: ' . $arch),
         // 'armv7' => 'arm',
     };
 }
@@ -46,6 +49,11 @@ function quote(string $str, string $quote = '"'): string
     return $quote . $str . $quote;
 }
 
+/**
+ * 将不同系统环境的编译使用工具集的文件夹名称进行一个返回
+ *
+ * @throws WrongUsageException
+ */
 function osfamily2dir(): string
 {
     return match (PHP_OS_FAMILY) {
@@ -53,7 +61,7 @@ function osfamily2dir(): string
         'Windows', 'WINNT', 'Cygwin' => 'windows',
         'Darwin' => 'macos',
         'Linux' => 'linux',
-        default => throw new \SPC\exception\RuntimeException('Not support os: ' . PHP_OS_FAMILY),
+        default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
     };
 }
 

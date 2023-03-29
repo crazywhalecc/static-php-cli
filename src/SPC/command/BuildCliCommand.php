@@ -6,6 +6,7 @@ namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
+use SPC\exception\WrongUsageException;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -73,6 +74,9 @@ class BuildCliCommand extends BuildCommand
                 logger()->info('phpmicro binary path: ' . BUILD_ROOT_PATH . '/bin/micro.sfx');
             }
             return 0;
+        } catch (WrongUsageException $e) {
+            logger()->critical($e->getMessage());
+            return 1;
         } catch (\Throwable $e) {
             if ($input->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);

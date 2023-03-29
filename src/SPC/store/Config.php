@@ -6,6 +6,7 @@ namespace SPC\store;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 
 /**
  * 一个读取 config 配置的操作类
@@ -38,7 +39,7 @@ class Config
      * 对于 macOS 平台，支持 frameworks。
      *
      * @throws FileSystemException
-     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function getLib(string $name, ?string $key = null, mixed $default = null)
     {
@@ -46,7 +47,7 @@ class Config
             self::$lib = FileSystem::loadConfigArray('lib');
         }
         if (!isset(self::$lib[$name])) {
-            throw new RuntimeException('lib [' . $name . '] is not supported yet for get');
+            throw new WrongUsageException('lib [' . $name . '] is not supported yet');
         }
         $supported_sys_based = ['static-libs', 'headers', 'lib-depends', 'lib-suggests', 'frameworks'];
         if ($key !== null && in_array($key, $supported_sys_based)) {
@@ -54,7 +55,7 @@ class Config
                 'Windows' => ['-windows', '-win', ''],
                 'Darwin' => ['-macos', '-unix', ''],
                 'Linux' => ['-linux', '-unix', ''],
-                default => throw new RuntimeException('OS ' . PHP_OS_FAMILY . ' is not supported'),
+                default => throw new WrongUsageException('OS ' . PHP_OS_FAMILY . ' is not supported'),
             };
             foreach ($m_key as $v) {
                 if (isset(self::$lib[$name][$key . $v])) {
@@ -83,6 +84,7 @@ class Config
     /**
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function getExt(string $name, ?string $key = null, mixed $default = null)
     {
@@ -90,7 +92,7 @@ class Config
             self::$ext = FileSystem::loadConfigArray('ext');
         }
         if (!isset(self::$ext[$name])) {
-            throw new RuntimeException('ext [' . $name . '] is not supported yet for get');
+            throw new WrongUsageException('ext [' . $name . '] is not supported yet');
         }
         $supported_sys_based = ['lib-depends', 'lib-suggests', 'ext-depends', 'ext-suggests', 'arg-type'];
         if ($key !== null && in_array($key, $supported_sys_based)) {
@@ -98,7 +100,7 @@ class Config
                 'Windows' => ['-windows', '-win', ''],
                 'Darwin' => ['-macos', '-unix', ''],
                 'Linux' => ['-linux', '-unix', ''],
-                default => throw new RuntimeException('OS ' . PHP_OS_FAMILY . ' is not supported'),
+                default => throw new WrongUsageException('OS ' . PHP_OS_FAMILY . ' is not supported'),
             };
             foreach ($m_key as $v) {
                 if (isset(self::$ext[$name][$key . $v])) {

@@ -196,7 +196,7 @@ class Patcher
                 case 'x86_64':
                     break;
                 default:
-                    throw new RuntimeException('unsupported arch: ' . $builder->arch);
+                    throw new RuntimeException('unsupported arch while patching php configure: ' . $builder->arch);
             }
         }
     }

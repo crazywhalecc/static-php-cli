@@ -9,6 +9,7 @@ use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\util\Patcher;
 
 /**
@@ -27,7 +28,11 @@ class MacOSBuilder extends BuilderBase
     private bool $phar_patched = false;
 
     /**
+     * @param  null|string         $cc   C编译器名称，如果不传入则默认使用clang
+     * @param  null|string         $cxx  C++编译器名称，如果不传入则默认使用clang++
+     * @param  null|string         $arch 当前架构，如果不传入则默认使用当前系统架构
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
     {
@@ -218,6 +223,7 @@ class MacOSBuilder extends BuilderBase
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
             try {
+                // TODO: 未来改进一下 patch，让除了这种 patch 类型的文件以外可以恢复原文件
                 f_passthru('cd ' . SOURCE_PATH . '/php-src && patch -p1 < sapi/micro/patches/phar.patch');
             } catch (RuntimeException $e) {
                 logger()->error('failed to patch phat due to patch exit with code ' . $e->getCode());
@@ -257,6 +263,9 @@ class MacOSBuilder extends BuilderBase
         );
     }
 
+    /**
+     * 获取当前即将编译的 PHP 的版本 ID，五位数那个
+     */
     public function getPHPVersionID(): int
     {
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');

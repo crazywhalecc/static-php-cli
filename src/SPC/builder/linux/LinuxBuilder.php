@@ -9,6 +9,7 @@ use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\util\Patcher;
 
 /**
@@ -86,7 +87,7 @@ class LinuxBuilder extends BuilderBase
             }
         }
         if (!empty($missing)) {
-            throw new RuntimeException('missing system commands: ' . implode(', ', $missing));
+            throw new WrongUsageException('missing system commands: ' . implode(', ', $missing));
         }
 
         // 创立 pkg-config 和放头文件的目录
@@ -151,7 +152,7 @@ class LinuxBuilder extends BuilderBase
                 }
                 break;
             default:
-                throw new RuntimeException('libc ' . $this->libc . ' is not implemented yet');
+                throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
         }
 
         $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";

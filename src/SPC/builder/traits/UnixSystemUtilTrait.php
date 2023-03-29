@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\traits;
 
+use SPC\store\FileSystem;
+
 /**
  * Unix 系统的工具函数 Trait，适用于 Linux、macOS
  */
@@ -48,7 +50,7 @@ CMAKE;
         if (PHP_OS_FAMILY === 'Linux') {
             $toolchain .= "\nSET(CMAKE_AR \"ar\")";
         }
-        file_put_contents(SOURCE_PATH . '/toolchain.cmake', $toolchain);
+        FileSystem::writeFile(SOURCE_PATH . '/toolchain.cmake', $toolchain);
         return realpath(SOURCE_PATH . '/toolchain.cmake');
     }
 

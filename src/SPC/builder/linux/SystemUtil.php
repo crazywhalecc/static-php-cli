@@ -7,6 +7,7 @@ namespace SPC\builder\linux;
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 
 class SystemUtil
 {
@@ -128,10 +129,10 @@ class SystemUtil
             'clang' => match ($arch) {
                 'x86_64' => '--target=x86_64-unknown-linux',
                 'arm64', 'aarch64' => '--target=arm64-unknown-linux',
-                default => throw new RuntimeException('unsupported arch: ' . $arch),
+                default => throw new WrongUsageException('unsupported arch: ' . $arch),
             },
             'gcc' => '',
-            default => throw new RuntimeException('cc compiler ' . $cc . ' is not supported'),
+            default => throw new WrongUsageException('cc compiler ' . $cc . ' is not supported'),
         };
     }
 

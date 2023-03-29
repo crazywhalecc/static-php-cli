@@ -8,6 +8,7 @@ use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
@@ -36,7 +37,7 @@ class BuilderProvider
                 cxx: $input->getOption('cxx'),
                 arch: $input->getOption('arch'),
             ),
-            default => throw new RuntimeException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
+            default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
     }
 }
