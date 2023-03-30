@@ -5,6 +5,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 Compile a purely static PHP binary file with various extensions to make PHP-cli applications more portable! 
 
 You can also use the micro binary file to package PHP source code and binary files into one for distribution!
+This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
 
 Note: only support cli SAPI, not support fpm, cgi.
 
@@ -24,7 +25,8 @@ But php-static-cli only requires an environment above PHP 8.0.
   - Supported arch: x86_64
   - Requirements: (TODO)
 - PHP
-  - Supported version: 7.4, 8.0, 8.1, 8.2
+  - Supported compile version: 7.4, 8.0, 8.1, 8.2
+  - Self required version: 8.0, 8.1, 8.2
 
 ## Usage
 
@@ -36,6 +38,8 @@ And currently you may need to clone this branch and edit GitHub Action to build.
 
 ```bash
 chmod +x spc
+# Check system tool dependencies, and show instructions for fixing
+./spc doctor
 # fetch all libraries
 ./spc fetch --all
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
@@ -43,6 +47,8 @@ chmod +x spc
 ```
 
 ### php-cli Usage
+
+> php-cli is a single static binary, which is similar with Go, Rust single-file binary.
 
 When using the parameter `--build-all` or not adding the `--build-micro` parameter, 
 the final compilation result will output a binary file named `./php`, 
@@ -57,10 +63,13 @@ This file will be located in the directory `source/php-src/sapi/cli/`, simply co
 
 ### micro.sfx Usage
 
+> phpmicro is a Self-Extracted Executable SAPI module, provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). 
+> This project is integrated with it.
+
 When using the parameter `--build-all` or `--build-micro`, 
 the final compilation result will output a file named `./micro.sfx`, 
 which needs to be used with your PHP source code like `code.php`. 
-This file will be located in the directory `source/php-src/sapi/micro/`, simply copy it out for use.
+This file will be located in the path `buildroot/bin/micro.sfx`, simply copy it out for use.
 
 Prepare your project source code, which can be a single PHP file or a Phar file, for use.
 
@@ -82,6 +91,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [X] Exception handler
 - [ ] Windows support
 - [X] PHP 7.4 support
+
+More functions and features are coming soon, Bugs and TODOs: https://github.com/crazywhalecc/static-php-cli/issues/32
 
 ## Supported Extensions
 
@@ -119,3 +130,9 @@ and they all have their own open source licenses.
 
 Please use the `dump-license`(TODO) command to export the open source licenses used in the project after compilation, 
 and comply with the corresponding project's LICENSE.
+
+## Advanced
+
+This project is pure open source project, and some modules are separated for developing.
+
+This section will be improved after refactor version released.

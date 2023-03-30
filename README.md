@@ -4,7 +4,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！
 
-同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！
+同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！（由 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 提供支持）
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式。
 
@@ -26,7 +26,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
     - 支持架构: x86_64
     - 依赖工具: (TODO)
 - PHP
-    - 支持版本: 7.4, 8.0, 8.1, 8.2
+    - 支持编译版本: 7.4, 8.0, 8.1, 8.2
+    - 项目依赖版本：8.0, 8.1, 8.2
 
 ## 使用（WIP）
 
@@ -39,6 +40,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 ```bash
 chmod +x spc
+# 检查环境依赖，并根据提示的命令安装缺失的编译工具（TODO）
+./spc doctor
 # 拉取所有依赖库
 ./spc fetch --all
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
@@ -47,16 +50,21 @@ chmod +x spc
 
 ### 使用 php-cli
 
+> php-cli 是一个静态的二进制文件，类似 Go、Rust 语言编译后的单个可移植的二进制文件。
+
 采用参数 `--build-all` 或不添加 `--build-micro` 参数时，最后编译结果会输出一个 `./php` 的二进制文件，此文件可分发、可直接使用。
-该文件编译后会存放在 `source/php-src/sapi/cli/` 目录中，拷贝出来即可。
+该文件编译后会存放在 `buildroot/bin/` 目录中，名称为 `php`，拷贝出来即可。
 
 ```bash
+cd buildroot/
 ./php -v
 ./php -m
 ./php your_code.php
 ```
 
 ### 使用 micro.sfx
+
+> phpmicro 是一个提供自执行二进制 PHP 的项目，本项目依赖 phpmicro 进行编译自执行二进制。详见 [dixyes/phpmicro](https://github.com/dixyes/phpmicro)。
 
 采用项目参数 `--build-all` 或 `--build-micro` 时，最后编译结果会输出一个 `./micro.sfx` 的文件，此文件需要配合你的 PHP 源码使用。
 该文件编译后会存放在 `source/php-src/sapi/micro/` 目录中，拷贝出来即可。
@@ -82,6 +90,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [X] Linux 支持
 - [X] PHP 7.4 支持
 
+更多功能和特性正在陆续支持中，详见：https://github.com/crazywhalecc/static-php-cli/issues/32
+
 ## 支持的扩展情况
 
 [扩展支持列表](/ext-support.md)
@@ -101,8 +111,15 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 本项目依据旧版本惯例采用 MIT License 开源，新版本采用了部分项目的源代码做参考，特别感谢：
 
+- [dixyes/phpmicro](https://github.com/dixyes/phpmicro)（Apache 2.0 LICENSE）
 - [dixyes/lwmbs](https://github.com/dixyes/lwmbs)（木兰宽松许可证）
-- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE+SWOOLE-CLI LICENSE）
+- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE、SWOOLE-CLI LICENSE）
 
 因本项目的特殊性，使用项目编译过程中会使用很多其他开源项目，例如 curl、protobuf 等，它们都有各自的开源协议。
 请在编译完成后，使用命令 `dump-license`(TODO) 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。
+
+## 进阶
+
+本项目重构分支为模块化编写。
+
+This section will be improved after refactor version released.
