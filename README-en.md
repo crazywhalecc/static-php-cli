@@ -34,6 +34,10 @@ After stable release for this project, a single phar and single binary for this 
 
 And currently you may need to clone this branch and edit GitHub Action to build.
 
+## Supported Extensions
+
+[Support Extension List](/ext-support.md)
+
 ### Compilation
 
 ```bash
@@ -93,10 +97,6 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [X] PHP 7.4 support
 
 More functions and features are coming soon, Bugs and TODOs: https://github.com/crazywhalecc/static-php-cli/issues/32
-
-## Supported Extensions
-
-[Support Extension List](/ext-support.md)
 
 ## Contribution
 

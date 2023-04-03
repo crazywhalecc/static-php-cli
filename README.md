@@ -36,6 +36,10 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 未来会提供一个直接可使用的 phar 包和一个 phpmicro 打包的二进制文件，你可以直接从 Release 中获取并使用：
 
+## 支持的扩展情况
+
+[扩展支持列表](/ext-support.md)
+
 ### 编译
 
 ```bash
@@ -91,10 +95,6 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [X] PHP 7.4 支持
 
 更多功能和特性正在陆续支持中，详见：https://github.com/crazywhalecc/static-php-cli/issues/32
-
-## 支持的扩展情况
-
-[扩展支持列表](/ext-support.md)
 
 ## 贡献
 
