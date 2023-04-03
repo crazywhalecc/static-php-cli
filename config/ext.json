@@ -111,7 +111,7 @@
     },
     "iconv": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends-windows": [
             "libiconv"
         ]

@@ -183,6 +183,9 @@ class Extension
                     $arg .= ' --with-event-openssl --with-openssl-dir="' . BUILD_ROOT_PATH . '"';
                 }
                 break;*/
+            case 'iconv':
+                $arg = ' --with-iconv="' . BUILD_ROOT_PATH . '"';
+                break;
             case 'mbstring':
                 $arg = ' --disable-mbregex ONIG_CFLAGS=-I"' . BUILD_ROOT_PATH . '" ' .
                 'ONIG_LIBS="' . $this->getLibFilesString() . '" ';
