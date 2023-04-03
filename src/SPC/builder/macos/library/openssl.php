@@ -37,16 +37,15 @@ class openssl extends MacOSLibraryBase
             $ex_lib = trim($zlib->getStaticLibFiles() . ' ' . $ex_lib);
         }
 
-        f_passthru(
-            $this->builder->set_x . ' && ' .
-            "cd {$this->source_dir} && " .
-            "{$this->builder->configure_env} ./Configure no-shared {$extra} " .
-            '--prefix=/ ' . // use prefix=/
-            "--libdir={$lib} " .
-            " darwin64-{$this->builder->arch}-cc && " .
-            'make clean && ' .
-            "make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\" && " .
-            'make install_sw DESTDIR=' . $destdir
-        );
+        shell()->cd($this->source_dir)
+            ->exec(
+                "{$this->builder->configure_env} ./Configure no-shared {$extra} " .
+                '--prefix=/ ' . // use prefix=/
+                "--libdir={$lib} " .
+                " darwin64-{$this->builder->arch}-cc"
+            )
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
+            ->exec("make install_sw DESTDIR={$destdir}");
     }
 }

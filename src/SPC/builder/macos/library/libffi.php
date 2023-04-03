@@ -26,20 +26,19 @@ class libffi extends MacOSLibraryBase
 
     protected function build()
     {
-        [$lib, $include, $destdir] = SEPARATED_PATH;
-        f_passthru(
-            $this->builder->set_x . ' && ' .
-            "cd {$this->source_dir} && " .
-            "{$this->builder->configure_env} ./configure " .
-            '--enable-static ' .
-            '--disable-shared ' .
-            "--host={$this->builder->arch}-apple-darwin " .
-            "--target={$this->builder->arch}-apple-darwin " .
-            '--prefix= ' . // use prefix=/
-            "--libdir={$lib} && " .
-            'make clean && ' .
-            "make -j{$this->builder->concurrency} && " .
-            "make install DESTDIR={$destdir}"
-        );
+        [$lib, , $destdir] = SEPARATED_PATH;
+        shell()->cd($this->source_dir)
+            ->exec(
+                "{$this->builder->configure_env} ./configure " .
+                '--enable-static ' .
+                '--disable-shared ' .
+                "--host={$this->builder->arch}-apple-darwin " .
+                "--target={$this->builder->arch}-apple-darwin " .
+                '--prefix= ' . // use prefix=/
+                "--libdir={$lib}"
+            )
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec("make install DESTDIR={$destdir}");
     }
 }

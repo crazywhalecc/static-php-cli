@@ -224,52 +224,31 @@ class MacOSBuilder extends BuilderBase
             $this->phar_patched = true;
             try {
                 // TODO: 未来改进一下 patch，让除了这种 patch 类型的文件以外可以恢复原文件
-                f_passthru('cd ' . SOURCE_PATH . '/php-src && patch -p1 < sapi/micro/patches/phar.patch');
+                shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 < sapi/micro/patches/phar.patch');
             } catch (RuntimeException $e) {
                 logger()->error('failed to patch phat due to patch exit with code ' . $e->getCode());
                 $this->phar_patched = false;
             }
         }
 
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            "make -j{$this->concurrency} " .
-            'EXTRA_CFLAGS="-g -Os -fno-ident" ' .
-            "EXTRA_LIBS=\"{$extra_libs} -lresolv\" " .
-            'STRIP="dsymutil -f " ' .
-            // TODO: comment things
-            'micro'
-        );
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" STRIP=\"dsymutil -f \" micro");
+        $this->deployBinary(BUILD_TYPE_MICRO);
     }
 
     /**
      * 构建 cli
      *
      * @throws RuntimeException
+     * @throws FileSystemException
      */
     public function buildCli(string $extra_libs): void
     {
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            "make -j{$this->concurrency} " .
-            'EXTRA_CFLAGS="-g -Os -fno-ident" ' . // 生成调试信息、优化编译后的尺寸、禁用标识符（如变量、函数名）缩短
-            "EXTRA_LIBS=\"{$extra_libs} -lresolv\" " .
-            // TODO: comment things
-            'cli &&' .
-            'dsymutil -f sapi/cli/php &&' .
-            'strip sapi/cli/php'
-        );
-    }
-
-    /**
-     * 获取当前即将编译的 PHP 的版本 ID，五位数那个
-     */
-    public function getPHPVersionID(): int
-    {
-        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
-        preg_match('/PHP_VERSION_ID (\d+)/', $file, $match);
-        return intval($match[1]);
+        shell()->cd(SOURCE_PATH . '/php-src')
+            // 生成调试信息、优化编译后的尺寸、禁用标识符（如变量、函数名）缩短
+            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli")
+            ->exec('dsymutil -f sapi/cli/php')
+            ->exec('strip sapi/cli/php');
+        $this->deployBinary(BUILD_TYPE_CLI);
     }
 }

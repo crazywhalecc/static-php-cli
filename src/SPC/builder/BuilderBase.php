@@ -203,6 +203,16 @@ abstract class BuilderBase
     }
 
     /**
+     * 获取当前即将编译的 PHP 的版本 ID，五位数那个
+     */
+    public function getPHPVersionID(): int
+    {
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        preg_match('/PHP_VERSION_ID (\d+)/', $file, $match);
+        return intval($match[1]);
+    }
+
+    /**
      * 检查是否存在 lib 库对应的源码，如果不存在，则抛出异常
      *
      * @throws RuntimeException

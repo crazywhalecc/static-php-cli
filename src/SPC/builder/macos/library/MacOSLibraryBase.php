@@ -14,14 +14,7 @@ abstract class MacOSLibraryBase extends LibraryBase
 {
     use UnixLibraryTrait;
 
-    protected array $static_libs;
-
     protected array $headers;
-
-    /**
-     * 依赖的名字及是否可选，例如：curl => true，代表依赖 curl 但可选
-     */
-    protected array $dep_names;
 
     public function __construct(protected MacOSBuilder $builder)
     {

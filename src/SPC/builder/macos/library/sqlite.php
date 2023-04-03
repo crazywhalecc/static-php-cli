@@ -11,16 +11,10 @@ class sqlite extends MacOSLibraryBase
     protected function build()
     {
         [,,$destdir] = SEPARATED_PATH;
-
-        f_passthru(
-            $this->builder->set_x . ' && ' .
-            "cd {$this->source_dir} && " .
-            "{$this->builder->configure_env} ./configure " .
-            '--enable-static --disable-shared ' .
-            '--prefix= && ' . // use prefix=/
-            'make clean && ' .
-            "make -j{$this->builder->concurrency} && " .
-            'make install DESTDIR=' . $destdir
-        );
+        shell()->cd($this->source_dir)
+            ->exec("{$this->builder->configure_env} ./configure --enable-static --disable-shared --prefix=")
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec("make install DESTDIR={$destdir}");
     }
 }

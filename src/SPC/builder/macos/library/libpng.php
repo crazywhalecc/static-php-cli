@@ -43,23 +43,20 @@ class libpng extends MacOSLibraryBase
 
         // patch configure
         Patcher::patchUnixLibpng();
-
-        f_passthru(
-            $this->builder->set_x . ' && ' .
-            "cd {$this->source_dir} && " .
-            "{$this->builder->configure_env} " .
-            './configure ' .
-            "--host={$this->builder->gnu_arch}-apple-darwin " .
-            '--disable-shared ' .
-            '--enable-static ' .
-            '--enable-hardware-optimizations ' .
-            $optimizations .
-            '--prefix= && ' . // use prefix=/
-            'make clean && ' .
-            "make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la && " .
-            'make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH . ' && ' .
-            'cd ' . BUILD_LIB_PATH . ' && ' .
-            'ln -sf libpng16.a libpng.a'
-        );
+        shell()->cd($this->source_dir)
+            ->exec(
+                "{$this->builder->configure_env} ./configure " .
+                "--host={$this->builder->gnu_arch}-apple-darwin " .
+                '--disable-shared ' .
+                '--enable-static ' .
+                '--enable-hardware-optimizations ' .
+                $optimizations .
+                '--prefix='
+            )
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
+            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
+            ->cd(BUILD_LIB_PATH)
+            ->exec('ln -sf libpng16.a libpng.a');
     }
 }

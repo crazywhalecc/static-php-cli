@@ -174,6 +174,7 @@ class LinuxBuilder extends BuilderBase
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
+                '--with-ffi ' .
                 '--enable-cli ' .
                 '--enable-micro=all-static ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
@@ -248,6 +249,9 @@ class LinuxBuilder extends BuilderBase
      */
     public function buildMicro(string $extra_libs, string $use_lld, string $cflags): void
     {
+        if ($this->getPHPVersionID() < 80000) {
+            throw new RuntimeException('phpmicro only support PHP >= 8.0!');
+        }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
             try {

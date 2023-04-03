@@ -26,16 +26,15 @@ class zstd extends MacOSLibraryBase
 
     protected function build()
     {
-        f_passthru(
-            $this->builder->set_x . ' && ' .
-            "cd {$this->source_dir} && " .
-            "make {$this->builder->configure_env} PREFIX='" . BUILD_ROOT_PATH . "' clean" . ' && ' .
-            "make -j{$this->builder->concurrency} " .
-            "{$this->builder->configure_env} " .
-            "PREFIX='" . BUILD_ROOT_PATH . "' " .
-            '-C lib libzstd.a CPPFLAGS_STATLIB=-DZSTD_MULTITHREAD && ' .
-            'cp lib/libzstd.a ' . BUILD_LIB_PATH . ' && ' .
-            'cp lib/zdict.h  lib/zstd_errors.h  lib/zstd.h ' . BUILD_INCLUDE_PATH
-        );
+        shell()->cd($this->source_dir)
+            ->exec("make {$this->builder->configure_env} PREFIX='" . BUILD_ROOT_PATH . "' clean")
+            ->exec(
+                "make -j{$this->builder->concurrency} " .
+                "{$this->builder->configure_env} " .
+                "PREFIX='" . BUILD_ROOT_PATH . "' " .
+                '-C lib libzstd.a CPPFLAGS_STATLIB=-DZSTD_MULTITHREAD'
+            )
+            ->exec('cp lib/libzstd.a ' . BUILD_LIB_PATH)
+            ->exec('cp lib/zdict.h  lib/zstd_errors.h  lib/zstd.h ' . BUILD_INCLUDE_PATH);
     }
 }
