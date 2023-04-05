@@ -23,7 +23,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - run: brew install make bison flex pkg-config autoconf automake unzip xz gzip bzip2
+      - run: brew install make bison flex automake unzip gzip bzip2
       - run: composer update
       - run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all
       - run: ./bin/spc build openssl,redis,ftp,curl,mbstring,pcntl,session,pdo,sqlite3,pdo_sqlite,tokenizer,filter,fileinfo,dom,xml,simplexml,bcmath
