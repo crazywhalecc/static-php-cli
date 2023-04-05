@@ -1,0 +1,33 @@
+name: CI
+
+on: [push]
+
+jobs:
+#  linux:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - run: sudo apt-get install ninja-build
+#      - run: ninja --version
+
+# When windows support is ready, we can use this
+#  windows:
+#    runs-on: windows-latest
+#    steps:
+#      - run: choco install ninja
+#      - run: ninja --version
+
+  mac:
+    strategy:
+      matrix:
+        php_version: [ "8.1", "8.2" ]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: brew install make bison flex pkg-config autoconf automake unzip xz gzip bzip2
+      - run: composer update
+      - run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all
+      - run: ./bin/spc build openssl,redis,ftp,curl,mbstring,pcntl,session,pdo,sqlite3,pdo_sqlite,tokenizer,filter,fileinfo,dom,xml,simplexml,bcmath
+      - uses: actions/upload-artifact@v3
+        with:
+          name: php-${{ matrix.php_version }}
+          path: buildroot/bin/php
