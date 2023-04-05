@@ -25,8 +25,8 @@ jobs:
       - uses: actions/checkout@v2
       - run: brew install make bison flex automake unzip gzip bzip2
       - run: composer update
-      - run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all
-      - run: ./bin/spc build openssl,redis,ftp,curl,mbstring,pcntl,session,pdo,sqlite3,pdo_sqlite,tokenizer,filter,fileinfo,dom,xml,simplexml,bcmath
+      - run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all --debug
+      - run: ./bin/spc build openssl,redis,ftp,curl,mbstring,pcntl,session,pdo,sqlite3,pdo_sqlite,tokenizer,filter,fileinfo,dom,xml,simplexml,bcmath --debug
       - uses: actions/upload-artifact@v3
         with:
           name: php-${{ matrix.php_version }}
