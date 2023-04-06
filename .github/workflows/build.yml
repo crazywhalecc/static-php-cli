@@ -54,9 +54,9 @@ jobs:
           path: source
           key: php-${{ inputs.version }}-dependencies
       - if: ${{ steps.cache-build-deps.outputs.cache-hit != 'true' && inputs.debug == 'true' }}
-        run: ./bin/spc fetch --with-php=${{ inputs.version }} --with-openssl11 --debug ${{ inputs.extensions }}
+        run: ./bin/spc fetch --with-php=${{ inputs.version }} --with-openssl11 --all --debug
       - if: ${{ steps.cache-build-deps.outputs.cache-hit != 'true' && inputs.debug != 'true' }}
-        run: ./bin/spc fetch --with-php=${{ inputs.version }} ${{ inputs.extensions }}
+        run: ./bin/spc fetch --with-php=${{ inputs.version }} --all
 
       
       - if: inputs.debug == 'true'
