@@ -59,8 +59,7 @@ class Downloader
         logger()->debug("finding {$name} source from github {$type} tarball");
         $data = json_decode(self::curlExec(
             url: "https://api.github.com/repos/{$source['repo']}/{$type}",
-            hooks: [[CurlHook::class, 'setupGithubToken']],
-            headers: ['User-Agent' => 'static-php-cli']
+            hooks: [[CurlHook::class, 'setupGithubToken']]
         ), true);
         $url = $data[0]['tarball_url'];
         if (!$url) {
