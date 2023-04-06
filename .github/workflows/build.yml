@@ -27,27 +27,27 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - run: brew install automake gzip
+      - run: brew install openssl automake gzip
       
-#      - id: cache-composer-deps
-#        uses: actions/cache@v3
-#        with:
-#          path: vendor
-#          key: composer-dependencies
-#      - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
-#        run: composer update
-      - run: composer update
+      - id: cache-composer-deps
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-dependencies
+      - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
+        run: composer update
+#      - run: composer update
       
-#      - id: cache-build-deps
-#        uses: actions/cache@v3
-#        with:
-#          path: source
-#          key: php-${{ matrix.php_version }}-dependencies
-#      - if: steps.cache-build-deps.outputs.cache-hit != 'true'
-#        run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all
-      - run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all --debug
+      - id: cache-build-deps
+        uses: actions/cache@v3
+        with:
+          path: source
+          key: php-${{ matrix.php_version }}-dependencies
+      - if: steps.cache-build-deps.outputs.cache-hit != 'true'
+        run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all
+#      - run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all --debug
       
-      - run: ./bin/spc build ftp,curl,mbstring,pcntl,session,pdo,sqlite3,pdo_sqlite,tokenizer,filter,fileinfo,dom,xml,simplexml,bcmath --debug
+      - run: ./bin/spc build openssl,ftp,curl,mbstring,pcntl,session,pdo,sqlite3,pdo_sqlite,tokenizer,filter,fileinfo,dom,xml,simplexml,bcmath
       
       - uses: actions/upload-artifact@v3
         with:
