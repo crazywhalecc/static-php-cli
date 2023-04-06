@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v2
       
       # Install some missing packages
-      - run: brew install automake gzip
+      - run: brew install automake gzip zlib
       
       - id: cache-composer-deps
         uses: actions/cache@v3
