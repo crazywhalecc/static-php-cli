@@ -1,6 +1,14 @@
 name: CI
 
-on: [push]
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: number
+      extensions:
+        required: true
+        type: string
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -20,14 +28,11 @@ jobs:
 #      - run: ninja --version
 
   mac:
-    strategy:
-      matrix:
-        php_version: [ "8.1", "8.2" ]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       
-      - run: brew install openssl automake gzip
+      - run: brew install automake gzip
       
       - id: cache-composer-deps
         uses: actions/cache@v3
@@ -42,14 +47,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: source
-          key: php-${{ matrix.php_version }}-dependencies
+          key: php-${{ inputs.php_version }}-dependencies
       - if: steps.cache-build-deps.outputs.cache-hit != 'true'
-        run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all
-#      - run: ./bin/spc fetch --with-php=${{ matrix.php_version }} --all --debug
+        run: ./bin/spc fetch --with-php=${{ inputs.php_version }} --all
+#      - run: ./bin/spc fetch --with-php=${{ inputs.php_version }} --all --debug
       
-      - run: ./bin/spc build openssl,ftp,curl,mbstring,pcntl,session,pdo,sqlite3,pdo_sqlite,tokenizer,filter,fileinfo,dom,xml,simplexml,bcmath
+      - run: ./bin/spc build ${{ inputs.extensions }}
       
       - uses: actions/upload-artifact@v3
         with:
-          name: php-${{ matrix.php_version }}
+          name: php-${{ inputs.php_version }}
           path: buildroot/bin/php
