@@ -67,7 +67,39 @@ class DependencyUtil
                 self::visitLibDeps($lib, $visited, $sorted);
             }
         }
-        return $sorted;
+
+        $sorted_suggests = [];
+        $visited_suggests = [];
+        $final = [];
+        foreach ($libs as $lib) {
+            if (!isset($visited_suggests[$lib])) {
+                self::visitLibAllDeps($lib, $visited_suggests, $sorted_suggests);
+            }
+        }
+        foreach ($sorted_suggests as $suggest) {
+            if (in_array($suggest, $sorted)) {
+                $final[] = $suggest;
+            }
+        }
+        return $final;
+    }
+
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    private static function visitLibAllDeps(string $lib_name, array &$visited, array &$sorted): void
+    {
+        // 如果已经识别到了，那就不管
+        if (isset($visited[$lib_name])) {
+            return;
+        }
+        $visited[$lib_name] = true;
+        // 遍历该依赖的所有依赖（此处的 getLib 如果检测到当前库不存在的话，会抛出异常）
+        foreach (array_merge(Config::getLib($lib_name, 'lib-depends', []), Config::getLib($lib_name, 'lib-suggests', [])) as $dep) {
+            self::visitLibDeps($dep, $visited, $sorted);
+        }
+        $sorted[] = $lib_name;
     }
 
     /**

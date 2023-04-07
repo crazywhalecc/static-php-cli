@@ -36,9 +36,9 @@
     },
     "enchant": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
-            "enchant2"
+            "enchant"
         ]
     },
     "exif": {
