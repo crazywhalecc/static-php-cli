@@ -49,9 +49,7 @@
             "brotli",
             "nghttp2",
             "zstd",
-            "openssl",
-            "idn2",
-            "psl"
+            "openssl"
         ],
         "lib-suggests-windows": [
             "zlib",
@@ -120,6 +118,35 @@
             "zlib"
         ]
     },
+    "enchant": {
+        "source": "enchant",
+        "static-libs-unix":[
+            "libenchant-2.a"
+        ],
+        "lib-depends": [
+            "glib"
+        ],
+        "headers": [
+            "enchant-2"
+        ]
+    },
+    "glib": {
+        "source": "glib",
+        "static-libs-unix": [
+            "libglib-2.0.a",
+            "libgio-2.0.a",
+            "libgmodule-2.0.a",
+            "libgobject-2.0.a",
+            "libgthread-2.0.a"
+        ],
+        "bin-depends-unix": [
+            "meson",
+            "ninja"
+        ],
+        "headers": [
+            "glib-2.0"
+        ]
+    },
     "libssh2": {
         "source": "libssh2",
         "static-libs-unix": [
@@ -158,7 +185,6 @@
             "libiconv"
         ],
         "lib-suggests": [
-            "icu",
             "xz",
             "zlib"
         ],
