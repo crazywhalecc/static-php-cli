@@ -33,6 +33,7 @@ jobs:
       matrix:
         operating-system: [ ubuntu-latest, macos-latest ]
     name: static-php-cli build on ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.operating-system }}
     steps:
       - uses: actions/checkout@v2
 
