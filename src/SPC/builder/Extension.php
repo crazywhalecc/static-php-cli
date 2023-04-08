@@ -300,7 +300,6 @@ class Extension
             case 'swow':
                 $arg .= $this->builder->getLib('openssl') ? ' --enable-swow-ssl' : ' --disable-swow-ssl';
                 $arg .= $this->builder->getLib('curl') ? ' --enable-swow-curl' : ' --disable-swow-curl';
-                $arg .= ' SWOW_UV_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ';
                 break;
             case 'swoole':
                 if ($this->builder->getLib('openssl')) {

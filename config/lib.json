@@ -164,15 +164,6 @@
             "zlib"
         ]
     },
-    "libuv": {
-        "source": "libuv",
-        "static-libs-unix": [
-            "libuv.a"
-        ],
-        "headers": [
-            "uv.h"
-        ]
-    },
     "libxml2": {
         "source": "libxml2",
         "static-libs-unix": [
@@ -302,7 +293,7 @@
         "headers": [
             "openssl"
         ],
-        "lib-suggests": [
+        "lib-depends": [
             "zlib"
         ]
     },
