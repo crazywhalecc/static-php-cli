@@ -32,15 +32,23 @@ But php-static-cli only requires an environment above PHP 8.0.
 
 ## Usage
 
-After stable release for this project, a single phar and single binary for this tool will be published.
-
-And currently you may need to clone this branch and edit GitHub Action to build.
+Please first select the extension you want to compile based on the extension list below.
 
 ## Supported Extensions
 
 [Support Extension List](/ext-support.md)
 
-### Compilation
+### GitHub Actions Build
+
+Use GitHub Action to easily build a statically compiled PHP and phpmicro, 
+and at the same time define the extensions to be compiled by yourself.
+
+1. Fork me.
+2. Go to the Actions of the project and select `CI`.
+3. Select `Run workflow`, fill in the PHP version you want to compile, the target type, and the list of extensions.
+4. After waiting for about a period of time, enter the corresponding task and get `Artifacts`.
+
+### Manual Build
 
 ```bash
 chmod +x spc

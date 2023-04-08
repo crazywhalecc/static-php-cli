@@ -33,25 +33,35 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 ## 使用（WIP）
 
-> 你正在看的是重构后的 static-php-cli 编译项目，新项目还未完全重构，所以还有大量的扩展没有完成。
-> 你可以阅读使用 bash 编写的仅为 Linux 系统使用的静态编译脚本和 Docker，详见 bash-version 分支。 旧版本未来将会切换为次要版本，提供有限支持。
-
-未来会提供一个直接可使用的 phar 包和一个 phpmicro 打包的二进制文件，你可以直接从 Release 中获取并使用：
+请先根据下方扩展列表选择你要编译的扩展。
 
 ## 支持的扩展情况
 
 [扩展支持列表](/ext-support.md)
 
-### 编译
+### 使用 Actions 构建
+
+使用 GitHub Action 可以方便地构建一个静态编译的 PHP 和 phpmicro，同时可以自行定义要编译的扩展。
+
+1. Fork 本项目。
+2. 进入项目的 Actions，选择 CI。
+3. 选择 `Run workflow`，填入你要编译的 PHP 版本、目标类型、扩展列表。
+4. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
+
+### 手动构建
 
 ```bash
-chmod +x spc
+# 克隆本项目
+git clone https://github.com/crazywhalecc/static-php-cli.git
+cd static-php-cli
+composer update
+chmod +x bin/spc
 # 检查环境依赖，并根据提示的命令安装缺失的编译工具（TODO）
-./spc doctor
+# ./bin/spc doctor
 # 拉取所有依赖库
-./spc fetch --all
+./bin/spc fetch --all
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
-./spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-all
+./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-all
 ```
 
 ### 使用 php-cli
