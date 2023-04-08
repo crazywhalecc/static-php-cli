@@ -16,6 +16,7 @@ class libuv extends MacOSLibraryBase
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
+            ->exec('./autogen.sh')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
                 '--enable-static --disable-shared ' .
