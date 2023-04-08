@@ -11,7 +11,7 @@
 | bz2        | yes                                                                | yes                                                                |         |
 | calendar   | yes                                                                | yes                                                                |         |
 | ctype      | yes                                                                | yes                                                                |         |
-| curl       | untested                                                           | yes                                                                |         |
+| curl       | yes                                                                | yes                                                                |         |
 | date       | yes                                                                | yes                                                                |         | 
 | dba        | yes                                                                | yes                                                                |         | 
 | dom        | yes                                                                | yes                                                                |         |
@@ -32,7 +32,7 @@
 | mongodb    | untested                                                           |                                                                    |         |
 | mysqli     |                                                                    |                                                                    |         |
 | mysqlnd    | yes                                                                | yes                                                                |         |
-| openssl    | untested                                                           | yes                                                                |         |
+| openssl    | yes                                                                | yes                                                                |         |
 | pcntl      | untested                                                           | yes                                                                |         |
 | pdo        | yes                                                                | yes                                                                |         |
 | pdo_mysql  | yes                                                                | yes                                                                |         |
@@ -47,9 +47,9 @@
 | shmop      | untested                                                           |                                                                    |         |
 | simplexml  | untested                                                           | untested                                                           |         |
 | soap       | untested                                                           |                                                                    |         |
-| sockets    | untested                                                           | yes                                                                |         |
+| sockets    | yes                                                                | yes                                                                |         |
 | sqlite3    | untested                                                           | untested                                                           |         |
-| swow       |                                                                    | yes                                                                |         |
+| swow       | yes                                                                | yes                                                                |         |
 | swoole     | [faulty](https://github.com/crazywhalecc/static-php-cli/issues/32) | [faulty](https://github.com/crazywhalecc/static-php-cli/issues/32) |         |
 | tokenizer  | yes                                                                | yes                                                                |         |
 | xml        | yes                                                                | yes                                                                |         |
