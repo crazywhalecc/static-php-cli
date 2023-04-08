@@ -298,6 +298,10 @@
         ],
         "unix-only": true
     },
+    "inotify": {
+        "type": "external",
+        "source": "inotify"
+    },
     "swow": {
         "type": "external",
         "source": "swow",

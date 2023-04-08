@@ -25,8 +25,8 @@
 | gettext    |                                                                    |                                                                    |         |
 | gmp        | untested                                                           | untested                                                           |         |
 | hash       | yes                                                                | yes                                                                |         |
-| iconv      | untested                                                           |                                                                    |         |
-| inotify    |                                                                    |                                                                    |         |
+| iconv      | yes                                                                |                                                                    |         |
+| inotify    | yes                                                                | yes                                                                |         |
 | mbstring   | yes                                                                | yes                                                                |         |
 | mcrypt     |                                                                    | [faulty](https://github.com/crazywhalecc/static-php-cli/issues/32) |         |
 | mongodb    | untested                                                           |                                                                    |         |
