@@ -37,7 +37,7 @@
     },
     "freetype": {
         "type": "filelist",
-        "url": "https://download.savannah.gnu.org/releases/freetype/",
+        "url": "https://download-mirror.savannah.gnu.org/releases/freetype/",
         "regex": "/href=\"(?<file>freetype-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "license": {
             "type": "file",
