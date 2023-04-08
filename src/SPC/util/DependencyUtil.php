@@ -6,6 +6,7 @@ namespace SPC\util;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 
 /**
@@ -19,8 +20,9 @@ class DependencyUtil
      * @param  array               $exts            要获取 libs 依赖的列表
      * @param  array               $additional_libs 额外要添加的库列表，用于激活 lib-suggests 触发的额外库特性
      * @return array               返回一个包含三个数组的数组，第一个是排序后的 ext 列表，第二个是排序后的 lib 列表，第三个是没有传入但是依赖了的 ext 列表
-     * @throws FileSystemException
+     * @throws WrongUsageException
      * @throws RuntimeException
+     * @throws FileSystemException
      */
     public static function getExtLibsByDeps(array $exts, array $additional_libs = []): array
     {
@@ -33,9 +35,22 @@ class DependencyUtil
                 self::visitExtDeps($ext, $visited, $sorted);
             }
         }
+        $sorted_suggests = [];
+        $visited_suggests = [];
+        $final = [];
+        foreach ($exts as $ext) {
+            if (!isset($visited_suggests[$ext])) {
+                self::visitExtAllDeps($ext, $visited_suggests, $sorted_suggests);
+            }
+        }
+        foreach ($sorted_suggests as $suggest) {
+            if (in_array($suggest, $sorted)) {
+                $final[] = $suggest;
+            }
+        }
         $libs = $additional_libs;
         // 遍历每一个 ext 的 libs
-        foreach ($sorted as $ext) {
+        foreach ($final as $ext) {
             if (!in_array($ext, $exts)) {
                 $not_included_exts[] = $ext;
             }
@@ -45,7 +60,7 @@ class DependencyUtil
                 }
             }
         }
-        return [$sorted, self::getLibsByDeps($libs), $not_included_exts];
+        return [$final, self::getLibsByDeps($libs), $not_included_exts];
     }
 
     /**
@@ -55,6 +70,7 @@ class DependencyUtil
      * @return array               排序后的列表
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function getLibsByDeps(array $libs): array
     {
@@ -85,8 +101,9 @@ class DependencyUtil
     }
 
     /**
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     private static function visitLibAllDeps(string $lib_name, array &$visited, array &$sorted): void
     {
@@ -105,6 +122,26 @@ class DependencyUtil
     /**
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
+     */
+    private static function visitExtAllDeps(string $ext_name, array &$visited, array &$sorted): void
+    {
+        // 如果已经识别到了，那就不管
+        if (isset($visited[$ext_name])) {
+            return;
+        }
+        $visited[$ext_name] = true;
+        // 遍历该依赖的所有依赖（此处的 getLib 如果检测到当前库不存在的话，会抛出异常）
+        foreach (array_merge(Config::getExt($ext_name, 'ext-depends', []), Config::getExt($ext_name, 'ext-suggests', [])) as $dep) {
+            self::visitExtDeps($dep, $visited, $sorted);
+        }
+        $sorted[] = $ext_name;
+    }
+
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     * @throws WrongUsageException
      */
     private static function visitLibDeps(string $lib_name, array &$visited, array &$sorted): void
     {
@@ -123,6 +160,7 @@ class DependencyUtil
     /**
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     private static function visitExtDeps(string $ext_name, array &$visited, array &$sorted): void
     {
