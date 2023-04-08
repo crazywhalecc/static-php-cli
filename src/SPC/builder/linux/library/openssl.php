@@ -40,7 +40,7 @@ class openssl extends LinuxLibraryBase
         $ex_lib = '-ldl -pthread';
 
         $env = $this->builder->pkgconf_env . " CFLAGS='{$this->builder->arch_c_flags}'";
-        $env .= " CC='{$this->builder->cc} --static -static-libgcc -idirafter " . BUILD_INCLUDE_PATH .
+        $env .= " CC='{$this->builder->cc} -static -idirafter " . BUILD_INCLUDE_PATH .
             ' -idirafter /usr/include/ ' .
             ' -idirafter /usr/include/' . $this->builder->arch . '-linux-gnu/ ' .
             "' ";
@@ -64,8 +64,8 @@ class openssl extends LinuxLibraryBase
             ->exec(
                 "{$this->builder->configure_env} {$env} ./Configure no-shared {$extra} " .
                 '--prefix=/ ' .
-                "--libdir={$lib} " .
-                '--static -static ' .
+                '--libdir=lib ' .
+                '-static ' .
                 "{$zlib_extra}" .
                 'no-legacy ' .
                 "linux-{$this->builder->arch}{$clang_postfix}"
