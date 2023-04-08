@@ -16,7 +16,7 @@ use Symfony\Component\Console\Command\ListCommand;
  */
 class ConsoleApplication extends Application
 {
-    public const VERSION = '2.0-alpha2';
+    public const VERSION = '2.0-beta1';
 
     /**
      * @throws \ReflectionException
