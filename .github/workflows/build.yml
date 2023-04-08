@@ -49,31 +49,31 @@ jobs:
           echo "SPC_BUILD_OS=linux" >> $GITHUB_ENV
 
       # Cache composer dependencies
-      - id: cache-${{ env.SPC_BUILD_OS }}-composer-deps
+      - id: cache-${{ matrix.operating-system }}-composer-deps
         uses: actions/cache@v3
         with:
           path: vendor
-          key: ${{ env.SPC_BUILD_OS }}-composer-dependencies
+          key: ${{ matrix.operating-system }}-composer-dependencies
 
       # If there's no Composer cache, install dependencies
-      - if: steps.cache-${{ env.SPC_BUILD_OS }}-composer-deps.outputs.cache-hit != 'true'
+      - if: steps.cache-${{ matrix.operating-system }}-composer-deps.outputs.cache-hit != 'true'
         run: composer update --no-dev
 
       # Cache downloaded source
-      - id: cache-${{ env.SPC_BUILD_OS }}-build-deps
+      - id: cache-${{ matrix.operating-system }}-build-deps
         uses: actions/cache@v3
         with:
           path: source
-          key: ${{ env.SPC_BUILD_OS }}-php-${{ inputs.version }}-dependencies
+          key: ${{ matrix.operating-system }}-php-${{ inputs.version }}-dependencies
 
       # With or without debug
       - if: inputs.debug == true
         run: echo "SPC_BUILD_DEBUG='--debug'" >> $GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
-      - if: ${{ steps.cache-${{ env.SPC_BUILD_OS }}-build-deps.outputs.cache-hit != 'true' && inputs.debug == true }}
+      - if: ${{ steps.cache-${{ matrix.operating-system }}-build-deps.outputs.cache-hit != 'true' && inputs.debug == true }}
         run: ./bin/spc fetch --with-php=${{ inputs.version }} --all --debug
-      - if: ${{ steps.cache-${{ env.SPC_BUILD_OS }}-build-deps.outputs.cache-hit != 'true' && inputs.debug == false }}
+      - if: ${{ steps.cache-${{ matrix.operating-system }}-build-deps.outputs.cache-hit != 'true' && inputs.debug == false }}
         run: ./bin/spc fetch --with-php=${{ inputs.version }} --all
 
       # Build target select: cli, micro or both
