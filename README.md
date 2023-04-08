@@ -8,6 +8,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 注：只能编译 CLI 模式，暂不支持 CGI 和 FPM 模式。
 
+> 此分支为重构的新版，如果你在找纯 Bash 编写的旧版本，请到 [bash-version 分支](https://github.com/crazywhalecc/static-php-cli/tree/bash-version)。
+
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 
 ## 编译环境需求

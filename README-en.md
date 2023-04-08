@@ -9,6 +9,8 @@ This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicr
 
 Note: only support cli SAPI, not support fpm, cgi.
 
+> This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
+
 ## Compilation Requirements
 
 Yes, this project is written in PHP, pretty funny.
