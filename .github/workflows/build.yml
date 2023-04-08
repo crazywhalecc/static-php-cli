@@ -11,6 +11,14 @@ on:
           - '8.2'
           - '8.1'
           - '8.0'
+      target:
+        required: true
+        default: 'cli'
+        type: choice
+        options:
+          - 'cli'
+          - 'micro'
+          - 'all'
       extensions:
         type: string
       debug:
@@ -20,58 +28,98 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-#  linux:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - run: sudo apt-get install ninja-build
-#      - run: ninja --version
+  #  linux:
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - run: sudo apt-get install ninja-build
+  #      - run: ninja --version
 
-# When windows support is ready, we can use this
-#  windows:
-#    runs-on: windows-latest
-#    steps:
-#      - run: choco install ninja
-#      - run: ninja --version
+  # When windows support is ready, we can use this
+  #  windows:
+  #    runs-on: windows-latest
+  #    steps:
+  #      - run: choco install ninja
+  #      - run: ninja --version
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
+      - run: sudo apt install musl-tools -y
+
+      - run: composer update --no-dev
+
+      # If there's no dependencies cache, fetch sources, with or without debug
+      - run: ./bin/spc fetch --with-php=${{ inputs.version }} --all --debug
+
+      # Run the build, with or without debug
+      - if: inputs.debug == true
+        run: echo "SPC_BUILD_DEBUG='--debug'" >> $GITHUB_ENV
+
+      - if: ${{ inputs.target == 'micro' || inputs.target == 'all' }}
+        run: echo "SPC_BUILD_TARGET='--build-${{ inputs.target }}' >> $GITHUB_ENV
+
+      - run: ./bin/spc build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_TARGET }}
+
+      - if: ${{ inputs.target == 'cli' || inputs.target == 'all' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: php-${{ inputs.version }}-linux
+          path: buildroot/bin/php
+
+      - if: ${{ inputs.target == 'micro' || inputs.target == 'all' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro-${{ inputs.version }}-linux
+          path: buildroot/bin/micro.sfx
   mac:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       # Install some missing packages
       - run: brew install automake gzip
-      
+
       - id: cache-composer-deps
         uses: actions/cache@v3
         with:
           path: vendor
           key: composer-dependencies
-      
+
       # If there's no Composer cache, install dependencies
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
         run: composer update
-      
+
       - id: cache-build-deps
         uses: actions/cache@v3
         with:
           path: source
           key: php-${{ inputs.version }}-dependencies
-          
+
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: ${{ steps.cache-build-deps.outputs.cache-hit != 'true' && inputs.debug == true }}
         run: ./bin/spc fetch --with-php=${{ inputs.version }} --with-openssl11 --all --debug
-        
+
       - if: ${{ steps.cache-build-deps.outputs.cache-hit != 'true' && inputs.debug == false }}
         run: ./bin/spc fetch --with-php=${{ inputs.version }} --all
 
       # Run the build, with or without debug
       - if: inputs.debug == true
-        run: ./bin/spc build ${{ inputs.extensions }} --debug
+        run: echo "SPC_BUILD_DEBUG='--debug'" >> $GITHUB_ENV
 
-      - if: inputs.debug == false
-        run: ./bin/spc build ${{ inputs.extensions }}
-      
-      - uses: actions/upload-artifact@v3
+      - if: ${{ inputs.target == 'micro' || inputs.target == 'all' }}
+        run: echo "SPC_BUILD_TARGET='--build-${{ inputs.target }}' >> $GITHUB_ENV
+
+      - run: ./bin/spc build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_TARGET }}
+
+      - if: ${{ inputs.target == 'cli' || inputs.target == 'all' }}
+        uses: actions/upload-artifact@v3
         with:
-          name: php-${{ inputs.version }}
+          name: php-${{ inputs.version }}-macos
           path: buildroot/bin/php
+
+      - if: ${{ inputs.target == 'micro' || inputs.target == 'all' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro-${{ inputs.version }}-macos
+          path: buildroot/bin/micro.sfx
