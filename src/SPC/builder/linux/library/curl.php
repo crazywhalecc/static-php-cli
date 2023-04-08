@@ -81,8 +81,8 @@ EOF
         // lib:zlib
         $zlib = $this->builder->getLib('zlib');
         if ($zlib instanceof LinuxLibraryBase) {
-            $extra .= '-DZLIB_LIBRARIES="' . $zlib->getStaticLibFiles(style: 'cmake') . '" ' .
-                '-DZLIB_INCLUDE_DIRS="' . BUILD_INCLUDE_PATH . '" ';
+            $extra .= '-DZLIB_LIBRARY="' . $zlib->getStaticLibFiles(style: 'cmake') . '" ' .
+                '-DZLIB_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
         }
         // lib:libssh2
         $libssh2 = $this->builder->getLib('libssh2');
@@ -145,13 +145,16 @@ EOF
             ->exec("{$this->builder->configure_env} cmake " .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DBUILD_CURL_EXE=OFF ' .
                 $extra .
-                '-DCMAKE_INSTALL_PREFIX=/ ' .
+                "-DCMAKE_INSTALL_PREFIX={$destdir} " .
                 "-DCMAKE_INSTALL_LIBDIR={$lib} " .
                 "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '..')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec("make install DESTDIR='{$destdir}'");
+        shell()->cd(BUILD_LIB_PATH . '/cmake/CURL/')
+            ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"" . BUILD_LIB_PATH . "/libcurl.a\"|g' CURLTargets-release.cmake");
     }
 }
