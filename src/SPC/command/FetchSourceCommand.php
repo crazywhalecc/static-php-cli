@@ -170,7 +170,7 @@ class FetchSourceCommand extends BaseCommand
             if ($input->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
             } else {
-                logger()->emergency($e->getMessage() . ', previous message: ' . $e->getPrevious()->getMessage());
+                logger()->emergency($e->getMessage() . ', previous message: ' . $e->getPrevious()?->getMessage());
             }
             return 1;
         }

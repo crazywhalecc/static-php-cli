@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        default: '8.2'
+        type: choice
+        options:
+          - '8.2'
+          - '8.1'
+          - '8.0'
+      extensions:
+        type: string
+      debug:
+        type: boolean
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+#  linux:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - run: sudo apt-get install ninja-build
+#      - run: ninja --version
+
+# When windows support is ready, we can use this
+#  windows:
+#    runs-on: windows-latest
+#    steps:
+#      - run: choco install ninja
+#      - run: ninja --version
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      # Install some missing packages
+      - run: brew install automake gzip
+      
+      - id: cache-composer-deps
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-dependencies
+      
+      # If there's no Composer cache, install dependencies
+      - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
+        run: composer update
+      
+      - id: cache-build-deps
+        uses: actions/cache@v3
+        with:
+          path: source
+          key: php-${{ inputs.version }}-dependencies
+          
+      # If there's no dependencies cache, fetch sources, with or without debug
+      - if: ${{ steps.cache-build-deps.outputs.cache-hit != 'true' && inputs.debug == true }}
+        run: ./bin/spc fetch --with-php=${{ inputs.version }} --with-openssl11 --all --debug
+        
+      - if: ${{ steps.cache-build-deps.outputs.cache-hit != 'true' && inputs.debug == false }}
+        run: ./bin/spc fetch --with-php=${{ inputs.version }} --all
+
+      # Run the build, with or without debug
+      - if: inputs.debug == true
+        run: ./bin/spc build ${{ inputs.extensions }} --debug
+
+      - if: inputs.debug == false
+        run: ./bin/spc build ${{ inputs.extensions }}
+      
+      - uses: actions/upload-artifact@v3
+        with:
+          name: php-${{ inputs.version }}
+          path: buildroot/bin/php
