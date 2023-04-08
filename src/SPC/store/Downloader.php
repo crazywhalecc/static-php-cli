@@ -322,10 +322,10 @@ class Downloader
 
         $cmd = "curl -sfSL {$methodArg} {$headerArg} \"{$url}\"";
         if (getenv('CACHE_API_EXEC') === 'yes') {
-            if (!file_exists(SOURCE_PATH . '/.curl_exec_cache')) {
+            if (!file_exists(DOWNLOAD_PATH . '/.curl_exec_cache')) {
                 $cache = [];
             } else {
-                $cache = json_decode(file_get_contents(SOURCE_PATH . '/.curl_exec_cache'), true);
+                $cache = json_decode(file_get_contents(DOWNLOAD_PATH . '/.curl_exec_cache'), true);
             }
             if (isset($cache[$cmd]) && $cache[$cmd]['expire'] >= time()) {
                 return $cache[$cmd]['cache'];
@@ -336,7 +336,7 @@ class Downloader
             }
             $cache[$cmd]['cache'] = implode("\n", $output);
             $cache[$cmd]['expire'] = time() + 3600;
-            file_put_contents(SOURCE_PATH . '/.curl_exec_cache', json_encode($cache));
+            file_put_contents(DOWNLOAD_PATH . '/.curl_exec_cache', json_encode($cache));
             return $cache[$cmd]['cache'];
         }
         f_exec($cmd, $output, $ret);
