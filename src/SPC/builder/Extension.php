@@ -113,6 +113,17 @@ class Extension
     }
 
     /**
+     * returns extension dist name
+     */
+    public function getDistName(): string
+    {
+        return match ($this->name) {
+            'mbregex' => 'mbstring',
+            default => $this->name,
+        };
+    }
+
+    /**
      * @throws RuntimeException
      */
     protected function addLibraryDependency(string $name, bool $optional = false): void
@@ -183,6 +194,21 @@ class Extension
                     $arg .= ' --with-event-openssl --with-openssl-dir="' . BUILD_ROOT_PATH . '"';
                 }
                 break;*/
+            case 'enchant':
+                $glibs = [
+                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgio-2.0.a',
+                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libglib-2.0.a',
+                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgmodule-2.0.a',
+                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgobject-2.0.a',
+                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgthread-2.0.a',
+                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libintl.a',
+                ];
+                $arg = ' --with-enchant="' . BUILD_ROOT_PATH . '"';
+                $arg .= ' ENCHANT2_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '/enchant-2"';
+                $arg .= ' ENCHANT2_LIBS="' . $this->getLibFilesString() . '"';
+                $arg .= ' GLIB_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '"';
+                $arg .= ' GLIB_LIBS="' . implode(' ', $glibs) . '"';
+                break;
             case 'iconv':
                 $arg = ' --with-iconv="' . BUILD_ROOT_PATH . '"';
                 break;
