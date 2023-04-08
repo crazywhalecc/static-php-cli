@@ -118,18 +118,6 @@
             "zlib"
         ]
     },
-    "enchant": {
-        "source": "enchant",
-        "static-libs-unix":[
-            "libenchant-2.a"
-        ],
-        "lib-depends": [
-            "glib"
-        ],
-        "headers": [
-            "enchant-2"
-        ]
-    },
     "glib": {
         "source": "glib",
         "static-libs-unix": [

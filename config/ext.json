@@ -34,13 +34,6 @@
             "zlib"
         ]
     },
-    "enchant": {
-        "type": "builtin",
-        "arg-type": "custom",
-        "lib-depends": [
-            "enchant"
-        ]
-    },
     "exif": {
         "type": "builtin"
     },
