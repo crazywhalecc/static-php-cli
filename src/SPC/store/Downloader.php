@@ -295,8 +295,8 @@ class Downloader
         // 从官网直接下载
         return [
             'type' => 'url',
-            // 'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
-            'url' => "https://mirrors.zhamao.xin/php/php-{$version}.tar.gz",
+            'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
+            // 'url' => "https://mirrors.zhamao.xin/php/php-{$version}.tar.gz",
         ];
     }
 
