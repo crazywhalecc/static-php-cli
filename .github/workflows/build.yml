@@ -57,7 +57,7 @@ jobs:
         run: echo "SPC_BUILD_DEBUG='--debug'" >> $GITHUB_ENV
 
       - if: ${{ inputs.target == 'micro' || inputs.target == 'all' }}
-        run: echo "SPC_BUILD_TARGET='--build-${{ inputs.target }}' >> $GITHUB_ENV
+        run: echo "SPC_BUILD_TARGET='--build-${{ inputs.target }}'" >> $GITHUB_ENV
 
       - run: ./bin/spc build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_TARGET }}
 
