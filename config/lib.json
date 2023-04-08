@@ -66,6 +66,16 @@
             "SystemConfiguration"
         ]
     },
+    "freetype": {
+        "source": "freetype",
+        "static-libs-unix": [
+            "libfreetype.a"
+        ],
+        "headers-unix": [
+            "freetype2/freetype/freetype.h",
+            "freetype2/ft2build.h"
+        ]
+    },
     "gmp": {
         "source": "gmp",
         "static-libs-unix": [
@@ -96,7 +106,23 @@
             "ffitarget.h"
         ]
     },
-
+    "libiconv": {
+        "source": "libiconv",
+        "static-libs-unix": [
+            "libiconv.a"
+        ],
+        "headers": [
+            "iconv.h",
+            "libcharset.h",
+            "localcharset.h"
+        ]
+    },
+    "libmcrypt": {
+        "source": "libmcrypt",
+        "static-libs-unix": [
+            "libmcrypt.a"
+        ]
+    },
     "libpng": {
         "source": "libpng",
         "static-libs-unix": [
@@ -118,23 +144,6 @@
             "zlib"
         ]
     },
-    "glib": {
-        "source": "glib",
-        "static-libs-unix": [
-            "libglib-2.0.a",
-            "libgio-2.0.a",
-            "libgmodule-2.0.a",
-            "libgobject-2.0.a",
-            "libgthread-2.0.a"
-        ],
-        "bin-depends-unix": [
-            "meson",
-            "ninja"
-        ],
-        "headers": [
-            "glib-2.0"
-        ]
-    },
     "libssh2": {
         "source": "libssh2",
         "static-libs-unix": [
@@ -153,6 +162,15 @@
         ],
         "lib-suggests": [
             "zlib"
+        ]
+    },
+    "libuv": {
+        "source": "libuv",
+        "static-libs-unix": [
+            "libuv.a"
+        ],
+        "headers": [
+            "uv.h"
         ]
     },
     "libxml2": {
@@ -181,17 +199,6 @@
             "xz",
             "zlib",
             "pthreads4w"
-        ]
-    },
-    "libiconv": {
-        "source": "libiconv",
-        "static-libs-unix": [
-            "libiconv.a"
-        ],
-        "headers": [
-            "iconv.h",
-            "libcharset.h",
-            "localcharset.h"
         ]
     },
     "libyaml": {
@@ -231,26 +238,10 @@
             "openssl"
         ]
     },
-    "libmcrypt": {
-        "source": "libmcrypt",
-        "static-libs-unix": [
-            "libmcrypt.a"
-        ]
-    },
     "mcrypt": {
         "source": "mcrypt",
         "static-libs-unix": [
             "libmcrypt.a"
-        ]
-    },
-    "freetype": {
-        "source": "freetype",
-        "static-libs-unix": [
-            "libfreetype.a"
-        ],
-        "headers-unix": [
-            "freetype2/freetype/freetype.h",
-            "freetype2/ft2build.h"
         ]
     },
     "nghttp2": {
@@ -280,15 +271,6 @@
             "jemalloc",
             "systemd",
             "cunit"
-        ]
-    },
-    "libuv": {
-        "source": "libuv",
-        "static-libs-unix": [
-            "libuv.a"
-        ],
-        "headers": [
-            "uv.h"
         ]
     },
     "onig": {

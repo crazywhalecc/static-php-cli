@@ -215,6 +215,10 @@
         "type": "builtin",
         "unix-only": true
     },
+    "protobuf": {
+        "type": "external",
+        "source": "protobuf"
+    },
     "pspell": {
         "type": "builtin",
         "arg-type": "with",
@@ -355,10 +359,6 @@
         "lib-depends": [
             "libxslt"
         ]
-    },
-    "protobuf": {
-        "type": "external",
-        "source": "protobuf"
     },
     "yaml": {
         "type": "external",
