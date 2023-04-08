@@ -174,7 +174,6 @@ class LinuxBuilder extends BuilderBase
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
-                '--with-ffi ' .
                 '--enable-cli ' .
                 '--enable-micro=all-static ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
