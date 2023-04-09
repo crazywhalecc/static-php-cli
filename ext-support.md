@@ -24,7 +24,6 @@
 | gd         | yes, untested                                                      | yes                                                                |         |
 | gettext    |                                                                    |                                                                    |         |
 | gmp        | yes, untested                                                      | yes, untested                                                      |         |
-| hash       | yes                                                                | yes                                                                |         |
 | iconv      | yes                                                                |                                                                    |         |
 | inotify    | yes                                                                | yes                                                                |         |
 | mbstring   | yes                                                                | yes                                                                |         |
