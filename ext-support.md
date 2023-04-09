@@ -49,7 +49,7 @@
 | soap       | untested                                                           |                                                                    |         |
 | sockets    | yes                                                                | yes                                                                |         |
 | sqlite3    | untested                                                           | untested                                                           |         |
-| swow       | yes                                                                | yes                                                                |         |
+| swow       | yes                                                                | [faulty](https://github.com/crazywhalecc/static-php-cli/issues/32) |         |
 | swoole     | [faulty](https://github.com/crazywhalecc/static-php-cli/issues/32) | [faulty](https://github.com/crazywhalecc/static-php-cli/issues/32) |         |
 | tokenizer  | yes                                                                | yes                                                                |         |
 | xml        | yes                                                                | yes                                                                |         |
