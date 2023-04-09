@@ -10,7 +10,9 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 > 此分支为重构的新版，如果你在找纯 Bash 编写的旧版本，请到 [bash-version 分支](https://github.com/crazywhalecc/static-php-cli/tree/bash-version)。
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
+[![Version](https://img.shields.io/badge/Version-2.0--beta1-green.svg?style=flat-square)]()
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build.yml?branch=refactor&label=Actions%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 
 ## 编译环境需求
 

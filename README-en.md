@@ -11,6 +11,10 @@ Note: only support cli SAPI, not support fpm, cgi.
 
 > This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
 
+[![Version](https://img.shields.io/badge/Version-2.0--beta1-green.svg?style=flat-square)]()
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build.yml?branch=refactor&label=Actions%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+
 ## Compilation Requirements
 
 Yes, this project is written in PHP, pretty funny.
