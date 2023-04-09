@@ -48,6 +48,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 3. 选择 `Run workflow`，填入你要编译的 PHP 版本、目标类型、扩展列表。
 4. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
 
+如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
+
 ### 手动构建
 
 ```bash
@@ -62,6 +64,19 @@ chmod +x bin/spc
 ./bin/spc fetch --all
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-all
+```
+
+你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.4 ~ 8.2：
+
+```bash
+./bin/spc fetch --with-php=8.2 --all
+```
+
+如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：
+
+```bash
+./bin/spc build openssl --debug
+./bin/spc fetch --all --debug
 ```
 
 ### 使用 php-cli
@@ -121,9 +136,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 ## 开源协议
 
-本项目依据旧版本惯例采用 MIT License 开源，新版本采用了部分项目的源代码做参考，特别感谢：
+本项目依据旧版本惯例采用 MIT License 开源，自身的部分代码引用或修改自以下项目：
 
-- [dixyes/phpmicro](https://github.com/dixyes/phpmicro)（Apache 2.0 LICENSE）
 - [dixyes/lwmbs](https://github.com/dixyes/lwmbs)（木兰宽松许可证）
 - [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE、SWOOLE-CLI LICENSE）
 

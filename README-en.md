@@ -48,16 +48,35 @@ and at the same time define the extensions to be compiled by yourself.
 3. Select `Run workflow`, fill in the PHP version you want to compile, the target type, and the list of extensions.
 4. After waiting for about a period of time, enter the corresponding task and get `Artifacts`.
 
+If you enable `debug`, all logs will be output at build time, including compiled logs, for troubleshooting.
+
 ### Manual Build
 
 ```bash
-chmod +x spc
-# Check system tool dependencies, and show instructions for fixing
-./spc doctor
+# Clone first
+git clone https://github.com/crazywhalecc/static-php-cli.git
+cd static-php-cli
+composer update
+chmod +x bin/spc
+# Check system tool dependencies, and show instructions for fixing (TODO)
+# ./spc doctor
 # fetch all libraries
-./spc fetch --all
+./bin/spc fetch --all
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
-./spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-all
+./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-all
+```
+
+You can also use the parameter `--with-php=x.y` to specify the downloaded PHP version, currently supports 7.4 ~ 8.2:
+
+```bash
+./bin/spc fetch --with-php=8.2 --all
+```
+
+If anything goes wrong, use `--debug` option to display full terminal output:
+
+```bash
+./bin/spc build openssl --debug
+./bin/spc fetch --all --debug
 ```
 
 ### php-cli Usage
@@ -128,8 +147,7 @@ The basic principles for contributing are as follows:
 ## Open-Source License
 
 This project is based on the tradition of using the MIT License for old versions, 
-while the new version references source code from some other projects. 
-Special thanks to:
+while the new version references source code from some other projects:
 
 - [dixyes/lwmbs](https://github.com/dixyes/lwmbs) (Mulun Permissive License)
 - [swoole/swoole-cli](https://github.com/swoole/swoole-cli) (Apache 2.0 LICENSE+SWOOLE-CLI LICENSE)
