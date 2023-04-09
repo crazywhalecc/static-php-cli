@@ -55,6 +55,7 @@ class FetchSourceCommand extends BaseCommand
         try {
             // 匹配版本
             $ver = $this->php_major_ver = $input->getOption('with-php') ?? '8.1';
+            define('SPC_BUILD_PHP_VERSION', $ver);
             preg_match('/^\d+\.\d+$/', $ver, $matches);
             if (!$matches) {
                 logger()->error("bad version arg: {$ver}, x.y required!");
@@ -142,9 +143,7 @@ class FetchSourceCommand extends BaseCommand
             f_mkdir(DOWNLOAD_PATH);
 
             // 下载 PHP
-            logger()->info('Fetching PHP source');
-            Downloader::fetchSource('php-src', Downloader::getLatestPHPInfo($ver));
-
+            array_unshift($chosen_sources, 'php-src');
             // 下载别的依赖资源
             $cnt = count($chosen_sources);
             $ni = 0;

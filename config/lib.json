@@ -66,6 +66,12 @@
             "SystemConfiguration"
         ]
     },
+    "postgresql": {
+        "source": "postgresql",
+        "static-libs-unix": [
+            "libpg.a"
+        ]
+    },
     "freetype": {
         "source": "freetype",
         "static-libs-unix": [

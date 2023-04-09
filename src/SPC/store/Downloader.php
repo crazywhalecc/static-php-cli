@@ -8,6 +8,7 @@ use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\source\CustomSourceBase;
 
 /**
  * 资源下载器
@@ -144,7 +145,7 @@ class Downloader
         }
         uksort($versions, 'version_compare');
 
-        return [$source['url'] . end($versions), end($versions)];
+        return [$source['url'] . end($versions), end($versions), key($versions)];
     }
 
     /**
@@ -266,6 +267,14 @@ class Downloader
                     break;
                 case 'git':             // 通过拉回 Git 仓库的形式拉取
                     self::downloadGit($name, $source['url'], $source['rev'], $source['path'] ?? null);
+                    break;
+                case 'custom':
+                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
+                    foreach ($classes as $class) {
+                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
+                            (new $class())->fetch();
+                        }
+                    }
                     break;
                 default:
                     throw new DownloaderException('unknown source type: ' . $source['type']);

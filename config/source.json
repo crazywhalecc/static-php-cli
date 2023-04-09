@@ -44,6 +44,13 @@
             "path": "LICENSE.TXT"
         }
     },
+    "postgresql": {
+        "type": "custom",
+        "license": {
+            "type": "file",
+            "path": "COPYRIGHT"
+        }
+    },
     "gmp": {
         "type": "filelist",
         "url": "https://gmplib.org/download/gmp/",
@@ -219,6 +226,13 @@
         "type": "git",
         "rev": "master",
         "url": "https://git.code.sf.net/p/pthreads4w/code",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "php-src": {
+        "type": "custom",
         "license": {
             "type": "file",
             "path": "LICENSE"
