@@ -45,6 +45,7 @@ class libpng extends LinuxLibraryBase
         Patcher::patchUnixLibpng();
 
         shell()->cd($this->source_dir)
+            ->exec('chmod +x ./configure')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
                 "--host={$this->builder->gnu_arch}-unknown-linux " .

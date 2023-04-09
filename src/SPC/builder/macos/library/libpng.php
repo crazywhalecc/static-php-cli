@@ -44,6 +44,7 @@ class libpng extends MacOSLibraryBase
         // patch configure
         Patcher::patchUnixLibpng();
         shell()->cd($this->source_dir)
+            ->exec('chmod +x ./configure')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
                 "--host={$this->builder->gnu_arch}-apple-darwin " .
