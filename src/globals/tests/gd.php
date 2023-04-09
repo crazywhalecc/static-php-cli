@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 $info = gd_info();
-// jpeg will be supported later
-$true = true; // $info['JPEG Support'] ?? false;
+$true = $info['JPEG Support'] ?? true; // JPEG support needs libjpeg library, and I will add it later. TODO
 $true = $true ? ($info['PNG Support'] ?? false) : false;
 exit($true ? 0 : 1);
