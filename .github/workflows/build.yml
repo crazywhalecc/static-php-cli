@@ -3,6 +3,12 @@ name: CI
 on:
   workflow_dispatch:
     inputs:
+      operating-system:
+        required: true
+        type: choice
+        options:
+          - ubuntu-latest
+          - macos-latest
       version:
         required: true
         default: '8.2'
@@ -30,22 +36,19 @@ env:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        operating-system: [ ubuntu-latest, macos-latest ]
-    name: static-php-cli build on ${{ matrix.operating-system }}
-    runs-on: ${{ matrix.operating-system }}
+    name: build on ${{ inputs.operating-system }}
+    runs-on: ${{ inputs.operating-system }}
     steps:
       - uses: actions/checkout@v2
 
       # Install macOS missing packages and mark os suffix
-      - if: ${{ matrix.operating-system == 'macos-latest' }}
+      - if: ${{ inputs.operating-system == 'macos-latest' }}
         run: |
           brew install automake gzip
           echo "SPC_BUILD_OS=macos" >> $GITHUB_ENV
 
       # Install Ubuntu missing packages and mark os suffix
-      - if: ${{ matrix.operating-system == 'ubuntu-latest' }}
+      - if: ${{ inputs.operating-system == 'ubuntu-latest' }}
         run: |
           sudo apt install musl-tools -y
           echo "SPC_BUILD_OS=linux" >> $GITHUB_ENV
