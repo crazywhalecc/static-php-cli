@@ -33,11 +33,11 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
     - 支持编译版本: 7.4, 8.0, 8.1, 8.2
     - 项目依赖版本：8.0, 8.1, 8.2
 
-## 使用（WIP）
+## 使用
 
 请先根据下方扩展列表选择你要编译的扩展。
 
-## 支持的扩展情况
+### 支持的扩展情况
 
 [扩展支持列表](/ext-support.md)
 
