@@ -36,7 +36,7 @@ env:
 
 jobs:
   build:
-    name: build on ${{ inputs.operating-system }}
+    name: build ${{ inputs.version }} on ${{ inputs.operating-system }}
     runs-on: ${{ inputs.operating-system }}
     steps:
       - uses: actions/checkout@v2
