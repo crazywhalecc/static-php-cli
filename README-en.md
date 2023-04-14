@@ -7,7 +7,7 @@ Compile a purely static PHP binary file with various extensions to make PHP-cli 
 You can also use the micro binary file to package PHP source code and binary files into one for distribution!
 This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
 
-Note: only support cli SAPI, not support fpm, cgi.
+Note: only support cli, not support fpm, cgi.
 
 > This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
 
@@ -18,7 +18,7 @@ Note: only support cli SAPI, not support fpm, cgi.
 ## Compilation Requirements
 
 Yes, this project is written in PHP, pretty funny.
-But php-static-cli only requires an environment above PHP 8.0.
+But php-static-cli runtime only requires an environment above PHP 8.0 and tokenizer extension.
 
 - Linux
   - Supported arch: aarch64, amd64
@@ -38,7 +38,7 @@ But php-static-cli only requires an environment above PHP 8.0.
 
 Please first select the extension you want to compile based on the extension list below.
 
-## Supported Extensions
+### Supported Extensions
 
 [Support Extension List](/ext-support.md)
 
