@@ -42,7 +42,7 @@ jobs:
     name: build ${{ inputs.version }} on ${{ inputs.operating-system }}
     runs-on: ${{ inputs.operating-system }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Install macOS missing packages and mark os suffix
       - if: ${{ inputs.operating-system == 'macos-latest' }}
