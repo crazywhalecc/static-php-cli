@@ -52,6 +52,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
 
+目前构建是基于 GitHub 官方的 Runner，使用 `macos-latest` 编译后的 PHP 为 Intel 架构，使用 `ubuntu-latest` 编译后的架构为 `x86_64` 架构。 如需编译其他架构，请手动构建。
+
 ### 手动构建
 
 ```bash

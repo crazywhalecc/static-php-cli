@@ -5,12 +5,14 @@ on:
     inputs:
       operating-system:
         required: true
+        description: Compile target OS
         type: choice
         options:
           - ubuntu-latest
           - macos-latest
       version:
         required: true
+        description: php version to compile
         default: '8.2'
         type: choice
         options:
@@ -20,6 +22,7 @@ on:
           - '7.4'
       target:
         required: true
+        description: which SAPI to deploy
         default: 'cli'
         type: choice
         options:
