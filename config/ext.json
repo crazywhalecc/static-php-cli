@@ -4,7 +4,7 @@
     },
     "bz2": {
         "type": "builtin",
-        "arg-type": "custom",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "bzip2"
         ]
@@ -17,7 +17,7 @@
     },
     "curl": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
             "curl"
         ]
@@ -28,6 +28,7 @@
     },
     "dom": {
         "type": "builtin",
+        "arg-type": "custom",
         "arg-type-windows": "with",
         "lib-depends": [
             "libxml2",
@@ -38,7 +39,7 @@
         "type": "builtin"
     },
     "ffi": {
-        "arg-type": "with",
+        "arg-type": "custom",
         "type": "builtin",
         "lib-depends": [
             "libffi"
@@ -58,6 +59,7 @@
     },
     "gd": {
         "type": "builtin",
+        "arg-type": "custom",
         "arg-type-windows": "with",
         "lib-depends": [
             "zlib",
@@ -97,14 +99,14 @@
     },
     "gmp": {
         "type": "builtin",
-        "arg-type": "none",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "gmp"
         ]
     },
     "iconv": {
         "type": "builtin",
-        "arg-type": "custom",
+        "arg-type": "with-prefix",
         "lib-depends-windows": [
             "libiconv"
         ]
@@ -140,6 +142,7 @@
     },
     "mbstring": {
         "type": "builtin",
+        "arg-type": "custom",
         "lib-depends": [
             "onig"
         ]
@@ -164,7 +167,7 @@
     },
     "openssl": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
             "openssl"
         ]
@@ -207,7 +210,7 @@
     },
     "phar": {
         "type": "builtin",
-        "lib-suggests": [
+        "ext-depends": [
             "zlib"
         ]
     },
@@ -239,7 +242,8 @@
     },
     "redis": {
         "type": "external",
-        "source": "redis"
+        "source": "redis",
+        "arg-type": "custom"
     },
     "session": {
         "type": "builtin"
@@ -249,6 +253,7 @@
     },
     "simplexml": {
         "type": "builtin",
+        "arg-type": "custom",
         "arg-type-windows": "with",
         "lib-depends": [
             "libxml2"
@@ -263,6 +268,7 @@
     },
     "soap": {
         "type": "builtin",
+        "arg-type": "custom",
         "lib-depends": [
             "libxml2"
         ]
@@ -279,7 +285,7 @@
     },
     "sqlite3": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
             "sqlite"
         ]
@@ -287,6 +293,7 @@
     "swoole": {
         "type": "external",
         "source": "swoole",
+        "arg-type": "custom",
         "lib-depends": [
             "openssl"
         ],
@@ -305,6 +312,7 @@
     "swow": {
         "type": "external",
         "source": "swow",
+        "arg-type": "custom",
         "lib-suggests": [
             "openssl",
             "curl"
@@ -338,6 +346,7 @@
     },
     "xml": {
         "type": "builtin",
+        "arg-type": "custom",
         "arg-type-windows": "with",
         "lib-depends": [
             "libxml2"
@@ -345,12 +354,14 @@
     },
     "xmlreader": {
         "type": "builtin",
+        "arg-type": "custom",
         "lib-depends": [
             "libxml2"
         ]
     },
     "xmlwriter": {
         "type": "builtin",
+        "arg-type": "custom",
         "lib-depends": [
             "libxml2"
         ]
@@ -365,14 +376,14 @@
     "yaml": {
         "type": "external",
         "source": "yaml",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "libyaml"
         ]
     },
     "zip": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "arg-type-windows": "enable",
         "lib-depends": [
             "libzip"
@@ -389,6 +400,7 @@
     "zstd": {
         "type": "external",
         "source": "ext-zstd",
+        "arg-type": "custom",
         "lib-depends": [
             "zstd"
         ]

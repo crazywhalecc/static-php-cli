@@ -14,8 +14,9 @@ class Extension
     protected array $dependencies = [];
 
     /**
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function __construct(protected string $name, protected BuilderBase $builder)
     {
@@ -34,13 +35,14 @@ class Extension
      * 获取开启该扩展的 PHP 编译添加的参数
      *
      * @throws FileSystemException|RuntimeException
+     * @throws WrongUsageException
      */
     public function getConfigureArg(): string
     {
         $arg = $this->getEnableArg();
         switch (PHP_OS_FAMILY) {
             case 'Windows':
-                $arg .= $this->getWindowsConfigureArg();
+                $arg = $this->getWindowsConfigureArg();
                 break;
             case 'Darwin':
             case 'Linux':
@@ -55,15 +57,17 @@ class Extension
      *
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function getEnableArg(): string
     {
         $_name = str_replace('_', '-', $this->name);
         return match ($arg_type = Config::getExt($this->name, 'arg-type', 'enable')) {
-            'enable' => '--enable-' . $_name,
-            'with' => '--with-' . $_name,
+            'enable' => '--enable-' . $_name . ' ',
+            'with' => '--with-' . $_name . ' ',
+            'with-prefix' => '--with-' . $_name . '="' . BUILD_ROOT_PATH . '" ',
             'none', 'custom' => '',
-            default => throw new WrongUsageException("argType does not accept {$arg_type}, use [enable/with] ."),
+            default => throw new WrongUsageException("argType does not accept {$arg_type}, use [enable/with/with-prefix] ."),
         };
     }
 
@@ -84,6 +88,7 @@ class Extension
      *
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function checkDependency(): static
     {
@@ -117,10 +122,18 @@ class Extension
      */
     public function getDistName(): string
     {
-        return match ($this->name) {
-            'mbregex' => 'mbstring',
-            default => $this->name,
-        };
+        return $this->name;
+    }
+
+    public function getWindowsConfigureArg(): string
+    {
+        return '';
+        // Windows is not supported yet
+    }
+
+    public function getUnixConfigureArg(): string
+    {
+        return '';
     }
 
     /**
@@ -153,164 +166,6 @@ class Extension
         } else {
             $this->dependencies[] = $depExt;
         }
-    }
-
-    private function getWindowsConfigureArg(): string
-    {
-        $arg = '';
-        switch ($this->name) {
-            case 'redis':
-                // $arg = '--enable-redis';
-                // if ($this->builder->getLib('zstd')) {
-                //     $arg .= ' --enable-redis-zstd --with-libzstd ';
-                // }
-                break;
-            case 'xml':
-            case 'soap':
-            case 'xmlreader':
-            case 'xmlwriter':
-            case 'dom':
-                $arg .= ' --with-libxml ';
-                break;
-            case 'swow':
-                if ($this->builder->getLib('openssl')) {
-                    $arg .= ' --enable-swow-ssl';
-                }
-                if ($this->builder->getLib('curl')) {
-                    $arg .= ' --enable-swow-curl';
-                }
-                break;
-        }
-        return $arg;
-    }
-
-    private function getUnixConfigureArg(): string
-    {
-        $arg = '';
-        switch ($this->name) {
-            /*case 'event':
-                $arg = ' --with-event-core --with-event-libevent-dir="' . BUILD_ROOT_PATH . '"';
-                if ($this->builder->getLib('openssl')) {
-                    $arg .= ' --with-event-openssl --with-openssl-dir="' . BUILD_ROOT_PATH . '"';
-                }
-                break;*/
-            case 'enchant':
-                $glibs = [
-                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgio-2.0.a',
-                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libglib-2.0.a',
-                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgmodule-2.0.a',
-                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgobject-2.0.a',
-                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgthread-2.0.a',
-                    '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libintl.a',
-                ];
-                $arg = ' --with-enchant="' . BUILD_ROOT_PATH . '"';
-                $arg .= ' ENCHANT2_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '/enchant-2"';
-                $arg .= ' ENCHANT2_LIBS="' . $this->getLibFilesString() . '"';
-                $arg .= ' GLIB_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '"';
-                $arg .= ' GLIB_LIBS="' . implode(' ', $glibs) . '"';
-                break;
-            case 'iconv':
-                $arg = ' --with-iconv="' . BUILD_ROOT_PATH . '"';
-                break;
-            case 'mbstring':
-                $arg = ' --disable-mbregex ONIG_CFLAGS=-I"' . BUILD_ROOT_PATH . '" ' .
-                'ONIG_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'gmp':
-                $arg = ' --with-gmp="' . BUILD_ROOT_PATH . '" ';
-                break;
-            case 'sqlite3':
-                $arg = ' --with-sqlite3="' . BUILD_ROOT_PATH . '" ' .
-                'SQLITE_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                'SQLITE_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'redis':
-                $arg = ' --enable-redis --disable-redis-session';
-                if ($this->builder->getLib('zstd')) {
-                    $arg .= ' --enable-redis-zstd --with-libzstd="' . BUILD_ROOT_PATH . '" ';
-                }
-                break;
-            case 'yaml':
-                $arg .= ' --with-yaml="' . BUILD_ROOT_PATH . '" ';
-                break;
-            case 'zstd':
-                $arg .= ' --with-libzstd';
-                break;
-            case 'bz2':
-                $arg = ' --with-bz2="' . BUILD_ROOT_PATH . '" ';
-                break;
-            case 'openssl':
-                $arg .= ' ' .
-                    'OPENSSL_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                    'OPENSSL_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'curl':
-                $arg .= ' ' .
-                    'CURL_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                    'CURL_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'gd':
-                if ($this->builder->getLib('freetype')) {
-                    $arg .= ' --with-freetype ' .
-                    'FREETYPE2_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '/freetype2" ' .
-                    'FREETYPE2_LIBS="' . $this->getLibFilesString() . '" ';
-                }
-                $arg .= ' ' .
-                    'PNG_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                    'PNG_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-                // TODO: other libraries
-            case 'phar':
-            case 'zlib':
-                $arg .= ' ' .
-                    'ZLIB_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                    'ZLIB_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'xml': // xml may use expat
-                if ($this->getLibraryDependencies()['expat'] ?? null) {
-                    $arg .= ' --with-expat="' . BUILD_ROOT_PATH . '" ' .
-                        'EXPAT_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                        'EXPAT_LIBS="' . $this->getLibFilesString() . '" ';
-                    break;
-                }
-                // no break
-            case 'soap':
-            case 'xmlreader':
-            case 'xmlwriter':
-            case 'dom':
-                $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '" ' .
-                    'LIBXML_CFLAGS=-I"' . realpath('include/libxml2') . '" ' .
-                    'LIBXML_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'ffi':
-                $arg .= ' ' .
-                    'FFI_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                    'FFI_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'zip':
-                $arg .= ' ' .
-                    'LIBZIP_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                    'LIBZIP_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'mbregex':
-                $arg .= ' ' .
-                    'ONIG_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-                    'ONIG_LIBS="' . $this->getLibFilesString() . '" ';
-                break;
-            case 'swow':
-                $arg .= $this->builder->getLib('openssl') ? ' --enable-swow-ssl' : ' --disable-swow-ssl';
-                $arg .= $this->builder->getLib('curl') ? ' --enable-swow-curl' : ' --disable-swow-curl';
-                break;
-            case 'swoole':
-                if ($this->builder->getLib('openssl')) {
-                    $arg .= ' --enable-openssl';
-                } else {
-                    $arg .= ' --disable-openssl --without-openssl';
-                }
-                // curl hook is buggy for static php
-                $arg .= ' --disable-swoole-curl';
-        }
-        return $arg;
     }
 
     private function getLibraryDependencies(bool $recursive = false): array
