@@ -49,7 +49,7 @@ and at the same time define the extensions to be compiled by yourself.
 
 1. Fork me.
 2. Go to the Actions of the project and select `CI`.
-3. Select `Run workflow`, fill in the PHP version you want to compile, the target type, and the list of extensions.
+3. Select `Run workflow`, fill in the PHP version you want to compile, the target type, and the list of extensions. (extensions comma separated, e.g. `bcmath,curl,mbstring`)
 4. After waiting for about a period of time, enter the corresponding task and get `Artifacts`.
 
 If you enable `debug`, all logs will be output at build time, including compiled logs, for troubleshooting.

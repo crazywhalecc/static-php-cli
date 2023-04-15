@@ -47,7 +47,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 1. Fork 本项目。
 2. 进入项目的 Actions，选择 CI。
-3. 选择 `Run workflow`，填入你要编译的 PHP 版本、目标类型、扩展列表。
+3. 选择 `Run workflow`，填入你要编译的 PHP 版本、目标类型、扩展列表。（扩展列表使用英文逗号分割，例如 `bcmath,curl,mbstring`）
 4. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
 
 如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
