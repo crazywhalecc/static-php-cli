@@ -19,19 +19,17 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 是的，本项目采用 PHP 编写，编译前需要一个 PHP 环境，比较滑稽。
 但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含 tokenizer 扩展和 PHP 版本大于等于 8.0 即可。
 
-- Linux
-    - 支持架构: aarch64, amd64
-    - 支持发行版: alpine, ubuntu, centos
-    - 依赖工具: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, gzip, bzip2, cmake
-- macOS
-    - 支持架构: arm64, x86_64
-    - 依赖工具: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, xz, gzip, bzip2, cmake
-- Windows
-    - 支持架构: x86_64
-    - 依赖工具: (TODO)
-- PHP
-    - 支持编译版本: 7.4, 8.0, 8.1, 8.2
-    - 项目依赖版本：8.0, 8.1, 8.2
+下面是架构支持情况，`CI` 代表支持 GitHub Action 构建，`Local` 代表支持本地构建，空 代表暂不支持。
+
+|         | x86_64    | aarch64 |
+|---------|-----------|---------|
+| macOS   | CI, Local | Local   |
+| Linux   | CI, Local | Local   |
+| Windows |           |         |
+
+> linux-aarch64 and macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
+
+目前支持编译的 PHP 版本为：`7.4`，`8.0`，`8.1`，`8.2`。
 
 ## 使用
 
@@ -51,8 +49,6 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 4. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
 
 如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
-
-目前构建是基于 GitHub 官方的 Runner，使用 `macos-latest` 编译后的 PHP 为 Intel 架构，使用 `ubuntu-latest` 编译后的架构为 `x86_64` 架构。 如需编译其他架构，请手动构建。
 
 ### 手动构建
 

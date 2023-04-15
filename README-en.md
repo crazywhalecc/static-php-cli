@@ -20,19 +20,18 @@ Note: only support cli, not support fpm, cgi.
 Yes, this project is written in PHP, pretty funny.
 But php-static-cli runtime only requires an environment above PHP 8.0 and tokenizer extension.
 
-- Linux
-  - Supported arch: aarch64, amd64
-  - Supported distributions: alpine, ubuntu, centos
-  - Requirements: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, gzip, bzip2, cmake
-- macOS
-  - Supported arch: arm64, x86_64
-  - Requirements: make, bison, flex, pkg-config, git, autoconf, automake, tar, unzip, xz, gzip, bzip2, cmake
-- Windows
-  - Supported arch: x86_64
-  - Requirements: (TODO)
-- PHP
-  - Supported compile version: 7.4, 8.0, 8.1, 8.2
-  - Self required version: 8.0, 8.1, 8.2
+Here is the architecture support status, where `CI` represents support for GitHub Action builds, 
+`Local` represents support for local builds, and blank represents not currently supported.
+
+|         | x86_64    | aarch64 |
+|---------|-----------|---------|
+| macOS   | CI, Local | Local   |
+| Linux   | CI, Local | Local   |
+| Windows |           |         |
+
+> linux-aarch64 and macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
+
+Currently supported PHP versions for compilation are: 7.4, 8.0, 8.1, 8.2.
 
 ## Usage
 
@@ -54,11 +53,8 @@ and at the same time define the extensions to be compiled by yourself.
 
 If you enable `debug`, all logs will be output at build time, including compiled logs, for troubleshooting.
 
-At present, the CI build is based on the official Runner of GitHub, and limitations:
-
 - When using ubuntu-latest, it will build linux-x86_64 binary.
 - When using macos-latest, it will build macOS-x86_64 binary.
-- linux-aarch64 and macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
 ### Manual Build
 
