@@ -8,6 +8,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\util\CustomExt;
 use SPC\util\DependencyUtil;
 
 abstract class BuilderBase
@@ -152,8 +153,10 @@ abstract class BuilderBase
      */
     public function proveExts(array $extensions): void
     {
+        CustomExt::loadCustomExt();
         foreach ($extensions as $extension) {
-            $ext = new Extension($extension, $this);
+            $class = CustomExt::getExtClass($extension);
+            $ext = new $class($extension, $this);
             $this->addExt($ext);
         }
 
@@ -188,7 +191,7 @@ abstract class BuilderBase
     {
         $ret = [];
         foreach ($this->exts as $ext) {
-            $ret[] = $ext->getConfigureArg();
+            $ret[] = trim($ext->getConfigureArg());
         }
         logger()->info('Using configure: ' . implode(' ', $ret));
         return implode(' ', $ret);
