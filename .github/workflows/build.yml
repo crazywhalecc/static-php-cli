@@ -105,7 +105,7 @@ jobs:
       # Upload extensions metadata
       - uses: actions/upload-artifact@v3
         with:
-          name: license-files.zip
+          name: license-files
           path: buildroot/license/
       - uses: actions/upload-artifact@v3
         with:
