@@ -54,6 +54,12 @@ and at the same time define the extensions to be compiled by yourself.
 
 If you enable `debug`, all logs will be output at build time, including compiled logs, for troubleshooting.
 
+At present, the CI build is based on the official Runner of GitHub, and limitations:
+
+- When using ubuntu-latest, it will build linux-x86_64 binary.
+- When using macos-latest, it will build macOS-x86_64 binary.
+- linux-aarch64 and macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
+
 ### Manual Build
 
 ```bash
