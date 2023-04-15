@@ -41,6 +41,7 @@ class LinuxBuilder extends BuilderBase
 
     /**
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
     {

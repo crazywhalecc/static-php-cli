@@ -151,11 +151,7 @@ class MacOSBuilder extends BuilderBase
         // patch before configure
         Patcher::patchPHPBeforeConfigure($this);
 
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            './buildconf --force'
-        );
+        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
         Patcher::patchPHPConfigure($this);
 
@@ -163,25 +159,24 @@ class MacOSBuilder extends BuilderBase
             $extra_libs .= ' -liconv';
         }
 
-        f_passthru(
-            $this->set_x . ' && ' .
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            './configure ' .
-            '--prefix= ' .
-            '--with-valgrind=no ' .     // 不检测内存泄漏
-            '--enable-shared=no ' .
-            '--enable-static=yes ' .
-            "--host={$this->gnu_arch}-apple-darwin " .
-            "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
-            '--disable-all ' .
-            '--disable-cgi ' .
-            '--disable-phpdbg ' .
-            '--enable-cli ' .
-            '--enable-micro ' .
-            ($this->zts ? '--enable-zts' : '') . ' ' .
-            $this->makeExtensionArgs() . ' ' .
-            $this->configure_env
-        );
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec(
+                './configure ' .
+                '--prefix= ' .
+                '--with-valgrind=no ' .     // 不检测内存泄漏
+                '--enable-shared=no ' .
+                '--enable-static=yes ' .
+                "--host={$this->gnu_arch}-apple-darwin " .
+                "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
+                '--disable-all ' .
+                '--disable-cgi ' .
+                '--disable-phpdbg ' .
+                '--enable-cli ' .
+                '--enable-micro ' .
+                ($this->zts ? '--enable-zts' : '') . ' ' .
+                $this->makeExtensionArgs() . ' ' .
+                $this->configure_env
+            );
 
         $this->cleanMake();
 
