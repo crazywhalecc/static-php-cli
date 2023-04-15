@@ -98,3 +98,15 @@ jobs:
         with:
           name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/micro.sfx
+
+      # Upload extensions metadata
+      - uses: actions/upload-artifact@v3
+        with:
+          name: license-files.zip
+          path: buildroot/license/
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-meta
+          path: |
+            buildroot/build-extensions.json
+            buildroot/build-libraries.json

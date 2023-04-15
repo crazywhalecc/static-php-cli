@@ -8,6 +8,7 @@ use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
 use SPC\util\DependencyUtil;
+use SPC\util\LicenseDumper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -73,6 +74,13 @@ class BuildCliCommand extends BuildCommand
             if ($rule !== BUILD_MICRO_NONE) {
                 logger()->info('phpmicro binary path: ' . BUILD_ROOT_PATH . '/bin/micro.sfx');
             }
+            // 导出相关元数据
+            file_put_contents(BUILD_ROOT_PATH . '/build-extensions.json', json_encode($extensions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            file_put_contents(BUILD_ROOT_PATH . '/build-libraries.json', json_encode($libraries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            // 导出 LICENSE
+            $dumper = new LicenseDumper();
+            $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
+            logger()->info('License path: ' . BUILD_ROOT_PATH . '/license/');
             return 0;
         } catch (WrongUsageException $e) {
             logger()->critical($e->getMessage());
