@@ -356,32 +356,46 @@ class FileSystem
      *
      * @throws FileSystemException
      */
-    public static function removeDir(string $dir, bool $throw_on_fail = false): bool
+    public static function removeDir(string $dir): bool
     {
         $dir = FileSystem::convertPath($dir);
-        logger()->warning('Removing path recursively: "' . $dir . '"');
-        switch (PHP_OS_FAMILY) {
-            case 'Windows':
-            case 'WINNT':
-            case 'Cygwin':
-                f_exec('rmdir /s /g "' . $dir . '"', $out, $ret);
-                break;
-            case 'Darwin':
-            case 'Linux':
-                f_exec('rm -rf ' . escapeshellarg($dir), $out, $ret);
-                break;
-            default:
-                throw new FileSystemException('Unsupported OS type: ' . PHP_OS_FAMILY);
+        logger()->debug('Removing path recursively: "' . $dir . '"');
+        // 不是目录不扫，直接 false 处理
+        if (!is_dir($dir)) {
+            logger()->warning('Scan dir failed, no such directory.');
+            return false;
         }
-        if ($ret !== 0 && $throw_on_fail) {
-            throw new FileSystemException('Cannot remove dir "' . $dir . '"');
+        logger()->debug('scanning directory ' . $dir);
+        // 套上 zm_dir
+        $scan_list = scandir($dir);
+        if ($scan_list === false) {
+            logger()->warning('Scan dir failed, cannot scan directory: ' . $dir);
+            return false;
         }
-        return $ret === 0;
+        // 遍历目录
+        foreach ($scan_list as $v) {
+            // Unix 系统排除这俩目录
+            if ($v == '.' || $v == '..') {
+                continue;
+            }
+            $sub_file = self::convertPath($dir . '/' . $v);
+            if (is_dir($sub_file)) {
+                # 如果是 目录 且 递推 , 则递推添加下级文件
+                if (!self::removeDir($sub_file)) {
+                    return false;
+                }
+            } elseif (is_link($sub_file) || is_file($sub_file)) {
+                if (!unlink($sub_file)) {
+                    return false;
+                }
+            }
+        }
+        return rmdir($dir);
     }
 
     public static function createDir(string $path): void
     {
-        if (!is_dir($path) && !mkdir($path, 0755, true) && !is_dir($path)) {
+        if (!is_dir($path) && !f_mkdir($path, 0755, true) && !is_dir($path)) {
             throw new FileSystemException(sprintf('无法建立目录：%s', $path));
         }
     }
