@@ -7,8 +7,6 @@ Compile a purely static PHP binary file with various extensions to make PHP-cli 
 You can also use the micro binary file to package PHP source code and binary files into one for distribution!
 This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
 
-Note: only support cli, not support fpm, cgi.
-
 > This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
 
 [![Version](https://img.shields.io/badge/Version-2.0--beta1-green.svg?style=flat-square)]()
@@ -117,7 +115,7 @@ echo "<?php echo 'Hello world' . PHP_EOL;" > code.php
 cat micro.sfx code.php > single-app && chmod +x single-app
 ./single-app
 
-# If packing a PHAR file, simply replace code.php with the Phar file path.
+# If packing a PHAR file, replace code.php with the Phar file path.
 ```
 
 > In some cases, PHAR files may not run in a micro environment.
@@ -130,6 +128,7 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [X] Exception handler
 - [ ] Windows support
 - [X] PHP 7.4 support
+- [ ] fpm support
 
 More functions and features are coming soon, Bugs and TODOs: https://github.com/crazywhalecc/static-php-cli/issues/32
 
