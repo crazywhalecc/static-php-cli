@@ -1,7 +1,7 @@
 # 快速启动容器环境
-> 提供了2款构建环境
-> 任意一款都可以
 
+> 提供了 debian 11 构建 和 alpine 构建环境
+> 任意选一个就可以 
 
 ## debian 11 构建环境
 
@@ -19,6 +19,7 @@ sh quickstart/linux/x86_64/debian-11-init.sh
 ```
 
 ## aline 构建环境
+
 ```bash
 
 # 启动 alpine 容器环境
