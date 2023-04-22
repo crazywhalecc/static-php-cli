@@ -32,3 +32,5 @@ chmod +x bin/spc
 
 ./bin/spc build:libs libgif --debug --cc=clang --cxx=clang++
 ./bin/spc build:libs libwebp --debug --cc=clang --cxx=clang++
+
+./bin/spc build "bcmath,tokenizer,pdo,ftp,gd" --cc=clang --cxx=clang++  --debug

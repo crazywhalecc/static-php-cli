@@ -20,6 +20,7 @@ class gd extends Extension
         }
         $arg .= ' PNG_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
             'PNG_LIBS="' . $this->getLibFilesString() . '"';
+        $arg .= ' --with-jpeg --with-freetype --with-webp';
         return $arg;
     }
 }

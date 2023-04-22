@@ -155,16 +155,24 @@ class LinuxBuilder extends BuilderBase
             default:
                 throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
         }
+        $envs = "{$envs} CFLAGS='{$cflags}' ";
 
-        $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
+        $preprocessors = ' set -exu ;  export PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig/:/lib/pkgconfig:/usr/lib/pkgconfig ;';
+        $preprocessors .= '  export PATH=' . BUILD_ROOT_PATH . '/bin/:$PATH ;';
+        $preprocessors .= ' export PACKAGES="libbrotlicommon libbrotlidec libbrotlienc libzip  libjpeg libturbojpeg freetype2 libpng libpng16 libwebp "  ;';
+        $preprocessors .= ' export CPPFLAGS="$(pkg-config --cflags-only-I --static $PACKAGES ) "  ;';
+        $preprocessors .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES )  -lz -lpng16 -lwebpmux -lwebpdemux -lwebpdecoder  -lwebp -lm -pthread   -lstdc++ " ;';
+        $preprocessors .= ' export LD=ld.lld ;';
 
-        Patcher::patchPHPBeforeConfigure($this);
+        $use_lld .= ' -L' . BUILD_LIB_PATH;
+        # Patcher::patchPHPBeforeConfigure($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
-        Patcher::patchPHPConfigure($this);
+        # Patcher::patchPHPConfigure($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec($preprocessors)
             ->exec(
                 './configure ' .
                 '--prefix= ' .
@@ -191,13 +199,13 @@ class LinuxBuilder extends BuilderBase
 
         if ($bloat) {
             logger()->info('bloat linking');
-            $extra_libs = "-Wl,--whole-archive {$extra_libs} -Wl,--no-whole-archive";
+            $extra_libs = "-Wl,--whole-archive {$extra_libs} -Wl,--no-whole-archive ";
         }
 
         switch ($build_micro_rule) {
             case BUILD_MICRO_NONE:
                 logger()->info('building cli');
-                $this->buildCli($extra_libs, $use_lld);
+                $this->buildCli($extra_libs, $use_lld, $preprocessors);
                 break;
             case BUILD_MICRO_ONLY:
                 logger()->info('building micro');
@@ -224,10 +232,11 @@ class LinuxBuilder extends BuilderBase
     /**
      * @throws RuntimeException
      */
-    public function buildCli(string $extra_libs, string $use_lld): void
+    public function buildCli(string $extra_libs, string $use_lld, string $preprocessors = ''): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            ->exec($preprocessors)
             ->exec(
                 'make -j' . $this->concurrency .
                 ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
