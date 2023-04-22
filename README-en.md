@@ -111,7 +111,7 @@ If anything goes wrong, use `--debug` option to display full terminal output:
 
 ### php-cli Usage
 
-> php-cli is a single static binary, which is similar with Go, Rust single-file binary.
+> php-cli is a single static binary, you can use it like normal php installed on your system.
 
 When using the parameter `--build-all` or not adding the `--build-micro` parameter, 
 the final compilation result will output a binary file named `./php`, 
