@@ -39,6 +39,8 @@ If you are using English, see [English README](README-en.md).
 
 [扩展支持列表](/ext-support.md)
 
+> 如果这里没有你需要的扩展，可以提交 Issue。
+
 ### 使用 Actions 构建
 
 使用 GitHub Action 可以方便地构建一个静态编译的 PHP 和 phpmicro，同时可以自行定义要编译的扩展。

@@ -39,6 +39,8 @@ Please first select the extension you want to compile based on the extension lis
 
 [Supported Extension List](/ext-support.md)
 
+> If there is no extension you need here, you can submit an issue.
+
 ### GitHub Actions Build
 
 Use GitHub Action to easily build a statically compiled PHP and phpmicro, 
