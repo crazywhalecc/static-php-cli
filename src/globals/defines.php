@@ -6,15 +6,15 @@ declare(strict_types=1);
 use ZM\Logger\ConsoleLogger;
 
 define('WORKING_DIR', getcwd());
-const ROOT_DIR = __DIR__ . '/../..';
+define('ROOT_DIR', realpath(__DIR__ . '/../..'));
 
 // 程序启动时间
 define('START_TIME', microtime(true));
 
 // 规定目录
-define('BUILD_ROOT_PATH', is_string($a = getenv('BUILD_ROOT_PATH')) ? $a : (WORKING_DIR . '/buildroot'));
-define('SOURCE_PATH', is_string($a = getenv('SOURCE_PATH')) ? $a : (WORKING_DIR . '/source'));
-define('DOWNLOAD_PATH', is_string($a = getenv('DOWNLOAD_PATH')) ? $a : (WORKING_DIR . '/downloads'));
+define('BUILD_ROOT_PATH', is_string($a = getenv('BUILD_ROOT_PATH')) ? $a : (ROOT_DIR . '/buildroot'));
+define('SOURCE_PATH', is_string($a = getenv('SOURCE_PATH')) ? $a : (ROOT_DIR . '/source'));
+define('DOWNLOAD_PATH', is_string($a = getenv('DOWNLOAD_PATH')) ? $a : (ROOT_DIR . '/downloads'));
 define('BUILD_LIB_PATH', is_string($a = getenv('INSTALL_LIB_PATH')) ? $a : (BUILD_ROOT_PATH . '/lib'));
 const BUILD_DEPS_PATH = BUILD_ROOT_PATH;
 define('BUILD_INCLUDE_PATH', is_string($a = getenv('INSTALL_INCLUDE_PATH')) ? $a : (BUILD_ROOT_PATH . '/include'));

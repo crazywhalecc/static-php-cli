@@ -24,21 +24,24 @@ class libjpeg extends LinuxLibraryBase
                 <<<EOF
             {$this->builder->configure_env} \\
             cmake -G"Unix Makefiles"   \\
-            -DCMAKE_INSTALL_PREFIX=/ \\
-            -DCMAKE_INSTALL_LIBDIR={$lib} \\
-            -DCMAKE_INSTALL_INCLUDEDIR={$include} \\
+            -DCMAKE_INSTALL_PREFIX={$destdir} \\
+            -DCMAKE_INSTALL_BINDIR={$destdir}/bin/ \\
+            -DCMAKE_INSTALL_LIBDIR={$destdir}/lib \\
+            -DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include \\
             -DCMAKE_BUILD_TYPE=Release  \\
-            -DBUILD_SHARED_LIBS=OFF  \\
-            -DBUILD_STATIC_LIBS=ON 
+            -DENABLE_SHARED=OFF  \\
+            -DENABLE_STATIC=ON  \\
+            -DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} 
+         
 EOF
             )
             ->exec("make  -j {$this->builder->concurrency}")
             ->exec('make install')
             ->exec(
                 <<<EOF
-            rm -rf {$lib}/*.so.*
-            rm -rf {$lib}/lib/*.so
-            rm -rf {$lib}/lib/*.dylib
+            rm -rf {$destdir}/lib/*.so.*
+            rm -rf {$destdir}/lib/*.so
+            rm -rf {$destdir}/lib/*.dylib
 EOF
             );
     }

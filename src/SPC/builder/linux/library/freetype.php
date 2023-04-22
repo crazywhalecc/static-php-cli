@@ -28,7 +28,7 @@ class freetype extends LinuxLibraryBase
             CPPFLAGS="$(pkg-config --cflags-only-I --static zlib libpng  libbrotlicommon  libbrotlidec  libbrotlienc)" \\
             LDFLAGS="$(pkg-config  --libs-only-L   --static zlib libpng  libbrotlicommon  libbrotlidec  libbrotlienc)" \\
             LIBS="$(pkg-config     --libs-only-l   --static zlib libpng  libbrotlicommon  libbrotlidec  libbrotlienc)" \\
-            ./configure --prefix=/ \\
+            ./configure --prefix={$destdir} \\
             --enable-static \\
             --disable-shared \\
             --with-zlib=yes \\

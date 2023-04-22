@@ -26,3 +26,9 @@ chmod +x bin/spc
 
 
 ./bin/spc build gd --debug --cc=clang --cxx=clang++
+
+./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++
+./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++ --clean
+
+./bin/spc build:libs libgif --debug --cc=clang --cxx=clang++
+./bin/spc build:libs libwebp --debug --cc=clang --cxx=clang++

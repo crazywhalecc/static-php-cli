@@ -21,11 +21,7 @@ class libgif extends LinuxLibraryBase
 
         shell()->cd($this->source_dir)
             ->exec("make  -j {$this->builder->concurrency} libgif.a")
-            ->exec(
-                <<<EOF
-                cp libgif.a {$lib}/libgif.a
-                cp gif_lib.h {$include}/gif_lib.h
-EOF
-            );
+            ->exec("cp libgif.a {$destdir}/lib//libgif.a")
+            ->exec("cp gif_lib.h {$destdir}/include/gif_lib.h");
     }
 }

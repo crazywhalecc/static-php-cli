@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
-use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 
 class libwebp extends LinuxLibraryBase
@@ -13,7 +12,6 @@ class libwebp extends LinuxLibraryBase
 
     /**
      * @throws RuntimeException
-     * @throws FileSystemException
      */
     public function build()
     {
@@ -32,7 +30,7 @@ class libwebp extends LinuxLibraryBase
                 CPPFLAGS="$(pkg-config  --cflags-only-I  --static libpng libjpeg )" \\
                 LDFLAGS="$(pkg-config --libs-only-L      --static libpng libjpeg )" \\
                 LIBS="$(pkg-config --libs-only-l         --static libpng libjpeg )" \\
-                ./configure --prefix=/ \\
+                ./configure --prefix={$destdir} \\
                 --enable-static --disable-shared \\
                 --enable-libwebpdecoder \\
                 --enable-libwebpextras \\

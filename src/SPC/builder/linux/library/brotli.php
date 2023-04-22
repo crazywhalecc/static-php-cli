@@ -42,18 +42,23 @@ class brotli extends LinuxLibraryBase
                 $this->builder->configure_env . ' cmake ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DCMAKE_INSTALL_PREFIX=/ ' .
-                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
+                "-DCMAKE_INSTALL_PREFIX={$destdir} " .
+                "-DCMAKE_INSTALL_LIBDIR={$destdir}/lib " .
+                "-DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include " .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '..'
             )
-            ->exec("cmake --build . -j {$this->builder->concurrency} --target brotlicommon-static")
-            ->exec("cmake --build . -j {$this->builder->concurrency} --target brotlidec-static")
-            ->exec("cmake --build . -j {$this->builder->concurrency} --target brotlienc-static")
-            ->exec('cp libbrotlidec-static.a ' . BUILD_LIB_PATH)
-            ->exec('cp libbrotlienc-static.a ' . BUILD_LIB_PATH)
-            ->exec('cp libbrotlicommon-static.a ' . BUILD_LIB_PATH)
-            ->exec('cp -r ../c/include/brotli ' . BUILD_INCLUDE_PATH);
+            ->exec("cmake --build . --config Release --target install -j {$this->builder->concurrency}")
+            ->exec(
+                <<<EOF
+            cp  -f {$destdir}/lib/libbrotlicommon-static.a {$destdir}/lib/libbrotli.a
+            mv     {$destdir}/lib/libbrotlicommon-static.a {$destdir}/lib/libbrotlicommon.a
+            mv     {$destdir}/lib/libbrotlienc-static.a    {$destdir}/lib/libbrotlienc.a
+            mv     {$destdir}/lib/libbrotlidec-static.a    {$destdir}/lib/libbrotlidec.a
+            rm -rf {$destdir}/lib/*.so.*
+            rm -rf {$destdir}/lib/*.so
+            rm -rf {$destdir}/lib/*.dylib
+EOF
+            );
     }
 }
