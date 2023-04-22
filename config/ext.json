@@ -63,7 +63,11 @@
         "arg-type-windows": "with",
         "lib-depends": [
             "zlib",
-            "libpng"
+            "libpng",
+            "libjpeg",
+            "freetype",
+            "libgif",
+            "libwebp"
         ],
         "ext-depends": [
             "zlib"

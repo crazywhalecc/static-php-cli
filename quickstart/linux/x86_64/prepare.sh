@@ -23,3 +23,6 @@ chmod +x bin/spc
 #./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=gcc --cxx=g++  --debug
 
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=clang --cxx=clang++  --debug
+
+
+./bin/spc build gd --debug --cc=clang --cxx=clang++

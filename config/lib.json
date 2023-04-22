@@ -150,6 +150,78 @@
             "zlib"
         ]
     },
+    "libjpeg": {
+        "source": "libjpeg",
+        "static-libs-unix": [
+
+        ],
+        "static-libs-windows": [
+
+        ],
+        "headers-unix": [
+
+        ],
+        "headers-windows": [
+
+        ],
+        "lib-depends": [
+
+        ]
+    },
+    "libgif": {
+        "source": "libgif",
+        "static-libs-unix": [
+
+        ],
+        "static-libs-windows": [
+
+        ],
+        "headers-unix": [
+
+        ],
+        "headers-windows": [
+
+        ],
+        "lib-depends": [
+
+        ]
+    },
+    "libwebp": {
+        "source": "libwebp",
+        "static-libs-unix": [
+
+        ],
+        "static-libs-windows": [
+
+        ],
+        "headers-unix": [
+
+        ],
+        "headers-windows": [
+
+        ],
+        "lib-depends": [
+
+        ]
+    },
+    "freetype": {
+        "source": "freetype",
+        "static-libs-unix": [
+
+        ],
+        "static-libs-windows": [
+
+        ],
+        "headers-unix": [
+
+        ],
+        "headers-windows": [
+
+        ],
+        "lib-depends": [
+
+        ]
+    },
     "libssh2": {
         "source": "libssh2",
         "static-libs-unix": [
