@@ -37,7 +37,7 @@ Please first select the extension you want to compile based on the extension lis
 
 ### Supported Extensions
 
-[Support Extension List](/ext-support.md)
+[Supported Extension List](/ext-support.md)
 
 ### GitHub Actions Build
 
@@ -56,14 +56,36 @@ If you enable `debug`, all logs will be output at build time, including compiled
 
 ### Manual Build
 
+Clone repo first:
+
 ```bash
-# Clone first
 git clone https://github.com/crazywhalecc/static-php-cli.git
+```
+
+If you have not installed php on your system, you can download single-file php binary and composer first.
+
+The PHP runtime for static-php-cli itself will be downloaded at `bin/php`, and composer is at `bin/composer`.
+
+```bash
+cd static-php-cli
+chmod +x bin/setup-runtime
+./bin/setup-runtime
+
+# Use this php runtime to run static-php-cli compiler
+./bin/php bin/spc
+
+# Use composer
+./bin/php bin/composer
+```
+
+Basic usage for building php and micro with some extensions:
+
+```bash
 cd static-php-cli
 composer update
 chmod +x bin/spc
-# Check system tool dependencies, and show instructions for fixing (TODO)
-# ./spc doctor
+# Check system tool dependencies, fix them automatically (only support macOS) (TODO: Linux distro support)
+./bin/spc doctor
 # fetch all libraries
 ./bin/spc fetch --all
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
@@ -73,13 +95,14 @@ chmod +x bin/spc
 You can also use the parameter `--with-php=x.y` to specify the downloaded PHP version, currently supports 7.4 ~ 8.2:
 
 ```bash
+# Using PHP >= 8.0 is recommended, because 7.4 cannot use phpmicro
 ./bin/spc fetch --with-php=8.2 --all
 ```
 
 If anything goes wrong, use `--debug` option to display full terminal output:
 
 ```bash
-./bin/spc build openssl --debug
+./bin/spc build openssl,pcntl,mbstring --debug
 ./bin/spc fetch --all --debug
 ```
 
@@ -100,8 +123,9 @@ This file will be located in the directory `source/php-src/sapi/cli/`, simply co
 
 ### micro.sfx Usage
 
-> phpmicro is a Self-Extracted Executable SAPI module, provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). 
-> This project is integrated with it.
+> phpmicro is a Self-Extracted Executable SAPI module, 
+> provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). 
+> It can put php runtime and your source code together.
 
 When using the parameter `--build-all` or `--build-micro`, 
 the final compilation result will output a file named `./micro.sfx`, 

@@ -52,14 +52,37 @@ If you are using English, see [English README](README-en.md).
 
 ### 手动构建
 
+先克隆本项目：
+
+```bash
+git clone https://github.com/crazywhalecc/static-php-cli.git
+```
+
+如果你本机没有安装 PHP，你可以通过命令下载静态编译好的 php-cli 和 Composer。
+
+下载的 php 和 Composer 将保存为 `bin/php` 和 `bin/composer`。
+
+```bash
+cd static-php-cli
+chmod +x bin/setup-runtime
+./bin/setup-runtime
+
+# 使用独立的 php 运行 static-php-cli
+./bin/php bin/spc
+
+# 使用 composer
+./bin/php bin/composer
+```
+
+下面是使用 static-php-cli 编译静态 php 和 micro 的基础用法：
+
 ```bash
 # 克隆本项目
-git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli
 composer update
 chmod +x bin/spc
-# 检查环境依赖，并根据提示的命令安装缺失的编译工具（TODO）
-# ./bin/spc doctor
+# 检查环境依赖，并根据提示的命令安装缺失的编译工具（目前仅支持 macOS，Linux 后续会支持）
+./bin/spc doctor
 # 拉取所有依赖库
 ./bin/spc fetch --all
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
@@ -69,13 +92,14 @@ chmod +x bin/spc
 你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.4 ~ 8.2：
 
 ```bash
+# 优先考虑使用 >= 8.0 的 PHP 版本
 ./bin/spc fetch --with-php=8.2 --all
 ```
 
 如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：
 
 ```bash
-./bin/spc build openssl --debug
+./bin/spc build openssl,pcntl,mbstring --debug
 ./bin/spc fetch --all --debug
 ```
 
