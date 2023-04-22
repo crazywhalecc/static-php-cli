@@ -13,6 +13,18 @@ use ZM\Logger\ConsoleLogger;
 
 abstract class BaseCommand extends Command
 {
+    /**
+     * 输入
+     */
+    protected InputInterface $input;
+
+    /**
+     * 输出
+     *
+     * 一般来说同样会是 ConsoleOutputInterface
+     */
+    protected OutputInterface $output;
+
     public function __construct(string $name = null)
     {
         parent::__construct($name);
@@ -55,5 +67,45 @@ abstract class BaseCommand extends Command
                              |_|         |_|    
 ";
         }
+    }
+
+    abstract public function handle(): int;
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $this->input = $input;
+        $this->output = $output;
+        if ($this->shouldExecute()) {
+            try {
+                return $this->handle();
+            } catch (\Throwable $e) {
+                $msg = explode("\n", $e->getMessage());
+                foreach ($msg as $v) {
+                    logger()->error($v);
+                }
+                return self::FAILURE;
+            }
+        }
+        return self::SUCCESS;
+    }
+
+    protected function getOption(string $name): mixed
+    {
+        return $this->input->getOption($name);
+    }
+
+    protected function getArgument(string $name): mixed
+    {
+        return $this->input->getArgument($name);
+    }
+
+    /**
+     * 是否应该执行
+     *
+     * @return bool 返回 true 以继续执行，返回 false 以中断执行
+     */
+    protected function shouldExecute(): bool
+    {
+        return true;
     }
 }

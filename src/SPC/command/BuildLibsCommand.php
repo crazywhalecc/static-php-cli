@@ -6,20 +6,17 @@ namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
-use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/** @noinspection PhpUnused */
+#[AsCommand('build:libs', 'Build dependencies')]
 class BuildLibsCommand extends BuildCommand
 {
-    protected static $defaultName = 'build:libs';
-
     public function configure()
     {
-        $this->setDescription('Build dependencies');
         $this->addArgument('libraries', InputArgument::REQUIRED, 'The libraries will be compiled, comma separated');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Build all libs that static-php-cli needed');
@@ -36,15 +33,14 @@ class BuildLibsCommand extends BuildCommand
 
     /**
      * @throws RuntimeException
-     * @throws FileSystemException
      */
-    public function execute(InputInterface $input, OutputInterface $output): int
+    public function handle(): int
     {
         // 从参数中获取要编译的 libraries，并转换为数组
-        $libraries = array_map('trim', array_filter(explode(',', $input->getArgument('libraries'))));
+        $libraries = array_map('trim', array_filter(explode(',', $this->getArgument('libraries'))));
 
         // 删除旧资源
-        if ($input->getOption('clean')) {
+        if ($this->getOption('clean')) {
             logger()->warning('You are doing some operations that not recoverable: removing directories below');
             logger()->warning(BUILD_ROOT_PATH);
             logger()->warning('I will remove these dir after you press [Enter] !');
@@ -59,7 +55,7 @@ class BuildLibsCommand extends BuildCommand
 
         try {
             // 构建对象
-            $builder = BuilderProvider::makeBuilderByInput($input);
+            $builder = BuilderProvider::makeBuilderByInput($this->input);
             // 只编译 library 的情况下，标记
             $builder->setLibsOnly();
             // 编译和检查库完整
@@ -69,7 +65,7 @@ class BuildLibsCommand extends BuildCommand
             logger()->info('Build libs complete, used ' . $time . ' s !');
             return 0;
         } catch (\Throwable $e) {
-            if ($input->getOption('debug')) {
+            if ($this->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
             } else {
                 logger()->critical('Build failed with ' . get_class($e) . ': ' . $e->getMessage());
