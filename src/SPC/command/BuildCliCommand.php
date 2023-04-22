@@ -9,38 +9,34 @@ use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
 use SPC\util\DependencyUtil;
 use SPC\util\LicenseDumper;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
-/** @noinspection PhpUnused */
+#[AsCommand('build', 'build CLI binary')]
 class BuildCliCommand extends BuildCommand
 {
-    protected static $defaultName = 'build';
-
     public function configure()
     {
-        $this->setDescription('Build CLI binary');
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
         $this->addOption('build-micro', null, null, 'build micro only');
         $this->addOption('build-all', null, null, 'build both cli and micro');
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    public function handle(): int
     {
         // 从参数中获取要编译的 libraries，并转换为数组
-        $libraries = array_map('trim', array_filter(explode(',', $input->getOption('with-libs'))));
+        $libraries = array_map('trim', array_filter(explode(',', $this->getOption('with-libs'))));
         // 从参数中获取要编译的 extensions，并转换为数组
-        $extensions = array_map('trim', array_filter(explode(',', $input->getArgument('extensions'))));
+        $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions'))));
 
         define('BUILD_ALL_STATIC', true);
 
-        if ($input->getOption('build-all')) {
+        if ($this->getOption('build-all')) {
             $rule = BUILD_MICRO_BOTH;
             logger()->info('Builder will build php-cli and phpmicro SAPI');
-        } elseif ($input->getOption('build-micro')) {
+        } elseif ($this->getOption('build-micro')) {
             $rule = BUILD_MICRO_ONLY;
             logger()->info('Builder will build phpmicro SAPI');
         } else {
@@ -49,7 +45,7 @@ class BuildCliCommand extends BuildCommand
         }
         try {
             // 构建对象
-            $builder = BuilderProvider::makeBuilderByInput($input);
+            $builder = BuilderProvider::makeBuilderByInput($this->input);
             // 根据提供的扩展列表获取依赖库列表并编译
             [$extensions, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps($extensions, $libraries);
 
@@ -64,7 +60,7 @@ class BuildCliCommand extends BuildCommand
             // 执行扩展检测
             $builder->proveExts($extensions);
             // 构建
-            $builder->buildPHP($rule, $input->getOption('bloat'));
+            $builder->buildPHP($rule, $this->getOption('bloat'));
             // 统计时间
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build complete, used ' . $time . ' s !');
@@ -86,7 +82,7 @@ class BuildCliCommand extends BuildCommand
             logger()->critical($e->getMessage());
             return 1;
         } catch (\Throwable $e) {
-            if ($input->getOption('debug')) {
+            if ($this->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
             } else {
                 logger()->critical('Build failed with ' . get_class($e) . ': ' . $e->getMessage());

@@ -12,23 +12,21 @@ use SPC\exception\RuntimeException;
 use SPC\store\Config;
 use SPC\store\Downloader;
 use SPC\util\Patcher;
+use SPC\util\Util;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /** @noinspection PhpUnused */
+#[AsCommand('fetch', 'Fetch required sources')]
 class FetchSourceCommand extends BaseCommand
 {
-    protected static $defaultName = 'fetch';
-
     protected string $php_major_ver;
-
-    protected InputInterface $input;
 
     public function configure()
     {
-        $this->setDescription('Fetch required sources');
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addArgument('libraries', InputArgument::REQUIRED, 'The libraries will be compiled, comma separated');
         $this->addOption('hash', null, null, 'Hash only');
@@ -49,12 +47,11 @@ class FetchSourceCommand extends BaseCommand
         parent::initialize($input, $output);
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    public function handle(): int
     {
-        $this->input = $input;
         try {
             // 匹配版本
-            $ver = $this->php_major_ver = $input->getOption('with-php') ?? '8.1';
+            $ver = $this->php_major_ver = $this->getOption('with-php') ?? '8.1';
             define('SPC_BUILD_PHP_VERSION', $ver);
             preg_match('/^\d+\.\d+$/', $ver, $matches);
             if (!$matches) {
@@ -63,7 +60,7 @@ class FetchSourceCommand extends BaseCommand
             }
 
             // 删除旧资源
-            if ($input->getOption('clean')) {
+            if ($this->getOption('clean')) {
                 logger()->warning('You are doing some operations that not recoverable: removing directories below');
                 logger()->warning(SOURCE_PATH);
                 logger()->warning(DOWNLOAD_PATH);
@@ -84,7 +81,7 @@ class FetchSourceCommand extends BaseCommand
             }
 
             // 使用浅克隆可以减少调用 git 命令下载资源时的存储空间占用
-            if ($input->getOption('shallow-clone')) {
+            if ($this->getOption('shallow-clone')) {
                 define('GIT_SHALLOW_CLONE', true);
             }
 
@@ -92,7 +89,7 @@ class FetchSourceCommand extends BaseCommand
             Config::getSource('openssl');
 
             // 是否启用openssl11
-            if ($input->getOption('with-openssl11')) {
+            if ($this->getOption('with-openssl11')) {
                 logger()->debug('Using openssl 1.1');
                 // 手动修改配置
                 Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
@@ -102,7 +99,7 @@ class FetchSourceCommand extends BaseCommand
             $chosen_sources = ['micro'];
 
             // 从参数中获取要编译的 libraries，并转换为数组
-            $libraries = array_map('trim', array_filter(explode(',', $input->getArgument('libraries'))));
+            $libraries = array_map('trim', array_filter(explode(',', $this->getArgument('libraries'))));
             if ($libraries) {
                 foreach ($libraries as $lib) {
                     // 从 lib 的 config 中找到对应 source 资源名称，组成一个 lib 的 source 列表
@@ -114,7 +111,7 @@ class FetchSourceCommand extends BaseCommand
             }
 
             // 从参数中获取要编译的 extensions，并转换为数组
-            $extensions = array_map('trim', array_filter(explode(',', $input->getArgument('extensions'))));
+            $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions'))));
             if ($extensions) {
                 foreach ($extensions as $lib) {
                     if (Config::getExt($lib, 'type') !== 'builtin') {
@@ -132,9 +129,9 @@ class FetchSourceCommand extends BaseCommand
             $chosen_sources = array_unique($chosen_sources);
 
             // 是否只hash，不下载资源
-            if ($input->getOption('hash')) {
+            if ($this->getOption('hash')) {
                 $hash = $this->doHash($chosen_sources);
-                $output->writeln($hash);
+                $this->output->writeln($hash);
                 return 0;
             }
 
@@ -166,7 +163,7 @@ class FetchSourceCommand extends BaseCommand
             return 0;
         } catch (\Throwable $e) {
             // 不开 debug 模式就不要再显示复杂的调试栈信息了
-            if ($input->getOption('debug')) {
+            if ($this->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
             } else {
                 logger()->emergency($e->getMessage() . ', previous message: ' . $e->getPrevious()?->getMessage());
@@ -214,11 +211,11 @@ class FetchSourceCommand extends BaseCommand
     private function doPatch(): void
     {
         // swow 需要软链接内部的文件夹才能正常编译
-        if (!file_exists(SOURCE_PATH . '/php-src/ext/swow')) {
+        if (!file_exists(SOURCE_PATH . '/php-src/ext/swow') && Util::getPHPVersionID() >= 80000) {
             Patcher::patchSwow();
+            // patch 一些 PHP 的资源，以便编译
+            Patcher::patchMicroThings();
         }
-        // patch 一些 PHP 的资源，以便编译
-        Patcher::patchPHPDepFiles();
 
         // openssl 3 需要 patch 额外的东西
         if (!$this->input->getOption('with-openssl11') && $this->php_major_ver === '8.0') {

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# set error-quit, verbose, non-variable-quit
+set -eu
+# see what system used
+__OS__=$(uname -s)
+# see what arch used
+__ARCH__=$(uname -m)
+# format arch name
+case $__ARCH__ in
+arm64 | aarch64) __ARCH__=arm64 ;;
+x86_64|x64) __ARCH__=x64 ;;
+*) ;;
+esac
+
+# format uname
+case $__OS__ in
+Darwin) __OS_FIXED__=macos ;;
+Linux) __OS_FIXED__=linux ;;
+*) echo "Current OS is not supported" && exit 1 ;;
+esac
+
+# set project dir
+__DIR__=$(cd "$(dirname "$0")" && pwd)
+__PROJECT__=$(cd ${__DIR__}/../ && pwd)
+
+# set download dir
+__PHP_RUNTIME_URL__="https://github.com/swoole/swoole-src/releases/download/v5.0.1/swoole-cli-v5.0.1-${__OS_FIXED__}-${__ARCH__}.tar.xz"
+__COMPOSER_URL__="https://getcomposer.org/download/latest-stable/composer.phar"
+
+# download static-php binary (currently using swoole-cli temporarily)
+test -d ${__PROJECT__}/downloads || mkdir ${__PROJECT__}/downloads
+# download static php binary
+test -f ${__PROJECT__}/downloads/runtime.tar.xz || curl -#fSL -o ${__PROJECT__}/downloads/runtime.tar.xz "$__PHP_RUNTIME_URL__"
+test -f ${__DIR__}/php || { tar -xf ${__PROJECT__}/downloads/runtime.tar.xz -C ${__DIR__}/ && mv ${__DIR__}/swoole-cli ${__DIR__}/php && rm ${__DIR__}/LICENSE ; } # (TODO: temporarily use swoole-cli as php)
+chmod +x ${__DIR__}/php
+# download composer
+test -f ${__DIR__}/composer || curl -#fSL -o ${__DIR__}/composer "$__COMPOSER_URL__"
+chmod +x ${__DIR__}/composer
+# sanity check for php and composer
+${__DIR__}/php -v >/dev/null || { echo "Failed to run php" && exit 1; }
+${__DIR__}/php ${__DIR__}/composer --version >/dev/null || { echo "Failed to run composer" && exit 1; }
+
+echo "Setup runtime OK!"
+echo "runtime bin path needs to add manually by command below:"
+echo ""
+echo "    export PATH=\"${__DIR__}:\$PATH\""
+echo ""

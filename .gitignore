@@ -19,3 +19,8 @@ composer.lock
 
 # php cs fixer cache file
 .php-cs-fixer.cache
+
+# exclude self-runtime
+/bin/*
+!/bin/spc
+!/bin/setup-runtime
