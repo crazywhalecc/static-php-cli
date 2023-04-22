@@ -16,7 +16,7 @@ This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicr
 ## Compilation Requirements
 
 Yes, this project is written in PHP, pretty funny.
-But php-static-cli runtime only requires an environment above PHP 8.0 and tokenizer extension.
+But static-php-cli runtime only requires an environment above PHP 8.0 and `tokenizer`, `iconv` extension.
 
 Here is the architecture support status, where `CI` represents support for GitHub Action builds, 
 `Local` represents support for local builds, and blank represents not currently supported.
@@ -29,7 +29,7 @@ Here is the architecture support status, where `CI` represents support for GitHu
 
 > linux-aarch64 and macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
-Currently supported PHP versions for compilation are: 7.4, 8.0, 8.1, 8.2.
+Currently supported PHP versions for compilation are: `7.4`, `8.0`, `8.1`, `8.2`.
 
 ## Usage
 
@@ -113,12 +113,14 @@ If anything goes wrong, use `--debug` option to display full terminal output:
 When using the parameter `--build-all` or not adding the `--build-micro` parameter, 
 the final compilation result will output a binary file named `./php`, 
 which can be distributed and used directly. 
-This file will be located in the directory `source/php-src/sapi/cli/`, simply copy it out for use.
+This file will be located in the directory `buildroot/bin/`, copy it out for use.
 
 ```bash
-./php -v
-./php -m
-./php your_code.php
+cd buildroot/bin/
+./php -v                # check version
+./php -m                # check extensions
+./php your_code.php     # run your php code
+./php your_project.phar # run your phar (project archive)
 ```
 
 ### micro.sfx Usage

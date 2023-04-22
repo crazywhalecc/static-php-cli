@@ -111,10 +111,11 @@ chmod +x bin/spc
 该文件编译后会存放在 `buildroot/bin/` 目录中，名称为 `php`，拷贝出来即可。
 
 ```bash
-cd buildroot/
-./php -v
-./php -m
-./php your_code.php
+cd buildroot/bin/
+./php -v                # 检查版本
+./php -m                # 检查编译的扩展
+./php your_code.php     # 运行代码
+./php your_project.phar # 运行打包为 phar 单文件的项目
 ```
 
 ### 使用 micro.sfx
