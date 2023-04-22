@@ -12,6 +12,7 @@ use SPC\exception\RuntimeException;
 use SPC\store\Config;
 use SPC\store\Downloader;
 use SPC\util\Patcher;
+use SPC\util\Util;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -214,11 +215,11 @@ class FetchSourceCommand extends BaseCommand
     private function doPatch(): void
     {
         // swow 需要软链接内部的文件夹才能正常编译
-        if (!file_exists(SOURCE_PATH . '/php-src/ext/swow')) {
+        if (!file_exists(SOURCE_PATH . '/php-src/ext/swow') && Util::getPHPVersionID() >= 80000) {
             Patcher::patchSwow();
+            // patch 一些 PHP 的资源，以便编译
+            Patcher::patchMicroThings();
         }
-        // patch 一些 PHP 的资源，以便编译
-        Patcher::patchPHPDepFiles();
 
         // openssl 3 需要 patch 额外的东西
         if (!$this->input->getOption('with-openssl11') && $this->php_major_ver === '8.0') {
