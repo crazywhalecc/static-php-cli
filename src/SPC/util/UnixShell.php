@@ -13,9 +13,9 @@ class UnixShell
 
     private bool $debug;
 
-    public function __construct()
+    public function __construct(?bool $debug = null)
     {
-        $this->debug = defined('DEBUG_MODE');
+        $this->debug = $debug ?? defined('DEBUG_MODE');
     }
 
     public function cd(string $dir): UnixShell

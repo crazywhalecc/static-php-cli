@@ -105,7 +105,7 @@ function f_mkdir(string $directory, int $permissions = 0777, bool $recursive = f
     return mkdir($directory, $permissions, $recursive);
 }
 
-function shell(): UnixShell
+function shell(?bool $debug = null): UnixShell
 {
-    return new UnixShell();
+    return new UnixShell($debug);
 }

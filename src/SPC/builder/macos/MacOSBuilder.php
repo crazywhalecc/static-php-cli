@@ -21,9 +21,6 @@ class MacOSBuilder extends BuilderBase
     /** 编译的 Unix 工具集 */
     use UnixBuilderTrait;
 
-    /** @var string[] MacOS 环境下编译依赖的命令 */
-    public const REQUIRED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
-
     /** @var bool 标记是否 patch 了 phar */
     private bool $phar_patched = false;
 
@@ -56,16 +53,6 @@ class MacOSBuilder extends BuilderBase
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
             "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration'";
-        // 保存丢失的命令
-        $missing = [];
-        foreach (self::REQUIRED_COMMANDS as $cmd) {
-            if (SystemUtil::findCommand($cmd) === null) {
-                $missing[] = $cmd;
-            }
-        }
-        if (!empty($missing)) {
-            throw new RuntimeException('missing system commands: ' . implode(', ', $missing));
-        }
 
         // 创立 pkg-config 和放头文件的目录
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
