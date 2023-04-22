@@ -16,7 +16,7 @@ class Patcher
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public static function patchPHPDepFiles(): void
+    public static function patchMicroThings(): void
     {
         $ver_file = SOURCE_PATH . '/php-src/main/php_version.h';
         if (!file_exists($ver_file)) {
@@ -29,6 +29,9 @@ class Patcher
         logger()->info('Patching php');
 
         $major_ver = $match[1] . $match[2];
+        if ($major_ver === '74') {
+            return;
+        }
         $check = !defined('DEBUG_MODE') ? ' -q' : '';
         // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
 
