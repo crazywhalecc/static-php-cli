@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
-use SPC\builder\traits\NoMotdTrait;
 use SPC\exception\FileSystemException;
 use SPC\store\Config;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -12,7 +11,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand('list-ext', 'List supported extensions')]
 class ListExtCommand extends BaseCommand
 {
-    use NoMotdTrait;
+    protected bool $no_motd = true;
 
     /**
      * @throws FileSystemException
