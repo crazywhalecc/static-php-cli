@@ -102,6 +102,5 @@ class libzip extends LinuxLibraryBase
             )
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . $destdir);
-        $this->withPackageName('libzip');
     }
 }

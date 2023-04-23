@@ -60,9 +60,5 @@ class brotli extends LinuxLibraryBase
             rm -rf {$destdir}/lib/*.dylib
 EOF
             );
-
-        $this->withPackageName('libbrotlicommon');
-        $this->withPackageName('libbrotlidec');
-        $this->withPackageName('libbrotlienc');
     }
 }
