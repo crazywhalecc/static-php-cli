@@ -20,16 +20,19 @@ on:
           - '8.1'
           - '8.0'
           - '7.4'
-      target:
-        required: true
-        description: which SAPI to deploy
-        default: 'cli'
-        type: choice
-        options:
-          - 'cli'
-          - 'micro'
-          - 'all'
+      build-cli:
+        description: build cli binary
+        default: true
+        type: boolean
+      build-micro:
+        description: build phpmicro binary
+        type: boolean
+      build-fpm:
+        description: build fpm binary
+        type: boolean
       extensions:
+        description: extensions to compile (comma separated)
+        required: true
         type: string
       debug:
         type: boolean
@@ -79,28 +82,39 @@ jobs:
         run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
 
       # With target select: cli, micro or both
-      - if: ${{ inputs.target == 'micro' || inputs.target == 'all' }}
-        run: echo "SPC_BUILD_TARGET='--build-${{ inputs.target }}'" >> $GITHUB_ENV
+      - if: ${{ inputs.build-cli == true }}
+        run: echo "SPC_BUILD_CLI=--build-cli" >> $GITHUB_ENV
+      - if: ${{ inputs.build-micro == true }}
+        run: echo "SPC_BUILD_MICRO=--build-micro" >> $GITHUB_ENV
+      - if: ${{ inputs.build-fpm == true }}
+        run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - run: CACHE_API_EXEC=yes ./bin/spc fetch --with-php=${{ inputs.version }} --all ${{ env.SPC_BUILD_DEBUG }}
 
       # Run build command
-      - run: ./bin/spc build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_TARGET }}
+      - run: ./bin/spc build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Upload cli executable
-      - if: ${{ inputs.target == 'cli' || inputs.target == 'all' }}
+      - if: ${{ inputs.build-cli == true }}
         uses: actions/upload-artifact@v3
         with:
           name: php-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/php
 
       # Upload micro self-extracted executable
-      - if: ${{ inputs.target == 'micro' || inputs.target == 'all' }}
+      - if: ${{ inputs.build-micro == true }}
         uses: actions/upload-artifact@v3
         with:
           name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/micro.sfx
+
+      # Upload fpm executable
+      - if: ${{ inputs.build-fpm == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          path: buildroot/bin/php-fpm
 
       # Upload extensions metadata
       - uses: actions/upload-artifact@v3
