@@ -163,6 +163,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - 应遵循命名规范，例如扩展名称应采取 PHP 内注册的扩展名本身，外部库名应遵循项目本身的名称，内部逻辑的函数、类名、变量等应遵循驼峰、下划线等格式，禁止同一模块混用。
 - 涉及编译外部库的命令和 Patch 时应注意兼容不同操作系统。
 
+另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
+
 ## 开源协议
 
 本项目依据旧版本惯例采用 MIT License 开源，自身的部分代码引用或修改自以下项目：
@@ -177,4 +179,4 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 本项目重构分支为模块化编写。
 
-This section will be improved after refactor version released.
+TODO：这部分将在基础功能完成后编写完成。
