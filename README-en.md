@@ -92,7 +92,7 @@ chmod +x bin/spc
 # fetch all libraries
 ./bin/spc fetch --all
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
-./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-all
+./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-cli --build-micro
 ```
 
 You can also use the parameter `--with-php=x.y` to specify the downloaded PHP version, currently supports 7.4 ~ 8.2:
@@ -102,10 +102,17 @@ You can also use the parameter `--with-php=x.y` to specify the downloaded PHP ve
 ./bin/spc fetch --with-php=8.2 --all
 ```
 
+Now we support `cli`, `micro`, `fpm`, you can use one or more of the following parameters to specify the compiled SAPI:
+
+- `--build-cli`: build static cli executable
+- `--build-micro`: build static phpmicro self-extracted executable
+- `--build-fpm`: build static fpm binary
+- `--build-all`: build all
+
 If anything goes wrong, use `--debug` option to display full terminal output:
 
 ```bash
-./bin/spc build openssl,pcntl,mbstring --debug
+./bin/spc build openssl,pcntl,mbstring --debug --build-all
 ./bin/spc fetch --all --debug
 ```
 
@@ -113,7 +120,7 @@ If anything goes wrong, use `--debug` option to display full terminal output:
 
 > php-cli is a single static binary, you can use it like normal php installed on your system.
 
-When using the parameter `--build-all` or not adding the `--build-micro` parameter, 
+When using the parameter `--build-cli` or `--build-all`, 
 the final compilation result will output a binary file named `./php`, 
 which can be distributed and used directly. 
 This file will be located in the directory `buildroot/bin/`, copy it out for use.
@@ -149,6 +156,17 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 > In some cases, PHAR files may not run in a micro environment.
 
+### php-fpm Usage
+
+When using the parameter `--build-all` or `--build-fpm`,
+the final compilation result will output a file named `./php-fpm`,
+This file will be located in the path `buildroot/bin/`, simply copy it out for use.
+
+In normal Linux distributions and macOS systems, the package manager will automatically generate a default fpm configuration file after installing php-fpm.
+Because php-fpm must specify a configuration file before running, the php-fpm compiled by this project will not have any configuration files, so you need to write `php-fpm.conf` and `pool.conf` configuration files yourself.
+
+Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./php-fpm -y php-fpm.conf`.
+
 ## Current Status
 
 - [X] Basic CLI framework (by `symfony/console`)
@@ -157,7 +175,7 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [X] Exception handler
 - [ ] Windows support
 - [X] PHP 7.4 support
-- [ ] fpm support
+- [X] fpm support
 
 More functions and features are coming soon, Bugs and TODOs: https://github.com/crazywhalecc/static-php-cli/issues/32
 
