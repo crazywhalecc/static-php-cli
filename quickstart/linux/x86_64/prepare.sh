@@ -15,22 +15,25 @@ composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
 
 chmod +x bin/spc
 
-./bin/spc fetch --all --debug
+# ./bin/spc fetch --all --debug
 
 ./bin/spc list-ext
 
 
 #./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=gcc --cxx=g++  --debug
 
-./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=clang --cxx=clang++  --debug
+#./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=clang --cxx=clang++  --debug
 
 
-./bin/spc build gd --debug --cc=clang --cxx=clang++
 
+
+./bin/spc build:libs libzip  --debug --cc=clang --cxx=clang++
 ./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++
-./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++ --clean
+./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++
 
 ./bin/spc build:libs libgif --debug --cc=clang --cxx=clang++
 ./bin/spc build:libs libwebp --debug --cc=clang --cxx=clang++
 
-./bin/spc build "bcmath,tokenizer,pdo,ftp,gd" --cc=clang --cxx=clang++  --debug
+# ./bin/spc build "bcmath,tokenizer,pdo,ftp,gd" --cc=clang --cxx=clang++  --debug
+
+# ./bin/spc build gd --debug --cc=clang --cxx=clang++ --debug

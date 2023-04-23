@@ -89,7 +89,7 @@ abstract class BuilderBase
         }
 
         foreach ($this->libs as $lib) {
-            match ($lib->tryBuild()) {
+            match ($lib->tryBuild(true)) {
                 BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
                 BUILD_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
                 BUILD_STATUS_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
