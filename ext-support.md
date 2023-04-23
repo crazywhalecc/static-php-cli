@@ -69,6 +69,7 @@ Here are some extension list example for different use.
 
 - For general use: `"bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,ftp,filter,gd,iconv,xml,mbstring,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip"`
 - For static-php-cli self: `"posix,pcntl,phar,tokenizer,iconv,zlib"`
+- For static-php-cli self (with dev dependencies): `"posix,pcntl,phar,tokenizer,iconv,zlib,xml,dom,xmlwriter,xmlreader,fileinfo"`
 - Minimum, with no extension: `""`
 
 ## Limitations
