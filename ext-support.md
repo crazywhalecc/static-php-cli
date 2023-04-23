@@ -63,11 +63,20 @@
 - swoole >= 5.0 requires PHP >= 8.0
 - swow requires PHP >= 8.0
 
+## Typical Extension List Example
+
+Here are some extension list example for different use.
+
+- For general use: `"bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,ftp,filter,gd,iconv,xml,mbstring,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip"`
+- For static-php-cli self: `"posix,pcntl,phar,tokenizer,iconv,zlib"`
+- Minimum, with no extension: `""`
+
 ## Limitations
 
 - swow and swoole cannot be compiled at the same time.
 - openssl needs manual configuration for ssl certificate. (TODO: I will write a wiki about it)
+- some extensions need system configuration, e.g. `curl` and `openssl` will search ssl certificate on your system.
 
-## Bugs
+## Bugs and TODOs
 
 See [#32](https://github.com/crazywhalecc/static-php-cli/issues/32).
