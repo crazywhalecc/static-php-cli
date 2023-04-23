@@ -28,6 +28,28 @@ __PROJECT__=$(cd ${__DIR__}/../ && pwd)
 __PHP_RUNTIME_URL__="https://github.com/swoole/swoole-src/releases/download/v5.0.1/swoole-cli-v5.0.1-${__OS_FIXED__}-${__ARCH__}.tar.xz"
 __COMPOSER_URL__="https://getcomposer.org/download/latest-stable/composer.phar"
 
+mirror=''
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --mirror)
+    mirror="$2"
+    shift
+    ;;
+  --*)
+    echo "Illegal option $1"
+    ;;
+  esac
+  shift $(($# > 0 ? 1 : 0))
+done
+
+case "$mirror" in
+china)
+  __PHP_RUNTIME_URL__="https://wenda-1252906962.file.myqcloud.com/dist/swoole-cli-v5.0.1-${__OS_FIXED__}-${__ARCH__}.tar.xz"
+  __COMPOSER_URL__="https://mirrors.aliyun.com/composer/composer.phar"
+  ;;
+
+esac
+
 # download static-php binary (currently using swoole-cli temporarily)
 test -d ${__PROJECT__}/downloads || mkdir ${__PROJECT__}/downloads
 # download static php binary

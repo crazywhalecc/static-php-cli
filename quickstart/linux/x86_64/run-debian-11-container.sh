@@ -14,6 +14,7 @@ cd ${__DIR__}
 
 {
   docker stop static-php-cli-dev-1
+  sleep 3
 } || {
   echo $?
 }

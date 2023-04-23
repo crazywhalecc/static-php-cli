@@ -6,8 +6,29 @@ __DIR__=$(
   pwd
 )
 
-test -f /etc/apk/repositories.save || cp /etc/apk/repositories /etc/apk/repositories.save
-sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+mirror=''
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--mirror)
+			mirror="$2"
+			shift
+			;;
+		--*)
+			echo "Illegal option $1"
+			;;
+	esac
+	shift $(( $# > 0 ? 1 : 0 ))
+done
+
+case "$mirror" in
+	china)
+		test -f /etc/apk/repositories.save || cp /etc/apk/repositories /etc/apk/repositories.save
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+		;;
+
+esac
+
+
 
 apk update
 

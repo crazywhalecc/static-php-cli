@@ -161,7 +161,7 @@ class LinuxBuilder extends BuilderBase
         $preprocessors .= '  export PATH=' . BUILD_ROOT_PATH . '/bin/:$PATH ;';
         $preprocessors .= ' export PACKAGES="libbrotlicommon libbrotlidec libbrotlienc libzip  libjpeg libturbojpeg freetype2 libpng libpng16 libwebp "  ;';
         $preprocessors .= ' export CPPFLAGS="$(pkg-config --cflags-only-I --static $PACKAGES ) "  ;';
-        $preprocessors .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES )  -lz -lpng16 -lwebpmux -lwebpdemux -lwebpdecoder  -lwebp -lm -pthread   -lstdc++ " ;';
+        $preprocessors .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES )   -lstdc++ " ;'; // -lz -lpng16 -lwebpmux -lwebpdemux -lwebpdecoder  -lwebp -lm -pthread
         $preprocessors .= ' export LD=ld.lld ;';
 
         $use_lld .= ' -L' . BUILD_LIB_PATH;

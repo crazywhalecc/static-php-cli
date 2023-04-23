@@ -14,7 +14,10 @@ sh quickstart/linux/x86_64/run-debian-11-container.sh
 sh quickstart/linux/x86_64/connection-static-php-cli.sh
 
 # 准备构建基础软件
-sh quickstart/linux/x86_64/debian-11-init.sh
+sh quickstart/linux/x86_64/debian-11-init.sh 
+
+# 准备构建基础软件 使用镜像
+sh quickstart/linux/x86_64/debian-11-init.sh  --mirror china
 
 ```
 
@@ -29,6 +32,18 @@ sh quickstart/linux/x86_64/run-alpine-3.16-container.sh
 sh sh quickstart/linux/x86_64/connection-static-php-cli.sh
 
 # 准备构建基础软件
-sh quickstart/linux/x86_64/alpine-3.16-init.sh
+sh quickstart/linux/x86_64/alpine-3.16-init.sh 
+
+# 准备构建基础软件 使用镜像
+sh quickstart/linux/x86_64/alpine-3.16-init.sh --mirror china
+```
+
+
+## 准备PHP 运行时镜像
+```bash
+sh bin/setup-runtime
+
+# 使用镜像
+sh bin/setup-runtime --mirror china
 
 ```
