@@ -170,15 +170,11 @@ abstract class BuilderBase
 
     /**
      * 开始构建 PHP
-     * 构建 micro 的规则：
-     * - BUILD_MICRO_NONE(默认)：只编译 cli
-     * - BUILD_MICRO_ONLY：只编译 micro
-     * - BUILD_MICRO_BOTH：同时编译 micro 和 cli
      *
-     * @param int  $build_micro_rule 规则
-     * @param bool $bloat            保留
+     * @param int  $build_target 规则
+     * @param bool $bloat        保留
      */
-    abstract public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $bloat = false);
+    abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $bloat = false);
 
     /**
      * 生成依赖的扩展编译启用参数
@@ -213,6 +209,21 @@ abstract class BuilderBase
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
         preg_match('/PHP_VERSION_ID (\d+)/', $file, $match);
         return intval($match[1]);
+    }
+
+    public function getBuildTypeName(int $type): string
+    {
+        $ls = [];
+        if (($type & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+            $ls[] = 'cli';
+        }
+        if (($type & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+            $ls[] = 'micro';
+        }
+        if (($type & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
+            $ls[] = 'fpm';
+        }
+        return implode(', ', $ls);
     }
 
     /**
