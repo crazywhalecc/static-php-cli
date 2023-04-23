@@ -74,7 +74,9 @@ abstract class BuilderBase
         // 过滤不支持的库后添加
         foreach ($libraries as $library) {
             if (!isset($support_lib_list[$library])) {
-                throw new RuntimeException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
+                throw new RuntimeException(
+                    'library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!'
+                );
             }
             $lib = new ($support_lib_list[$library])($this);
             $this->addLib($lib);
@@ -89,7 +91,8 @@ abstract class BuilderBase
         }
 
         foreach ($this->libs as $lib) {
-            match ($lib->tryBuild(true)) {
+            // $lib->build(true);
+            match ($lib->tryBuild()) {
                 BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
                 BUILD_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
                 BUILD_STATUS_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
@@ -234,7 +237,9 @@ abstract class BuilderBase
                 '"' . implode(', ', $not_downloaded) .
                 '" totally ' . count($not_downloaded) .
                 ' source' . (count($not_downloaded) === 1 ? '' : 's') .
-                ' not downloaded, maybe you need to "fetch" ' . (count($not_downloaded) === 1 ? 'it' : 'them') . ' first?'
+                ' not downloaded, maybe you need to "fetch" ' . (count(
+                    $not_downloaded
+                ) === 1 ? 'it' : 'them') . ' first?'
             );
         }
     }

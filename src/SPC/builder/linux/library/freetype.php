@@ -40,5 +40,7 @@ EOF
             )
             ->exec("make  -j {$this->builder->concurrency}")
             ->exec('make install');
+
+        $this->withPackageName('freetype2');
     }
 }

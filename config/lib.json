@@ -2,9 +2,14 @@
     "brotli": {
         "source": "brotli",
         "static-libs-unix": [
-            "libbrotlidec-static.a",
-            "libbrotlienc-static.a",
-            "libbrotlicommon-static.a"
+            "libbrotlidec.a",
+            "libbrotlienc.a",
+            "libbrotlicommon.a"
+        ],
+        "pkg-unix": [
+            "libbrotlicommon",
+            "libbrotlidec",
+            "libbrotlienc"
         ],
         "static-libs-windows": [
             "brotlicommon-static.lib",
@@ -19,6 +24,8 @@
         "source": "bzip2",
         "static-libs-unix": [
             "libbz2.a"
+        ],
+        "pkg-unix": [
         ],
         "static-libs-windows": [
             [
@@ -77,6 +84,9 @@
         "static-libs-unix": [
             "libfreetype.a"
         ],
+        "pkg-unix": [
+            "freetype2"
+        ],
         "headers-unix": [
             "freetype2/freetype/freetype.h",
             "freetype2/ft2build.h"
@@ -134,6 +144,10 @@
         "static-libs-unix": [
             "libpng.a"
         ],
+        "pkg-unix": [
+            "libpng",
+            "libpng16"
+        ],
         "static-libs-windows": [
             "libpng16_static.lib"
         ],
@@ -153,7 +167,11 @@
     "libjpeg": {
         "source": "libjpeg",
         "static-libs-unix": [
-
+            "libjpeg.a"
+        ],
+        "pkg-unix": [
+            "libjpeg",
+            "libturbojpeg"
         ],
         "static-libs-windows": [
 
@@ -171,7 +189,7 @@
     "libgif": {
         "source": "libgif",
         "static-libs-unix": [
-
+            "libgif.a"
         ],
         "static-libs-windows": [
 
@@ -189,25 +207,18 @@
     "libwebp": {
         "source": "libwebp",
         "static-libs-unix": [
-
+            "libwebp.a",
+            "libwebpdecoder.a",
+            "libwebpdemux.a",
+            "libwebpmux.a",
+            "libsharpyuv.a"
         ],
-        "static-libs-windows": [
-
-        ],
-        "headers-unix": [
-
-        ],
-        "headers-windows": [
-
-        ],
-        "lib-depends": [
-
-        ]
-    },
-    "freetype": {
-        "source": "freetype",
-        "static-libs-unix": [
-
+        "pkg-unix": [
+            "libsharpyuv",
+            "libwebp",
+            "libwebpdecoder",
+            "libwebpdemux",
+            "libwebpmux"
         ],
         "static-libs-windows": [
 
@@ -286,6 +297,9 @@
         "source": "libzip",
         "static-libs-unix": [
             "libzip.a"
+        ],
+        "pkg-unix": [
+            "libzip"
         ],
         "static-libs-windows": [
             [
@@ -423,6 +437,10 @@
         "source": "zlib",
         "static-libs-unix": [
             "libz.a"
+        ],
+
+        "pkg-unix": [
+            "zlib"
         ],
         "static-libs-windows": [
             "zlib_a.lib"

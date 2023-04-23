@@ -12,7 +12,6 @@ class zlib extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        return '--with-zlib ZLIB_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-            'ZLIB_LIBS="' . $this->getLibFilesString() . '"';
+        return '--with-zlib';
     }
 }

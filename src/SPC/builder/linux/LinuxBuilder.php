@@ -10,6 +10,8 @@ use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\Config;
+use SPC\store\FileSystem;
 use SPC\util\Patcher;
 
 /**
@@ -21,7 +23,21 @@ class LinuxBuilder extends BuilderBase
     use UnixBuilderTrait;
 
     /** @var string[] Linux 环境下编译依赖的命令 */
-    public const REQUIRED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', /* 'xz', 好像不需要 */ 'gzip', 'bzip2', 'cmake'];
+    public const REQUIRED_COMMANDS = [
+        'make',
+        'bison',
+        'flex',
+        'pkg-config',
+        'git',
+        'autoconf',
+        'automake',
+        'tar',
+        'unzip',
+        /* 'xz', 好像不需要 */
+        'gzip',
+        'bzip2',
+        'cmake',
+    ];
 
     /** @var string 使用的 libc */
     public string $libc;
@@ -67,7 +83,8 @@ class LinuxBuilder extends BuilderBase
             cxx: $this->cxx
         );
         // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
+        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig:/lib/pkgconfig:/usr/lib/pkgconfig"';
+        $this->pkgconf_env = '';
         // 设置 configure 依赖的环境变量
         $this->configure_env =
             $this->pkgconf_env . ' ' .
@@ -157,12 +174,26 @@ class LinuxBuilder extends BuilderBase
         }
         $envs = "{$envs} CFLAGS='{$cflags}' ";
 
-        $preprocessors = ' set -exu ;  export PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig/:/lib/pkgconfig:/usr/lib/pkgconfig ;';
-        $preprocessors .= '  export PATH=' . BUILD_ROOT_PATH . '/bin/:$PATH ;';
-        $preprocessors .= ' export PACKAGES="libbrotlicommon libbrotlidec libbrotlienc libzip  libjpeg libturbojpeg freetype2 libpng libpng16 libwebp "  ;';
-        $preprocessors .= ' export CPPFLAGS="$(pkg-config --cflags-only-I --static $PACKAGES ) "  ;';
-        $preprocessors .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES )   -lstdc++ " ;'; // -lz -lpng16 -lwebpmux -lwebpdemux -lwebpdecoder  -lwebp -lm -pthread
-        $preprocessors .= ' export LD=ld.lld ;';
+        $lib_meta = FileSystem::loadConfigArray('lib');
+        $packages = [];
+        foreach ($this->libs as $lib) {
+            if (isset($lib_meta[$lib::NAME]['pkg-unix'])) {
+                $packages = array_merge($packages, $lib_meta[$lib::NAME]['pkg-unix']);
+            }
+        }
+        $packages = array_unique($packages);
+        $this->configure_env = '';
+        $preprocessors = 'set -exu ' . PHP_EOL;
+        $preprocessors .= " export CC={$this->cc} " . PHP_EOL;
+        $preprocessors .= " export CXX={$this->cxx} " . PHP_EOL;
+        $preprocessors .= ' export PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig:/lib/pkgconfig:/usr/lib/pkgconfig" ' . PHP_EOL;
+        $preprocessors .= ' export PATH=' . BUILD_ROOT_PATH . '/bin/:$PATH ' . PHP_EOL;
+        if (!empty($packages)) {
+            $preprocessors .= ' export PACKAGES="' . implode(' ', $packages) . '"  ' . PHP_EOL;
+            $preprocessors .= ' export CPPFLAGS="$(pkg-config --cflags-only-I --static $PACKAGES )" ' . PHP_EOL;
+            $preprocessors .= ' export LDFLAGS=$(pkg-config --libs-only-L --static $PACKAGES ) ' . PHP_EOL;
+            $preprocessors .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES )   -lstdc++ " ' . PHP_EOL;
+        }
 
         $use_lld .= ' -L' . BUILD_LIB_PATH;
         # Patcher::patchPHPBeforeConfigure($this);
@@ -171,9 +202,10 @@ class LinuxBuilder extends BuilderBase
 
         # Patcher::patchPHPConfigure($this);
 
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec($preprocessors)
+        shell()
             ->exec(
+                'cd ' . SOURCE_PATH . '/php-src' . PHP_EOL .
+                $preprocessors . PHP_EOL .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
@@ -226,7 +258,10 @@ class LinuxBuilder extends BuilderBase
             shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 -R < sapi/micro/patches/phar.patch');
         }
 
-        file_put_contents(SOURCE_PATH . '/php-src/.extensions.json', json_encode($this->plain_extensions, JSON_PRETTY_PRINT));
+        file_put_contents(
+            SOURCE_PATH . '/php-src/.extensions.json',
+            json_encode($this->plain_extensions, JSON_PRETTY_PRINT)
+        );
     }
 
     /**
@@ -236,10 +271,14 @@ class LinuxBuilder extends BuilderBase
     {
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec($preprocessors)
             ->exec(
+                'echo start build' . PHP_EOL .
+                $preprocessors . PHP_EOL .
                 'make -j' . $this->concurrency .
-                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
+                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(
+                    ' ',
+                    array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
+                ) . '" ' .
                 "EXTRA_LIBS=\"{$extra_libs}\" " .
                 "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
                 'cli'
@@ -249,7 +288,9 @@ class LinuxBuilder extends BuilderBase
             ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php php.debug")
             ->exec('elfedit --output-osabi linux php')
             ->exec("{$this->cross_compile_prefix}strip --strip-all php")
-            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php");
+            ->exec(
+                "{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php"
+            );
         $this->deployBinary(BUILD_TYPE_CLI);
     }
 
@@ -275,13 +316,17 @@ class LinuxBuilder extends BuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(
                 "make -j{$this->concurrency} " .
-                'EXTRA_CFLAGS=' . quote('-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags))) . ' ' .
+                'EXTRA_CFLAGS=' . quote(
+                    '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags))
+                ) . ' ' .
                 'EXTRA_LIBS=' . quote($extra_libs) . ' ' .
                 'EXTRA_LDFLAGS_PROGRAM=' . quote("{$cflags} {$use_lld}" . ' -all-static', "'") . ' ' .
                 'micro'
             );
 
-        shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec("{$this->cross_compile_prefix}strip --strip-all micro.sfx");
+        shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec(
+            "{$this->cross_compile_prefix}strip --strip-all micro.sfx"
+        );
 
         $this->deployBinary(BUILD_TYPE_MICRO);
     }
