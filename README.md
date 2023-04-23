@@ -165,7 +165,7 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [ ] Windows 支持
 - [X] Linux 支持
 - [X] PHP 7.4 支持
-- [ ] fpm 支持
+- [X] fpm 支持
 
 更多功能和特性正在陆续支持中，详见：https://github.com/crazywhalecc/static-php-cli/issues/32
 
