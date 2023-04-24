@@ -13,6 +13,7 @@ If you are using English, see [English README](README-en.md).
 [![Version](https://img.shields.io/badge/Version-2.0--beta1-green.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build.yml?branch=refactor&label=Actions%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+[![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 ## 编译环境需求
 
@@ -39,6 +40,8 @@ If you are using English, see [English README](README-en.md).
 
 [扩展支持列表](/ext-support.md)
 
+> 如果这里没有你需要的扩展，可以提交 Issue。
+
 ### 使用 Actions 构建
 
 使用 GitHub Action 可以方便地构建一个静态编译的 PHP 和 phpmicro，同时可以自行定义要编译的扩展。
@@ -52,30 +55,61 @@ If you are using English, see [English README](README-en.md).
 
 ### 手动构建
 
+先克隆本项目：
+
+```bash
+git clone https://github.com/crazywhalecc/static-php-cli.git
+```
+
+如果你本机没有安装 PHP，你可以通过命令下载静态编译好的 php-cli 和 Composer。
+
+下载的 php 和 Composer 将保存为 `bin/php` 和 `bin/composer`。
+
+```bash
+cd static-php-cli
+chmod +x bin/setup-runtime
+./bin/setup-runtime
+
+# 使用独立的 php 运行 static-php-cli
+./bin/php bin/spc
+
+# 使用 composer
+./bin/php bin/composer
+```
+
+下面是使用 static-php-cli 编译静态 php 和 micro 的基础用法：
+
 ```bash
 # 克隆本项目
-git clone https://github.com/crazywhalecc/static-php-cli.git
 cd static-php-cli
 composer update
 chmod +x bin/spc
-# 检查环境依赖，并根据提示的命令安装缺失的编译工具（TODO）
-# ./bin/spc doctor
+# 检查环境依赖，并根据提示的命令安装缺失的编译工具（目前仅支持 macOS，Linux 后续会支持）
+./bin/spc doctor
 # 拉取所有依赖库
 ./bin/spc fetch --all
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
-./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-all
+./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 ```
 
 你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.4 ~ 8.2：
 
 ```bash
+# 优先考虑使用 >= 8.0 的 PHP 版本
 ./bin/spc fetch --with-php=8.2 --all
 ```
+
+其中，目前支持构建 cli，micro，fpm 三种静态二进制，使用以下参数的一个或多个来指定编译的 SAPI：
+
+- `--build-cli`：构建 cli 二进制
+- `--build-micro`：构建 phpmicro 自执行二进制
+- `--build-fpm`：构建 fpm
+- `--build-all`：构建所有
 
 如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：
 
 ```bash
-./bin/spc build openssl --debug
+./bin/spc build openssl,pcntl,mbstring --debug --build-all
 ./bin/spc fetch --all --debug
 ```
 
@@ -83,22 +117,23 @@ chmod +x bin/spc
 
 > php-cli 是一个静态的二进制文件，类似 Go、Rust 语言编译后的单个可移植的二进制文件。
 
-采用参数 `--build-all` 或不添加 `--build-micro` 参数时，最后编译结果会输出一个 `./php` 的二进制文件，此文件可分发、可直接使用。
+采用参数 `--build-cli` 或`--build-all` 参数时，最后编译结果会输出一个 `./php` 的二进制文件，此文件可分发、可直接使用。
 该文件编译后会存放在 `buildroot/bin/` 目录中，名称为 `php`，拷贝出来即可。
 
 ```bash
-cd buildroot/
-./php -v
-./php -m
-./php your_code.php
+cd buildroot/bin/
+./php -v                # 检查版本
+./php -m                # 检查编译的扩展
+./php your_code.php     # 运行代码
+./php your_project.phar # 运行打包为 phar 单文件的项目
 ```
 
 ### 使用 micro.sfx
 
 > phpmicro 是一个提供自执行二进制 PHP 的项目，本项目依赖 phpmicro 进行编译自执行二进制。详见 [dixyes/phpmicro](https://github.com/dixyes/phpmicro)。
 
-采用项目参数 `--build-all` 或 `--build-micro` 时，最后编译结果会输出一个 `./micro.sfx` 的文件，此文件需要配合你的 PHP 源码使用。
-该文件编译后会存放在 `source/php-src/sapi/micro/` 目录中，拷贝出来即可。
+采用项目参数 `--build-micro` 或 `--build-all` 时，最后编译结果会输出一个 `./micro.sfx` 的文件，此文件需要配合你的 PHP 源码使用。
+该文件编译后会存放在 `buildroot/bin/` 目录中，拷贝出来即可。
 
 使用时应准备好你的项目源码文件，可以是单个 PHP 文件，也可以是 Phar 文件。
 
@@ -112,6 +147,16 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 > 有些情况下的 phar 文件可能无法在 micro 环境下运行。
 
+### 使用 php-fpm
+
+采用项目参数 `--build-fpm` 或 `--build-all` 时，最后编译结果会输出一个 `./php-fpm` 的文件。
+该文件存放在 `buildroot/bin/` 目录，拷贝出来即可使用。
+
+在正常的 Linux 发行版和 macOS 系统中，安装 php-fpm 后包管理会自动生成默认的 fpm 配置文件。
+因为 php-fpm 必须指定配置文件才可启动，本项目编译的 php-fpm 不会带任何配置文件，所以需自行编写 `php-fpm.conf` 和 `pool.conf` 配置文件。
+
+指定 `php-fpm.conf` 可以使用命令参数 `-y`，例如：`./php-fpm -y php-fpm.conf`。
+
 ## 项目支持情况
 
 - [X] 基础结构编写（采用 `symfony/console`）
@@ -120,7 +165,7 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [ ] Windows 支持
 - [X] Linux 支持
 - [X] PHP 7.4 支持
-- [ ] fpm 支持
+- [X] fpm 支持
 
 更多功能和特性正在陆续支持中，详见：https://github.com/crazywhalecc/static-php-cli/issues/32
 
@@ -134,6 +179,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - 涉及到其他开源库的部分应提供对应库的协议，同时对配置文件在修改后采用命令 `sort-config` 排序。有关排序的命令，见文档。
 - 应遵循命名规范，例如扩展名称应采取 PHP 内注册的扩展名本身，外部库名应遵循项目本身的名称，内部逻辑的函数、类名、变量等应遵循驼峰、下划线等格式，禁止同一模块混用。
 - 涉及编译外部库的命令和 Patch 时应注意兼容不同操作系统。
+
+另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
 
 ## 开源协议
 
@@ -149,4 +196,4 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 本项目重构分支为模块化编写。
 
-This section will be improved after refactor version released.
+TODO：这部分将在基础功能完成后编写完成。

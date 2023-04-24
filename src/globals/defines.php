@@ -34,20 +34,17 @@ const REPLACE_FILE_STR = 1;
 const REPLACE_FILE_PREG = 2;
 const REPLACE_FILE_USER = 3;
 
-// build sapi type
-const BUILD_MICRO_NONE = 0;
-const BUILD_MICRO_ONLY = 1;
-const BUILD_MICRO_BOTH = 2;
-
 // library build status
 const BUILD_STATUS_OK = 0;
 const BUILD_STATUS_ALREADY = 1;
 const BUILD_STATUS_FAILED = 2;
 
 // build target type
-const BUILD_TYPE_CLI = 1;
-const BUILD_TYPE_MICRO = 2;
-const BUILD_TYPE_FPM = 3;
+const BUILD_TARGET_NONE = 0;
+const BUILD_TARGET_CLI = 1;
+const BUILD_TARGET_MICRO = 2;
+const BUILD_TARGET_FPM = 4;
+const BUILD_TARGET_ALL = 7;
 
 // doctor error fix policy
 const FIX_POLICY_DIE = 1;       // die directly

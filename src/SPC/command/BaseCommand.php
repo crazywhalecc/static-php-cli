@@ -13,6 +13,8 @@ use ZM\Logger\ConsoleLogger;
 
 abstract class BaseCommand extends Command
 {
+    protected bool $no_motd = false;
+
     /**
      * 输入
      */
@@ -29,10 +31,14 @@ abstract class BaseCommand extends Command
     {
         parent::__construct($name);
         $this->addOption('debug', null, null, 'Enable debug mode');
+        $this->addOption('no-motd', null, null, 'Disable motd');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output)
     {
+        if ($input->getOption('no-motd')) {
+            $this->no_motd = true;
+        }
         // 注册全局错误处理器
         set_error_handler(static function ($error_no, $error_msg, $error_file, $error_line) {
             $tips = [
@@ -58,7 +64,7 @@ abstract class BaseCommand extends Command
             define('DEBUG_MODE', true);
         }
         $version = ConsoleApplication::VERSION;
-        if (!isset($this->no_motd)) {
+        if (!$this->no_motd) {
             echo "     _        _   _                 _           
  ___| |_ __ _| |_(_) ___      _ __ | |__  _ __  
 / __| __/ _` | __| |/ __|____| '_ \\| '_ \\| '_ \\ 

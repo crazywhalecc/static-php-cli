@@ -119,7 +119,7 @@ class MacOSBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $bloat = false): void
+    public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $bloat = false): void
     {
         $extra_libs = $this->getFrameworks(true) . ' ' . ($this->getExt('swoole') ? '-lc++ ' : '');
         if (!$bloat) {
@@ -159,6 +159,7 @@ class MacOSBuilder extends BuilderBase
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
+                '--enable-fpm ' .
                 '--enable-micro ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs() . ' ' .
@@ -167,24 +168,21 @@ class MacOSBuilder extends BuilderBase
 
         $this->cleanMake();
 
-        switch ($build_micro_rule) {
-            case BUILD_MICRO_NONE:
-                logger()->info('building cli');
-                $this->buildCli($extra_libs);
-                break;
-            case BUILD_MICRO_ONLY:
-                logger()->info('building micro');
-                $this->buildMicro($extra_libs);
-                break;
-            case BUILD_MICRO_BOTH:
-                logger()->info('building cli and micro');
-                $this->buildCli($extra_libs);
-                $this->buildMicro($extra_libs);
-                break;
+        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+            logger()->info('building cli');
+            $this->buildCli($extra_libs);
+        }
+        if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
+            logger()->info('building fpm');
+            $this->buildFpm($extra_libs);
+        }
+        if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+            logger()->info('building micro');
+            $this->buildMicro($extra_libs);
         }
 
         if (php_uname('m') === $this->arch) {
-            $this->sanityCheck($build_micro_rule);
+            $this->sanityCheck($build_target);
         }
 
         if ($this->phar_patched) {
@@ -193,9 +191,24 @@ class MacOSBuilder extends BuilderBase
     }
 
     /**
-     * 构建 phpmicro
+     * 构建 cli
      *
      * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public function buildCli(string $extra_libs): void
+    {
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli")
+            ->exec('dsymutil -f sapi/cli/php')
+            ->exec('strip sapi/cli/php');
+        $this->deployBinary(BUILD_TARGET_CLI);
+    }
+
+    /**
+     * 构建 phpmicro
+     *
+     * @throws FileSystemException|RuntimeException
      */
     public function buildMicro(string $extra_libs): void
     {
@@ -215,22 +228,21 @@ class MacOSBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" STRIP=\"dsymutil -f \" micro");
-        $this->deployBinary(BUILD_TYPE_MICRO);
+        $this->deployBinary(BUILD_TARGET_MICRO);
     }
 
     /**
-     * 构建 cli
+     * 构建 fpm
      *
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(string $extra_libs): void
+    public function buildFpm(string $extra_libs): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
-            // 生成调试信息、优化编译后的尺寸、禁用标识符（如变量、函数名）缩短
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli")
-            ->exec('dsymutil -f sapi/cli/php')
-            ->exec('strip sapi/cli/php');
-        $this->deployBinary(BUILD_TYPE_CLI);
+            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm")
+            ->exec('dsymutil -f sapi/fpm/php-fpm')
+            ->exec('strip sapi/fpm/php-fpm');
+        $this->deployBinary(BUILD_TARGET_FPM);
     }
 }

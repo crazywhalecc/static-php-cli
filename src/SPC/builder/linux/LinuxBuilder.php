@@ -149,7 +149,7 @@ EOF;
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildPHP(int $build_micro_rule = BUILD_MICRO_NONE, bool $with_clean = false, bool $bloat = false)
+    public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $with_clean = false, bool $bloat = false)
     {
         if (!$bloat) {
             $extra_libs = implode(' ', $this->getAllStaticLibFiles());
@@ -243,6 +243,7 @@ EOF;
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
+                '--enable-fpm ' .
                 '--enable-micro=all-static ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs() . ' ' .
@@ -261,34 +262,26 @@ EOF;
             $extra_libs = "-Wl,--whole-archive {$extra_libs} -Wl,--no-whole-archive ";
         }
 
-        switch ($build_micro_rule) {
-            case BUILD_MICRO_NONE:
-                logger()->info('building cli');
-                $this->buildCli($extra_libs, $use_lld, $preprocessors);
-                break;
-            case BUILD_MICRO_ONLY:
-                logger()->info('building micro');
-                $this->buildMicro($extra_libs, $use_lld, $cflags);
-                break;
-            case BUILD_MICRO_BOTH:
-                logger()->info('building cli and micro');
-                $this->buildCli($extra_libs, $use_lld);
-                $this->buildMicro($extra_libs, $use_lld, $cflags);
-                break;
+        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+            logger()->info('building cli');
+            $this->buildCli($extra_libs, $use_lld);
+        }
+        if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
+            logger()->info('building fpm');
+            $this->buildFpm($extra_libs, $use_lld);
+        }
+        if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+            logger()->info('building micro');
+            $this->buildMicro($extra_libs, $use_lld, $cflags);
         }
 
         if (php_uname('m') === $this->arch) {
-            $this->sanityCheck($build_micro_rule);
+            $this->sanityCheck($build_target);
         }
 
         if ($this->phar_patched) {
             shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 -R < sapi/micro/patches/phar.patch');
         }
-
-        file_put_contents(
-            SOURCE_PATH . '/php-src/.extensions.json',
-            json_encode($this->plain_extensions, JSON_PRETTY_PRINT)
-        );
     }
 
     /**
@@ -315,10 +308,8 @@ EOF;
             ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php php.debug")
             ->exec('elfedit --output-osabi linux php')
             ->exec("{$this->cross_compile_prefix}strip --strip-all php")
-            ->exec(
-                "{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php"
-            );
-        $this->deployBinary(BUILD_TYPE_CLI);
+            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php");
+        $this->deployBinary(BUILD_TARGET_CLI);
     }
 
     /**
@@ -355,7 +346,30 @@ EOF;
             "{$this->cross_compile_prefix}strip --strip-all micro.sfx"
         );
 
-        $this->deployBinary(BUILD_TYPE_MICRO);
+        $this->deployBinary(BUILD_TARGET_MICRO);
+    }
+
+    /**
+     * @throws RuntimeException
+     */
+    public function buildFpm(string $extra_libs, string $use_lld): void
+    {
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            ->exec(
+                'make -j' . $this->concurrency .
+                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
+                "EXTRA_LIBS=\"{$extra_libs}\" " .
+                "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
+                'fpm'
+            );
+
+        shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
+            ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php-fpm php-fpm.debug")
+            ->exec('elfedit --output-osabi linux php-fpm')
+            ->exec("{$this->cross_compile_prefix}strip --strip-all php-fpm")
+            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php-fpm.debug --remove-section=.note php-fpm");
+        $this->deployBinary(BUILD_TARGET_FPM);
     }
 
     /**

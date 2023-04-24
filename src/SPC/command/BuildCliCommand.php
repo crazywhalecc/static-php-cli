@@ -12,6 +12,7 @@ use SPC\util\LicenseDumper;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use ZM\Logger\ConsoleColor;
 
 #[AsCommand('build', 'build CLI binary')]
 class BuildCliCommand extends BuildCommand
@@ -20,8 +21,10 @@ class BuildCliCommand extends BuildCommand
     {
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
-        $this->addOption('build-micro', null, null, 'build micro only');
-        $this->addOption('build-all', null, null, 'build both cli and micro');
+        $this->addOption('build-micro', null, null, 'build micro');
+        $this->addOption('build-cli', null, null, 'build cli');
+        $this->addOption('build-fpm', null, null, 'build fpm');
+        $this->addOption('build-all', null, null, 'build cli, micro, fpm');
     }
 
     public function handle(): int
@@ -33,24 +36,30 @@ class BuildCliCommand extends BuildCommand
 
         define('BUILD_ALL_STATIC', true);
 
-        if ($this->getOption('build-all')) {
-            $rule = BUILD_MICRO_BOTH;
-            logger()->info('Builder will build php-cli and phpmicro SAPI');
-        } elseif ($this->getOption('build-micro')) {
-            $rule = BUILD_MICRO_ONLY;
-            logger()->info('Builder will build phpmicro SAPI');
-        } else {
-            $rule = BUILD_MICRO_NONE;
-            logger()->info('Builder will build php-cli SAPI');
+        $rule = BUILD_TARGET_NONE;
+        $rule = $rule | ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
+        $rule = $rule | ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
+        $rule = $rule | ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
+        $rule = $rule | ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
+        if ($rule === BUILD_TARGET_NONE) {
+            $this->output->writeln('<error>Please add at least one build target!</error>');
+            $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm</comment>");
+            return 1;
         }
         try {
             // 构建对象
             $builder = BuilderProvider::makeBuilderByInput($this->input);
             // 根据提供的扩展列表获取依赖库列表并编译
             [$extensions, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps($extensions, $libraries);
-
-            logger()->info('Enabled extensions: ' . implode(', ', $extensions));
-            logger()->info('Required libraries: ' . implode(', ', $libraries));
+            /* @phpstan-ignore-next-line */
+            logger()->info('Build target: ' . ConsoleColor::yellow($builder->getBuildTypeName($rule)));
+            /* @phpstan-ignore-next-line */
+            logger()->info('Enabled extensions: ' . ConsoleColor::yellow(implode(', ', $extensions)));
+            /* @phpstan-ignore-next-line */
+            logger()->info('Required libraries: ' . ConsoleColor::yellow(implode(', ', $libraries)));
             if (!empty($not_included)) {
                 logger()->warning('some extensions will be enabled due to dependencies: ' . implode(',', $not_included));
             }
@@ -64,11 +73,14 @@ class BuildCliCommand extends BuildCommand
             // 统计时间
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build complete, used ' . $time . ' s !');
-            if ($rule !== BUILD_MICRO_ONLY) {
+            if (($rule & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
                 logger()->info('Static php binary path: ' . BUILD_ROOT_PATH . '/bin/php');
             }
-            if ($rule !== BUILD_MICRO_NONE) {
+            if (($rule & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
                 logger()->info('phpmicro binary path: ' . BUILD_ROOT_PATH . '/bin/micro.sfx');
+            }
+            if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
+                logger()->info('Static php-fpm binary path: ' . BUILD_ROOT_PATH . '/bin/php-fpm');
             }
             // 导出相关元数据
             file_put_contents(BUILD_ROOT_PATH . '/build-extensions.json', json_encode($extensions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
