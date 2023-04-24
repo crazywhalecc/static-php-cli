@@ -70,7 +70,8 @@ class LinuxBuilder extends BuilderBase
         $this->ld = match ($this->cc) {
             'musl-gcc' => 'musl-ldd',
             'gcc' => 'ld',
-            'clang' => 'ld.lld'
+            'clang' => 'ld.lld',
+            default => throw new RuntimeException('no found ld'),
         };
 
         // 根据 CPU 线程数设置编译进程数
