@@ -16,6 +16,7 @@
             "brotlienc-static.lib",
             "brotlidec-static.lib"
         ],
+
         "headers": [
             "brotli"
         ]
@@ -26,6 +27,9 @@
             "libbz2.a"
         ],
         "pkg-unix": [
+        ],
+        "none-pkg-unix": [
+            "-lbz2"
         ],
         "static-libs-windows": [
             [
@@ -90,6 +94,12 @@
         "headers-unix": [
             "freetype2/freetype/freetype.h",
             "freetype2/ft2build.h"
+        ],
+        "lib-depends-unix": [
+            "zlib",
+            "libpng",
+            "brotli",
+            "bzip2"
         ]
     },
     "gmp": {
@@ -126,6 +136,9 @@
         "source": "libiconv",
         "static-libs-unix": [
             "libiconv.a"
+        ],
+        "none-pkg-unix": [
+            "-liconv"
         ],
         "headers": [
             "iconv.h",

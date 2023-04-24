@@ -32,23 +32,25 @@ class brotli extends LinuxLibraryBase
     public function build()
     {
         [$lib, $include, $destdir] = SEPARATED_PATH;
-        // 清理旧的编译文件
-        shell()->cd($this->source_dir)
-            ->exec('rm -rf build')
-            ->exec('mkdir -p build');
         // 使用 cmake 编译
-        shell()->cd($this->source_dir . '/build')
+        shell()->cd($this->source_dir)
             ->exec(
-                $this->builder->configure_env . ' cmake ' .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                "-DCMAKE_INSTALL_PREFIX={$destdir} " .
-                "-DCMAKE_INSTALL_LIBDIR={$destdir}/lib " .
-                "-DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include " .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '..'
+                <<<EOF
+                {$this->builder->configure_env}
+                test -d build && rm -rf build 
+                mkdir -p build 
+                cd build 
+                cmake .. \\
+                -DCMAKE_BUILD_TYPE=Release \\
+                -DBUILD_SHARED_LIBS=OFF \\
+                -DCMAKE_INSTALL_PREFIX={$destdir} \\
+                -DCMAKE_INSTALL_LIBDIR={$destdir}/lib \\
+                -DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include \\
+                -DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} 
+              
+                cmake --build . --config Release --target install -j {$this->builder->concurrency}
+EOF
             )
-            ->exec("cmake --build . --config Release --target install -j {$this->builder->concurrency}")
             ->exec(
                 <<<EOF
             cp  -f {$destdir}/lib/libbrotlicommon-static.a {$destdir}/lib/libbrotli.a

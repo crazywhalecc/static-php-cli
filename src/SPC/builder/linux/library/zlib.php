@@ -34,6 +34,7 @@ class zlib extends LinuxLibraryBase
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
+            ->exec('make clean')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
                 '--static ' .

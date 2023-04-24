@@ -22,8 +22,12 @@ class libjpeg extends LinuxLibraryBase
         shell()->cd($this->source_dir)
             ->exec(
                 <<<EOF
-            {$this->builder->configure_env} \\
+            test -d build && rm -rf build 
+            mkdir -p build 
+            cd build 
+            {$this->builder->configure_env} 
             cmake -G"Unix Makefiles"   \\
+            ..  \\
             -DCMAKE_INSTALL_PREFIX={$destdir} \\
             -DCMAKE_INSTALL_BINDIR={$destdir}/bin/ \\
             -DCMAKE_INSTALL_LIBDIR={$destdir}/lib \\

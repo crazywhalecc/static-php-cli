@@ -19,6 +19,8 @@ trait UnixBuilderTrait
     /** @var string C++ 编译器命令 */
     public string $cxx;
 
+    public string $ld;
+
     /** @var string cflags 参数 */
     public string $arch_c_flags;
 

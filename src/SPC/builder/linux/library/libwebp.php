@@ -20,30 +20,26 @@ class libwebp extends LinuxLibraryBase
         shell()->cd($this->source_dir)
             ->exec(
                 <<<EOF
-                 {$this->builder->configure_env} \\
-                 ./autogen.sh 
- EOF
-            )
-            ->exec(
-                <<<EOF
-                 {$this->builder->configure_env} \\
-                CPPFLAGS="$(pkg-config  --cflags-only-I  --static libpng libjpeg )" \\
-                LDFLAGS="$(pkg-config --libs-only-L      --static libpng libjpeg )" \\
-                LIBS="$(pkg-config --libs-only-l         --static libpng libjpeg )" \\
-                ./configure --prefix={$destdir} \\
-                --enable-static --disable-shared \\
+               {$this->builder->configure_env} 
+                ./autogen.sh 
+                CPPFLAGS="$(pkg-config  --cflags-only-I  --static libpng libpng16 libjpeg libturbojpeg)" \\
+                LDFLAGS="$(pkg-config --libs-only-L      --static libpng libpng16 libjpeg libturbojpeg)" \\
+                LIBS="$(pkg-config --libs-only-l         --static libpng libpng16 libjpeg libturbojpeg)" \\
+                CFLAGS="-fPIC -fPIE" \\
+                ./configure \\
+                --prefix={$destdir} \\
+                --enable-shared=no \\
+                --enable-static=yes \\
+                --disable-shared \\
                 --enable-libwebpdecoder \\
                 --enable-libwebpextras \\
-                --with-pngincludedir={$include} \\
-                --with-pnglibdir={$lib} \\
-                --with-jpegincludedir={$include} \\
-                --with-jpeglibdir={$lib} \\
-                --with-gifincludedir={$include} \\
-                --with-giflibdir={$lib} \\
-                --disable-tiff  
+                --disable-tiff   \\
+                --disable-gl  \\
+                --disable-sdl \\
+                --disable-wic
 EOF
             )
-            ->exec("make  -j {$this->builder->concurrency}")
+            ->exec($this->builder->configure_env . "make  -j {$this->builder->concurrency}")
             ->exec('make install');
     }
 }

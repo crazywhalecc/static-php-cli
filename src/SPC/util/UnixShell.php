@@ -34,7 +34,7 @@ class UnixShell
         /* @phpstan-ignore-next-line */
         logger()->info(ConsoleColor::yellow('[EXEC] ') . ConsoleColor::green($cmd));
         if ($this->cd !== null) {
-            $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
+            $cmd = 'cd ' . escapeshellarg($this->cd) . PHP_EOL . $cmd;
         }
         if (!$this->debug) {
             $cmd .= ' 1>/dev/null 2>&1';

@@ -67,6 +67,11 @@ class LinuxBuilder extends BuilderBase
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
         $this->libc = 'musl'; // SystemUtil::selectLibc($this->cc);
+        $this->ld = match ($this->cc) {
+            'musl-gcc' => 'musl-ldd',
+            'gcc' => 'ld',
+            'clang' => 'ld.lld'
+        };
 
         // 根据 CPU 线程数设置编译进程数
         $this->concurrency = SystemUtil::getCpuCount();
@@ -83,14 +88,19 @@ class LinuxBuilder extends BuilderBase
             cxx: $this->cxx
         );
         // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig:/lib/pkgconfig:/usr/lib/pkgconfig"';
-        $this->pkgconf_env = '';
+        $this->pkgconf_env = 'export PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig:/usr/lib/pkgconfig"';
+        $build_lib_path = BUILD_LIB_PATH;
         // 设置 configure 依赖的环境变量
-        $this->configure_env =
-            $this->pkgconf_env . ' ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' " .
-            (php_uname('m') === $this->arch ? '' : "CFLAGS='{$this->arch_c_flags}'");
+        $this->configure_env = <<<EOF
+        export CC={$this->cc}
+        export CXX={$this->cxx}
+        export LD=ld={$this->ld}
+        export PATH={$build_lib_path}/bin/:\$PATH
+        {$this->pkgconf_env}
+EOF;
+        $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
+
+        php_uname('m') === $this->arch ? '' : "CFLAGS='{$this->arch_c_flags}'";
         // 交叉编译依赖的，TODO
         if (php_uname('m') !== $this->arch) {
             $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
@@ -159,6 +169,8 @@ class LinuxBuilder extends BuilderBase
         $cflags = $this->arch_c_flags;
         $use_lld = '';
 
+        $this->libc = 'glibc';
+
         switch ($this->libc) {
             case 'musl_wrapper':
             case 'glibc':
@@ -173,32 +185,46 @@ class LinuxBuilder extends BuilderBase
                 throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
         }
         $envs = "{$envs} CFLAGS='{$cflags}' ";
+        $envs = '';
+        echo $envs;
+        echo PHP_EOL;
+        echo $this->libc;
+        echo PHP_EOL;
 
         $lib_meta = FileSystem::loadConfigArray('lib');
         $packages = [];
+        $pkg_libs = [];
         foreach ($this->libs as $lib) {
             if (isset($lib_meta[$lib::NAME]['pkg-unix'])) {
                 $packages = array_merge($packages, $lib_meta[$lib::NAME]['pkg-unix']);
             }
+            if (isset($lib_meta[$lib::NAME]['none-pkg-unix'])) {
+                $pkg_libs = array_merge($pkg_libs, $lib_meta[$lib::NAME]['none-pkg-unix']);
+            }
         }
+
         $packages = array_unique($packages);
-        $this->configure_env = '';
-        $preprocessors = 'set -exu ' . PHP_EOL;
-        $preprocessors .= " export CC={$this->cc} " . PHP_EOL;
-        $preprocessors .= " export CXX={$this->cxx} " . PHP_EOL;
-        $preprocessors .= ' export PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig:/lib/pkgconfig:/usr/lib/pkgconfig" ' . PHP_EOL;
-        $preprocessors .= ' export PATH=' . BUILD_ROOT_PATH . '/bin/:$PATH ' . PHP_EOL;
+
+        $preprocessors = $this->configure_env;
+        $preprocessors .= ' CPPFLAGS="-I' . BUILD_ROOT_PATH . '/include" ' . PHP_EOL;
+        $preprocessors .= ' LDFLAGS="-L' . BUILD_ROOT_PATH . '/lib" ' . PHP_EOL;
+        $preprocessors .= ' LIBS=" -pthread -lstdc++ " ' . PHP_EOL;
+
+        if (!empty($pkg_libs)) {
+            $preprocessors .= ' LIBS="$LIBS ' . implode(' ', $pkg_libs) . '"' . PHP_EOL;
+        }
+
         if (!empty($packages)) {
             $preprocessors .= ' export PACKAGES="' . implode(' ', $packages) . '"  ' . PHP_EOL;
-            $preprocessors .= ' export CPPFLAGS="$(pkg-config --cflags-only-I --static $PACKAGES )" ' . PHP_EOL;
-            $preprocessors .= ' export LDFLAGS=$(pkg-config --libs-only-L --static $PACKAGES ) ' . PHP_EOL;
-            $preprocessors .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES )   -lstdc++ " ' . PHP_EOL;
+            $preprocessors .= ' export CPPFLAGS="$CPPFLAGS $(pkg-config --cflags-only-I --static $PACKAGES )" ' . PHP_EOL;
+            $preprocessors .= ' export LDFLAGS="$LDFLAGS $(pkg-config --libs-only-L --static $PACKAGES )" ' . PHP_EOL;
+            $preprocessors .= ' export LIBS="$LIBS $(pkg-config --libs-only-l --static $PACKAGES )" ' . PHP_EOL;
         }
+        $preprocessors .= " export CFLAGS=\"{$cflags}\" " . PHP_EOL;
 
-        $use_lld .= ' -L' . BUILD_LIB_PATH;
         # Patcher::patchPHPBeforeConfigure($this);
 
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
+        shell()->cd(SOURCE_PATH . '/php-src')->exec($preprocessors . PHP_EOL . './buildconf --force');
 
         # Patcher::patchPHPConfigure($this);
 
@@ -207,7 +233,7 @@ class LinuxBuilder extends BuilderBase
                 'cd ' . SOURCE_PATH . '/php-src' . PHP_EOL .
                 $preprocessors . PHP_EOL .
                 './configure ' .
-                '--prefix= ' .
+                '--prefix=/' .
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .

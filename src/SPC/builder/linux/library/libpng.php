@@ -46,22 +46,23 @@ class libpng extends LinuxLibraryBase
         // Patcher::patchUnixLibpng();
 
         shell()->cd($this->source_dir)
+            ->exec('make clean')
             ->exec('chmod +x ./configure')
             ->exec(
                 <<<EOF
-                PKG_CONFIG_PATH={$destdir}/lib/pkgconfig \\
+                {$this->builder->configure_env} 
                 CPPFLAGS="$(pkg-config  --cflags-only-I  --static zlib )" \\
                 LDFLAGS="$(pkg-config   --libs-only-L    --static zlib )" \\
                 LIBS="$(pkg-config      --libs-only-l    --static zlib )" \\
-                {$this->builder->configure_env} ./configure  \\
+                ./configure  \\
+                --prefix={$destdir} \\
                 --host={$this->builder->gnu_arch}-unknown-linux  \\
                 --disable-shared  \\
                 --enable-static  \\
                 --enable-hardware-optimizations  \\
                 --with-zlib-prefix={$destdir}  \\
-                {$optimizations} \\
-                --prefix={$destdir}
-                EOF
+                {$optimizations} 
+EOF
             )
             ->exec('make -j ' . $this->builder->concurrency)
             ->exec('make install ');

@@ -24,16 +24,27 @@ chmod +x bin/spc
 
 #./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=clang --cxx=clang++  --debug
 
+cc=gcc
+cxx=g++
+:<<'EOF'
+  cc=clang
+  cxx=clang++
+EOF
 
 
+./bin/spc build:libs zlib  --debug 
+./bin/spc build:libs bzip2 --debug 
+./bin/spc build:libs libzip  --debug 
+./bin/spc build:libs libjpeg --debug 
+./bin/spc build:libs libpng --debug 
+./bin/spc build:libs libgif --debug 
+./bin/spc build:libs libwebp --debug 
+./bin/spc build:libs brotli --debug 
+./bin/spc build:libs freetype --debug 
 
-./bin/spc build:libs libzip  --debug --cc=clang --cxx=clang++
-./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++
-./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++
-
-./bin/spc build:libs libgif --debug --cc=clang --cxx=clang++
-./bin/spc build:libs libwebp --debug --cc=clang --cxx=clang++
 
 # ./bin/spc build "bcmath,tokenizer,pdo,ftp,gd" --cc=clang --cxx=clang++  --debug
 
 # ./bin/spc build gd --debug --cc=clang --cxx=clang++ --debug
+
+# ./bin/spc build gd,zlib --debug --cc=gcc  --cxx=g++ --debug
