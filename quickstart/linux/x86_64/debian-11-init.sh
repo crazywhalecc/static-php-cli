@@ -5,6 +5,7 @@ __DIR__=$(
   cd "$(dirname "$0")"
   pwd
 )
+cd ${__DIR__}
 
 mirror=''
 while [ $# -gt 0 ]; do
@@ -33,8 +34,7 @@ apt update -y
 apt install -y git curl wget ca-certificates
 apt install -y xz-utils autoconf automake lld libtool cmake bison re2c gettext coreutils lzip zip unzip
 apt install -y pkg-config bzip2 flex
-apt install -y musl-tools  g++ gcc-multilib
-apt install -y  clang
-
+apt install -y musl-tools g++
+apt install -y clang
 
 # apt install build-essential linux-headers-$(uname -r)

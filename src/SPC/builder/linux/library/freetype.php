@@ -34,7 +34,7 @@ class freetype extends LinuxLibraryBase
             --with-bzip2=yes \\
             --with-png=yes \\
             --with-harfbuzz=no  \\
-            --with-brotli=yes
+            --with-brotli=no
 EOF
             )
             ->exec("make  -j {$this->builder->concurrency}")
