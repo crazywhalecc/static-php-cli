@@ -302,7 +302,6 @@ EOF;
                 'make -j' . $this->concurrency .
                 ' cli'
             );
-        exit;
         /*
          . '" ' .
             "EXTRA_LIBS=\"{$extra_libs}\" " .
