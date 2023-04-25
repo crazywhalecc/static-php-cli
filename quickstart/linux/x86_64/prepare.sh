@@ -47,8 +47,8 @@ EOF
 
 # ./bin/spc build gd --debug --cc=clang --cxx=clang++ --debug
 
-./bin/spc build gd,zlib  --cc=gcc       --cxx=g++ --build-cli  --debug
+# ./bin/spc build gd,zlib  --cc=gcc       --cxx=g++ --build-cli  --debug
 ./bin/spc build gd,zlib  --cc=musl-gcc  --cxx=g++ --build-cli --debug
-./bin/spc build gd,zlib  --cc=clang     --cxx=clang++ --build-cli --debug
+# ./bin/spc build gd,zlib  --cc=clang     --cxx=clang++ --build-cli --debug
 
 # musl-gcc/musl-clang（或 gcc-musl/gcc-clang
