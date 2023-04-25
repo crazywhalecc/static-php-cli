@@ -10,6 +10,7 @@ use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 use SPC\util\Patcher;
 
 /**
@@ -66,19 +67,31 @@ class LinuxBuilder extends BuilderBase
             cc: $this->cc,
             cxx: $this->cxx
         );
+        $this->ld = match ($this->cc) {
+            'clang' => 'lld',
+            default => 'ld'
+        };
+        $build_root_path = BUILD_ROOT_PATH;
+        $build_lib_path = BUILD_LIB_PATH;
         // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
+        $this->pkgconf_env = 'export PKG_CONFIG_PATH="' . $build_lib_path . '/pkgconfig"';
         // 设置 configure 依赖的环境变量
-        $this->configure_env =
-            $this->pkgconf_env . ' ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' " .
-            (php_uname('m') === $this->arch ? '' : "CFLAGS='{$this->arch_c_flags}'");
+        $this->configure_env = <<<EOF
+        echo 'init env'
+        set -uex
+        export CC={$this->cc}
+        export CXX={$this->cxx}
+        export LD={$this->ld}
+        export PATH={$build_root_path}/bin/:\$PATH
+        {$this->pkgconf_env}
+EOF;
+        $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
+
         // 交叉编译依赖的，TODO
         if (php_uname('m') !== $this->arch) {
             $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
             logger()->info('using cross compile prefix: ' . $this->cross_compile_prefix);
-            $this->configure_env .= " CROSS_COMPILE='{$this->cross_compile_prefix}'";
+            # $this->configure_env .= " CROSS_COMPILE='{$this->cross_compile_prefix}'";
         }
 
         $missing = [];
@@ -92,6 +105,7 @@ class LinuxBuilder extends BuilderBase
         }
 
         // 创立 pkg-config 和放头文件的目录
+        f_mkdir(BUILD_ROOT_PATH . '/bin', recursive: true);
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
         f_mkdir(BUILD_INCLUDE_PATH, recursive: true);
     }
@@ -119,7 +133,7 @@ class LinuxBuilder extends BuilderBase
 
     /**
      * @throws RuntimeException
-     * @throws FileSystemException
+     * @throws FileSystemException|WrongUsageException
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $with_clean = false, bool $bloat = false)
     {
@@ -136,9 +150,7 @@ class LinuxBuilder extends BuilderBase
             );
         }
 
-        $envs = $this->pkgconf_env . ' ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' ";
+        $envs = '';
         $cflags = $this->arch_c_flags;
         $use_lld = '';
 
@@ -156,16 +168,51 @@ class LinuxBuilder extends BuilderBase
                 throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
         }
 
-        $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
+        $lib_meta = FileSystem::loadConfigArray('lib');
+        $packages = [];
+        $pkg_libs = [];
+        foreach ($this->libs as $lib) {
+            if (isset($lib_meta[$lib::NAME]['pkg-unix'])) {
+                $packages = array_merge($packages, $lib_meta[$lib::NAME]['pkg-unix']);
+            }
+            if (isset($lib_meta[$lib::NAME]['none-pkg-unix'])) {
+                $pkg_libs = array_merge($pkg_libs, $lib_meta[$lib::NAME]['none-pkg-unix']);
+            }
+        }
+        $packages = array_unique($packages);
+        $envs = $this->configure_env;
+        $envs .= 'CPPFLAGS="-I' . BUILD_ROOT_PATH . '/include  " ' . PHP_EOL;
+        $envs .= 'LDFLAGS="-L' . BUILD_ROOT_PATH . '/lib  " ' . PHP_EOL;
+        $envs .= 'LIBS=" -lm -lrt -lpthread -lcrypt -lutil  -lresolv " ' . PHP_EOL;
+
+        if (!empty($pkg_libs)) {
+            $envs .= 'LIBS="$LIBS ' . implode(' ', $pkg_libs) . '"' . PHP_EOL;
+        }
+
+        if (!empty($packages)) {
+            $envs .= 'PACKAGES="' . implode(' ', $packages) . '"  ' . PHP_EOL;
+            $envs .= 'CPPFLAGS="$CPPFLAGS $(pkg-config --cflags-only-I --static $PACKAGES )" ' . PHP_EOL;
+            $envs .= 'LDFLAGS="$LDFLAGS $(pkg-config --libs-only-L --static $PACKAGES )" ' . PHP_EOL;
+            $envs .= 'LIBS="$LIBS $(pkg-config --libs-only-l --static $PACKAGES ) " ' . PHP_EOL;
+        }
+
+        $envs .= 'export CPPFLAGS="$CPPFLAGS" ' . PHP_EOL;
+        $envs .= 'export LDFLAGS="$LDFLAGS" ' . PHP_EOL;
+        $envs .= 'export LIBS="$LIBS" ' . PHP_EOL;
+
+        if (!empty($cflags)) {
+            $envs .= 'export CFLAGS="{$cflags}" ' . PHP_EOL;
+        }
 
         Patcher::patchPHPBeforeConfigure($this);
-
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
         Patcher::patchPHPConfigure($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                $envs . PHP_EOL .
+                'test -f sapi/cli/php_cli.o && make clean ' . PHP_EOL .
+                './buildconf --force' . PHP_EOL .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
@@ -188,7 +235,7 @@ class LinuxBuilder extends BuilderBase
         file_put_contents('/tmp/comment', $this->note_section);
 
         // 清理
-        $this->cleanMake();
+        // $this->cleanMake();
 
         if ($bloat) {
             logger()->info('bloat linking');
@@ -197,15 +244,15 @@ class LinuxBuilder extends BuilderBase
 
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('building cli');
-            $this->buildCli($extra_libs, $use_lld);
+            $this->buildCli($extra_libs, $use_lld, $envs);
         }
         if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
             logger()->info('building fpm');
-            $this->buildFpm($extra_libs, $use_lld);
+            $this->buildFpm($extra_libs, $use_lld, $envs);
         }
         if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
             logger()->info('building micro');
-            $this->buildMicro($extra_libs, $use_lld, $cflags);
+            $this->buildMicro($extra_libs, $use_lld, $cflags, $envs);
         }
 
         if (php_uname('m') === $this->arch) {
@@ -220,7 +267,7 @@ class LinuxBuilder extends BuilderBase
     /**
      * @throws RuntimeException
      */
-    public function buildCli(string $extra_libs, string $use_lld): void
+    public function buildCli(string $extra_libs, string $use_lld, string $env): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
@@ -243,7 +290,7 @@ class LinuxBuilder extends BuilderBase
     /**
      * @throws RuntimeException
      */
-    public function buildMicro(string $extra_libs, string $use_lld, string $cflags): void
+    public function buildMicro(string $extra_libs, string $use_lld, string $cflags, string $env): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new RuntimeException('phpmicro only support PHP >= 8.0!');
@@ -276,7 +323,7 @@ class LinuxBuilder extends BuilderBase
     /**
      * @throws RuntimeException
      */
-    public function buildFpm(string $extra_libs, string $use_lld): void
+    public function buildFpm(string $extra_libs, string $use_lld, string $env): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')

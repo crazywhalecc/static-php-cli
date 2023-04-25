@@ -34,13 +34,15 @@ class zlib extends LinuxLibraryBase
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
+
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                "{$this->builder->configure_env} " . PHP_EOL .
+                'test -f gzlib.o && make clean' . PHP_EOL .
+                 'CFLAGS="-fPIE -fPIC" ./configure ' .
                 '--static ' .
-                '--prefix='
+                '--prefix=' . $destdir
             )
-            ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            ->exec('make install');
     }
 }

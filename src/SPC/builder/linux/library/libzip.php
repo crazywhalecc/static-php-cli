@@ -80,7 +80,7 @@ class libzip extends LinuxLibraryBase
 
         shell()
             ->cd($this->source_dir)
-            ->exec('rm -rf build')
+            ->exec('test -d build && rm -rf build')
             ->exec('mkdir -p build')
             ->cd($this->source_dir . '/build')
             ->exec(
@@ -94,13 +94,13 @@ class libzip extends LinuxLibraryBase
                 '-DBUILD_REGRESS=OFF ' .
                 '-DBUILD_TOOLS=OFF ' .
                 $extra .
-                '-DCMAKE_INSTALL_PREFIX=/ ' .
-                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
+                "-DCMAKE_INSTALL_PREFIX={$destdir} " .
+                "-DCMAKE_INSTALL_LIBDIR={$destdir}/lib " .
+                "-DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include " .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '..'
             )
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . $destdir);
+            ->exec('make install');
     }
 }

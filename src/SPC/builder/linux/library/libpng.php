@@ -34,6 +34,7 @@ class libpng extends LinuxLibraryBase
      */
     public function build()
     {
+        [$lib, $include, $destdir] = SEPARATED_PATH;
         // 不同架构的专属优化
         $optimizations = match ($this->builder->arch) {
             'x86_64' => '--enable-intel-sse ',
@@ -42,24 +43,28 @@ class libpng extends LinuxLibraryBase
         };
 
         // patch configure
-        Patcher::patchUnixLibpng();
+        // Patcher::patchUnixLibpng();
 
         shell()->cd($this->source_dir)
+            ->exec('test -f .libs/libpng16.a && make clean')
             ->exec('chmod +x ./configure')
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                "--host={$this->builder->gnu_arch}-unknown-linux " .
-                '--disable-shared ' .
-                '--enable-static ' .
-                '--enable-hardware-optimizations ' .
-                '--with-zlib-prefix=' . BUILD_ROOT_PATH . ' ' .
-                $optimizations .
-                '--prefix='
+                <<<EOF
+                {$this->builder->configure_env} 
+                CPPFLAGS="$(pkg-config  --cflags-only-I  --static zlib )" \\
+                LDFLAGS="$(pkg-config   --libs-only-L    --static zlib )" \\
+                LIBS="$(pkg-config      --libs-only-l    --static zlib )" \\
+                ./configure  \\
+                --prefix={$destdir} \\
+                --host={$this->builder->gnu_arch}-unknown-linux  \\
+                --disable-shared  \\
+                --enable-static  \\
+                --enable-hardware-optimizations  \\
+                --with-zlib-prefix={$destdir}  \\
+                {$optimizations} 
+EOF
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
-            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
-            ->cd(BUILD_LIB_PATH)
-            ->exec('ln -sf libpng16.a libpng.a');
+            ->exec('make -j ' . $this->builder->concurrency)
+            ->exec('make install ');
     }
 }
