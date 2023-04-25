@@ -224,7 +224,7 @@ EOF;
             $envs .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES ) $LIBS" ' . PHP_EOL;
         }
         $cflags .= ' -static '; // -std=gnu11 -idirafter /usr/include -nostdinc /usr/lib
-        if (strlen($cflags) > 0) {
+        if (strlen($cflags) > 2) {
             $envs .= " export CFLAGS=\"{$cflags}\" " . PHP_EOL;
         }
 
@@ -319,7 +319,7 @@ EOF;
     /**
      * @throws RuntimeException
      */
-    public function buildMicro(string $extra_libs, string $use_lld, string $cflags): void
+    public function buildMicro(string $extra_libs, string $use_lld, string $cflags, string $envs = ''): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new RuntimeException('phpmicro only support PHP >= 8.0!');
@@ -356,7 +356,7 @@ EOF;
     /**
      * @throws RuntimeException
      */
-    public function buildFpm(string $extra_libs, string $use_lld): void
+    public function buildFpm(string $extra_libs, string $use_lld, string $envs = ''): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
