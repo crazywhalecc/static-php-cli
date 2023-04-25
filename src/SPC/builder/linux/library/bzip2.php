@@ -37,9 +37,10 @@ class bzip2 extends LinuxLibraryBase
             ->cd($this->source_dir)
             ->exec(
                 $this->builder->configure_env .
+                'test -f libbz2.a && make clean ' . PHP_EOL .
                 "make -j{$this->builder->concurrency}  PREFIX='" . BUILD_ROOT_PATH . "' libbz2.a"
             )
-            ->exec('cp libbz2.a ' . BUILD_LIB_PATH)
-            ->exec('cp bzlib.h ' . BUILD_INCLUDE_PATH);
+            ->exec('cp -f libbz2.a ' . BUILD_LIB_PATH)
+            ->exec('cp -f bzlib.h ' . BUILD_INCLUDE_PATH);
     }
 }
