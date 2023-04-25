@@ -5,9 +5,10 @@ __DIR__=$(
   cd "$(dirname "$0")"
   pwd
 )
+cd ${__DIR__}
 
 # use china mirror
-# bash quickstart/linux/x86_64/alpine-3.16-init.sh --mirror china
+# bash quickstart/linux/x86_64/debian-11-init.sh --mirror china
 mirror=''
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -24,19 +25,18 @@ done
 
 case "$mirror" in
 	china)
-		test -f /etc/apk/repositories.save || cp /etc/apk/repositories /etc/apk/repositories.save
-    sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+		test -f /etc/apt/sources.list.save || cp /etc/apt/sources.list /etc/apt/sources.list.save
+    sed -i "s@deb.debian.org@mirrors.ustc.edu.cn@g" /etc/apt/sources.list && \
+    sed -i "s@security.debian.org@mirrors.ustc.edu.cn@g" /etc/apt/sources.list
 		;;
 
 esac
 
-sed -i "s@deb.debian.org@mirrors.ustc.edu.cn@g" /etc/apt/sources.list && \
-sed -i "s@security.debian.org@mirrors.ustc.edu.cn@g" /etc/apt/sources.list
 
 apt update -y
-apt install -y   git curl wget ca-certificates
-apt install -y   xz-utils autoconf automake  libclang-13-dev clang lld libtool cmake bison re2c gettext  coreutils lzip zip unzip
-apt install -y   pkg-config bzip2 flex
+apt install -y git curl wget ca-certificates
+apt install -y xz-utils autoconf automake lld libtool cmake bison re2c gettext coreutils lzip zip unzip
+apt install -y pkg-config bzip2 flex
+apt install -y musl-tools g++
+apt install -y clang
 
-
-# apt install build-essential linux-headers-$(uname -r)

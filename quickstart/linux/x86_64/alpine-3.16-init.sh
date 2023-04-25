@@ -5,6 +5,8 @@ __DIR__=$(
   cd "$(dirname "$0")"
   pwd
 )
+cd ${__DIR__}
+
 
 # use china mirror
 # bash quickstart/linux/x86_64/alpine-3.16-init.sh --mirror china
