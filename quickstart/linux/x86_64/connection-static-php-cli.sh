@@ -8,4 +8,4 @@ __DIR__=$(
 
 cd ${__DIR__}
 
-docker exec -it static-php-cli-dev-1 bash
+docker exec -it static-php-cli-dev-1 sh
