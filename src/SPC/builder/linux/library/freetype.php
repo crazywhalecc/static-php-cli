@@ -24,9 +24,9 @@ class freetype extends LinuxLibraryBase
             {$this->builder->configure_env} 
             BZIP2_CFLAGS="-I{$destdir}/include"  \\
             BZIP2_LIBS="-L{$destdir}/lib -lbz2"  \\
-            CPPFLAGS="$(pkg-config --cflags-only-I --static zlib libpng  libbrotlicommon  libbrotlidec  libbrotlienc)" \\
-            LDFLAGS="$(pkg-config  --libs-only-L   --static zlib libpng  libbrotlicommon  libbrotlidec  libbrotlienc)" \\
-            LIBS="$(pkg-config     --libs-only-l   --static zlib libpng  libbrotlicommon  libbrotlidec  libbrotlienc)" \\
+            CPPFLAGS="$(pkg-config --cflags-only-I --static zlib libpng  libbrotlidec  libbrotlienc libbrotlicommon)" \\
+            LDFLAGS="$(pkg-config  --libs-only-L   --static zlib libpng  libbrotlidec  libbrotlienc libbrotlicommon)" \\
+            LIBS="$(pkg-config     --libs-only-l   --static zlib libpng  libbrotlidec  libbrotlienc libbrotlicommon)" \\
             ./configure --prefix={$destdir} \\
             --enable-static \\
             --disable-shared \\
@@ -34,7 +34,7 @@ class freetype extends LinuxLibraryBase
             --with-bzip2=yes \\
             --with-png=yes \\
             --with-harfbuzz=no  \\
-            --with-brotli=yes  
+            --with-brotli=yes
 EOF
             )
             ->exec("make  -j {$this->builder->concurrency}")

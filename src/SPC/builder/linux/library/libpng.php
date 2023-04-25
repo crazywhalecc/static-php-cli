@@ -46,7 +46,7 @@ class libpng extends LinuxLibraryBase
         // Patcher::patchUnixLibpng();
 
         shell()->cd($this->source_dir)
-            ->exec('make clean')
+            ->exec('test -f .libs/libpng16.a && make clean')
             ->exec('chmod +x ./configure')
             ->exec(
                 <<<EOF

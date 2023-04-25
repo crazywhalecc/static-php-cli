@@ -66,10 +66,14 @@ class LinuxBuilder extends BuilderBase
         $this->cxx = $cxx ?? 'g++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
-        $this->libc = 'musl'; // SystemUtil::selectLibc($this->cc);
+        $this->libc = match ($this->cc) {
+            'gcc' => 'glibc',
+            'musl-gcc', 'clang' => 'libc',
+            default => ''
+        }; // SystemUtil::selectLibc($this->cc);
+
         $this->ld = match ($this->cc) {
-            'musl-gcc' => 'musl-ldd',
-            'gcc' => 'ld',
+            'musl-gcc', 'gcc' => 'ld',
             'clang' => 'ld.lld',
             default => throw new RuntimeException('no found ld'),
         };
@@ -88,15 +92,18 @@ class LinuxBuilder extends BuilderBase
             cc: $this->cc,
             cxx: $this->cxx
         );
-        // 设置 pkgconfig
-        $this->pkgconf_env = 'export PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig:/usr/lib/pkgconfig"';
+        $build_root_path = BUILD_ROOT_PATH;
         $build_lib_path = BUILD_LIB_PATH;
+        // 设置 pkgconfig
+        $this->pkgconf_env = 'export PKG_CONFIG_PATH="' . $build_lib_path . '/pkgconfig:/usr/lib/pkgconfig"';
+
         // 设置 configure 依赖的环境变量
         $this->configure_env = <<<EOF
+        set -uex
         export CC={$this->cc}
         export CXX={$this->cxx}
-        export LD=ld={$this->ld}
-        export PATH={$build_lib_path}/bin/:\$PATH
+        export LD={$this->ld}
+        export PATH={$build_root_path}/bin/:\$PATH
         {$this->pkgconf_env}
 EOF;
         $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
@@ -120,6 +127,7 @@ EOF;
         }
 
         // 创立 pkg-config 和放头文件的目录
+        f_mkdir(BUILD_ROOT_PATH . '/bin', recursive: true);
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
         f_mkdir(BUILD_INCLUDE_PATH, recursive: true);
     }
@@ -164,13 +172,9 @@ EOF;
             );
         }
 
-        $envs = $this->pkgconf_env . ' ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' ";
+        $envs = '';
         $cflags = $this->arch_c_flags;
         $use_lld = '';
-
-        $this->libc = 'glibc';
 
         switch ($this->libc) {
             case 'musl_wrapper':
@@ -178,19 +182,14 @@ EOF;
                 $cflags .= ' -static-libgcc -I"' . BUILD_INCLUDE_PATH . '"';
                 break;
             case 'musl':
+            case 'libc':
                 if (str_ends_with($this->cc, 'clang') && SystemUtil::findCommand('lld')) {
-                    $use_lld = '-Xcompiler -fuse-ld=lld';
+                    $use_lld = '-Xcompiler -fuse-ld=lld'; // lld = ld.lld  soft link
                 }
                 break;
             default:
-                throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
+                throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet  ' . __FILE__ . ':' . __LINE__);
         }
-        $envs = "{$envs} CFLAGS='{$cflags}' ";
-        $envs = '';
-        echo $envs;
-        echo PHP_EOL;
-        echo $this->libc;
-        echo PHP_EOL;
 
         $lib_meta = FileSystem::loadConfigArray('lib');
         $packages = [];
@@ -205,34 +204,40 @@ EOF;
         }
 
         $packages = array_unique($packages);
-
-        $preprocessors = $this->configure_env;
-        $preprocessors .= ' CPPFLAGS="-I' . BUILD_ROOT_PATH . '/include" ' . PHP_EOL;
-        $preprocessors .= ' LDFLAGS="-L' . BUILD_ROOT_PATH . '/lib" ' . PHP_EOL;
-        $preprocessors .= ' LIBS=" -pthread -lstdc++ " ' . PHP_EOL;
+        // -I/usr/include -I/usr/local/include
+        // -L/usr/lib -L/usr/local/lib
+        $envs = $this->configure_env;
+        $envs .= ' CPPFLAGS="-I' . BUILD_ROOT_PATH . '/include  " ' . PHP_EOL;
+        $envs .= ' LDFLAGS="-L' . BUILD_ROOT_PATH . '/lib  " ' . PHP_EOL;
+        $envs .= ' LIBS=" -lm -lrt -lpthread -lcrypt -lutil  -lresolv " ' . PHP_EOL;
+        # $envs .= ' LIBS="-lc++  -libc++  -lm -lrt -lpthread -lcrypt -lutil -lxnet -lresolv " ' . PHP_EOL;
+        // for libc -lm -lrt -lpthread -lcrypt -lutil -lxnet -lresolv
 
         if (!empty($pkg_libs)) {
-            $preprocessors .= ' LIBS="$LIBS ' . implode(' ', $pkg_libs) . '"' . PHP_EOL;
+            $envs .= ' LIBS="$LIBS ' . implode(' ', $pkg_libs) . '"' . PHP_EOL;
         }
 
         if (!empty($packages)) {
-            $preprocessors .= ' export PACKAGES="' . implode(' ', $packages) . '"  ' . PHP_EOL;
-            $preprocessors .= ' export CPPFLAGS="$CPPFLAGS $(pkg-config --cflags-only-I --static $PACKAGES )" ' . PHP_EOL;
-            $preprocessors .= ' export LDFLAGS="$LDFLAGS $(pkg-config --libs-only-L --static $PACKAGES )" ' . PHP_EOL;
-            $preprocessors .= ' export LIBS="$LIBS $(pkg-config --libs-only-l --static $PACKAGES )" ' . PHP_EOL;
+            $envs .= ' export PACKAGES="' . implode(' ', $packages) . '"  ' . PHP_EOL;
+            $envs .= ' export CPPFLAGS="$CPPFLAGS $(pkg-config --cflags-only-I --static $PACKAGES )" ' . PHP_EOL;
+            $envs .= ' export LDFLAGS="$LDFLAGS $(pkg-config --libs-only-L --static $PACKAGES )" ' . PHP_EOL;
+            $envs .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES ) $LIBS" ' . PHP_EOL;
         }
-        $preprocessors .= " export CFLAGS=\"{$cflags}\" " . PHP_EOL;
+        $cflags .= ' -static '; // -std=gnu11 -idirafter /usr/include -nostdinc /usr/lib
+        if (strlen($cflags) > 0) {
+            $envs .= " export CFLAGS=\"{$cflags}\" " . PHP_EOL;
+        }
 
         # Patcher::patchPHPBeforeConfigure($this);
 
-        shell()->cd(SOURCE_PATH . '/php-src')->exec($preprocessors . PHP_EOL . './buildconf --force');
-
         # Patcher::patchPHPConfigure($this);
-
+        $envs .= 'export EXTRA_LDFLAGS_PROGRAM="$LDFLAGS -all-static"';
         shell()
+            ->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                'cd ' . SOURCE_PATH . '/php-src' . PHP_EOL .
-                $preprocessors . PHP_EOL .
+                $envs . PHP_EOL .
+                'test -f sapi/cli/php_cli.o && make clean ' . PHP_EOL .
+                './buildconf --force' . PHP_EOL .
                 './configure ' .
                 '--prefix=/' .
                 '--with-valgrind=no ' .
@@ -244,18 +249,18 @@ EOF;
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 '--enable-fpm ' .
-                '--enable-micro=all-static ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
-                $this->makeExtensionArgs() . ' ' .
-                $envs
+                $this->makeExtensionArgs()
             );
+        //  '--enable-micro=all-static ' .
 
         $extra_libs .= $this->generateExtraLibs();
+        echo $envs;
 
         file_put_contents('/tmp/comment', $this->note_section);
 
         // 清理
-        $this->cleanMake();
+        // $this->cleanMake();
 
         if ($bloat) {
             logger()->info('bloat linking');
@@ -264,15 +269,15 @@ EOF;
 
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('building cli');
-            $this->buildCli($extra_libs, $use_lld);
+            $this->buildCli($extra_libs, $use_lld, $envs);
         }
         if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
             logger()->info('building fpm');
-            $this->buildFpm($extra_libs, $use_lld);
+            $this->buildFpm($extra_libs, $use_lld, $envs);
         }
         if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
             logger()->info('building micro');
-            $this->buildMicro($extra_libs, $use_lld, $cflags);
+            $this->buildMicro($extra_libs, $use_lld, $cflags, $envs);
         }
 
         if (php_uname('m') === $this->arch) {
@@ -287,23 +292,22 @@ EOF;
     /**
      * @throws RuntimeException
      */
-    public function buildCli(string $extra_libs, string $use_lld, string $preprocessors = ''): void
+    public function buildCli(string $extra_libs, string $use_lld, string $envs = ''): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            // ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(
                 'echo start build' . PHP_EOL .
-                $preprocessors . PHP_EOL .
+                $envs . PHP_EOL .
                 'make -j' . $this->concurrency .
-                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(
-                    ' ',
-                    array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
-                ) . '" ' .
-                "EXTRA_LIBS=\"{$extra_libs}\" " .
-                "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
-                'cli'
+                ' cli'
             );
-
+        exit;
+        /*
+         . '" ' .
+            "EXTRA_LIBS=\"{$extra_libs}\" " .
+            "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
+         */
         shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
             ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php php.debug")
             ->exec('elfedit --output-osabi linux php')

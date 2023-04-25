@@ -21,6 +21,7 @@ class libwebp extends LinuxLibraryBase
             ->exec(
                 <<<EOF
                {$this->builder->configure_env} 
+               test -d src/.libs/libwebp.a && make clean 
                 ./autogen.sh 
                 CPPFLAGS="$(pkg-config  --cflags-only-I  --static libpng libpng16 libjpeg libturbojpeg)" \\
                 LDFLAGS="$(pkg-config --libs-only-L      --static libpng libpng16 libjpeg libturbojpeg)" \\

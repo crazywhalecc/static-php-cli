@@ -58,15 +58,12 @@ trait UnixBuilderTrait
     }
 
     /**
-     * Sanity check after build complete
-     *
      * @throws RuntimeException
      */
-    public function sanityCheck(int $build_target): void
+    public function sanityCheck(int $build_micro_rule): void
     {
-        // sanity check for php-cli
-        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
-            logger()->info('running cli sanity check');
+        logger()->info('running sanity check');
+        if ($build_micro_rule == BUILD_TARGET_CLI) {
             [$ret, $output] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "echo \"hello\";"');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new RuntimeException('cli failed sanity check');
@@ -85,9 +82,7 @@ trait UnixBuilderTrait
                 }
             }
         }
-
-        // sanity check for phpmicro
-        if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+        if ($build_micro_rule == BUILD_TARGET_MICRO) {
             if (file_exists(SOURCE_PATH . '/hello.exe')) {
                 @unlink(SOURCE_PATH . '/hello.exe');
             }
@@ -116,10 +111,9 @@ trait UnixBuilderTrait
         $src = match ($type) {
             BUILD_TARGET_CLI => SOURCE_PATH . '/php-src/sapi/cli/php',
             BUILD_TARGET_MICRO => SOURCE_PATH . '/php-src/sapi/micro/micro.sfx',
-            BUILD_TARGET_FPM => SOURCE_PATH . '/php-src/sapi/fpm/php-fpm',
             default => throw new RuntimeException('Deployment does not accept type ' . $type),
         };
-        logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
+        logger()->info('Deploying ' . ($type === BUILD_TARGET_CLI ? 'cli' : 'micro') . ' file');
         FileSystem::createDir(BUILD_ROOT_PATH . '/bin');
         shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '/bin/'));
         return true;

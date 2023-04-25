@@ -39,6 +39,9 @@ class UnixShell
         if (!$this->debug) {
             $cmd .= ' 1>/dev/null 2>&1';
         }
+        echo PHP_EOL;
+        echo $cmd;
+        echo PHP_EOL;
         f_passthru($cmd);
         return $this;
     }

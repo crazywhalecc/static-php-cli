@@ -42,13 +42,20 @@ class brotli extends LinuxLibraryBase
                 cd build 
                 cmake .. \\
                 -DCMAKE_BUILD_TYPE=Release \\
-                -DBUILD_SHARED_LIBS=OFF \\
                 -DCMAKE_INSTALL_PREFIX={$destdir} \\
-                -DCMAKE_INSTALL_LIBDIR={$destdir}/lib \\
-                -DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include \\
-                -DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} 
-              
-                cmake --build . --config Release --target install -j {$this->builder->concurrency}
+                -DBUILD_SHARED_LIBS=OFF  \\
+                -DBUILD_STATIC_LIBS=ON \\
+                -DBROTLI_SHARED_LIBS=OFF \\
+                -DBROTLI_STATIC_LIBS=ON \\
+                -DBROTLI_DISABLE_TESTS=OFF \\
+                -DBROTLI_BUNDLED_MODE=OFF \\
+                -DBROTLI_EMSCRIPTEN=OFF
+                
+                cmake --build . --config Release --target install 
+                
+               # -DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file}
+               # -DCMAKE_INSTALL_LIBDIR={$destdir}/lib \\
+               # -DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include \\
 EOF
             )
             ->exec(

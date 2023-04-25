@@ -20,7 +20,7 @@ class libgif extends LinuxLibraryBase
         [$lib, $include, $destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
-            ->exec('make clean')
+            ->exec('test -f libgif.a && make clean')
             ->exec(" {$this->builder->configure_env}  make  -j {$this->builder->concurrency} libgif.a")
             ->exec("cp libgif.a {$destdir}/lib/libgif.a")
             ->exec("cp gif_lib.h {$destdir}/include/gif_lib.h");

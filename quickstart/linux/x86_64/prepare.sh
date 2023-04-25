@@ -24,7 +24,7 @@ chmod +x bin/spc
 
 #./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=clang --cxx=clang++  --debug
 
-cc=gcc
+cc=musl-gcc
 cxx=g++
 :<<'EOF'
   cc=clang
@@ -32,19 +32,23 @@ cxx=g++
 EOF
 
 
-./bin/spc build:libs zlib  --debug 
-./bin/spc build:libs bzip2 --debug 
-./bin/spc build:libs libzip  --debug 
-./bin/spc build:libs libjpeg --debug 
-./bin/spc build:libs libpng --debug 
-./bin/spc build:libs libgif --debug 
-./bin/spc build:libs libwebp --debug 
-./bin/spc build:libs brotli --debug 
-./bin/spc build:libs freetype --debug 
+./bin/spc build:libs zlib  --debug  --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs bzip2 --debug --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs libzip  --debug --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs libjpeg --debug --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs libpng --debug  --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs libgif --debug  --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs libwebp --debug  --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs brotli --debug  --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs freetype --debug --cc=musl-gcc  --cxx=g++
 
 
 # ./bin/spc build "bcmath,tokenizer,pdo,ftp,gd" --cc=clang --cxx=clang++  --debug
 
 # ./bin/spc build gd --debug --cc=clang --cxx=clang++ --debug
 
-# ./bin/spc build gd,zlib --debug --cc=gcc  --cxx=g++ --debug
+./bin/spc build gd,zlib  --cc=gcc       --cxx=g++ --build-cli  --debug
+./bin/spc build gd,zlib  --cc=musl-gcc  --cxx=g++ --build-cli --debug
+./bin/spc build gd,zlib  --cc=clang     --cxx=clang++ --build-cli --debug
+
+# musl-gcc/musl-clang（或 gcc-musl/gcc-clang

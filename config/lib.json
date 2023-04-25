@@ -11,6 +11,10 @@
             "libbrotlidec",
             "libbrotlienc"
         ],
+        "none-pkg-unix":[
+            "-lbrotlicommon",
+            "-lbrotli"
+        ],
         "static-libs-windows": [
             "brotlicommon-static.lib",
             "brotlienc-static.lib",
