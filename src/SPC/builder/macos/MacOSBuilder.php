@@ -25,6 +25,9 @@ class MacOSBuilder extends BuilderBase
     /** @var bool 标记是否 patch 了 phar */
     private bool $phar_patched = false;
 
+    /** @var string env pkgconf */
+    private string $pkgconf_env;
+
     /**
      * @param  null|string         $cc   C编译器名称，如果不传入则默认使用clang
      * @param  null|string         $cxx  C++编译器名称，如果不传入则默认使用clang++
