@@ -61,16 +61,33 @@ class LinuxBuilder extends BuilderBase
      */
     public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
     {
+        if (isset(SystemUtil::getOSRelease()['dist'])) {
+            $os_release = SystemUtil::getOSRelease();
+            $os_release_name = $os_release['dist'];
+            $os_release_version = $os_release['ver'];
+        } else {
+            throw new \RuntimeException('no recognize os release');
+        }
+        if ($cc == 'gcc') {
+            if ($os_release_name == 'alpine') {
+                $cc = 'gcc';
+                $this->libc = 'musl';
+            } elseif ($os_release_name == 'debian') {
+                $cc = 'musl-gcc';
+                $this->libc = 'musl';
+            }
+        } else {
+            $this->libc = 'libc';
+        }
+
         // 初始化一些默认参数
-        $this->cc = $cc ?? 'musl-gcc';
-        $this->cxx = $cxx ?? 'g++';
+
+        $this->cc = $cc ?? 'clang';
+        $this->cxx = $cxx ?? 'clang++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
-        $this->libc = match ($this->cc) {
-            'gcc' => 'glibc',
-            'musl-gcc', 'clang' => 'libc',
-            default => ''
-        }; // SystemUtil::selectLibc($this->cc);
+
+        // SystemUtil::selectLibc($this->cc);
 
         $this->ld = match ($this->cc) {
             'musl-gcc', 'gcc' => 'ld',
@@ -232,11 +249,20 @@ EOF;
 
         # Patcher::patchPHPConfigure($this);
         $envs .= 'export EXTRA_LDFLAGS_PROGRAM="$LDFLAGS -all-static"';
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec(
+                <<<'EOF'
+            if [[ -d php_cli_process_title.lo ]] 
+            then
+                    make clean 
+            fi 
+
+EOF
+            );
         shell()
             ->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 $envs . PHP_EOL .
-                'test -f sapi/cli/php_cli.o && make clean ' . PHP_EOL .
                 './buildconf --force' . PHP_EOL .
                 './configure ' .
                 '--prefix=/' .
@@ -249,10 +275,10 @@ EOF;
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 '--enable-fpm ' .
+                '--enable-micro=all-static ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs()
             );
-        //  '--enable-micro=all-static ' .
 
         $extra_libs .= $this->generateExtraLibs();
         echo $envs;

@@ -29,26 +29,34 @@ cxx=g++
 :<<'EOF'
   cc=clang
   cxx=clang++
+  cc=musl-gcc
+  cxx=g++
 EOF
 
 
-./bin/spc build:libs zlib  --debug  --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs bzip2 --debug --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs libzip  --debug --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs libjpeg --debug --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs libpng --debug  --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs libgif --debug  --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs libwebp --debug  --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs brotli --debug  --cc=musl-gcc  --cxx=g++
-./bin/spc build:libs freetype --debug --cc=musl-gcc  --cxx=g++
+./bin/spc build:libs zlib  --debug  --cc=clang --cxx=clang++
+./bin/spc build:libs bzip2 --debug --cc=clang --cxx=clang++
+./bin/spc build:libs libzip  --debug --cc=clang --cxx=clang++
+./bin/spc build:libs libjpeg --debug --cc=clang --cxx=clang++
+./bin/spc build:libs libpng --debug  --cc=clang --cxx=clang++
+./bin/spc build:libs libgif --debug  --cc=clang --cxx=clang++
+./bin/spc build:libs libwebp --debug  --cc=clang --cxx=clang++
+./bin/spc build:libs brotli --debug  --cc=clang --cxx=clang++
+./bin/spc build:libs freetype --debug --cc=clang --cxx=clang++
 
 
-# ./bin/spc build "bcmath,tokenizer,pdo,ftp,gd" --cc=clang --cxx=clang++  --debug
+# ./bin/spc build "bcmath,tokenizer,pdo,ftp,gd" --build-cli --cc=clang --cxx=clang++  --debug
 
-# ./bin/spc build gd --debug --cc=clang --cxx=clang++ --debug
 
-# ./bin/spc build gd,zlib  --cc=gcc       --cxx=g++ --build-cli  --debug
-./bin/spc build gd,zlib  --cc=musl-gcc  --cxx=g++ --build-cli --debug
+
+## debian
+
+# ./bin/spc build gd,zlib  --cc=musl-gcc  --cxx=g++ --build-cli --debug
+
+## alpine
 # ./bin/spc build gd,zlib  --cc=clang     --cxx=clang++ --build-cli --debug
+# ./bin/spc build gd,zlib  --cc=gcc       --cxx=g++ --build-cli  --debug
+
+
 
 # musl-gcc/musl-clang（或 gcc-musl/gcc-clang

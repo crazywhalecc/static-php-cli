@@ -31,14 +31,21 @@ class zlib extends LinuxLibraryBase
      */
     public function build()
     {
-        [,,$destdir] = SEPARATED_PATH;
-
+        [, , $destdir] = SEPARATED_PATH;
+        shell()
+            ->cd($this->source_dir)
+            ->exec(
+                <<<'EOF'
+        if [[ -f gzlib.o ]] 
+        then
+            make clean
+        fi
+EOF
+            );
         shell()->cd($this->source_dir)
-
             ->exec(
                 "{$this->builder->configure_env} " . PHP_EOL .
-                'test -f gzlib.o && make clean' . PHP_EOL .
-                 'CFLAGS="-fPIE -fPIC" ./configure ' .
+                'CFLAGS="-fPIE -fPIC" ./configure ' .
                 '--static ' .
                 '--prefix=' . $destdir
             )

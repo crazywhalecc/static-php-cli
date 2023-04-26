@@ -48,7 +48,6 @@ done
 
 case "$mirror" in
 china)
-<<<<<<< HEAD
   __PHP_RUNTIME_URL__="https://wenda-1252906962.file.myqcloud.com/dist/swoole-cli-v4.8.13-${__OS_FIXED__}-${__ARCH__}.tar.xz"
   __COMPOSER_URL__="https://mirrors.aliyun.com/composer/composer.phar"
   ;;

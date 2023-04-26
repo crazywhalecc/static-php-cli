@@ -44,13 +44,21 @@ class libpng extends LinuxLibraryBase
 
         // patch configure
         // Patcher::patchUnixLibpng();
-
+        shell()
+            ->cd($this->source_dir)
+            ->exec(
+                <<<'EOF'
+        if [[ -f .libs/libpng16.a ]] 
+        then
+            make clean
+        fi
+EOF
+            );
         shell()->cd($this->source_dir)
-            ->exec('test -f .libs/libpng16.a && make clean')
-            ->exec('chmod +x ./configure')
             ->exec(
                 <<<EOF
                 {$this->builder->configure_env} 
+                chmod +x ./configure
                 CPPFLAGS="$(pkg-config  --cflags-only-I  --static zlib )" \\
                 LDFLAGS="$(pkg-config   --libs-only-L    --static zlib )" \\
                 LIBS="$(pkg-config      --libs-only-l    --static zlib )" \\
@@ -60,8 +68,9 @@ class libpng extends LinuxLibraryBase
                 --disable-shared  \\
                 --enable-static  \\
                 --enable-hardware-optimizations  \\
-                --with-zlib-prefix={$destdir}  \\
-                {$optimizations} 
+                --with-zlib-prefix={$destdir}  
+                
+                # {$optimizations} 
 EOF
             )
             ->exec('make -j ' . $this->builder->concurrency)
