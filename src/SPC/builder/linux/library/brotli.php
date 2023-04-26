@@ -36,11 +36,11 @@ class brotli extends LinuxLibraryBase
             ->cd($this->source_dir)
             ->exec(
                 <<<'EOF'
-        if [[ -d build ]]
+        if [[ -d BUILD_DIR ]]
         then
-            rm -rf build 
+            rm -rf BUILD_DIR
         fi
-        mkdir -p build 
+        mkdir -p BUILD_DIR
 EOF
             );
         // 使用 cmake 编译
