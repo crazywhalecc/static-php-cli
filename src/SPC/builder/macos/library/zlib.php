@@ -20,18 +20,36 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
+use SPC\exception\RuntimeException;
+
 class zlib extends MacOSLibraryBase
 {
     public const NAME = 'zlib';
 
-    protected function build()
+    /**
+     * @throws RuntimeException
+     */
+    public function build()
     {
-        [,,$destdir] = SEPARATED_PATH;
-
+        [, , $destdir] = SEPARATED_PATH;
+        shell()
+            ->cd($this->source_dir)
+            ->exec(
+                <<<'EOF'
+        if [[ -f gzlib.o ]] 
+        then
+            make clean
+        fi
+EOF
+            );
         shell()->cd($this->source_dir)
-            ->exec("{$this->builder->configure_env} ./configure --static --prefix=")
-            ->exec('make clean')
+            ->exec(
+                "{$this->builder->configure_env} " . PHP_EOL .
+                'CFLAGS="-fPIE -fPIC" ./configure ' .
+                '--static ' .
+                '--prefix=' . $destdir
+            )
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            ->exec('make install');
     }
 }

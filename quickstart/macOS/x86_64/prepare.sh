@@ -22,3 +22,5 @@ chmod +x bin/spc
 ./bin/spc list-ext
 
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=clang --cxx=clang++  --debug
+
+./bin/spc build gd,zlib  --cc=clang     --cxx=clang++ --build-cli --debug

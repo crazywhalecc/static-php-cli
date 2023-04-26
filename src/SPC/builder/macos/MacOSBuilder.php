@@ -10,6 +10,7 @@ use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 use SPC\util\Patcher;
 
 /**
@@ -47,14 +48,25 @@ class MacOSBuilder extends BuilderBase
         $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->arch);
         // 设置 cmake
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->arch, $this->arch_c_flags);
+
+        $build_root_path = BUILD_ROOT_PATH;
+        $build_lib_path = BUILD_LIB_PATH;
+        // 设置 pkgconfig
+        $this->pkgconf_env = 'export PKG_CONFIG_PATH="' . $build_lib_path . '/pkgconfig:/usr/lib/pkgconfig"';
+        $this->ld = $this->cc == 'clang' ? 'lld' : 'ld';
         // 设置 configure 依赖的环境变量
-        $this->configure_env =
-            'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' " .
-            "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration'";
+        $this->configure_env = <<<EOF
+        set -uex
+        export CC={$this->cc}
+        export CXX={$this->cxx}
+        export LD={$this->ld}
+        export PATH={$build_root_path}/bin/:\$PATH
+        {$this->pkgconf_env}
+EOF;
+        $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
 
         // 创立 pkg-config 和放头文件的目录
+        f_mkdir(BUILD_ROOT_PATH . '/bin', recursive: true);
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
         f_mkdir(BUILD_INCLUDE_PATH, recursive: true);
     }
@@ -135,26 +147,70 @@ class MacOSBuilder extends BuilderBase
             );
         }
 
+        $envs = '';
+        $cflags = $this->arch_c_flags;
+        $use_lld = '';
+
+        $lib_meta = FileSystem::loadConfigArray('lib');
+        $packages = [];
+        $pkg_libs = [];
+        foreach ($this->libs as $lib) {
+            if (isset($lib_meta[$lib::NAME]['pkg-unix'])) {
+                $packages = array_merge($packages, $lib_meta[$lib::NAME]['pkg-unix']);
+            }
+            if (isset($lib_meta[$lib::NAME]['none-pkg-unix'])) {
+                $pkg_libs = array_merge($pkg_libs, $lib_meta[$lib::NAME]['none-pkg-unix']);
+            }
+        }
+
+        $packages = array_unique($packages);
+        $envs = $this->configure_env;
+        $envs .= ' CPPFLAGS="-I' . BUILD_ROOT_PATH . '/include  " ' . PHP_EOL;
+        $envs .= ' LDFLAGS="-L' . BUILD_ROOT_PATH . '/lib  " ' . PHP_EOL;
+        $envs .= ' LIBS=" -lm  -lpthread  -lutil  -lresolv " ' . PHP_EOL;
+
+        if (!empty($pkg_libs)) {
+            $envs .= ' LIBS="$LIBS ' . implode(' ', $pkg_libs) . '"' . PHP_EOL;
+        }
+
+        if (!empty($packages)) {
+            $envs .= ' export PACKAGES="' . implode(' ', $packages) . '"  ' . PHP_EOL;
+            $envs .= ' export CPPFLAGS="$CPPFLAGS $(pkg-config --cflags-only-I --static $PACKAGES )" ' . PHP_EOL;
+            $envs .= ' export LDFLAGS="$LDFLAGS $(pkg-config --libs-only-L --static $PACKAGES )" ' . PHP_EOL;
+            $envs .= ' export LIBS="$(pkg-config --libs-only-l --static $PACKAGES ) $LIBS" ' . PHP_EOL;
+        }
+        $cflags .= ' -Wimplicit-function-declaration  ';
+        if (strlen($cflags) > 2) {
+            $envs .= " export CFLAGS=\"{$cflags}\" " . PHP_EOL;
+        }
+
+        $envs .= 'export EXTRA_LDFLAGS_PROGRAM="$LDFLAGS -all-static"';
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec(
+                <<<'EOF'
+            if [[ -d php_cli_process_title.lo ]] 
+            then
+                    make clean 
+            fi 
+
+EOF
+            );
         // patch before configure
         Patcher::patchPHPBeforeConfigure($this);
 
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
-
         Patcher::patchPHPConfigure($this);
-
-        if ($this->getLib('libxml2') || $this->getExt('iconv')) {
-            $extra_libs .= ' -liconv';
-        }
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                'echo "start build php"' . PHP_EOL .
+                $envs . PHP_EOL .
+                './buildconf --force ' . PHP_EOL .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .     // 不检测内存泄漏
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
                 "--host={$this->gnu_arch}-apple-darwin " .
-                "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -170,15 +226,15 @@ class MacOSBuilder extends BuilderBase
 
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('building cli');
-            $this->buildCli($extra_libs);
+            $this->buildCli($extra_libs, $envs);
         }
         if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
             logger()->info('building fpm');
-            $this->buildFpm($extra_libs);
+            $this->buildFpm($extra_libs, $envs);
         }
         if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
             logger()->info('building micro');
-            $this->buildMicro($extra_libs);
+            $this->buildMicro($extra_libs, $envs);
         }
 
         if (php_uname('m') === $this->arch) {
@@ -196,7 +252,7 @@ class MacOSBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(string $extra_libs): void
+    public function buildCli(string $extra_libs, string $envs): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli")
@@ -210,7 +266,7 @@ class MacOSBuilder extends BuilderBase
      *
      * @throws FileSystemException|RuntimeException
      */
-    public function buildMicro(string $extra_libs): void
+    public function buildMicro(string $extra_libs, string $envs): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new RuntimeException('phpmicro only support PHP >= 8.0!');
@@ -237,7 +293,7 @@ class MacOSBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildFpm(string $extra_libs): void
+    public function buildFpm(string $extra_libs, string $envs): void
     {
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm")

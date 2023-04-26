@@ -4,33 +4,47 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-/**
- * is a template library class for unix
- */
+use SPC\exception\RuntimeException;
+
 class freetype extends MacOSLibraryBase
 {
     public const NAME = 'freetype';
 
-    protected function build()
+    /**
+     * @throws RuntimeException
+     */
+    public function build()
     {
-        [,,$destdir] = SEPARATED_PATH;
-
-        $suggested = '';
-        $suggested .= ($this->builder->getLib('libpng') instanceof MacOSLibraryBase) ? ('--with-png=' . BUILD_ROOT_PATH) : '--without-png';
-        $suggested .= ' ';
-        $suggested .= ($this->builder->getLib('bzip2') instanceof MacOSLibraryBase) ? ('--with-bzip2=' . BUILD_ROOT_PATH) : '--without-bzip2';
-        $suggested .= ' ';
-        $suggested .= ($this->builder->getLib('brotli') instanceof MacOSLibraryBase) ? ('--with-brotli=' . BUILD_ROOT_PATH) : '--without-brotli';
-        $suggested .= ' ';
-
+        [$lib, $include, $destdir] = SEPARATED_PATH;
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                '--enable-static --disable-shared --without-harfbuzz --prefix= ' .
-                $suggested
+                <<<'EOF'
+            if [[ -d objs/.libs ]] 
+            then 
+              make clean
+            fi 
+EOF
+            );
+        shell()->cd($this->source_dir)
+            ->exec(
+                <<<EOF
+            {$this->builder->configure_env} 
+            BZIP2_CFLAGS="-I{$destdir}/include"  \\
+            BZIP2_LIBS="-L{$destdir}/lib -lbz2"  \\
+            CPPFLAGS="$(pkg-config --cflags-only-I --static zlib libpng  libbrotlidec  libbrotlienc libbrotlicommon)" \\
+            LDFLAGS="$(pkg-config  --libs-only-L   --static zlib libpng  libbrotlidec  libbrotlienc libbrotlicommon)" \\
+            LIBS="$(pkg-config     --libs-only-l   --static zlib libpng  libbrotlidec  libbrotlienc libbrotlicommon)" \\
+            ./configure --prefix={$destdir} \\
+            --enable-static \\
+            --disable-shared \\
+            --with-zlib=yes \\
+            --with-bzip2=yes \\
+            --with-png=yes \\
+            --with-harfbuzz=no  \\
+            --with-brotli=no
+EOF
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            ->exec("make  -j {$this->builder->concurrency}")
+            ->exec('make install');
     }
 }

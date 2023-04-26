@@ -20,15 +20,36 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
+use SPC\exception\RuntimeException;
+
 class bzip2 extends MacOSLibraryBase
 {
     public const NAME = 'bzip2';
 
-    protected function build()
+    protected array $dep_names = [];
+
+    /**
+     * @throws RuntimeException
+     */
+    public function build()
     {
-        shell()->cd($this->source_dir)
-            ->exec("make {$this->builder->configure_env} PREFIX='" . BUILD_ROOT_PATH . "' clean")
-            ->exec("make -j{$this->builder->concurrency} {$this->builder->configure_env} PREFIX='" . BUILD_ROOT_PATH . "' libbz2.a")
+        shell()
+            ->cd($this->source_dir)
+            ->exec(
+                <<<'EOF'
+        if [[ -f blocksort.o ]]
+        then
+            make clean
+        fi
+EOF
+            );
+
+        shell()
+            ->cd($this->source_dir)
+            ->exec(
+                $this->builder->configure_env .
+                "make -j{$this->builder->concurrency}  PREFIX='" . BUILD_ROOT_PATH . "' libbz2.a"
+            )
             ->exec('cp libbz2.a ' . BUILD_LIB_PATH)
             ->exec('cp bzlib.h ' . BUILD_INCLUDE_PATH);
     }
