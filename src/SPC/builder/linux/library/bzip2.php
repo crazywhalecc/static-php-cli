@@ -36,11 +36,21 @@ class bzip2 extends LinuxLibraryBase
         shell()
             ->cd($this->source_dir)
             ->exec(
+                <<<'EOF'
+        if [[ -f blocksort.o ]]
+        then
+            make clean
+        fi
+EOF
+            );
+
+        shell()
+            ->cd($this->source_dir)
+            ->exec(
                 $this->builder->configure_env .
-                'test -f libbz2.a && make clean ' . PHP_EOL .
                 "make -j{$this->builder->concurrency}  PREFIX='" . BUILD_ROOT_PATH . "' libbz2.a"
             )
-            ->exec('cp -f libbz2.a ' . BUILD_LIB_PATH)
-            ->exec('cp -f bzlib.h ' . BUILD_INCLUDE_PATH);
+            ->exec('cp libbz2.a ' . BUILD_LIB_PATH)
+            ->exec('cp bzlib.h ' . BUILD_INCLUDE_PATH);
     }
 }

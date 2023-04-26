@@ -18,13 +18,20 @@ class libjpeg extends LinuxLibraryBase
     public function build()
     {
         [$lib, $include, $destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)
+        shell()
+            ->cd($this->source_dir)
+            ->exec(
+                <<<'EOF'
+        if [[ -d build ]] 
+        then
+           rm -rf build 
+        fi
+        mkdir -p build 
+EOF
+            );
+        shell()->cd($this->source_dir . '/build/')
             ->exec(
                 <<<EOF
-            test -d build && rm -rf build 
-            mkdir -p build 
-            cd build 
             {$this->builder->configure_env} 
             cmake -G"Unix Makefiles"   \\
             ..  \\
@@ -34,8 +41,8 @@ class libjpeg extends LinuxLibraryBase
             -DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include \\
             -DCMAKE_BUILD_TYPE=Release  \\
             -DENABLE_SHARED=OFF  \\
-            -DENABLE_STATIC=ON  \\
-            -DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} 
+            -DENABLE_STATIC=ON  
+            # -DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} 
          
 EOF
             )

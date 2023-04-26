@@ -77,11 +77,18 @@ class libzip extends LinuxLibraryBase
         }
 
         [$lib, $include, $destdir] = SEPARATED_PATH;
-
         shell()
             ->cd($this->source_dir)
-            ->exec('test -d build && rm -rf build')
-            ->exec('mkdir -p build')
+            ->exec(
+                <<<'EOF'
+        if [[ -d build ]] 
+        then
+             rm -rf build
+        fi
+        mkdir -p build 
+EOF
+            );
+        shell()
             ->cd($this->source_dir . '/build')
             ->exec(
                 $this->builder->configure_env . ' cmake ' .

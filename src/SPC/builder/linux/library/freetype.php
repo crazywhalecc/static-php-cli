@@ -16,11 +16,18 @@ class freetype extends LinuxLibraryBase
     public function build()
     {
         [$lib, $include, $destdir] = SEPARATED_PATH;
-
+        shell()->cd($this->source_dir)
+            ->exec(
+                <<<'EOF'
+            if [[ -d objs/.libs ]] 
+            then 
+              make clean
+            fi 
+EOF
+            );
         shell()->cd($this->source_dir)
             ->exec(
                 <<<EOF
-            test -d objs/.libs && make clean
             {$this->builder->configure_env} 
             BZIP2_CFLAGS="-I{$destdir}/include"  \\
             BZIP2_LIBS="-L{$destdir}/lib -lbz2"  \\
