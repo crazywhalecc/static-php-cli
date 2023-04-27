@@ -260,6 +260,9 @@
     "static-libs-unix": [
       "libxml2.a"
     ],
+    "none-pkg-unix": [
+      "-liconv'"
+    ],
     "static-libs-windows": [
       [
         "libxml2s.lib",

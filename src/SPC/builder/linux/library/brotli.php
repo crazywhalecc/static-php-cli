@@ -41,6 +41,7 @@ class brotli extends LinuxLibraryBase
             rm -rf build-dir
         fi
         mkdir -p build-dir
+
 EOF
             );
         // 使用 cmake 编译

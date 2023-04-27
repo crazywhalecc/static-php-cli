@@ -29,11 +29,12 @@ class libpng extends MacOSLibraryBase
     public const NAME = 'libpng';
 
     /**
-     * @throws FileSystemException
      * @throws RuntimeException
+     * @throws FileSystemException
      */
-    protected function build()
+    public function build()
     {
+        [$lib, $include, $destdir] = SEPARATED_PATH;
         // 不同架构的专属优化
         $optimizations = match ($this->builder->arch) {
             'x86_64' => '--enable-intel-sse ',
@@ -42,22 +43,37 @@ class libpng extends MacOSLibraryBase
         };
 
         // patch configure
-        Patcher::patchUnixLibpng();
-        shell()->cd($this->source_dir)
-            ->exec('chmod +x ./configure')
+        // Patcher::patchUnixLibpng();
+        shell()
+            ->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                "--host={$this->builder->gnu_arch}-apple-darwin " .
-                '--disable-shared ' .
-                '--enable-static ' .
-                '--enable-hardware-optimizations ' .
-                $optimizations .
-                '--prefix='
+                <<<'EOF'
+        if [[ -f .libs/libpng16.a ]] 
+        then
+            make clean
+        fi
+EOF
+            );
+        shell()->cd($this->source_dir)
+            ->exec(
+                <<<EOF
+                {$this->builder->configure_env} 
+                chmod +x ./configure
+                CPPFLAGS="$(pkg-config  --cflags-only-I  --static zlib )" \\
+                LDFLAGS="$(pkg-config   --libs-only-L    --static zlib )" \\
+                LIBS="$(pkg-config      --libs-only-l    --static zlib )" \\
+                ./configure  \\
+                --prefix={$destdir} \\
+                --host={$this->builder->gnu_arch}-unknown-linux  \\
+                --disable-shared  \\
+                --enable-static  \\
+                --enable-hardware-optimizations  \\
+                --with-zlib-prefix={$destdir}  
+                
+                # {$optimizations} 
+EOF
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
-            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
-            ->cd(BUILD_LIB_PATH)
-            ->exec('ln -sf libpng16.a libpng.a');
+            ->exec('make -j ' . $this->builder->concurrency)
+            ->exec('make install ');
     }
 }
