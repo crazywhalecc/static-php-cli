@@ -61,32 +61,14 @@ class LinuxBuilder extends BuilderBase
      */
     public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
     {
-        if (isset(SystemUtil::getOSRelease()['dist'])) {
-            $os_release = SystemUtil::getOSRelease();
-            $os_release_name = $os_release['dist'];
-            $os_release_version = $os_release['ver'];
-        } else {
-            throw new \RuntimeException('no recognize os release');
-        }
-        if ($cc == 'gcc') {
-            if ($os_release_name == 'alpine') {
-                $cc = 'gcc';
-                $this->libc = 'musl';
-            } elseif ($os_release_name == 'debian') {
-                $cc = 'musl-gcc';
-                $this->libc = 'musl';
-            }
-        } else {
-            $this->libc = 'libc';
-        }
-
+        // 编译器 选择 参考 https://github.com/crazywhalecc/static-php-cli/issues/50#issuecomment-1522809787
         // 初始化一些默认参数
 
-        $this->cc = $cc ?? 'clang';
-        $this->cxx = $cxx ?? 'clang++';
+        $this->cc = $cc ?? 'musl-gcc';
+        $this->cxx = $cxx ?? 'g++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
-
+        $this->libc = 'libc';
         // SystemUtil::selectLibc($this->cc);
 
         $this->ld = match ($this->cc) {
