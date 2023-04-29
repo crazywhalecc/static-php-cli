@@ -204,9 +204,6 @@ class Patcher
         }
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchUnixLibpng(): void
     {
         FileSystem::replaceFile(
@@ -214,6 +211,22 @@ class Patcher
             REPLACE_FILE_STR,
             '-lz',
             BUILD_LIB_PATH . '/libz.a'
+        );
+    }
+
+    public static function patchCurlMacOS(): void
+    {
+        FileSystem::replaceFile(
+            SOURCE_PATH . '/curl/CMakeLists.txt',
+            REPLACE_FILE_PREG,
+            '/NOT COREFOUNDATION_FRAMEWORK/m',
+            'FALSE'
+        );
+        FileSystem::replaceFile(
+            SOURCE_PATH . '/curl/CMakeLists.txt',
+            REPLACE_FILE_PREG,
+            '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m',
+            'FALSE'
         );
     }
 

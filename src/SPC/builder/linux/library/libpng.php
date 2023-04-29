@@ -34,7 +34,6 @@ class libpng extends LinuxLibraryBase
      */
     public function build()
     {
-        // 不同架构的专属优化
         $optimizations = match ($this->builder->arch) {
             'x86_64' => '--enable-intel-sse ',
             'arm64' => '--enable-arm-neon ',
@@ -52,7 +51,7 @@ class libpng extends LinuxLibraryBase
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .
-                '--with-zlib-prefix=' . BUILD_ROOT_PATH . ' ' .
+                '--with-zlib-prefix="' . BUILD_ROOT_PATH . '" ' .
                 $optimizations .
                 '--prefix='
             )
@@ -61,5 +60,6 @@ class libpng extends LinuxLibraryBase
             ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
             ->cd(BUILD_LIB_PATH)
             ->exec('ln -sf libpng16.a libpng.a');
+        $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

@@ -169,8 +169,8 @@ class FileSystem
                         break;
                         // case 'zstd':
                         // case 'zst':
-                    //     passthru('cat ' . $filename . ' | zstd -d | tar -x -C ".SOURCE_PATH . "/' . $name . ' --strip-components 1', $ret);
-                    //     break;
+                        //     passthru('cat ' . $filename . ' | zstd -d | tar -x -C ".SOURCE_PATH . "/' . $name . ' --strip-components 1', $ret);
+                        //     break;
                     case 'tar':
                         f_passthru("tar -xf {$filename} -C " . SOURCE_PATH . "/{$name} --strip-components 1");
                         break;
@@ -407,5 +407,18 @@ class FileSystem
             throw new FileSystemException('Write file failed, cannot create parent directory: ' . $dir);
         }
         return file_put_contents($path, $content, ...$args);
+    }
+
+    /**
+     * Reset (remove recursively and create again) dir
+     *
+     * @throws FileSystemException
+     */
+    public static function resetDir(string $dir_name): void
+    {
+        if (is_dir($dir_name)) {
+            self::removeDir($dir_name);
+        }
+        self::createDir($dir_name);
     }
 }

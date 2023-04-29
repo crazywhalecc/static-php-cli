@@ -44,13 +44,6 @@
             "path": "LICENSE.TXT"
         }
     },
-    "postgresql": {
-        "type": "custom",
-        "license": {
-            "type": "file",
-            "path": "COPYRIGHT"
-        }
-    },
     "gmp": {
         "type": "filelist",
         "url": "https://gmplib.org/download/gmp/",
@@ -58,6 +51,24 @@
         "license": {
             "type": "text",
             "text": "Since version 6, GMP is distributed under the dual licenses, GNU LGPL v3 and GNU GPL v2. These licenses make the library free to use, share, and improve, and allow you to pass on the result. The GNU licenses give freedoms, but also set firm restrictions on the use with non-free programs."
+        }
+    },
+    "inotify": {
+        "type": "url",
+        "url": "http://pecl.php.net/get/inotify",
+        "path": "php-src/ext/inotify",
+        "filename": "inotify.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "libavif": {
+        "type": "ghtar",
+        "repo": "AOMediaCodec/libavif",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "libffi": {
@@ -76,6 +87,14 @@
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "libjpeg": {
+        "type": "ghtar",
+        "repo": "libjpeg-turbo/libjpeg-turbo",
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
         }
     },
     "libmcrypt": {
@@ -119,6 +138,14 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "libwebp": {
+        "type": "ghtagtar",
+        "repo": "webmproject/libwebp",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "libxml2": {
@@ -202,6 +229,20 @@
             "path": "LICENSE.txt"
         }
     },
+    "php-src": {
+        "type": "custom",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "postgresql": {
+        "type": "custom",
+        "license": {
+            "type": "file",
+            "path": "COPYRIGHT"
+        }
+    },
     "protobuf": {
         "type": "url",
         "url": "http://pecl.php.net/get/protobuf",
@@ -212,27 +253,10 @@
             "path": "LICENSE"
         }
     },
-    "inotify": {
-        "type": "url",
-        "url": "http://pecl.php.net/get/inotify",
-        "path": "php-src/ext/inotify",
-        "filename": "inotify.tgz",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "pthreads4w": {
         "type": "git",
         "rev": "master",
         "url": "https://git.code.sf.net/p/pthreads4w/code",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
-    "php-src": {
-        "type": "custom",
         "license": {
             "type": "file",
             "path": "LICENSE"

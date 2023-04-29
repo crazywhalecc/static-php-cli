@@ -16,6 +16,6 @@ class mbstring extends Extension
         if ($this->builder->getExt('mbregex') === null) {
             $arg .= ' --disable-mbregex';
         }
-        return $arg . ' ONIG_CFLAGS=-I"' . BUILD_ROOT_PATH . '" ONIG_LIBS="' . $this->getLibFilesString() . '"';
+        return $arg;
     }
 }

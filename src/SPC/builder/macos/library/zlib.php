@@ -22,16 +22,7 @@ namespace SPC\builder\macos\library;
 
 class zlib extends MacOSLibraryBase
 {
+    use \SPC\builder\unix\library\zlib;
+
     public const NAME = 'zlib';
-
-    protected function build()
-    {
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)
-            ->exec("{$this->builder->configure_env} ./configure --static --prefix=")
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
-    }
 }

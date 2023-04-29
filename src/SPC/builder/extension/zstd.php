@@ -12,6 +12,6 @@ class zstd extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        return '--with-libzstd';
+        return '--enable-zstd --with-libzstd="' . BUILD_ROOT_PATH . '"';
     }
 }

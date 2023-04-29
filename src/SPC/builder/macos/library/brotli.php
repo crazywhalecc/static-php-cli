@@ -22,26 +22,7 @@ namespace SPC\builder\macos\library;
 
 class brotli extends MacOSLibraryBase
 {
-    public const NAME = 'brotli';
+    use \SPC\builder\unix\library\brotli;
 
-    protected function build()
-    {
-        [$lib, $include, $destdir] = SEPARATED_PATH;
-        shell()->cd($this->source_dir)
-            ->exec('rm -rf build')
-            ->exec('mkdir -p build')
-            ->cd($this->source_dir . '/build')
-            ->exec(
-                "{$this->builder->configure_env} cmake " .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DCMAKE_INSTALL_PREFIX=/ ' .
-                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '..'
-            )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
-    }
+    public const NAME = 'brotli';
 }

@@ -77,7 +77,7 @@ class MacOSBuilder extends BuilderBase
             $prefix = $arr[1] ?? null;
             if ($lib instanceof MacOSLibraryBase) {
                 logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
-                $ret .= $lib->makeAutoconfEnv($prefix) . ' ';
+                $ret .= '--with-' . $libName . '=yes ';
             } else {
                 logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
                 $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';

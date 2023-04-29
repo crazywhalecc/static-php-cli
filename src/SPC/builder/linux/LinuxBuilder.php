@@ -183,8 +183,6 @@ class LinuxBuilder extends BuilderBase
                 $envs
             );
 
-        $extra_libs .= $this->generateExtraLibs();
-
         file_put_contents('/tmp/comment', $this->note_section);
 
         // 清理
@@ -274,7 +272,9 @@ class LinuxBuilder extends BuilderBase
     }
 
     /**
-     * @throws RuntimeException
+     * 构建 fpm
+     *
+     * @throws FileSystemException|RuntimeException
      */
     public function buildFpm(string $extra_libs, string $use_lld): void
     {
@@ -294,41 +294,5 @@ class LinuxBuilder extends BuilderBase
             ->exec("{$this->cross_compile_prefix}strip --strip-all php-fpm")
             ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php-fpm.debug --remove-section=.note php-fpm");
         $this->deployBinary(BUILD_TARGET_FPM);
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    private function generateExtraLibs(): string
-    {
-        if ($this->libc === 'glibc') {
-            $glibc_libs = [
-                'rt',
-                'm',
-                'c',
-                'pthread',
-                'dl',
-                'nsl',
-                'anl',
-                // 'crypt',
-                'resolv',
-                'util',
-            ];
-            $makefile = file_get_contents(SOURCE_PATH . '/php-src/Makefile');
-            preg_match('/^EXTRA_LIBS\s*=\s*(.*)$/m', $makefile, $matches);
-            if (!$matches) {
-                throw new RuntimeException('failed to find EXTRA_LIBS in Makefile');
-            }
-            $_extra_libs = [];
-            foreach (array_filter(explode(' ', $matches[1])) as $used) {
-                foreach ($glibc_libs as $libName) {
-                    if ("-l{$libName}" === $used && !in_array("-l{$libName}", $_extra_libs, true)) {
-                        array_unshift($_extra_libs, "-l{$libName}");
-                    }
-                }
-            }
-            return ' ' . implode(' ', $_extra_libs);
-        }
-        return '';
     }
 }

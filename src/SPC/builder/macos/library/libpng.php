@@ -22,7 +22,6 @@ namespace SPC\builder\macos\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\util\Patcher;
 
 class libpng extends MacOSLibraryBase
 {
@@ -34,15 +33,11 @@ class libpng extends MacOSLibraryBase
      */
     protected function build()
     {
-        // 不同架构的专属优化
         $optimizations = match ($this->builder->arch) {
             'x86_64' => '--enable-intel-sse ',
             'arm64' => '--enable-arm-neon ',
             default => '',
         };
-
-        // patch configure
-        Patcher::patchUnixLibpng();
         shell()->cd($this->source_dir)
             ->exec('chmod +x ./configure')
             ->exec(
@@ -59,5 +54,6 @@ class libpng extends MacOSLibraryBase
             ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
             ->cd(BUILD_LIB_PATH)
             ->exec('ln -sf libpng16.a libpng.a');
+        $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

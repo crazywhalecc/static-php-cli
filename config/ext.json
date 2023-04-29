@@ -17,7 +17,7 @@
     },
     "curl": {
         "type": "builtin",
-        "arg-type": "custom",
+        "arg-type": "with",
         "lib-depends": [
             "curl"
         ]
@@ -69,25 +69,10 @@
             "zlib"
         ],
         "lib-suggests": [
-            "gd",
             "libavif",
             "libwebp",
             "libjpeg",
-            "xpm",
             "freetype"
-        ],
-        "lib-depends-windows": [
-            "libiconv",
-            "freetype",
-            "libjpeg",
-            "zlib",
-            "libpng",
-            "xpm"
-        ],
-        "lib-suggests-windows": [
-            "gd",
-            "libavif",
-            "libwebp"
         ]
     },
     "gettext": {
@@ -121,6 +106,10 @@
             "kerberos"
         ]
     },
+    "inotify": {
+        "type": "external",
+        "source": "inotify"
+    },
     "intl": {
         "type": "builtin",
         "lib-depends": [
@@ -149,7 +138,8 @@
     },
     "mongodb": {
         "type": "external",
-        "source": "mongodb"
+        "source": "mongodb",
+        "arg-type": "custom"
     },
     "mysqli": {
         "type": "builtin",
@@ -167,7 +157,7 @@
     },
     "openssl": {
         "type": "builtin",
-        "arg-type": "custom",
+        "arg-type": "with",
         "lib-depends": [
             "openssl"
         ]
@@ -285,7 +275,7 @@
     },
     "sqlite3": {
         "type": "builtin",
-        "arg-type": "custom",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "sqlite"
         ]
@@ -304,10 +294,6 @@
             "curl"
         ],
         "unix-only": true
-    },
-    "inotify": {
-        "type": "external",
-        "source": "inotify"
     },
     "swow": {
         "type": "external",
@@ -383,7 +369,7 @@
     },
     "zip": {
         "type": "builtin",
-        "arg-type": "custom",
+        "arg-type": "with-prefix",
         "arg-type-windows": "enable",
         "lib-depends": [
             "libzip"

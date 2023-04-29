@@ -66,12 +66,6 @@
             "SystemConfiguration"
         ]
     },
-    "postgresql": {
-        "source": "postgresql",
-        "static-libs-unix": [
-            "libpg.a"
-        ]
-    },
     "freetype": {
         "source": "freetype",
         "static-libs-unix": [
@@ -80,6 +74,14 @@
         "headers-unix": [
             "freetype2/freetype/freetype.h",
             "freetype2/ft2build.h"
+        ],
+        "lib-depends": [
+            "zlib"
+        ],
+        "lib-suggests": [
+            "libpng",
+            "bzip2",
+            "brotli"
         ]
     },
     "gmp": {
@@ -92,6 +94,12 @@
         ],
         "headers": [
             "gmp.h"
+        ]
+    },
+    "libavif": {
+        "source": "libavif",
+        "static-libs-unix": [
+            "libavif.a"
         ]
     },
     "libffi": {
@@ -115,12 +123,20 @@
     "libiconv": {
         "source": "libiconv",
         "static-libs-unix": [
-            "libiconv.a"
+            "libiconv.a",
+            "libcharset.a"
         ],
         "headers": [
             "iconv.h",
             "libcharset.h",
             "localcharset.h"
+        ]
+    },
+    "libjpeg": {
+        "source": "libjpeg",
+        "static-libs-unix": [
+            "libjpeg.a",
+            "libturbojpeg.a"
         ]
     },
     "libmcrypt": {
@@ -168,6 +184,16 @@
         ],
         "lib-suggests": [
             "zlib"
+        ]
+    },
+    "libwebp": {
+        "source": "libwebp",
+        "static-libs-unix": [
+            "libwebp.a",
+            "libwebpdecoder.a",
+            "libwebpdemux.a",
+            "libwebpmux.a",
+            "libsharpyuv.a"
         ]
     },
     "libxml2": {
@@ -257,17 +283,7 @@
             "openssl"
         ],
         "lib-suggests": [
-            "libxml2",
-            "libev",
-            "libcares",
-            "libngtcp2",
-            "libnghttp3",
-            "libbpf",
-            "libevent-openssl",
-            "jansson",
-            "jemalloc",
-            "systemd",
-            "cunit"
+            "libxml2"
         ]
     },
     "onig": {
@@ -301,6 +317,12 @@
         ],
         "lib-depends": [
             "zlib"
+        ]
+    },
+    "postgresql": {
+        "source": "postgresql",
+        "static-libs-unix": [
+            "libpg.a"
         ]
     },
     "pthreads4w": {

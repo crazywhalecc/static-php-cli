@@ -30,9 +30,7 @@ class xml extends Extension
             'simplexml' => '--enable-simplexml',
             default => throw new RuntimeException('Not accept non-xml extension'),
         };
-        $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '" ' .
-            'LIBXML_CFLAGS=-I"' . realpath('include/libxml2') . '" ' .
-            'LIBXML_LIBS="' . $this->getLibFilesString() . '" ';
+        $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '"';
         return $arg;
     }
 }
