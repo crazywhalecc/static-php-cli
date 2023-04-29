@@ -18,6 +18,7 @@ trait curl
         // lib:libssh2
         $libssh2 = $this->builder->getLib('libssh2');
         if ($this->builder->getLib('libssh2')) {
+            /* @phpstan-ignore-next-line */
             $extra .= '-DLIBSSH2_LIBRARY="' . $libssh2->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DLIBSSH2_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
         } else {
@@ -26,6 +27,7 @@ trait curl
         // lib:nghttp2
         if ($nghttp2 = $this->builder->getLib('nghttp2')) {
             $extra .= '-DUSE_NGHTTP2=ON ' .
+                /* @phpstan-ignore-next-line */
                 '-DNGHTTP2_LIBRARY="' . $nghttp2->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DNGHTTP2_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
         } else {
