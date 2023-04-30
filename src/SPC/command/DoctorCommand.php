@@ -18,6 +18,7 @@ class DoctorCommand extends BaseCommand
             $this->output->writeln('<info>Doctor check complete !</info>');
         } catch (\Throwable $e) {
             $this->output->writeln('<error>' . $e->getMessage() . '</error>');
+            pcntl_signal(SIGINT, SIG_IGN);
             return 1;
         }
         return 0;

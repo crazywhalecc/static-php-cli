@@ -10,7 +10,7 @@ use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\util\Patcher;
+use SPC\store\SourcePatcher;
 
 /**
  * macOS 系统环境下的构建器
@@ -136,11 +136,11 @@ class MacOSBuilder extends BuilderBase
         }
 
         // patch before configure
-        Patcher::patchPHPBeforeConfigure($this);
+        SourcePatcher::patchPHPBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
-        Patcher::patchPHPConfigure($this);
+        SourcePatcher::patchPHPConfigure($this);
 
         if ($this->getLib('libxml2') || $this->getExt('iconv')) {
             $extra_libs .= ' -liconv';
@@ -165,6 +165,8 @@ class MacOSBuilder extends BuilderBase
                 $this->makeExtensionArgs() . ' ' .
                 $this->configure_env
             );
+
+        SourcePatcher::patchPHPAfterConfigure($this);
 
         $this->cleanMake();
 

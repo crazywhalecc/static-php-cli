@@ -22,7 +22,7 @@ namespace SPC\builder\linux\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\util\Patcher;
+use SPC\store\SourcePatcher;
 
 class libpng extends LinuxLibraryBase
 {
@@ -41,7 +41,7 @@ class libpng extends LinuxLibraryBase
         };
 
         // patch configure
-        Patcher::patchUnixLibpng();
+        SourcePatcher::patchUnixLibpng();
 
         shell()->cd($this->source_dir)
             ->exec('chmod +x ./configure')

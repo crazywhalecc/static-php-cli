@@ -10,7 +10,7 @@ use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\util\Patcher;
+use SPC\store\SourcePatcher;
 
 /**
  * Linux 系统环境下的构建器
@@ -46,7 +46,10 @@ class LinuxBuilder extends BuilderBase
     public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
     {
         // 初始化一些默认参数
-        $this->cc = $cc ?? 'musl-gcc';
+        $this->cc = $cc ?? match (SystemUtil::getOSRelease()['dist']) {
+            'alpine' => 'gcc',
+            default => 'musl-gcc'
+        };
         $this->cxx = $cxx ?? 'g++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
@@ -135,6 +138,9 @@ class LinuxBuilder extends BuilderBase
                 )
             );
         }
+        if ($this->getExt('swoole')) {
+            $extra_libs .= ' -lstdc++';
+        }
 
         $envs = $this->pkgconf_env . ' ' .
             "CC='{$this->cc}' " .
@@ -158,11 +164,11 @@ class LinuxBuilder extends BuilderBase
 
         $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
 
-        Patcher::patchPHPBeforeConfigure($this);
+        SourcePatcher::patchPHPBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
-        Patcher::patchPHPConfigure($this);
+        SourcePatcher::patchPHPConfigure($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -182,6 +188,8 @@ class LinuxBuilder extends BuilderBase
                 $this->makeExtensionArgs() . ' ' .
                 $envs
             );
+
+        SourcePatcher::patchPHPAfterConfigure($this);
 
         file_put_contents('/tmp/comment', $this->note_section);
 

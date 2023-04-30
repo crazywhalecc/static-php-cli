@@ -13,44 +13,6 @@ class SystemUtil
 {
     use UnixSystemUtilTrait;
 
-    /**
-     * 查找并选择编译器命令
-     *
-     * @throws RuntimeException
-     */
-    public static function selectCC(): string
-    {
-        logger()->debug('Choose cc');
-        if (self::findCommand('clang')) {
-            logger()->info('using clang');
-            return 'clang';
-        }
-        if (self::findCommand('gcc')) {
-            logger()->info('using gcc');
-            return 'gcc';
-        }
-        throw new RuntimeException('no supported cc found');
-    }
-
-    /**
-     * 查找并选择编译器命令
-     *
-     * @throws RuntimeException
-     */
-    public static function selectCXX(): string
-    {
-        logger()->debug('Choose cxx');
-        if (self::findCommand('clang++')) {
-            logger()->info('using clang++');
-            return 'clang++';
-        }
-        if (self::findCommand('g++')) {
-            logger()->info('using g++');
-            return 'g++';
-        }
-        return self::selectCC();
-    }
-
     #[ArrayShape(['dist' => 'mixed|string', 'ver' => 'mixed|string'])]
     public static function getOSRelease(): array
     {

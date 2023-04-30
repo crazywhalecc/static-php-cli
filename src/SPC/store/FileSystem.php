@@ -6,10 +6,11 @@ namespace SPC\store;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 class FileSystem
 {
+    private static array $_extract_hook = [];
+
     /**
      * @throws FileSystemException
      */
@@ -118,20 +119,16 @@ class FileSystem
 
     public static function copyDir(string $from, string $to): void
     {
-        $iterator = new \RecursiveIteratorIterator(new RecursiveDirectoryIterator($from, \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_FILEINFO), \RecursiveIteratorIterator::SELF_FIRST);
-        foreach ($iterator as $item) {
-            /**
-             * @var \SplFileInfo $item
-             */
-            $target = $to . substr($item->getPathname(), strlen($from));
-            if ($item->isDir()) {
-                logger()->info("mkdir {$target}");
-                f_mkdir($target, recursive: true);
-            } else {
-                logger()->info("copying {$item} to {$target}");
-                @f_mkdir(dirname($target), recursive: true);
-                copy($item->getPathname(), $target);
-            }
+        $dst_path = FileSystem::convertPath($to);
+        $src_path = FileSystem::convertPath($from);
+        switch (PHP_OS_FAMILY) {
+            case 'Windows':
+                f_passthru('xcopy "' . $src_path . '" "' . $dst_path . '" /s/e/v/y/i');
+                break;
+            case 'Linux':
+            case 'Darwin':
+                f_passthru('cp -r "' . $src_path . '" "' . $dst_path . '"');
+                break;
         }
     }
 
@@ -143,41 +140,56 @@ class FileSystem
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public static function extractSource(string $name, string $filename): void
+    public static function extractSource(string $name, string $filename, ?string $move_path = null): void
     {
+        // if source hook is empty, load it
+        if (self::$_extract_hook === []) {
+            SourcePatcher::init();
+        }
+        if ($move_path !== null) {
+            $move_path = SOURCE_PATH . '/' . $move_path;
+        }
         logger()->info("extracting {$name} source");
         try {
-            if (PHP_OS_FAMILY !== 'Windows') {
-                if (f_mkdir(directory: SOURCE_PATH . "/{$name}", recursive: true) !== true) {
+            $target = $move_path ?? (SOURCE_PATH . "/{$name}");
+            // Git source, just move
+            if (is_dir($filename)) {
+                self::copyDir($filename, $target);
+                self::emitSourceExtractHook($name);
+                return;
+            }
+
+            if (PHP_OS_FAMILY === 'Darwin' || PHP_OS_FAMILY === 'Linux') {
+                if (f_mkdir(directory: $target, recursive: true) !== true) {
                     throw new FileSystemException('create ' . $name . 'source dir failed');
                 }
                 switch (self::extname($filename)) {
                     case 'xz':
                     case 'txz':
-                        f_passthru("tar -xf {$filename} -C " . SOURCE_PATH . "/{$name} --strip-components 1");
+                        f_passthru("tar -xf {$filename} -C {$target} --strip-components 1");
                         // f_passthru("cat {$filename} | xz -d | tar -x -C " . SOURCE_PATH . "/{$name} --strip-components 1");
                         break;
                     case 'gz':
                     case 'tgz':
-                        f_passthru("tar -xzf {$filename} -C " . SOURCE_PATH . "/{$name} --strip-components 1");
+                        f_passthru("tar -xzf {$filename} -C {$target} --strip-components 1");
                         break;
                     case 'bz2':
-                        f_passthru("tar -xjf {$filename} -C " . SOURCE_PATH . "/{$name} --strip-components 1");
+                        f_passthru("tar -xjf {$filename} -C {$target} --strip-components 1");
                         break;
                     case 'zip':
-                        f_passthru("unzip {$filename} -d " . SOURCE_PATH . "/{$name}");
+                        f_passthru("unzip {$filename} -d {$target}");
                         break;
                         // case 'zstd':
                         // case 'zst':
                         //     passthru('cat ' . $filename . ' | zstd -d | tar -x -C ".SOURCE_PATH . "/' . $name . ' --strip-components 1', $ret);
                         //     break;
                     case 'tar':
-                        f_passthru("tar -xf {$filename} -C " . SOURCE_PATH . "/{$name} --strip-components 1");
+                        f_passthru("tar -xf {$filename} -C {$target} --strip-components 1");
                         break;
                     default:
                         throw new FileSystemException('unknown archive format: ' . $filename);
                 }
-            } else {
+            } elseif (PHP_OS_FAMILY === 'Windows') {
                 // find 7z
                 $_7zExe = self::findCommandPath('7z', [
                     'C:\Program Files\7-Zip-Zstandard',
@@ -201,13 +213,13 @@ class FileSystem
                     case 'gz':
                     case 'tgz':
                     case 'bz2':
-                        f_passthru("\"{$_7zExe}\" x -so {$filename} | tar -f - -x -C " . SOURCE_PATH . "/{$name} --strip-components 1");
+                        f_passthru("\"{$_7zExe}\" x -so {$filename} | tar -f - -x -C {$target} --strip-components 1");
                         break;
                     case 'tar':
-                        f_passthru("tar -xf {$filename} -C " . SOURCE_PATH . "/{$name} --strip-components 1");
+                        f_passthru("tar -xf {$filename} -C {$target} --strip-components 1");
                         break;
                     case 'zip':
-                        f_passthru("\"{$_7zExe}\" x {$filename} -o" . SOURCE_PATH . "/{$name}");
+                        f_passthru("\"{$_7zExe}\" x {$filename} -o{$target}");
                         break;
                     default:
                         throw new FileSystemException("unknown archive format: {$filename}");
@@ -420,5 +432,19 @@ class FileSystem
             self::removeDir($dir_name);
         }
         self::createDir($dir_name);
+    }
+
+    public static function addSourceExtractHook(string $name, callable $callback)
+    {
+        self::$_extract_hook[$name][] = $callback;
+    }
+
+    private static function emitSourceExtractHook(string $name)
+    {
+        foreach ((self::$_extract_hook[$name] ?? []) as $hook) {
+            if ($hook($name) === true) {
+                logger()->info('Patched source [' . $name . '] after extracted');
+            }
+        }
     }
 }

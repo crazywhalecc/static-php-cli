@@ -1,4 +1,11 @@
 {
+    "php-src": {
+        "type": "custom",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",
@@ -227,13 +234,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE.txt"
-        }
-    },
-    "php-src": {
-        "type": "custom",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
         }
     },
     "postgresql": {

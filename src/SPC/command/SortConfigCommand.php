@@ -38,7 +38,7 @@ class SortConfigCommand extends BaseCommand
             case 'source':
                 $file = json_decode(FileSystem::readFile(ROOT_DIR . '/config/source.json'), true);
                 ConfigValidator::validateSource($file);
-                ksort($file);
+                uksort($file, fn ($a, $b) => $a === 'php-src' ? -1 : ($b === 'php-src' ? 1 : ($a < $b ? -1 : 1)));
                 file_put_contents(ROOT_DIR . '/config/source.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                 break;
             case 'ext':

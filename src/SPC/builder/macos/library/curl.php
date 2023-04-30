@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\util\Patcher;
+use SPC\store\SourcePatcher;
 
 class curl extends MacOSLibraryBase
 {
@@ -32,7 +32,7 @@ class curl extends MacOSLibraryBase
 
     protected function build()
     {
-        Patcher::patchCurlMacOS();
+        SourcePatcher::patchCurlMacOS();
         $this->unixBuild();
     }
 }

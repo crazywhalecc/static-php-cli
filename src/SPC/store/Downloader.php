@@ -149,6 +149,37 @@ class Downloader
     }
 
     /**
+     * @throws DownloaderException
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null): void
+    {
+        logger()->debug("Downloading {$url}");
+        pcntl_signal(SIGINT, function () use ($filename) {
+            if (file_exists(DOWNLOAD_PATH . '/' . $filename)) {
+                logger()->warning('Deleting download file: ' . $filename);
+                unlink(DOWNLOAD_PATH . '/' . $filename);
+            }
+        });
+        self::curlDown(url: $url, path: DOWNLOAD_PATH . "/{$filename}");
+        pcntl_signal(SIGINT, SIG_IGN);
+        logger()->debug("Locking {$filename}");
+        self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path]);
+    }
+
+    public static function lockSource(string $name, array $data): void
+    {
+        if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+            $lock = [];
+        } else {
+            $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
+        }
+        $lock[$name] = $data;
+        FileSystem::writeFile(DOWNLOAD_PATH . '/.lock.json', json_encode($lock, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    }
+
+    /**
      * 通过链接下载资源到本地并解压
      *
      * @param  string              $name     资源名称
@@ -183,25 +214,32 @@ class Downloader
         }
     }
 
-    public static function downloadGit(string $name, string $url, string $branch, ?string $path = null): void
+    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null): void
     {
-        if ($path !== null) {
-            $path = SOURCE_PATH . "/{$path}";
-        } else {
-            $path = DOWNLOAD_PATH . "/{$name}";
-        }
         $download_path = DOWNLOAD_PATH . "/{$name}";
         if (file_exists($download_path)) {
-            logger()->notice("{$name} git source already fetched");
-        } else {
-            logger()->debug("cloning {$name} source");
-            $check = !defined('DEBUG_MODE') ? ' -q' : '';
-            f_passthru(
-                'git clone' . $check .
-                ' --config core.autocrlf=false ' .
-                "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
-            );
+            FileSystem::removeDir($download_path);
         }
+        logger()->debug("cloning {$name} source");
+        $check = !defined('DEBUG_MODE') ? ' -q' : '';
+        pcntl_signal(SIGINT, function () use ($download_path) {
+            if (is_dir($download_path)) {
+                logger()->warning('Removing path ' . $download_path);
+                FileSystem::removeDir($download_path);
+            }
+        });
+        f_passthru(
+            'git clone' . $check .
+            ' --config core.autocrlf=false ' .
+            "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
+        );
+        pcntl_signal(SIGINT, SIG_IGN);
+
+        // Lock
+        logger()->debug("Locking git source {$name}");
+        self::lockSource($name, ['source_type' => 'dir', 'dirname' => $name, 'move_path' => $move_path]);
+
+        /*
         // 复制目录过去
         if ($path !== $download_path) {
             $dst_path = FileSystem::convertPath($path);
@@ -215,64 +253,78 @@ class Downloader
                     f_passthru('cp -r "' . $src_path . '" "' . $dst_path . '"');
                     break;
             }
-        }
+        }*/
     }
 
     /**
      * 拉取资源
      *
      * @param  string              $name   资源名称
-     * @param  array               $source 资源参数，包含 type、path、rev、url、filename、regex、license
+     * @param  null|array          $source 资源参数，包含 type、path、rev、url、filename、regex、license
      * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
      */
-    public static function fetchSource(string $name, array $source): void
+    public static function downloadSource(string $name, ?array $source = null): void
     {
-        // 如果是 git 类型，且没有设置 path，那我就需要指定一下 path
-        if ($source['type'] === 'git' && !isset($source['path'])) {
-            $source['path'] = $name;
+        if ($source === null) {
+            $source = Config::getSource($name);
         }
-        // 避免重复 fetch
-        if (!isset($source['path']) && is_dir(FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}")) || isset($source['path']) && is_dir(FileSystem::convertPath(SOURCE_PATH . "/{$source['path']}"))) {
-            logger()->notice("{$name} source already extracted");
-            return;
+
+        // load lock file
+        if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+            $lock = [];
+        } else {
+            $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
         }
+        // If lock file exists, skip downloading
+        if (isset($lock[$name])) {
+            if ($lock[$name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename'])) {
+                logger()->notice("source [{$name}] already downloaded: " . $lock[$name]['filename']);
+                return;
+            }
+            if ($lock[$name]['source_type'] === 'dir' && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])) {
+                logger()->notice("source [{$name}] already downloaded: " . $lock[$name]['dirname']);
+                return;
+            }
+        }
+
         try {
             switch ($source['type']) {
                 case 'bitbuckettag':    // 从 BitBucket 的 Tag 拉取
                     [$url, $filename] = self::getLatestBitbucketTag($name, $source);
-                    self::downloadUrl($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'ghtar':           // 从 GitHub 的 TarBall 拉取
                     [$url, $filename] = self::getLatestGithubTarball($name, $source);
-                    self::downloadUrl($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'ghtagtar':        // 根据 GitHub 的 Tag 拉取相应版本的 Tar
                     [$url, $filename] = self::getLatestGithubTarball($name, $source, 'tags');
-                    self::downloadUrl($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'ghrel':           // 通过 GitHub Release 来拉取
                     [$url, $filename] = self::getLatestGithubRelease($name, $source);
-                    self::downloadUrl($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'filelist':        // 通过网站提供的 filelist 使用正则提取后拉取
                     [$url, $filename] = self::getFromFileList($name, $source);
-                    self::downloadUrl($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'url':             // 通过直链拉取
                     $url = $source['url'];
                     $filename = $source['filename'] ?? basename($source['url']);
-                    self::downloadUrl($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'git':             // 通过拉回 Git 仓库的形式拉取
                     self::downloadGit($name, $source['url'], $source['rev'], $source['path'] ?? null);
                     break;
-                case 'custom':
+                case 'custom':          // 自定义，可能是通过复杂 API 形式获取的文件，需要手写 crawler
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
                     foreach ($classes as $class) {
                         if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
                             (new $class())->fetch();
+                            break;
                         }
                     }
                     break;

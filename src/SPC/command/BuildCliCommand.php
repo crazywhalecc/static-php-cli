@@ -73,14 +73,22 @@ class BuildCliCommand extends BuildCommand
             // 统计时间
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build complete, used ' . $time . ' s !');
+            $build_root_path = BUILD_ROOT_PATH;
+            $cwd = getcwd();
+            $fixed = '';
+            if (!empty(getenv('SPC_FIX_DEPLOY_ROOT'))) {
+                str_replace($cwd, '', $build_root_path);
+                $build_root_path = getenv('SPC_FIX_DEPLOY_ROOT') . $build_root_path;
+                $fixed = ' (host system)';
+            }
             if (($rule & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
-                logger()->info('Static php binary path: ' . BUILD_ROOT_PATH . '/bin/php');
+                logger()->info('Static php binary path' . $fixed . ': ' . $build_root_path . '/bin/php');
             }
             if (($rule & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
-                logger()->info('phpmicro binary path: ' . BUILD_ROOT_PATH . '/bin/micro.sfx');
+                logger()->info('phpmicro binary path' . $fixed . ': ' . $build_root_path . '/bin/micro.sfx');
             }
             if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
-                logger()->info('Static php-fpm binary path: ' . BUILD_ROOT_PATH . '/bin/php-fpm');
+                logger()->info('Static php-fpm binary path' . $fixed . ': ' . $build_root_path . '/bin/php-fpm');
             }
             // 导出相关元数据
             file_put_contents(BUILD_ROOT_PATH . '/build-extensions.json', json_encode($extensions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
@@ -88,7 +96,7 @@ class BuildCliCommand extends BuildCommand
             // 导出 LICENSE
             $dumper = new LicenseDumper();
             $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
-            logger()->info('License path: ' . BUILD_ROOT_PATH . '/license/');
+            logger()->info('License path' . $fixed . ': ' . $build_root_path . '/license/');
             return 0;
         } catch (WrongUsageException $e) {
             logger()->critical($e->getMessage());

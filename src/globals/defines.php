@@ -57,4 +57,9 @@ const PKGCONF_PATCH_LIBDIR = 4;
 const PKGCONF_PATCH_INCLUDEDIR = 8;
 const PKGCONF_PATCH_ALL = 15;
 
+// Custom download type
+const DOWNLOAD_TYPE_NONE = 0;
+const DOWNLOAD_TYPE_ARCHIVE = 1;
+const DOWNLOAD_TYPE_DIR = 2;
+
 ConsoleLogger::$date_format = 'H:i:s';
