@@ -13,11 +13,13 @@ Compile A Statically Linked PHP With Swoole and other Extensions. [English READM
 
 ## 重构
 
-当前项目正在重构中，本分支为旧版。重构版支持很多新特性。下面是目前重构的进度：
+本分支为旧版。重构版支持很多新特性。下面是目前重构的进度：
 
 - **关于重构版的讨论：https://github.com/crazywhalecc/static-php-cli/discussions/29**
 - **重构的分支：[refactor](https://github.com/crazywhalecc/static-php-cli/tree/refactor)**
 - **重构的问题和待办：https://github.com/crazywhalecc/static-php-cli/issues/32**
+
+**目前重构版已经完成本分支的所有扩展，并且还支持更多扩展**。
 
 ## 编译环境需求
 
