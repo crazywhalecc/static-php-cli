@@ -153,7 +153,6 @@ class MacOSBuilder extends BuilderBase
                 '--with-valgrind=no ' .     // 不检测内存泄漏
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
-                "--host={$this->gnu_arch}-apple-darwin " .
                 "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
                 '--disable-all ' .
                 '--disable-cgi ' .

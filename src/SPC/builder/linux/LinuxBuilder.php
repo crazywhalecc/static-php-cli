@@ -177,7 +177,6 @@ class LinuxBuilder extends BuilderBase
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
-                "--host={$this->gnu_arch}-unknown-linux " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
