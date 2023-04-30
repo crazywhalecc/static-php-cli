@@ -41,6 +41,24 @@
             "path": "LICENSE"
         }
     },
+    "ncurses": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
+        "regex": "/href=\"(?<file>ncurses-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "readline": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/pub/gnu/readline/",
+        "regex": "/href=\"(?<file>readline-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",

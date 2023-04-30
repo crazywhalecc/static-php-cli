@@ -15,6 +15,21 @@
             "brotli"
         ]
     },
+    "ncurses": {
+        "source": "ncurses",
+        "static-libs-unix": [
+            "libncursesw.a"
+        ]
+    },
+    "readline": {
+        "source": "readline",
+        "static-libs-unix": [
+            "libreadline.a"
+        ],
+        "lib-depends": [
+            "ncurses"
+        ]
+    },
     "bzip2": {
         "source": "bzip2",
         "static-libs-unix": [

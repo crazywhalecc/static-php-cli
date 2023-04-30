@@ -41,7 +41,7 @@
 | phar       | yes                                                                 | yes                                                                |         |
 | posix      | yes                                                                 | yes                                                                |         |
 | protobuf   | yes                                                                 | yes                                                                |         |
-| readline   |                                                                     |                                                                    |         |
+| readline   | yes, untested                                                       | yes, untested                                                      |         |
 | redis      | yes                                                                 | yes                                                                |         |
 | session    | yes                                                                 | yes                                                                |         |
 | shmop      | yes                                                                 | yes                                                                |         |
