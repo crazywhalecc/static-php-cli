@@ -22,13 +22,13 @@ If you are using English, see [English README](README-en.md).
 
 下面是架构支持情况，`CI` 代表支持 GitHub Action 构建，`Local` 代表支持本地构建，空 代表暂不支持。
 
-|         | x86_64    | aarch64 |
-|---------|-----------|---------|
-| macOS   | CI, Local | Local   |
-| Linux   | CI, Local | Local   |
-| Windows |           |         |
+|         | x86_64    | aarch64   | armv7l    |
+|---------|-----------|-----------|-----------|
+| macOS   | CI, Local | Local     |           |
+| Linux   | CI, Local | CI, Local | CI, Local |
+| Windows |           |           |           |
 
-> linux-aarch64 and macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
+> macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
 
 目前支持编译的 PHP 版本为：`7.4`，`8.0`，`8.1`，`8.2`。
 

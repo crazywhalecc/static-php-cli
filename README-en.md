@@ -22,13 +22,13 @@ But static-php-cli runtime only requires an environment above PHP 8.0 and `token
 Here is the architecture support status, where `CI` represents support for GitHub Action builds, 
 `Local` represents support for local builds, and blank represents not currently supported.
 
-|         | x86_64    | aarch64 |
-|---------|-----------|---------|
-| macOS   | CI, Local | Local   |
-| Linux   | CI, Local | Local   |
-| Windows |           |         |
+|         | x86_64    | aarch64   | armv7l    |
+|---------|-----------|-----------|-----------|
+| macOS   | CI, Local | Local     |           |
+| Linux   | CI, Local | CI, Local | CI, Local |
+| Windows |           |           |           |
 
-> linux-aarch64 and macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
+> macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
 Currently supported PHP versions for compilation are: `7.4`, `8.0`, `8.1`, `8.2`.
 
