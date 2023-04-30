@@ -102,6 +102,18 @@
             "libavif.a"
         ]
     },
+    "libevent": {
+        "source": "libevent",
+        "static-libs-unix": [
+            "libevent.a",
+            "libevent_core.a",
+            "libevent_extra.a",
+            "libevent_openssl.a"
+        ],
+        "lib-depends": [
+            "openssl"
+        ]
+    },
     "libffi": {
         "source": "libffi",
         "static-libs-unix": [

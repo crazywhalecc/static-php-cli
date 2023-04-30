@@ -79,6 +79,9 @@ class SourcePatcher
         if ($pdo_sqlite = $builder->getExt('pdo_sqlite')) {
             $patch[] = ['pdo_sqlite linking', '/sqlite3_column_table_name=yes/', 'sqlite3_column_table_name=no'];
         }
+        if ($event = $builder->getExt('event')) {
+            $patch[] = ['event check', '/-levent_openssl/', $event->getLibFilesString()];
+        }
         $patch[] = ['disable capstone', '/have_capstone="yes"/', 'have_capstone="no"'];
         foreach ($patch as $item) {
             logger()->info('Patching configure: ' . $item[0]);
@@ -208,5 +211,6 @@ class SourcePatcher
             FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_STRLCPY 1$/m', '');
             FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_STRLCAT 1$/m', '');
         }
+        FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_OPENPTY 1$/m', '');
     }
 }

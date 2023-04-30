@@ -32,6 +32,15 @@
             "path": "COPYING"
         }
     },
+    "ext-event": {
+        "type": "url",
+        "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
+        "path": "php-src/ext/event",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",
@@ -73,6 +82,15 @@
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "libevent": {
+        "type": "ghrel",
+        "repo": "libevent/libevent",
+        "match": "libevent.+\\.tar\\.gz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -137,14 +155,6 @@
         "license": {
             "type": "file",
             "path": "COPYING"
-        }
-    },
-    "libuv": {
-        "type": "ghtar",
-        "repo": "libuv/libuv",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
         }
     },
     "libwebp": {

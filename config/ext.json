@@ -35,6 +35,20 @@
             "zlib"
         ]
     },
+    "event": {
+        "type": "external",
+        "source": "ext-event",
+        "arg-type": "custom",
+        "lib-depends": [
+            "libevent"
+        ],
+        "ext-depends": [
+            "openssl"
+        ],
+        "ext-suggests": [
+            "sockets"
+        ]
+    },
     "exif": {
         "type": "builtin"
     },
