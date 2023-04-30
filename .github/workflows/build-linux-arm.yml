@@ -9,7 +9,6 @@ on:
         type: choice
         options:
           - aarch64
-          - armv7l
       version:
         required: true
         description: php version to compile

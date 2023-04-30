@@ -36,11 +36,6 @@ aarch64)
     echo -e "\e[033m* Using different arch needs to setup qemu-static for docker !\e[0m"
     $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static:register --reset > /dev/null
     ;;
-armv7l)
-    ALPINE_FROM=multiarch/alpine:armv7-edge
-    echo -e "\e[033m* Using different arch needs to setup qemu-static for docker !\e[0m"
-    $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static:register --reset > /dev/null
-    ;;
 *)
     echo "Current arch is not supported to run in docker: $SPC_USE_ARCH"
     exit 1
