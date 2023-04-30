@@ -16,7 +16,7 @@
 | dba        | yes                                                                 | yes                                                                |         | 
 | dom        | yes                                                                 | yes                                                                |         |
 | enchant    |                                                                     |                                                                    |         |
-| event      |                                                                     |                                                                    |         |
+| event      | yes                                                                 | yes                                                                |         |
 | exif       | yes                                                                 | yes                                                                |         |
 | filter     | yes                                                                 | yes                                                                |         |
 | fileinfo   | yes                                                                 | yes                                                                |         |
