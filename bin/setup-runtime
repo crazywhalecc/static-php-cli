@@ -8,8 +8,8 @@ __OS__=$(uname -s)
 __ARCH__=$(uname -m)
 # format arch name
 case $__ARCH__ in
-arm64 | aarch64) __ARCH__=arm64 ;;
-x86_64|x64) __ARCH__=x64 ;;
+arm64 | aarch64) __ARCH__=aarch64 ;;
+x86_64|x64) __ARCH__=x86_64 ;;
 *) ;;
 esac
 
@@ -25,7 +25,7 @@ __DIR__=$(cd "$(dirname "$0")" && pwd)
 __PROJECT__=$(cd ${__DIR__}/../ && pwd)
 
 # set download dir
-__PHP_RUNTIME_URL__="https://github.com/swoole/swoole-src/releases/download/v4.8.13/swoole-cli-v4.8.13-${__OS_FIXED__}-${__ARCH__}.tar.xz"
+__PHP_RUNTIME_URL__="https://dl.zhamao.xin/static-php-cli/php-8.2.5-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
 __COMPOSER_URL__="https://getcomposer.org/download/latest-stable/composer.phar"
 
 # use china mirror
@@ -46,17 +46,16 @@ done
 
 case "$mirror" in
 china)
-  __PHP_RUNTIME_URL__="https://wenda-1252906962.file.myqcloud.com/dist/swoole-cli-v4.8.13-${__OS_FIXED__}-${__ARCH__}.tar.xz"
+  __PHP_RUNTIME_URL__="https://dl.zhamao.xin/static-php-cli/php-8.2.5-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
   __COMPOSER_URL__="https://mirrors.aliyun.com/composer/composer.phar"
   ;;
 
 esac
 
-# download static-php binary (currently using swoole-cli temporarily)
 test -d ${__PROJECT__}/downloads || mkdir ${__PROJECT__}/downloads
 # download static php binary
-test -f ${__PROJECT__}/downloads/runtime.tar.xz || { echo "Downloading $__PHP_RUNTIME_URL__ ..." && curl -#fSL -o ${__PROJECT__}/downloads/runtime.tar.xz "$__PHP_RUNTIME_URL__" ; }
-test -f ${__DIR__}/php || { tar -xf ${__PROJECT__}/downloads/runtime.tar.xz -C ${__DIR__}/ && mv ${__DIR__}/swoole-cli ${__DIR__}/php && rm ${__DIR__}/LICENSE ; } # (TODO: temporarily use swoole-cli as php)
+test -f ${__PROJECT__}/downloads/runtime.tar.gz || { echo "Downloading $__PHP_RUNTIME_URL__ ..." && curl -#fSL -o ${__PROJECT__}/downloads/runtime.tar.gz "$__PHP_RUNTIME_URL__" ; }
+test -f ${__DIR__}/php || { tar -xf ${__PROJECT__}/downloads/runtime.tar.gz -C ${__DIR__}/ ; }
 chmod +x ${__DIR__}/php
 # download composer
 test -f ${__DIR__}/composer || curl -#fSL -o ${__DIR__}/composer "$__COMPOSER_URL__"
