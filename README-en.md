@@ -9,7 +9,7 @@ This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicr
 
 > This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
 
-[![Version](https://img.shields.io/badge/Version-2.0--beta3-green.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--beta3-orange.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
