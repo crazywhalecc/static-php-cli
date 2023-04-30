@@ -82,6 +82,9 @@ class SourcePatcher
         if ($event = $builder->getExt('event')) {
             $patch[] = ['event check', '/-levent_openssl/', $event->getLibFilesString()];
         }
+        if ($readline = $builder->getExt('readline')) {
+            $patch[] = ['readline patch', '/-lncurses/', $readline->getLibFilesString()];
+        }
         $patch[] = ['disable capstone', '/have_capstone="yes"/', 'have_capstone="no"'];
         foreach ($patch as $item) {
             logger()->info('Patching configure: ' . $item[0]);

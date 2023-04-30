@@ -2,4 +2,4 @@
 
 declare(strict_types=1);
 
-exit(class_exists('\\ZipArchive') ? 0 : 1);
+assert(class_exists('\\ZipArchive'));

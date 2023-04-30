@@ -18,7 +18,7 @@
     "ncurses": {
         "source": "ncurses",
         "static-libs-unix": [
-            "libncursesw.a"
+            "libncurses.a"
         ]
     },
     "readline": {
