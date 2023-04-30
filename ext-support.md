@@ -6,58 +6,58 @@
 > - no with issue link: not supported yet due to issue
 > - partial with issue link: supported but not perfect due to issue
 
-|            | Linux                                                               | macOS                                                              | Windows |
-|------------|---------------------------------------------------------------------|--------------------------------------------------------------------|---------|
-| bcmath     | yes                                                                 | yes                                                                |         |
-| bz2        | yes                                                                 | yes                                                                |         |
-| calendar   | yes                                                                 | yes                                                                |         |
-| ctype      | yes                                                                 | yes                                                                |         |
-| curl       | yes                                                                 | yes                                                                |         |
-| dba        | yes                                                                 | yes                                                                |         | 
-| dom        | yes                                                                 | yes                                                                |         |
-| enchant    |                                                                     |                                                                    |         |
-| event      | yes                                                                 | yes                                                                |         |
-| exif       | yes                                                                 | yes                                                                |         |
-| filter     | yes                                                                 | yes                                                                |         |
-| fileinfo   | yes                                                                 | yes                                                                |         |
-| ftp        | yes                                                                 | yes                                                                |         |
-| gd         | yes                                                                 | yes                                                                |         |
-| gettext    |                                                                     |                                                                    |         |
-| gmp        | yes                                                                 | yes                                                                |         |
-| iconv      | yes                                                                 | yes                                                                |         |
-| inotify    | yes                                                                 | yes                                                                |         |
-| mbstring   | yes                                                                 | yes                                                                |         |
-| mbregex    | yes                                                                 | yes                                                                |         |
-| mcrypt     |                                                                     | [faulty](https://github.com/crazywhalecc/static-php-cli/issues/32) |         |
-| mongodb    | yes                                                                 | yes                                                                |         |
-| mysqli     | yes                                                                 | yes                                                                |         |
-| mysqlnd    | yes                                                                 | yes                                                                |         |
-| openssl    | yes                                                                 | yes                                                                |         |
-| pcntl      | yes                                                                 | yes                                                                |         |
-| pdo        | yes                                                                 | yes                                                                |         |
-| pdo_mysql  | yes                                                                 | yes                                                                |         |
-| pdo_sqlite | yes                                                                 | yes                                                                |         |
-| pdo_pgsql  |                                                                     |                                                                    |         |
-| phar       | yes                                                                 | yes                                                                |         |
-| posix      | yes                                                                 | yes                                                                |         |
-| protobuf   | yes                                                                 | yes                                                                |         |
-| readline   | yes, untested                                                       | yes, untested                                                      |         |
-| redis      | yes                                                                 | yes                                                                |         |
-| session    | yes                                                                 | yes                                                                |         |
-| shmop      | yes                                                                 | yes                                                                |         |
-| simplexml  | yes                                                                 | yes                                                                |         |
-| soap       | yes                                                                 | yes                                                                |         |
-| sockets    | yes                                                                 | yes                                                                |         |
-| sqlite3    | yes                                                                 | yes                                                                |         |
-| swow       | yes                                                                 | yes                                                                |         |
-| swoole     | [partial](https://github.com/crazywhalecc/static-php-cli/issues/32) | yes                                                                |         |
-| tokenizer  | yes                                                                 | yes                                                                |         |
-| xml        | yes                                                                 | yes                                                                |         |
-| xmlreader  | yes, untested                                                       | yes, untested                                                      |         |
-| xmlwriter  | yes, untested                                                       | yes, untested                                                      |         |
-| zip        | yes, untested                                                       | yes                                                                |         |
-| zlib       | yes                                                                 | yes                                                                |         |
-| zstd       | yes                                                                 | yes                                                                |         |
+|            | Linux                                                               | macOS                                                          | Windows |
+|------------|---------------------------------------------------------------------|----------------------------------------------------------------|---------|
+| bcmath     | yes                                                                 | yes                                                            |         |
+| bz2        | yes                                                                 | yes                                                            |         |
+| calendar   | yes                                                                 | yes                                                            |         |
+| ctype      | yes                                                                 | yes                                                            |         |
+| curl       | yes                                                                 | yes                                                            |         |
+| dba        | yes                                                                 | yes                                                            |         | 
+| dom        | yes                                                                 | yes                                                            |         |
+| enchant    |                                                                     |                                                                |         |
+| event      | yes                                                                 | yes                                                            |         |
+| exif       | yes                                                                 | yes                                                            |         |
+| filter     | yes                                                                 | yes                                                            |         |
+| fileinfo   | yes                                                                 | yes                                                            |         |
+| ftp        | yes                                                                 | yes                                                            |         |
+| gd         | yes                                                                 | yes                                                            |         |
+| gettext    |                                                                     |                                                                |         |
+| gmp        | yes                                                                 | yes                                                            |         |
+| iconv      | yes                                                                 | yes                                                            |         |
+| inotify    | yes                                                                 | yes                                                            |         |
+| mbstring   | yes                                                                 | yes                                                            |         |
+| mbregex    | yes                                                                 | yes                                                            |         |
+| mcrypt     |                                                                     | [no](https://github.com/crazywhalecc/static-php-cli/issues/32) |         |
+| mongodb    | yes                                                                 | yes                                                            |         |
+| mysqli     | yes                                                                 | yes                                                            |         |
+| mysqlnd    | yes                                                                 | yes                                                            |         |
+| openssl    | yes                                                                 | yes                                                            |         |
+| pcntl      | yes                                                                 | yes                                                            |         |
+| pdo        | yes                                                                 | yes                                                            |         |
+| pdo_mysql  | yes                                                                 | yes                                                            |         |
+| pdo_sqlite | yes                                                                 | yes                                                            |         |
+| pdo_pgsql  |                                                                     |                                                                |         |
+| phar       | yes                                                                 | yes                                                            |         |
+| posix      | yes                                                                 | yes                                                            |         |
+| protobuf   | yes                                                                 | yes                                                            |         |
+| readline   | yes, untested                                                       | yes, untested                                                  |         |
+| redis      | yes                                                                 | yes                                                            |         |
+| session    | yes                                                                 | yes                                                            |         |
+| shmop      | yes                                                                 | yes                                                            |         |
+| simplexml  | yes                                                                 | yes                                                            |         |
+| soap       | yes                                                                 | yes                                                            |         |
+| sockets    | yes                                                                 | yes                                                            |         |
+| sqlite3    | yes                                                                 | yes                                                            |         |
+| swow       | yes                                                                 | yes                                                            |         |
+| swoole     | [partial](https://github.com/crazywhalecc/static-php-cli/issues/51) | yes                                                            |         |
+| tokenizer  | yes                                                                 | yes                                                            |         |
+| xml        | yes                                                                 | yes                                                            |         |
+| xmlreader  | yes, untested                                                       | yes, untested                                                  |         |
+| xmlwriter  | yes, untested                                                       | yes, untested                                                  |         |
+| zip        | yes, untested                                                       | yes                                                            |         |
+| zlib       | yes                                                                 | yes                                                            |         |
+| zstd       | yes                                                                 | yes                                                            |         |
 
 ## Additional Requirements
 
