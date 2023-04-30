@@ -17,7 +17,6 @@ class SourcePatcher
     {
         FileSystem::addSourceExtractHook('swow', [SourcePatcher::class, 'patchSwow']);
         FileSystem::addSourceExtractHook('micro', [SourcePatcher::class, 'patchMicro']);
-        FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl3']);
         FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl11Darwin']);
     }
 
@@ -183,17 +182,6 @@ class SourcePatcher
         return true;
     }
 
-    public static function patchOpenssl3(): bool
-    {
-        if (file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && Util::getPHPVersionID() >= 80000) {
-            $openssl_c = file_get_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c');
-            $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
-            file_put_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c', $openssl_c);
-            return true;
-        }
-        return false;
-    }
-
     public static function patchOpenssl11Darwin(): bool
     {
         if (PHP_OS_FAMILY === 'Darwin' && !file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && file_exists(SOURCE_PATH . '/openssl/test/v3ext.c')) {
@@ -215,5 +203,12 @@ class SourcePatcher
             FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_STRLCAT 1$/m', '');
         }
         FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_OPENPTY 1$/m', '');
+
+        // patch openssl3 with php8.0 bug
+        if (file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && Util::getPHPVersionID() >= 80000 && Util::getPHPVersionID() < 80100) {
+            $openssl_c = file_get_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c');
+            $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
+            file_put_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c', $openssl_c);
+        }
     }
 }
