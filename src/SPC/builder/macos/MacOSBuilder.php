@@ -202,7 +202,7 @@ EOF
         // patch before configure
         SourcePatcher::patchPHPBuildconf($this);
 
-        Patcher::patchPHPConfigure($this);
+        // Patcher::patchPHPConfigure($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 

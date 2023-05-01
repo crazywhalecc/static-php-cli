@@ -270,9 +270,6 @@ EOF
                 $this->makeExtensionArgs()
             );
 
-        $extra_libs .= $this->generateExtraLibs();
-        echo $envs;
-
         SourcePatcher::patchPHPAfterConfigure($this);
 
         file_put_contents('/tmp/comment', $this->note_section);
