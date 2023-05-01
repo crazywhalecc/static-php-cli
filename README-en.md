@@ -37,6 +37,12 @@ Currently supported PHP versions for compilation are: `7.4`, `8.0`, `8.1`, `8.2`
 
 Please first select the extension you want to compile based on the extension list below.
 
+### Direct Download
+
+If you don't compile yourself, you can download pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.zhamao.xin/static-php-cli/)
+
+> self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+
 ### Supported Extensions
 
 [Supported Extension List](/ext-support.md)

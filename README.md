@@ -37,6 +37,12 @@ If you are using English, see [English README](README-en.md).
 
 请先根据下方扩展列表选择你要编译的扩展。
 
+### 自托管直接下载
+
+如果你不想自行编译，可以从本项目现有的 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.zhamao.xin/static-php-cli/)
+
+> 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+
 ### 支持的扩展情况
 
 [扩展支持列表](/ext-support.md)
