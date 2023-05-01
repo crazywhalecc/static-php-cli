@@ -1,15 +1,8 @@
-name: CI
+name: CI on x86_64 linux
 
 on:
   workflow_dispatch:
     inputs:
-      operating-system:
-        required: true
-        description: Compile target OS
-        type: choice
-        options:
-          - ubuntu-latest
-          - macos-latest
       version:
         required: true
         description: php version to compile
@@ -42,20 +35,13 @@ env:
 
 jobs:
   build:
-    name: build ${{ inputs.version }} on ${{ inputs.operating-system }}
-    runs-on: ${{ inputs.operating-system }}
+    name: build ${{ inputs.version }} on Linux x86_64
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      # Install macOS missing packages and mark os suffix
-      - if: ${{ inputs.operating-system == 'macos-latest' }}
-        run: |
-          brew install automake gzip
-          echo "SPC_BUILD_OS=macos" >> $GITHUB_ENV
-
       # Install Ubuntu missing packages and mark os suffix
-      - if: ${{ inputs.operating-system == 'ubuntu-latest' }}
-        run: |
+      - run: |
           sudo apt install musl-tools -y
           echo "SPC_BUILD_OS=linux" >> $GITHUB_ENV
 
@@ -90,7 +76,7 @@ jobs:
         run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
-      - run: CACHE_API_EXEC=yes ./bin/spc fetch --with-php=${{ inputs.version }} --all ${{ env.SPC_BUILD_DEBUG }}
+      - run: CACHE_API_EXEC=yes ./bin/spc download --with-php=${{ inputs.version }} --all ${{ env.SPC_BUILD_DEBUG }}
 
       # Run build command
       - run: ./bin/spc build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}

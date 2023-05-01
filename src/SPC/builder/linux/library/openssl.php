@@ -34,7 +34,7 @@ class openssl extends LinuxLibraryBase
      */
     public function build()
     {
-        [$lib,$include,$destdir] = SEPARATED_PATH;
+        [$lib, $include, $destdir] = SEPARATED_PATH;
 
         $extra = '';
         $ex_lib = '-ldl -pthread';
@@ -73,5 +73,6 @@ class openssl extends LinuxLibraryBase
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
             ->exec("make install_sw DESTDIR={$destdir}");
+        $this->patchPkgconfPrefix(['libssl.pc', 'openssl.pc', 'libcrypto.pc']);
     }
 }

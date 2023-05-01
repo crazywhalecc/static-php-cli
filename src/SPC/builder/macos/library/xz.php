@@ -22,30 +22,7 @@ namespace SPC\builder\macos\library;
 
 class xz extends MacOSLibraryBase
 {
+    use \SPC\builder\unix\library\xz;
+
     public const NAME = 'xz';
-
-    protected function build()
-    {
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)
-            ->exec('autoreconf -i --force')
-            ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                '--enable-static ' .
-                '--disable-shared ' .
-                "--host={$this->builder->gnu_arch}-apple-darwin " .
-                '--disable-xz ' .
-                '--disable-xzdec ' .
-                '--disable-lzmadec ' .
-                '--disable-lzmainfo ' .
-                '--disable-scripts ' .
-                '--disable-doc ' .
-                '--with-libiconv ' .
-                '--prefix='
-            )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
-    }
 }

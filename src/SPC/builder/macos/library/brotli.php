@@ -20,59 +20,9 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\exception\RuntimeException;
-
 class brotli extends MacOSLibraryBase
 {
+    use \SPC\builder\unix\library\brotli;
+
     public const NAME = 'brotli';
-
-    /**
-     * @throws RuntimeException
-     */
-    public function build()
-    {
-        [$lib, $include, $destdir] = SEPARATED_PATH;
-        shell()
-            ->cd($this->source_dir)
-            ->exec(
-                <<<'EOF'
-        if [[ -d build-dir ]]
-        then
-            rm -rf build-dir
-        fi
-        mkdir -p build-dir
-
-EOF
-            );
-        // 使用 cmake 编译
-        shell()->cd($this->source_dir . '/build-dir')
-            ->exec(
-                <<<EOF
-                {$this->builder->configure_env}
-                cmake .. \\
-                -DCMAKE_BUILD_TYPE=Release \\
-                -DCMAKE_INSTALL_PREFIX={$destdir} \\
-                -DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file}  \\
-                -DCMAKE_INSTALL_LIBDIR={$destdir}/lib \\
-                -DCMAKE_INSTALL_INCLUDEDIR={$destdir}/include \\
-                -DBROTLI_DISABLE_TESTS=OFF \\
-                -DBROTLI_BUNDLED_MODE=OFF \\
-                -DBROTLI_EMSCRIPTEN=OFF
-                
-                cmake --build . --config Release --target install 
-
-EOF
-            )
-            ->exec(
-                <<<EOF
-            cp  -f {$destdir}/lib/libbrotlicommon-static.a {$destdir}/lib/libbrotli.a
-            mv     {$destdir}/lib/libbrotlicommon-static.a {$destdir}/lib/libbrotlicommon.a
-            mv     {$destdir}/lib/libbrotlienc-static.a    {$destdir}/lib/libbrotlienc.a
-            mv     {$destdir}/lib/libbrotlidec-static.a    {$destdir}/lib/libbrotlidec.a
-            rm -rf {$destdir}/lib/*.so.*
-            rm -rf {$destdir}/lib/*.so
-            rm -rf {$destdir}/lib/*.dylib
-EOF
-            );
-    }
 }

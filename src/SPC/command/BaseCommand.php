@@ -6,6 +6,8 @@ namespace SPC\command;
 
 use Psr\Log\LogLevel;
 use SPC\ConsoleApplication;
+use SPC\exception\ExceptionHandler;
+use SPC\exception\WrongUsageException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -84,10 +86,21 @@ abstract class BaseCommand extends Command
         if ($this->shouldExecute()) {
             try {
                 return $this->handle();
-            } catch (\Throwable $e) {
+            } catch (WrongUsageException $e) {
                 $msg = explode("\n", $e->getMessage());
                 foreach ($msg as $v) {
                     logger()->error($v);
+                }
+                return self::FAILURE;
+            } catch (\Throwable $e) {
+                // 不开 debug 模式就不要再显示复杂的调试栈信息了
+                if ($this->getOption('debug')) {
+                    ExceptionHandler::getInstance()->handle($e);
+                } else {
+                    $msg = explode("\n", $e->getMessage());
+                    foreach ($msg as $v) {
+                        logger()->error($v);
+                    }
                 }
                 return self::FAILURE;
             }

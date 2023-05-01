@@ -116,8 +116,12 @@ class CheckListHandler
 
     private function emitFix(CheckResult $result)
     {
+        pcntl_signal(SIGINT, function () {
+            $this->output->writeln('<error>You cancelled fix</error>');
+        });
         $fix = $this->fix_map[$result->getFixItem()];
         $fix_result = call_user_func($fix, ...$result->getFixParams());
+        pcntl_signal(SIGINT, SIG_IGN);
         if ($fix_result) {
             $this->output->writeln('<info>Fix done</info>');
         } else {

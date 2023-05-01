@@ -19,7 +19,7 @@ class ConfigValidator
         foreach ($data as $name => $src) {
             isset($src['type']) || throw new ValidationException("source {$name} must have prop: [type]");
             is_string($src['type']) || throw new ValidationException("source {$name} type prop must be string");
-            in_array($src['type'], ['filelist', 'git', 'ghtagtar', 'ghtar', 'ghrel', 'url']) || throw new ValidationException("source {$name} type [{$src['type']}] is invalid");
+            in_array($src['type'], ['filelist', 'git', 'ghtagtar', 'ghtar', 'ghrel', 'url', 'custom']) || throw new ValidationException("source {$name} type [{$src['type']}] is invalid");
             switch ($src['type']) {
                 case 'filelist':
                     isset($src['url'], $src['regex']) || throw new ValidationException("source {$name} needs [url] and [regex] props");

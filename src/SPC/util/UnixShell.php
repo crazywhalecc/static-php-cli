@@ -13,6 +13,8 @@ class UnixShell
 
     private bool $debug;
 
+    private array $env = [];
+
     public function __construct(?bool $debug = null)
     {
         $this->debug = $debug ?? defined('DEBUG_MODE');
@@ -56,5 +58,25 @@ class UnixShell
         }
         exec($cmd, $out, $code);
         return [$code, $out];
+    }
+
+    public function setEnv(array $env): UnixShell
+    {
+        $this->env = array_merge($this->env, $env);
+        return $this;
+    }
+
+    public function execWithEnv(string $cmd): UnixShell
+    {
+        return $this->exec($this->getEnvString() . ' ' . $cmd);
+    }
+
+    private function getEnvString(): string
+    {
+        $str = '';
+        foreach ($this->env as $k => $v) {
+            $str .= ' ' . $k . '="' . $v . '"';
+        }
+        return trim($str);
     }
 }

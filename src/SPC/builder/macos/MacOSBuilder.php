@@ -11,6 +11,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
+use SPC\store\SourcePatcher;
 use SPC\util\Patcher;
 
 /**
@@ -64,7 +65,7 @@ class MacOSBuilder extends BuilderBase
         export CXX={$this->cxx}
         export LD={$this->ld}
         export PATH={$build_root_path}/bin/:\$PATH
-        {$this->pkgconf_env}
+        {$this->pkgconf_env} 
 EOF;
         $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
 
@@ -92,7 +93,7 @@ EOF;
             $prefix = $arr[1] ?? null;
             if ($lib instanceof MacOSLibraryBase) {
                 logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
-                $ret .= $lib->makeAutoconfEnv($prefix) . ' ';
+                $ret .= '--with-' . $libName . '=yes ';
             } else {
                 logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
                 $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
@@ -199,9 +200,13 @@ EOF;
 EOF
             );
         // patch before configure
-        Patcher::patchPHPBeforeConfigure($this);
+        SourcePatcher::patchPHPBuildconf($this);
 
         Patcher::patchPHPConfigure($this);
+
+        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
+
+        SourcePatcher::patchPHPConfigure($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -213,7 +218,7 @@ EOF
                 '--with-valgrind=no ' .     // 不检测内存泄漏
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
-                "--host={$this->gnu_arch}-apple-darwin " .
+                "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -224,6 +229,8 @@ EOF
                 $this->makeExtensionArgs() . ' ' .
                 $this->configure_env
             );
+
+        SourcePatcher::patchPHPAfterConfigure($this);
 
         $this->cleanMake();
 
@@ -245,7 +252,7 @@ EOF
         }
 
         if ($this->phar_patched) {
-            f_passthru('cd ' . SOURCE_PATH . '/php-src && patch -p1 -R < sapi/micro/patches/phar.patch');
+            SourcePatcher::patchMicro(['phar'], true);
         }
     }
 
@@ -276,13 +283,7 @@ EOF
         }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
-            try {
-                // TODO: 未来改进一下 patch，让除了这种 patch 类型的文件以外可以恢复原文件
-                shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 < sapi/micro/patches/phar.patch');
-            } catch (RuntimeException $e) {
-                logger()->error('failed to patch phat due to patch exit with code ' . $e->getCode());
-                $this->phar_patched = false;
-            }
+            SourcePatcher::patchMicro(['phar']);
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')

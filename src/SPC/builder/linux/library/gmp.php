@@ -9,20 +9,7 @@ namespace SPC\builder\linux\library;
  */
 class gmp extends LinuxLibraryBase
 {
+    use \SPC\builder\unix\library\gmp;
+
     public const NAME = 'gmp';
-
-    protected function build()
-    {
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)
-            ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                '--enable-static --disable-shared ' .
-                '--prefix='
-            )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
-    }
 }

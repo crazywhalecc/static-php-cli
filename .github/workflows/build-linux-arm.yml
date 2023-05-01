@@ -1,0 +1,105 @@
+name: CI on arm linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      operating-system:
+        required: true
+        description: Compile target arch (Linux only)
+        type: choice
+        options:
+          - aarch64
+      version:
+        required: true
+        description: php version to compile
+        default: '8.2'
+        type: choice
+        options:
+          - '8.2'
+          - '8.1'
+          - '8.0'
+          - '7.4'
+      build-cli:
+        description: build cli binary
+        default: true
+        type: boolean
+      build-micro:
+        description: build phpmicro binary
+        type: boolean
+      build-fpm:
+        description: build fpm binary
+        type: boolean
+      extensions:
+        description: extensions to compile (comma separated)
+        required: true
+        type: string
+      debug:
+        type: boolean
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: build ${{ inputs.version }} on ${{ inputs.operating-system }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v3
+        with:
+          path: downloads
+          key: php-${{ inputs.version }}-dependencies
+
+      # With or without debug
+      - if: inputs.debug == true
+        run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
+
+      # With target select: cli, micro or both
+      - if: ${{ inputs.build-cli == true }}
+        run: echo "SPC_BUILD_CLI=--build-cli" >> $GITHUB_ENV
+      - if: ${{ inputs.build-micro == true }}
+        run: echo "SPC_BUILD_MICRO=--build-micro" >> $GITHUB_ENV
+      - if: ${{ inputs.build-fpm == true }}
+        run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
+
+      # If there's no dependencies cache, fetch sources, with or without debug
+      - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker download --with-php=${{ inputs.version }} --all ${{ env.SPC_BUILD_DEBUG }}
+
+      # Run build command
+      - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+
+      # Upload cli executable
+      - if: ${{ inputs.build-cli == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: php-${{ inputs.version }}-linux-${{ inputs.operating-system }}
+          path: buildroot/bin/php
+
+      # Upload micro self-extracted executable
+      - if: ${{ inputs.build-micro == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro-${{ inputs.version }}-linux-${{ inputs.operating-system }}
+          path: buildroot/bin/micro.sfx
+
+      # Upload fpm executable
+      - if: ${{ inputs.build-fpm == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: php-fpm-${{ inputs.version }}-linux-${{ inputs.operating-system }}
+          path: buildroot/bin/php-fpm
+
+      # Upload extensions metadata
+      - uses: actions/upload-artifact@v3
+        with:
+          name: license-files
+          path: buildroot/license/
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-meta
+          path: |
+            buildroot/build-extensions.json
+            buildroot/build-libraries.json

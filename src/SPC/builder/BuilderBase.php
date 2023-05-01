@@ -6,6 +6,7 @@ namespace SPC\builder;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
@@ -40,8 +41,9 @@ abstract class BuilderBase
     /**
      * 构建指定列表的 libs
      *
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function buildLibs(array $libraries): void
     {
@@ -82,14 +84,14 @@ abstract class BuilderBase
             $this->addLib($lib);
         }
 
-        // 统计还没 fetch 到本地的库
-        $this->checkLibsSource();
-
         // 计算依赖，经过这里的遍历，如果没有抛出异常，说明依赖符合要求，可以继续下面的
         foreach ($this->libs as $lib) {
             $lib->calcDependency();
         }
 
+        $this->initSource(libs: $libraries);
+
+        // 构建库
         foreach ($this->libs as $lib) {
             // $lib->build(true);
             match ($lib->tryBuild()) {
@@ -158,6 +160,11 @@ abstract class BuilderBase
     public function proveExts(array $extensions): void
     {
         CustomExt::loadCustomExt();
+        $this->initSource(sources: ['php-src']);
+        if ($this->getPHPVersionID() >= 80000) {
+            $this->initSource(sources: ['micro']);
+        }
+        $this->initSource(exts: $extensions);
         foreach ($extensions as $extension) {
             $class = CustomExt::getExtClass($extension);
             $ext = new $class($extension, $this);
@@ -252,6 +259,62 @@ abstract class BuilderBase
                     $not_downloaded
                 ) === 1 ? 'it' : 'them') . ' first?'
             );
+        }
+    }
+
+    protected function initSource(?array $sources = null, ?array $libs = null, ?array $exts = null): void
+    {
+        if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+            throw new WrongUsageException(
+                'Download lock file "downloads/.lock.json" not found, maybe you need to download sources first ?'
+            );
+        }
+        $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true);
+
+        $sources_extracted = [];
+        // source check exist
+        if (is_array($sources)) {
+            foreach ($sources as $source) {
+                $sources_extracted[$source] = true;
+            }
+        }
+        // lib check source exist
+        if (is_array($libs)) {
+            foreach ($libs as $lib) {
+                // get source name for lib
+                $source = Config::getLib($lib, 'source');
+                $sources_extracted[$source] = true;
+            }
+        }
+        // ext check source exist
+        if (is_array($exts)) {
+            foreach ($exts as $ext) {
+                // get source name for ext
+                if (Config::getExt($ext, 'type') !== 'external') {
+                    continue;
+                }
+                $source = Config::getExt($ext, 'source');
+                $sources_extracted[$source] = true;
+            }
+        }
+
+        // start check
+        foreach ($sources_extracted as $source => $item) {
+            if (!isset($lock[$source])) {
+                throw new WrongUsageException(
+                    'Source [' . $source . '] not downloaded, you should download it first !'
+                );
+            }
+
+            // check source dir exist
+            $check = $lock[$source]['move_path'] === null ? SOURCE_PATH . '/' . $source : SOURCE_PATH . '/' . $lock[$source]['move_path'];
+            if (!is_dir($check)) {
+                FileSystem::extractSource(
+                    $source,
+                    DOWNLOAD_PATH . '/' . ($lock[$source]['filename'] ?? $lock[$source]['dirname']),
+                    $lock[$source]['move_path']
+                );
+            }
         }
     }
 }

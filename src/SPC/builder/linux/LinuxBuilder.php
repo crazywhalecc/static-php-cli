@@ -12,7 +12,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
-use SPC\util\Patcher;
+use SPC\store\SourcePatcher;
 
 /**
  * Linux 系统环境下的构建器
@@ -64,7 +64,11 @@ class LinuxBuilder extends BuilderBase
         // 编译器 选择 参考 https://github.com/crazywhalecc/static-php-cli/issues/50#issuecomment-1522809787
         // 初始化一些默认参数
 
-        $this->cc = $cc ?? 'musl-gcc';
+        $this->cc = $cc ?? match (SystemUtil::getOSRelease()['dist']) {
+            'alpine' => 'gcc',
+            default => 'musl-gcc'
+        };
+
         $this->cxx = $cxx ?? 'g++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
@@ -104,6 +108,7 @@ class LinuxBuilder extends BuilderBase
         export LD={$this->ld}
         export PATH={$build_root_path}/bin/:\$PATH
         {$this->pkgconf_env}
+        
 EOF;
         $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
 
@@ -170,6 +175,9 @@ EOF;
                 )
             );
         }
+        if ($this->getExt('swoole')) {
+            $extra_libs .= ' -lstdc++';
+        }
 
         $envs = '';
         $cflags = $this->arch_c_flags;
@@ -212,6 +220,8 @@ EOF;
         # $envs .= ' LIBS="-lc++  -libc++  -lm -lrt -lpthread -lcrypt -lutil -lxnet -lresolv " ' . PHP_EOL;
         // for libc -lm -lrt -lpthread -lcrypt -lutil -lxnet -lresolv
 
+        SourcePatcher::patchPHPBuildconf($this);
+
         if (!empty($pkg_libs)) {
             $envs .= ' LIBS="$LIBS ' . implode(' ', $pkg_libs) . '"' . PHP_EOL;
         }
@@ -227,9 +237,8 @@ EOF;
             $envs .= " export CFLAGS=\"{$cflags}\" " . PHP_EOL;
         }
 
-        # Patcher::patchPHPBeforeConfigure($this);
+        SourcePatcher::patchPHPConfigure($this);   // 处理静态库链接参数
 
-        # Patcher::patchPHPConfigure($this);
         $envs .= 'export EXTRA_LDFLAGS_PROGRAM="$LDFLAGS -all-static"';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -251,7 +260,6 @@ EOF
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
-                "--host={$this->gnu_arch}-unknown-linux " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -264,6 +272,8 @@ EOF
 
         $extra_libs .= $this->generateExtraLibs();
         echo $envs;
+
+        SourcePatcher::patchPHPAfterConfigure($this);
 
         file_put_contents('/tmp/comment', $this->note_section);
 
@@ -293,7 +303,7 @@ EOF
         }
 
         if ($this->phar_patched) {
-            shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 -R < sapi/micro/patches/phar.patch');
+            SourcePatcher::patchMicro(['phar'], true);
         }
     }
 
@@ -333,12 +343,7 @@ EOF
         }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
-            try {
-                shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 < sapi/micro/patches/phar.patch');
-            } catch (RuntimeException $e) {
-                logger()->error('failed to patch phat due to patch exit with code ' . $e->getCode());
-                $this->phar_patched = false;
-            }
+            SourcePatcher::patchMicro(['phar']);
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')
@@ -361,7 +366,9 @@ EOF
     }
 
     /**
-     * @throws RuntimeException
+     * 构建 fpm
+     *
+     * @throws FileSystemException|RuntimeException
      */
     public function buildFpm(string $extra_libs, string $use_lld, string $envs = ''): void
     {
@@ -381,41 +388,5 @@ EOF
             ->exec("{$this->cross_compile_prefix}strip --strip-all php-fpm")
             ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php-fpm.debug --remove-section=.note php-fpm");
         $this->deployBinary(BUILD_TARGET_FPM);
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    private function generateExtraLibs(): string
-    {
-        if ($this->libc === 'glibc') {
-            $glibc_libs = [
-                'rt',
-                'm',
-                'c',
-                'pthread',
-                'dl',
-                'nsl',
-                'anl',
-                // 'crypt',
-                'resolv',
-                'util',
-            ];
-            $makefile = file_get_contents(SOURCE_PATH . '/php-src/Makefile');
-            preg_match('/^EXTRA_LIBS\s*=\s*(.*)$/m', $makefile, $matches);
-            if (!$matches) {
-                throw new RuntimeException('failed to find EXTRA_LIBS in Makefile');
-            }
-            $_extra_libs = [];
-            foreach (array_filter(explode(' ', $matches[1])) as $used) {
-                foreach ($glibc_libs as $libName) {
-                    if ("-l{$libName}" === $used && !in_array("-l{$libName}", $_extra_libs, true)) {
-                        array_unshift($_extra_libs, "-l{$libName}");
-                    }
-                }
-            }
-            return ' ' . implode(' ', $_extra_libs);
-        }
-        return '';
     }
 }

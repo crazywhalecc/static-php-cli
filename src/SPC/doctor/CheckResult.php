@@ -39,4 +39,10 @@ class CheckResult
     {
         return empty($this->message);
     }
+
+    public function setFixItem(string $fix_item = '', array $fix_params = [])
+    {
+        $this->fix_item = $fix_item;
+        $this->fix_params = $fix_params;
+    }
 }

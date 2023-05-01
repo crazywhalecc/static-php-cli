@@ -9,9 +9,10 @@ This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicr
 
 > This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
 
-[![Version](https://img.shields.io/badge/Version-2.0--beta1-green.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--beta3-orange.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
-[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build.yml?branch=refactor&label=Actions%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 ## Compilation Requirements
@@ -22,19 +23,25 @@ But static-php-cli runtime only requires an environment above PHP 8.0 and `token
 Here is the architecture support status, where `CI` represents support for GitHub Action builds, 
 `Local` represents support for local builds, and blank represents not currently supported.
 
-|         | x86_64    | aarch64 |
-|---------|-----------|---------|
-| macOS   | CI, Local | Local   |
-| Linux   | CI, Local | Local   |
-| Windows |           |         |
+|         | x86_64    | aarch64   | armv7l    |
+|---------|-----------|-----------|-----------|
+| macOS   | CI, Local | Local     |           |
+| Linux   | CI, Local | CI, Local | CI, Local |
+| Windows |           |           |           |
 
-> linux-aarch64 and macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
+> macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
 Currently supported PHP versions for compilation are: `7.4`, `8.0`, `8.1`, `8.2`.
 
 ## Usage
 
 Please first select the extension you want to compile based on the extension list below.
+
+### Direct Download
+
+If you don't compile yourself, you can download pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.zhamao.xin/static-php-cli/)
+
+> self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
 
 ### Supported Extensions
 

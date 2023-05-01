@@ -42,7 +42,7 @@ class nghttp2 extends MacOSLibraryBase
             'cunit' => null,
         ]);
 
-        [,,$destdir] = SEPARATED_PATH;
+        [, , $destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
             ->exec(
@@ -58,5 +58,6 @@ class nghttp2 extends MacOSLibraryBase
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec("make install DESTDIR={$destdir}");
+        $this->patchPkgconfPrefix(['libnghttp2.pc']);
     }
 }

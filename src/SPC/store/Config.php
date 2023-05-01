@@ -125,4 +125,12 @@ class Config
         }
         return self::$ext;
     }
+
+    public static function getSources(): array
+    {
+        if (self::$source === null) {
+            self::$source = FileSystem::loadConfigArray('source');
+        }
+        return self::$source;
+    }
 }

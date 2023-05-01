@@ -2,4 +2,4 @@
 
 declare(strict_types=1);
 
-exit(function_exists('gzcompress') ? 0 : 1);
+assert(function_exists('gzcompress'));

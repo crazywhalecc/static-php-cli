@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\traits;
 
+use SPC\builder\linux\LinuxBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -128,5 +129,19 @@ trait UnixBuilderTrait
     {
         logger()->info('cleaning up');
         shell()->cd(SOURCE_PATH . '/php-src')->exec('make clean');
+    }
+
+    /**
+     * Return generic cmake options when configuring cmake projects
+     */
+    public function makeCmakeArgs(): string
+    {
+        [$lib, $include] = SEPARATED_PATH;
+        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . $this->cc . ' ' : '';
+        return $extra . '-DCMAKE_BUILD_TYPE=Release ' .
+            '-DCMAKE_INSTALL_PREFIX=/ ' .
+            "-DCMAKE_INSTALL_LIBDIR={$lib} " .
+            "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
+            "-DCMAKE_TOOLCHAIN_FILE={$this->cmake_toolchain_file}";
     }
 }

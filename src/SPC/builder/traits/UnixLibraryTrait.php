@@ -51,4 +51,30 @@ trait UnixLibraryTrait
         return $prefix . '_CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ' .
             $prefix . '_LIBS="' . $this->getStaticLibFiles() . '"';
     }
+
+    /**
+     * Patch pkgconfig file prefix
+     *
+     * @param  array               $files file list
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    public function patchPkgconfPrefix(array $files, int $patch_option = PKGCONF_PATCH_ALL): void
+    {
+        logger()->info('Patching library [' . static::NAME . '] pkgconfig');
+        foreach ($files as $name) {
+            $realpath = realpath(BUILD_ROOT_PATH . '/lib/pkgconfig/' . $name);
+            if ($realpath === false) {
+                throw new RuntimeException('Cannot find library [' . static::NAME . '] pkgconfig file [' . $name . '] !');
+            }
+            logger()->debug('Patching ' . $realpath);
+            // replace prefix
+            $file = FileSystem::readFile($realpath);
+            $file = ($patch_option & PKGCONF_PATCH_PREFIX) === PKGCONF_PATCH_PREFIX ? preg_replace('/^prefix=.*$/m', 'prefix=' . BUILD_ROOT_PATH, $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_EXEC_PREFIX) === PKGCONF_PATCH_EXEC_PREFIX ? preg_replace('/^exec_prefix=.*$/m', 'exec_prefix=${prefix}', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_LIBDIR) === PKGCONF_PATCH_LIBDIR ? preg_replace('/^libdir=.*$/m', 'libdir=${prefix}/lib', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_INCLUDEDIR) === PKGCONF_PATCH_INCLUDEDIR ? preg_replace('/^includedir=.*$/m', 'includedir=${prefix}/include', $file) : $file;
+            FileSystem::writeFile($realpath, $file);
+        }
+    }
 }

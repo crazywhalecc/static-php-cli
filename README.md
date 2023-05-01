@@ -10,9 +10,10 @@ If you are using English, see [English README](README-en.md).
 
 > 此分支为重构的新版，如果你在找纯 Bash 编写的旧版本，请到 [bash-version 分支](https://github.com/crazywhalecc/static-php-cli/tree/bash-version)。
 
-[![Version](https://img.shields.io/badge/Version-2.0--beta1-green.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--beta3-orange.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
-[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build.yml?branch=refactor&label=Actions%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 ## 编译环境需求
@@ -22,19 +23,25 @@ If you are using English, see [English README](README-en.md).
 
 下面是架构支持情况，`CI` 代表支持 GitHub Action 构建，`Local` 代表支持本地构建，空 代表暂不支持。
 
-|         | x86_64    | aarch64 |
-|---------|-----------|---------|
-| macOS   | CI, Local | Local   |
-| Linux   | CI, Local | Local   |
-| Windows |           |         |
+|         | x86_64    | aarch64   |
+|---------|-----------|-----------|
+| macOS   | CI, Local | Local     |
+| Linux   | CI, Local | CI, Local |
+| Windows |           |           |
 
-> linux-aarch64 and macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
+> macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
 
 目前支持编译的 PHP 版本为：`7.4`，`8.0`，`8.1`，`8.2`。
 
 ## 使用
 
 请先根据下方扩展列表选择你要编译的扩展。
+
+### 自托管直接下载
+
+如果你不想自行编译，可以从本项目现有的 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.zhamao.xin/static-php-cli/)
+
+> 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
 
 ### 支持的扩展情况
 

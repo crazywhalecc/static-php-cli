@@ -51,4 +51,16 @@ const FIX_POLICY_DIE = 1;       // die directly
 const FIX_POLICY_PROMPT = 2;    // if it can be fixed, ask fix or not
 const FIX_POLICY_AUTOFIX = 3;   // if it can be fixed, just fix automatically
 
+// pkgconf patch policy
+const PKGCONF_PATCH_PREFIX = 1;
+const PKGCONF_PATCH_EXEC_PREFIX = 2;
+const PKGCONF_PATCH_LIBDIR = 4;
+const PKGCONF_PATCH_INCLUDEDIR = 8;
+const PKGCONF_PATCH_ALL = 15;
+
+// Custom download type
+const DOWNLOAD_TYPE_NONE = 0;
+const DOWNLOAD_TYPE_ARCHIVE = 1;
+const DOWNLOAD_TYPE_DIR = 2;
+
 ConsoleLogger::$date_format = 'H:i:s';

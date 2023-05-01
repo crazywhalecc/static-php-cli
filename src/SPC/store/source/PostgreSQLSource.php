@@ -12,7 +12,7 @@ class PostgreSQLSource extends CustomSourceBase
 
     public function fetch()
     {
-        Downloader::fetchSource('postgresql', self::getLatestInfo());
+        Downloader::downloadSource('postgresql', self::getLatestInfo());
     }
 
     public function getLatestInfo(): array
