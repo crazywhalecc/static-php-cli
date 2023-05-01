@@ -442,7 +442,7 @@ class FileSystem
     private static function emitSourceExtractHook(string $name)
     {
         foreach ((self::$_extract_hook[$name] ?? []) as $hook) {
-            if ($hook($name) === true) {
+            if ($hook() === true) {
                 logger()->info('Patched source [' . $name . '] after extracted');
             }
         }

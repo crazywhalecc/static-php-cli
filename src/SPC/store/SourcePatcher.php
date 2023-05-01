@@ -117,7 +117,7 @@ class SourcePatcher
         );
     }
 
-    public static function patchMicro(): bool
+    public static function patchMicro(?array $list = null, bool $reverse = false): bool
     {
         if (!file_exists(SOURCE_PATH . '/php-src/sapi/micro/php_micro.c')) {
             return false;
@@ -137,7 +137,7 @@ class SourcePatcher
         $check = !defined('DEBUG_MODE') ? ' -q' : '';
         // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
 
-        $patch_list = [
+        $default = [
             'static_opcache',
             'static_extensions_win32',
             'cli_checks',
@@ -146,15 +146,13 @@ class SourcePatcher
             'win32',
             'zend_stream',
         ];
-        $patch_list = array_merge($patch_list, match (PHP_OS_FAMILY) {
-            'Windows' => [
-                'cli_static',
-            ],
-            'Darwin' => [
-                'macos_iconv',
-            ],
-            default => [],
-        });
+        if (PHP_OS_FAMILY === 'Windows') {
+            $default[] = 'cli_static';
+        }
+        if (PHP_OS_FAMILY === 'Darwin') {
+            $default[] = 'macos_iconv';
+        }
+        $patch_list = $list ?? $default;
         $patches = [];
         $serial = ['80', '81', '82'];
         foreach ($patch_list as $patchName) {
@@ -177,8 +175,9 @@ class SourcePatcher
 
         f_passthru(
             'cd ' . SOURCE_PATH . '/php-src && ' .
-            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1'
+            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1 ' . ($reverse ? '-R' : '')
         );
+
         return true;
     }
 

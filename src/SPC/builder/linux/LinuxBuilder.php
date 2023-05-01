@@ -218,7 +218,7 @@ class LinuxBuilder extends BuilderBase
         }
 
         if ($this->phar_patched) {
-            shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 -R < sapi/micro/patches/phar.patch');
+            SourcePatcher::patchMicro(['phar'], true);
         }
     }
 
@@ -255,12 +255,7 @@ class LinuxBuilder extends BuilderBase
         }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
-            try {
-                shell()->cd(SOURCE_PATH . '/php-src')->exec('patch -p1 < sapi/micro/patches/phar.patch');
-            } catch (RuntimeException $e) {
-                logger()->error('failed to patch phat due to patch exit with code ' . $e->getCode());
-                $this->phar_patched = false;
-            }
+            SourcePatcher::patchMicro(['phar']);
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')

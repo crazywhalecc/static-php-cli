@@ -221,7 +221,7 @@
         "type": "git",
         "path": "php-src/sapi/micro",
         "rev": "master",
-        "url": "https://github.com/dixyes/phpmicro",
+        "url": "https://github.com/crazywhalecc/phpmicro",
         "license": {
             "type": "file",
             "path": "LICENSE"
