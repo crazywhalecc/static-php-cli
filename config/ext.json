@@ -35,6 +35,10 @@
             "zlib"
         ]
     },
+    "apcu": {
+        "type": "external",
+        "source": "apcu"
+    },
     "event": {
         "type": "external",
         "source": "ext-event",

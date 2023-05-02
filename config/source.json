@@ -209,6 +209,16 @@
             "path": "LICENSE"
         }
     },
+    "apcu": {
+        "type": "url",
+        "url": "http://pecl.php.net/get/APCu",
+        "path": "php-src/ext/apcu",
+        "filename": "apcu.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "mcrypt": {
         "type": "url",
         "url": "https://jaist.dl.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
