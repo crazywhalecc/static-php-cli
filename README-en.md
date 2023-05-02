@@ -2,11 +2,11 @@
 
 Compile A Statically Linked PHP With Swoole and other Extensions.
 
-Compile a purely static PHP binary file with various extensions to make PHP-cli applications more portable! (cli SAPI)
+Compile a purely static php-cli binary file with various extensions to make PHP applications more portable! (cli SAPI)
 
 <img width="600" alt="截屏2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
 
-You can also use the micro binary file to package PHP source code and binary files into one for distribution!
+You can also use the micro binary file to combine php binary and php source code into one for distribution!
 This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). (micro SAPI)
 
 <img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
