@@ -17,6 +17,8 @@ This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+
+[![](https://img.shields.io/badge/Extension%20Counter-45+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 ## Compilation Requirements
