@@ -204,7 +204,7 @@ class SourcePatcher
         FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_OPENPTY 1$/m', '');
 
         // patch openssl3 with php8.0 bug
-        if (file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && Util::getPHPVersionID() >= 80000 && Util::getPHPVersionID() < 80100) {
+        if (file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && Util::getPHPVersionID() < 80100) {
             $openssl_c = file_get_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c');
             $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
             file_put_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c', $openssl_c);
