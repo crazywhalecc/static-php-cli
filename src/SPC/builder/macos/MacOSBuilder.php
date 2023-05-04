@@ -145,6 +145,12 @@ class MacOSBuilder extends BuilderBase
         if ($this->getLib('libxml2') || $this->getExt('iconv')) {
             $extra_libs .= ' -liconv';
         }
+        
+        if ($this->getPHPVersionID() < 80000) {
+            $json_74 = '--enable-json ';
+        } else {
+            $json_74 = '';
+        }
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -159,6 +165,7 @@ class MacOSBuilder extends BuilderBase
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 '--enable-fpm ' .
+                $json_74 .
                 '--enable-micro ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs() . ' ' .
