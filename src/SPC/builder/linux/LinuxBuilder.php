@@ -169,6 +169,12 @@ class LinuxBuilder extends BuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
         SourcePatcher::patchPHPConfigure($this);
+        
+        if ($this->getPHPVersionID() < 80000) {
+            $json_74 = '--enable-json ';
+        } else {
+            $json_74 = '';
+        }
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -182,6 +188,7 @@ class LinuxBuilder extends BuilderBase
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 '--enable-fpm ' .
+                $json_74 .
                 '--enable-micro=all-static ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs() . ' ' .
