@@ -66,7 +66,8 @@ jobs:
         run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
-      - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker download --with-php=${{ inputs.version }} --all ${{ env.SPC_BUILD_DEBUG }}
+      - if: steps.cache-download.outputs.cache-hit != 'true'
+        run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker download --with-php=${{ inputs.version }} --all ${{ env.SPC_BUILD_DEBUG }}
 
       # Run build command
       - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
