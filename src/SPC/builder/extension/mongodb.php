@@ -12,6 +12,19 @@ class mongodb extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        return '--enable-mongodb --without-mongodb-sasl';
+        $arg = '--enable-mongodb --without-mongodb-sasl';
+        if ($this->builder->getLib('openssl')) {
+            $arg .= '--with-mongodb-system-libs=no --with-mongodb-ssl=openssl';
+        } else {
+            // 禁用，否则链接的是系统库
+            $arg .= '';
+        }
+        if ($this->builder->getLib('icu')) {
+            $arg .= '--with-mongodb-system-libs=no --with-mongodb-ssl=openssl';
+        } else {
+            // 禁用，否则链接的是系统库
+            $arg .= '';
+        }
+        return $arg;
     }
 }

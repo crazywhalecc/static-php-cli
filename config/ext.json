@@ -157,7 +157,11 @@
     "mongodb": {
         "type": "external",
         "source": "mongodb",
-        "arg-type": "custom"
+        "arg-type": "custom",
+        "lib-suggests": [
+            "icu",
+            "openssl"
+        ]
     },
     "mysqli": {
         "type": "builtin",
