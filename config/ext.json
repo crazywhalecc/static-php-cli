@@ -404,5 +404,13 @@
         "lib-depends": [
             "zstd"
         ]
+    },
+    "ssh2": {
+        "type": "external",
+        "source": "ext-ssh2",
+        "arg-type": "custom",
+        "lib-depends": [
+            "libssh2"
+        ]
     }
 }
