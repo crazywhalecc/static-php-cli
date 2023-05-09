@@ -51,6 +51,7 @@
 | soap       | yes                                                                 | yes                                                            |         |
 | sockets    | yes                                                                 | yes                                                            |         |
 | sqlite3    | yes                                                                 | yes                                                            |         |
+| ssh2       |                                                                     | yes, untested                                                  |         |
 | swow       | yes                                                                 | yes                                                            |         |
 | swoole     | [partial](https://github.com/crazywhalecc/static-php-cli/issues/51) | yes                                                            |         |
 | tokenizer  | yes                                                                 | yes                                                            |         |
