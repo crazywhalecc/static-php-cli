@@ -302,6 +302,14 @@
             "sqlite"
         ]
     },
+    "ssh2": {
+        "type": "external",
+        "source": "ext-ssh2",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libssh2"
+        ]
+    },
     "swoole": {
         "type": "external",
         "source": "swoole",

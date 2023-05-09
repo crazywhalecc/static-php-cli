@@ -61,6 +61,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-ssh2": {
+        "type": "url",
+        "url": "http://pecl.php.net/get/ssh2",
+        "path": "php-src/ext/ssh2",
+        "filename": "ssh2.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",
