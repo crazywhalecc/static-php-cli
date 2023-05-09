@@ -49,6 +49,7 @@ class MacOSBuilder extends BuilderBase
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->arch, $this->arch_c_flags);
         // 设置 configure 依赖的环境变量
         $this->configure_env =
+            'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" ' .
             'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
@@ -145,7 +146,7 @@ class MacOSBuilder extends BuilderBase
         if ($this->getLib('libxml2') || $this->getExt('iconv')) {
             $extra_libs .= ' -liconv';
         }
-        
+
         if ($this->getPHPVersionID() < 80000) {
             $json_74 = '--enable-json ';
         } else {

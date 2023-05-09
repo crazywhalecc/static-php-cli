@@ -26,6 +26,7 @@
 | gettext    |                                                                     |                                                                |         |
 | gmp        | yes                                                                 | yes                                                            |         |
 | iconv      | yes                                                                 | yes                                                            |         |
+| imagick    |                                                                     | yes                                                            |         |
 | inotify    | yes                                                                 | yes                                                            |         |
 | mbstring   | yes                                                                 | yes                                                            |         |
 | mbregex    | yes                                                                 | yes                                                            |         |
@@ -56,7 +57,7 @@
 | xml        | yes                                                                 | yes                                                            |         |
 | xmlreader  | yes, untested                                                       | yes, untested                                                  |         |
 | xmlwriter  | yes, untested                                                       | yes, untested                                                  |         |
-| zip        | yes, untested                                                       | yes                                                            |         |
+| zip        | yes, untested                                                       | yes, untested                                                  |         |
 | zlib       | yes                                                                 | yes                                                            |         |
 | zstd       | yes                                                                 | yes                                                            |         |
 

@@ -63,6 +63,9 @@ abstract class BuilderBase
         if ($libraries === [] && $this->isLibsOnly()) {
             $libraries = array_keys($support_lib_list);
         }
+        if (!in_array('pkg-config', $libraries)) {
+            array_unshift($libraries, 'pkg-config');
+        }
 
         // 排序 libs，根据依赖计算一个新的列表出来
         $libraries = DependencyUtil::getLibsByDeps($libraries);

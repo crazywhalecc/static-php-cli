@@ -66,6 +66,8 @@ function osfamily2dir(): string
 }
 
 /**
+ * 执行shell，直接输出在终端，出现错误抛出异常
+ *
  * @throws \SPC\exception\RuntimeException
  */
 function f_passthru(string $cmd): ?bool
@@ -89,7 +91,13 @@ function f_passthru(string $cmd): ?bool
     return $ret;
 }
 
-function f_exec(string $command, &$output, &$result_code)
+/**
+ * 执行命令，不输出内容，返回执行结果和内容
+ *
+ * @param mixed $output
+ * @param mixed $result_code
+ */
+function f_exec(string $command, &$output, &$result_code): bool|string
 {
     logger()->debug('Running command (no output) : ' . $command);
     return exec($command, $output, $result_code);

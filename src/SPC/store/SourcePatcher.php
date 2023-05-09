@@ -6,6 +6,7 @@ namespace SPC\store;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -99,6 +100,14 @@ class SourcePatcher
             '-lz',
             BUILD_LIB_PATH . '/libz.a'
         );
+        if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
+            FileSystem::replaceFile(
+                SOURCE_PATH . '/libpng/configure',
+                REPLACE_FILE_STR,
+                '-lm',
+                '/usr/lib/libm.a'
+            );
+        }
     }
 
     public static function patchCurlMacOS(): void

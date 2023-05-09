@@ -70,7 +70,7 @@ class LinuxBuilder extends BuilderBase
             cxx: $this->cxx
         );
         // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
+        $this->pkgconf_env = 'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
         // 设置 configure 依赖的环境变量
         $this->configure_env =
             $this->pkgconf_env . ' ' .
@@ -141,6 +141,9 @@ class LinuxBuilder extends BuilderBase
         if ($this->getExt('swoole')) {
             $extra_libs .= ' -lstdc++';
         }
+        if ($this->getExt('imagick')) {
+            $extra_libs .= ' /usr/lib/libMagick++-7.Q16HDRI.a /usr/lib/libMagickCore-7.Q16HDRI.a /usr/lib/libMagickWand-7.Q16HDRI.a';
+        }
 
         $envs = $this->pkgconf_env . ' ' .
             "CC='{$this->cc}' " .
@@ -169,7 +172,7 @@ class LinuxBuilder extends BuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
         SourcePatcher::patchPHPConfigure($this);
-        
+
         if ($this->getPHPVersionID() < 80000) {
             $json_74 = '--enable-json ';
         } else {

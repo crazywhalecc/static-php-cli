@@ -61,6 +61,11 @@ abstract class LinuxLibraryBase extends LibraryBase
                 return BUILD_STATUS_OK;
             }
         }
+        // pkg-config 做特殊处理，如果是 pkg-config 就检查有没有 pkg-config 二进制
+        if (static::NAME === 'pkg-config' && !file_exists(BUILD_ROOT_PATH . '/bin/pkg-config')) {
+            $this->tryBuild(true);
+            return BUILD_STATUS_OK;
+        }
         // 到这里说明所有的文件都存在，就跳过编译
         return BUILD_STATUS_ALREADY;
     }

@@ -107,11 +107,11 @@
             "zlib",
             "libpng",
             "libjpeg",
-            "bzip2"
+            "bzip2",
+            "libwebp",
+            "freetype"
         ],
         "lib-suggests": [
-            "libwebp",
-            "freetype",
             "zstd",
             "xz",
             "libzip",
