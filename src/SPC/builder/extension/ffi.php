@@ -12,7 +12,6 @@ class ffi extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        return '--with-ffi FFI_CFLAGS=-I"' . BUILD_INCLUDE_PATH . '" ' .
-            'FFI_LIBS="' . $this->getLibFilesString() . '"';
+        return '--with-ffi --enable-zend-signals';
     }
 }

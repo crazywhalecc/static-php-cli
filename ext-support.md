@@ -19,6 +19,7 @@
 | enchant    |                                                                     |                                                                |         |
 | event      | yes                                                                 | yes                                                            |         |
 | exif       | yes                                                                 | yes                                                            |         |
+| ffi        |                                                                     | yes, [docs]()                                                  |         |
 | filter     | yes                                                                 | yes                                                            |         |
 | fileinfo   | yes                                                                 | yes                                                            |         |
 | ftp        | yes                                                                 | yes                                                            |         |

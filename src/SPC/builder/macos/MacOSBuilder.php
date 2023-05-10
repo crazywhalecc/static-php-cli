@@ -207,10 +207,11 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildCli(string $extra_libs): void
     {
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli")
-            ->exec('dsymutil -f sapi/cli/php')
-            ->exec('strip sapi/cli/php');
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli");
+        if ($this->strip) {
+            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
+        }
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
@@ -230,7 +231,7 @@ class MacOSBuilder extends BuilderBase
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" STRIP=\"dsymutil -f \" micro");
+            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" " . ($this->strip ? 'STRIP="dsymutil -f " ' : '') . 'micro');
         $this->deployBinary(BUILD_TARGET_MICRO);
     }
 
@@ -242,10 +243,11 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildFpm(string $extra_libs): void
     {
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm")
-            ->exec('dsymutil -f sapi/fpm/php-fpm')
-            ->exec('strip sapi/fpm/php-fpm');
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm");
+        if ($this->strip) {
+            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
+        }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 }
