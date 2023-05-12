@@ -454,5 +454,11 @@
             "zstd.h",
             "zstd_errors.h"
         ]
+    },
+    "libsodium": {
+        "source": "libsodium",
+        "static-libs-unix": [
+            "libsodium.a"
+        ]
     }
 }
