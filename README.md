@@ -14,7 +14,7 @@ If you are using English, see [English README](README-en.md).
 
 > 此分支为重构的新版，如果你在找纯 Bash 编写的旧版本，请到 [bash-version 分支](https://github.com/crazywhalecc/static-php-cli/tree/bash-version)。
 
-[![Version](https://img.shields.io/badge/Version-2.0--beta3-orange.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--rc1-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
