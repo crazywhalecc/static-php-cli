@@ -292,7 +292,7 @@
         "type": "builtin",
         "arg-type": "with",
         "lib-depends": [
-            "sodium"
+            "libsodium"
         ]
     },
     "sqlite3": {

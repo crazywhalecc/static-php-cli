@@ -411,5 +411,13 @@
             "type": "file",
             "path": "LICENSE"
         }
+    },
+    "libsodium": {
+        "type": "url",
+        "url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
     }
 }
