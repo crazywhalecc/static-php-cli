@@ -11,8 +11,6 @@ This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro
 
 <img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
 
-> This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
-
 [![Version](https://img.shields.io/badge/Version-2.0--rc1-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
@@ -128,6 +126,14 @@ If anything goes wrong, use `--debug` option to display full terminal output:
 ./bin/spc build openssl,pcntl,mbstring --debug --build-all
 ./bin/spc fetch --all --debug
 ```
+
+In addition, we build NTS by default. If you are going to build ZTS version, just add `--enable-zts` option.
+
+```bash
+./bin/spc build openssl,pcntl --build-all --enable-zts
+```
+
+Adding option `--no-strip` can produce binaries with debug symbols, in order to debug (using gdb). Disabling strip will increase the size of static binary.
 
 ### php-cli Usage
 

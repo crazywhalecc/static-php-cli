@@ -12,8 +12,6 @@ If you are using English, see [English README](README-en.md).
 
 <img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
 
-> 此分支为重构的新版，如果你在找纯 Bash 编写的旧版本，请到 [bash-version 分支](https://github.com/crazywhalecc/static-php-cli/tree/bash-version)。
-
 [![Version](https://img.shields.io/badge/Version-2.0--rc1-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
@@ -124,6 +122,14 @@ chmod +x bin/spc
 ./bin/spc build openssl,pcntl,mbstring --debug --build-all
 ./bin/spc fetch --all --debug
 ```
+
+此外，默认编译的 PHP 为 NTS 版本。如需编译线程安全版本（ZTS），只需添加参数 `--enable-zts` 即可。
+
+```bash
+./bin/spc build openssl,pcntl --build-all --enable-zts
+```
+
+同时，你也可以使用参数 `--no-strip` 来关闭裁剪，关闭裁剪后可以使用 gdb 等工具调试，但这样会让静态二进制体积变大。
 
 ### 使用 php-cli
 
