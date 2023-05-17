@@ -38,8 +38,6 @@ trait UnixSystemUtilTrait
             $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . self::findCommand($cxx) . ')';
         }
         $toolchain = <<<CMAKE
-SET(CMAKE_SYSTEM_NAME {$os})
-SET(CMAKE_SYSTEM_PROCESSOR {$target_arch})
 {$ccLine}
 {$cxxLine}
 SET(CMAKE_C_FLAGS "{$cflags}")
