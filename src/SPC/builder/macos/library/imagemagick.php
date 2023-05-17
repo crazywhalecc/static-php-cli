@@ -15,7 +15,7 @@ class imagemagick extends MacOSLibraryBase
 
     protected function build(): void
     {
-        $extra = '--without-jxl --without-xml --without-zstd ';
+        $extra = '--without-jxl --without-xml --without-zstd --without-x ';
         // jpeg support
         $extra .= $this->builder->getLib('libjpeg') ? '--with-jpeg ' : '';
         // png support
