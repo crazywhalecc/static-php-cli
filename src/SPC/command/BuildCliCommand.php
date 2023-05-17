@@ -26,6 +26,7 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('build-fpm', null, null, 'build fpm');
         $this->addOption('build-all', null, null, 'build cli, micro, fpm');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
+        $this->addOption('enable-zts', null, null, 'enable ZTS support');
     }
 
     public function handle(): int

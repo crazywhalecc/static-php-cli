@@ -31,7 +31,7 @@ class MacOSBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
+    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
     {
         // 如果是 Debug 模式，才使用 set -x 显示每条执行的命令
         $this->set_x = defined('DEBUG_MODE') ? 'set -x' : 'true';
@@ -40,6 +40,7 @@ class MacOSBuilder extends BuilderBase
         $this->cxx = $cxx ?? 'clang++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
+        $this->zts = $zts;
         // 根据 CPU 线程数设置编译进程数
         $this->concurrency = SystemUtil::getCpuCount();
         // 设置 cflags

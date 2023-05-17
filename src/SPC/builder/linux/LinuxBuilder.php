@@ -43,7 +43,7 @@ class LinuxBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
+    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
     {
         // 初始化一些默认参数
         $this->cc = $cc ?? match (SystemUtil::getOSRelease()['dist']) {
@@ -53,6 +53,7 @@ class LinuxBuilder extends BuilderBase
         $this->cxx = $cxx ?? 'g++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
+        $this->zts = $zts;
         $this->libc = 'musl'; // SystemUtil::selectLibc($this->cc);
 
         // 根据 CPU 线程数设置编译进程数
