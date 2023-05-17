@@ -51,6 +51,7 @@
 | simplexml  | yes                                                                 | yes                                                            |         |
 | soap       | yes                                                                 | yes                                                            |         |
 | sockets    | yes                                                                 | yes                                                            |         |
+| sodium     | yes                                                                 | yes                                                            |         |
 | sqlite3    | yes                                                                 | yes                                                            |         |
 | ssh2       |                                                                     | yes, untested                                                  |         |
 | swow       | yes                                                                 | yes                                                            |         |
