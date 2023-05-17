@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SPC\builder\macos\library;
+namespace SPC\builder\linux\library;
 
 /**
- * gmp is a template library class for unix
+ * a template library class for unix
  */
-class imagemagick extends MacOSLibraryBase
+class imagemagick extends LinuxLibraryBase
 {
     use \SPC\builder\unix\library\imagemagick;
 

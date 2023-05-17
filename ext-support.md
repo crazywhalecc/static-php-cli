@@ -27,7 +27,7 @@
 | gettext    |                                                                     |                                                                |         |
 | gmp        | yes                                                                 | yes                                                            |         |
 | iconv      | yes                                                                 | yes                                                            |         |
-| imagick    |                                                                     | yes                                                            |         |
+| imagick    | yes                                                                 | yes                                                            |         |
 | inotify    | yes                                                                 | yes                                                            |         |
 | mbstring   | yes                                                                 | yes                                                            |         |
 | mbregex    | yes                                                                 | yes                                                            |         |
