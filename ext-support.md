@@ -53,7 +53,7 @@
 | sockets    | yes                                                                 | yes                                                            |         |
 | sodium     | yes                                                                 | yes                                                            |         |
 | sqlite3    | yes                                                                 | yes                                                            |         |
-| ssh2       |                                                                     | yes, untested                                                  |         |
+| ssh2       | yes, untested                                                       | yes, untested                                                  |         |
 | swow       | yes                                                                 | yes                                                            |         |
 | swoole     | [partial](https://github.com/crazywhalecc/static-php-cli/issues/51) | yes                                                            |         |
 | tokenizer  | yes                                                                 | yes                                                            |         |
