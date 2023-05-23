@@ -28,5 +28,6 @@ trait libwebp
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . $destdir);
         $this->patchPkgconfPrefix(['libsharpyuv.pc', 'libwebp.pc', 'libwebpdecoder.pc', 'libwebpdemux.pc', 'libwebpmux.pc'], PKGCONF_PATCH_PREFIX);
+        $this->cleanLaFiles();
     }
 }

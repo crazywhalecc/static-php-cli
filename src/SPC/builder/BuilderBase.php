@@ -38,6 +38,9 @@ abstract class BuilderBase
     /** @var bool 本次编译是否只编译 libs，不编译 PHP */
     protected bool $libs_only = false;
 
+    /** @var bool 是否 strip 最终的二进制 */
+    protected bool $strip = true;
+
     /**
      * 构建指定列表的 libs
      *
@@ -63,15 +66,12 @@ abstract class BuilderBase
         if ($libraries === [] && $this->isLibsOnly()) {
             $libraries = array_keys($support_lib_list);
         }
+        if (!in_array('pkg-config', $libraries)) {
+            array_unshift($libraries, 'pkg-config');
+        }
 
         // 排序 libs，根据依赖计算一个新的列表出来
         $libraries = DependencyUtil::getLibsByDeps($libraries);
-
-        // 这里筛选 libraries，比如纯静态模式排除掉ffi
-        if (defined('BUILD_ALL_STATIC') && BUILD_ALL_STATIC) {
-            $k = array_search('libffi', $libraries, true);
-            $k !== false && array_splice($libraries, $k, 1);
-        }
 
         // 过滤不支持的库后添加
         foreach ($libraries as $library) {
@@ -232,6 +232,11 @@ abstract class BuilderBase
             $ls[] = 'fpm';
         }
         return implode(', ', $ls);
+    }
+
+    public function setStrip(bool $strip): void
+    {
+        $this->strip = $strip;
     }
 
     /**

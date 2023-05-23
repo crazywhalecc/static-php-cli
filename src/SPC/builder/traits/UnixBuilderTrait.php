@@ -72,7 +72,7 @@ trait UnixBuilderTrait
             }
             foreach ($this->exts as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
-                [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri ' . $ext->getDistName(), false);
+                [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $ext->getDistName() . '"', false);
                 if ($ret !== 0) {
                     throw new RuntimeException('extension ' . $ext->getName() . ' failed compile check');
                 }

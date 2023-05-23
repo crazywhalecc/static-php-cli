@@ -31,7 +31,7 @@ class MacOSBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
+    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
     {
         // 如果是 Debug 模式，才使用 set -x 显示每条执行的命令
         $this->set_x = defined('DEBUG_MODE') ? 'set -x' : 'true';
@@ -40,6 +40,7 @@ class MacOSBuilder extends BuilderBase
         $this->cxx = $cxx ?? 'clang++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
+        $this->zts = $zts;
         // 根据 CPU 线程数设置编译进程数
         $this->concurrency = SystemUtil::getCpuCount();
         // 设置 cflags
@@ -49,6 +50,7 @@ class MacOSBuilder extends BuilderBase
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->arch, $this->arch_c_flags);
         // 设置 configure 依赖的环境变量
         $this->configure_env =
+            'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" ' .
             'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
@@ -145,7 +147,7 @@ class MacOSBuilder extends BuilderBase
         if ($this->getLib('libxml2') || $this->getExt('iconv')) {
             $extra_libs .= ' -liconv';
         }
-        
+
         if ($this->getPHPVersionID() < 80000) {
             $json_74 = '--enable-json ';
         } else {
@@ -206,10 +208,11 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildCli(string $extra_libs): void
     {
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli")
-            ->exec('dsymutil -f sapi/cli/php')
-            ->exec('strip sapi/cli/php');
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli");
+        if ($this->strip) {
+            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
+        }
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
@@ -229,7 +232,7 @@ class MacOSBuilder extends BuilderBase
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" STRIP=\"dsymutil -f \" micro");
+            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" " . ($this->strip ? 'STRIP="dsymutil -f " ' : '') . 'micro');
         $this->deployBinary(BUILD_TARGET_MICRO);
     }
 
@@ -241,10 +244,11 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildFpm(string $extra_libs): void
     {
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm")
-            ->exec('dsymutil -f sapi/fpm/php-fpm')
-            ->exec('strip sapi/fpm/php-fpm');
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm");
+        if ($this->strip) {
+            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
+        }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 }

@@ -149,7 +149,7 @@ class SystemUtil
     {
         $paths = getenv('LIBPATH');
         if (!$paths) {
-            $paths = '/lib:/lib64:/usr/lib:/usr/lib64:/usr/local/lib:/usr/local/lib64';
+            $paths = '/lib:/lib64:/usr/lib:/usr/lib64:/usr/local/lib:/usr/local/lib64:';
         }
         foreach (explode(':', $paths) as $path) {
             if (file_exists("{$path}/{$name}")) {

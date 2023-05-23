@@ -6,6 +6,7 @@ namespace SPC\store;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -84,6 +85,9 @@ class SourcePatcher
         if ($readline = $builder->getExt('readline')) {
             $patch[] = ['readline patch', '/-lncurses/', $readline->getLibFilesString()];
         }
+        if ($ssh2 = $builder->getExt('ssh2')) {
+            $patch[] = ['ssh2 patch', '/-lssh2/', $ssh2->getLibFilesString()];
+        }
         $patch[] = ['disable capstone', '/have_capstone="yes"/', 'have_capstone="no"'];
         foreach ($patch as $item) {
             logger()->info('Patching configure: ' . $item[0]);
@@ -98,6 +102,24 @@ class SourcePatcher
             REPLACE_FILE_STR,
             '-lz',
             BUILD_LIB_PATH . '/libz.a'
+        );
+        if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
+            FileSystem::replaceFile(
+                SOURCE_PATH . '/libpng/configure',
+                REPLACE_FILE_STR,
+                '-lm',
+                '/usr/lib/libm.a'
+            );
+        }
+    }
+
+    public static function patchUnixSsh2(): void
+    {
+        FileSystem::replaceFile(
+            SOURCE_PATH . '/php-src/configure',
+            REPLACE_FILE_STR,
+            '-lssh2',
+            BUILD_LIB_PATH . '/libssh2.a'
         );
     }
 
