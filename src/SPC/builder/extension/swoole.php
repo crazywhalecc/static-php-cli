@@ -16,7 +16,6 @@ class swoole extends Extension
         if ($this->builder->getLib('openssl')) {
             $arg .= ' --enable-openssl --with-openssl-dir=' . BUILD_ROOT_PATH;
         }
-        // ' --disable-openssl --without-openssl' 是否有效，我没有测试验证过
         if ($this->builder->getLib('brotli')) {
             $arg .= ' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH;
         }
