@@ -376,6 +376,7 @@
             "openssl",
             "zlib",
             "readline"
+
         ]
     },
     "pthreads4w": {

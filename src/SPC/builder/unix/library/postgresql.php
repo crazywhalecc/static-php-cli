@@ -16,20 +16,20 @@ trait postgresql
     protected function build()
     {
         [$libdir, , $destdir] = SEPARATED_PATH;
-
+        $builddir = BUILD_ROOT_PATH;
         shell()->cd($this->source_dir)
             ->exec('sed -i.backup "s/invokes exit\\\'; exit 1;/invokes exit\\\';/"  src/interfaces/libpq/Makefile')
             ->exec(
                 <<<EOF
             {$this->builder->configure_env} \\
             ./configure  \\
-            --prefix={$destdir} \\
+            --prefix={$builddir} \\
             --enable-coverage=no \\
             --with-ssl=openssl  \\
             --with-readline \\
             --without-icu \\
             --without-ldap \\
-            --without-libxml  \\
+            --with-libxml  \\
             --without-libxslt \\
             --without-lz4 \\
             --with-zstd \\
@@ -46,6 +46,9 @@ trait postgresql
 
             make -C  src/common install 
             make -C  src/port install 
+            rm -rf {$builddir}/lib/*.so.*
+            rm -rf {$builddir}/lib/*.so
+            rm -rf {$builddir}/lib/*.dylib
         
 EOF
             );
