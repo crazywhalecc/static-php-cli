@@ -20,6 +20,8 @@ class mongodb extends Extension
         }
         if ($this->builder->getLib('icu')) {
             $arg .= ' --with-mongodb-icu=yes ';
+        } else {
+            $arg .= ' --with-mongodb-icu=no ';
         }
         return $arg;
     }
