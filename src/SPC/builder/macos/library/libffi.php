@@ -34,11 +34,11 @@ class libffi extends MacOSLibraryBase
                 '--disable-shared ' .
                 "--host={$this->builder->arch}-apple-darwin " .
                 "--target={$this->builder->arch}-apple-darwin " .
-                '--prefix= ' . // use prefix=/
-                "--libdir={$lib}"
+                '--prefix= ' // use prefix=/
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec("make install DESTDIR={$destdir}");
+        $this->patchPkgconfPrefix(['libffi.pc']);
     }
 }

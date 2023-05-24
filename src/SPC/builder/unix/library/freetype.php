@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\store\FileSystem;
+
 trait freetype
 {
     protected function build()
@@ -25,5 +27,13 @@ trait freetype
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['freetype2.pc']);
+        FileSystem::replaceFile(
+            BUILD_ROOT_PATH . '/lib/pkgconfig/freetype2.pc',
+            REPLACE_FILE_STR,
+            ' -L/lib ',
+            ' -L' . BUILD_ROOT_PATH . '/lib '
+        );
+
+        $this->cleanLaFiles();
     }
 }

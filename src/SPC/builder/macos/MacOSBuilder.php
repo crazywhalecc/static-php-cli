@@ -36,7 +36,7 @@ class MacOSBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
+    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
     {
         // 如果是 Debug 模式，才使用 set -x 显示每条执行的命令
         $this->set_x = defined('DEBUG_MODE') ? 'set -x' : 'true';
@@ -45,6 +45,7 @@ class MacOSBuilder extends BuilderBase
         $this->cxx = $cxx ?? 'clang++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
+        $this->zts = $zts;
         // 根据 CPU 线程数设置编译进程数
         $this->concurrency = SystemUtil::getCpuCount();
         // 设置 cflags
@@ -59,15 +60,15 @@ class MacOSBuilder extends BuilderBase
         $this->pkgconf_env = 'export PKG_CONFIG_PATH="' . $build_lib_path . '/pkgconfig:/usr/lib/pkgconfig"';
         $this->ld = $this->cc == 'clang' ? 'lld' : 'ld';
         // 设置 configure 依赖的环境变量
-        $this->configure_env = <<<EOF
-        set -uex
-        export CC={$this->cc}
-        export CXX={$this->cxx}
-        export LD={$this->ld}
-        export PATH={$build_root_path}/bin/:\$PATH
-        {$this->pkgconf_env} 
-EOF;
+
         $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
+
+        $this->configure_env =
+            'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" ' .
+            'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
+            "CC='{$this->cc}' " .
+            "CXX='{$this->cxx}' " .
+            "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration'";
 
         // 创立 pkg-config 和放头文件的目录
         f_mkdir(BUILD_ROOT_PATH . '/bin', recursive: true);
@@ -208,6 +209,16 @@ EOF
 
         SourcePatcher::patchPHPConfigure($this);
 
+        if ($this->getLib('libxml2') || $this->getExt('iconv')) {
+            $extra_libs .= ' -liconv';
+        }
+
+        if ($this->getPHPVersionID() < 80000) {
+            $json_74 = '--enable-json ';
+        } else {
+            $json_74 = '';
+        }
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 'echo "start build php"' . PHP_EOL .
@@ -224,6 +235,7 @@ EOF
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 '--enable-fpm ' .
+                $json_74 .
                 '--enable-micro ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs() . ' ' .
@@ -264,10 +276,13 @@ EOF
      */
     public function buildCli(string $extra_libs, string $envs): void
     {
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli")
-            ->exec('dsymutil -f sapi/cli/php')
-            ->exec('strip sapi/cli/php');
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        $shell->exec(
+            "make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli"
+        );
+        if ($this->strip) {
+            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
+        }
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
@@ -287,7 +302,9 @@ EOF
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" STRIP=\"dsymutil -f \" micro");
+            ->exec(
+                "make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" " . ($this->strip ? 'STRIP="dsymutil -f " ' : '') . 'micro'
+            );
         $this->deployBinary(BUILD_TARGET_MICRO);
     }
 
@@ -299,10 +316,13 @@ EOF
      */
     public function buildFpm(string $extra_libs, string $envs): void
     {
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm")
-            ->exec('dsymutil -f sapi/fpm/php-fpm')
-            ->exec('strip sapi/fpm/php-fpm');
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        $shell->exec(
+            "make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm"
+        );
+        if ($this->strip) {
+            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
+        }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 }

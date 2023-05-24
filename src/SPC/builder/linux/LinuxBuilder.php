@@ -59,7 +59,7 @@ class LinuxBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
+    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
     {
         // 编译器 选择 参考 https://github.com/crazywhalecc/static-php-cli/issues/50#issuecomment-1522809787
         // 初始化一些默认参数
@@ -72,14 +72,9 @@ class LinuxBuilder extends BuilderBase
         $this->cxx = $cxx ?? 'g++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
-        $this->libc = 'libc';
-        // SystemUtil::selectLibc($this->cc);
 
-        $this->ld = match ($this->cc) {
-            'musl-gcc', 'gcc' => 'ld',
-            'clang' => 'ld.lld',
-            default => throw new RuntimeException('no found ld'),
-        };
+        $this->zts = $zts;
+        $this->libc = 'musl'; // SystemUtil::selectLibc($this->cc);
 
         // 根据 CPU 线程数设置编译进程数
         $this->concurrency = SystemUtil::getCpuCount();
@@ -98,7 +93,8 @@ class LinuxBuilder extends BuilderBase
         $build_root_path = BUILD_ROOT_PATH;
         $build_lib_path = BUILD_LIB_PATH;
         // 设置 pkgconfig
-        $this->pkgconf_env = 'export PKG_CONFIG_PATH="' . $build_lib_path . '/pkgconfig:/usr/lib/pkgconfig"';
+
+        $this->pkgconf_env = 'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
 
         // 设置 configure 依赖的环境变量
         $this->configure_env = <<<EOF
@@ -107,7 +103,7 @@ class LinuxBuilder extends BuilderBase
         export CXX={$this->cxx}
         export LD={$this->ld}
         export PATH={$build_root_path}/bin/:\$PATH
-        {$this->pkgconf_env}
+        {$this->pkgconf_env} 
         
 EOF;
         $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
@@ -178,6 +174,9 @@ EOF;
         if ($this->getExt('swoole')) {
             $extra_libs .= ' -lstdc++';
         }
+        if ($this->getExt('imagick')) {
+            $extra_libs .= ' /usr/lib/libMagick++-7.Q16HDRI.a /usr/lib/libMagickCore-7.Q16HDRI.a /usr/lib/libMagickWand-7.Q16HDRI.a';
+        }
 
         $envs = '';
         $cflags = $this->arch_c_flags;
@@ -195,7 +194,9 @@ EOF;
                 }
                 break;
             default:
-                throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet  ' . __FILE__ . ':' . __LINE__);
+                throw new WrongUsageException(
+                    'libc ' . $this->libc . ' is not implemented yet  ' . __FILE__ . ':' . __LINE__
+                );
         }
 
         $lib_meta = FileSystem::loadConfigArray('lib');
@@ -237,9 +238,12 @@ EOF;
             $envs .= " export CFLAGS=\"{$cflags}\" " . PHP_EOL;
         }
 
-        SourcePatcher::patchPHPConfigure($this);   // 处理静态库链接参数
+        if ($this->getPHPVersionID() < 80000) {
+            $json_74 = '--enable-json ';
+        } else {
+            $json_74 = '';
+        }
 
-        $envs .= 'export EXTRA_LDFLAGS_PROGRAM="$LDFLAGS -all-static"';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 <<<'EOF'
@@ -265,6 +269,7 @@ EOF
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 '--enable-fpm ' .
+                $json_74 .
                 '--enable-micro=all-static ' .
                 ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs()
@@ -326,7 +331,9 @@ EOF
             ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php php.debug")
             ->exec('elfedit --output-osabi linux php')
             ->exec("{$this->cross_compile_prefix}strip --strip-all php")
-            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php");
+            ->exec(
+                "{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php"
+            );
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
@@ -373,7 +380,10 @@ EOF
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(
                 'make -j' . $this->concurrency .
-                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
+                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(
+                    ' ',
+                    array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
+                ) . '" ' .
                 "EXTRA_LIBS=\"{$extra_libs}\" " .
                 "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
                 'fpm'
@@ -383,7 +393,9 @@ EOF
             ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php-fpm php-fpm.debug")
             ->exec('elfedit --output-osabi linux php-fpm')
             ->exec("{$this->cross_compile_prefix}strip --strip-all php-fpm")
-            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php-fpm.debug --remove-section=.note php-fpm");
+            ->exec(
+                "{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php-fpm.debug --remove-section=.note php-fpm"
+            );
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 }

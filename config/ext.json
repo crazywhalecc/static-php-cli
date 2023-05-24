@@ -1,4 +1,8 @@
 {
+    "apcu": {
+        "type": "external",
+        "source": "apcu"
+    },
     "bcmath": {
         "type": "builtin"
     },
@@ -112,6 +116,14 @@
         "arg-type": "with-prefix",
         "lib-depends-windows": [
             "libiconv"
+        ]
+    },
+    "imagick": {
+        "type": "external",
+        "source": "ext-imagick",
+        "arg-type": "custom",
+        "lib-depends": [
+            "imagemagick"
         ]
     },
     "imap": {
@@ -284,7 +296,7 @@
         "type": "builtin",
         "arg-type": "with",
         "lib-depends": [
-            "sodium"
+            "libsodium"
         ]
     },
     "sqlite3": {
@@ -292,6 +304,14 @@
         "arg-type": "with-prefix",
         "lib-depends": [
             "sqlite"
+        ]
+    },
+    "ssh2": {
+        "type": "external",
+        "source": "ext-ssh2",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libssh2"
         ]
     },
     "swoole": {

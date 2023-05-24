@@ -38,8 +38,6 @@ trait UnixSystemUtilTrait
             $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . self::findCommand($cxx) . ')';
         }
         $toolchain = <<<CMAKE
-SET(CMAKE_SYSTEM_NAME {$os})
-SET(CMAKE_SYSTEM_PROCESSOR {$target_arch})
 {$ccLine}
 {$cxxLine}
 SET(CMAKE_C_FLAGS "{$cflags}")
@@ -47,6 +45,7 @@ SET(CMAKE_CXX_FLAGS "{$cflags}")
 SET(CMAKE_FIND_ROOT_PATH "{$root}")
 SET(CMAKE_PREFIX_PATH "{$root}")
 
+set(PKG_CONFIG_EXECUTABLE "{$root}/bin/pkg-config")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

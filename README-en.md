@@ -2,17 +2,21 @@
 
 Compile A Statically Linked PHP With Swoole and other Extensions.
 
-Compile a purely static PHP binary file with various extensions to make PHP-cli applications more portable! 
+Compile a purely static php-cli binary file with various extensions to make PHP applications more portable! (cli SAPI)
 
-You can also use the micro binary file to package PHP source code and binary files into one for distribution!
-This function is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
+<img width="600" alt="截屏2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
 
-> This branch is new version, if you are looking for old bash version of static-php-cli, see [bash-version](https://github.com/crazywhalecc/static-php-cli/tree/bash-version).
+You can also use the micro binary file to combine php binary and php source code into one for distribution!
+This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). (micro SAPI)
 
-[![Version](https://img.shields.io/badge/Version-2.0--beta3-orange.svg?style=flat-square)]()
+<img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
+
+[![Version](https://img.shields.io/badge/Version-2.0--rc1-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+
+[![](https://img.shields.io/badge/Extension%20Counter-50+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 ## Compilation Requirements
@@ -23,11 +27,11 @@ But static-php-cli runtime only requires an environment above PHP 8.0 and `token
 Here is the architecture support status, where `CI` represents support for GitHub Action builds, 
 `Local` represents support for local builds, and blank represents not currently supported.
 
-|         | x86_64    | aarch64   | armv7l    |
-|---------|-----------|-----------|-----------|
-| macOS   | CI, Local | Local     |           |
-| Linux   | CI, Local | CI, Local | CI, Local |
-| Windows |           |           |           |
+|         | x86_64    | aarch64   |
+|---------|-----------|-----------|
+| macOS   | CI, Local | Local     |
+| Linux   | CI, Local | CI, Local |
+| Windows |           |           |
 
 > macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
@@ -122,6 +126,14 @@ If anything goes wrong, use `--debug` option to display full terminal output:
 ./bin/spc build openssl,pcntl,mbstring --debug --build-all
 ./bin/spc fetch --all --debug
 ```
+
+In addition, we build NTS by default. If you are going to build ZTS version, just add `--enable-zts` option.
+
+```bash
+./bin/spc build openssl,pcntl --build-all --enable-zts
+```
+
+Adding option `--no-strip` can produce binaries with debug symbols, in order to debug (using gdb). Disabling strip will increase the size of static binary.
 
 ### php-cli Usage
 

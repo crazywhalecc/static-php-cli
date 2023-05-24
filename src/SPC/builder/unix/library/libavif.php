@@ -24,5 +24,6 @@ trait libavif
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         // patch pkgconfig
         $this->patchPkgconfPrefix(['libavif.pc']);
+        $this->cleanLaFiles();
     }
 }

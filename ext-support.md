@@ -8,6 +8,7 @@
 
 |            | Linux                                                               | macOS                                                          | Windows |
 |------------|---------------------------------------------------------------------|----------------------------------------------------------------|---------|
+| apcu       | yes, untested                                                       | yes, untested                                                  |         |
 | bcmath     | yes                                                                 | yes                                                            |         |
 | bz2        | yes                                                                 | yes                                                            |         |
 | calendar   | yes                                                                 | yes                                                            |         |
@@ -18,6 +19,7 @@
 | enchant    |                                                                     |                                                                |         |
 | event      | yes                                                                 | yes                                                            |         |
 | exif       | yes                                                                 | yes                                                            |         |
+| ffi        |                                                                     | yes, [docs]()                                                  |         |
 | filter     | yes                                                                 | yes                                                            |         |
 | fileinfo   | yes                                                                 | yes                                                            |         |
 | ftp        | yes                                                                 | yes                                                            |         |
@@ -25,6 +27,7 @@
 | gettext    |                                                                     |                                                                |         |
 | gmp        | yes                                                                 | yes                                                            |         |
 | iconv      | yes                                                                 | yes                                                            |         |
+| imagick    | yes                                                                 | yes                                                            |         |
 | inotify    | yes                                                                 | yes                                                            |         |
 | mbstring   | yes                                                                 | yes                                                            |         |
 | mbregex    | yes                                                                 | yes                                                            |         |
@@ -48,14 +51,16 @@
 | simplexml  | yes                                                                 | yes                                                            |         |
 | soap       | yes                                                                 | yes                                                            |         |
 | sockets    | yes                                                                 | yes                                                            |         |
+| sodium     | yes                                                                 | yes                                                            |         |
 | sqlite3    | yes                                                                 | yes                                                            |         |
+| ssh2       | yes, untested                                                       | yes, untested                                                  |         |
 | swow       | yes                                                                 | yes                                                            |         |
 | swoole     | [partial](https://github.com/crazywhalecc/static-php-cli/issues/51) | yes                                                            |         |
 | tokenizer  | yes                                                                 | yes                                                            |         |
 | xml        | yes                                                                 | yes                                                            |         |
 | xmlreader  | yes, untested                                                       | yes, untested                                                  |         |
 | xmlwriter  | yes, untested                                                       | yes, untested                                                  |         |
-| zip        | yes, untested                                                       | yes                                                            |         |
+| zip        | yes, untested                                                       | yes, untested                                                  |         |
 | zlib       | yes                                                                 | yes                                                            |         |
 | zstd       | yes                                                                 | yes                                                            |         |
 
