@@ -20,6 +20,25 @@ chmod +x bin/spc
 ./bin/spc list-ext
 
 
-#./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=gcc --cxx=g++  --debug
+EXTENSION="calendar,ctype,exif,fileinfo,filter,ftp"
+EXTENSION="${EXTENSION},session,tokenizer"
+EXTENSION="${EXTENSION},phar,posix"
+EXTENSION="${EXTENSION},iconv"
+EXTENSION="${EXTENSION},xml,dom,simplexml,xmlwriter,xmlreader"
+EXTENSION="${EXTENSION},phar,posix"
+EXTENSION="${EXTENSION},soap"
+EXTENSION="${EXTENSION},mbstring,mbregex"
+EXTENSION="${EXTENSION},openssl"
+EXTENSION="${EXTENSION},sockets,gmp,bcmath"
+EXTENSION="${EXTENSION},pcntl"
+EXTENSION="${EXTENSION},curl"
+EXTENSION="${EXTENSION},zlib,zip,bz2"
+EXTENSION="${EXTENSION},gd"
+EXTENSION="${EXTENSION},redis"
+EXTENSION="${EXTENSION},pdo,pdo_mysql,pdo_sqlite,"
+EXTENSION="${EXTENSION},mysqlnd,sqlite3"
+EXTENSION="${EXTENSION},mongodb"
 
-./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo,pdo_sqlite,ftp,curl" --cc=clang --cxx=clang++  --debug
+
+./bin/spc build "${EXTENSION}" --build-cli --cc=clang --cxx=clang++  --debug
+# ./bin/spc build "${EXTENSION}" --build-cli --cc=gcc --cxx=g++  --debug
