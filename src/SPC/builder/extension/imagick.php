@@ -7,11 +7,11 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\util\CustomExt;
 
-#[CustomExt('ffi')]
-class ffi extends Extension
+#[CustomExt('imagick')]
+class imagick extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        return '--with-ffi --enable-zend-signals';
+        return '--with-imagick=' . BUILD_ROOT_PATH;
     }
 }

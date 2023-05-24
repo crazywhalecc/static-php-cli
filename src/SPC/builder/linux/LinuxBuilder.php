@@ -43,7 +43,7 @@ class LinuxBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null)
+    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
     {
         // 初始化一些默认参数
         $this->cc = $cc ?? match (SystemUtil::getOSRelease()['dist']) {
@@ -53,6 +53,7 @@ class LinuxBuilder extends BuilderBase
         $this->cxx = $cxx ?? 'g++';
         $this->arch = $arch ?? php_uname('m');
         $this->gnu_arch = arch2gnu($this->arch);
+        $this->zts = $zts;
         $this->libc = 'musl'; // SystemUtil::selectLibc($this->cc);
 
         // 根据 CPU 线程数设置编译进程数
@@ -70,7 +71,7 @@ class LinuxBuilder extends BuilderBase
             cxx: $this->cxx
         );
         // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
+        $this->pkgconf_env = 'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
         // 设置 configure 依赖的环境变量
         $this->configure_env =
             $this->pkgconf_env . ' ' .
@@ -141,6 +142,9 @@ class LinuxBuilder extends BuilderBase
         if ($this->getExt('swoole')) {
             $extra_libs .= ' -lstdc++';
         }
+        if ($this->getExt('imagick')) {
+            $extra_libs .= ' /usr/lib/libMagick++-7.Q16HDRI.a /usr/lib/libMagickCore-7.Q16HDRI.a /usr/lib/libMagickWand-7.Q16HDRI.a';
+        }
 
         $envs = $this->pkgconf_env . ' ' .
             "CC='{$this->cc}' " .
@@ -169,7 +173,7 @@ class LinuxBuilder extends BuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
         SourcePatcher::patchPHPConfigure($this);
-        
+
         if ($this->getPHPVersionID() < 80000) {
             $json_74 = '--enable-json ';
         } else {

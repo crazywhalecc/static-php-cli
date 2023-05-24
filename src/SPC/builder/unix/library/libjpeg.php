@@ -24,5 +24,6 @@ trait libjpeg
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         // patch pkgconfig
         $this->patchPkgconfPrefix(['libjpeg.pc', 'libturbojpeg.pc']);
+        $this->cleanLaFiles();
     }
 }

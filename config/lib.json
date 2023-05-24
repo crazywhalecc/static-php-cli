@@ -15,21 +15,6 @@
             "brotli"
         ]
     },
-    "ncurses": {
-        "source": "ncurses",
-        "static-libs-unix": [
-            "libncurses.a"
-        ]
-    },
-    "readline": {
-        "source": "readline",
-        "static-libs-unix": [
-            "libreadline.a"
-        ],
-        "lib-depends": [
-            "ncurses"
-        ]
-    },
     "bzip2": {
         "source": "bzip2",
         "static-libs-unix": [
@@ -109,6 +94,28 @@
         ],
         "headers": [
             "gmp.h"
+        ]
+    },
+    "imagemagick": {
+        "source": "imagemagick",
+        "static-libs-unix": [
+            "libMagick++-7.Q16HDRI.a",
+            "libMagickCore-7.Q16HDRI.a",
+            "libMagickWand-7.Q16HDRI.a"
+        ],
+        "lib-depends": [
+            "zlib",
+            "libpng",
+            "libjpeg",
+            "bzip2",
+            "libwebp",
+            "freetype"
+        ],
+        "lib-suggests": [
+            "zstd",
+            "xz",
+            "libzip",
+            "libxml2"
         ]
     },
     "libavif": {
@@ -294,6 +301,12 @@
             "libmcrypt.a"
         ]
     },
+    "ncurses": {
+        "source": "ncurses",
+        "static-libs-unix": [
+            "libncurses.a"
+        ]
+    },
     "nghttp2": {
         "source": "nghttp2",
         "static-libs-unix": [
@@ -346,6 +359,9 @@
             "zlib"
         ]
     },
+    "pkg-config": {
+        "source": "pkg-config"
+    },
     "postgresql": {
         "source": "postgresql",
         "static-libs-unix": [
@@ -362,6 +378,15 @@
             "pthread.h",
             "sched.h",
             "semaphore.h"
+        ]
+    },
+    "readline": {
+        "source": "readline",
+        "static-libs-unix": [
+            "libreadline.a"
+        ],
+        "lib-depends": [
+            "ncurses"
         ]
     },
     "sqlite": {
@@ -428,6 +453,12 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
+        ]
+    },
+    "libsodium": {
+        "source": "libsodium",
+        "static-libs-unix": [
+            "libsodium.a"
         ]
     }
 }

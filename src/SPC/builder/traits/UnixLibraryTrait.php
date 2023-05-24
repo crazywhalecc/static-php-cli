@@ -77,4 +77,20 @@ trait UnixLibraryTrait
             FileSystem::writeFile($realpath, $file);
         }
     }
+
+    /**
+     * remove libtool archive files
+     *
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    public function cleanLaFiles(): void
+    {
+        foreach ($this->getStaticLibs() as $lib) {
+            $filename = pathinfo($lib, PATHINFO_FILENAME) . '.la';
+            if (file_exists(BUILD_LIB_PATH . '/' . $filename)) {
+                unlink(BUILD_LIB_PATH . '/' . $filename);
+            }
+        }
+    }
 }

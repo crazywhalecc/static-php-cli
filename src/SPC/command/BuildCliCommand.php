@@ -25,6 +25,8 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('build-cli', null, null, 'build cli');
         $this->addOption('build-fpm', null, null, 'build fpm');
         $this->addOption('build-all', null, null, 'build cli, micro, fpm');
+        $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
+        $this->addOption('enable-zts', null, null, 'enable ZTS support');
     }
 
     public function handle(): int
@@ -68,6 +70,8 @@ class BuildCliCommand extends BuildCommand
             $builder->buildLibs($libraries);
             // 执行扩展检测
             $builder->proveExts($extensions);
+            // strip
+            $builder->setStrip(false);
             // 构建
             $builder->buildPHP($rule, $this->getOption('bloat'));
             // 统计时间
