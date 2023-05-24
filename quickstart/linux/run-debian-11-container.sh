@@ -6,7 +6,7 @@ __DIR__=$(
   pwd
 )
 __PROJECT__=$(
-  cd ${__DIR__}/../../../
+  cd ${__DIR__}/../../
   pwd
 )
 cd ${__DIR__}
