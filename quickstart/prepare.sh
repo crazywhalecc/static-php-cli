@@ -19,6 +19,9 @@ if [[ $OS = "Linux" && -f /etc/os-release ]]; then
   # debian ubuntu alpine
 fi
 
+# sh bin/setup-runtime --mirror china
+# export PATH="${__PROJECT__}/bin:$PATH"
+
 composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
 
 chmod +x bin/spc
@@ -47,6 +50,8 @@ EXTENSIONS="${EXTENSIONS},mysqlnd,sqlite3"
 EXTENSIONS="${EXTENSIONS},mongodb"
 # EXTENSIONS="${EXTENSIONS},swoole"
 EXTENSIONS="${EXTENSIONS},swow"
+EXTENSIONS="pdo"
+EXTENSIONS="${EXTENSIONS},pgsql,pdo_pgsql"
 
 ./bin/spc build "${EXTENSIONS}" --build-cli --cc=clang --cxx=clang++ --debug
 # ./bin/spc build "${EXTENSIONS}" --build-cli --cc=gcc --cxx=g++  --debug

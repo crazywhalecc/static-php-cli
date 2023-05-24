@@ -209,12 +209,12 @@
     },
     "pdo_pgsql": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "ext-depends": [
             "pdo"
         ],
         "lib-depends": [
-            "pq"
+            "postgresql"
         ]
     },
     "pdo_sqlite": {
@@ -423,6 +423,13 @@
         "arg-type": "custom",
         "lib-depends": [
             "zstd"
+        ]
+    },
+    "pgsql": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "postgresql"
         ]
     }
 }

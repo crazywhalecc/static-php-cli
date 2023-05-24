@@ -72,7 +72,6 @@ abstract class BuilderBase
 
         // 排序 libs，根据依赖计算一个新的列表出来
         $libraries = DependencyUtil::getLibsByDeps($libraries);
-
         // 过滤不支持的库后添加
         foreach ($libraries as $library) {
             if (!isset($support_lib_list[$library])) {
