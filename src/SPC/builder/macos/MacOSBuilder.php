@@ -61,7 +61,7 @@ class MacOSBuilder extends BuilderBase
         $this->ld = $this->cc == 'clang' ? 'lld' : 'ld';
         // 设置 configure 依赖的环境变量
 
-        $this->configure_env = PHP_EOL . $this->configure_env . PHP_EOL;
+        $this->configure_env .= PHP_EOL . $this->pkgconf_env . PHP_EOL;
 
         $this->configure_env =
             'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" ' .
