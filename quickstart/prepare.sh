@@ -45,7 +45,8 @@ EXTENSIONS="${EXTENSIONS},redis"
 EXTENSIONS="${EXTENSIONS},pdo,pdo_mysql,pdo_sqlite"
 EXTENSIONS="${EXTENSIONS},mysqlnd,sqlite3"
 EXTENSIONS="${EXTENSIONS},mongodb"
-EXTENSIONS="${EXTENSIONS},swoole"
+# EXTENSIONS="${EXTENSIONS},swoole"
+EXTENSIONS="${EXTENSIONS},swow"
 
 ./bin/spc build "${EXTENSIONS}" --build-cli --cc=clang --cxx=clang++ --debug
 # ./bin/spc build "${EXTENSIONS}" --build-cli --cc=gcc --cxx=g++  --debug
