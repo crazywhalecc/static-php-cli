@@ -27,7 +27,8 @@ done
 case "$mirror" in
 	china)
 		test -f /etc/apk/repositories.save || cp /etc/apk/repositories /etc/apk/repositories.save
-    sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+    # sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 		;;
 
 esac

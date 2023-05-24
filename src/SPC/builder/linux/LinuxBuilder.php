@@ -71,8 +71,8 @@ class LinuxBuilder extends BuilderBase
             cxx: $this->cxx
         );
         // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
-        $this->pkgconf_env .= $this->pkgconf_env . ' PATH=' . BUILD_ROOT_PATH . '/bin/:' . BUILD_ROOT_PATH . '/usr/bin/:$PATH ';
+        $this->pkgconf_env = 'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig" ';
+        $this->pkgconf_env .= $this->pkgconf_env . ' PATH=' . BUILD_ROOT_PATH . '/bin/:' . BUILD_ROOT_PATH . '/usr/bin/:$PATH  ';
         // 设置 configure 依赖的环境变量
         $this->configure_env =
             $this->pkgconf_env . ' ' .

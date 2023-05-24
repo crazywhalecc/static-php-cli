@@ -18,9 +18,9 @@ trait postgresql
         [$libdir, , $destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
+            ->exec('sed -i.backup "s/invokes exit\\\'; exit 1;/invokes exit\\\';/"  src/interfaces/libpq/Makefile')
             ->exec(
                 <<<EOF
-            sed -i.backup "s/invokes exit\\'; exit 1;/invokes exit\\';/"  src/interfaces/libpq/Makefile
             {$this->builder->configure_env} \\
             ./configure  \\
             --prefix={$destdir} \\
@@ -46,9 +46,6 @@ trait postgresql
 
             make -C  src/common install 
             make -C  src/port install 
-            rm -rf {$libdir}/*.so.*
-            rm -rf {$libdir}/*.so
-            rm -rf {$libdir}/*.dylib
         
 EOF
             );
