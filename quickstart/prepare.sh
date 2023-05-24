@@ -11,6 +11,14 @@ __PROJECT__=$(
 )
 cd ${__PROJECT__}
 
+OS=$(uname -s)
+ARCH=$(uname -m)
+
+if [[ $OS = "Linux" && -f /etc/os-release ]]; then
+  OS_NAME=$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{print $2}')
+  # debian ubuntu alpine
+fi
+
 composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
 
 chmod +x bin/spc
@@ -18,7 +26,6 @@ chmod +x bin/spc
 ./bin/spc fetch --all --debug
 
 ./bin/spc list-ext
-
 
 EXTENSIONS="calendar,ctype,exif,fileinfo,filter,ftp"
 EXTENSIONS="${EXTENSIONS},session,tokenizer"
@@ -38,7 +45,7 @@ EXTENSIONS="${EXTENSIONS},redis"
 EXTENSIONS="${EXTENSIONS},pdo,pdo_mysql,pdo_sqlite"
 EXTENSIONS="${EXTENSIONS},mysqlnd,sqlite3"
 EXTENSIONS="${EXTENSIONS},mongodb"
+EXTENSIONS="${EXTENSIONS},swoole"
 
-
-./bin/spc build "${EXTENSIONS}" --build-cli --cc=clang --cxx=clang++  --debug
+./bin/spc build "${EXTENSIONS}" --build-cli --cc=clang --cxx=clang++ --debug
 # ./bin/spc build "${EXTENSIONS}" --build-cli --cc=gcc --cxx=g++  --debug
