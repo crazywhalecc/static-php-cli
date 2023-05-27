@@ -169,7 +169,14 @@
     "mongodb": {
         "type": "external",
         "source": "mongodb",
-        "arg-type": "custom"
+        "arg-type": "custom",
+        "lib-depends": [
+            "zstd"
+        ],
+        "lib-suggests": [
+            "icu",
+            "openssl"
+        ]
     },
     "mysqli": {
         "type": "builtin",
