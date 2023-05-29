@@ -200,6 +200,10 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
 
+## 赞助本项目
+
+你可以在 [我的个人赞助页](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md) 支持我和我的项目。
+
 ## 开源协议
 
 本项目依据旧版本惯例采用 MIT License 开源，自身的部分代码引用或修改自以下项目：
