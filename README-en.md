@@ -215,6 +215,10 @@ The basic principles for contributing are as follows:
     camelCase and underscore formats should be followed, and mixing within the same module is prohibited.
 - When compiling external libraries and creating patches, compatibility with different operating systems should be considered.
 
+## Sponsor this project
+
+You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md).
+
 ## Open-Source License
 
 This project is based on the tradition of using the MIT License for old versions, 
