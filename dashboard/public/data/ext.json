@@ -1,0 +1,431 @@
+{
+    "apcu": {
+        "type": "external",
+        "source": "apcu"
+    },
+    "bcmath": {
+        "type": "builtin"
+    },
+    "bz2": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "bzip2"
+        ]
+    },
+    "calendar": {
+        "type": "builtin"
+    },
+    "ctype": {
+        "type": "builtin"
+    },
+    "curl": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "curl"
+        ]
+    },
+    "dba": {
+        "type": "builtin",
+        "arg-type-windows": "with"
+    },
+    "dom": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "libxml2",
+            "zlib"
+        ]
+    },
+    "event": {
+        "type": "external",
+        "source": "ext-event",
+        "arg-type": "custom",
+        "lib-depends": [
+            "libevent"
+        ],
+        "ext-depends": [
+            "openssl"
+        ],
+        "ext-suggests": [
+            "sockets"
+        ]
+    },
+    "exif": {
+        "type": "builtin"
+    },
+    "ffi": {
+        "arg-type": "custom",
+        "type": "builtin",
+        "lib-depends": [
+            "libffi"
+        ]
+    },
+    "fileinfo": {
+        "type": "builtin"
+    },
+    "filter": {
+        "type": "builtin"
+    },
+    "ftp": {
+        "type": "builtin",
+        "lib-suggests": [
+            "openssl"
+        ]
+    },
+    "gd": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "zlib",
+            "libpng"
+        ],
+        "ext-depends": [
+            "zlib"
+        ],
+        "lib-suggests": [
+            "libavif",
+            "libwebp",
+            "libjpeg",
+            "freetype"
+        ]
+    },
+    "gettext": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "gettext"
+        ]
+    },
+    "gmp": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "gmp"
+        ]
+    },
+    "iconv": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends-windows": [
+            "libiconv"
+        ]
+    },
+    "imagick": {
+        "type": "external",
+        "source": "ext-imagick",
+        "arg-type": "custom",
+        "lib-depends": [
+            "imagemagick"
+        ]
+    },
+    "imap": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "imap"
+        ],
+        "lib-suggests": [
+            "kerberos"
+        ]
+    },
+    "inotify": {
+        "type": "external",
+        "source": "inotify"
+    },
+    "intl": {
+        "type": "builtin",
+        "lib-depends": [
+            "icu"
+        ]
+    },
+    "ldap": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "ldap"
+        ]
+    },
+    "mbregex": {
+        "type": "builtin",
+        "lib-depends": [
+            "onig"
+        ]
+    },
+    "mbstring": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "lib-depends": [
+            "onig"
+        ]
+    },
+    "mongodb": {
+        "type": "external",
+        "source": "mongodb",
+        "arg-type": "custom",
+        "lib-depends": [
+            "zstd"
+        ],
+        "lib-suggests": [
+            "icu",
+            "openssl"
+        ]
+    },
+    "mysqli": {
+        "type": "builtin",
+        "arg-type": "with",
+        "ext-depends": [
+            "mysqlnd"
+        ]
+    },
+    "mysqlnd": {
+        "type": "builtin",
+        "arg-type-windows": "with"
+    },
+    "opcache": {
+        "type": "builtin"
+    },
+    "openssl": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "openssl"
+        ]
+    },
+    "pcntl": {
+        "type": "builtin",
+        "unix-only": true
+    },
+    "pdo": {
+        "type": "builtin"
+    },
+    "pdo_mysql": {
+        "type": "builtin",
+        "arg-type": "with",
+        "ext-depends": [
+            "pdo",
+            "mysqlnd"
+        ]
+    },
+    "pdo_pgsql": {
+        "type": "builtin",
+        "arg-type": "with",
+        "ext-depends": [
+            "pdo"
+        ],
+        "lib-depends": [
+            "pq"
+        ]
+    },
+    "pdo_sqlite": {
+        "type": "builtin",
+        "arg-type": "with",
+        "ext-depends": [
+            "pdo",
+            "sqlite3"
+        ],
+        "lib-depends": [
+            "sqlite"
+        ]
+    },
+    "phar": {
+        "type": "builtin",
+        "ext-depends": [
+            "zlib"
+        ]
+    },
+    "posix": {
+        "type": "builtin",
+        "unix-only": true
+    },
+    "protobuf": {
+        "type": "external",
+        "source": "protobuf"
+    },
+    "pspell": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "aspell"
+        ]
+    },
+    "readline": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "readline"
+        ]
+    },
+    "redis": {
+        "type": "external",
+        "source": "redis",
+        "arg-type": "custom"
+    },
+    "session": {
+        "type": "builtin"
+    },
+    "shmop": {
+        "type": "builtin"
+    },
+    "simplexml": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "libxml2"
+        ]
+    },
+    "snmp": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "net-snmp"
+        ]
+    },
+    "soap": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "lib-depends": [
+            "libxml2"
+        ]
+    },
+    "sockets": {
+        "type": "builtin"
+    },
+    "sodium": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "libsodium"
+        ]
+    },
+    "sqlite3": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "sqlite"
+        ]
+    },
+    "ssh2": {
+        "type": "external",
+        "source": "ext-ssh2",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libssh2"
+        ]
+    },
+    "swoole": {
+        "type": "external",
+        "source": "swoole",
+        "arg-type": "custom",
+        "lib-depends": [
+            "openssl"
+        ],
+        "ext-depends": [
+            "openssl"
+        ],
+        "ext-suggests": [
+            "curl"
+        ],
+        "unix-only": true
+    },
+    "swow": {
+        "type": "external",
+        "source": "swow",
+        "arg-type": "custom",
+        "lib-suggests": [
+            "openssl",
+            "curl"
+        ],
+        "ext-suggests": [
+            "openssl",
+            "curl"
+        ]
+    },
+    "sysvmsg": {
+        "type": "builtin",
+        "unix-only": true
+    },
+    "sysvsem": {
+        "type": "builtin",
+        "unix-only": true
+    },
+    "sysvshm": {
+        "type": "builtin",
+        "unix-only": true
+    },
+    "tidy": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "tidy"
+        ]
+    },
+    "tokenizer": {
+        "type": "builtin"
+    },
+    "xml": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "libxml2"
+        ]
+    },
+    "xmlreader": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "lib-depends": [
+            "libxml2"
+        ]
+    },
+    "xmlwriter": {
+        "type": "builtin",
+        "arg-type": "custom",
+        "lib-depends": [
+            "libxml2"
+        ]
+    },
+    "xsl": {
+        "type": "builtin",
+        "arg-type": "with",
+        "lib-depends": [
+            "libxslt"
+        ]
+    },
+    "yaml": {
+        "type": "external",
+        "source": "yaml",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libyaml"
+        ]
+    },
+    "zip": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "arg-type-windows": "enable",
+        "lib-depends": [
+            "libzip"
+        ]
+    },
+    "zlib": {
+        "type": "builtin",
+        "arg-type": "with",
+        "arg-type-windows": "enable",
+        "lib-depends": [
+            "zlib"
+        ]
+    },
+    "zstd": {
+        "type": "external",
+        "source": "ext-zstd",
+        "arg-type": "custom",
+        "lib-depends": [
+            "zstd"
+        ]
+    }
+}

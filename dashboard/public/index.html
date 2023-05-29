@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>soft</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="format-detection" content="telephone=no, email=no">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="keywords" content="web ui"/>
+    <meta name="description" content="web ui"/>
+    <link rel="stylesheet" type="text/css" href="/css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/app.css"/>
+    <style>
+
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="main">
+        <div class="main-container">
+            <div class="container">
+                <header>
+                    <div>
+                        <div class="options-list">
+                            <label>
+                                <span>🛠️构建环境 OS：</span>
+                                <select name="os">
+                                    <option value="linux" selected>linux</option>
+                                    <option value="macos">macos</option>
+                                    <option value="windows">windows</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span>🛠️编译器 compiler：</span>
+                                <select name="compiler">
+                                    <option value="--cc=musl-gcc --cxx=g++" >debian -- musl-gcc/g++</option>
+                                    <option value="--cc=clang --cxx=clang++">debian -- clang/clang++</option>
+                                    <option value="--cc=gcc --cxx=g++" selected>alpine -- gcc/c++</option>
+                                    <option value="--cc=clang --cxx=clang++ ">alpine -- clang/clang++</option>
+                                </select>
+                            </label>
+                            &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label>
+                                <span>🛠️是否容器环境：</span>
+                                <select name="without-docker">
+                                    <option value="0" selected>容器</option>
+                                    <option value="1">不使用容器</option>
+                                </select>
+                            </label>
+                            &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+                            <label>
+                                <span>🛠️使用http代理：</span>
+                                <input
+                                    name="with-http-proxy"
+                                    type="text"
+                                    placeholder="例子：http://192.168.3.2:8015"
+                                    value=""
+                                    size="50"
+                                />
+                            </label>
+                            &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label>
+                                <span>🛠️debug：</span>
+                                <select name="with-debug">
+                                    <option value="" selected>none</option>
+                                    <option value="--debug">debug</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                </header>
+                <section class="extension-list">
+                    <div>
+                        支持的扩展列表 ：
+                       <ul class="all_extentions" id="all_extentions"></ul>
+                    </div>
+                </section>
+                <section class="lib-list">
+                    <div>
+                        必要依赖库 ：
+                       <ul class="all_extentions" id="depend_libraries"></ul>
+                    </div>   <div>
+                        建议依赖库 ：
+                       <ul class="all_extentions" id="suggest_depend_libraries"></ul>
+                    </div>
+                </section>
+                <section class="controller-gen">
+                    <div>
+                        <button class="btn-success generate-cmd-button">生成构建命令</button>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button class="btn-success reset-cmd-button" data-status="disable">启用所用扩展</button>
+                        <br/>
+                    </div>
+                </section>
+                <section>
+                    <br/>
+                    <br/>
+                    <div class="preview-code">
+                        <code class="pre-code preprocessor"></code>
+                    </div>
+                </section>
+                <section class="controller-run">
+                    <div>
+                        <br/>
+                        <br/>
+                        <button class="btn-success exec-button">运行构建命令</button>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="module">
+    import app from '/js/app.js'
+    app()
+</script>
+</body>
+</html>

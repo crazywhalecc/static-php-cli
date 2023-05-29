@@ -1,0 +1,36 @@
+.all_extentions, .default_extensions {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.all_extentions li, .default_extensions li {
+    margin-bottom: 30px;
+    margin-right: 30px;
+    font-weight: bold;
+}
+
+ul li label {
+    color: #1f2328;
+}
+
+.preview-code {
+    background: #23241f;
+    padding: 1.2rem;
+}
+
+.pre-code {
+    background: #23241f;
+    color: #f8f8f2;
+    line-height: 32px;
+    min-height: 200px;
+    overflow-wrap: break-word;
+
+}
+
+.x.pre-code{
+    border-bottom-color: #2ecc71;
+    border-bottom-style: dashed;
+    border-bottom-width: 0.01rem;
+
+}
