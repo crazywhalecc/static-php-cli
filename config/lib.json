@@ -460,5 +460,11 @@
         "static-libs-unix": [
             "libsodium.a"
         ]
+    },
+    "libargon2": {
+        "source": "libargon2",
+        "static-libs-unix": [
+            "libargon2.a"
+        ]
     }
 }

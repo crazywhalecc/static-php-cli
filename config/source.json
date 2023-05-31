@@ -419,5 +419,13 @@
             "type": "file",
             "path": "LICENSE"
         }
+    },
+    "libargon2": {
+        "type": "ghtar",
+        "repo": "P-H-C/phc-winner-argon2",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
     }
 }

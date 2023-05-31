@@ -295,6 +295,13 @@
             "libsodium"
         ]
     },
+    "password-argon2": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libargon2"
+        ]
+    },
     "sqlite3": {
         "type": "builtin",
         "arg-type": "with-prefix",
