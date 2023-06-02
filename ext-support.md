@@ -29,6 +29,7 @@
 | iconv      | yes                                                                 | yes                                                            |         |
 | imagick    | yes                                                                 | yes                                                            |         |
 | inotify    | yes                                                                 | yes                                                            |         |
+| intl       |                                                                     |                                                                |         |
 | mbstring   | yes                                                                 | yes                                                            |         |
 | mbregex    | yes                                                                 | yes                                                            |         |
 | mcrypt     |                                                                     | [no](https://github.com/crazywhalecc/static-php-cli/issues/32) |         |
@@ -36,6 +37,7 @@
 | mysqli     | yes                                                                 | yes                                                            |         |
 | mysqlnd    | yes                                                                 | yes                                                            |         |
 | openssl    | yes                                                                 | yes                                                            |         |
+| password-argon2    |                                                             |                                                                |         |
 | pcntl      | yes                                                                 | yes                                                            |         |
 | pdo        | yes                                                                 | yes                                                            |         |
 | pdo_mysql  | yes                                                                 | yes                                                            |         |
@@ -57,6 +59,7 @@
 | swow       | yes                                                                 | yes                                                            |         |
 | swoole     | [partial](https://github.com/crazywhalecc/static-php-cli/issues/51) | yes                                                            |         |
 | tokenizer  | yes                                                                 | yes                                                            |         |
+| xlswriter  |                                                                     |                                                                |         |
 | xml        | yes                                                                 | yes                                                            |         |
 | xmlreader  | yes, untested                                                       | yes, untested                                                  |         |
 | xmlwriter  | yes, untested                                                       | yes, untested                                                  |         |
@@ -79,7 +82,7 @@ Here are some extension list example for different use.
 - For static-php-cli self (with dev dependencies): `"posix,pcntl,phar,tokenizer,iconv,zlib,xml,dom,xmlwriter,xmlreader,fileinfo"`
 - Minimum, with no extension: `""`
 
-Compile with all supported extensions (exclude `swow`, `swoole` due to c++ extension):
+Compile with all supported extensions (exclude `swow`, `swoole`, because these will change the default behavior of php):
 
 ```bash
 bin/spc build --build-all bcmath,bz2,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,mbregex,mbstring,mongodb,mysqli,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,protobuf,redis,session,shmop,simplexml,soap,sockets,sqlite3,tokenizer,xml,xmlreader,xmlwriter,yaml,zip,zlib,zstd --with-libs=libjpeg,freetype,libwebp,libavif --debug
