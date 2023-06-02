@@ -139,7 +139,7 @@ class LinuxBuilder extends BuilderBase
                 )
             );
         }
-        if ($this->getExt('swoole')) {
+        if ($this->getExt('swoole') || $this->getExt('intl')) {
             $extra_libs .= ' -lstdc++';
         }
         if ($this->getExt('imagick')) {
