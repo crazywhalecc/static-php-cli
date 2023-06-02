@@ -154,7 +154,7 @@ cd buildroot/bin/
 
 ### micro.sfx Usage
 
-> phpmicro is a Self-Extracted Executable SAPI module, 
+> phpmicro is a SelF-extracted eXecutable SAPI module, 
 > provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). 
 > It can put php runtime and your source code together.
 
