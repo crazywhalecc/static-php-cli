@@ -212,7 +212,7 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 - [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE、SWOOLE-CLI LICENSE）
 
 因本项目的特殊性，使用项目编译过程中会使用很多其他开源项目，例如 curl、protobuf 等，它们都有各自的开源协议。
-请在编译完成后，使用命令 `dump-license`(TODO) 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。
+请在编译完成后，使用命令 `bin/spc dump-license` 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。
 
 ## 进阶
 
