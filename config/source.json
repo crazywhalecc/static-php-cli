@@ -391,6 +391,16 @@
             "path": "LICENSE"
         }
     },
+    "xlswriter": {
+        "type": "url",
+        "url": "http://pecl.php.net/get/xlswriter",
+        "path": "php-src/ext/xlswriter",
+        "filename": "xlswriter.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "xz": {
         "type": "filelist",
         "url": "https://tukaani.org/xz/",

@@ -367,6 +367,15 @@
     "tokenizer": {
         "type": "builtin"
     },
+    "xlswriter": {
+        "type": "external",
+        "source": "xlswriter",
+        "arg-type": "custom",
+        "ext-depends": [
+            "zlib",
+            "zip"
+        ]
+    },
     "xml": {
         "type": "builtin",
         "arg-type": "custom",
