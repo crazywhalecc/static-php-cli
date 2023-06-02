@@ -125,6 +125,16 @@
             "path": "LICENSE"
         }
     },
+    "libargon2": {
+        "type": "git",
+        "path": "",
+        "rev": "master",
+        "url": "https://github.com/mpociot/phc-winner-argon2",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",
@@ -423,14 +433,6 @@
         "type": "ghrel",
         "repo": "facebook/zstd",
         "match": "zstd.+\\.tar\\.gz",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
-    "libargon2": {
-        "type": "ghtar",
-        "repo": "P-H-C/phc-winner-argon2",
         "license": {
             "type": "file",
             "path": "LICENSE"

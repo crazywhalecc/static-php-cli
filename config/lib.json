@@ -127,6 +127,12 @@
             "libxml2"
         ]
     },
+    "libargon2": {
+        "source": "libargon2",
+        "static-libs-unix": [
+            "libargon2.a"
+        ]
+    },
     "libavif": {
         "source": "libavif",
         "static-libs-unix": [
@@ -468,12 +474,6 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
-        ]
-    },
-    "libargon2": {
-        "source": "libargon2",
-        "static-libs-unix": [
-            "libargon2.a"
         ]
     }
 }

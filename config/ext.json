@@ -195,6 +195,13 @@
             "openssl"
         ]
     },
+    "password-argon2": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libargon2"
+        ]
+    },
     "pcntl": {
         "type": "builtin",
         "unix-only": true
@@ -300,13 +307,6 @@
         "arg-type": "with",
         "lib-depends": [
             "libsodium"
-        ]
-    },
-    "password-argon2": {
-        "type": "builtin",
-        "arg-type": "with-prefix",
-        "lib-depends": [
-            "libargon2"
         ]
     },
     "sqlite3": {
