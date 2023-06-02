@@ -460,5 +460,18 @@
         "static-libs-unix": [
             "libsodium.a"
         ]
+    },
+    "icu": {
+        "source": "icu",
+        "static-libs-unix": [
+            "libicudata.a",
+            "libicui18n.a",
+            "libicuio.a",
+            "libicutu.a",
+            "libicuuc.a"
+        ],
+        "headers": [
+
+        ]
     }
 }

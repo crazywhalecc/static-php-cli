@@ -419,5 +419,13 @@
             "type": "file",
             "path": "LICENSE"
         }
+    },
+    "icu": {
+        "type": "url",
+        "url": "https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
     }
 }
