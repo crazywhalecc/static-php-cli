@@ -127,7 +127,6 @@
     },
     "libargon2": {
         "type": "git",
-        "path": "",
         "rev": "master",
         "url": "https://github.com/mpociot/phc-winner-argon2",
         "license": {
