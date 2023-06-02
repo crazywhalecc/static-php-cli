@@ -264,7 +264,8 @@
         ],
         "lib-suggests": [
             "xz",
-            "zlib"
+            "zlib",
+            "icu"
         ],
         "lib-suggests-windows": [
             "icu",
