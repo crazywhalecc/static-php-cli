@@ -154,7 +154,7 @@ cd buildroot/bin/
 
 ### micro.sfx Usage
 
-> phpmicro is a Self-Extracted Executable SAPI module, 
+> phpmicro is a SelF-extracted eXecutable SAPI module, 
 > provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). 
 > It can put php runtime and your source code together.
 
@@ -215,6 +215,10 @@ The basic principles for contributing are as follows:
     camelCase and underscore formats should be followed, and mixing within the same module is prohibited.
 - When compiling external libraries and creating patches, compatibility with different operating systems should be considered.
 
+## Sponsor this project
+
+You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md).
+
 ## Open-Source License
 
 This project is based on the tradition of using the MIT License for old versions, 
@@ -227,7 +231,7 @@ Due to the special nature of this project,
 many other open source projects such as curl and protobuf will be used during the project compilation process, 
 and they all have their own open source licenses.
 
-Please use the `dump-license`(TODO) command to export the open source licenses used in the project after compilation, 
+Please use the `bin/spc dump-license` command to export the open source licenses used in the project after compilation, 
 and comply with the corresponding project's LICENSE.
 
 ## Advanced
