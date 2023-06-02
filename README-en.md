@@ -76,8 +76,9 @@ Clone repo first:
 git clone https://github.com/crazywhalecc/static-php-cli.git
 ```
 
-If you have not installed php on your system, you can download single-file php binary and composer first.
+If you have not installed php on your system, you can use package management to install PHP (such as brew, apt, yum, apk etc.).
 
+And you can also download single-file php binary and composer first.
 The PHP runtime for static-php-cli itself will be downloaded at `bin/php`, and composer is at `bin/composer`.
 
 ```bash
