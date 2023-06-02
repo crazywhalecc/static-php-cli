@@ -469,9 +469,6 @@
             "libicuio.a",
             "libicutu.a",
             "libicuuc.a"
-        ],
-        "headers": [
-
         ]
     }
 }
