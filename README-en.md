@@ -78,12 +78,13 @@ git clone https://github.com/crazywhalecc/static-php-cli.git
 
 If you have not installed php on your system, you can use package management to install PHP (such as brew, apt, yum, apk etc.).
 
-And you can also download single-file php binary and composer first.
+And you can also download single-file php binary and composer using command `bin/setup-runtime`.
 The PHP runtime for static-php-cli itself will be downloaded at `bin/php`, and composer is at `bin/composer`.
 
 ```bash
 cd static-php-cli
 chmod +x bin/setup-runtime
+# It will download php-cli from self-hosted server and composer from getcomposer.org
 ./bin/setup-runtime
 
 # Use this php runtime to run static-php-cli compiler
