@@ -71,9 +71,9 @@ If you are using English, see [English README](README-en.md).
 git clone https://github.com/crazywhalecc/static-php-cli.git
 ```
 
-如果你本机没有安装 PHP，你可以通过命令下载静态编译好的 php-cli 和 Composer。
+如果你本机没有安装 PHP，你需要先使用包管理（例如 brew、apt、yum、apk 等）安装 php。
 
-下载的 php 和 Composer 将保存为 `bin/php` 和 `bin/composer`。
+你也可以通过 `bin/setup-runtime` 命令下载静态编译好的 php-cli 和 Composer。下载的 php 和 Composer 将保存为 `bin/php` 和 `bin/composer`。
 
 ```bash
 cd static-php-cli
