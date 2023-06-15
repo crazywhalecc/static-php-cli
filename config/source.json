@@ -212,8 +212,8 @@
         }
     },
     "libwebp": {
-        "type": "ghtagtar",
-        "repo": "webmproject/libwebp",
+        "type": "url",
+        "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.0.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
