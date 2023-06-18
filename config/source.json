@@ -99,6 +99,14 @@
             "text": "Since version 6, GMP is distributed under the dual licenses, GNU LGPL v3 and GNU GPL v2. These licenses make the library free to use, share, and improve, and allow you to pass on the result. The GNU licenses give freedoms, but also set firm restrictions on the use with non-free programs."
         }
     },
+    "icu": {
+        "type": "url",
+        "url": "https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "imagemagick": {
         "type": "ghtar",
         "repo": "ImageMagick/ImageMagick",
@@ -186,6 +194,14 @@
             "path": "COPYING"
         }
     },
+    "libsodium": {
+        "type": "url",
+        "url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "libssh2": {
         "type": "ghrel",
         "repo": "libssh2/libssh2",
@@ -196,8 +212,8 @@
         }
     },
     "libwebp": {
-        "type": "ghtagtar",
-        "repo": "webmproject/libwebp",
+        "type": "url",
+        "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.0.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -376,6 +392,16 @@
             "path": "LICENSE"
         }
     },
+    "xlswriter": {
+        "type": "url",
+        "url": "http://pecl.php.net/get/xlswriter",
+        "path": "php-src/ext/xlswriter",
+        "filename": "xlswriter.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "xz": {
         "type": "filelist",
         "url": "https://tukaani.org/xz/",
@@ -408,14 +434,6 @@
         "type": "ghrel",
         "repo": "facebook/zstd",
         "match": "zstd.+\\.tar\\.gz",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
-    "libsodium": {
-        "type": "url",
-        "url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz",
         "license": {
             "type": "file",
             "path": "LICENSE"

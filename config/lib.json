@@ -96,6 +96,15 @@
             "gmp.h"
         ]
     },
+    "icu": {
+        "source": "icu",
+        "static-libs-unix": [
+            "libicui18n.a",
+            "libicuio.a",
+            "libicuuc.a",
+            "libicudata.a"
+        ]
+    },
     "imagemagick": {
         "source": "imagemagick",
         "static-libs-unix": [
@@ -200,6 +209,12 @@
             "zlib"
         ]
     },
+    "libsodium": {
+        "source": "libsodium",
+        "static-libs-unix": [
+            "libsodium.a"
+        ]
+    },
     "libssh2": {
         "source": "libssh2",
         "static-libs-unix": [
@@ -249,7 +264,8 @@
         ],
         "lib-suggests": [
             "xz",
-            "zlib"
+            "zlib",
+            "icu"
         ],
         "lib-suggests-windows": [
             "icu",
@@ -464,12 +480,6 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
-        ]
-    },
-    "libsodium": {
-        "source": "libsodium",
-        "static-libs-unix": [
-            "libsodium.a"
         ]
     }
 }

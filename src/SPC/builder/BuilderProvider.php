@@ -31,13 +31,13 @@ class BuilderProvider
                 cc: $input->getOption('cc'),
                 cxx: $input->getOption('cxx'),
                 arch: $input->getOption('arch'),
-                zts: $input->getOption('enable-zts'),
+                zts: $input->hasOption('enable-zts') ? $input->getOption('enable-zts') : false,
             ),
             'Linux' => new LinuxBuilder(
                 cc: $input->getOption('cc'),
                 cxx: $input->getOption('cxx'),
                 arch: $input->getOption('arch'),
-                zts: $input->getOption('enable-zts'),
+                zts: $input->hasOption('enable-zts') ? $input->getOption('enable-zts') : false,
             ),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
