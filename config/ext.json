@@ -166,12 +166,11 @@
         "type": "external",
         "source": "mongodb",
         "arg-type": "custom",
-        "lib-depends": [
-            "zstd"
-        ],
         "lib-suggests": [
             "icu",
-            "openssl"
+            "openssl",
+            "zstd",
+            "zlib"
         ]
     },
     "mysqli": {
