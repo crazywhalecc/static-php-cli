@@ -32,6 +32,8 @@ trait UnixBuilderTrait
     /** @var string configure 环境依赖的变量 */
     public string $configure_env;
 
+    public array $pkg_config_packages = [];
+
     public function getAllStaticLibFiles(): array
     {
         $libs = [];
@@ -50,9 +52,11 @@ trait UnixBuilderTrait
         foreach ($libs as $lib) {
             if (!in_array($lib::NAME, $libNames, true)) {
                 $libNames[] = $lib::NAME;
+                $this->pkg_config_packages = array_merge($this->pkg_config_packages, $lib->getPackages());
                 array_unshift($libFiles, ...$lib->getStaticLibs());
             }
         }
+        $this->pkg_config_packages = array_unique($this->pkg_config_packages);
         return array_map(fn ($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
     }
 

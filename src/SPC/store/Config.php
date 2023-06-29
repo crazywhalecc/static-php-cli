@@ -49,7 +49,7 @@ class Config
         if (!isset(self::$lib[$name])) {
             throw new WrongUsageException('lib [' . $name . '] is not supported yet');
         }
-        $supported_sys_based = ['static-libs', 'headers', 'lib-depends', 'lib-suggests', 'frameworks'];
+        $supported_sys_based = ['static-libs', 'headers', 'lib-depends', 'lib-suggests', 'frameworks', 'pkg-config-packages'];
         if ($key !== null && in_array($key, $supported_sys_based)) {
             $m_key = match (PHP_OS_FAMILY) {
                 'Windows' => ['-windows', '-win', ''],

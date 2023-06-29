@@ -71,7 +71,9 @@ class LinuxBuilder extends BuilderBase
             cxx: $this->cxx
         );
         // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
+        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig" ';
+        $this->pkgconf_env .= $this->pkgconf_env . ' PATH=' . BUILD_ROOT_PATH . '/bin/:' . BUILD_ROOT_PATH . '/usr/bin/:$PATH  ';
+
         // 设置 configure 依赖的环境变量
         $this->configure_env =
             $this->pkgconf_env . ' ' .
@@ -139,6 +141,7 @@ class LinuxBuilder extends BuilderBase
                 )
             );
         }
+
         if ($this->getExt('swoole') || $this->getExt('intl')) {
             $extra_libs .= ' -lstdc++';
         }
@@ -165,10 +168,25 @@ class LinuxBuilder extends BuilderBase
             default:
                 throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
         }
+        $builddir = BUILD_ROOT_PATH;
+        $libs = '';
+        if (!empty($this->pkg_config_packages)) {
+            $packages = implode(' ', $this->pkg_config_packages);
+            $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-l   --static  ' . $packages);
+            var_dump($libs);
+            if (!empty($output[1][0])) {
+                $libs = $output[1][0];
+            }
+        }
+        $envs .= " CPPFLAGS=\"-I{$builddir}/include/\" ";
+        $envs .= " LDFLAGS=\"-L{$builddir}/lib/\" ";
+        $envs .= " LIBS=\"{$libs} -lstdc++ \" ";
+        if (!empty(trim($cflags))) {
+            $envs .= " CFLAGS='{$cflags} ";
+        }
+        # $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
 
-        $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
-
-        SourcePatcher::patchPHPBuildconf($this);
+        // SourcePatcher::patchPHPBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
@@ -182,8 +200,8 @@ class LinuxBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                $envs . ' ' .
                 './configure ' .
-                '--prefix= ' .
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
