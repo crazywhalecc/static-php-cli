@@ -22,10 +22,10 @@ trait libxml2
 
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
-            //    "-DCMAKE_INSTALL_PREFIX={{$destdir}} " .
+            //   "{$this->builder->makeCmakeArgs()} " .
             ->exec(
                 "{$this->builder->configure_env} " . ' cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
+                "-DCMAKE_INSTALL_PREFIX={{$destdir}} " .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DLIBXML2_WITH_ICONV=ON ' .
                 '-DIconv_IS_BUILT_IN=OFF ' .
@@ -38,7 +38,8 @@ trait libxml2
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            // ->exec("make install DESTDIR={$destdir}");
+            ->exec('make install');
 
         if (is_dir(BUILD_INCLUDE_PATH . '/libxml2/libxml')) {
             if (is_dir(BUILD_INCLUDE_PATH . '/libxml')) {
@@ -48,9 +49,11 @@ trait libxml2
             $dst_path = FileSystem::convertPath(BUILD_INCLUDE_PATH . '/');
             shell()->exec('mv "' . $path . '" "' . $dst_path . '"');
         }
+        /*
         $realpath = $destdir . '/usr/bin/xml2-config';
         $file = FileSystem::readFile($realpath);
         $file = preg_replace('/^prefix=.*$/m', 'prefix=' . BUILD_ROOT_PATH, $file);
         FileSystem::writeFile($realpath, $file);
+        */
     }
 }
