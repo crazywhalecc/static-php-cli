@@ -9,7 +9,7 @@ cd ${__DIR__}
 
 
 # use china mirror
-# bash quickstart/linux/x86_64/alpine-3.16-init.sh --mirror china
+# bash quickstart/linux/alpine-init.sh --mirror china
 mirror=''
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -39,3 +39,4 @@ apk update
 apk add vim alpine-sdk xz autoconf automake linux-headers clang-dev clang lld libtool cmake bison re2c gettext coreutils
 apk add bash p7zip zip unzip flex  pkgconf ca-certificates
 apk add wget git curl
+apk add pkg-config

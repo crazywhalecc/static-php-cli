@@ -25,3 +25,4 @@ composer.lock
 !/bin/spc
 !/bin/setup-runtime
 !/bin/spc-alpine-docker
+quickstart/prepare.sh

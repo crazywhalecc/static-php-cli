@@ -60,7 +60,6 @@ class BuildLibsCommand extends BuildCommand
             $builder->setLibsOnly();
             // 编译和检查库完整
             $builder->buildLibs($libraries);
-
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build libs complete, used ' . $time . ' s !');
             return 0;

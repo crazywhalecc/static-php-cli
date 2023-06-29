@@ -15,14 +15,31 @@ OS=$(uname -s)
 ARCH=$(uname -m)
 
 if [[ $OS = "Linux" && -f /etc/os-release ]]; then
-  OS_NAME=$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{print $2}')
-  # debian ubuntu alpine
+  OS_ID=$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{print $2}')
+  case $OS_ID in
+  debian | alpine | ubuntu)
+    echo $OS_ID
+    ;;
+  *)
+    echo 'NO SUPPORT LINUX OS'
+    exit 0
+    ;;
+  esac
 fi
 
 # sh bin/setup-runtime --mirror china
-# export PATH="${__PROJECT__}/bin:$PATH"
 
+export PATH="${__PROJECT__}/bin:$PATH"
+
+alias php="php -d curl.cainfo=${__PROJECT__}/bin/cacert.pem -d openssl.cafile=${__PROJECT__}/bin/cacert.pem"
+
+# php --ri curl
+# php --ri openssl
+
+export COMPOSER_ALLOW_SUPERUSER=1
+#composer suggests --all
 composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+# composer update --optimize-autoloader
 
 chmod +x bin/spc
 
@@ -53,5 +70,7 @@ EXTENSIONS="${EXTENSIONS},swow"
 EXTENSIONS="pdo"
 EXTENSIONS="${EXTENSIONS},pgsql,pdo_pgsql"
 
+./bin/spc build:libs "libiconv,libxml2,zstd,zlib,openssl,ncurses,readline,icu,postgresql"  --cc=clang --cxx=clang++ --debug
+exit 0
 ./bin/spc build "${EXTENSIONS}" --build-cli --cc=clang --cxx=clang++ --debug
 # ./bin/spc build "${EXTENSIONS}" --build-cli --cc=gcc --cxx=g++  --debug

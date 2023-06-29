@@ -66,16 +66,15 @@ abstract class BuilderBase
         if ($libraries === [] && $this->isLibsOnly()) {
             $libraries = array_keys($support_lib_list);
         }
-        if (!in_array('pkg-config', $libraries)) {
-            array_unshift($libraries, 'pkg-config');
-        }
 
         // 排序 libs，根据依赖计算一个新的列表出来
         $libraries = DependencyUtil::getLibsByDeps($libraries);
         // 过滤不支持的库后添加
         foreach ($libraries as $library) {
             if (!isset($support_lib_list[$library])) {
-                throw new RuntimeException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
+                throw new RuntimeException(
+                    'library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!'
+                );
             }
             $lib = new ($support_lib_list[$library])($this);
             $this->addLib($lib);
@@ -256,7 +255,9 @@ abstract class BuilderBase
                 '"' . implode(', ', $not_downloaded) .
                 '" totally ' . count($not_downloaded) .
                 ' source' . (count($not_downloaded) === 1 ? '' : 's') .
-                ' not downloaded, maybe you need to "fetch" ' . (count($not_downloaded) === 1 ? 'it' : 'them') . ' first?'
+                ' not downloaded, maybe you need to "fetch" ' . (count(
+                    $not_downloaded
+                ) === 1 ? 'it' : 'them') . ' first?'
             );
         }
     }
@@ -264,7 +265,9 @@ abstract class BuilderBase
     protected function initSource(?array $sources = null, ?array $libs = null, ?array $exts = null): void
     {
         if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
-            throw new WrongUsageException('Download lock file "downloads/.lock.json" not found, maybe you need to download sources first ?');
+            throw new WrongUsageException(
+                'Download lock file "downloads/.lock.json" not found, maybe you need to download sources first ?'
+            );
         }
         $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true);
 
@@ -298,13 +301,19 @@ abstract class BuilderBase
         // start check
         foreach ($sources_extracted as $source => $item) {
             if (!isset($lock[$source])) {
-                throw new WrongUsageException('Source [' . $source . '] not downloaded, you should download it first !');
+                throw new WrongUsageException(
+                    'Source [' . $source . '] not downloaded, you should download it first !'
+                );
             }
 
             // check source dir exist
             $check = $lock[$source]['move_path'] === null ? SOURCE_PATH . '/' . $source : SOURCE_PATH . '/' . $lock[$source]['move_path'];
             if (!is_dir($check)) {
-                FileSystem::extractSource($source, DOWNLOAD_PATH . '/' . ($lock[$source]['filename'] ?? $lock[$source]['dirname']), $lock[$source]['move_path']);
+                FileSystem::extractSource(
+                    $source,
+                    DOWNLOAD_PATH . '/' . ($lock[$source]['filename'] ?? $lock[$source]['dirname']),
+                    $lock[$source]['move_path']
+                );
             }
         }
     }

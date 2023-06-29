@@ -17,17 +17,27 @@ trait postgresql
     {
         [$libdir, , $destdir] = SEPARATED_PATH;
         $builddir = BUILD_ROOT_PATH;
+
+        # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
         shell()->cd($this->source_dir)
-            ->exec('sed -i.backup "s/invokes exit\\\'; exit 1;/invokes exit\\\';/"  src/interfaces/libpq/Makefile')
+            ->exec(
+                <<<'EOF'
+            sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  src/interfaces/libpq/Makefile 
+EOF
+            )
             ->exec(
                 <<<EOF
             {$this->builder->configure_env} \\
-            ./configure  \\
+            test -d build && rm -rf build 
+            mkdir -p build  
+            cd build 
+            
+            ../configure  \\
             --prefix={$builddir} \\
             --enable-coverage=no \\
             --with-ssl=openssl  \\
             --with-readline \\
-            --without-icu \\
+            --with-icu \\
             --without-ldap \\
             --with-libxml  \\
             --without-libxslt \\
@@ -40,12 +50,18 @@ trait postgresql
             --without-bonjour \\
             --without-tcl
 
-            make -C src/bin install
-            make -C src/include install
-            make -C src/interfaces install 
 
-            make -C  src/common install 
-            make -C  src/port install 
+            make -C src/bin/pg_config install
+            make -C src/include install
+
+            make -C  src/common install
+
+            make -C  src/backend/port install
+            make -C  src/port install
+
+            make -C  src/backend/libpq install
+            make -C  src/interfaces/libpq install
+            
             rm -rf {$builddir}/lib/*.so.*
             rm -rf {$builddir}/lib/*.so
             rm -rf {$builddir}/lib/*.dylib

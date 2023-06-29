@@ -391,7 +391,8 @@
             "zstd",
             "openssl",
             "zlib",
-            "readline"
+            "readline",
+            "icu"
 
         ]
     },
