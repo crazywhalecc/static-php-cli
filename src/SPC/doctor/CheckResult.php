@@ -6,21 +6,21 @@ namespace SPC\doctor;
 
 class CheckResult
 {
-    public function __construct(private string $message = '', private string $fix_item = '', private array $fix_params = [])
+    public function __construct(private bool $ok, private ?string $message = null, private string $fix_item = '', private array $fix_params = [])
     {
     }
 
     public static function fail(string $message, string $fix_item = '', array $fix_params = []): CheckResult
     {
-        return new static($message, $fix_item, $fix_params);
+        return new static(false, $message, $fix_item, $fix_params);
     }
 
-    public static function ok(): CheckResult
+    public static function ok(?string $message = null): CheckResult
     {
-        return new static();
+        return new static(true, $message);
     }
 
-    public function getMessage(): string
+    public function getMessage(): ?string
     {
         return $this->message;
     }
@@ -37,7 +37,7 @@ class CheckResult
 
     public function isOK(): bool
     {
-        return empty($this->message);
+        return $this->ok;
     }
 
     public function setFixItem(string $fix_item = '', array $fix_params = [])

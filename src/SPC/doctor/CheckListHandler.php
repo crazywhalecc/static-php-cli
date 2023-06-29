@@ -24,9 +24,20 @@ class CheckListHandler
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public function __construct(private InputInterface $input, private OutputInterface $output)
+    public function __construct(private InputInterface $input, private OutputInterface $output, bool $include_manual = false)
     {
-        $this->loadCheckList();
+        $this->loadCheckList($include_manual);
+    }
+
+    public function runSingleCheck(string $item_name, int $fix_policy = FIX_POLICY_DIE): void
+    {
+        foreach ($this->check_list as $item) {
+            if ($item->item_name === $item_name) {
+                $this->check_list = [$item];
+                break;
+            }
+        }
+        $this->runCheck($fix_policy);
     }
 
     /**
@@ -44,7 +55,7 @@ class CheckListHandler
                 $this->output->writeln('skipped');
             } elseif ($result instanceof CheckResult) {
                 if ($result->isOK()) {
-                    $this->output->writeln('ok');
+                    $this->output->writeln($result->getMessage() ?? 'ok');
                     continue;
                 }
                 // Failed
@@ -85,28 +96,30 @@ class CheckListHandler
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    private function loadCheckList(): void
+    private function loadCheckList(bool $include_manual = false): void
     {
         foreach (FileSystem::getClassesPsr4(__DIR__ . '/item', 'SPC\\doctor\\item') as $class) {
             $ref = new \ReflectionClass($class);
             foreach ($ref->getMethods() as $method) {
-                $attr = $method->getAttributes(AsCheckItem::class);
-                if (isset($attr[0])) {
-                    /** @var AsCheckItem $instance */
-                    $instance = $attr[0]->newInstance();
-                    $instance->callback = [new $class(), $method->getName()];
-                    $this->check_list[] = $instance;
-                    continue;
-                }
-                $attr = $method->getAttributes(AsFixItem::class);
-                if (isset($attr[0])) {
-                    /** @var AsFixItem $instance */
-                    $instance = $attr[0]->newInstance();
-                    // Redundant fix item
-                    if (isset($this->fix_map[$instance->name])) {
-                        throw new RuntimeException('Redundant doctor fix item: ' . $instance->name);
+                $attr = $method->getAttributes();
+                foreach ($attr as $a) {
+                    if (is_a($a->getName(), AsCheckItem::class, true)) {
+                        /** @var AsCheckItem $instance */
+                        $instance = $a->newInstance();
+                        if (!$include_manual && $instance->manual) {
+                            continue;
+                        }
+                        $instance->callback = [new $class(), $method->getName()];
+                        $this->check_list[] = $instance;
+                    } elseif (is_a($a->getName(), AsFixItem::class, true)) {
+                        /** @var AsFixItem $instance */
+                        $instance = $a->newInstance();
+                        // Redundant fix item
+                        if (isset($this->fix_map[$instance->name])) {
+                            throw new RuntimeException('Redundant doctor fix item: ' . $instance->name);
+                        }
+                        $this->fix_map[$instance->name] = [new $class(), $method->getName()];
                     }
-                    $this->fix_map[$instance->name] = [new $class(), $method->getName()];
                 }
             }
         }
