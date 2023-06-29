@@ -8,7 +8,7 @@ __DIR__=$(
 cd ${__DIR__}
 
 # use china mirror
-# bash quickstart/linux/x86_64/debian-11-init.sh --mirror china
+# bash quickstart/linux/debian-init.sh --mirror china
 mirror=''
 while [ $# -gt 0 ]; do
 	case "$1" in
