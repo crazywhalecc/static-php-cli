@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace SPC\builder\linux\library;
+namespace SPC\builder\macos\library;
 
-class postgresql extends LinuxLibraryBase
+use SPC\builder\unix\library\postgresql as pgsql;
+
+class postgresql extends MacOSLibraryBase
 {
-    use \SPC\builder\unix\library\postgresql;
+    use pgsql;
 
     public const NAME = 'postgresql';
 }

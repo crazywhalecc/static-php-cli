@@ -39,7 +39,8 @@ alias php="php -d curl.cainfo=${__PROJECT__}/bin/cacert.pem -d openssl.cafile=${
 export COMPOSER_ALLOW_SUPERUSER=1
 #composer suggests --all
 composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
-composer update --no-dev --optimize-autoloader
+#composer update --no-dev --optimize-autoloader
+composer update  --optimize-autoloader
 
 chmod +x bin/spc
 

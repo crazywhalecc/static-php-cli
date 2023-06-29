@@ -17,21 +17,18 @@ trait postgresql
     {
         [$libdir, , $destdir] = SEPARATED_PATH;
         $builddir = BUILD_ROOT_PATH;
-
+        shell()->cd($this->source_dir)->exec('mkdir -p build  ');
+        shell()->cd($this->source_dir . '/build')->exec('rm -rf ./* ');
         # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
-        shell()->cd($this->source_dir)
+        shell()->cd($this->source_dir . '/build')
             ->exec(
                 <<<'EOF'
-            sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  src/interfaces/libpq/Makefile 
+            sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile 
 EOF
             )
             ->exec(
                 <<<EOF
             {$this->builder->configure_env} \\
-            test -d build && rm -rf build 
-            mkdir -p build  
-            cd build 
-            
             ../configure  \\
             --prefix={$builddir} \\
             --enable-coverage=no \\
