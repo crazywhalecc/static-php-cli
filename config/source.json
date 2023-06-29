@@ -8,7 +8,7 @@
     },
     "apcu": {
         "type": "url",
-        "url": "http://pecl.php.net/get/APCu",
+        "url": "https://pecl.php.net/get/APCu",
         "path": "php-src/ext/apcu",
         "filename": "apcu.tgz",
         "license": {
@@ -63,7 +63,7 @@
     },
     "ext-ssh2": {
         "type": "url",
-        "url": "http://pecl.php.net/get/ssh2",
+        "url": "https://pecl.php.net/get/ssh2",
         "path": "php-src/ext/ssh2",
         "filename": "ssh2.tgz",
         "license": {
@@ -117,7 +117,7 @@
     },
     "inotify": {
         "type": "url",
-        "url": "http://pecl.php.net/get/inotify",
+        "url": "https://pecl.php.net/get/inotify",
         "path": "php-src/ext/inotify",
         "filename": "inotify.tgz",
         "license": {
@@ -327,7 +327,7 @@
     },
     "protobuf": {
         "type": "url",
-        "url": "http://pecl.php.net/get/protobuf",
+        "url": "https://pecl.php.net/get/protobuf",
         "path": "php-src/ext/protobuf",
         "filename": "protobuf.tgz",
         "license": {
@@ -393,7 +393,7 @@
     },
     "xlswriter": {
         "type": "url",
-        "url": "http://pecl.php.net/get/xlswriter",
+        "url": "https://pecl.php.net/get/xlswriter",
         "path": "php-src/ext/xlswriter",
         "filename": "xlswriter.tgz",
         "license": {
