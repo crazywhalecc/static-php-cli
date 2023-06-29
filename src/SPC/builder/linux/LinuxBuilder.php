@@ -164,6 +164,15 @@ class LinuxBuilder extends BuilderBase
             $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-l   --static  ' . $packages);
             if (!empty($output[1][0])) {
                 $libs = $output[1][0];
+                logger()->info('LIBS=' . $output[1][0]);
+            }
+            $output = shell()->execWithResult($envs . ' pkg-config      --cflags-only-I   --static  ' . $packages);
+            if (!empty($output[1][0])) {
+                logger()->info('CPPFLAGS=' . $output[1][0]);
+            }
+            $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-L   --static  ' . $packages);
+            if (!empty($output[1][0])) {
+                logger()->info('LDFLAGS=' . $output[1][0]);
             }
         }
         $envs .= " CPPFLAGS=\"-I{$builddir}/include/\" ";
