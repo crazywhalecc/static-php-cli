@@ -173,7 +173,6 @@ class LinuxBuilder extends BuilderBase
         if (!empty($this->pkg_config_packages)) {
             $packages = implode(' ', $this->pkg_config_packages);
             $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-l   --static  ' . $packages);
-            var_dump($libs);
             if (!empty($output[1][0])) {
                 $libs = $output[1][0];
             }
@@ -184,7 +183,6 @@ class LinuxBuilder extends BuilderBase
         if (!empty(trim($cflags))) {
             $envs .= " CFLAGS='{$cflags} ";
         }
-        # $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
 
         // SourcePatcher::patchPHPBuildconf($this);
 

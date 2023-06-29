@@ -50,7 +50,6 @@ class MacOSBuilder extends BuilderBase
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->arch, $this->arch_c_flags);
         // 设置 configure 依赖的环境变量
         $this->configure_env =
-            'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" ' .
             'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
@@ -137,12 +136,26 @@ class MacOSBuilder extends BuilderBase
             );
         }
 
+        $builddir = BUILD_ROOT_PATH;
+        $libs = '';
+        $envs = $this->configure_env;
+        if (!empty($this->pkg_config_packages)) {
+            $packages = implode(' ', $this->pkg_config_packages);
+            $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-l   --static  ' . $packages);
+            if (!empty($output[1][0])) {
+                $libs = $output[1][0];
+            }
+        }
+        $envs .= " CPPFLAGS=\"-I{$builddir}/include/\" ";
+        $envs .= " LDFLAGS=\"-L{$builddir}/lib/\" ";
+        $envs .= " LIBS=\"{$libs} -lstdc++ \" ";
+
         // patch before configure
         SourcePatcher::patchPHPBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
-        SourcePatcher::patchPHPConfigure($this);
+        // SourcePatcher::patchPHPConfigure($this);
 
         if ($this->getLib('libxml2') || $this->getExt('iconv')) {
             $extra_libs .= ' -liconv';
@@ -156,8 +169,8 @@ class MacOSBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                $envs . ' ' .
                 './configure ' .
-                '--prefix= ' .
                 '--with-valgrind=no ' .     // 不检测内存泄漏
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
