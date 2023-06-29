@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\FileSystem;
 
 trait postgresql
 {
@@ -17,8 +18,16 @@ trait postgresql
     {
         [$libdir, , $destdir] = SEPARATED_PATH;
         $builddir = BUILD_ROOT_PATH;
-        shell()->cd($this->source_dir)->exec('mkdir -p build  ');
-        shell()->cd($this->source_dir . '/build')->exec('rm -rf ./* ');
+
+        $env = $this->builder->configure_env;
+        $packages = 'openssl zlib icu-uc icu-io icu-i18n readline libxml-2.0 libzstd';
+        $output = shell()->execWithResult($env . ' pkg-config      --libs-only-l   --static  ' . $packages);
+        $libs = $output[1][0];
+        $env .= " CPPFLAGS=\"-I{$builddir}/include/\" ";
+        $env .= " LDFLAGS=\"-L{$builddir}/lib/\" ";
+        $env .= " LIBS=\"{$libs}\" ";
+
+        FileSystem::resetDir($this->source_dir . '/build');
         # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
         shell()->cd($this->source_dir . '/build')->exec(
             <<<'EOF'
@@ -29,9 +38,10 @@ EOF
         shell()->cd($this->source_dir . '/build')
             ->exec(
                 <<<EOF
-            {$this->builder->configure_env} \\
+            {$env} \\
             ../configure  \\
             --prefix={$builddir} \\
+            --disable-thread-safety \\
             --enable-coverage=no \\
             --with-ssl=openssl  \\
             --with-readline \\
@@ -47,8 +57,11 @@ EOF
             --without-ldap \\
             --without-bonjour \\
             --without-tcl
+EOF
+            );
 
-
+        shell()->cd($this->source_dir . '/build')->exec(
+            <<<EOF
             make -C src/bin/pg_config install
             make -C src/include install
 
@@ -65,7 +78,7 @@ EOF
             rm -rf {$builddir}/lib/*.dylib
         
 EOF
-            );
+        );
         $this->patchPkgconfPrefix(['libpq.pc', 'libecpg.pc', 'libecpg_compat.pc']);
     }
 }

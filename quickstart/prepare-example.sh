@@ -40,7 +40,7 @@ export COMPOSER_ALLOW_SUPERUSER=1
 #composer suggests --all
 composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
 #composer update --no-dev --optimize-autoloader
-composer update  --optimize-autoloader
+#composer update  --optimize-autoloader
 
 chmod +x bin/spc
 
@@ -71,6 +71,10 @@ EXTENSIONS="${EXTENSIONS},swow"
 EXTENSIONS="pdo"
 EXTENSIONS="${EXTENSIONS},pgsql,pdo_pgsql"
 
+./bin/spc build:libs "libxml2"  --cc=clang --cxx=clang++ --debug
+
+./bin/spc build:libs "postgresql"  --cc=clang --cxx=clang++ --debug
+exit 0
 ./bin/spc build:libs "libiconv,libxml2,zstd,zlib,openssl,ncurses,readline,icu,postgresql"  --cc=clang --cxx=clang++ --debug
 exit 0
 ./bin/spc build "${EXTENSIONS}" --build-cli --cc=clang --cxx=clang++ --debug
