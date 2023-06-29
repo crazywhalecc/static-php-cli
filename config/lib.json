@@ -393,7 +393,6 @@
             "zlib",
             "readline",
             "icu"
-
         ]
     },
     "pthreads4w": {
