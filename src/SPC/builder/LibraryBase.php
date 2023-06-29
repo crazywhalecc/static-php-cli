@@ -137,7 +137,6 @@ abstract class LibraryBase
             $this->build();
             return BUILD_STATUS_OK;
         }
-
         // 看看这些库是不是存在，如果不存在，则调用编译并返回结果状态
         foreach ($this->getStaticLibs() as $name) {
             if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {

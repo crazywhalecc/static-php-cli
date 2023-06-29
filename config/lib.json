@@ -381,9 +381,9 @@
     "postgresql": {
         "source": "postgresql",
         "static-libs-unix": [
-            "libpg.a",
-            "libpgcommon.a",
-            "libpgport.a"
+            "libpq.a",
+            "libpqcommon.a",
+            "libpqport.a"
         ],
         "lib-depends": [
             "libiconv",

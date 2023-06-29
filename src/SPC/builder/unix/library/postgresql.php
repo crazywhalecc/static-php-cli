@@ -83,7 +83,5 @@ EOF
             rm -rf {$builddir}/lib/*.dylib
 EOF
         );
-
-        $this->patchPkgconfPrefix(['libpq.pc']);
     }
 }
