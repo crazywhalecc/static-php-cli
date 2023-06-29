@@ -70,16 +70,15 @@ class LinuxBuilder extends BuilderBase
             cc: $this->cc,
             cxx: $this->cxx
         );
-        // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig" ';
-        $this->pkgconf_env .= $this->pkgconf_env . ' PATH=' . BUILD_ROOT_PATH . '/bin/:' . BUILD_ROOT_PATH . '/usr/bin/:$PATH  ';
 
-        // 设置 configure 依赖的环境变量
-        $this->configure_env =
-            $this->pkgconf_env . ' ' .
+        $this->configure_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig" ' .
+            ' PATH=' . BUILD_ROOT_PATH . '/bin/:' .
+            BUILD_ROOT_PATH . '/sbin/:' .
+            BUILD_ROOT_PATH . '/usr/bin/:' .
+            BUILD_ROOT_PATH . '/usr/sbin/:$PATH  ' .
             "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' " .
-            (php_uname('m') === $this->arch ? '' : "CFLAGS='{$this->arch_c_flags}'");
+            "CXX='{$this->cxx}' ";
+        //  (php_uname('m') === $this->arch ? '' : "CFLAGS='{$this->arch_c_flags}'");
         // 交叉编译依赖的，TODO
         if (php_uname('m') !== $this->arch) {
             $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
@@ -142,19 +141,9 @@ class LinuxBuilder extends BuilderBase
             );
         }
 
-        if ($this->getExt('swoole') || $this->getExt('intl')) {
-            $extra_libs .= ' -lstdc++';
-        }
-        if ($this->getExt('imagick')) {
-            $extra_libs .= ' /usr/lib/libMagick++-7.Q16HDRI.a /usr/lib/libMagickCore-7.Q16HDRI.a /usr/lib/libMagickWand-7.Q16HDRI.a';
-        }
-
-        $envs = $this->pkgconf_env . ' ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' ";
         $cflags = $this->arch_c_flags;
         $use_lld = '';
-
+        $envs = $this->configure_env;
         switch ($this->libc) {
             case 'musl_wrapper':
             case 'glibc':

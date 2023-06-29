@@ -580,6 +580,9 @@
         ],
         "pkg-config-packages-unix": [
             "libzstd"
+        ],
+        "bin-path-unix": [
+            "usr/bin/"
         ]
     }
 }

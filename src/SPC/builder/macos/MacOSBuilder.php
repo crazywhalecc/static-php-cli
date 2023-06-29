@@ -51,9 +51,13 @@ class MacOSBuilder extends BuilderBase
         // 设置 configure 依赖的环境变量
         $this->configure_env =
             'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
+            ' PATH=' . BUILD_ROOT_PATH . '/bin/:' .
+            BUILD_ROOT_PATH . '/sbin/:' .
+            BUILD_ROOT_PATH . '/usr/bin/:' .
+            BUILD_ROOT_PATH . '/usr/sbin/:$PATH  ' .
             "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' " .
-            "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration'";
+            "CXX='{$this->cxx}' ";
+        // "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration'";
 
         // 创立 pkg-config 和放头文件的目录
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
