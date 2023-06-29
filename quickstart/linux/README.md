@@ -16,6 +16,8 @@ sh quickstart/linux/connection-static-php-cli.sh
 
 # 准备构建基础软件
 sh quickstart/linux/debian-init.sh
+# 准备构建基础软件 使用镜像 
+sh quickstart/linux/debian-init.sh --mirror china 
 
 ```
 
@@ -31,7 +33,6 @@ sh quickstart/linux/connection-static-php-cli.sh
 
 # 准备构建基础软件
 sh quickstart/linux/alpine-init.sh
-
 # 准备构建基础软件 使用镜像
 sh quickstart/linux/alpine-init.sh --mirror china 
 
