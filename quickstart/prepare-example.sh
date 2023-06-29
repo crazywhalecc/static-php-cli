@@ -68,7 +68,8 @@ EXTENSIONS="${EXTENSIONS},mysqlnd,sqlite3"
 EXTENSIONS="${EXTENSIONS},mongodb"
 # EXTENSIONS="${EXTENSIONS},swoole"
 EXTENSIONS="${EXTENSIONS},swow"
-EXTENSIONS="pdo"
+EXTENSIONS="${EXTENSIONS},pdo"
+# EXTENSIONS="pdo"
 EXTENSIONS="${EXTENSIONS},pgsql,pdo_pgsql"
 
 ./bin/spc build:libs "libxml2"  --cc=clang --cxx=clang++ --debug

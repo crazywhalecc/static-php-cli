@@ -194,8 +194,8 @@ class LinuxBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                $envs . ' ' .
                 './configure ' .
-                '--prefix= ' .
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
