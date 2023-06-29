@@ -174,7 +174,9 @@ class LinuxBuilder extends BuilderBase
         $envs .= " CPPFLAGS=\"-I{$builddir}/include/\" ";
         $envs .= " LDFLAGS=\"-L{$builddir}/lib/\" ";
         $envs .= " LIBS=\"{$libs}\" ";
-        $envs .= " CFLAGS='{$cflags} ";
+        if (!empty(trim($cflags))) {
+            $envs .= " CFLAGS='{$cflags} ";
+        }
 
         // $envs = "{$envs} ' LIBS='-ldl -lpthread'";
 
