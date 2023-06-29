@@ -383,7 +383,7 @@
         "static-libs-unix": [
             "libpq.a",
             "libpqcommon.a",
-            "libpqport.a"
+            "libpgport.a"
         ],
         "lib-depends": [
             "libiconv",
