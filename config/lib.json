@@ -13,6 +13,11 @@
         ],
         "headers": [
             "brotli"
+        ],
+        "pkg-config-packages-unix": [
+            "libbrotlicommon",
+            "libbrotlidec",
+            "libbrotlienc"
         ]
     },
     "bzip2": {
@@ -64,6 +69,9 @@
         "frameworks": [
             "CoreFoundation",
             "SystemConfiguration"
+        ],
+        "pkg-config-packages-unix": [
+            "libcurl"
         ]
     },
     "freetype": {
@@ -82,6 +90,9 @@
             "libpng",
             "bzip2",
             "brotli"
+        ],
+        "pkg-config-packages-unix": [
+            "freetype2"
         ]
     },
     "gmp": {
@@ -94,6 +105,9 @@
         ],
         "headers": [
             "gmp.h"
+        ],
+        "pkg-config-packages-unix": [
+            "gmp"
         ]
     },
     "icu": {
@@ -103,6 +117,11 @@
             "libicuio.a",
             "libicuuc.a",
             "libicudata.a"
+        ],
+        "pkg-config-packages-unix": [
+            "icu-i18n",
+            "icu-io",
+            "icu-uc"
         ]
     },
     "imagemagick": {
@@ -125,6 +144,14 @@
             "xz",
             "libzip",
             "libxml2"
+        ],
+        "pkg-config-packages-unix": [
+            "ImageMagick-7.Q16HDRI",
+            "ImageMagick",
+            "MagickCore-7.Q16HDRI",
+            "MagickCore",
+            "MagickWand-7.Q16HDRI",
+            "MagickWand"
         ]
     },
     "libavif": {
@@ -180,6 +207,10 @@
         "static-libs-unix": [
             "libjpeg.a",
             "libturbojpeg.a"
+        ],
+        "pkg-config-packages-unix": [
+            "libjpeg",
+            "libturbojpeg"
         ]
     },
     "libmcrypt": {
@@ -207,12 +238,19 @@
         ],
         "lib-depends": [
             "zlib"
+        ],
+        "pkg-config-packages-unix": [
+            "libpng",
+            "libpng16"
         ]
     },
     "libsodium": {
         "source": "libsodium",
         "static-libs-unix": [
             "libsodium.a"
+        ],
+        "pkg-config-packages-unix": [
+            "libsodium"
         ]
     },
     "libssh2": {
@@ -233,6 +271,9 @@
         ],
         "lib-suggests": [
             "zlib"
+        ],
+        "pkg-config-packages-unix": [
+            "libssh2"
         ]
     },
     "libwebp": {
@@ -243,6 +284,12 @@
             "libwebpdemux.a",
             "libwebpmux.a",
             "libsharpyuv.a"
+        ],
+        "pkg-config-packages-unix": [
+            "libwebp",
+            "libwebpdecoder",
+            "libwebpdemux",
+            "libwebpmux"
         ]
     },
     "libxml2": {
@@ -272,6 +319,9 @@
             "xz",
             "zlib",
             "pthreads4w"
+        ],
+        "pkg-config-packages-unix": [
+            "libxml-2.0"
         ]
     },
     "libyaml": {
@@ -284,6 +334,9 @@
         ],
         "headers": [
             "yaml.h"
+        ],
+        "pkg-config-packages-unix": [
+            "yaml-0.1"
         ]
     },
     "libzip": {
@@ -309,6 +362,9 @@
             "xz",
             "zstd",
             "openssl"
+        ],
+        "pkg-config-packages-unix": [
+            "libzip"
         ]
     },
     "mcrypt": {
@@ -321,6 +377,20 @@
         "source": "ncurses",
         "static-libs-unix": [
             "libncurses.a"
+        ],
+        "pkg-config-packages-unix": [
+            "form",
+            "formw",
+            "menu",
+            "menuw",
+            "ncurses++",
+            "ncurses++w",
+            "ncurses",
+            "ncursesw",
+            "panel",
+            "panelw",
+            "tic",
+            "ticw"
         ]
     },
     "nghttp2": {
@@ -340,6 +410,9 @@
         ],
         "lib-suggests": [
             "libxml2"
+        ],
+        "pkg-config-packages-unix": [
+            "libnghttp2"
         ]
     },
     "onig": {
@@ -356,6 +429,9 @@
         "headers": [
             "oniggnu.h",
             "oniguruma.h"
+        ],
+        "pkg-config-packages-unix": [
+            "oniguruma"
         ]
     },
     "openssl": {
@@ -373,6 +449,11 @@
         ],
         "lib-depends": [
             "zlib"
+        ],
+        "pkg-config-packages-unix": [
+            "libcrypto",
+            "libssl",
+            "openssl"
         ]
     },
     "pkg-config": {
@@ -381,7 +462,21 @@
     "postgresql": {
         "source": "postgresql",
         "static-libs-unix": [
-            "libpg.a"
+            "libpq.a",
+            "libpgport.a",
+            "libpgcommon.a"
+        ],
+        "lib-depends": [
+            "libiconv",
+            "libxml2",
+            "zstd",
+            "openssl",
+            "zlib",
+            "readline",
+            "icu"
+        ],
+        "pkg-config-packages-unix": [
+            "libpq"
         ]
     },
     "pthreads4w": {
@@ -403,6 +498,10 @@
         ],
         "lib-depends": [
             "ncurses"
+        ],
+        "pkg-config-packages-unix": [
+            "history",
+            "readline"
         ]
     },
     "sqlite": {
@@ -413,6 +512,9 @@
         "headers-unix": [
             "sqlite3.h",
             "sqlite3ext.h"
+        ],
+        "pkg-config-packages-unix": [
+            "sqlite3"
         ]
     },
     "xz": {
@@ -435,6 +537,9 @@
         ],
         "lib-depends": [
             "libiconv"
+        ],
+        "pkg-config-packages-unix": [
+            "liblzma"
         ]
     },
     "zlib": {
@@ -448,6 +553,9 @@
         "headers": [
             "zlib.h",
             "zconf.h"
+        ],
+        "pkg-config-packages-unix": [
+            "zlib"
         ]
     },
     "zstd": {
@@ -469,6 +577,9 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
+        ],
+        "pkg-config-packages-unix": [
+            "libzstd"
         ]
     }
 }
