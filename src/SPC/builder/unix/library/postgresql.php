@@ -61,7 +61,7 @@ EOF
             );
 
         shell()->cd($this->source_dir . '/build')->exec(
-            <<<EOF
+            <<<'EOF'
             make -C src/bin/pg_config install
             make -C src/include install
 
@@ -72,13 +72,18 @@ EOF
 
             make -C  src/backend/libpq install
             make -C  src/interfaces/libpq install
-            
+     
+EOF
+        );
+
+        shell()->cd($this->source_dir . '/build')->exec(
+            <<<EOF
             rm -rf {$builddir}/lib/*.so.*
             rm -rf {$builddir}/lib/*.so
             rm -rf {$builddir}/lib/*.dylib
-        
 EOF
         );
-        $this->patchPkgconfPrefix(['libpq.pc', 'libecpg.pc', 'libecpg_compat.pc']);
+
+        $this->patchPkgconfPrefix(['libpq.pc']);
     }
 }
