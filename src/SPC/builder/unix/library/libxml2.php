@@ -25,9 +25,10 @@ trait libxml2
             //   "{$this->builder->makeCmakeArgs()} " .
             ->exec(
                 "{$this->builder->configure_env} " . ' cmake ' .
-                "-DCMAKE_INSTALL_PREFIX={{$destdir}} " .
+                "-DCMAKE_INSTALL_PREFIX={$destdir} " .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DLIBXML2_WITH_ICONV=ON ' .
+                '-DIconv_ROOT=' . " {$destdir} " .
                 '-DIconv_IS_BUILT_IN=OFF ' .
                 "-DLIBXML2_WITH_ZLIB={$enable_zlib} " .
                 "-DLIBXML2_WITH_ICU={$enable_icu} " .
