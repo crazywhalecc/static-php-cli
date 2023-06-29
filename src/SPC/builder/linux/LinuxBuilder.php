@@ -167,7 +167,16 @@ class LinuxBuilder extends BuilderBase
                 throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
         }
 
-        $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
+        $packages = 'openssl zlib icu-uc icu-io icu-i18n readline libxml-2.0 libzstd libpq';
+        $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-l   --static  ' . $packages);
+        $builddir = BUILD_ROOT_PATH;
+        $libs = $output[1][0];
+        $envs .= " CPPFLAGS=\"-I{$builddir}/include/\" ";
+        $envs .= " LDFLAGS=\"-L{$builddir}/lib/\" ";
+        $envs .= " LIBS=\"{$libs}\" ";
+        $envs .= " CFLAGS='{$cflags} ";
+
+        // $envs = "{$envs} ' LIBS='-ldl -lpthread'";
 
         SourcePatcher::patchPHPBuildconf($this);
 
