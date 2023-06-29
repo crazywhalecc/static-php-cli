@@ -20,12 +20,13 @@ trait postgresql
         shell()->cd($this->source_dir)->exec('mkdir -p build  ');
         shell()->cd($this->source_dir . '/build')->exec('rm -rf ./* ');
         # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
-        shell()->cd($this->source_dir . '/build')
-            ->exec(
-                <<<'EOF'
+        shell()->cd($this->source_dir . '/build')->exec(
+            <<<'EOF'
             sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile 
 EOF
-            )
+        );
+
+        shell()->cd($this->source_dir . '/build')
             ->exec(
                 <<<EOF
             {$this->builder->configure_env} \\
