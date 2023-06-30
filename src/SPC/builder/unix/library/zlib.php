@@ -6,15 +6,14 @@ namespace SPC\builder\unix\library;
 
 trait zlib
 {
-    protected function build()
+    protected function build(): void
     {
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
-            ->exec("{$this->builder->configure_env} ./configure --static --prefix=")
+            ->exec("{$this->builder->configure_env} ./configure --static --prefix=" . $destdir)
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
-        $this->patchPkgconfPrefix(['zlib.pc']);
+            ->exec('make install');
     }
 }
