@@ -22,31 +22,7 @@ namespace SPC\builder\macos\library;
 
 class openssl extends MacOSLibraryBase
 {
+    use \SPC\builder\unix\library\openssl;
+
     public const NAME = 'openssl';
-
-    protected function build()
-    {
-        [$lib,,$destdir] = SEPARATED_PATH;
-
-        // lib:zlib
-        $extra = '';
-        $ex_lib = '';
-        $zlib = $this->builder->getLib('zlib');
-        if ($zlib instanceof MacOSLibraryBase) {
-            $extra = 'zlib';
-            $ex_lib = trim($zlib->getStaticLibFiles() . ' ' . $ex_lib);
-        }
-
-        shell()->cd($this->source_dir)
-            ->exec(
-                "{$this->builder->configure_env} ./Configure no-shared {$extra} " .
-                '--prefix=/ ' . // use prefix=/
-                "--libdir={$lib} " .
-                " darwin64-{$this->builder->arch}-cc"
-            )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
-            ->exec("make install_sw DESTDIR={$destdir}");
-        $this->patchPkgconfPrefix(['libssl.pc', 'openssl.pc', 'libcrypto.pc']);
-    }
 }

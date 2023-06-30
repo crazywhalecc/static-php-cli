@@ -35,10 +35,10 @@ trait openssl
         shell()->cd($this->source_dir)
             ->exec(
                 "{$this->builder->configure_env}  ./Configure no-shared  " .
-                '--prefix=' . BUILD_ROOT_PATH .
-                '--libdir=' . BUILD_LIB_PATH .
-                '-static ' .
-                'no-legacy '
+                ' --prefix=' . BUILD_ROOT_PATH .
+                ' --libdir=' . BUILD_LIB_PATH .
+                ' -static ' .
+                ' no-legacy '
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} build_sw")
