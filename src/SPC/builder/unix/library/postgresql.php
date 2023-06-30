@@ -18,20 +18,21 @@ trait postgresql
     {
         [$libdir, , $destdir] = SEPARATED_PATH;
         $builddir = BUILD_ROOT_PATH;
-        $envs = $this->builder->configure_env;
+        $env = $this->builder->configure_env;
+        $envs = $env;
         $packages = 'openssl zlib icu-uc icu-io icu-i18n readline libxml-2.0 libzstd';
 
-        $output = shell()->execWithResult($envs . ' pkg-config      --cflags-only-I   --static  ' . $packages);
+        $output = shell()->execWithResult($env . ' pkg-config      --cflags-only-I   --static  ' . $packages);
         if (!empty($output[1][0])) {
             $cppflags = $output[1][0];
             $envs .= " CPPFLAGS=\"{$cppflags}\"";
         }
-        $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-L   --static  ' . $packages);
+        $output = shell()->execWithResult($env . ' pkg-config      --libs-only-L   --static  ' . $packages);
         if (!empty($output[1][0])) {
             $ldflags = $output[1][0];
             $envs .= " LDFLAGS=\"{$ldflags}\" ";
         }
-        $output = shell()->execWithResult($envs . ' pkg-config      --libs-only-l   --static  ' . $packages);
+        $output = shell()->execWithResult($env . ' pkg-config      --libs-only-l   --static  ' . $packages);
         if (!empty($output[1][0])) {
             $libs = $output[1][0];
             $envs .= " LIBS=\"{$libs}\" ";
