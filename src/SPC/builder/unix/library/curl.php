@@ -10,47 +10,67 @@ trait curl
 {
     protected function build()
     {
-        $extra = '';
+        $extra = ' -DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ';
+        $extra .= ' -DCMAKE_BUILD_TYPE=Release ';
+        $extra .= ' -DCMAKE_POLICY_DEFAULT_CMP0074=NEW ';
+        $extra .= ' -DCMAKE_BUILD_TYPE=Release ';
+        $extra .= ' -DBUILD_SHARED_LIBS=OFF ';
+        $extra .= '  -DBUILD_CURL_EXE=OFF ';
+
         // lib:openssl
-        $extra .= $this->builder->getLib('openssl') ? '-DCURL_USE_OPENSSL=ON ' : '-DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF ';
-        // lib:brotli
-        $extra .= $this->builder->getLib('brotli') ? '-DCURL_BROTLI=ON ' : '-DCURL_BROTLI=OFF ';
-        // lib:libssh2
-        $libssh2 = $this->builder->getLib('libssh2');
-        if ($this->builder->getLib('libssh2')) {
-            /* @phpstan-ignore-next-line */
-            $extra .= '-DLIBSSH2_LIBRARY="' . $libssh2->getStaticLibFiles(style: 'cmake') . '" ' .
-                '-DLIBSSH2_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
+        if ($this->builder->getLib('openssl')) {
+            $extra .= ' -DCURL_USE_OPENSSL=ON -DOpenSSL_ROOT=' . BUILD_ROOT_PATH . ' ';
         } else {
-            $extra .= '-DCURL_USE_LIBSSH2=OFF ';
+            $extra .= ' -DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF ';
+        }
+        // lib:brotli
+        if ($this->builder->getLib('brotli')) {
+            $extra .= ' -DCURL_BROTLI=ON -DBrotli_ROOT=' . BUILD_ROOT_PATH . ' ';
+        } else {
+            $extra .= ' -DCURL_BROTLI=OFF ';
+        }
+        // lib:libssh2
+        if ($this->builder->getLib('libssh2')) {
+            $extra .= ' -DLibSSH2_ROOT=' . BUILD_ROOT_PATH . ' ';
+        } else {
+            $extra .= ' -DCURL_USE_LIBSSH2=OFF ';
         }
         // lib:nghttp2
-        if ($nghttp2 = $this->builder->getLib('nghttp2')) {
-            $extra .= '-DUSE_NGHTTP2=ON ' .
-                /* @phpstan-ignore-next-line */
-                '-DNGHTTP2_LIBRARY="' . $nghttp2->getStaticLibFiles(style: 'cmake') . '" ' .
-                '-DNGHTTP2_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
+        if ($this->builder->getLib('nghttp2')) {
+            $extra .= ' -DUSE_NGHTTP2=ON -DNGHTTP2_ROOT=' . BUILD_ROOT_PATH . ' ';
         } else {
-            $extra .= '-DUSE_NGHTTP2=OFF ';
+            $extra .= ' -DUSE_NGHTTP2=OFF  ';
         }
+
         // TODO: ldap is not supported yet
-        $extra .= '-DCURL_DISABLE_LDAP=ON ';
+        $extra .= ' -DCURL_DISABLE_LDAP=ON ';
+
         // lib:zstd
-        $extra .= $this->builder->getLib('zstd') ? '-DCURL_ZSTD=ON ' : '-DCURL_ZSTD=OFF ';
+        if ($this->builder->getLib('zstd')) {
+            $extra .= ' -DCURL_ZSTD=ON -DZstd_ROOT=' . BUILD_ROOT_PATH . ' ';
+        } else {
+            $extra .= ' -DCURL_ZSTD=OFF ';
+        }
+
         // lib:idn2
-        $extra .= $this->builder->getLib('idn2') ? '-DUSE_LIBIDN2=ON ' : '-DUSE_LIBIDN2=OFF ';
+        if ($this->builder->getLib('idn2')) {
+            $extra .= ' -DUSE_LIBIDN2=ON -DLIBIDN2_ROOT=' . BUILD_ROOT_PATH . ' ';
+        } else {
+            $extra .= ' -DUSE_LIBIDN2=OFF ';
+        }
+
         // lib:psl
-        $extra .= $this->builder->getLib('psl') ? '-DCURL_USE_LIBPSL=ON ' : '-DCURL_USE_LIBPSL=OFF ';
+        if ($this->builder->getLib('psl')) {
+            $extra .= ' -DCURL_USE_LIBPSL=ON  -DLibPSL_ROOT=' . BUILD_ROOT_PATH . ' ';
+        } else {
+            $extra .= ' -DCURL_USE_LIBPSL=OFF ';
+        }
 
         FileSystem::resetDir($this->source_dir . '/build');
         // compile！
         shell()->cd($this->source_dir . '/build')
-            ->exec("{$this->builder->configure_env} cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF {$extra} ..")
+            ->exec("{$this->builder->configure_env} cmake   {$extra} ..")
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
-        // patch pkgconf
-        $this->patchPkgconfPrefix(['libcurl.pc']);
-        shell()->cd(BUILD_LIB_PATH . '/cmake/CURL/')
-            ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"" . BUILD_LIB_PATH . "/libcurl.a\"|g' CURLTargets-release.cmake");
+            ->exec('make install');
     }
 }

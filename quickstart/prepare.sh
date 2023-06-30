@@ -47,6 +47,12 @@ EXTENSIONS="${EXTENSIONS},mysqlnd,sqlite3"
 EXTENSIONS="${EXTENSIONS},mongodb"
 # EXTENSIONS="${EXTENSIONS},swoole"
 EXTENSIONS="${EXTENSIONS},swow"
+EXTENSIONS="curl,xml,xmlreader,simplexml,xmlwriter"
+EXTENSIONS="curl"
+
+# ./bin/spc build:libs "zstd,openssl,zlib"  --cc=clang --cxx=clang++ --debug
+./bin/spc build:libs "curl,zstd,openssl,zlib"  --cc=clang --cxx=clang++ --debug
+
 
 ./bin/spc build "${EXTENSIONS}" --build-cli --cc=clang --cxx=clang++ --debug
 # ./bin/spc build "${EXTENSIONS}" --build-cli --cc=gcc --cxx=g++  --debug
