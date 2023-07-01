@@ -388,11 +388,9 @@
         "lib-depends": [
             "libiconv",
             "libxml2",
-            "zstd",
             "openssl",
             "zlib",
-            "readline",
-            "icu"
+            "readline"
         ]
     },
     "pthreads4w": {
