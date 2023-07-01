@@ -68,7 +68,7 @@ EOF
             --enable-coverage=no \\
             --with-ssl=openssl  \\
             --with-readline \\
-            --with-icu \\
+            --without-icu \\
             --without-ldap \\
             --with-libxml  \\
             --without-libxslt \\
