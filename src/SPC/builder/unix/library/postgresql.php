@@ -43,7 +43,18 @@ trait postgresql
         # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
         shell()->cd($this->source_dir . '/build')->exec(
             <<<'EOF'
-            sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile 
+            sed -i.backup "s/invokes exit'; exit 1;/invokes exit';/"  ../src/interfaces/libpq/Makefile 
+EOF
+        );
+
+        shell()->cd($this->source_dir . '/build')->exec(
+            <<<'EOF'
+            sed -i.backup "293 s/^/#$/"  ../src/Makefile.shlib
+EOF
+        );
+        shell()->cd($this->source_dir . '/build')->exec(
+            <<<'EOF'
+            sed -i.backup "441 s/^/#$/"  ../src/Makefile.shlib
 EOF
         );
 
@@ -71,22 +82,32 @@ EOF
             --without-tcl
 EOF
             );
+        // 方便调试，
+        shell()->cd($this->source_dir . '/build')->exec($envs . ' make -C src/bin/pg_config install');
+        shell()->cd($this->source_dir . '/build')->exec($envs . ' make -C src/include install');
+        shell()->cd($this->source_dir . '/build')->exec($envs . ' make -C  src/common install');
+        shell()->cd($this->source_dir . '/build')->exec($envs . ' make -C  src/backend/port install');
+        shell()->cd($this->source_dir . '/build')->exec($envs . ' make -C  src/port install');
+        shell()->cd($this->source_dir . '/build')->exec($envs . ' make -C  src/backend/libpq install');
+        shell()->cd($this->source_dir . '/build')->exec($envs . ' make -C  src/interfaces/libpq install');
 
-        shell()->cd($this->source_dir . '/build')->exec(
-            <<<'EOF'
-            make -C src/bin/pg_config install
-            make -C src/include install
+        /*
+           shell()->cd($this->source_dir . '/build')->exec(
+               <<<'EOF'
+               make -C src/bin/pg_config install
+               make -C src/include install
 
-            make -C  src/common install
+               make -C  src/common install
 
-            make -C  src/backend/port install
-            make -C  src/port install
+               make -C  src/backend/port install
+               make -C  src/port install
 
-            make -C  src/backend/libpq install
-            make -C  src/interfaces/libpq install
-     
-EOF
-        );
+               make -C  src/backend/libpq install
+               make -C  src/interfaces/libpq install
+
+   EOF
+           );
+       */
 
         shell()->cd($this->source_dir . '/build')->exec(
             <<<EOF
