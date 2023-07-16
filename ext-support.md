@@ -36,6 +36,7 @@
 | mongodb         | yes                                                                 | yes                                                            |         |
 | mysqli          | yes                                                                 | yes                                                            |         |
 | mysqlnd         | yes                                                                 | yes                                                            |         |
+| opcache         | yes                                                                 | yes                                                            |         |
 | openssl         | yes                                                                 | yes                                                            |         |
 | password-argon2 |                                                                     |                                                                |         |
 | pcntl           | yes                                                                 | yes                                                            |         |
