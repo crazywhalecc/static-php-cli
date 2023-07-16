@@ -3,7 +3,7 @@ name: archive download sources weekly
 on:
   workflow_dispatch:
   schedule:
-    - * 14 * * 5
+    - cron: "* 14 * * 5"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
