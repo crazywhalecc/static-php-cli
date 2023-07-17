@@ -26,13 +26,13 @@ class LinuxToolCheckList
                 'git', 'autoconf', 'automake',
                 'tar', 'unzip', 'gzip',
                 'bzip2', 'cmake', 'gcc',
-                'g++',
+                'g++', 'patch',
             ],
             default => [
                 'make', 'bison', 'flex',
                 'git', 'autoconf', 'automake',
                 'tar', 'unzip', 'gzip',
-                'bzip2', 'cmake',
+                'bzip2', 'cmake', 'patch',
             ],
         };
         $missing = [];
