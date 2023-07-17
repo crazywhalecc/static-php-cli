@@ -57,7 +57,7 @@ class LinuxToolCheckList
         if ($distro['dist'] === 'alpine') {
             // check linux-headers installation
             if (!file_exists('/usr/include/linux/mman.h')) {
-                return CheckResult::fail('linux-headers not installed on your system', 'install-linux-tools', ['alpine', ['linux-headers']]);
+                return CheckResult::fail('linux-headers not installed on your system', 'install-linux-tools', [$distro, ['linux-headers']]);
             }
         }
         return CheckResult::ok();
