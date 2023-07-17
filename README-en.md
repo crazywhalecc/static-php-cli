@@ -53,7 +53,7 @@ If you don't compile yourself, you can download pre-compiled artifact from Actio
 
 ### Supported Extensions
 
-[Supported Extension List](/ext-support.md)
+[Supported Extension List](https://static-php-cli.zhamao.me/en/guide/extensions.html)
 
 > If there is no extension you need here, you can submit an issue.
 

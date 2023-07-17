@@ -52,7 +52,7 @@ If you are using English, see [English README](README-en.md).
 
 ### 支持的扩展情况
 
-[扩展支持列表](/ext-support.md)
+[扩展支持列表](https://static-php-cli.zhamao.me/zh/guide/extensions.html)
 
 > 如果这里没有你需要的扩展，可以提交 Issue。
 
