@@ -37,7 +37,11 @@ Here is the architecture support status, where `CI` represents support for GitHu
 
 Currently supported PHP versions for compilation are: `7.4`, `8.0`, `8.1`, `8.2`.
 
-## Usage
+## Docs
+
+docs here: <https://static-php-cli.zhamao.me>.
+
+## Simple Usage
 
 Please first select the extension you want to compile based on the extension list below.
 

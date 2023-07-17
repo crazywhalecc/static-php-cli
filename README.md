@@ -36,6 +36,10 @@ If you are using English, see [English README](README-en.md).
 
 目前支持编译的 PHP 版本为：`7.4`，`8.0`，`8.1`，`8.2`。
 
+## 文档
+
+点击这里查看文档：<https://static-php-cli.zhamao.me>。
+
 ## 使用
 
 请先根据下方扩展列表选择你要编译的扩展。
