@@ -98,7 +98,7 @@ chmod +x bin/setup-runtime
 cd static-php-cli
 composer update
 chmod +x bin/spc
-# 检查环境依赖，并根据提示的命令安装缺失的编译工具（目前仅支持 macOS，Linux 后续会支持）
+# 检查环境依赖，并根据提示的命令安装缺失的编译工具
 ./bin/spc doctor
 # 拉取所有依赖库
 ./bin/spc fetch --all

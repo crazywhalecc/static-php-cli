@@ -104,7 +104,7 @@ Basic usage for building php and micro with some extensions:
 cd static-php-cli
 composer update
 chmod +x bin/spc
-# Check system tool dependencies, fix them automatically (only support macOS) (TODO: Linux distro support)
+# Check system tool dependencies, fix them automatically
 ./bin/spc doctor
 # fetch all libraries
 ./bin/spc fetch --all
