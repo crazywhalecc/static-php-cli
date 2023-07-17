@@ -21,18 +21,18 @@ class LinuxToolCheckList
         $distro = SystemUtil::getOSRelease();
 
         $required = match ($distro['dist']) {
-            'ubuntu', 'debian' => [
-                'make', 'bison', 'flex',
-                'git', 'autoconf', 'automake',
-                'tar', 'unzip', 'gzip',
-                'bzip2', 'cmake',
-            ],
             'alpine' => [
                 'make', 'bison', 'flex',
                 'git', 'autoconf', 'automake',
                 'tar', 'unzip', 'gzip',
                 'bzip2', 'cmake', 'gcc',
-            ]
+            ],
+            default => [
+                'make', 'bison', 'flex',
+                'git', 'autoconf', 'automake',
+                'tar', 'unzip', 'gzip',
+                'bzip2', 'cmake',
+            ],
         };
         $missing = [];
         foreach ($required as $cmd) {
