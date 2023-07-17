@@ -50,6 +50,19 @@ class LinuxToolCheckList
         return CheckResult::ok();
     }
 
+    #[AsCheckItem('if necessary packages are installed', limit_os: 'Linux')]
+    public function checkSystemOSPackages(): ?CheckResult
+    {
+        $distro = SystemUtil::getOSRelease();
+        if ($distro['dist'] === 'alpine') {
+            // check linux-headers installation
+            if (!file_exists('/usr/include/linux/mman.h')) {
+                return CheckResult::fail('linux-headers not installed on your system', 'install-linux-tools', ['alpine', ['linux-headers']]);
+            }
+        }
+        return CheckResult::ok();
+    }
+
     #[AsFixItem('install-linux-tools')]
     public function fixBuildTools(array $distro, array $missing): bool
     {
