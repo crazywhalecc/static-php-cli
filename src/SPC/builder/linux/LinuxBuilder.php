@@ -21,7 +21,7 @@ class LinuxBuilder extends BuilderBase
     use UnixBuilderTrait;
 
     /** @var string[] Linux 环境下编译依赖的命令 */
-    public const REQUIRED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', /* 'xz', 好像不需要 */ 'gzip', 'bzip2', 'cmake'];
+    public const REQUIRED_COMMANDS = ['make', 'bison', 'flex', 'git', 'autoconf', 'automake', 'tar', 'unzip', /* 'xz', 好像不需要 */ 'gzip', 'bzip2', 'cmake'];
 
     /** @var string 使用的 libc */
     public string $libc;
