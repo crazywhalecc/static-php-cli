@@ -26,6 +26,7 @@ class LinuxToolCheckList
                 'git', 'autoconf', 'automake',
                 'tar', 'unzip', 'gzip',
                 'bzip2', 'cmake', 'gcc',
+                'g++',
             ],
             default => [
                 'make', 'bison', 'flex',
