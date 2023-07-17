@@ -221,6 +221,8 @@ The basic principles for contributing are as follows:
     camelCase and underscore formats should be followed, and mixing within the same module is prohibited.
 - When compiling external libraries and creating patches, compatibility with different operating systems should be considered.
 
+If you want to contribute document content, please go to [crazywhalecc/static-php-cli-docs](https://github.com/crazywhalecc/static-php-cli-docs).
+
 ## Sponsor this project
 
 You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md).

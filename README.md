@@ -204,6 +204,8 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
 
+如果你想贡献文档内容，请到项目仓库 [crazywhalecc/static-php-cli-docs](https://github.com/crazywhalecc/static-php-cli-docs) 贡献。
+
 ## 赞助本项目
 
 你可以在 [我的个人赞助页](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md) 支持我和我的项目。
