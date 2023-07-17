@@ -10,7 +10,6 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\Config;
 use SPC\store\Downloader;
-use SPC\store\FileSystem;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -92,9 +91,12 @@ class DownloadCommand extends BaseCommand
                 return 1;
             }
             // create downloads
-            FileSystem::createDir(DOWNLOAD_PATH);
             try {
-                f_passthru('cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($path));
+                if (PHP_OS_FAMILY !== 'Windows') {
+                    f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($path));
+                }
+                // Windows TODO
+
                 if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
                     throw new RuntimeException('.lock.json not exist in "downloads/"');
                 }
