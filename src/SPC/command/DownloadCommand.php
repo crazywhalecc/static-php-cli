@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
+use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\Config;
 use SPC\store\Downloader;
+use SPC\store\FileSystem;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,6 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand('download', 'Download required sources', ['fetch'])]
 class DownloadCommand extends BaseCommand
 {
+    use UnixSystemUtilTrait;
+
     protected string $php_major_ver;
 
     public function configure()
@@ -28,12 +32,13 @@ class DownloadCommand extends BaseCommand
         $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'version in major.minor format like 8.1', '8.1');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
+        $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output)
     {
         // --all 等于 "" ""，也就是所有东西都要下载
-        if ($input->getOption('all') || $input->getOption('clean')) {
+        if ($input->getOption('all') || $input->getOption('clean') || $input->getOption('from-zip')) {
             $input->setArgument('sources', '');
         }
         parent::initialize($input, $output);
@@ -63,6 +68,41 @@ class DownloadCommand extends BaseCommand
                 f_passthru('rm -rf ' . DOWNLOAD_PATH . '/*');
                 f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
             }
+            return 0;
+        }
+
+        // --from-zip
+        if ($path = $this->getOption('from-zip')) {
+            if (!file_exists($path)) {
+                logger()->critical('File ' . $path . ' not exist or not a zip archive.');
+                return 1;
+            }
+            // remove old download files first
+            if (is_dir(DOWNLOAD_PATH)) {
+                logger()->warning('You are doing some operations that not recoverable: removing directories below');
+                logger()->warning(DOWNLOAD_PATH);
+                logger()->alert('I will remove these dir after 5 seconds !');
+                sleep(5);
+                f_passthru((PHP_OS_FAMILY === 'Windows' ? 'rmdir /s /q ' : 'rm -rf ') . DOWNLOAD_PATH);
+            }
+            // unzip command check
+            if (PHP_OS_FAMILY !== 'Windows' && !$this->findCommand('unzip')) {
+                logger()->critical('Missing unzip command, you need to install it first !');
+                logger()->critical('You can use "bin/spc doctor" command to check and install required tools');
+                return 1;
+            }
+            // create downloads
+            FileSystem::createDir(DOWNLOAD_PATH);
+            try {
+                f_passthru('cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($path));
+                if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+                    throw new RuntimeException('.lock.json not exist in "downloads/"');
+                }
+            } catch (RuntimeException $e) {
+                logger()->critical('Extract failed: ' . $e->getMessage());
+                return 1;
+            }
+            logger()->info('Extract success');
             return 0;
         }
 
