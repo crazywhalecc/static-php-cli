@@ -15,25 +15,29 @@ class LinuxToolCheckList
 {
     use UnixSystemUtilTrait;
 
+    public const TOOLS_ALPINE = [
+        'make', 'bison', 'flex',
+        'git', 'autoconf', 'automake',
+        'tar', 'unzip', 'gzip',
+        'bzip2', 'cmake', 'gcc',
+        'g++', 'patch',
+    ];
+
+    public const TOOLS_DEBIAN = [
+        'make', 'bison', 'flex',
+        'git', 'autoconf', 'automake',
+        'tar', 'unzip', 'gzip',
+        'bzip2', 'cmake', 'patch',
+    ];
+
     #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux')]
     public function checkCliTools(): ?CheckResult
     {
         $distro = SystemUtil::getOSRelease();
 
         $required = match ($distro['dist']) {
-            'alpine' => [
-                'make', 'bison', 'flex',
-                'git', 'autoconf', 'automake',
-                'tar', 'unzip', 'gzip',
-                'bzip2', 'cmake', 'gcc',
-                'g++', 'patch',
-            ],
-            default => [
-                'make', 'bison', 'flex',
-                'git', 'autoconf', 'automake',
-                'tar', 'unzip', 'gzip',
-                'bzip2', 'cmake', 'patch',
-            ],
+            'alpine' => self::TOOLS_ALPINE,
+            default => self::TOOLS_DEBIAN,
         };
         $missing = [];
         foreach ($required as $cmd) {
