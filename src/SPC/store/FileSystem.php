@@ -439,6 +439,20 @@ class FileSystem
         self::$_extract_hook[$name][] = $callback;
     }
 
+    /**
+     * Check whether the path is a relative path (judging according to whether the first character is "/")
+     *
+     * @param string $path Path
+     */
+    public static function isRelativePath(string $path): bool
+    {
+        // 适配 Windows 的多盘符目录形式
+        if (DIRECTORY_SEPARATOR === '\\') {
+            return !(strlen($path) > 2 && ctype_alpha($path[0]) && $path[1] === ':');
+        }
+        return strlen($path) > 0 && $path[0] !== '/';
+    }
+
     private static function emitSourceExtractHook(string $name)
     {
         foreach ((self::$_extract_hook[$name] ?? []) as $hook) {
