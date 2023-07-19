@@ -40,6 +40,7 @@ class libpng extends MacOSLibraryBase
         };
         shell()->cd($this->source_dir)
             ->exec('chmod +x ./configure')
+            ->exec('chmod +x ./install-sh')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
                 "--host={$this->builder->gnu_arch}-apple-darwin " .
