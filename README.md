@@ -19,6 +19,8 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 [![](https://img.shields.io/badge/Extension%20Counter-50+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
+> 在项目发布最后一个 RC 版本后（可能不超过 5 个候选版），项目将会重命名 `refactor` 分支为 `main` 分支，请依赖的项目注意更改分支名称。
+
 ## 编译环境需求
 
 是的，本项目采用 PHP 编写，编译前需要一个 PHP 环境，比较滑稽。
