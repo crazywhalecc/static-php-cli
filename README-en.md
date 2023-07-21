@@ -225,6 +225,11 @@ The basic principles for contributing are as follows:
 
 If you want to contribute document content, please go to [crazywhalecc/static-php-cli-docs](https://github.com/crazywhalecc/static-php-cli-docs).
 
+Part of the English document is written by me, and part is translated by Google,
+and there may be inaccurate descriptions, strange or offensive expressions.
+If you are a native English speaker, some corrections to the documentation are welcome.
+
+
 ## Sponsor this project
 
 You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md).
