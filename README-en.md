@@ -244,6 +244,6 @@ and comply with the corresponding project's LICENSE.
 
 ## Advanced
 
-This project is pure open source project, and some modules are separated for developing.
-
-This section will be improved after refactor version released.
+The refactoring branch of this project is written modularly. 
+If you are interested in this project and want to join the development,
+you can refer to the [Contribution Guide](https://static-php-cli.zhamao.me) of the documentation to contribute code or documentation. (TODO)
