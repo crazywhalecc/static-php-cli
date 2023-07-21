@@ -222,6 +222,4 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 ## 进阶
 
-本项目重构分支为模块化编写。
-
-TODO：这部分将在基础功能完成后编写完成。
+本项目重构分支为模块化编写。如果你对本项目感兴趣，想加入开发，可以参照文档的 [贡献指南](https://static-php-cli.zhamao.me) 贡献代码或文档。（TODO）
