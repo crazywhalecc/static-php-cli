@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -30,7 +32,7 @@ trait postgresql
         $output = shell()->execWithResult($env . ' pkg-config      --libs-only-L   --static  ' . $packages);
         if (!empty($output[1][0])) {
             $ldflags = $output[1][0];
-            $envs .= " LDFLAGS=\"{$ldflags} -static\" ";
+            $envs .= $this instanceof MacOSLibraryBase ? " LDFLAGS=\"{$ldflags}\" " : " LDFLAGS=\"{$ldflags} -static\" ";
         }
         $output = shell()->execWithResult($env . ' pkg-config      --libs-only-l   --static  ' . $packages);
         if (!empty($output[1][0])) {
