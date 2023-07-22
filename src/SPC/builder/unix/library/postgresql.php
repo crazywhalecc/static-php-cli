@@ -50,7 +50,7 @@ trait postgresql
         // configure
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                "{$env} ../configure " .
+                "{$envs} ../configure " .
                 "--prefix={$builddir} " .
                 '--disable-thread-safety ' .
                 '--enable-coverage=no ' .
