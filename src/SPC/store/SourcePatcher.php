@@ -88,6 +88,9 @@ class SourcePatcher
         if ($ssh2 = $builder->getExt('ssh2')) {
             $patch[] = ['ssh2 patch', '/-lssh2/', $ssh2->getLibFilesString()];
         }
+        if ($pgsql = $builder->getExt('pgsql')) {
+            $patch[] = ['pgsql patch', '/-lpq/', $pgsql->getLibFilesString()];
+        }
         $patch[] = ['disable capstone', '/have_capstone="yes"/', 'have_capstone="no"'];
         foreach ($patch as $item) {
             logger()->info('Patching configure: ' . $item[0]);

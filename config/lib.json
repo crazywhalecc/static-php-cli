@@ -381,7 +381,16 @@
     "postgresql": {
         "source": "postgresql",
         "static-libs-unix": [
-            "libpg.a"
+            "libpq.a",
+            "libpgport.a",
+            "libpgcommon.a"
+        ],
+        "lib-depends": [
+            "libiconv",
+            "libxml2",
+            "openssl",
+            "zlib",
+            "readline"
         ]
     },
     "pthreads4w": {
