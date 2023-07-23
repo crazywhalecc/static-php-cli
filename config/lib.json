@@ -391,6 +391,9 @@
             "openssl",
             "zlib",
             "readline"
+        ],
+        "lib-suggests": [
+            "icu"
         ]
     },
     "pthreads4w": {

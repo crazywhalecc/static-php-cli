@@ -57,7 +57,7 @@ trait postgresql
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
                 '--with-libxml ' .
-                '--without-icu ' .
+                ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
                 '--without-ldap ' .
                 '--without-libxslt ' .
                 '--without-lz4 ' .
