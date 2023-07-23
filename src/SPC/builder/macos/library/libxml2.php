@@ -31,18 +31,16 @@ class libxml2 extends MacOSLibraryBase
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DLIBXML2_WITH_ICONV=ON ' .
                 "-DLIBXML2_WITH_ZLIB={$enable_zlib} " .
-                "-DLIBXML2_WITH_ICU={$enable_icu} " .
+                '-DLIBXML2_WITH_ICU=OFF ' .
                 "-DLIBXML2_WITH_LZMA={$enable_xz} " .
                 '-DLIBXML2_WITH_PYTHON=OFF ' .
                 '-DLIBXML2_WITH_PROGRAMS=OFF ' .
                 '-DLIBXML2_WITH_TESTS=OFF ' .
-                '-DCMAKE_INSTALL_PREFIX=/ ' .
-                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
+                "-DCMAKE_INSTALL_PREFIX={$destdir} " .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            ->exec('make install');
     }
 }
