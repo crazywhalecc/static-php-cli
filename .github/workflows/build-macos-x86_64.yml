@@ -115,8 +115,3 @@ jobs:
             buildroot/build-extensions.json
             buildroot/build-libraries.json
 
-      # Upload downloaded files
-      - uses: actions/upload-artifact@v3
-        with:
-          name: download-files
-          path: downloads/
