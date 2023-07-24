@@ -42,7 +42,8 @@ class openssl extends MacOSLibraryBase
                 "{$this->builder->configure_env} ./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/
                 "--libdir={$lib} " .
-                " darwin64-{$this->builder->arch}-cc"
+                '--openssldir=/System/Library/OpenSSL ' .
+                "darwin64-{$this->builder->arch}-cc"
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
