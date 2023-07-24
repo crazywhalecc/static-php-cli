@@ -118,12 +118,15 @@ class MacOSBuilder extends BuilderBase
     }
 
     /**
-     * @throws RuntimeException
+     * @param  int                 $build_target build target
+     * @param  bool                $bloat        just raw add all lib files
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $bloat = false): void
     {
-        $extra_libs = $this->getFrameworks(true) . ' ' . ($this->getExt('swoole') || $this->getExt('intl') ? '-lc++ ' : '');
+        $extra_libs = $this->getFrameworks(true) . ' ' . ($this->hasCppExtension() ? '-lc++' : '');
         if (!$bloat) {
             $extra_libs .= implode(' ', $this->getAllStaticLibFiles());
         } else {

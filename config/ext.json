@@ -138,6 +138,7 @@
     },
     "intl": {
         "type": "builtin",
+        "cpp-extension": true,
         "lib-depends": [
             "icu"
         ]
@@ -327,6 +328,7 @@
         "type": "external",
         "source": "swoole",
         "arg-type": "custom",
+        "cpp-extension": true,
         "lib-depends": [
             "openssl"
         ],

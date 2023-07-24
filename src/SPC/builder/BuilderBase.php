@@ -141,6 +141,37 @@ abstract class BuilderBase
     }
 
     /**
+     * 获取所有要编译的扩展对象
+     *
+     * @return Extension[]
+     */
+    public function getExts(): array
+    {
+        return $this->exts;
+    }
+
+    /**
+     * 检查 C++ 扩展是否存在
+     *
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
+    public function hasCppExtension(): bool
+    {
+        // judge cpp-extension
+        $exts = array_keys($this->getExts());
+        $cpp = false;
+        foreach ($exts as $ext) {
+            if (Config::getExt($ext, 'cpp-extension', false) === true) {
+                $cpp = true;
+                break;
+            }
+        }
+        return $cpp;
+    }
+
+    /**
      * 设置本次 Builder 是否为仅编译库的模式
      */
     public function setLibsOnly(bool $status = true): void
