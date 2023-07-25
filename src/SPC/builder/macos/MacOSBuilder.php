@@ -126,7 +126,7 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $bloat = false): void
     {
-        $extra_libs = $this->getFrameworks(true) . ' ' . ($this->hasCppExtension() ? '-lc++' : '');
+        $extra_libs = $this->getFrameworks(true) . ' ' . ($this->hasCppExtension() ? '-lc++ ' : '');
         if (!$bloat) {
             $extra_libs .= implode(' ', $this->getAllStaticLibFiles());
         } else {
