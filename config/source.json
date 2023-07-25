@@ -16,6 +16,25 @@
             "path": "LICENSE"
         }
     },
+    "memcached": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/memcached",
+        "path": "php-src/ext/memcached",
+        "filename": "memcached.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "libmemcached": {
+        "type": "git",
+        "url": "https://github.com/crazywhalecc/libmemcached-macos.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",

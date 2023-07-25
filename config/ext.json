@@ -53,6 +53,19 @@
             "sockets"
         ]
     },
+    "memcached": {
+        "type": "external",
+        "source": "memcached",
+        "arg-type": "custom",
+        "cpp-extension": true,
+        "lib-depends": [
+            "libmemcached"
+        ],
+        "ext-depends": [
+            "session",
+            "zlib"
+        ]
+    },
     "exif": {
         "type": "builtin"
     },
