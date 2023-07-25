@@ -462,6 +462,13 @@
             "zconf.h"
         ]
     },
+    "libmemcached": {
+        "source": "libmemcached",
+        "static-libs-unix": [
+            "libmemcached.a",
+            "libmemcachedutil.a"
+        ]
+    },
     "zstd": {
         "source": "zstd",
         "static-libs-unix": [
