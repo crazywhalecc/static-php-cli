@@ -22,6 +22,7 @@ trait libevent
                 '-DEVENT__LIBRARY_TYPE=STATIC ' .
                 '-DEVENT__DISABLE_BENCHMARK=ON ' .
                 '-DEVENT__DISABLE_THREAD_SUPPORT=ON ' .
+                '-DEVENT__DISABLE_MBEDTLS=ON ' .
                 '-DEVENT__DISABLE_TESTS=ON ' .
                 '-DEVENT__DISABLE_SAMPLES=ON ' .
                 '..'
