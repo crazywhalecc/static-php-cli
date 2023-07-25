@@ -61,6 +61,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-memcache": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/memcache",
+        "path": "php-src/ext/memcache",
+        "filename": "memcache.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ssh2": {
         "type": "url",
         "url": "https://pecl.php.net/get/ssh2",

@@ -163,6 +163,17 @@
             "onig"
         ]
     },
+    "memcache": {
+        "type": "external",
+        "source": "ext-memcache",
+        "arg-type": "custom",
+        "lib-depends": [
+            "zlib"
+        ],
+        "ext-depends": [
+            "session"
+        ]
+    },
     "mongodb": {
         "type": "external",
         "source": "mongodb",
@@ -220,13 +231,6 @@
             "postgresql"
         ]
     },
-    "pgsql": {
-        "type": "builtin",
-        "arg-type": "with-prefix",
-        "lib-depends": [
-            "postgresql"
-        ]
-    },
     "pdo_sqlite": {
         "type": "builtin",
         "arg-type": "with",
@@ -236,6 +240,13 @@
         ],
         "lib-depends": [
             "sqlite"
+        ]
+    },
+    "pgsql": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "postgresql"
         ]
     },
     "phar": {
