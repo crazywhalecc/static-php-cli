@@ -22,7 +22,7 @@ class PhpVerCommand extends BaseCommand
     {
         // Find php from source/php-src
         $file = SOURCE_PATH . '/php-src/main/php_version.h';
-        $result = preg_match('/#define PHP_VERSION "(\d+\.\d+\.\d+)"/', file_get_contents($file), $match);
+        $result = preg_match('/#define PHP_VERSION "([^"]+)"/', file_get_contents($file), $match);
         if ($result === false) {
             $this->output->writeln('<error>PHP source not found, maybe you need to extract first ?</error>');
             return 1;
