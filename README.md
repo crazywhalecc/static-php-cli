@@ -12,14 +12,14 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 <img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc2-pink.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--rc3-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/badge/Extension%20Counter-55+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
-> 在项目发布最后一个 RC 版本后（可能不超过 5 个候选版），项目将会重命名 `refactor` 分支为 `main` 分支，请依赖的项目注意更改分支名称。
+> 项目已重命名 `refactor` 分支为 `main` 分支，请依赖的项目注意更改分支名称。
 
 ## 编译环境需求
 
