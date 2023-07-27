@@ -238,7 +238,8 @@
         "type": "builtin",
         "arg-type": "with-prefix",
         "ext-depends": [
-            "pdo"
+            "pdo",
+            "pgsql"
         ],
         "lib-depends": [
             "postgresql"
