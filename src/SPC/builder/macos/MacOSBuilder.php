@@ -54,7 +54,7 @@ class MacOSBuilder extends BuilderBase
             'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
-            "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration'";
+            "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration -Os'";
 
         // 创立 pkg-config 和放头文件的目录
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
@@ -212,7 +212,7 @@ class MacOSBuilder extends BuilderBase
     public function buildCli(string $extra_libs): void
     {
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli");
+        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli");
         if ($this->strip) {
             $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
         }
