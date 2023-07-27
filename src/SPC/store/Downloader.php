@@ -265,7 +265,7 @@ class Downloader
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public static function downloadSource(string $name, ?array $source = null): void
+    public static function downloadSource(string $name, ?array $source = null, bool $force = false): void
     {
         if ($source === null) {
             $source = Config::getSource($name);
@@ -278,7 +278,7 @@ class Downloader
             $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
         }
         // If lock file exists, skip downloading
-        if (isset($lock[$name])) {
+        if (isset($lock[$name]) && !$force) {
             if ($lock[$name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename'])) {
                 logger()->notice("source [{$name}] already downloaded: " . $lock[$name]['filename']);
                 return;

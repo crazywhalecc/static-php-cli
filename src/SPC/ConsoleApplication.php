@@ -7,7 +7,6 @@ namespace SPC;
 use SPC\command\DeployCommand;
 use SPC\store\FileSystem;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
 
@@ -16,7 +15,7 @@ use Symfony\Component\Console\Command\ListCommand;
  */
 class ConsoleApplication extends Application
 {
-    public const VERSION = '2.0-rc3';
+    public const VERSION = '2.0-rc4';
 
     /**
      * @throws \ReflectionException

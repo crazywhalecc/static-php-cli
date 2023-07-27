@@ -31,6 +31,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'version in major.minor format like 8.1', '8.1');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
+        $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
     }
 
@@ -139,14 +140,37 @@ class DownloadCommand extends BaseCommand
         }
         $chosen_sources = $sources;
 
+        // Process -U options
+        $custom_urls = [];
+        foreach ($this->input->getOption('custom-url') as $value) {
+            [$source_name, $url] = explode(':', $value, 2);
+            $custom_urls[$source_name] = $url;
+        }
+
         // Download them
         f_mkdir(DOWNLOAD_PATH);
         $cnt = count($chosen_sources);
         $ni = 0;
         foreach ($chosen_sources as $source) {
             ++$ni;
-            logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
-            Downloader::downloadSource($source, Config::getSource($source));
+            if (isset($custom_urls[$source])) {
+                $config = Config::getSource($source);
+                $new_config = [
+                    'type' => 'url',
+                    'url' => $custom_urls[$source],
+                ];
+                if (isset($config['path'])) {
+                    $new_config['path'] = $config['path'];
+                }
+                if (isset($config['filename'])) {
+                    $new_config['filename'] = $config['filename'];
+                }
+                logger()->info("Fetching source {$source} from custom url [{$ni}/{$cnt}]");
+                Downloader::downloadSource($source, $new_config, true);
+            } else {
+                logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
+                Downloader::downloadSource($source, Config::getSource($source));
+            }
         }
         // 打印拉取资源用时
         $time = round(microtime(true) - START_TIME, 3);
