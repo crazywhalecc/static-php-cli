@@ -71,7 +71,7 @@ class BuildCliCommand extends BuildCommand
             // 执行扩展检测
             $builder->proveExts($extensions);
             // strip
-            $builder->setStrip(false);
+            $builder->setStrip(!$this->getOption('no-strip'));
             // 构建
             $builder->buildPHP($rule, $this->getOption('bloat'));
             // 统计时间
