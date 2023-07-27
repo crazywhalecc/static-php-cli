@@ -165,8 +165,9 @@
     },
     "mbregex": {
         "type": "builtin",
-        "lib-depends": [
-            "onig"
+        "arg-type": "custom",
+        "ext-depends": [
+            "mbstring"
         ]
     },
     "mbstring": {
