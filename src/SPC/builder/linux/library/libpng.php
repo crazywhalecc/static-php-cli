@@ -45,6 +45,7 @@ class libpng extends LinuxLibraryBase
 
         shell()->cd($this->source_dir)
             ->exec('chmod +x ./configure')
+            ->exec('chmod +x ./install-sh')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
                 "--host={$this->builder->gnu_arch}-unknown-linux " .
