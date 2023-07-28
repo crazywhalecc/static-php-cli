@@ -20,13 +20,33 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\store\SourcePatcher;
+use SPC\store\FileSystem;
 
 class libpng extends LinuxLibraryBase
 {
     public const NAME = 'libpng';
+
+    public function patchBeforeBuild(): bool
+    {
+        FileSystem::replaceFile(
+            SOURCE_PATH . '/libpng/configure',
+            REPLACE_FILE_STR,
+            '-lz',
+            BUILD_LIB_PATH . '/libz.a'
+        );
+        if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
+            FileSystem::replaceFile(
+                SOURCE_PATH . '/libpng/configure',
+                REPLACE_FILE_STR,
+                '-lm',
+                '/usr/lib/libm.a'
+            );
+        }
+        return true;
+    }
 
     /**
      * @throws RuntimeException
@@ -39,10 +59,6 @@ class libpng extends LinuxLibraryBase
             'arm64' => '--enable-arm-neon ',
             default => '',
         };
-
-        // patch configure
-        SourcePatcher::patchUnixLibpng();
-
         shell()->cd($this->source_dir)
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')

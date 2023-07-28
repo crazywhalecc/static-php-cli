@@ -20,19 +20,32 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\store\SourcePatcher;
+use SPC\exception\FileSystemException;
+use SPC\store\FileSystem;
 
 class curl extends MacOSLibraryBase
 {
-    use \SPC\builder\unix\library\curl {
-        build as unixBuild;
-    }
+    use \SPC\builder\unix\library\curl;
 
     public const NAME = 'curl';
 
-    protected function build()
+    /**
+     * @throws FileSystemException
+     */
+    public function patchBeforeBuild(): bool
     {
-        SourcePatcher::patchCurlMacOS();
-        $this->unixBuild();
+        FileSystem::replaceFile(
+            SOURCE_PATH . '/curl/CMakeLists.txt',
+            REPLACE_FILE_PREG,
+            '/NOT COREFOUNDATION_FRAMEWORK/m',
+            'FALSE'
+        );
+        FileSystem::replaceFile(
+            SOURCE_PATH . '/curl/CMakeLists.txt',
+            REPLACE_FILE_PREG,
+            '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m',
+            'FALSE'
+        );
+        return true;
     }
 }
