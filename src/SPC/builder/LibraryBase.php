@@ -135,6 +135,7 @@ abstract class LibraryBase
         // 传入 true，表明直接编译
         if ($force_build) {
             logger()->info('Building required library [' . static::NAME . ']');
+            $this->patchBeforeBuild();
             $this->build();
             return BUILD_STATUS_OK;
         }
@@ -160,6 +161,14 @@ abstract class LibraryBase
         }
         // 到这里说明所有的文件都存在，就跳过编译
         return BUILD_STATUS_ALREADY;
+    }
+
+    /**
+     * Patch before build, overwrite this and return true to patch libs
+     */
+    public function patchBeforeBuild(): bool
+    {
+        return false;
     }
 
     /**

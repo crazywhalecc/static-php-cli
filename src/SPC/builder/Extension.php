@@ -137,6 +137,33 @@ class Extension
     }
 
     /**
+     * Patch code before ./buildconf
+     * If you need to patch some code, overwrite this and return true
+     */
+    public function patchBeforeBuildconf(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before ./configure
+     * If you need to patch some code, overwrite this and return true
+     */
+    public function patchBeforeConfigure(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before make
+     * If you need to patch some code, overwrite this and return true
+     */
+    public function patchBeforeMake(): bool
+    {
+        return false;
+    }
+
+    /**
      * @throws RuntimeException
      */
     protected function addLibraryDependency(string $name, bool $optional = false): void

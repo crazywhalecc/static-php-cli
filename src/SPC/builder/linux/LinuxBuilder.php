@@ -169,11 +169,11 @@ class LinuxBuilder extends BuilderBase
 
         $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
 
-        SourcePatcher::patchPHPBuildconf($this);
+        SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
-        SourcePatcher::patchPHPConfigure($this);
+        SourcePatcher::patchBeforeConfigure($this);
 
         if ($this->getPHPVersionID() < 80000) {
             $json_74 = '--enable-json ';
@@ -200,7 +200,7 @@ class LinuxBuilder extends BuilderBase
                 $envs
             );
 
-        SourcePatcher::patchPHPAfterConfigure($this);
+        SourcePatcher::patchBeforeMake($this);
 
         file_put_contents('/tmp/comment', $this->note_section);
 
