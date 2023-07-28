@@ -185,6 +185,8 @@ abstract class BuilderBase
      *
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws \ReflectionException
+     * @throws WrongUsageException
      */
     public function proveExts(array $extensions): void
     {
