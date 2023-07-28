@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\exception\FileSystemException;
+use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('event')]
@@ -22,5 +24,19 @@ class event extends Extension
             $arg .= ' --disable-event-sockets';
         }
         return $arg;
+    }
+
+    /**
+     * @throws FileSystemException
+     */
+    public function patchBeforeConfigure(): bool
+    {
+        FileSystem::replaceFile(
+            SOURCE_PATH . '/php-src/configure',
+            REPLACE_FILE_PREG,
+            '/-levent_openssl/',
+            $this->getLibFilesString()
+        );
+        return true;
     }
 }
