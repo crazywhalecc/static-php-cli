@@ -140,12 +140,12 @@ class MacOSBuilder extends BuilderBase
             );
         }
 
-        // patch before configure
-        SourcePatcher::patchPHPBuildconf($this);
+        // patch before buildconf
+        SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
-        SourcePatcher::patchPHPConfigure($this);
+        SourcePatcher::patchBeforeConfigure($this);
 
         if ($this->getLib('libxml2') || $this->getExt('iconv')) {
             $extra_libs .= ' -liconv';
@@ -177,7 +177,7 @@ class MacOSBuilder extends BuilderBase
                 $this->configure_env
             );
 
-        SourcePatcher::patchPHPAfterConfigure($this);
+        SourcePatcher::patchBeforeMake($this);
 
         $this->cleanMake();
 
