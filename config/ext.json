@@ -208,7 +208,10 @@
     },
     "mysqlnd": {
         "type": "builtin",
-        "arg-type-windows": "with"
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "zlib"
+        ]
     },
     "opcache": {
         "type": "builtin"
