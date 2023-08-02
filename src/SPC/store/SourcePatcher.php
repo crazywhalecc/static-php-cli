@@ -146,4 +146,56 @@ class SourcePatcher
             }
         }
     }
+
+    /**
+     * @throws FileSystemException
+     */
+    public static function patchHardcodedINI(array $ini = []): bool
+    {
+        $cli_c = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c';
+        $cli_c_bak = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c.bak';
+        $micro_c = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c';
+        $micro_c_bak = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c.bak';
+
+        // Try to reverse backup file
+        $find_pattern = 'const char HARDCODED_INI[] =';
+        $patch_str = '';
+        foreach ($ini as $key => $value) {
+            $patch_str .= "\"{$key}={$value}\\n\"\n";
+        }
+        $patch_str = "const char HARDCODED_INI[] =\n{$patch_str}";
+
+        // Detect backup, if we have backup, it means we need to reverse first
+        if (file_exists($cli_c_bak) || file_exists($micro_c_bak)) {
+            self::unpatchHardcodedINI();
+        }
+
+        // Backup it
+        $result = file_put_contents($cli_c_bak, file_get_contents($cli_c));
+        $result = $result && file_put_contents($micro_c_bak, file_get_contents($micro_c));
+        if ($result === false) {
+            return false;
+        }
+
+        // Patch it
+        FileSystem::replaceFile($cli_c, REPLACE_FILE_STR, $find_pattern, $patch_str);
+        FileSystem::replaceFile($micro_c, REPLACE_FILE_STR, $find_pattern, $patch_str);
+        return true;
+    }
+
+    public static function unpatchHardcodedINI(): bool
+    {
+        $cli_c = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c';
+        $cli_c_bak = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c.bak';
+        $micro_c = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c';
+        $micro_c_bak = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c.bak';
+        if (!file_exists($cli_c_bak) && !file_exists($micro_c_bak)) {
+            return false;
+        }
+        $result = file_put_contents($cli_c, file_get_contents($cli_c_bak));
+        $result = $result && file_put_contents($micro_c, file_get_contents($micro_c_bak));
+        @unlink($cli_c_bak);
+        @unlink($micro_c_bak);
+        return $result;
+    }
 }
