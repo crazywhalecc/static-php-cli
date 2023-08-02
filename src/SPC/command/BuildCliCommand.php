@@ -7,6 +7,7 @@ namespace SPC\command;
 use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
+use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
 use SPC\util\LicenseDumper;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,6 +28,7 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('build-all', null, null, 'build cli, micro, fpm');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('enable-zts', null, null, 'enable ZTS support');
+        $this->addOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
     }
 
     public function handle(): int
@@ -72,6 +74,16 @@ class BuildCliCommand extends BuildCommand
             $builder->proveExts($extensions);
             // strip
             $builder->setStrip(!$this->getOption('no-strip'));
+            // Process -I option
+            $custom_ini = [];
+            foreach ($this->input->getOption('with-hardcoded-ini') as $value) {
+                [$source_name, $ini_value] = explode('=', $value, 2);
+                $custom_ini[$source_name] = $ini_value;
+                logger()->info('Adding hardcoded INI [' . $source_name . ' = ' . $ini_value . ']');
+            }
+            if (!empty($custom_ini)) {
+                SourcePatcher::patchHardcodedINI($custom_ini);
+            }
             // 构建
             $builder->buildPHP($rule, $this->getOption('bloat'));
             // 统计时间
