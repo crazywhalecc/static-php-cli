@@ -25,7 +25,7 @@ class ExtractCommand extends BaseCommand
     {
         $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
         if (empty($sources)) {
-            $this->output->writeln('<erorr>sources cannot be empty, at least contain one !</erorr>');
+            $this->output->writeln('<error>sources cannot be empty, at least contain one !</error>');
             return 1;
         }
         SourceExtractor::initSource(sources: $sources);
