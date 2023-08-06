@@ -18,7 +18,6 @@ class AllExtCommand extends BaseCommand
     public function handle(): int
     {
         $this->output->writeln(implode(',', array_keys(Config::getExts())));
-
-        return 0;
+        return static::SUCCESS;
     }
 }

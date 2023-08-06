@@ -24,8 +24,8 @@ class DoctorCommand extends BaseCommand
         } catch (\Throwable $e) {
             $this->output->writeln('<error>' . $e->getMessage() . '</error>');
             pcntl_signal(SIGINT, SIG_IGN);
-            return 1;
+            return static::FAILURE;
         }
-        return 0;
+        return static::SUCCESS;
     }
 }

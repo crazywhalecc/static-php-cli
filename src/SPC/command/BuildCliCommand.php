@@ -51,7 +51,7 @@ class BuildCliCommand extends BuildCommand
             $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
             $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
             $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm</comment>");
-            return 1;
+            return static::FAILURE;
         }
         try {
             // 构建对象
@@ -113,10 +113,10 @@ class BuildCliCommand extends BuildCommand
             $dumper = new LicenseDumper();
             $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
             logger()->info('License path' . $fixed . ': ' . $build_root_path . '/license/');
-            return 0;
+            return static::SUCCESS;
         } catch (WrongUsageException $e) {
             logger()->critical($e->getMessage());
-            return 1;
+            return static::FAILURE;
         } catch (\Throwable $e) {
             if ($this->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
@@ -124,7 +124,7 @@ class BuildCliCommand extends BuildCommand
                 logger()->critical('Build failed with ' . get_class($e) . ': ' . $e->getMessage());
                 logger()->critical('Please check with --debug option to see more details.');
             }
-            return 1;
+            return static::FAILURE;
         }
     }
 }

@@ -37,7 +37,6 @@ class ExtInfoCommand extends BaseCommand
             }
             $this->output->writeln('');
         }
-
-        return 0;
+        return static::SUCCESS;
     }
 }

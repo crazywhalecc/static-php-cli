@@ -26,10 +26,10 @@ class ExtractCommand extends BaseCommand
         $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
         if (empty($sources)) {
             $this->output->writeln('<error>sources cannot be empty, at least contain one !</error>');
-            return 1;
+            return static::FAILURE;
         }
         SourceExtractor::initSource(sources: $sources);
         logger()->info('Extract done !');
-        return 0;
+        return static::SUCCESS;
     }
 }

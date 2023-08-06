@@ -52,6 +52,6 @@ class SortConfigCommand extends BaseCommand
                 return 1;
         }
         $this->output->writeln('<info>sort success</info>');
-        return 0;
+        return static::SUCCESS;
     }
 }

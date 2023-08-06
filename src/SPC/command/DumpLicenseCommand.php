@@ -50,7 +50,7 @@ class DumpLicenseCommand extends BaseCommand
             $this->output->writeln('Dump license with libraries: ' . implode(', ', $libraries));
             $this->output->writeln('Dump license with' . ($this->getOption('without-php') ? 'out' : '') . ' php-src');
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
-            return 0;
+            return static::SUCCESS;
         }
         if ($this->getOption('by-libs') !== null) {
             $libraries = array_map('trim', array_filter(explode(',', $this->getOption('by-libs'))));
@@ -58,16 +58,16 @@ class DumpLicenseCommand extends BaseCommand
             $dumper->addLibs($libraries);
             $dumper->dump($this->getOption('dump-dir'));
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
-            return 0;
+            return static::SUCCESS;
         }
         if ($this->getOption('by-sources') !== null) {
             $sources = array_map('trim', array_filter(explode(',', $this->getOption('by-sources'))));
             $dumper->addSources($sources);
             $dumper->dump($this->getOption('dump-dir'));
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
-            return 0;
+            return static::SUCCESS;
         }
         $this->output->writeln('You must use one of "--by-extensions=", "--by-libs=", "--by-sources=" to dump');
-        return 1;
+        return static::FAILURE;
     }
 }
