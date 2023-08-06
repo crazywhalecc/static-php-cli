@@ -35,12 +35,12 @@ class MicroCombineCommand extends BaseCommand
         // 1. Make sure specified micro.sfx file exists
         if ($micro_file !== null && !file_exists($micro_file)) {
             $this->output->writeln('<error>The micro.sfx file you specified is incorrect or does not exist!</error>');
-            return 1;
+            return static::FAILURE;
         }
         // 2. Make sure buildroot/bin/micro.sfx exists
         if ($micro_file === null && !file_exists($internal)) {
             $this->output->writeln('<error>You haven\'t compiled micro.sfx yet, please use "build" command and "--build-micro" to compile phpmicro first!</error>');
-            return 1;
+            return static::FAILURE;
         }
         // 3. Use buildroot/bin/micro.sfx
         if ($micro_file === null) {
@@ -49,19 +49,19 @@ class MicroCombineCommand extends BaseCommand
         // 4. Make sure php or phar file exists
         if (!is_file(FileSystem::convertPath($file))) {
             $this->output->writeln('<error>The file to combine does not exist!</error>');
-            return 1;
+            return static::FAILURE;
         }
         // 5. Confirm ini files (ini-set has higher priority)
         if ($ini_file !== null) {
             // Check file exist first
             if (!file_exists($ini_file)) {
                 $this->output->writeln('<error>The ini file to combine does not exist! (' . $ini_file . ')</error>');
-                return 1;
+                return static::FAILURE;
             }
             $arr = parse_ini_file($ini_file);
             if ($arr === false) {
                 $this->output->writeln('<error>Cannot parse ini file</error>');
-                return 1;
+                return static::FAILURE;
             }
             $target_ini = array_merge($target_ini, $arr);
         }
@@ -71,7 +71,7 @@ class MicroCombineCommand extends BaseCommand
                 $arr = parse_ini_string($item);
                 if ($arr === false) {
                     $this->output->writeln('<error>--with-ini-set parse failed</error>');
-                    return 1;
+                    return static::FAILURE;
                 }
                 $target_ini = array_merge($target_ini, $arr);
             }
@@ -90,12 +90,12 @@ class MicroCombineCommand extends BaseCommand
         $result = file_put_contents($output, $file_target);
         if ($result === false) {
             $this->output->writeln('<error>Combine failed.</error>');
-            return 1;
+            return static::FAILURE;
         }
         // 9. chmod +x
         chmod($output, 0755);
         $this->output->writeln('<info>Combine success! Binary file: ' . $output . '</info>');
-        return 0;
+        return static::SUCCESS;
     }
 
     private function encodeINI(array $array): string

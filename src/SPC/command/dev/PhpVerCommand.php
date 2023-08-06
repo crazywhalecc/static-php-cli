@@ -25,9 +25,9 @@ class PhpVerCommand extends BaseCommand
         $result = preg_match('/#define PHP_VERSION "([^"]+)"/', file_get_contents($file), $match);
         if ($result === false) {
             $this->output->writeln('<error>PHP source not found, maybe you need to extract first ?</error>');
-            return 1;
+            return static::FAILURE;
         }
         $this->output->writeln('<info>' . $match[1] . '</info>');
-        return 0;
+        return static::SUCCESS;
     }
 }

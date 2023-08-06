@@ -91,7 +91,7 @@ abstract class BaseCommand extends Command
                 foreach ($msg as $v) {
                     logger()->error($v);
                 }
-                return self::FAILURE;
+                return static::FAILURE;
             } catch (\Throwable $e) {
                 // 不开 debug 模式就不要再显示复杂的调试栈信息了
                 if ($this->getOption('debug')) {
@@ -102,10 +102,10 @@ abstract class BaseCommand extends Command
                         logger()->error($v);
                     }
                 }
-                return self::FAILURE;
+                return static::FAILURE;
             }
         }
-        return self::SUCCESS;
+        return static::SUCCESS;
     }
 
     protected function getOption(string $name): mixed

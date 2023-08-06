@@ -60,7 +60,7 @@ class DeployCommand extends BaseCommand
             $ask = $this->getOption('overwrite') ? true : $prompt->requireBool('<comment>The file "' . $phar_path . '" already exists, do you want to overwrite it?</comment>' . PHP_EOL . 'If you want to, just Enter');
             if (!$ask) {
                 $this->output->writeln('<comment>User canceled.</comment>');
-                return 1;
+                return static::FAILURE;
             }
             @unlink($phar_path);
         }
@@ -97,7 +97,7 @@ class DeployCommand extends BaseCommand
             $phar->setStub($phar->createDefaultStub($stub));
         } catch (\Throwable $e) {
             $this->output->writeln($e);
-            return 1;
+            return static::FAILURE;
         }
         $phar->addFromString('.prod', 'true');
         $phar->stopBuffering();
@@ -114,7 +114,7 @@ class DeployCommand extends BaseCommand
         }
         chmod($phar_path, 0755);
         $this->output->writeln('<info>Phar Executable: ' . $phar_path . '</info>');
-        return 0;
+        return static::SUCCESS;
     }
 
     private function progress(int $max = 0): ProgressBar

@@ -63,7 +63,7 @@ class BuildLibsCommand extends BuildCommand
 
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build libs complete, used ' . $time . ' s !');
-            return 0;
+            return static::SUCCESS;
         } catch (\Throwable $e) {
             if ($this->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
@@ -71,7 +71,7 @@ class BuildLibsCommand extends BuildCommand
                 logger()->critical('Build failed with ' . get_class($e) . ': ' . $e->getMessage());
                 logger()->critical('Please check with --debug option to see more details.');
             }
-            return 1;
+            return static::FAILURE;
         }
     }
 }

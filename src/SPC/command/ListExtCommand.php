@@ -21,6 +21,6 @@ class ListExtCommand extends BaseCommand
         foreach (Config::getExts() as $ext => $meta) {
             echo $ext . PHP_EOL;
         }
-        return 0;
+        return static::SUCCESS;
     }
 }

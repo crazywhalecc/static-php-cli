@@ -68,14 +68,14 @@ class DownloadCommand extends BaseCommand
                 f_passthru('rm -rf ' . DOWNLOAD_PATH . '/*');
                 f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
             }
-            return 0;
+            return static::FAILURE;
         }
 
         // --from-zip
         if ($path = $this->getOption('from-zip')) {
             if (!file_exists($path)) {
                 logger()->critical('File ' . $path . ' not exist or not a zip archive.');
-                return 1;
+                return static::FAILURE;
             }
             // remove old download files first
             if (is_dir(DOWNLOAD_PATH)) {
@@ -89,7 +89,7 @@ class DownloadCommand extends BaseCommand
             if (PHP_OS_FAMILY !== 'Windows' && !$this->findCommand('unzip')) {
                 logger()->critical('Missing unzip command, you need to install it first !');
                 logger()->critical('You can use "bin/spc doctor" command to check and install required tools');
-                return 1;
+                return static::FAILURE;
             }
             // create downloads
             try {
@@ -103,10 +103,10 @@ class DownloadCommand extends BaseCommand
                 }
             } catch (RuntimeException $e) {
                 logger()->critical('Extract failed: ' . $e->getMessage());
-                return 1;
+                return static::FAILURE;
             }
             logger()->info('Extract success');
-            return 0;
+            return static::SUCCESS;
         }
 
         // Define PHP major version
@@ -115,7 +115,7 @@ class DownloadCommand extends BaseCommand
         preg_match('/^\d+\.\d+$/', $ver, $matches);
         if (!$matches) {
             logger()->error("bad version arg: {$ver}, x.y required!");
-            return 1;
+            return static::FAILURE;
         }
 
         // Use shallow-clone can reduce git resource download
@@ -175,6 +175,6 @@ class DownloadCommand extends BaseCommand
         // 打印拉取资源用时
         $time = round(microtime(true) - START_TIME, 3);
         logger()->info('Download complete, used ' . $time . ' s !');
-        return 0;
+        return static::SUCCESS;
     }
 }
