@@ -29,7 +29,6 @@ class MacOSToolCheckList
         'xz',
         'gzip',
         'bzip2',
-        'gotop',
         'cmake',
     ];
 
