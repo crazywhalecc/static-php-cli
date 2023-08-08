@@ -24,7 +24,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 ## 编译环境需求
 
 是的，本项目采用 PHP 编写，编译前需要一个 PHP 环境，比较滑稽。
-但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含 tokenizer 扩展和 PHP 版本大于等于 8.0 即可。
+但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含 mbstring、pcntl 扩展和 PHP 版本大于等于 8.1 即可。
 
 下面是架构支持情况，`CI` 代表支持 GitHub Action 构建，`Local` 代表支持本地构建，空 代表暂不支持。
 

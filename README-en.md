@@ -24,7 +24,7 @@ This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro
 ## Compilation Requirements
 
 Yes, this project is written in PHP, pretty funny.
-But static-php-cli runtime only requires an environment above PHP 8.0 and `tokenizer`, `iconv` extension.
+But static-php-cli runtime only requires an environment above PHP 8.1 and `mbstring`, `pcntl` extension.
 
 Here is the architecture support status, where `CI` represents support for GitHub Action builds, 
 `Local` represents support for local builds, and blank represents not currently supported.
