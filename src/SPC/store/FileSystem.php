@@ -320,28 +320,7 @@ class FileSystem
         foreach ($files as $v) {
             $pathinfo = pathinfo($v);
             if (($pathinfo['extension'] ?? '') == 'php') {
-                $path = rtrim($dir, '/') . '/' . rtrim($pathinfo['dirname'], './') . '/' . $pathinfo['basename'];
-
-                // 过滤不包含类的文件
-                $tokens = token_get_all(self::readFile($path));
-                $found = false;
-                foreach ($tokens as $token) {
-                    if (!is_array($token)) {
-                        continue;
-                    }
-                    if ($token[0] === T_CLASS) {
-                        $found = true;
-                        break;
-                    }
-                }
-                if (!$found) {
-                    continue;
-                }
-
-                if ($rule === null) { // 规则未设置回调时候，使用默认的识别过滤规则
-                    /*if (substr(file_get_contents($dir . '/' . $v), 6, 6) == '#plain') {
-                        continue;
-                    }*/
+                if ($rule === null) {
                     if (file_exists($dir . '/' . $pathinfo['basename'] . '.ignore')) {
                         continue;
                     }
