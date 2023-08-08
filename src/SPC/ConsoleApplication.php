@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC;
 
-use SPC\command\DeployCommand;
 use SPC\store\FileSystem;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\HelpCommand;
@@ -32,13 +31,19 @@ class ConsoleApplication extends Application
 
         // 通过扫描目录 src/static-php-cli/command/ 添加子命令
         $commands = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/command', 'SPC\\command');
-        $this->addCommands(array_map(function ($x) { return new $x(); }, array_filter($commands, function ($y) {
-            if (is_a($y, DeployCommand::class, true) && (class_exists('\\Phar') && \Phar::running() || !class_exists('\\Phar'))) {
+        $phar = class_exists('\\Phar') && \Phar::running() || !class_exists('\\Phar');
+        $commands = array_filter($commands, function ($y) use ($phar) {
+            $archive_blacklist = [
+                'SPC\command\dev\SortConfigCommand',
+                'SPC\command\DeployCommand',
+            ];
+            if ($phar && in_array($y, $archive_blacklist)) {
                 return false;
             }
             $reflection = new \ReflectionClass($y);
             return !$reflection->isAbstract() && !$reflection->isInterface();
-        })));
+        });
+        $this->addCommands(array_map(function ($x) { return new $x(); }, $commands));
     }
 
     /**
