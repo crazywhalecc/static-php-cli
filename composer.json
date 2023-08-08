@@ -9,16 +9,15 @@
         }
     ],
     "require": {
-        "php": ">= 8.0",
-        "ext-tokenizer": "*",
-        "ext-iconv": "*",
+        "php": ">= 8.1",
+        "ext-pcntl": "*",
+        "ext-mbstring": "*",
+        "laravel/prompts": "dev-main",
         "symfony/console": "^6 || ^5 || ^4",
-        "zhamao/logger": "^1.0",
-        "crazywhalecc/cli-helper": "^0.1.0",
-        "nunomaduro/collision": "*",
-        "ext-pcntl": "*"
+        "zhamao/logger": "^1.0"
     },
     "require-dev": {
+        "nunomaduro/collision": "*",
         "friendsofphp/php-cs-fixer": "^3.2 != 3.7.0",
         "phpstan/phpstan": "^1.1",
         "captainhook/captainhook": "^5.10",

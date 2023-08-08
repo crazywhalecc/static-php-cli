@@ -47,7 +47,8 @@ class ExceptionHandler
             logger()->error($e->getTraceAsString());
             return;
         }
-
         $this->whoops->handleException($e);
+
+        logger()->critical('You can report this exception to static-php-cli GitHub repo.');
     }
 }

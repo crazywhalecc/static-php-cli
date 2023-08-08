@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
-use CliHelper\Tools\ArgFixer;
-use CliHelper\Tools\DataProvider;
-use CliHelper\Tools\SeekableArrayIterator;
+use SPC\store\FileSystem;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\text;
 
 #[AsCommand('deploy', 'Deploy static-php-cli self to an .phar application')]
 class DeployCommand extends BaseCommand
@@ -20,26 +21,51 @@ class DeployCommand extends BaseCommand
         $this->addArgument('target', InputArgument::OPTIONAL, 'The file or directory to pack.');
         $this->addOption('auto-phar-fix', null, InputOption::VALUE_NONE, 'Automatically fix ini option.');
         $this->addOption('overwrite', 'W', InputOption::VALUE_NONE, 'Overwrite existing files.');
+        $this->addOption('with-no-dev', 'D', InputOption::VALUE_NONE, 'Automatically use non-dev composer dependencies to reduce size');
+        $this->addOption('with-dev', 'd', InputOption::VALUE_NONE, 'Automatically use dev composer dependencies');
     }
 
     public function handle(): int
     {
-        // 第一阶段流程：如果没有写path，将会提示输入要打包的path
-        $prompt = new ArgFixer($this->input, $this->output);
+        $composer = require ROOT_DIR . '/vendor/composer/installed.php';
+        if (($composer['root']['dev'] ?? false) === true) {
+            if (!$this->getOption('with-no-dev')) {
+                $this->output->writeln('<comment>Current static-php-cli dependencies have installed dev-dependencies</comment>');
+                $this->output->writeln('<comment>If you want to remove, you can choose "Yes" to run command "composer update --no-dev" to remove.</comment>');
+                $this->output->writeln('<comment>Or choose "No", just pack, deploy.</comment>');
+                $ask = confirm('Do you want to remove dev-dependencies to reduce size of phar file?');
+            } elseif (!$this->getOption('with-dev')) {
+                $ask = true;
+            } else {
+                $ask = false;
+            }
+            if ($ask) {
+                [$code] = shell()->execWithResult('composer update --no-dev');
+                if ($code !== 0) {
+                    $this->output->writeln('<error>"composer update --no-dev" failed with exit code [' . $code . ']</error>');
+                    $this->output->writeln('<error>You may need to run this command by your own.</error>');
+                    return static::FAILURE;
+                }
+                $this->output->writeln('<info>Update successfully, you need to re-run deploy command to pack.</info>');
+                return static::SUCCESS;
+            }
+        }
         // 首先得确认是不是关闭了readonly模式
         if (ini_get('phar.readonly') == 1) {
             if ($this->getOption('auto-phar-fix')) {
                 $ask = true;
             } else {
-                $ask = $prompt->requireBool('<comment>pack command needs "phar.readonly" = "Off" !</comment>' . PHP_EOL . 'If you want to automatically set it and continue, just Enter', true);
+                $this->output->writeln('<comment>pack command needs "phar.readonly" = "Off" !</comment>');
+                $ask = confirm('Do you want to automatically set it and continue ?');
+                // $ask = $prompt->requireBool('<comment>pack command needs "phar.readonly" = "Off" !</comment>' . PHP_EOL . 'If you want to automatically set it and continue, just Enter', true);
             }
             if ($ask) {
                 global $argv;
-                $args = array_merge(['-d', 'phar.readonly=0'], $_SERVER['argv']);
+                $args = array_merge(['-d', 'phar.readonly=0'], $_SERVER['argv'], ['--no-motd']);
                 if (function_exists('pcntl_exec')) {
                     $this->output->writeln('<info>Changing to phar.readonly=0 mode ...</info>');
                     if (pcntl_exec(PHP_BINARY, $args) === false) {
-                        throw new \PharException('切换到读写模式失败，请检查环境。');
+                        throw new \PharException('Switching to read write mode failed, please check the environment.');
                     }
                 } else {
                     $this->output->writeln('<info>Now running command in child process.</info>');
@@ -51,13 +77,19 @@ class DeployCommand extends BaseCommand
         // 获取路径
         $path = WORKING_DIR;
         // 如果是目录，则将目录下的所有文件打包
-        $phar_path = $prompt->requireArgument('target', 'Please input the phar target filename', 'static-php-cli.phar');
+        $phar_path = text('Please input the phar target filename', default: '/tmp/static-php-cli.phar');
+        // $phar_path = $prompt->requireArgument('target', 'Please input the phar target filename', 'static-php-cli.phar');
 
-        if (DataProvider::isRelativePath($phar_path)) {
-            $phar_path = '/tmp/' . $phar_path;
+        if (FileSystem::isRelativePath($phar_path)) {
+            $phar_path = WORKING_DIR . '/' . $phar_path;
         }
         if (file_exists($phar_path)) {
-            $ask = $this->getOption('overwrite') ? true : $prompt->requireBool('<comment>The file "' . $phar_path . '" already exists, do you want to overwrite it?</comment>' . PHP_EOL . 'If you want to, just Enter');
+            if (!$this->getOption('overwrite')) {
+                $this->output->writeln('<comment>The file "' . $phar_path . '" already exists.</comment>');
+                $ask = confirm('Do you want to overwrite it?');
+            } else {
+                $ask = true;
+            }
             if (!$ask) {
                 $this->output->writeln('<comment>User canceled.</comment>');
                 return static::FAILURE;
@@ -67,7 +99,7 @@ class DeployCommand extends BaseCommand
         $phar = new \Phar($phar_path);
         $phar->startBuffering();
 
-        $all = DataProvider::scanDirFiles($path, true, true);
+        $all = FileSystem::scanDirFiles($path, true, true);
 
         $all = array_filter($all, function ($x) {
             $dirs = preg_match('/(^(config|src|vendor)\\/|^(composer\\.json|README\\.md|source\\.json|LICENSE|README-en\\.md)$)/', $x);
