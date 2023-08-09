@@ -12,7 +12,12 @@ class redis extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        $arg = '--enable-redis --disable-redis-session';
+        $arg = '--enable-redis';
+        if (!$this->builder->getExt('session')) {
+            $arg .= ' --disable-redis-session';
+        } else {
+            $arg .= ' --enable-redis-session';
+        }
         if ($this->builder->getLib('zstd')) {
             $arg .= ' --enable-redis-zstd --with-libzstd="' . BUILD_ROOT_PATH . '"';
         }
