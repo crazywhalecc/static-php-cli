@@ -298,7 +298,10 @@
     "redis": {
         "type": "external",
         "source": "redis",
-        "arg-type": "custom"
+        "arg-type": "custom",
+        "ext-suggests": [
+            "session"
+        ]
     },
     "session": {
         "type": "builtin"
