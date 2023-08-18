@@ -15,6 +15,18 @@
             "brotli"
         ]
     },
+    "glfw": {
+        "source": "ext-glfw",
+        "static-libs-unix": [
+            "libglfw3.a"
+        ],
+        "frameworks": [
+            "CoreVideo",
+            "OpenGL",
+            "Cocoa",
+            "IOKit"
+        ]
+    },
     "bzip2": {
         "source": "bzip2",
         "static-libs-unix": [
