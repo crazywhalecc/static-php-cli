@@ -6,6 +6,15 @@
             "path": "LICENSE"
         }
     },
+    "ext-glfw": {
+        "type": "git",
+        "url": "https://github.com/mario-deluna/php-glfw",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "apcu": {
         "type": "url",
         "url": "https://pecl.php.net/get/APCu",

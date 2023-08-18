@@ -135,6 +135,14 @@
             "imagemagick"
         ]
     },
+    "glfw": {
+        "type": "external",
+        "arg-type": "custom",
+        "source": "ext-glfw",
+        "lib-depends": [
+            "glfw"
+        ]
+    },
     "imap": {
         "type": "builtin",
         "arg-type": "with",
