@@ -39,11 +39,11 @@ const BUILD_STATUS_ALREADY = 1;
 const BUILD_STATUS_FAILED = 2;
 
 // build target type
-const BUILD_TARGET_NONE = 0;
-const BUILD_TARGET_CLI = 1;
-const BUILD_TARGET_MICRO = 2;
-const BUILD_TARGET_FPM = 4;
-const BUILD_TARGET_ALL = 7;
+const BUILD_TARGET_NONE = 0;    // no target
+const BUILD_TARGET_CLI = 1;     // build cli
+const BUILD_TARGET_MICRO = 2;   // build micro
+const BUILD_TARGET_FPM = 4;     // build fpm
+const BUILD_TARGET_ALL = 7;     // build all
 
 // doctor error fix policy
 const FIX_POLICY_DIE = 1;       // die directly
@@ -56,10 +56,5 @@ const PKGCONF_PATCH_EXEC_PREFIX = 2;
 const PKGCONF_PATCH_LIBDIR = 4;
 const PKGCONF_PATCH_INCLUDEDIR = 8;
 const PKGCONF_PATCH_ALL = 15;
-
-// Custom download type
-const DOWNLOAD_TYPE_NONE = 0;
-const DOWNLOAD_TYPE_ARCHIVE = 1;
-const DOWNLOAD_TYPE_DIR = 2;
 
 ConsoleLogger::$date_format = 'H:i:s';

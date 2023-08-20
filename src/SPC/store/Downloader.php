@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
-use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\source\CustomSourceBase;
 
 /**
- * 资源下载器
+ * Source Downloader.
  */
 class Downloader
 {
     /**
-     * 获取 BitBucket 仓库的最新 Tag
+     * Get latest version from BitBucket tag
      *
-     * @param  string              $name   资源名称
-     * @param  array               $source 资源的元信息，包含字段 repo
-     * @return array<int, string>  返回下载 url 链接和文件名
+     * @param  string              $name   source name
+     * @param  array               $source source meta info: [repo]
+     * @return array<int, string>  [url, filename]
      * @throws DownloaderException
      */
     public static function getLatestBitbucketTag(string $name, array $source): array
@@ -49,10 +48,13 @@ class Downloader
     }
 
     /**
-     * 获取 GitHub 最新的打包地址和文件名
+     * Get latest version from GitHub tarball
      *
-     * @param  string              $name   包名称
-     * @param  array               $source 源信息
+     * @param  string             $name   source name
+     * @param  array              $source source meta info: [repo]
+     * @param  string             $type   type of tarball, default is 'releases'
+     * @return array<int, string> [url, filename]
+     *
      * @throws DownloaderException
      */
     public static function getLatestGithubTarball(string $name, array $source, string $type = 'releases'): array
@@ -82,10 +84,11 @@ class Downloader
     }
 
     /**
-     * 获取 GitHub 最新的 Release 下载信息
+     * Get latest version from GitHub release (uploaded archive)
      *
-     * @param  string              $name   资源名
-     * @param  array               $source 资源的元信息，包含字段 repo、match
+     * @param  string              $name   source name
+     * @param  array               $source source meta info: [repo, match]
+     * @return array<int, string>  [url, filename]
      * @throws DownloaderException
      */
     public static function getLatestGithubRelease(string $name, array $source): array
@@ -111,10 +114,11 @@ class Downloader
     }
 
     /**
-     * 获取文件列表的资源链接和名称
+     * Get latest version from file list (regex based crawler)
      *
-     * @param  string              $name   资源名称
-     * @param  array               $source 资源元信息，包含 url、regex
+     * @param  string              $name   source name
+     * @param  array               $source source meta info: [url, regex]
+     * @return array<int, string>  [url, filename]
      * @throws DownloaderException
      */
     public static function getFromFileList(string $name, array $source): array
@@ -149,6 +153,8 @@ class Downloader
     }
 
     /**
+     * Just download file using system curl command, and lock it
+     *
      * @throws DownloaderException
      * @throws RuntimeException
      * @throws FileSystemException
@@ -168,6 +174,11 @@ class Downloader
         self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path]);
     }
 
+    /**
+     * Try to lock source.
+     *
+     * @throws FileSystemException
+     */
     public static function lockSource(string $name, array $data): void
     {
         if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
@@ -180,40 +191,11 @@ class Downloader
     }
 
     /**
-     * 通过链接下载资源到本地并解压
+     * Download git source, and lock it.
      *
-     * @param  string              $name     资源名称
-     * @param  string              $url      下载链接
-     * @param  string              $filename 下载到下载目录的目标文件名称，例如 xz.tar.gz
-     * @param  null|string         $path     如果指定了此参数，则会移动该资源目录到目标目录
      * @throws FileSystemException
      * @throws RuntimeException
-     * @throws DownloaderException
      */
-    public static function downloadUrl(string $name, string $url, string $filename, ?string $path = null): void
-    {
-        if (!file_exists(DOWNLOAD_PATH . "/{$filename}")) {
-            logger()->debug("downloading {$url}");
-            self::curlDown(url: $url, path: DOWNLOAD_PATH . "/{$filename}");
-        } else {
-            logger()->notice("{$filename} already exists");
-        }
-        FileSystem::extractSource($name, DOWNLOAD_PATH . "/{$filename}");
-        if ($path) {
-            $path = FileSystem::convertPath(SOURCE_PATH . "/{$path}");
-            $src_path = FileSystem::convertPath(SOURCE_PATH . "/{$name}");
-            switch (PHP_OS_FAMILY) {
-                case 'Windows':
-                    f_passthru('move "' . $src_path . '" "' . $path . '"');
-                    break;
-                case 'Linux':
-                case 'Darwin':
-                    f_passthru('mv "' . $src_path . '" "' . $path . '"');
-                    break;
-            }
-        }
-    }
-
     public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null): void
     {
         $download_path = DOWNLOAD_PATH . "/{$name}";
@@ -257,10 +239,10 @@ class Downloader
     }
 
     /**
-     * 拉取资源
+     * Download source by name and meta.
      *
-     * @param  string              $name   资源名称
-     * @param  null|array          $source 资源参数，包含 type、path、rev、url、filename、regex、license
+     * @param  string              $name   source name
+     * @param  null|array          $source source meta info: [type, path, rev, url, filename, regex, license]
      * @throws DownloaderException
      * @throws FileSystemException
      * @throws RuntimeException
@@ -291,35 +273,35 @@ class Downloader
 
         try {
             switch ($source['type']) {
-                case 'bitbuckettag':    // 从 BitBucket 的 Tag 拉取
+                case 'bitbuckettag':    // BitBucket Tag
                     [$url, $filename] = self::getLatestBitbucketTag($name, $source);
                     self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
-                case 'ghtar':           // 从 GitHub 的 TarBall 拉取
+                case 'ghtar':           // GitHub Release (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $source);
                     self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
-                case 'ghtagtar':        // 根据 GitHub 的 Tag 拉取相应版本的 Tar
+                case 'ghtagtar':        // GitHub Tag (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $source, 'tags');
                     self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
-                case 'ghrel':           // 通过 GitHub Release 来拉取
+                case 'ghrel':           // GitHub Release (uploaded)
                     [$url, $filename] = self::getLatestGithubRelease($name, $source);
                     self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
-                case 'filelist':        // 通过网站提供的 filelist 使用正则提取后拉取
+                case 'filelist':        // Basic File List (regex based crawler)
                     [$url, $filename] = self::getFromFileList($name, $source);
                     self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
-                case 'url':             // 通过直链拉取
+                case 'url':             // Direct download URL
                     $url = $source['url'];
                     $filename = $source['filename'] ?? basename($source['url']);
                     self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
-                case 'git':             // 通过拉回 Git 仓库的形式拉取
+                case 'git':             // Git repo
                     self::downloadGit($name, $source['url'], $source['rev'], $source['path'] ?? null);
                     break;
-                case 'custom':          // 自定义，可能是通过复杂 API 形式获取的文件，需要手写 crawler
+                case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
                     foreach ($classes as $class) {
                         if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
@@ -332,7 +314,8 @@ class Downloader
                     throw new DownloaderException('unknown source type: ' . $source['type']);
             }
         } catch (RuntimeException $e) {
-            // 因为某些时候通过命令行下载的文件在失败后不会删除，这里检测到文件存在需要手动删一下
+            // Because sometimes files downloaded through the command line are not automatically deleted after a failure.
+            // Here we need to manually delete the file if it is detected to exist.
             if (isset($filename) && file_exists(DOWNLOAD_PATH . '/' . $filename)) {
                 logger()->warning('Deleting download file: ' . $filename);
                 unlink(DOWNLOAD_PATH . '/' . $filename);
@@ -342,27 +325,7 @@ class Downloader
     }
 
     /**
-     * 获取 PHP x.y 的具体版本号，例如通过 8.1 来获取 8.1.10
-     *
-     * @throws DownloaderException
-     */
-    #[ArrayShape(['type' => 'string', 'path' => 'string', 'rev' => 'string', 'url' => 'string'])]
-    public static function getLatestPHPInfo(string $major_version): array
-    {
-        // 查找最新的小版本号
-        $info = json_decode(self::curlExec(url: "https://www.php.net/releases/index.php?json&version={$major_version}"), true);
-        $version = $info['version'];
-
-        // 从官网直接下载
-        return [
-            'type' => 'url',
-            'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
-            // 'url' => "https://mirrors.zhamao.xin/php/php-{$version}.tar.gz",
-        ];
-    }
-
-    /**
-     * 使用 curl 命令拉取元信息
+     * Use curl command to get http response
      *
      * @throws DownloaderException
      */
@@ -408,7 +371,7 @@ class Downloader
     }
 
     /**
-     * 使用 curl 命令下载文件
+     * Use curl to download sources from url
      *
      * @throws DownloaderException
      * @throws RuntimeException

@@ -53,19 +53,6 @@
             "sockets"
         ]
     },
-    "memcached": {
-        "type": "external",
-        "source": "memcached",
-        "arg-type": "custom",
-        "cpp-extension": true,
-        "lib-depends": [
-            "libmemcached"
-        ],
-        "ext-depends": [
-            "session",
-            "zlib"
-        ]
-    },
     "exif": {
         "type": "builtin"
     },
@@ -113,6 +100,14 @@
             "gettext"
         ]
     },
+    "glfw": {
+        "type": "external",
+        "arg-type": "custom",
+        "source": "ext-glfw",
+        "lib-depends": [
+            "glfw"
+        ]
+    },
     "gmp": {
         "type": "builtin",
         "arg-type": "with-prefix",
@@ -133,14 +128,6 @@
         "arg-type": "custom",
         "lib-depends": [
             "imagemagick"
-        ]
-    },
-    "glfw": {
-        "type": "external",
-        "arg-type": "custom",
-        "source": "ext-glfw",
-        "lib-depends": [
-            "glfw"
         ]
     },
     "imap": {
@@ -194,6 +181,19 @@
         ],
         "ext-depends": [
             "session"
+        ]
+    },
+    "memcached": {
+        "type": "external",
+        "source": "memcached",
+        "arg-type": "custom",
+        "cpp-extension": true,
+        "lib-depends": [
+            "libmemcached"
+        ],
+        "ext-depends": [
+            "session",
+            "zlib"
         ]
     },
     "mongodb": {

@@ -6,7 +6,7 @@ namespace SPC\builder;
 
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
-use SPC\builder\windows\WindowsBuilder;
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,7 +17,9 @@ use Symfony\Component\Console\Input\InputInterface;
 class BuilderProvider
 {
     /**
+     * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function makeBuilderByInput(InputInterface $input): BuilderBase
     {
@@ -27,18 +29,8 @@ class BuilderProvider
             //    vs_ver: $input->getOption('vs-ver'),
             //    arch: $input->getOption('arch'),
             // ),
-            'Darwin' => new MacOSBuilder(
-                cc: $input->getOption('cc'),
-                cxx: $input->getOption('cxx'),
-                arch: $input->getOption('arch'),
-                zts: $input->hasOption('enable-zts') ? $input->getOption('enable-zts') : false,
-            ),
-            'Linux' => new LinuxBuilder(
-                cc: $input->getOption('cc'),
-                cxx: $input->getOption('cxx'),
-                arch: $input->getOption('arch'),
-                zts: $input->hasOption('enable-zts') ? $input->getOption('enable-zts') : false,
-            ),
+            'Darwin' => new MacOSBuilder($input->getOptions()),
+            'Linux' => new LinuxBuilder($input->getOptions()),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
     }

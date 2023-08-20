@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace SPC\command\dev;
 
 use SPC\command\BaseCommand;
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -13,11 +16,16 @@ use Symfony\Component\Console\Input\InputArgument;
 #[AsCommand('dev:ext-info', 'Dev command')]
 class ExtInfoCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extension name you need to get info');
     }
 
+    /**
+     * @throws WrongUsageException
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
     public function handle(): int
     {
         $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions'))));

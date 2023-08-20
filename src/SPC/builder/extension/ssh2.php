@@ -17,9 +17,8 @@ class ssh2 extends Extension
      */
     public function patchBeforeConfigure(): bool
     {
-        FileSystem::replaceFile(
+        FileSystem::replaceFileRegex(
             SOURCE_PATH . '/php-src/configure',
-            REPLACE_FILE_PREG,
             '/-lssh2/',
             $this->getLibFilesString()
         );

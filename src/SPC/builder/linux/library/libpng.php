@@ -23,24 +23,26 @@ namespace SPC\builder\linux\library;
 use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 
 class libpng extends LinuxLibraryBase
 {
     public const NAME = 'libpng';
 
+    /**
+     * @throws FileSystemException
+     */
     public function patchBeforeBuild(): bool
     {
-        FileSystem::replaceFile(
+        FileSystem::replaceFileStr(
             SOURCE_PATH . '/libpng/configure',
-            REPLACE_FILE_STR,
             '-lz',
             BUILD_LIB_PATH . '/libz.a'
         );
         if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
-            FileSystem::replaceFile(
+            FileSystem::replaceFileStr(
                 SOURCE_PATH . '/libpng/configure',
-                REPLACE_FILE_STR,
                 '-lm',
                 '/usr/lib/libm.a'
             );
@@ -49,12 +51,13 @@ class libpng extends LinuxLibraryBase
     }
 
     /**
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
-    public function build()
+    public function build(): void
     {
-        $optimizations = match ($this->builder->arch) {
+        $optimizations = match ($this->builder->getOption('arch')) {
             'x86_64' => '--enable-intel-sse ',
             'arm64' => '--enable-arm-neon ',
             default => '',
@@ -64,7 +67,7 @@ class libpng extends LinuxLibraryBase
             ->exec('chmod +x ./install-sh')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
-                "--host={$this->builder->gnu_arch}-unknown-linux " .
+                "--host={$this->builder->getOption('gnu-arch')}-unknown-linux " .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .

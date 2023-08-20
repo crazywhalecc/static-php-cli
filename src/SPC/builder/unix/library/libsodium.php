@@ -6,7 +6,7 @@ namespace SPC\builder\unix\library;
 
 trait libsodium
 {
-    protected function build()
+    protected function build(): void
     {
         $root = BUILD_ROOT_PATH;
         shell()->cd($this->source_dir)

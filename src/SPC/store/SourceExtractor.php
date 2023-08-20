@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
 class SourceExtractor
 {
+    /**
+     * @throws WrongUsageException
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
     public static function initSource(?array $sources = null, ?array $libs = null, ?array $exts = null): void
     {
         if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {

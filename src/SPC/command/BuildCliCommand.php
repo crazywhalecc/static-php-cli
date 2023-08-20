@@ -18,7 +18,7 @@ use ZM\Logger\ConsoleColor;
 #[AsCommand('build', 'build CLI binary')]
 class BuildCliCommand extends BuildCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
@@ -29,16 +29,15 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('enable-zts', null, null, 'enable ZTS support');
         $this->addOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
+        $this->addOption('with-micro-fake-cli', null, null, 'Enable phpmicro fake cli');
     }
 
     public function handle(): int
     {
-        // 从参数中获取要编译的 libraries，并转换为数组
+        // transform string to array
         $libraries = array_map('trim', array_filter(explode(',', $this->getOption('with-libs'))));
-        // 从参数中获取要编译的 extensions，并转换为数组
+        // transform string to array
         $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions'))));
-
-        define('BUILD_ALL_STATIC', true);
 
         $rule = BUILD_TARGET_NONE;
         $rule = $rule | ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
@@ -54,9 +53,9 @@ class BuildCliCommand extends BuildCommand
             return static::FAILURE;
         }
         try {
-            // 构建对象
+            // create builder
             $builder = BuilderProvider::makeBuilderByInput($this->input);
-            // 根据提供的扩展列表获取依赖库列表并编译
+            // calculate dependencies
             [$extensions, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps($extensions, $libraries);
             /* @phpstan-ignore-next-line */
             logger()->info('Build target: ' . ConsoleColor::yellow($builder->getBuildTypeName($rule)));
@@ -68,12 +67,11 @@ class BuildCliCommand extends BuildCommand
                 logger()->warning('some extensions will be enabled due to dependencies: ' . implode(',', $not_included));
             }
             sleep(2);
-            // 编译和检查库是否完整
+            // compile libraries
             $builder->buildLibs($libraries);
-            // 执行扩展检测
+            // check extensions
             $builder->proveExts($extensions);
-            // strip
-            $builder->setStrip(!$this->getOption('no-strip'));
+
             // Process -I option
             $custom_ini = [];
             foreach ($this->input->getOption('with-hardcoded-ini') as $value) {
@@ -84,11 +82,15 @@ class BuildCliCommand extends BuildCommand
             if (!empty($custom_ini)) {
                 SourcePatcher::patchHardcodedINI($custom_ini);
             }
-            // 构建
-            $builder->buildPHP($rule, $this->getOption('bloat'));
-            // 统计时间
+
+            // start to build
+            $builder->buildPHP($rule);
+
+            // compile stopwatch :P
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build complete, used ' . $time . ' s !');
+
+            // ---------- When using bin/spc-alpine-docker, the build root path is different from the host system ----------
             $build_root_path = BUILD_ROOT_PATH;
             $cwd = getcwd();
             $fixed = '';
@@ -106,15 +108,17 @@ class BuildCliCommand extends BuildCommand
             if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
                 logger()->info('Static php-fpm binary path' . $fixed . ': ' . $build_root_path . '/bin/php-fpm');
             }
-            // 导出相关元数据
+
+            // export metadata
             file_put_contents(BUILD_ROOT_PATH . '/build-extensions.json', json_encode($extensions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             file_put_contents(BUILD_ROOT_PATH . '/build-libraries.json', json_encode($libraries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            // 导出 LICENSE
+            // export licenses
             $dumper = new LicenseDumper();
             $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
             logger()->info('License path' . $fixed . ': ' . $build_root_path . '/license/');
             return static::SUCCESS;
         } catch (WrongUsageException $e) {
+            // WrongUsageException is not an exception, it's a user error, so we just print the error message
             logger()->critical($e->getMessage());
             return static::FAILURE;
         } catch (\Throwable $e) {

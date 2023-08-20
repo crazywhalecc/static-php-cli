@@ -31,12 +31,7 @@ class event extends Extension
      */
     public function patchBeforeConfigure(): bool
     {
-        FileSystem::replaceFile(
-            SOURCE_PATH . '/php-src/configure',
-            REPLACE_FILE_PREG,
-            '/-levent_openssl/',
-            $this->getLibFilesString()
-        );
+        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/-levent_openssl/', $this->getLibFilesString());
         return true;
     }
 }

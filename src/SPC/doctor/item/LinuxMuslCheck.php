@@ -12,11 +12,11 @@ use SPC\exception\RuntimeException;
 
 class LinuxMuslCheck
 {
+    /** @noinspection PhpUnused */
     #[AsCheckItem('if musl-libc is installed', limit_os: 'Linux')]
     public function checkMusl(): ?CheckResult
     {
         $file = '/lib/ld-musl-x86_64.so.1';
-        $result = null;
         if (file_exists($file)) {
             return CheckResult::ok();
         }
@@ -29,6 +29,10 @@ class LinuxMuslCheck
         };
     }
 
+    /**
+     * @throws RuntimeException
+     * @noinspection PhpUnused
+     */
     #[AsFixItem('fix-musl')]
     public function fixMusl(array $distro): bool
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\traits;
 
+use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 
 /**
@@ -14,11 +15,12 @@ trait UnixSystemUtilTrait
     /**
      * 生成 toolchain.cmake，用于 cmake 构建
      *
-     * @param string      $os          操作系统代号
-     * @param string      $target_arch 目标架构
-     * @param string      $cflags      CFLAGS 参数
-     * @param null|string $cc          CC 参数（默认空）
-     * @param null|string $cxx         CXX 参数（默认空）
+     * @param  string              $os          操作系统代号
+     * @param  string              $target_arch 目标架构
+     * @param  string              $cflags      CFLAGS 参数
+     * @param  null|string         $cc          CC 参数（默认空）
+     * @param  null|string         $cxx         CXX 参数（默认空）
+     * @throws FileSystemException
      */
     public static function makeCmakeToolchainFile(
         string $os,
@@ -75,5 +77,21 @@ CMAKE;
             }
         }
         return null;
+    }
+
+    /**
+     * @param  array  $vars Variables, like: ["CFLAGS" => "-Ixxx"]
+     * @return string like: CFLAGS="-Ixxx"
+     */
+    public static function makeEnvVarString(array $vars): string
+    {
+        $str = '';
+        foreach ($vars as $key => $value) {
+            if ($str !== '') {
+                $str .= ' ';
+            }
+            $str .= $key . '=' . escapeshellarg($value);
+        }
+        return $str;
     }
 }

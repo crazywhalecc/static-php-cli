@@ -15,7 +15,7 @@ trait postgresql
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    protected function build()
+    protected function build(): void
     {
         $builddir = BUILD_ROOT_PATH;
         $env = $this->builder->configure_env;

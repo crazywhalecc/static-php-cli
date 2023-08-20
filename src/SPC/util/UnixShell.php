@@ -63,6 +63,9 @@ class UnixShell
         return $this;
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public function execWithEnv(string $cmd): UnixShell
     {
         return $this->exec($this->getEnvString() . ' ' . $cmd);

@@ -8,7 +8,7 @@ class icu extends LinuxLibraryBase
 {
     public const NAME = 'icu';
 
-    protected function build()
+    protected function build(): void
     {
         $root = BUILD_ROOT_PATH;
         $cppflag = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1  -DU_STATIC_IMPLEMENTATION=1"';

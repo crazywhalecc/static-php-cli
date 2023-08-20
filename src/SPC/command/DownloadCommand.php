@@ -23,7 +23,7 @@ class DownloadCommand extends BaseCommand
 
     protected string $php_major_ver;
 
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('sources', InputArgument::REQUIRED, 'The sources will be compiled, comma separated');
         $this->addOption('shallow-clone', null, null, 'Clone shallow');
@@ -35,7 +35,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
     }
 
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(InputInterface $input, OutputInterface $output): void
     {
         // --all 等于 "" ""，也就是所有东西都要下载
         if ($input->getOption('all') || $input->getOption('clean') || $input->getOption('from-zip')) {

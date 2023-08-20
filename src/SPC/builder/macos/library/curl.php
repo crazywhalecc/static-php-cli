@@ -34,15 +34,13 @@ class curl extends MacOSLibraryBase
      */
     public function patchBeforeBuild(): bool
     {
-        FileSystem::replaceFile(
+        FileSystem::replaceFileRegex(
             SOURCE_PATH . '/curl/CMakeLists.txt',
-            REPLACE_FILE_PREG,
             '/NOT COREFOUNDATION_FRAMEWORK/m',
             'FALSE'
         );
-        FileSystem::replaceFile(
+        FileSystem::replaceFileRegex(
             SOURCE_PATH . '/curl/CMakeLists.txt',
-            REPLACE_FILE_PREG,
             '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m',
             'FALSE'
         );

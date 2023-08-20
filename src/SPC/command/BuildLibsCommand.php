@@ -15,14 +15,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand('build:libs', 'Build dependencies')]
 class BuildLibsCommand extends BuildCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('libraries', InputArgument::REQUIRED, 'The libraries will be compiled, comma separated');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Build all libs that static-php-cli needed');
     }
 
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(InputInterface $input, OutputInterface $output): void
     {
         // --all 等于 ""
         if ($input->getOption('all')) {

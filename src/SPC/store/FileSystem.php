@@ -55,23 +55,25 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): bool|int
+    public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): bool|int
     {
-        logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);
-        $file = self::readFile($filename);
-        switch ($replace_type) {
-            case REPLACE_FILE_STR:
-            default:
-                $file = str_replace($callback_or_search, $to_replace, $file);
-                break;
-            case REPLACE_FILE_PREG:
-                $file = preg_replace($callback_or_search, $to_replace, $file);
-                break;
-            case REPLACE_FILE_USER:
-                $file = $callback_or_search($file);
-                break;
-        }
-        return file_put_contents($filename, $file);
+        return self::replaceFile($filename, REPLACE_FILE_STR, $search, $replace);
+    }
+
+    /**
+     * @throws FileSystemException
+     */
+    public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): bool|int
+    {
+        return self::replaceFile($filename, REPLACE_FILE_PREG, $search, $replace);
+    }
+
+    /**
+     * @throws FileSystemException
+     */
+    public static function replaceFileUser(string $filename, mixed $callback = null): bool|int
+    {
+        return self::replaceFile($filename, REPLACE_FILE_USER, $callback);
     }
 
     /**
@@ -117,6 +119,9 @@ class FileSystem
         return null;
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public static function copyDir(string $from, string $to): void
     {
         $dst_path = FileSystem::convertPath($to);
@@ -384,6 +389,9 @@ class FileSystem
         return rmdir($dir);
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function createDir(string $path): void
     {
         if (!is_dir($path) && !f_mkdir($path, 0755, true) && !is_dir($path)) {
@@ -391,7 +399,11 @@ class FileSystem
         }
     }
 
-    public static function writeFile(string $path, $content, ...$args): bool|string|int
+    /**
+     * @param  mixed               ...$args Arguments passed to file_put_contents
+     * @throws FileSystemException
+     */
+    public static function writeFile(string $path, mixed $content, ...$args): bool|string|int
     {
         $dir = pathinfo($path, PATHINFO_DIRNAME);
         if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
@@ -413,7 +425,7 @@ class FileSystem
         self::createDir($dir_name);
     }
 
-    public static function addSourceExtractHook(string $name, callable $callback)
+    public static function addSourceExtractHook(string $name, callable $callback): void
     {
         self::$_extract_hook[$name][] = $callback;
     }
@@ -425,14 +437,35 @@ class FileSystem
      */
     public static function isRelativePath(string $path): bool
     {
-        // 适配 Windows 的多盘符目录形式
         if (DIRECTORY_SEPARATOR === '\\') {
             return !(strlen($path) > 2 && ctype_alpha($path[0]) && $path[1] === ':');
         }
         return strlen($path) > 0 && $path[0] !== '/';
     }
 
-    private static function emitSourceExtractHook(string $name)
+    /**
+     * @throws FileSystemException
+     */
+    private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): bool|int
+    {
+        logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);
+        $file = self::readFile($filename);
+        switch ($replace_type) {
+            case REPLACE_FILE_STR:
+            default:
+                $file = str_replace($callback_or_search, $to_replace, $file);
+                break;
+            case REPLACE_FILE_PREG:
+                $file = preg_replace($callback_or_search, $to_replace, $file);
+                break;
+            case REPLACE_FILE_USER:
+                $file = $callback_or_search($file);
+                break;
+        }
+        return file_put_contents($filename, $file);
+    }
+
+    private static function emitSourceExtractHook(string $name): void
     {
         foreach ((self::$_extract_hook[$name] ?? []) as $hook) {
             if ($hook() === true) {

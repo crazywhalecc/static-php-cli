@@ -18,7 +18,7 @@ use Symfony\Component\Console\Input\InputArgument;
 #[AsCommand('dev:sort-config', 'After config edited, sort it by alphabet', ['sort-config'])]
 class SortConfigCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('config-name', InputArgument::REQUIRED, 'Your config to be sorted, you can sort "lib", "source" and "ext".');
     }

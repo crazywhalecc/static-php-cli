@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+
 trait gmp
 {
-    protected function build()
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    protected function build(): void
     {
         shell()->cd($this->source_dir)
             ->exec(

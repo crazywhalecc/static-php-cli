@@ -15,18 +15,6 @@
             "brotli"
         ]
     },
-    "glfw": {
-        "source": "ext-glfw",
-        "static-libs-unix": [
-            "libglfw3.a"
-        ],
-        "frameworks": [
-            "CoreVideo",
-            "OpenGL",
-            "Cocoa",
-            "IOKit"
-        ]
-    },
     "bzip2": {
         "source": "bzip2",
         "static-libs-unix": [
@@ -94,6 +82,18 @@
             "libpng",
             "bzip2",
             "brotli"
+        ]
+    },
+    "glfw": {
+        "source": "ext-glfw",
+        "static-libs-unix": [
+            "libglfw3.a"
+        ],
+        "frameworks": [
+            "CoreVideo",
+            "OpenGL",
+            "Cocoa",
+            "IOKit"
         ]
     },
     "gmp": {
@@ -198,6 +198,13 @@
         "source": "libmcrypt",
         "static-libs-unix": [
             "libmcrypt.a"
+        ]
+    },
+    "libmemcached": {
+        "source": "libmemcached",
+        "static-libs-unix": [
+            "libmemcached.a",
+            "libmemcachedutil.a"
         ]
     },
     "libpng": {
@@ -472,13 +479,6 @@
         "headers": [
             "zlib.h",
             "zconf.h"
-        ]
-    },
-    "libmemcached": {
-        "source": "libmemcached",
-        "static-libs-unix": [
-            "libmemcached.a",
-            "libmemcachedutil.a"
         ]
     },
     "zstd": {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
@@ -16,17 +17,18 @@ class memcache extends Extension
         return '--enable-memcache --with-zlib-dir=' . BUILD_ROOT_PATH;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public function patchBeforeBuildconf(): bool
     {
-        FileSystem::replaceFile(
+        FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
-            REPLACE_FILE_STR,
             'if test -d $abs_srcdir/src ; then',
             'if test -d $abs_srcdir/main ; then'
         );
-        FileSystem::replaceFile(
+        FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
-            REPLACE_FILE_STR,
             'export CPPFLAGS="$CPPFLAGS $INCLUDES"',
             'export CPPFLAGS="$CPPFLAGS $INCLUDES -I$abs_srcdir/main"'
         );

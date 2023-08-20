@@ -12,94 +12,90 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\SourcePatcher;
 
-/**
- * Linux 系统环境下的构建器
- */
 class LinuxBuilder extends BuilderBase
 {
-    /** 编译的 Unix 工具集 */
+    /** Unix compatible builder methods */
     use UnixBuilderTrait;
 
-    /** @var string[] Linux 环境下编译依赖的命令 */
-    public const REQUIRED_COMMANDS = ['make', 'bison', 'flex', 'git', 'autoconf', 'automake', 'tar', 'unzip', /* 'xz', 好像不需要 */ 'gzip', 'bzip2', 'cmake'];
-
-    /** @var string 使用的 libc */
+    /** @var string Using libc [musl,glibc] */
     public string $libc;
 
-    /** @var array 特殊架构下的 cflags */
+    /** @var array Tune cflags */
     public array $tune_c_flags;
 
-    /** @var string pkg-config 环境变量 */
+    /** @var string pkg-config env, including PKG_CONFIG_PATH, PKG_CONFIG */
     public string $pkgconf_env;
 
-    /** @var string 交叉编译变量 */
-    public string $cross_compile_prefix = '';
-
-    public string $note_section = "Je pense, donc je suis\0";
-
+    /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
     /**
+     * @throws FileSystemException
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
+    public function __construct(array $options = [])
     {
-        // 初始化一些默认参数
-        $this->cc = $cc ?? match (SystemUtil::getOSRelease()['dist']) {
+        $this->options = $options;
+
+        // ---------- set necessary options ----------
+        // set C Compiler (default: alpine: gcc, others: musl-gcc)
+        $this->setOptionIfNotExist('cc', match (SystemUtil::getOSRelease()['dist']) {
             'alpine' => 'gcc',
             default => 'musl-gcc'
-        };
-        $this->cxx = $cxx ?? 'g++';
-        $this->arch = $arch ?? php_uname('m');
-        $this->gnu_arch = arch2gnu($this->arch);
-        $this->zts = $zts;
-        $this->libc = 'musl'; // SystemUtil::selectLibc($this->cc);
+        });
+        // set C++ Compiler (default: g++)
+        $this->setOptionIfNotExist('cxx', 'g++');
+        // set arch (default: current)
+        $this->setOptionIfNotExist('arch', php_uname('m'));
+        $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
 
-        // 根据 CPU 线程数设置编译进程数
+        // ---------- set necessary compile environments ----------
+        // set libc
+        $this->libc = 'musl'; // SystemUtil::selectLibc($this->cc);
+        // concurrency
         $this->concurrency = SystemUtil::getCpuCount();
-        // 设置 cflags
-        $this->arch_c_flags = SystemUtil::getArchCFlags($this->cc, $this->arch);
-        $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->cxx, $this->arch);
-        $this->tune_c_flags = SystemUtil::checkCCFlags(SystemUtil::getTuneCFlags($this->arch), $this->cc);
-        // 设置 cmake
+        // cflags
+        $this->arch_c_flags = SystemUtil::getArchCFlags($this->getOption('cc'), $this->getOption('arch'));
+        $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->getOption('cxx'), $this->getOption('arch'));
+        $this->tune_c_flags = SystemUtil::checkCCFlags(SystemUtil::getTuneCFlags($this->getOption('arch')), $this->getOption('cc'));
+        // cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile(
-            os: 'Linux',
-            target_arch: $this->arch,
-            cflags: $this->arch_c_flags,
-            cc: $this->cc,
-            cxx: $this->cxx
+            'Linux',
+            $this->getOption('arch'),
+            $this->arch_c_flags,
+            $this->getOption('cc'),
+            $this->getOption('cxx'),
         );
-        // 设置 pkgconfig
-        $this->pkgconf_env = 'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig"';
-        // 设置 configure 依赖的环境变量
-        $this->configure_env =
-            $this->pkgconf_env . ' ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' " .
-            (php_uname('m') === $this->arch ? '' : "CFLAGS='{$this->arch_c_flags}'");
-        // 交叉编译依赖的，TODO
-        if (php_uname('m') !== $this->arch) {
+        // pkg-config
+        $vars = [
+            'PKG_CONFIG' => BUILD_ROOT_PATH . '/bin/pkg-config',
+            'PKG_CONFIG_PATH' => BUILD_LIB_PATH . '/pkgconfig',
+        ];
+        $this->pkgconf_env = SystemUtil::makeEnvVarString($vars);
+        // configure environment
+        $this->configure_env = SystemUtil::makeEnvVarString([
+            ...$vars,
+            'CC' => $this->getOption('cc'),
+            'CXX' => $this->getOption('cxx'),
+        ]);
+        // cross-compile does not support yet
+        /*if (php_uname('m') !== $this->arch) {
             $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
             logger()->info('using cross compile prefix: ' . $this->cross_compile_prefix);
             $this->configure_env .= " CROSS_COMPILE='{$this->cross_compile_prefix}'";
-        }
+        }*/
 
-        $missing = [];
-        foreach (self::REQUIRED_COMMANDS as $cmd) {
-            if (SystemUtil::findCommand($cmd) === null) {
-                $missing[] = $cmd;
-            }
-        }
-        if (!empty($missing)) {
-            throw new WrongUsageException('missing system commands: ' . implode(', ', $missing));
-        }
-
-        // 创立 pkg-config 和放头文件的目录
+        // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
         f_mkdir(BUILD_INCLUDE_PATH, recursive: true);
     }
 
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
     public function makeAutoconfArgs(string $name, array $libSpecs): string
     {
         $ret = '';
@@ -124,32 +120,22 @@ class LinuxBuilder extends BuilderBase
     /**
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
-    public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $with_clean = false, bool $bloat = false)
+    public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
-        if (!$bloat) {
-            $extra_libs = implode(' ', $this->getAllStaticLibFiles());
+        // ---------- Update extra-libs ----------
+        $extra_libs = $this->getOption('extra-libs', '');
+        // non-bloat linking
+        if (!$this->getOption('bloat', false)) {
+            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
         } else {
-            logger()->info('bloat linking');
-            $extra_libs = implode(
-                ' ',
-                array_map(
-                    fn ($x) => "-Xcompiler {$x}",
-                    array_filter($this->getAllStaticLibFiles())
-                )
-            );
+            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
         }
+        // add libstdc++, some extensions or libraries need it (C++ cannot be linked statically)
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lc++ ' : '');
+        $this->setOption('extra-libs', $extra_libs);
 
-        if ($this->hasCppExtension()) {
-            $extra_libs .= ' -lstdc++';
-        }
-        if ($this->getExt('imagick')) {
-            $extra_libs .= ' /usr/lib/libMagick++-7.Q16HDRI.a /usr/lib/libMagickCore-7.Q16HDRI.a /usr/lib/libMagickWand-7.Q16HDRI.a';
-        }
-
-        $envs = $this->pkgconf_env . ' ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' ";
         $cflags = $this->arch_c_flags;
         $use_lld = '';
 
@@ -159,7 +145,7 @@ class LinuxBuilder extends BuilderBase
                 $cflags .= ' -static-libgcc -I"' . BUILD_INCLUDE_PATH . '"';
                 break;
             case 'musl':
-                if (str_ends_with($this->cc, 'clang') && SystemUtil::findCommand('lld')) {
+                if (str_ends_with($this->getOption('cc'), 'clang') && SystemUtil::findCommand('lld')) {
                     $use_lld = '-Xcompiler -fuse-ld=lld';
                 }
                 break;
@@ -167,7 +153,12 @@ class LinuxBuilder extends BuilderBase
                 throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
         }
 
-        $envs = "{$envs} CFLAGS='{$cflags}' LIBS='-ldl -lpthread'";
+        $envs = $this->pkgconf_env . ' ' . SystemUtil::makeEnvVarString([
+            'CC' => $this->getOption('cc'),
+            'CXX' => $this->getOption('cxx'),
+            'CFLAGS' => $cflags,
+            'LIBS' => '-ldl -lpthread',
+        ]);
 
         SourcePatcher::patchBeforeBuildconf($this);
 
@@ -175,11 +166,8 @@ class LinuxBuilder extends BuilderBase
 
         SourcePatcher::patchBeforeConfigure($this);
 
-        if ($this->getPHPVersionID() < 80000) {
-            $json_74 = '--enable-json ';
-        } else {
-            $json_74 = '';
-        }
+        $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
+        $zts = $this->getOption('enable-zts', false) ? '--enable-zts ' : '';
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -194,23 +182,15 @@ class LinuxBuilder extends BuilderBase
                 '--enable-cli ' .
                 '--enable-fpm ' .
                 $json_74 .
+                $zts .
                 '--enable-micro=all-static ' .
-                ($this->zts ? '--enable-zts' : '') . ' ' .
                 $this->makeExtensionArgs() . ' ' .
                 $envs
             );
 
         SourcePatcher::patchBeforeMake($this);
 
-        file_put_contents('/tmp/comment', $this->note_section);
-
-        // 清理
         $this->cleanMake();
-
-        if ($bloat) {
-            logger()->info('bloat linking');
-            $extra_libs = "-Wl,--whole-archive {$extra_libs} -Wl,--no-whole-archive";
-        }
 
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('building cli');
@@ -225,7 +205,7 @@ class LinuxBuilder extends BuilderBase
             $this->buildMicro($extra_libs, $use_lld, $cflags);
         }
 
-        if (php_uname('m') === $this->arch) {
+        if (php_uname('m') === $this->getOption('arch')) {
             $this->sanityCheck($build_target);
         }
 
@@ -235,30 +215,34 @@ class LinuxBuilder extends BuilderBase
     }
 
     /**
+     * Build cli sapi
+     *
      * @throws RuntimeException
+     * @throws FileSystemException
      */
     public function buildCli(string $extra_libs, string $use_lld): void
     {
+        $vars = SystemUtil::makeEnvVarString([
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
+        ]);
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec(
-                'make -j' . $this->concurrency .
-                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
-                "EXTRA_LIBS=\"{$extra_libs}\" " .
-                "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
-                'cli'
-            );
+            ->exec("make -j{$this->concurrency} {$vars} cli");
 
-        shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
-            ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php php.debug")
-            ->exec('elfedit --output-osabi linux php')
-            ->exec("{$this->cross_compile_prefix}strip --strip-all php")
-            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php");
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
+        }
+
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
     /**
+     * Build phpmicro sapi
+     *
      * @throws RuntimeException
+     * @throws FileSystemException
      */
     public function buildMicro(string $extra_libs, string $use_lld, string $cflags): void
     {
@@ -270,43 +254,45 @@ class LinuxBuilder extends BuilderBase
             SourcePatcher::patchMicro(['phar']);
         }
 
+        $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+        $vars = SystemUtil::makeEnvVarString([
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $enable_fake_cli,
+            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LDFLAGS_PROGRAM' => "{$cflags} {$use_lld} -all-static",
+        ]);
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec(
-                "make -j{$this->concurrency} " .
-                'EXTRA_CFLAGS=' . quote('-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags))) . ' ' .
-                'EXTRA_LIBS=' . quote($extra_libs) . ' ' .
-                'EXTRA_LDFLAGS_PROGRAM=' . quote("{$cflags} {$use_lld}" . ' -all-static', "'") . ' ' .
-                'micro'
-            );
+            ->exec("make -j{$this->concurrency} {$vars} micro");
 
-        shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec("{$this->cross_compile_prefix}strip --strip-all micro.sfx");
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec('strip --strip-all micro.sfx');
+        }
 
         $this->deployBinary(BUILD_TARGET_MICRO);
     }
 
     /**
-     * 构建 fpm
+     * Build fpm sapi
      *
-     * @throws FileSystemException|RuntimeException
+     * @throws FileSystemException
+     * @throws RuntimeException
      */
     public function buildFpm(string $extra_libs, string $use_lld): void
     {
+        $vars = SystemUtil::makeEnvVarString([
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
+        ]);
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec(
-                'make -j' . $this->concurrency .
-                ' EXTRA_CFLAGS="-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . '" ' .
-                "EXTRA_LIBS=\"{$extra_libs}\" " .
-                "EXTRA_LDFLAGS_PROGRAM='{$use_lld} -all-static' " .
-                'fpm'
-            );
+            ->exec("make -j{$this->concurrency} {$vars} fpm");
 
-        shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
-            ->exec("{$this->cross_compile_prefix}objcopy --only-keep-debug php-fpm php-fpm.debug")
-            ->exec('elfedit --output-osabi linux php-fpm')
-            ->exec("{$this->cross_compile_prefix}strip --strip-all php-fpm")
-            ->exec("{$this->cross_compile_prefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php-fpm.debug --remove-section=.note php-fpm");
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
+        }
+
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 }

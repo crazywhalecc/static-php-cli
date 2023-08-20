@@ -8,7 +8,7 @@ class icu extends MacOSLibraryBase
 {
     public const NAME = 'icu';
 
-    protected function build()
+    protected function build(): void
     {
         $root = BUILD_ROOT_PATH;
         shell()->cd($this->source_dir . '/source')

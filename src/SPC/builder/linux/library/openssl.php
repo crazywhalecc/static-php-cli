@@ -23,26 +23,28 @@ namespace SPC\builder\linux\library;
 use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 
 class openssl extends LinuxLibraryBase
 {
     public const NAME = 'openssl';
 
     /**
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
-    public function build()
+    public function build(): void
     {
-        [$lib,$include,$destdir] = SEPARATED_PATH;
+        [,,$destdir] = SEPARATED_PATH;
 
         $extra = '';
         $ex_lib = '-ldl -pthread';
 
         $env = $this->builder->pkgconf_env . " CFLAGS='{$this->builder->arch_c_flags}'";
-        $env .= " CC='{$this->builder->cc} -static -idirafter " . BUILD_INCLUDE_PATH .
+        $env .= " CC='{$this->builder->getOption('cc')} -static -idirafter " . BUILD_INCLUDE_PATH .
             ' -idirafter /usr/include/ ' .
-            ' -idirafter /usr/include/' . $this->builder->arch . '-linux-gnu/ ' .
+            ' -idirafter /usr/include/' . $this->builder->getOption('arch') . '-linux-gnu/ ' .
             "' ";
         // lib:zlib
         $zlib = $this->builder->getLib('zlib');
@@ -58,7 +60,7 @@ class openssl extends LinuxLibraryBase
 
         $ex_lib = trim($ex_lib);
 
-        $clang_postfix = SystemUtil::getCCType($this->builder->cc) === 'clang' ? '-clang' : '';
+        $clang_postfix = SystemUtil::getCCType($this->builder->getOption('cc')) === 'clang' ? '-clang' : '';
 
         shell()->cd($this->source_dir)
             ->exec(
@@ -68,7 +70,7 @@ class openssl extends LinuxLibraryBase
                 '-static ' .
                 "{$zlib_extra}" .
                 'no-legacy ' .
-                "linux-{$this->builder->arch}{$clang_postfix}"
+                "linux-{$this->builder->getOption('arch')}{$clang_postfix}"
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")

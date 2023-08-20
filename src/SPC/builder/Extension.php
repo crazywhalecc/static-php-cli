@@ -34,7 +34,7 @@ class Extension
     /**
      * 获取开启该扩展的 PHP 编译添加的参数
      *
-     * @throws FileSystemException|RuntimeException
+     * @throws FileSystemException
      * @throws WrongUsageException
      */
     public function getConfigureArg(): string
@@ -56,7 +56,6 @@ class Extension
      * 根据 ext 的 arg-type 获取对应开启的参数，一般都是 --enable-xxx 和 --with-xxx
      *
      * @throws FileSystemException
-     * @throws RuntimeException
      * @throws WrongUsageException
      */
     public function getEnableArg(): string

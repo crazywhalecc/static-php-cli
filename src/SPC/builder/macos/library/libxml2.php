@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
@@ -13,14 +14,22 @@ class libxml2 extends MacOSLibraryBase
 
     /**
      * @throws RuntimeException
+     * @throws FileSystemException
      */
-    protected function build()
+    protected function build(): void
     {
+        // macOS need to link iconv dynamically, we add it to extra-libs
+        $extra_libs = $this->builder->getOption('extra-libs', '');
+        if (!str_contains($extra_libs, '-liconv')) {
+            $extra_libs .= ' -liconv';
+        }
+        $this->builder->setOption('extra-libs', $extra_libs);
+
         $enable_zlib = $this->builder->getLib('zlib') ? 'ON' : 'OFF';
-        $enable_icu = $this->builder->getLib('icu') ? 'ON' : 'OFF';
+        // $enable_icu = $this->builder->getLib('icu') ? 'ON' : 'OFF';
         $enable_xz = $this->builder->getLib('xz') ? 'ON' : 'OFF';
 
-        [$lib, $include, $destdir] = SEPARATED_PATH;
+        [, , $destdir] = SEPARATED_PATH;
 
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')

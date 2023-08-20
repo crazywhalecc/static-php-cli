@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait brotli
 {
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
     protected function build(): void
     {
         FileSystem::resetDir($this->source_dir . '/build-dir');

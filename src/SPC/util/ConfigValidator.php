@@ -49,10 +49,9 @@ class ConfigValidator
     }
 
     /**
-     * @param  mixed               $data
      * @throws ValidationException
      */
-    public static function validateLibs($data, array $source_data = []): void
+    public static function validateLibs(mixed $data, array $source_data = []): void
     {
         is_array($data) || throw new ValidationException('lib.json is broken');
         foreach ($data as $name => $lib) {
@@ -64,7 +63,10 @@ class ConfigValidator
         }
     }
 
-    public static function validateExts($data, array $source_data = []): void
+    /**
+     * @throws ValidationException
+     */
+    public static function validateExts(mixed $data): void
     {
         is_array($data) || throw new ValidationException('ext.json is broken');
     }

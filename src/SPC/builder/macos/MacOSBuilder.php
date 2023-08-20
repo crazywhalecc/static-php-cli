@@ -12,57 +12,56 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\SourcePatcher;
 
-/**
- * macOS 系统环境下的构建器
- * 源于 Config，但因为感觉叫 Config 不太合适，就换成了 Builder
- */
 class MacOSBuilder extends BuilderBase
 {
-    /** 编译的 Unix 工具集 */
+    /** Unix compatible builder methods */
     use UnixBuilderTrait;
 
-    /** @var bool 标记是否 patch 了 phar */
+    /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
     /**
-     * @param  null|string         $cc   C编译器名称，如果不传入则默认使用clang
-     * @param  null|string         $cxx  C++编译器名称，如果不传入则默认使用clang++
-     * @param  null|string         $arch 当前架构，如果不传入则默认使用当前系统架构
      * @throws RuntimeException
      * @throws WrongUsageException
+     * @throws FileSystemException
      */
-    public function __construct(?string $cc = null, ?string $cxx = null, ?string $arch = null, bool $zts = false)
+    public function __construct(array $options = [])
     {
-        // 如果是 Debug 模式，才使用 set -x 显示每条执行的命令
-        $this->set_x = defined('DEBUG_MODE') ? 'set -x' : 'true';
-        // 初始化一些默认参数
-        $this->cc = $cc ?? 'clang';
-        $this->cxx = $cxx ?? 'clang++';
-        $this->arch = $arch ?? php_uname('m');
-        $this->gnu_arch = arch2gnu($this->arch);
-        $this->zts = $zts;
-        // 根据 CPU 线程数设置编译进程数
-        $this->concurrency = SystemUtil::getCpuCount();
-        // 设置 cflags
-        $this->arch_c_flags = SystemUtil::getArchCFlags($this->arch);
-        $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->arch);
-        // 设置 cmake
-        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->arch, $this->arch_c_flags);
-        // 设置 configure 依赖的环境变量
-        $this->configure_env =
-            'PKG_CONFIG="' . BUILD_ROOT_PATH . '/bin/pkg-config" ' .
-            'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
-            "CC='{$this->cc}' " .
-            "CXX='{$this->cxx}' " .
-            "CFLAGS='{$this->arch_c_flags} -Wimplicit-function-declaration -Os'";
+        $this->options = $options;
 
-        // 创立 pkg-config 和放头文件的目录
+        // ---------- set necessary options ----------
+        // set C Compiler (default: clang)
+        $this->setOptionIfNotExist('cc', 'clang');
+        // set C++ Composer (default: clang++)
+        $this->setOptionIfNotExist('cxx', 'clang++');
+        // set arch (default: current)
+        $this->setOptionIfNotExist('arch', php_uname('m'));
+        $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
+
+        // ---------- set necessary compile environments ----------
+        // concurrency
+        $this->concurrency = SystemUtil::getCpuCount();
+        // cflags
+        $this->arch_c_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
+        $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
+        // cmake toolchain
+        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->getOption('arch'), $this->arch_c_flags);
+        // configure environment
+        $this->configure_env = SystemUtil::makeEnvVarString([
+            'PKG_CONFIG' => BUILD_ROOT_PATH . '/bin/pkg-config',
+            'PKG_CONFIG_PATH' => BUILD_LIB_PATH . '/pkgconfig/',
+            'CC' => $this->getOption('cc'),
+            'CXX' => $this->getOption('cxx'),
+            'CFLAGS' => "{$this->arch_c_flags} -Wimplicit-function-declaration -Os",
+        ]);
+
+        // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
         f_mkdir(BUILD_INCLUDE_PATH, recursive: true);
     }
 
     /**
-     * 生成库构建采用的 autoconf 参数列表
+     * [deprecated] 生成库构建采用的 autoconf 参数列表
      *
      * @param string $name      要构建的 lib 库名，传入仅供输出日志
      * @param array  $lib_specs 依赖的 lib 库的 autoconf 文件
@@ -76,7 +75,6 @@ class MacOSBuilder extends BuilderBase
             $arr = $arr ?? [];
 
             $disableArgs = $arr[0] ?? null;
-            $prefix = $arr[1] ?? null;
             if ($lib instanceof MacOSLibraryBase) {
                 logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
                 $ret .= '--with-' . $libName . '=yes ';
@@ -89,9 +87,11 @@ class MacOSBuilder extends BuilderBase
     }
 
     /**
-     * 返回 macOS 系统依赖的框架列表
+     * Get dynamically linked macOS frameworks
      *
-     * @param bool $asString 是否以字符串形式返回（默认为 False）
+     * @param  bool                $asString If true, return as string
+     * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function getFrameworks(bool $asString = false): array|string
     {
@@ -118,50 +118,43 @@ class MacOSBuilder extends BuilderBase
     }
 
     /**
+     * Just start to build statically linked php binary
+     *
      * @param  int                 $build_target build target
-     * @param  bool                $bloat        just raw add all lib files
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $bloat = false): void
+    public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
-        $extra_libs = $this->getFrameworks(true) . ' ' . ($this->hasCppExtension() ? '-lc++ ' : '');
-        if (!$bloat) {
-            $extra_libs .= implode(' ', $this->getAllStaticLibFiles());
+        // ---------- Update extra-libs ----------
+        $extra_libs = $this->getOption('extra-libs', '');
+        // add macOS frameworks
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . $this->getFrameworks(true);
+        // add libc++, some extensions or libraries need it (C++ cannot be linked statically)
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lc++ ' : '');
+        if (!$this->getOption('bloat', false)) {
+            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
         } else {
             logger()->info('bloat linking');
-            $extra_libs .= implode(
-                ' ',
-                array_map(
-                    fn ($x) => "-Wl,-force_load,{$x}",
-                    array_filter($this->getAllStaticLibFiles())
-                )
-            );
+            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Wl,-force_load,{$x}", array_filter($this->getAllStaticLibFiles())));
         }
+        $this->setOption('extra-libs', $extra_libs);
 
-        // patch before buildconf
         SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
         SourcePatcher::patchBeforeConfigure($this);
 
-        if ($this->getLib('libxml2') || $this->getExt('iconv')) {
-            $extra_libs .= ' -liconv';
-        }
-
-        if ($this->getPHPVersionID() < 80000) {
-            $json_74 = '--enable-json ';
-        } else {
-            $json_74 = '';
-        }
+        $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
+        $zts = $this->getOption('enable-zts', false) ? '--enable-zts ' : '';
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 './configure ' .
                 '--prefix= ' .
-                '--with-valgrind=no ' .     // 不检测内存泄漏
+                '--with-valgrind=no ' .     // Not detect memory leak
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
                 "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
@@ -170,9 +163,9 @@ class MacOSBuilder extends BuilderBase
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 '--enable-fpm ' .
-                $json_74 .
                 '--enable-micro ' .
-                ($this->zts ? '--enable-zts' : '') . ' ' .
+                $json_74 .
+                $zts .
                 $this->makeExtensionArgs() . ' ' .
                 $this->configure_env
             );
@@ -183,18 +176,18 @@ class MacOSBuilder extends BuilderBase
 
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('building cli');
-            $this->buildCli($extra_libs);
+            $this->buildCli();
         }
         if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
             logger()->info('building fpm');
-            $this->buildFpm($extra_libs);
+            $this->buildFpm();
         }
         if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
             logger()->info('building micro');
-            $this->buildMicro($extra_libs);
+            $this->buildMicro();
         }
 
-        if (php_uname('m') === $this->arch) {
+        if (php_uname('m') === $this->getOption('arch')) {
             $this->sanityCheck($build_target);
         }
 
@@ -204,27 +197,32 @@ class MacOSBuilder extends BuilderBase
     }
 
     /**
-     * 构建 cli
+     * Build cli sapi
      *
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(string $extra_libs): void
+    public function buildCli(): void
     {
+        $vars = SystemUtil::makeEnvVarString([
+            'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS need it)
+        ]);
+
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" cli");
-        if ($this->strip) {
+        $shell->exec("make -j{$this->concurrency} {$vars} cli");
+        if (!$this->getOption('no-strip', false)) {
             $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
         }
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
     /**
-     * 构建 phpmicro
+     * Build phpmicro sapi
      *
      * @throws FileSystemException|RuntimeException
      */
-    public function buildMicro(string $extra_libs): void
+    public function buildMicro(): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new RuntimeException('phpmicro only support PHP >= 8.0!');
@@ -234,22 +232,39 @@ class MacOSBuilder extends BuilderBase
             SourcePatcher::patchMicro(['phar']);
         }
 
+        $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+        $vars = [
+            // with debug information, optimize for size, remove identifiers, patch fake cli for micro
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident' . $enable_fake_cli,
+            // link resolv library (macOS need it)
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv",
+        ];
+        if (!$this->getOption('no-strip', false)) {
+            $vars['STRIP'] = 'dsymutil -f ';
+        }
+        $vars = SystemUtil::makeEnvVarString($vars);
+
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" " . ($this->strip ? 'STRIP="dsymutil -f " ' : '') . 'micro');
+            ->exec("make -j{$this->concurrency} {$vars} micro");
         $this->deployBinary(BUILD_TARGET_MICRO);
     }
 
     /**
-     * 构建 fpm
+     * Build fpm sapi
      *
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildFpm(string $extra_libs): void
+    public function buildFpm(): void
     {
+        $vars = SystemUtil::makeEnvVarString([
+            'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS need it)
+        ]);
+
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("make -j{$this->concurrency} EXTRA_CFLAGS=\"-g -Os -fno-ident\" EXTRA_LIBS=\"{$extra_libs} -lresolv\" fpm");
-        if ($this->strip) {
+        $shell->exec("make -j{$this->concurrency} {$vars} fpm");
+        if (!$this->getOption('no-strip', false)) {
             $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
         }
         $this->deployBinary(BUILD_TARGET_FPM);

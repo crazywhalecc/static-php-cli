@@ -16,7 +16,7 @@ use function Laravel\Prompts\text;
 #[AsCommand('deploy', 'Deploy static-php-cli self to an .phar application')]
 class DeployCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('target', InputArgument::OPTIONAL, 'The file or directory to pack.');
         $this->addOption('auto-phar-fix', null, InputOption::VALUE_NONE, 'Automatically fix ini option.');
@@ -25,6 +25,9 @@ class DeployCommand extends BaseCommand
         $this->addOption('with-dev', 'd', InputOption::VALUE_NONE, 'Automatically use dev composer dependencies');
     }
 
+    /**
+     * @throws \PharException
+     */
     public function handle(): int
     {
         $composer = require ROOT_DIR . '/vendor/composer/installed.php';
@@ -149,9 +152,9 @@ class DeployCommand extends BaseCommand
         return static::SUCCESS;
     }
 
-    private function progress(int $max = 0): ProgressBar
+    private function progress(): ProgressBar
     {
-        $progress = new ProgressBar($this->output, $max);
+        $progress = new ProgressBar($this->output, 0);
         $progress->setBarCharacter('<fg=green>⚬</>');
         $progress->setEmptyBarCharacter('<fg=red>⚬</>');
         $progress->setProgressCharacter('<fg=green>➤</>');

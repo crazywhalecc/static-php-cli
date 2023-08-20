@@ -17,16 +17,8 @@ abstract class BaseCommand extends Command
 {
     protected bool $no_motd = false;
 
-    /**
-     * 输入
-     */
     protected InputInterface $input;
 
-    /**
-     * 输出
-     *
-     * 一般来说同样会是 ConsoleOutputInterface
-     */
     protected OutputInterface $output;
 
     public function __construct(string $name = null)
@@ -36,12 +28,12 @@ abstract class BaseCommand extends Command
         $this->addOption('no-motd', null, null, 'Disable motd');
     }
 
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(InputInterface $input, OutputInterface $output): void
     {
         if ($input->getOption('no-motd')) {
             $this->no_motd = true;
         }
-        // 注册全局错误处理器
+
         set_error_handler(static function ($error_no, $error_msg, $error_file, $error_line) {
             $tips = [
                 E_WARNING => ['PHP Warning: ', 'warning'],
@@ -77,6 +69,9 @@ abstract class BaseCommand extends Command
         }
     }
 
+    /**
+     * @throws WrongUsageException
+     */
     abstract public function handle(): int;
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -93,7 +88,6 @@ abstract class BaseCommand extends Command
                 }
                 return static::FAILURE;
             } catch (\Throwable $e) {
-                // 不开 debug 模式就不要再显示复杂的调试栈信息了
                 if ($this->getOption('debug')) {
                     ExceptionHandler::getInstance()->handle($e);
                 } else {
@@ -118,11 +112,6 @@ abstract class BaseCommand extends Command
         return $this->input->getArgument($name);
     }
 
-    /**
-     * 是否应该执行
-     *
-     * @return bool 返回 true 以继续执行，返回 false 以中断执行
-     */
     protected function shouldExecute(): bool
     {
         return true;

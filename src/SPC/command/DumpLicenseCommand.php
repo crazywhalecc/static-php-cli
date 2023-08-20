@@ -18,7 +18,7 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand('dump-license', 'Dump licenses for required libraries')]
 class DumpLicenseCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addOption('by-extensions', null, InputOption::VALUE_REQUIRED, 'Dump by extensions and related libraries', null);
         $this->addOption('without-php', null, InputOption::VALUE_NONE, 'Dump without php-src');
@@ -39,7 +39,7 @@ class DumpLicenseCommand extends BaseCommand
             // 从参数中获取要编译的 extensions，并转换为数组
             $extensions = array_map('trim', array_filter(explode(',', $this->getOption('by-extensions'))));
             // 根据提供的扩展列表获取依赖库列表并编译
-            [$extensions, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps($extensions);
+            [$extensions, $libraries] = DependencyUtil::getExtLibsByDeps($extensions);
             $dumper->addExts($extensions);
             $dumper->addLibs($libraries);
             if (!$this->getOption('without-php')) {

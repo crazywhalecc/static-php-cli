@@ -6,7 +6,7 @@ namespace SPC\builder\unix\library;
 
 trait sqlite
 {
-    protected function build()
+    protected function build(): void
     {
         shell()->cd($this->source_dir)
             ->exec("{$this->builder->configure_env} ./configure --enable-static --disable-shared --prefix=")

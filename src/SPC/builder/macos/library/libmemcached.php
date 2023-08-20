@@ -11,7 +11,7 @@ class libmemcached extends MacOSLibraryBase
 {
     public const NAME = 'libmemcached';
 
-    public function build()
+    public function build(): void
     {
         $rootdir = BUILD_ROOT_PATH;
 

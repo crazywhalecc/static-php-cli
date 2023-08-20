@@ -10,7 +10,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand('doctor', 'Diagnose whether the current environment can compile normally')]
 class DoctorCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addOption('auto-fix', null, null, 'Automatically fix failed items (if possible)');
     }

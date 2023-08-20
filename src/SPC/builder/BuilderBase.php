@@ -15,43 +15,32 @@ use SPC\util\DependencyUtil;
 
 abstract class BuilderBase
 {
-    /** @var bool 是否启用 ZTS 线程安全 */
-    public bool $zts = false;
-
-    /** @var string 编译目标架构 */
-    public string $arch;
-
-    /** @var string GNU 格式的编译目标架构 */
-    public string $gnu_arch;
-
-    /** @var int 编译进程数 */
+    /** @var int Concurrency */
     public int $concurrency = 1;
 
-    /** @var array<string, LibraryBase> 要编译的 libs 列表 */
+    /** @var array<string, LibraryBase> libraries */
     protected array $libs = [];
 
-    /** @var array<string, Extension> 要编译的扩展列表 */
+    /** @var array<string, Extension> extensions */
     protected array $exts = [];
 
-    /** @var array<int, string> 要编译的扩展列表（仅名字列表，用于最后生成编译的扩展列表给 micro） */
-    protected array $plain_extensions = [];
-
-    /** @var bool 本次编译是否只编译 libs，不编译 PHP */
+    /** @var bool compile libs only (just mark it) */
     protected bool $libs_only = false;
 
-    /** @var bool 是否 strip 最终的二进制 */
-    protected bool $strip = true;
+    /** @var array<string, mixed> compile options */
+    protected array $options = [];
 
     /**
-     * 构建指定列表的 libs
+     * Build libraries
      *
+     * @param  array<string>       $libraries Libraries to build
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws WrongUsageException
      */
     public function buildLibs(array $libraries): void
     {
-        // 通过扫描目录查找 lib
+        // search all supported libs
         $support_lib_list = [];
         $classes = FileSystem::getClassesPsr4(
             ROOT_DIR . '/src/SPC/builder/' . osfamily2dir() . '/library',
@@ -63,19 +52,22 @@ abstract class BuilderBase
             }
         }
 
-        // 如果传入了空，则默认检查和安置所有支持的lib，libraries为要build的，support_lib_list为支持的列表
+        // if no libs specified, compile all supported libs
         if ($libraries === [] && $this->isLibsOnly()) {
             $libraries = array_keys($support_lib_list);
         }
+
+        // pkg-config must be compiled first, whether it is specified or not
         if (!in_array('pkg-config', $libraries)) {
             array_unshift($libraries, 'pkg-config');
         }
 
-        // 排序 libs，根据依赖计算一个新的列表出来
+        // append dependencies
         $libraries = DependencyUtil::getLibsByDeps($libraries);
 
-        // 过滤不支持的库后添加
+        // add lib object for builder
         foreach ($libraries as $library) {
+            // if some libs are not supported (but in config "lib.json", throw exception)
             if (!isset($support_lib_list[$library])) {
                 throw new RuntimeException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
             }
@@ -83,14 +75,15 @@ abstract class BuilderBase
             $this->addLib($lib);
         }
 
-        // 计算依赖，经过这里的遍历，如果没有抛出异常，说明依赖符合要求，可以继续下面的
+        // calculate and check dependencies
         foreach ($this->libs as $lib) {
             $lib->calcDependency();
         }
 
+        // extract sources
         SourceExtractor::initSource(libs: $libraries);
 
-        // 构建库
+        // build all libs
         foreach ($this->libs as $lib) {
             match ($lib->tryBuild()) {
                 BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
@@ -102,9 +95,9 @@ abstract class BuilderBase
     }
 
     /**
-     * 添加要编译的 Lib 库
+     * Add library to build.
      *
-     * @param LibraryBase $library Lib 库对象
+     * @param LibraryBase $library Library object
      */
     public function addLib(LibraryBase $library): void
     {
@@ -112,9 +105,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 获取要编译的 Lib 库对象
-     *
-     * @param string $name 库名称
+     * Get library object by name.
      */
     public function getLib(string $name): ?LibraryBase
     {
@@ -122,9 +113,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 添加要编译的扩展
-     *
-     * @param Extension $extension 扩展对象
+     * Add extension to build.
      */
     public function addExt(Extension $extension): void
     {
@@ -132,9 +121,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 获取要编译的扩展对象
-     *
-     * @param string $name 扩展名称
+     * Get extension object by name.
      */
     public function getExt(string $name): ?Extension
     {
@@ -142,7 +129,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 获取所有要编译的扩展对象
+     * Get all extension objects.
      *
      * @return Extension[]
      */
@@ -152,10 +139,9 @@ abstract class BuilderBase
     }
 
     /**
-     * 检查 C++ 扩展是否存在
+     * Check if there is a cpp extension.
      *
      * @throws FileSystemException
-     * @throws RuntimeException
      * @throws WrongUsageException
      */
     public function hasCppExtension(): bool
@@ -173,7 +159,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 设置本次 Builder 是否为仅编译库的模式
+     * Set libs only mode.
      */
     public function setLibsOnly(bool $status = true): void
     {
@@ -181,7 +167,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 检验 ext 扩展列表是否合理，并声明 Extension 对象，检查扩展的依赖
+     * Verify the list of "ext" extensions for validity and declare an Extension object to check the dependencies of the extensions.
      *
      * @throws FileSystemException
      * @throws RuntimeException
@@ -203,26 +189,21 @@ abstract class BuilderBase
         }
 
         foreach ($this->exts as $ext) {
-            // 检查下依赖就行了，作用是导入依赖给 Extension 对象，今后可以对库依赖进行选择性处理
             $ext->checkDependency();
         }
-
-        $this->plain_extensions = $extensions;
     }
 
     /**
-     * 开始构建 PHP
+     * Start to build PHP
      *
-     * @param int  $build_target 规则
-     * @param bool $bloat        保留
+     * @param int $build_target Build target, see BUILD_TARGET_*
      */
-    abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE, bool $bloat = false);
+    abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE);
 
     /**
-     * 生成依赖的扩展编译启用参数
-     * 例如 --enable-mbstring 等
+     * Generate extension enable arguments for configure.
+     * e.g. --enable-mbstring
      *
-     * @throws RuntimeException
      * @throws FileSystemException
      * @throws WrongUsageException
      */
@@ -237,7 +218,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 返回是否只编译 libs 的模式
+     * Get libs only mode.
      */
     public function isLibsOnly(): bool
     {
@@ -245,7 +226,7 @@ abstract class BuilderBase
     }
 
     /**
-     * 获取当前即将编译的 PHP 的版本 ID，五位数那个
+     * Get PHP Version ID from php-src/main/php_version.h
      */
     public function getPHPVersionID(): int
     {
@@ -254,6 +235,11 @@ abstract class BuilderBase
         return intval($match[1]);
     }
 
+    /**
+     * Get build type name string to display.
+     *
+     * @param int $type Build target type
+     */
     public function getBuildTypeName(int $type): string
     {
         $ls = [];
@@ -269,13 +255,46 @@ abstract class BuilderBase
         return implode(', ', $ls);
     }
 
-    public function setStrip(bool $strip): void
+    /**
+     * Get builder options (maybe changed by user)
+     *
+     * @param string $key     Option key
+     * @param mixed  $default If not exists, return this value
+     */
+    public function getOption(string $key, mixed $default = null): mixed
     {
-        $this->strip = $strip;
+        return $this->options[$key] ?? $default;
     }
 
     /**
-     * 检查是否存在 lib 库对应的源码，如果不存在，则抛出异常
+     * Get all builder options
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /**
+     * Set builder options if not exists.
+     */
+    public function setOptionIfNotExist(string $key, mixed $value): void
+    {
+        if (!isset($this->options[$key])) {
+            $this->options[$key] = $value;
+        }
+    }
+
+    /**
+     * Set builder options.
+     */
+    public function setOption(string $key, mixed $value): void
+    {
+        $this->options[$key] = $value;
+    }
+
+    /**
+     * Check if all libs are downloaded.
+     * If not, throw exception.
      *
      * @throws RuntimeException
      */
