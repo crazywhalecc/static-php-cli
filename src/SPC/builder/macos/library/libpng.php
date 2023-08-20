@@ -22,6 +22,7 @@ namespace SPC\builder\macos\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 
 class libpng extends MacOSLibraryBase
 {
@@ -30,10 +31,11 @@ class libpng extends MacOSLibraryBase
     /**
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
-    protected function build()
+    protected function build(): void
     {
-        $optimizations = match ($this->builder->arch) {
+        $optimizations = match ($this->builder->getOption('arch')) {
             'x86_64' => '--enable-intel-sse ',
             'arm64' => '--enable-arm-neon ',
             default => '',
@@ -43,7 +45,7 @@ class libpng extends MacOSLibraryBase
             ->exec('chmod +x ./install-sh')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
-                "--host={$this->builder->gnu_arch}-apple-darwin " .
+                "--host={$this->builder->getOption('gnu-arch')}-apple-darwin " .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .

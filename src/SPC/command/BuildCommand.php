@@ -12,7 +12,6 @@ abstract class BuildCommand extends BaseCommand
     {
         parent::__construct($name);
 
-        // 根据运行的操作系统分配允许不同的命令行参数，Windows 需要额外的 VS 和 SDK等，*nix 需要提供架构
         switch (PHP_OS_FAMILY) {
             case 'Windows':
                 $this->addOption('with-sdk-binary-dir', null, InputOption::VALUE_REQUIRED, 'path to binary sdk');
@@ -29,9 +28,7 @@ abstract class BuildCommand extends BaseCommand
                 break;
         }
 
-        // 是否在编译 make 前清除旧的文件
         $this->addOption('with-clean', null, null, 'fresh build, `make clean` before `make`');
-        // 是否采用强制链接，让链接器强制加载静态库文件
         $this->addOption('bloat', null, null, 'add all libraries into binary');
     }
 }

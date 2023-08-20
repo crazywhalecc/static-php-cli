@@ -17,9 +17,8 @@ class pdo_sqlite extends Extension
      */
     public function patchBeforeConfigure(): bool
     {
-        FileSystem::replaceFile(
+        FileSystem::replaceFileRegex(
             SOURCE_PATH . '/php-src/configure',
-            REPLACE_FILE_PREG,
             '/sqlite3_column_table_name=yes/',
             'sqlite3_column_table_name=no'
         );

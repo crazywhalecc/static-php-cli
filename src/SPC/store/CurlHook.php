@@ -13,7 +13,7 @@ class CurlHook
      * @param string $url     修改的链接
      * @param array  $headers 修改的 headers
      */
-    public static function setupGithubToken(string &$method, string &$url, array &$headers): void
+    public static function setupGithubToken(string $method, string $url, array &$headers): void
     {
         if (!getenv('GITHUB_TOKEN')) {
             return;

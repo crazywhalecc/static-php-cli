@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait libevent
 {
-    protected function build()
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    protected function build(): void
     {
         // CMake needs a clean build directory
         FileSystem::resetDir($this->source_dir . '/build');
@@ -29,6 +35,5 @@ trait libevent
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install');
-        // patch pkgconfig
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
@@ -11,8 +12,9 @@ trait libyaml
 {
     /**
      * @throws RuntimeException
+     * @throws FileSystemException
      */
-    protected function build()
+    protected function build(): void
     {
         // prepare cmake/config.h.in
         if (!is_file(SOURCE_PATH . '/libyaml/cmake/config.h.in')) {

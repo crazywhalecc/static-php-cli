@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait curl
 {
-    protected function build()
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    protected function build(): void
     {
         $extra = '';
         // lib:openssl

@@ -10,11 +10,11 @@ use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
 
 /**
- * spc 应用究级入口
+ * static-php-cli console app entry
  */
 class ConsoleApplication extends Application
 {
-    public const VERSION = '2.0-rc5';
+    public const VERSION = '2.0.0';
 
     /**
      * @throws \ReflectionException
@@ -26,10 +26,10 @@ class ConsoleApplication extends Application
 
         global $argv;
 
-        // 生产环境不显示详细的调试错误，只使用 symfony console 自带的错误显示
+        // Detailed debugging errors are not displayed in the production environment. Only the error display provided by Symfony console is used.
         $this->setCatchExceptions(file_exists(ROOT_DIR . '/.prod') || !in_array('--debug', $argv));
 
-        // 通过扫描目录 src/static-php-cli/command/ 添加子命令
+        // Add subcommands by scanning the directory src/static-php-cli/command/
         $commands = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/command', 'SPC\\command');
         $phar = class_exists('\\Phar') && \Phar::running() || !class_exists('\\Phar');
         $commands = array_filter($commands, function ($y) use ($phar) {
@@ -46,9 +46,6 @@ class ConsoleApplication extends Application
         $this->addCommands(array_map(function ($x) { return new $x(); }, $commands));
     }
 
-    /**
-     * 重载以去除一些不必要的默认命令
-     */
     protected function getDefaultCommands(): array
     {
         return [new HelpCommand(), new ListCommand()];

@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand('micro:combine', 'Combine micro.sfx and php code together')]
 class MicroCombineCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('file', InputArgument::REQUIRED, 'The php or phar file to be combined');
         $this->addOption('with-micro', 'M', InputOption::VALUE_REQUIRED, 'Customize your micro.sfx file');

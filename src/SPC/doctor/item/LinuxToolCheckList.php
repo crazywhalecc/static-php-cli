@@ -30,6 +30,7 @@ class LinuxToolCheckList
         'bzip2', 'cmake', 'patch',
     ];
 
+    /** @noinspection PhpUnused */
     #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux')]
     public function checkCliTools(): ?CheckResult
     {
@@ -54,6 +55,7 @@ class LinuxToolCheckList
         return CheckResult::ok();
     }
 
+    /** @noinspection PhpUnused */
     #[AsCheckItem('if necessary packages are installed', limit_os: 'Linux')]
     public function checkSystemOSPackages(): ?CheckResult
     {
@@ -67,6 +69,10 @@ class LinuxToolCheckList
         return CheckResult::ok();
     }
 
+    /**
+     * @throws RuntimeException
+     * @noinspection PhpUnused
+     */
     #[AsFixItem('install-linux-tools')]
     public function fixBuildTools(array $distro, array $missing): bool
     {

@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+
 trait onig
 {
-    protected function build()
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    protected function build(): void
     {
         [,,$destdir] = SEPARATED_PATH;
 

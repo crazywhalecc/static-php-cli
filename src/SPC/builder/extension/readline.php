@@ -17,9 +17,8 @@ class readline extends Extension
      */
     public function patchBeforeConfigure(): bool
     {
-        FileSystem::replaceFile(
+        FileSystem::replaceFileRegex(
             SOURCE_PATH . '/php-src/configure',
-            REPLACE_FILE_PREG,
             '/-lncurses/',
             $this->getLibFilesString()
         );

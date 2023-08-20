@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\store;
 
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
 /**
@@ -83,7 +82,6 @@ class Config
 
     /**
      * @throws FileSystemException
-     * @throws RuntimeException
      * @throws WrongUsageException
      */
     public static function getExt(string $name, ?string $key = null, mixed $default = null)
@@ -126,6 +124,9 @@ class Config
         return self::$ext;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function getSources(): array
     {
         if (self::$source === null) {

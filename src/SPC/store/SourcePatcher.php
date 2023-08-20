@@ -11,7 +11,7 @@ use SPC\exception\RuntimeException;
 
 class SourcePatcher
 {
-    public static function init()
+    public static function init(): void
     {
         // FileSystem::addSourceExtractHook('swow', [SourcePatcher::class, 'patchSwow']);
         FileSystem::addSourceExtractHook('micro', [SourcePatcher::class, 'patchMicro']);
@@ -46,9 +46,13 @@ class SourcePatcher
             }
         }
         // patch capstone
-        FileSystem::replaceFile(SOURCE_PATH . '/php-src/configure', REPLACE_FILE_PREG, '/have_capstone="yes"/', 'have_capstone="no"');
+        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
     }
 
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
     public static function patchMicro(?array $list = null, bool $reverse = false): bool
     {
         if (!file_exists(SOURCE_PATH . '/php-src/sapi/micro/php_micro.c')) {
@@ -66,7 +70,7 @@ class SourcePatcher
         if ($major_ver === '74') {
             return false;
         }
-        $check = !defined('DEBUG_MODE') ? ' -q' : '';
+        // $check = !defined('DEBUG_MODE') ? ' -q' : '';
         // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
 
         $default = [
@@ -113,15 +117,13 @@ class SourcePatcher
         return true;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function patchOpenssl11Darwin(): bool
     {
         if (PHP_OS_FAMILY === 'Darwin' && !file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && file_exists(SOURCE_PATH . '/openssl/test/v3ext.c')) {
-            FileSystem::replaceFile(
-                SOURCE_PATH . '/openssl/test/v3ext.c',
-                REPLACE_FILE_STR,
-                '#include <stdio.h>',
-                '#include <stdio.h>' . PHP_EOL . '#include <string.h>'
-            );
+            FileSystem::replaceFileStr(SOURCE_PATH . '/openssl/test/v3ext.c', '#include <stdio.h>', '#include <stdio.h>' . PHP_EOL . '#include <string.h>');
             return true;
         }
         return false;
@@ -134,10 +136,10 @@ class SourcePatcher
     {
         // Try to fix debian environment build lack HAVE_STRLCAT problem
         if ($builder instanceof LinuxBuilder) {
-            FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_STRLCPY 1$/m', '');
-            FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_STRLCAT 1$/m', '');
+            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCPY 1$/m', '');
+            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCAT 1$/m', '');
         }
-        FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_OPENPTY 1$/m', '');
+        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
 
         // call extension patch before make
         foreach ($builder->getExts() as $ext) {
@@ -158,7 +160,7 @@ class SourcePatcher
         $micro_c_bak = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c.bak';
 
         // Try to reverse backup file
-        $find_pattern = 'const char HARDCODED_INI[] =';
+        $find_str = 'const char HARDCODED_INI[] =';
         $patch_str = '';
         foreach ($ini as $key => $value) {
             $patch_str .= "\"{$key}={$value}\\n\"\n";
@@ -178,8 +180,8 @@ class SourcePatcher
         }
 
         // Patch it
-        FileSystem::replaceFile($cli_c, REPLACE_FILE_STR, $find_pattern, $patch_str);
-        FileSystem::replaceFile($micro_c, REPLACE_FILE_STR, $find_pattern, $patch_str);
+        FileSystem::replaceFileStr($cli_c, $find_str, $patch_str);
+        FileSystem::replaceFileStr($micro_c, $find_str, $patch_str);
         return true;
     }
 

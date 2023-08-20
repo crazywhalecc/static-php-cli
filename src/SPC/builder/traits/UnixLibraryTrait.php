@@ -7,6 +7,7 @@ namespace SPC\builder\traits;
 use SPC\builder\LibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 
 trait UnixLibraryTrait
@@ -16,6 +17,7 @@ trait UnixLibraryTrait
     /**
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
     {
@@ -43,6 +45,11 @@ trait UnixLibraryTrait
         return implode($sep, $ret);
     }
 
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
     public function makeAutoconfEnv(string $prefix = null): string
     {
         if ($prefix === null) {
@@ -82,7 +89,7 @@ trait UnixLibraryTrait
      * remove libtool archive files
      *
      * @throws FileSystemException
-     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function cleanLaFiles(): void
     {

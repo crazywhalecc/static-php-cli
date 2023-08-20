@@ -6,7 +6,7 @@ namespace SPC\builder\unix\library;
 
 trait libiconv
 {
-    protected function build()
+    protected function build(): void
     {
         [,,$destdir] = SEPARATED_PATH;
 

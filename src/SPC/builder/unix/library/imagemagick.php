@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait imagemagick
 {
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
     protected function build(): void
     {
         $extra = '--without-jxl --without-xml --without-zstd --without-x --disable-openmp ';
@@ -46,9 +52,8 @@ trait imagemagick
         ];
         $this->patchPkgconfPrefix($filelist);
         foreach ($filelist as $file) {
-            FileSystem::replaceFile(
+            FileSystem::replaceFileRegex(
                 BUILD_LIB_PATH . '/pkgconfig/' . $file,
-                REPLACE_FILE_PREG,
                 '#includearchdir=/include/ImageMagick-7#m',
                 'includearchdir=${prefix}/include/ImageMagick-7'
             );

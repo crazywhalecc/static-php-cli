@@ -24,11 +24,14 @@ class CheckListHandler
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public function __construct(private InputInterface $input, private OutputInterface $output, bool $include_manual = false)
+    public function __construct(private readonly InputInterface $input, private readonly OutputInterface $output, bool $include_manual = false)
     {
         $this->loadCheckList($include_manual);
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public function runSingleCheck(string $item_name, int $fix_policy = FIX_POLICY_DIE): void
     {
         foreach ($this->check_list as $item) {
@@ -127,7 +130,10 @@ class CheckListHandler
         usort($this->check_list, fn ($a, $b) => $a->level > $b->level ? -1 : ($a->level == $b->level ? 0 : 1));
     }
 
-    private function emitFix(CheckResult $result)
+    /**
+     * @throws RuntimeException
+     */
+    private function emitFix(CheckResult $result): void
     {
         pcntl_signal(SIGINT, function () {
             $this->output->writeln('<error>You cancelled fix</error>');

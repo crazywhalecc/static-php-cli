@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux;
 
-use JetBrains\PhpStorm\ArrayShape;
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -13,7 +12,7 @@ class SystemUtil
 {
     use UnixSystemUtilTrait;
 
-    #[ArrayShape(['dist' => 'mixed|string', 'ver' => 'mixed|string'])]
+    /** @noinspection PhpMissingBreakStatementInspection */
     public static function getOSRelease(): array
     {
         $ret = [
@@ -81,6 +80,8 @@ class SystemUtil
 
     /**
      * @throws RuntimeException
+     * @throws WrongUsageException
+     * @throws WrongUsageException
      */
     public static function getArchCFlags(string $cc, string $arch): string
     {
@@ -129,6 +130,7 @@ class SystemUtil
 
     /**
      * @throws RuntimeException
+     * @noinspection PhpUnused
      */
     public static function getCrossCompilePrefix(string $cc, string $arch): string
     {
@@ -159,6 +161,7 @@ class SystemUtil
         return null;
     }
 
+    /** @noinspection PhpUnused */
     public static function findStaticLibs(array $names): ?array
     {
         $ret = [];
@@ -187,6 +190,7 @@ class SystemUtil
         return null;
     }
 
+    /** @noinspection PhpUnused */
     public static function findHeaders(array $names): ?array
     {
         $ret = [];

@@ -7,31 +7,27 @@ namespace SPC\builder\traits;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 
 trait UnixBuilderTrait
 {
-    /** @var string 设置的命令前缀，设置为 set -x 可以在终端打印命令 */
-    public string $set_x = 'set -x';
-
-    /** @var string C 编译器命令 */
-    public string $cc;
-
-    /** @var string C++ 编译器命令 */
-    public string $cxx;
-
-    /** @var string cflags 参数 */
+    /** @var string cflags */
     public string $arch_c_flags;
 
-    /** @var string C++ flags 参数 */
+    /** @var string C++ flags */
     public string $arch_cxx_flags;
 
     /** @var string cmake toolchain file */
     public string $cmake_toolchain_file;
 
-    /** @var string configure 环境依赖的变量 */
+    /** @var string configure environments */
     public string $configure_env;
 
+    /**
+     * @throws WrongUsageException
+     * @throws FileSystemException
+     */
     public function getAllStaticLibFiles(): array
     {
         $libs = [];
@@ -125,7 +121,7 @@ trait UnixBuilderTrait
     }
 
     /**
-     * 清理编译好的文件
+     * Run php clean
      *
      * @throws RuntimeException
      */
@@ -141,7 +137,7 @@ trait UnixBuilderTrait
     public function makeCmakeArgs(): string
     {
         [$lib, $include] = SEPARATED_PATH;
-        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . $this->cc . ' ' : '';
+        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . $this->getOption('cc') . ' ' : '';
         return $extra . '-DCMAKE_BUILD_TYPE=Release ' .
             '-DCMAKE_INSTALL_PREFIX=/ ' .
             "-DCMAKE_INSTALL_LIBDIR={$lib} " .

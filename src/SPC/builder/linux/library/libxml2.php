@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
@@ -13,14 +14,15 @@ class libxml2 extends LinuxLibraryBase
 
     /**
      * @throws RuntimeException
+     * @throws FileSystemException
      */
-    public function build()
+    public function build(): void
     {
         $enable_zlib = $this->builder->getLib('zlib') ? 'ON' : 'OFF';
         $enable_icu = $this->builder->getLib('icu') ? 'ON' : 'OFF';
         $enable_xz = $this->builder->getLib('xz') ? 'ON' : 'OFF';
 
-        [$lib, $include, $destdir] = SEPARATED_PATH;
+        [, , $destdir] = SEPARATED_PATH;
 
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')

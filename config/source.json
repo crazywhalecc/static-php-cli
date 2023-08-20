@@ -6,15 +6,6 @@
             "path": "LICENSE"
         }
     },
-    "ext-glfw": {
-        "type": "git",
-        "url": "https://github.com/mario-deluna/php-glfw",
-        "rev": "master",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "apcu": {
         "type": "url",
         "url": "https://pecl.php.net/get/APCu",
@@ -23,25 +14,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "memcached": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/memcached",
-        "path": "php-src/ext/memcached",
-        "filename": "memcached.tgz",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
-    "libmemcached": {
-        "type": "git",
-        "url": "https://github.com/crazywhalecc/libmemcached-macos.git",
-        "rev": "master",
-        "license": {
-            "type": "file",
-            "path": "COPYING"
         }
     },
     "brotli": {
@@ -74,6 +46,15 @@
         "type": "url",
         "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
         "path": "php-src/ext/event",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-glfw": {
+        "type": "git",
+        "url": "https://github.com/mario-deluna/php-glfw",
+        "rev": "master",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -213,6 +194,15 @@
             "path": "COPYING"
         }
     },
+    "libmemcached": {
+        "type": "git",
+        "url": "https://github.com/crazywhalecc/libmemcached-macos.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libpng": {
         "type": "git",
         "url": "https://git.code.sf.net/p/libpng/code",
@@ -288,6 +278,16 @@
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "memcached": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/memcached",
+        "path": "php-src/ext/memcached",
+        "filename": "memcached.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "micro": {

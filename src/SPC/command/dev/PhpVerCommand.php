@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand('dev:php-ver', 'Dev command')]
 class PhpVerCommand extends BaseCommand
 {
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->no_motd = true;
         parent::initialize($input, $output);

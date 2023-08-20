@@ -8,7 +8,9 @@ use SPC\builder\BuilderBase;
 use SPC\builder\LibraryBase;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\traits\UnixLibraryTrait;
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 
 abstract class LinuxLibraryBase extends LibraryBase
 {
@@ -37,6 +39,8 @@ abstract class LinuxLibraryBase extends LibraryBase
 
     /**
      * @throws RuntimeException
+     * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function tryBuild(bool $force_build = false): int
     {
@@ -71,7 +75,7 @@ abstract class LinuxLibraryBase extends LibraryBase
         return BUILD_STATUS_ALREADY;
     }
 
-    protected function makeFakePkgconfs()
+    protected function makeFakePkgconfs(): void
     {
         $workspace = BUILD_ROOT_PATH;
         if ($workspace === '/') {
