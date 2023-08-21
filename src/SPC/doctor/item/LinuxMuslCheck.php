@@ -16,7 +16,7 @@ class LinuxMuslCheck
     #[AsCheckItem('if musl-libc is installed', limit_os: 'Linux')]
     public function checkMusl(): ?CheckResult
     {
-        $file = '/lib/ld-musl-x86_64.so.1';
+        $file = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         if (file_exists($file)) {
             return CheckResult::ok();
         }
