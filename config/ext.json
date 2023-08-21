@@ -370,7 +370,8 @@
         "arg-type": "custom",
         "cpp-extension": true,
         "lib-depends": [
-            "openssl"
+            "openssl",
+            "pqsql"
         ],
         "ext-depends": [
             "openssl"
