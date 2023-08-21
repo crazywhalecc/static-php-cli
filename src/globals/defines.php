@@ -43,7 +43,8 @@ const BUILD_TARGET_NONE = 0;    // no target
 const BUILD_TARGET_CLI = 1;     // build cli
 const BUILD_TARGET_MICRO = 2;   // build micro
 const BUILD_TARGET_FPM = 4;     // build fpm
-const BUILD_TARGET_ALL = 7;     // build all
+const BUILD_TARGET_EMBED = 8;   // build embed
+const BUILD_TARGET_ALL = 15;    // build all
 
 // doctor error fix policy
 const FIX_POLICY_DIE = 1;       // die directly

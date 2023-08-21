@@ -252,6 +252,9 @@ abstract class BuilderBase
         if (($type & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
             $ls[] = 'fpm';
         }
+        if (($type & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
+            $ls[] = 'embed';
+        }
         return implode(', ', $ls);
     }
 

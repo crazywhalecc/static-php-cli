@@ -179,6 +179,11 @@ class LinuxBuilder extends BuilderBase
             $zts = '';
         }
 
+        $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
+        $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
+        $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
+        $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 './configure ' .
@@ -189,12 +194,13 @@ class LinuxBuilder extends BuilderBase
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
-                '--enable-cli ' .
-                '--enable-fpm ' .
+                ($enableCli ? '--enable-cli ' : '') .
+                ($enableFpm ? '--enable-fpm ' : '') .
+                ($enableEmbed ? '--enable-embed=static ' : '') .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                '--enable-micro=all-static ' .
+                ($enableMicro ? '--enable-micro=all-static ' : '') .
                 $this->makeExtensionArgs() . ' ' .
                 $envs
             );
@@ -203,17 +209,21 @@ class LinuxBuilder extends BuilderBase
 
         $this->cleanMake();
 
-        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+        if ($enableCli) {
             logger()->info('building cli');
             $this->buildCli($extra_libs, $use_lld);
         }
-        if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
+        if ($enableFpm) {
             logger()->info('building fpm');
             $this->buildFpm($extra_libs, $use_lld);
         }
-        if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+        if ($enableMicro) {
             logger()->info('building micro');
             $this->buildMicro($extra_libs, $use_lld, $cflags);
+        }
+        if ($enableEmbed) {
+            logger()->info('building embed');
+            $this->buildEmbed($extra_libs, $use_lld);
         }
 
         if (php_uname('m') === $this->getOption('arch')) {
@@ -305,5 +315,19 @@ class LinuxBuilder extends BuilderBase
         }
 
         $this->deployBinary(BUILD_TARGET_FPM);
+    }
+
+    public function buildEmbed(string $extra_libs, string $use_lld): void
+    {
+        $vars = SystemUtil::makeEnvVarString([
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
+        ]);
+
+        shell()
+            ->cd(SOURCE_PATH . '/php-src')
+            ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            ->exec('make INSTALL_ROOT=' . BUILD_ROOT_PATH . " -j{$this->concurrency} {$vars} install");
     }
 }
