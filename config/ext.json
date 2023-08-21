@@ -370,14 +370,14 @@
         "arg-type": "custom",
         "cpp-extension": true,
         "lib-depends": [
-            "openssl",
-            "pqsql"
+            "openssl"
         ],
         "ext-depends": [
             "openssl"
         ],
         "ext-suggests": [
-            "curl"
+            "curl",
+            "pgsql"
         ],
         "unix-only": true
     },
