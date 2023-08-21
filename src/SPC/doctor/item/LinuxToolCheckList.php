@@ -77,7 +77,7 @@ class LinuxToolCheckList
     public function fixBuildTools(array $distro, array $missing): bool
     {
         $install_cmd = match ($distro['dist']) {
-            'ubuntu', 'debian' => 'apt install -y',
+            'ubuntu', 'debian' => 'apt-get install -y',
             'alpine' => 'apk add',
             default => throw new RuntimeException('Current linux distro is not supported for auto-install musl packages'),
         };

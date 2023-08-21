@@ -37,7 +37,7 @@ class LinuxMuslCheck
     public function fixMusl(array $distro): bool
     {
         $install_cmd = match ($distro['dist']) {
-            'ubuntu', 'debian' => 'apt install musl musl-tools -y',
+            'ubuntu', 'debian' => 'apt-get install musl musl-tools -y',
             'alpine' => 'apk add musl musl-utils musl-dev',
             default => throw new RuntimeException('Current linux distro is not supported for auto-install musl packages'),
         };
