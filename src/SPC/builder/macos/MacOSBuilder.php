@@ -149,7 +149,7 @@ class MacOSBuilder extends BuilderBase
         SourcePatcher::patchBeforeConfigure($this);
 
         $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
-        $zts = $this->getOption('enable-zts', false) ? '--enable-zts ' : '';
+        $zts = $this->getOption('enable-zts', false) ? '--enable-zts --disable-zend-signals ' : '';
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
