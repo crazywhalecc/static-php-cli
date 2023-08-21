@@ -25,7 +25,8 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('build-micro', null, null, 'build micro');
         $this->addOption('build-cli', null, null, 'build cli');
         $this->addOption('build-fpm', null, null, 'build fpm');
-        $this->addOption('build-all', null, null, 'build cli, micro, fpm');
+        $this->addOption('build-embed', null, null, 'build embed');
+        $this->addOption('build-all', null, null, 'build cli, micro, fpm, embed');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('enable-zts', null, null, 'enable ZTS support');
         $this->addOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
@@ -43,13 +44,15 @@ class BuildCliCommand extends BuildCommand
         $rule = $rule | ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
         $rule = $rule | ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule = $rule | ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
+        $rule = $rule | ($this->getOption('build-embed') ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
         $rule = $rule | ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         if ($rule === BUILD_TARGET_NONE) {
             $this->output->writeln('<error>Please add at least one build target!</error>');
             $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
             $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
             $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm</comment>");
+            $this->output->writeln("<comment>\t--build-embed\tBuild embed SAPI/libphp</comment>");
+            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm, embed</comment>");
             return static::FAILURE;
         }
         try {

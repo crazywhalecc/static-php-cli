@@ -151,6 +151,11 @@ class MacOSBuilder extends BuilderBase
         $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
         $zts = $this->getOption('enable-zts', false) ? '--enable-zts --disable-zend-signals ' : '';
 
+        $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
+        $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
+        $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
+        $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 './configure ' .
@@ -162,9 +167,10 @@ class MacOSBuilder extends BuilderBase
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
-                '--enable-cli ' .
-                '--enable-fpm ' .
-                '--enable-micro ' .
+                ($enableCli ? '--enable-cli ' : '') .
+                ($enableFpm ? '--enable-fpm ' : '') .
+                ($enableEmbed ? '--enable-embed=static ' : '') .
+                ($enableMicro ? '--enable-micro ' : '') .
                 $json_74 .
                 $zts .
                 $this->makeExtensionArgs() . ' ' .
@@ -175,17 +181,21 @@ class MacOSBuilder extends BuilderBase
 
         $this->cleanMake();
 
-        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+        if ($enableCli) {
             logger()->info('building cli');
             $this->buildCli();
         }
-        if (($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
+        if ($enableFpm) {
             logger()->info('building fpm');
             $this->buildFpm();
         }
-        if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+        if ($enableMicro) {
             logger()->info('building micro');
             $this->buildMicro();
+        }
+        if ($enableEmbed) {
+            logger()->info('building embed');
+            $this->buildEmbed();
         }
 
         if (php_uname('m') === $this->getOption('arch')) {
@@ -207,7 +217,7 @@ class MacOSBuilder extends BuilderBase
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS need it)
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS needs it)
         ]);
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
@@ -237,7 +247,7 @@ class MacOSBuilder extends BuilderBase
         $vars = [
             // with debug information, optimize for size, remove identifiers, patch fake cli for micro
             'EXTRA_CFLAGS' => '-g -Os -fno-ident' . $enable_fake_cli,
-            // link resolv library (macOS need it)
+            // link resolv library (macOS needs it)
             'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv",
         ];
         if (!$this->getOption('no-strip', false)) {
@@ -260,7 +270,7 @@ class MacOSBuilder extends BuilderBase
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS need it)
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS needs it)
         ]);
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
@@ -269,5 +279,17 @@ class MacOSBuilder extends BuilderBase
             $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
         }
         $this->deployBinary(BUILD_TARGET_FPM);
+    }
+
+    public function buildEmbed(): void
+    {
+        $vars = SystemUtil::makeEnvVarString([
+            'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS needs it)
+        ]);
+
+        shell()
+            ->cd(SOURCE_PATH . '/php-src')
+            ->exec('make INSTALL_ROOT=' . BUILD_ROOT_PATH . " -j{$this->concurrency} {$vars} install");
     }
 }
