@@ -253,6 +253,12 @@ class Downloader
             $source = Config::getSource($name);
         }
 
+        if ($source === null) {
+            logger()->warning('Source {name} unknown. Skipping.', ['name' => $name]);
+
+            return;
+        }
+
         // load lock file
         if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
             $lock = [];
