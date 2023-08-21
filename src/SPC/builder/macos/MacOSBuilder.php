@@ -53,6 +53,7 @@ class MacOSBuilder extends BuilderBase
             'CC' => $this->getOption('cc'),
             'CXX' => $this->getOption('cxx'),
             'CFLAGS' => "{$this->arch_c_flags} -Wimplicit-function-declaration -Os",
+            'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
         ]);
 
         // create pkgconfig and include dir (some libs cannot create them automatically)

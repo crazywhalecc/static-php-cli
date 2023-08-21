@@ -78,6 +78,7 @@ class LinuxBuilder extends BuilderBase
             ...$vars,
             'CC' => $this->getOption('cc'),
             'CXX' => $this->getOption('cxx'),
+            'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
         ]);
         // cross-compile does not support yet
         /*if (php_uname('m') !== $this->arch) {
@@ -158,6 +159,7 @@ class LinuxBuilder extends BuilderBase
             'CXX' => $this->getOption('cxx'),
             'CFLAGS' => $cflags,
             'LIBS' => '-ldl -lpthread',
+            'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
         ]);
 
         SourcePatcher::patchBeforeBuildconf($this);
