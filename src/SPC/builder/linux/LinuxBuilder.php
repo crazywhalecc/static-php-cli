@@ -169,10 +169,15 @@ class LinuxBuilder extends BuilderBase
         SourcePatcher::patchBeforeConfigure($this);
 
         $phpVersionID = $this->getPHPVersionID();
-
         $json_74 = $phpVersionID < 80000 ? '--enable-json ' : '';
-        $maxExecutionTimers = $this->getOption('enable-zts', false) && $this->getPHPVersionID() > 81000 ? '--enable-zend-max-execution-timers ' : '';
-        $zts = $this->getOption('enable-zts', false) ? '--enable-zts --disable-zend-signals ' : '';
+
+        if ($this->getOption('enable-zts', false)) {
+            $maxExecutionTimers = $phpVersionID >= 80100 ? '--enable-zend-max-execution-timers ' : '';
+            $zts = '--enable-zts --disable-zend-signals ';
+        } else {
+            $maxExecutionTimers = '';
+            $zts = '';
+        }
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
