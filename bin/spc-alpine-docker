@@ -55,10 +55,38 @@ if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-$SPC_USE_ARCH; then
     $DOCKER_EXECUTABLE build -t cwcc-spc-$SPC_USE_ARCH -f- . <<EOF
 FROM $ALPINE_FROM
 $SPC_USE_MIRROR
-RUN apk update
-RUN apk add bash file wget cmake gcc g++ jq autoconf git libstdc++ linux-headers make m4 libgcc binutils bison flex pkgconfig automake curl
-RUN apk add build-base xz php81 php81-common php81-pcntl php81-tokenizer php81-phar php81-posix php81-xml composer
-RUN mkdir /app
+RUN apk update; \
+    apk add --no-cache \
+        autoconf \
+        automake \
+        bash \
+        binutils \
+        bison \
+        build-base \
+        cmake \
+        composer \
+        curl \
+        file \
+        flex \
+        g++ \
+        gcc \
+        git \
+        jq \
+        libgcc \
+        libstdc++ \
+        linux-headers \
+        m4 \
+        make \
+        php81 \
+        php81-common \
+        php81-pcntl \
+        php81-phar \
+        php81-posix \
+        php81-tokenizer \
+        php81-xml \
+        pkgconfig \
+        wget \
+        xz
 WORKDIR /app
 ADD ./src /app/src
 ADD ./composer.json /app/composer.json
