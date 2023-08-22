@@ -52,7 +52,9 @@ china)
 
 esac
 
-apk add --no-cache curl || true
+if ! command -v curl &> /dev/null && command -v apk &> /dev/null; then
+  apk add --no-cache curl
+fi
 
 test -d "${__PROJECT__}"/downloads || mkdir "${__PROJECT__}"/downloads
 # download static php binary
