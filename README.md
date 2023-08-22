@@ -36,7 +36,7 @@ Compile A Statically Linked PHP With Swoole and other Extensions.
 
 > macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
 
-目前支持编译的 PHP 版本为：`7.4`，`8.0`，`8.1`，`8.2`。
+目前支持编译的 PHP 版本为：`7.3`，`7.4`，`8.0`，`8.1`，`8.2`，`8.3`。
 
 ## 文档
 
@@ -108,10 +108,10 @@ chmod +x bin/spc
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 ```
 
-你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.4 ~ 8.2：
+你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.3 ~ 8.3：
 
 ```bash
-# 优先考虑使用 >= 8.0 的 PHP 版本
+# 优先考虑使用 >= 8.0 的 PHP 版本，因为 phpmicro 不支持在 PHP7 中构建
 ./bin/spc fetch --with-php=8.2 --all
 ```
 

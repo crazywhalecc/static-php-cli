@@ -37,7 +37,7 @@ Here is the architecture support status, where `CI` represents support for GitHu
 
 > macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
-Currently supported PHP versions for compilation are: `7.4`, `8.0`, `8.1`, `8.2`.
+Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`, `8.2`, `8.3`.
 
 ## Docs
 
@@ -117,7 +117,7 @@ chmod +x bin/spc
 You can also use the parameter `--with-php=x.y` to specify the downloaded PHP version, currently supports 7.4 ~ 8.2:
 
 ```bash
-# Using PHP >= 8.0 is recommended, because 7.4 cannot use phpmicro
+# Using PHP >= 8.0 is recommended, because PHP7 cannot use phpmicro
 ./bin/spc fetch --with-php=8.2 --all
 ```
 
