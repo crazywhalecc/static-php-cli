@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # set error-quit, verbose, non-variable-quit
 set -eu
@@ -51,6 +51,8 @@ china)
   ;;
 
 esac
+
+apk add --no-cache curl || true
 
 test -d "${__PROJECT__}"/downloads || mkdir "${__PROJECT__}"/downloads
 # download static php binary
