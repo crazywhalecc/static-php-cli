@@ -104,4 +104,4 @@ fi
 
 # Run docker
 # shellcheck disable=SC2068
-$DOCKER_EXECUTABLE run --rm "$INTERACT" -e SPC_FIX_DEPLOY_ROOT="$(pwd)" -v "$(pwd)"/config:/app/config -v "$(pwd)"/src:/app/src -v "$(pwd)"/buildroot:/app/buildroot -v "$(pwd)"/source:/app/source -v "$(pwd)"/downloads:/app/downloads cwcc-spc-$SPC_USE_ARCH bin/spc $@
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" -v "$(pwd)"/config:/app/config -v "$(pwd)"/src:/app/src -v "$(pwd)"/buildroot:/app/buildroot -v "$(pwd)"/source:/app/source -v "$(pwd)"/downloads:/app/downloads cwcc-spc-$SPC_USE_ARCH bin/spc $@
