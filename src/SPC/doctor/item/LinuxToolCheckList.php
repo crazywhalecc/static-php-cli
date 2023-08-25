@@ -28,6 +28,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
+        'xz',
     ];
 
     /** @noinspection PhpUnused */
@@ -87,7 +88,7 @@ class LinuxToolCheckList
             logger()->warning('Current user is not root, using sudo for running command');
         }
         try {
-            shell(true)->exec($prefix . $install_cmd . ' ' . implode(' ', $missing));
+            shell(true)->exec($prefix . $install_cmd . ' ' . implode(' ', str_replace('xz', 'xz-utils', $missing)));
         } catch (RuntimeException) {
             return false;
         }
