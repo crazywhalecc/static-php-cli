@@ -6,7 +6,7 @@ namespace SPC\exception;
 
 class ExceptionHandler
 {
-    protected mixed $whoops;
+    protected mixed $whoops = null;
 
     private static ?ExceptionHandler $obj = null;
 
