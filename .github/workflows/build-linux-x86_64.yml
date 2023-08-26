@@ -40,11 +40,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Install Ubuntu missing packages and mark os suffix
-      - run: |
-          sudo apt install musl-tools -y
-          echo "SPC_BUILD_OS=linux" >> $GITHUB_ENV
-
       # Cache composer dependencies
       - id: cache-composer-deps
         uses: actions/cache@v3
@@ -54,7 +49,7 @@ jobs:
 
       # If there's no Composer cache, install dependencies
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
-        run: composer update --no-dev
+        run: composer update --no-dev --classmap-authoritative
 
       # Cache downloaded source
       - id: cache-download
