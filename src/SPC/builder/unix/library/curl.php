@@ -51,6 +51,7 @@ trait curl
         FileSystem::resetDir($this->source_dir . '/build');
         // compile！
         shell()->cd($this->source_dir . '/build')
+            ->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ../CMakeLists.txt')
             ->exec("{$this->builder->configure_env} cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF {$extra} ..")
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
