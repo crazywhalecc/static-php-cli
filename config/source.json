@@ -16,15 +16,6 @@
             "path": "LICENSE"
         }
     },
-    "libxslt": {
-        "type": "filelist",
-        "url": "https://download.gnome.org/sources/libxslt/1.1/",
-        "regex": "/href=\"(?<file>libxslt-(?<version>[^\"]+)\\.tar\\.xz)\"/",
-        "license": {
-            "type": "text",
-            "text": "TODO"
-        }
-    },
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",
@@ -261,6 +252,15 @@
         "license": {
             "type": "file",
             "path": "Copyright"
+        }
+    },
+    "libxslt": {
+        "type": "filelist",
+        "url": "https://download.gnome.org/sources/libxslt/1.1/",
+        "regex": "/href=\"(?<file>libxslt-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "license": {
+            "type": "text",
+            "text": "TODO"
         }
     },
     "libyaml": {

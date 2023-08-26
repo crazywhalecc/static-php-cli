@@ -293,6 +293,16 @@
             "pthreads4w"
         ]
     },
+    "libxslt": {
+        "source": "libxslt",
+        "static-libs-unix": [
+            "libxslt.a",
+            "libexslt.a"
+        ],
+        "lib-depends": [
+            "libxml2"
+        ]
+    },
     "libyaml": {
         "source": "libyaml",
         "static-libs-unix": [
