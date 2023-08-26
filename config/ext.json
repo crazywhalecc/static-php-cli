@@ -449,9 +449,13 @@
     },
     "xsl": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "libxslt"
+        ],
+        "ext-depends": [
+            "xml",
+            "dom"
         ]
     },
     "yaml": {
