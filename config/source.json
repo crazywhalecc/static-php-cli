@@ -259,8 +259,8 @@
         "url": "https://download.gnome.org/sources/libxslt/1.1/",
         "regex": "/href=\"(?<file>libxslt-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "license": {
-            "type": "text",
-            "text": "TODO"
+            "type": "file",
+            "text": "COPYING"
         }
     },
     "libyaml": {
