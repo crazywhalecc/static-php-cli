@@ -279,17 +279,16 @@
             "libxml2"
         ],
         "lib-depends": [
-            "libiconv"
+            "libiconv",
+            "zlib"
         ],
         "lib-suggests": [
             "xz",
-            "zlib",
             "icu"
         ],
         "lib-suggests-windows": [
             "icu",
             "xz",
-            "zlib",
             "pthreads4w"
         ]
     },
