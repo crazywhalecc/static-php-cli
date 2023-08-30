@@ -42,14 +42,14 @@
             "curl"
         ],
         "lib-depends-unix": [
+            "openssl",
             "zlib"
         ],
         "lib-suggests": [
             "libssh2",
             "brotli",
             "nghttp2",
-            "zstd",
-            "openssl"
+            "zstd"
         ],
         "lib-suggests-windows": [
             "zlib",
