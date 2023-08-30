@@ -290,6 +290,15 @@ class MacOSBuilder extends BuilderBase
 
         shell()
             ->cd(SOURCE_PATH . '/php-src')
-            ->exec('make INSTALL_ROOT=' . BUILD_ROOT_PATH . " -j{$this->concurrency} {$vars} install");
+            ->exec('make INSTALL_ROOT=' . BUILD_ROOT_PATH . " -j{$this->concurrency} {$vars} install")
+            // https://github.com/php/php-src/issues/12082
+            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o')
+            ->exec('mkdir ' . BUILD_ROOT_PATH . '/lib/php-o')
+            ->cd(BUILD_ROOT_PATH . '/lib/php-o')
+            ->exec('ar x ' . BUILD_ROOT_PATH . '/lib/libphp.a')
+            ->exec('ls')
+            ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
+            ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
+            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
     }
 }
