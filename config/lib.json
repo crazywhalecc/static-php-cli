@@ -522,6 +522,9 @@
             "snappy.h",
             "snappy-stubs-internal.h",
             "snappy-stubs-public.h"
+        ],
+        "lib-depends": [
+            "zlib"
         ]
     }
 }
