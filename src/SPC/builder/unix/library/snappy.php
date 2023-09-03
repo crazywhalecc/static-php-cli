@@ -21,12 +21,14 @@ trait snappy
         shell()->cd($this->source_dir . '/cmake/build')
             ->exec(
                 "{$this->builder->configure_env} cmake " .
-                "{$this->builder->makeCmakeArgs()} " .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DCMAKE_INSTALL_PREFIX=' . escapeshellarg(BUILD_ROOT_PATH) . ' ' .
                 '-DSNAPPY_BUILD_TESTS=OFF ' .
                 '-DSNAPPY_BUILD_BENCHMARKS=OFF ' .
                 '../..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
     }
 }

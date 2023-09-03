@@ -328,6 +328,7 @@
     "snappy": {
         "type": "external",
         "source": "ext-snappy",
+        "cpp-extension": true,
         "arg-type": "custom",
         "lib-depends": [
             "snappy"
