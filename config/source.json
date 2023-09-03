@@ -80,6 +80,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-snappy": {
+        "type": "git",
+        "path": "php-src/ext/snappy",
+        "rev": "master",
+        "url": "https://github.com/kjdev/php-ext-snappy",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ssh2": {
         "type": "url",
         "url": "https://pecl.php.net/get/ssh2",
@@ -396,6 +406,16 @@
         "path": "php-src/ext/redis",
         "rev": "5.3.7",
         "url": "https://github.com/phpredis/phpredis",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "snappy": {
+        "type": "git",
+        "repo": "google/snappy",
+        "rev": "main",
+        "url": "https://github.com/google/snappy",
         "license": {
             "type": "file",
             "path": "COPYING"

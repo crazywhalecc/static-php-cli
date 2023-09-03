@@ -325,6 +325,17 @@
             "libxml2"
         ]
     },
+    "snappy": {
+        "type": "external",
+        "source": "ext-snappy",
+        "arg-type": "custom",
+        "lib-depends": [
+            "snappy"
+        ],
+        "ext-suggest": [
+            "apcu"
+        ]
+    },
     "snmp": {
         "type": "builtin",
         "arg-type": "with",
