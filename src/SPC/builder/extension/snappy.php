@@ -21,7 +21,7 @@ class snappy extends Extension
         FileSystem::replaceFileRegex(
             SOURCE_PATH . '/php-src/configure',
             '/-lsnappy/',
-            $this->getLibFilesString() . $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++'
+            $this->getLibFilesString() . ($this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++')
         );
         return true;
     }
