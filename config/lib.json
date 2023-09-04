@@ -445,6 +445,22 @@
             "ncurses"
         ]
     },
+    "snappy": {
+        "source": "snappy",
+        "static-libs-unix": [
+            "libsnappy.a"
+        ],
+        "headers-unix": [
+            "snappy-c.h",
+            "snappy-sinksource.h",
+            "snappy.h",
+            "snappy-stubs-internal.h",
+            "snappy-stubs-public.h"
+        ],
+        "lib-depends": [
+            "zlib"
+        ]
+    },
     "sqlite": {
         "source": "sqlite",
         "static-libs-unix": [
@@ -509,22 +525,6 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
-        ]
-    },
-    "snappy": {
-        "source": "snappy",
-        "static-libs-unix": [
-            "libsnappy.a"
-        ],
-        "headers-unix": [
-            "snappy-c.h",
-            "snappy-sinksource.h",
-            "snappy.h",
-            "snappy-stubs-internal.h",
-            "snappy-stubs-public.h"
-        ],
-        "lib-depends": [
-            "zlib"
         ]
     }
 }
