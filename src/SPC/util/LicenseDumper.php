@@ -45,46 +45,58 @@ class LicenseDumper
     {
         // mkdir first
         if (is_dir($target_dir) && !FileSystem::removeDir($target_dir)) {
-            logger()->warning('Target dump directory is noe empty, be aware!');
+            logger()->warning('Target dump directory is not empty, be aware!');
         }
         FileSystem::createDir($target_dir);
         foreach ($this->exts as $ext) {
             if (Config::getExt($ext, 'type') !== 'external') {
                 continue;
             }
+
             $source_name = Config::getExt($ext, 'source');
-            $content = $this->getSourceLicense($source_name);
-            file_put_contents($target_dir . '/ext_' . $ext . '.txt', $content);
+            foreach ($this->getSourceLicenses($source_name) as $index => $license) {
+                file_put_contents("{$target_dir}/ext_{$ext}_{$index}.txt", $license);
+            }
         }
 
         foreach ($this->libs as $lib) {
             $source_name = Config::getLib($lib, 'source');
-            $content = $this->getSourceLicense($source_name);
-            file_put_contents($target_dir . '/lib_' . $lib . '.txt', $content);
+            foreach ($this->getSourceLicenses($source_name) as $index => $license) {
+                file_put_contents("{$target_dir}/lib_{$lib}_{$index}.txt", $license);
+            }
         }
 
         foreach ($this->sources as $source) {
-            file_put_contents($target_dir . '/src_' . $source . '.txt', $this->getSourceLicense($source));
+            foreach ($this->getSourceLicenses($source) as $index => $license) {
+                file_put_contents("{$target_dir}/src_{$source}_{$index}.txt", $license);
+            }
         }
         return true;
     }
 
     /**
+     * @return string[]
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    private function getSourceLicense(string $source_name): ?string
+    private function getSourceLicenses(string $source_name): iterable
     {
-        $src = Config::getSource($source_name)['license'] ?? null;
-        if ($src === null) {
-            throw new RuntimeException('source [' . $source_name . '] license meta is not exist');
+        $licenses = Config::getSource($source_name)['license'] ?? [];
+        if ($licenses === []) {
+            throw new RuntimeException('source [' . $source_name . '] license meta not exist');
         }
 
-        return match ($src['type']) {
-            'text' => $src['text'],
-            'file' => $this->loadSourceFile($source_name, $src['path'], Config::getSource($source_name)['path'] ?? null),
-            default => throw new RuntimeException('source [' . $source_name . '] license type is not allowed'),
-        };
+        if (!array_is_list($licenses)) {
+            $licenses = [$licenses];
+        }
+
+        foreach ($licenses as $license) {
+            yield match ($license['type']) {
+                'text' => $license['text'],
+                'file' => $this->loadSourceFile($source_name, $license['path'], Config::getSource($source_name)['path'] ?? null),
+                default => throw new RuntimeException('source [' . $source_name . '] license type is not allowed'),
+            };
+        }
     }
 
     /**
@@ -93,8 +105,9 @@ class LicenseDumper
     private function loadSourceFile(string $source_name, string $in_path, ?string $custom_base_path = null): string
     {
         if (!file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path)) {
-            throw new RuntimeException('source [' . $source_name . '] license file [' . $in_path . '] is not exist');
+            throw new RuntimeException('source [' . $source_name . '] license file [' . $in_path . '] not exist');
         }
+
         return file_get_contents(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path);
     }
 }
