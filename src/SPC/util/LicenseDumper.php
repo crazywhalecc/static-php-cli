@@ -90,8 +90,8 @@ class LicenseDumper
             $licenses = [$licenses];
         }
 
-        foreach ($licenses as $license) {
-            yield match ($license['type']) {
+        foreach ($licenses as $index => $license) {
+            yield ($license['suffix'] ?? $index) => match ($license['type']) {
                 'text' => $license['text'],
                 'file' => $this->loadSourceFile($source_name, $license['path'], Config::getSource($source_name)['path'] ?? null),
                 default => throw new RuntimeException('source [' . $source_name . '] license type is not allowed'),
