@@ -17,11 +17,12 @@
         "zhamao/logger": "^1.0"
     },
     "require-dev": {
-        "nunomaduro/collision": "*",
-        "friendsofphp/php-cs-fixer": "^3.2 != 3.7.0",
-        "phpstan/phpstan": "^1.1",
         "captainhook/captainhook": "^5.10",
-        "captainhook/plugin-composer": "^5.3"
+        "captainhook/plugin-composer": "^5.3",
+        "friendsofphp/php-cs-fixer": "^3.2 != 3.7.0",
+        "nunomaduro/collision": "*",
+        "phpstan/phpstan": "^1.1",
+        "phpunit/phpunit": "^10.3"
     },
     "autoload": {
         "psr-4": {
@@ -32,13 +33,18 @@
             "src/globals/functions.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "SPC\\Tests\\": "tests/SPC"
+        }
+    },
     "bin": [
         "bin/spc"
     ],
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",
         "cs-fix": "php-cs-fixer fix",
-        "test": "bin/phpunit --no-coverage"
+        "test": "vendor/bin/phpunit tests/ --no-coverage"
     },
     "config": {
         "allow-plugins": {
