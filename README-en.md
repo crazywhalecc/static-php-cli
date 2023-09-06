@@ -1,15 +1,15 @@
 # static-php-cli
 
-Compile A Statically Linked PHP With Swoole and other Extensions.
+Build single static PHP binary, with PHP project together, with popular extensions included.
 
 Compile a purely static php-cli binary file with various extensions to make PHP applications more portable! (cli SAPI)
 
-<img width="600" alt="截屏2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
+<img width="600" alt="2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
 
 You can also use the micro binary file to combine php binary and php source code into one for distribution!
 This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). (micro SAPI)
 
-<img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
+<img width="600" alt="2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
 
 [![Version](https://img.shields.io/badge/Version-2.0--rc5-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
@@ -194,18 +194,6 @@ Because php-fpm must specify a configuration file before running, the php-fpm co
 
 Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./php-fpm -y php-fpm.conf`.
 
-## Current Status
-
-- [X] Basic CLI framework (by `symfony/console`)
-- [X] Linux support
-- [X] macOS support
-- [X] Exception handler
-- [ ] Windows support
-- [X] PHP 7.4 support
-- [X] fpm support
-
-More functions and features are coming soon, Bugs and TODOs: https://github.com/crazywhalecc/static-php-cli/issues/32
-
 ## Contribution
 
 Currently, there are only a few supported extensions. 
@@ -236,8 +224,9 @@ You can sponsor my project on [this page](https://github.com/crazywhalecc/crazyw
 
 ## Open-Source License
 
-This project is based on the tradition of using the MIT License for old versions, 
-while the new version references source code from some other projects:
+This project itself is based on MIT License, 
+some newly added extensions and dependencies may originate from the following projects (including but not limited to), 
+and the headers of these code files will also be given additional instructions LICENSE and AUTHOR:
 
 - [dixyes/lwmbs](https://github.com/dixyes/lwmbs) (Mulun Permissive License)
 - [swoole/swoole-cli](https://github.com/swoole/swoole-cli) (Apache 2.0 LICENSE+SWOOLE-CLI LICENSE)
@@ -253,4 +242,4 @@ and comply with the corresponding project's LICENSE.
 
 The refactoring branch of this project is written modularly. 
 If you are interested in this project and want to join the development,
-you can refer to the [Contribution Guide](https://static-php-cli.zhamao.me) of the documentation to contribute code or documentation. (TODO)
+you can refer to the [Contribution Guide](https://static-php-cli.zhamao.me) of the documentation to contribute code or documentation.
