@@ -13,15 +13,15 @@
         "ext-mbstring": "*",
         "ext-pcntl": "*",
         "laravel/prompts": "^0.1.3",
-        "symfony/console": "^6 || ^5 || ^4",
+        "symfony/console": "^5.4 || ^6 || ^7",
         "zhamao/logger": "^1.0"
     },
     "require-dev": {
         "captainhook/captainhook": "^5.10",
         "captainhook/plugin-composer": "^5.3",
-        "friendsofphp/php-cs-fixer": "^3.2 != 3.7.0",
-        "nunomaduro/collision": "*",
-        "phpstan/phpstan": "^1.1",
+        "friendsofphp/php-cs-fixer": "^3.25",
+        "nunomaduro/collision": "^7.8",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.3"
     },
     "autoload": {
