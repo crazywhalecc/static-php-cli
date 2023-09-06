@@ -19,7 +19,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 [![](https://img.shields.io/badge/Extension%20Counter-55+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
-> 项目已重命名 `refactor` 分支为 `main` 分支，请依赖的项目注意更改分支名称。
+> 项目名称是 static-php-cli，但其实支持 cli、fpm、micro 和 embed（正在路上）SAPI 😎
 
 ## 编译环境需求
 
