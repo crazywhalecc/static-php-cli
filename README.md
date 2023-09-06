@@ -1,6 +1,6 @@
 # static-php-cli
 
-Compile A Statically Linked PHP With Swoole and other Extensions. 
+Build single static PHP binary, with PHP project together, with popular extensions included.
 
 **If you are using English, see [English README](README-en.md).**
 
@@ -181,18 +181,6 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 指定 `php-fpm.conf` 可以使用命令参数 `-y`，例如：`./php-fpm -y php-fpm.conf`。
 
-## 项目支持情况
-
-- [X] 基础结构编写（采用 `symfony/console`）
-- [X] 错误处理
-- [X] macOS 支持
-- [ ] Windows 支持
-- [X] Linux 支持
-- [X] PHP 7.4 支持
-- [X] fpm 支持
-
-更多功能和特性正在陆续支持中，详见：https://github.com/crazywhalecc/static-php-cli/issues/32
-
 ## 贡献
 
 目前支持的扩展较少，如果缺少你需要的扩展，可发起 Issue。如果你对本项目较熟悉，也欢迎为本项目发起 Pull Request。
@@ -224,4 +212,4 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 ## 进阶
 
-本项目重构分支为模块化编写。如果你对本项目感兴趣，想加入开发，可以参照文档的 [贡献指南](https://static-php-cli.zhamao.me) 贡献代码或文档。（TODO）
+本项目重构分支为模块化编写。如果你对本项目感兴趣，想加入开发，可以参照文档的 [贡献指南](https://static-php-cli.zhamao.me) 贡献代码或文档。
