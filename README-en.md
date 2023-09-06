@@ -2,6 +2,8 @@
 
 Build single static PHP binary, with PHP project together, with popular extensions included.
 
+The project name is static-php-cli, but it actually supports cli, fpm, micro and embed (on the way) SAPI 😎
+
 Compile a purely static php-cli binary file with various extensions to make PHP applications more portable! (cli SAPI)
 
 <img width="600" alt="2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
@@ -18,8 +20,6 @@ This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro
 
 [![](https://img.shields.io/badge/Extension%20Counter-55+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
-
-> The project has renamed the `refactor` branch to the `main` branch, please pay attention to changing the branch name for dependent projects.
 
 ## Compilation Requirements
 
