@@ -1,0 +1,98 @@
+name: Tests
+
+on:
+    push:
+        branches: [ "main" ]
+    pull_request:
+        branches: [ "main" ]
+
+permissions:
+    contents: read
+
+jobs:
+    php-cs-fixer:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.1'
+                  extensions: curl, openssl, mbstring
+                  ini-values: memory_limit=-1
+                  tools: pecl, composer, php-cs-fixer
+
+            - name: Run PHP-CS-Fixer fix
+              run: php-cs-fixer fix --dry-run --diff --ansi
+
+    phpstan:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.1'
+                  extensions: curl, openssl, mbstring
+                  ini-values: memory_limit=-1
+                  tools: composer
+
+            - name: Cache Composer packages
+              id: composer-cache
+              uses: actions/cache@v3
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-phpstan-
+
+            - name: Install Dependencies
+              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+            - name: Run phpstan
+              run: vendor/bin/phpstan analyse
+
+    phpunit:
+        name: PHPUnit (PHP ${{ matrix.php }})
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        strategy:
+            matrix:
+                include:
+                    - php: '8.1'
+                    - php: '8.2'
+            fail-fast: false
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: "${{ matrix.php }}"
+                  tools: pecl, composer
+                  extensions: curl, openssl, mbstring
+                  ini-values: memory_limit=-1
+
+            - name: Cache Composer packages
+              id: composer-cache
+              uses: actions/cache@v3
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-
+
+            - name: Install Dependencies
+              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+            - name: Run PHPUnit tests
+              run: |
+                  vendor/bin/phpunit tests/ --no-coverage
