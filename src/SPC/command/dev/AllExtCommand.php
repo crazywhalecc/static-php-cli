@@ -56,10 +56,14 @@ class AllExtCommand extends BaseCommand
             ];
         }
 
-        $style->table(
-            ['Extension', 'lib-depends', 'lib-suggests', 'ext-depends', 'ext-suggests', 'unix-only'],
-            $data
-        );
+        if ($data === []) {
+            $style->warning('Unknown extension selected: ' . implode(',', $extensions));
+        } else {
+            $style->table(
+                ['Extension', 'lib-depends', 'lib-suggests', 'ext-depends', 'ext-suggests', 'unix-only'],
+                $data
+            );
+        }
 
         return static::SUCCESS;
     }
