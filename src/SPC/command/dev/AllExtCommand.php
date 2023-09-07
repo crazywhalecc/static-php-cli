@@ -6,15 +6,19 @@ namespace SPC\command\dev;
 
 use SPC\command\BaseCommand;
 use SPC\exception\FileSystemException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand('dev:ext-all', 'Dev command', ['list-ext'])]
+#[AsCommand('dev:extensions', 'Helper command that lists available extension details', ['list-ext'])]
 class AllExtCommand extends BaseCommand
 {
     public function configure(): void
     {
-        $this->addOption('line', 'l', null, 'Show with separate lines');
+        $this->addArgument('extensions', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'Extension name', null);
     }
 
     /**
@@ -22,7 +26,41 @@ class AllExtCommand extends BaseCommand
      */
     public function handle(): int
     {
-        $this->output->writeln(implode($this->input->getOption('line') ? PHP_EOL : ',', array_keys(Config::getExts())));
+        $extensions = $this->input->getArgument('extensions') ?: [];
+
+        $style = new SymfonyStyle($this->input, $this->output);
+        $style->writeln($extensions ? 'Available extensions:' : 'Extensions:');
+
+        $data = [];
+        foreach (Config::getExts() as $extension => $details) {
+            if ($extensions !== [] && !\in_array($extension, $extensions, true)) {
+                continue;
+            }
+
+            try {
+                [, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps([$extension]);
+            } catch (WrongUsageException) {
+                $libraries = $not_included = [];
+            }
+
+            $lib_suggests = Config::getExt($extension, 'lib-suggests', []);
+            $ext_suggests = Config::getExt($extension, 'ext-suggests', []);
+
+            $data[] = [
+                $extension,
+                implode(', ', $libraries),
+                implode(', ', $lib_suggests),
+                implode(',', $not_included),
+                implode(', ', $ext_suggests),
+                Config::getExt($extension, 'unix-only', false) ? 'true' : 'false',
+            ];
+        }
+
+        $style->table(
+            ['Extension', 'lib-depends', 'lib-suggests', 'ext-depends', 'ext-suggests', 'unix-only'],
+            $data
+        );
+
         return static::SUCCESS;
     }
 }
