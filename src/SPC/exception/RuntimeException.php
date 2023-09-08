@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace SPC\exception;
 
-class RuntimeException extends \Exception
-{
-}
+class RuntimeException extends \Exception {}

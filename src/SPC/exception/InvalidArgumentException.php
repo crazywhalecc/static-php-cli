@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace SPC\exception;
 
-class InvalidArgumentException extends \Exception
-{
-}
+class InvalidArgumentException extends \Exception {}
