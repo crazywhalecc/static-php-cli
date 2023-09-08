@@ -6,9 +6,7 @@ namespace SPC\doctor;
 
 class CheckResult
 {
-    public function __construct(private readonly bool $ok, private readonly ?string $message = null, private string $fix_item = '', private array $fix_params = [])
-    {
-    }
+    public function __construct(private readonly bool $ok, private readonly ?string $message = null, private string $fix_item = '', private array $fix_params = []) {}
 
     public static function fail(string $message, string $fix_item = '', array $fix_params = []): CheckResult
     {
