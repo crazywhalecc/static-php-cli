@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\doctor\CheckListHandler;
+use SPC\doctor\CheckResult;
+use SPC\exception\RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand('doctor', 'Diagnose whether the current environment can compile normally')]
 class DoctorCommand extends BaseCommand
@@ -18,14 +22,65 @@ class DoctorCommand extends BaseCommand
     public function handle(): int
     {
         try {
-            $checker = new CheckListHandler($this->input, $this->output);
-            $checker->runCheck($this->input->getOption('auto-fix') ? FIX_POLICY_AUTOFIX : FIX_POLICY_PROMPT);
+            $checker = new CheckListHandler();
+
+            $fix_policy = $this->input->getOption('auto-fix') ? FIX_POLICY_AUTOFIX : FIX_POLICY_PROMPT;
+            foreach ($checker->runChecks() as $check) {
+                if ($check->limit_os !== null && $check->limit_os !== PHP_OS_FAMILY) {
+                    continue;
+                }
+
+                $this->output->write('Checking <comment>' . $check->item_name . '</comment> ... ');
+
+                $result = call_user_func($check->callback);
+                if ($result === null) {
+                    $this->output->writeln('skipped');
+                } elseif ($result instanceof CheckResult) {
+                    if ($result->isOK()) {
+                        $this->output->writeln($result->getMessage() ?? 'ok');
+
+                        continue;
+                    }
+
+                    // Failed
+                    $this->output->writeln('<error>' . $result->getMessage() . '</error>');
+                    switch ($fix_policy) {
+                        case FIX_POLICY_DIE:
+                            throw new RuntimeException('Some check items can not be fixed !');
+                        case FIX_POLICY_PROMPT:
+                            if ($result->getFixItem() !== '') {
+                                $helper = new QuestionHelper();
+                                $question = new ConfirmationQuestion('Do you want to fix it? [Y/n] ', true);
+                                if ($helper->ask($this->input, $this->output, $question)) {
+                                    $checker->emitFix($this->output, $result);
+                                } else {
+                                    throw new RuntimeException('You cancelled fix');
+                                }
+                            } else {
+                                throw new RuntimeException('Some check items can not be fixed !');
+                            }
+                            break;
+                        case FIX_POLICY_AUTOFIX:
+                            if ($result->getFixItem() !== '') {
+                                $this->output->writeln('Automatically fixing ' . $result->getFixItem() . ' ...');
+                                $checker->emitFix($this->output, $result);
+                            } else {
+                                throw new RuntimeException('Some check items can not be fixed !');
+                            }
+                            break;
+                    }
+                }
+            }
+
             $this->output->writeln('<info>Doctor check complete !</info>');
         } catch (\Throwable $e) {
             $this->output->writeln('<error>' . $e->getMessage() . '</error>');
+
             pcntl_signal(SIGINT, SIG_IGN);
+
             return static::FAILURE;
         }
+
         return static::SUCCESS;
     }
 }
