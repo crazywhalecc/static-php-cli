@@ -200,7 +200,7 @@ class LinuxBuilder extends BuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                '--enable-micro=all-static ' .
+                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $this->makeExtensionArgs() . ' ' .
                 $envs
             );
