@@ -357,8 +357,9 @@
         }
     },
     "pkg-config": {
-        "type": "url",
-        "url": "https://gitlab.freedesktop.org/pkg-config/pkg-config/-/archive/pkg-config-0.29.2/pkg-config-pkg-config-0.29.2.tar.gz",
+        "type": "filelist",
+        "url": "https://pkgconfig.freedesktop.org/releases/",
+        "regex": "/href=\"(?<file>pkg-config-(?<version>[^\"]+)\\.tar\\.gz)\"/",
         "license": {
             "type": "file",
             "path": "COPYING"
