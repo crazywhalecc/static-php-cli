@@ -20,6 +20,7 @@ class BuildLibsCommand extends BuildCommand
         $this->addArgument('libraries', InputArgument::REQUIRED, 'The libraries will be compiled, comma separated');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Build all libs that static-php-cli needed');
+        $this->addOption('rebuild', 'r', null, 'Delete old build and rebuild');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
