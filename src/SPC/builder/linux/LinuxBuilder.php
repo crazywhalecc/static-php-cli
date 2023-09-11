@@ -319,6 +319,8 @@ class LinuxBuilder extends BuilderBase
 
     public function buildEmbed(string $extra_libs, string $use_lld): void
     {
+        SourcePatcher::patchMicro(['static_opcache']);
+
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
             'EXTRA_LIBS' => $extra_libs,
