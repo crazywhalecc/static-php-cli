@@ -34,7 +34,7 @@ class SortConfigCommand extends BaseCommand
                 $file = json_decode(FileSystem::readFile(ROOT_DIR . '/config/lib.json'), true);
                 ConfigValidator::validateLibs($file);
                 ksort($file);
-                if (!file_put_contents(ROOT_DIR . '/config/lib.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+                if (!file_put_contents(ROOT_DIR . '/config/lib.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n")) {
                     $this->output->writeln('<error>Write file lib.json failed!</error>');
                     return static::FAILURE;
                 }
@@ -43,7 +43,7 @@ class SortConfigCommand extends BaseCommand
                 $file = json_decode(FileSystem::readFile(ROOT_DIR . '/config/source.json'), true);
                 ConfigValidator::validateSource($file);
                 uksort($file, fn ($a, $b) => $a === 'php-src' ? -1 : ($b === 'php-src' ? 1 : ($a < $b ? -1 : 1)));
-                if (!file_put_contents(ROOT_DIR . '/config/source.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+                if (!file_put_contents(ROOT_DIR . '/config/source.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n")) {
                     $this->output->writeln('<error>Write file source.json failed!</error>');
                     return static::FAILURE;
                 }
@@ -52,7 +52,7 @@ class SortConfigCommand extends BaseCommand
                 $file = json_decode(FileSystem::readFile(ROOT_DIR . '/config/ext.json'), true);
                 ConfigValidator::validateExts($file);
                 ksort($file);
-                if (!file_put_contents(ROOT_DIR . '/config/ext.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+                if (!file_put_contents(ROOT_DIR . '/config/ext.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n")) {
                     $this->output->writeln('<error>Write file ext.json failed!</error>');
                     return static::FAILURE;
                 }
