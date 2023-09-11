@@ -56,6 +56,7 @@ const PKGCONF_PATCH_PREFIX = 1;
 const PKGCONF_PATCH_EXEC_PREFIX = 2;
 const PKGCONF_PATCH_LIBDIR = 4;
 const PKGCONF_PATCH_INCLUDEDIR = 8;
-const PKGCONF_PATCH_ALL = 15;
+const PKGCONF_PATCH_CUSTOM = 16;
+const PKGCONF_PATCH_ALL = 31;
 
 ConsoleLogger::$date_format = 'H:i:s';

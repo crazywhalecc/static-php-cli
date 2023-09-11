@@ -66,7 +66,7 @@ trait UnixLibraryTrait
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public function patchPkgconfPrefix(array $files, int $patch_option = PKGCONF_PATCH_ALL): void
+    public function patchPkgconfPrefix(array $files, int $patch_option = PKGCONF_PATCH_ALL, ?array $custom_replace = null): void
     {
         logger()->info('Patching library [' . static::NAME . '] pkgconfig');
         foreach ($files as $name) {
@@ -81,6 +81,7 @@ trait UnixLibraryTrait
             $file = ($patch_option & PKGCONF_PATCH_EXEC_PREFIX) === PKGCONF_PATCH_EXEC_PREFIX ? preg_replace('/^exec_prefix=.*$/m', 'exec_prefix=${prefix}', $file) : $file;
             $file = ($patch_option & PKGCONF_PATCH_LIBDIR) === PKGCONF_PATCH_LIBDIR ? preg_replace('/^libdir=.*$/m', 'libdir=${prefix}/lib', $file) : $file;
             $file = ($patch_option & PKGCONF_PATCH_INCLUDEDIR) === PKGCONF_PATCH_INCLUDEDIR ? preg_replace('/^includedir=.*$/m', 'includedir=${prefix}/include', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_CUSTOM) === PKGCONF_PATCH_CUSTOM && $custom_replace !== null ? preg_replace($custom_replace[0], $custom_replace[1], $file) : $file;
             FileSystem::writeFile($realpath, $file);
         }
     }
