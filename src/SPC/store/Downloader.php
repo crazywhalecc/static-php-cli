@@ -395,7 +395,7 @@ class Downloader
         };
         $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
         $check = !defined('DEBUG_MODE') ? 's' : '#';
-        $cmd = "curl -{$check}fSL -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
+        $cmd = "curl -{$check}fSLk -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
         f_passthru($cmd);
     }
 }
