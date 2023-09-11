@@ -196,7 +196,7 @@ class LinuxBuilder extends BuilderBase
                 '--disable-phpdbg ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
+                ($enableEmbed ? '--enable-embed=static --disable-opcache-jit ' : '--disable-embed ') .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
@@ -319,8 +319,6 @@ class LinuxBuilder extends BuilderBase
 
     public function buildEmbed(string $extra_libs, string $use_lld): void
     {
-        SourcePatcher::patchMicro(['static_opcache']);
-
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
             'EXTRA_LIBS' => $extra_libs,
