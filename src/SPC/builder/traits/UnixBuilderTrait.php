@@ -72,8 +72,10 @@ trait UnixBuilderTrait
                 if ($ret !== 0) {
                     throw new RuntimeException('extension ' . $ext->getName() . ' failed compile check');
                 }
-                if (file_exists(ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php')) {
-                    [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php ' . ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php');
+
+                $tests = $ext->getTests();
+                if ($tests !== []) {
+                    [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . implode('', $tests) . '"');
                     if ($ret !== 0) {
                         throw new RuntimeException('extension ' . $ext->getName() . ' failed sanity check');
                     }

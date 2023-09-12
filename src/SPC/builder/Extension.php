@@ -124,6 +124,14 @@ class Extension
         return $this->name;
     }
 
+    /**
+     * @return string[]
+     */
+    public function getTests(): array
+    {
+        return Config::getExt($this->name, 'test', []);
+    }
+
     public function getWindowsConfigureArg(): string
     {
         return '';

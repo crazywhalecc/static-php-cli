@@ -4,17 +4,30 @@
         "source": "apcu"
     },
     "bcmath": {
-        "type": "builtin"
+        "type": "builtin",
+        "test": [
+            "assert(function_exists('bcscale'));"
+        ]
     },
     "bz2": {
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
             "bzip2"
+        ],
+        "test": [
+            "$str = 'This is bz2 extension test';",
+            "assert(function_exists('bzdecompress'));",
+            "assert(function_exists('bzcompress'));",
+            "assert(bzdecompress(bzcompress($str, 9)) === $str);"
         ]
     },
     "calendar": {
-        "type": "builtin"
+        "type": "builtin",
+        "test": [
+            "assert(function_exists('cal_info'));",
+            "assert(is_array(cal_info(0)));"
+        ]
     },
     "ctype": {
         "type": "builtin"
@@ -24,6 +37,9 @@
         "arg-type": "with",
         "lib-depends": [
             "curl"
+        ],
+        "test": [
+            "assert(function_exists('curl_init'));"
         ]
     },
     "dba": {
@@ -37,6 +53,12 @@
         "lib-depends": [
             "libxml2",
             "zlib"
+        ],
+        "test": [
+            "assert(class_exists('\\DOMDocument'));",
+            "$doc = new DOMDocument();",
+            "$doc->loadHtml('<html><head><meta charset=\"UTF-8\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"></head><body id='app'>Hello</body></html>');",
+            "assert($doc->getElementById('app')->nodeValue === 'Hello');"
         ]
     },
     "event": {
@@ -67,7 +89,10 @@
         "type": "builtin"
     },
     "filter": {
-        "type": "builtin"
+        "type": "builtin",
+        "test": [
+            "assert(function_exists('filter_var'));"
+        ]
     },
     "ftp": {
         "type": "builtin",
@@ -91,6 +116,12 @@
             "libwebp",
             "libjpeg",
             "freetype"
+        ],
+        "test": [
+            "assert(function_exists('gd_info'));",
+            "assert(gd_info()['PNG Support'] ?? false);",
+            "assert(gd_info()['GIF Create Support'] ?? false);",
+            "assert(gd_info()['GIF Read Support'] ?? false);"
         ]
     },
     "gettext": {
@@ -149,6 +180,9 @@
         "cpp-extension": true,
         "lib-depends": [
             "icu"
+        ],
+        "test": [
+            "assert(class_exists(NumberFormatter::class));"
         ]
     },
     "ldap": {
@@ -309,6 +343,9 @@
         "arg-type": "custom",
         "ext-suggests": [
             "session"
+        ],
+        "test": [
+            "assert(class_exists('\\Redis'));"
         ]
     },
     "session": {
@@ -484,6 +521,9 @@
         "arg-type-windows": "enable",
         "lib-depends": [
             "libzip"
+        ],
+        "test": [
+            "assert(class_exists('\\ZipArchive'));"
         ]
     },
     "zlib": {
@@ -492,6 +532,9 @@
         "arg-type-windows": "enable",
         "lib-depends": [
             "zlib"
+        ],
+        "test": [
+            "assert(function_exists('gzcompress'));"
         ]
     },
     "zstd": {
