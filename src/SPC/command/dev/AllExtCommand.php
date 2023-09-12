@@ -19,7 +19,7 @@ class AllExtCommand extends BaseCommand
 {
     public function configure(): void
     {
-        $this->addArgument('extensions', InputArgument::OPTIONAL, 'The extensions will be shown, comma separated');
+        $this->addArgument('extensions', InputArgument::OPTIONAL, 'List of extensions that will be displayed, comma separated');
     }
 
     /**
