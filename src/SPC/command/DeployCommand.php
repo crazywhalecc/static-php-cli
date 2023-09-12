@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
 
-#[AsCommand('deploy', 'Deploy static-php-cli self to an .phar application')]
+#[AsCommand('deploy', 'Deploy static-php-cli self to an .phar application', [], true)]
 class DeployCommand extends BaseCommand
 {
     public function configure(): void
