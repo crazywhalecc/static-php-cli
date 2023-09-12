@@ -1,10 +1,11 @@
 name: Build PHAR
 
-on:
-    push:
-        branches: [ "main" ]
-    pull_request:
-        branches: [ "main" ]
+# Temporary disabled, please follow: https://github.com/crazywhalecc/static-php-cli/issues/179
+#on:
+#    push:
+#        branches: [ "main" ]
+#    pull_request:
+#        branches: [ "main" ]
 
 permissions:
     contents: read
