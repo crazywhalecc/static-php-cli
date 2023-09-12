@@ -20,6 +20,7 @@
         "captainhook/captainhook": "^5.10",
         "captainhook/plugin-composer": "^5.3",
         "friendsofphp/php-cs-fixer": "^3.25",
+        "humbug/box": "^4.3",
         "nunomaduro/collision": "^7.8",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.3"
@@ -44,7 +45,8 @@
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",
         "cs-fix": "php-cs-fixer fix",
-        "test": "vendor/bin/phpunit tests/ --no-coverage"
+        "test": "vendor/bin/phpunit tests/ --no-coverage",
+        "build:phar": "vendor/bin/box compile"
     },
     "config": {
         "allow-plugins": {
