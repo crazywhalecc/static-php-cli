@@ -6,6 +6,7 @@ namespace SPC\command\dev;
 
 use SPC\command\BaseCommand;
 use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\util\DependencyUtil;
@@ -18,15 +19,17 @@ class AllExtCommand extends BaseCommand
 {
     public function configure(): void
     {
-        $this->addArgument('extensions', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'Extension name', null);
+        $this->addArgument('extensions', InputArgument::OPTIONAL, 'The extensions will be shown, comma separated');
     }
 
     /**
      * @throws FileSystemException
+     * @throws WrongUsageException
+     * @throws RuntimeException
      */
     public function handle(): int
     {
-        $extensions = $this->input->getArgument('extensions') ?: [];
+        $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions') ?? '')));
 
         $style = new SymfonyStyle($this->input, $this->output);
         $style->writeln($extensions ? 'Available extensions:' : 'Extensions:');
