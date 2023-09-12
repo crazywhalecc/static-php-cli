@@ -19,7 +19,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 [![](https://img.shields.io/badge/Extension%20Counter-55+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
-> 项目名称是 static-php-cli，但其实支持 cli、fpm、micro 和 embed（正在路上）SAPI 😎
+> 项目名称是 static-php-cli，但其实支持 cli、fpm、micro 和 embed SAPI 😎
 
 ## 编译环境需求
 
@@ -120,6 +120,7 @@ chmod +x bin/spc
 - `--build-cli`：构建 cli 二进制
 - `--build-micro`：构建 phpmicro 自执行二进制
 - `--build-fpm`：构建 fpm
+- `--build-embed`：构建 embed（libphp）
 - `--build-all`：构建所有
 
 如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：
@@ -181,9 +182,15 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 指定 `php-fpm.conf` 可以使用命令参数 `-y`，例如：`./php-fpm -y php-fpm.conf`。
 
+### 使用 php-embed
+
+采用项目参数 `--build-embed` 或 `--build-all` 时，最后编译结果会输出一个 `libphp.a`、`php-config` 以及一系列头文件，存放在 `buildroot/`，你可以在你的其他代码中引入它们。
+
+如果你知道 embed SAPI，你应该知道如何使用它。对于有可能编译用到引入其他库的问题，你可以使用 `buildroot/bin/php-config` 来获取编译时的配置。
+
 ## 贡献
 
-目前支持的扩展较少，如果缺少你需要的扩展，可发起 Issue。如果你对本项目较熟悉，也欢迎为本项目发起 Pull Request。
+如果缺少你需要的扩展，可发起 Issue。如果你对本项目较熟悉，也欢迎为本项目发起 Pull Request。
 
 贡献基本原则如下：
 
@@ -202,7 +209,7 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 ## 开源协议
 
-本项目依据旧版本惯例采用 MIT License 开源，自身的部分代码引用或修改自以下项目：
+本项目依据旧版本惯例采用 MIT License 开源，部分扩展的集成编译命令参考或修改自以下项目：
 
 - [dixyes/lwmbs](https://github.com/dixyes/lwmbs)（木兰宽松许可证）
 - [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE、SWOOLE-CLI LICENSE）

@@ -2,7 +2,7 @@
 
 Build single static PHP binary, with PHP project together, with popular extensions included.
 
-The project name is static-php-cli, but it actually supports cli, fpm, micro and embed (on the way) SAPI 😎
+The project name is static-php-cli, but it actually supports cli, fpm, micro and embed SAPI 😎
 
 Compile a purely static php-cli binary file with various extensions to make PHP applications more portable! (cli SAPI)
 
@@ -126,6 +126,7 @@ Now we support `cli`, `micro`, `fpm`, you can use one or more of the following p
 - `--build-cli`: build static cli executable
 - `--build-micro`: build static phpmicro self-extracted executable
 - `--build-fpm`: build static fpm binary
+- `--build-embed`: build embed (libphp)
 - `--build-all`: build all
 
 If anything goes wrong, use `--debug` option to display full terminal output:
@@ -194,9 +195,18 @@ Because php-fpm must specify a configuration file before running, the php-fpm co
 
 Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./php-fpm -y php-fpm.conf`.
 
+### Embed Usage
+
+When using the project parameters `--build-embed` or `--build-all`, 
+the final compilation result will output a `libphp.a`, `php-config` and a series of header files, 
+stored in `buildroot/`, You can introduce them in your other projects.
+
+If you know embed SAPI, you should know how to use it. 
+You may require the introduction of other libraries during compilation, 
+you can use `buildroot/bin/php-config` to obtain the compile-time configuration.
+
 ## Contribution
 
-Currently, there are only a few supported extensions. 
 If the extension you need is missing, you can create an issue. 
 If you are familiar with this project, you are also welcome to initiate a pull request.
 
