@@ -9,7 +9,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand('dev:php-ver', 'Dev command')]
+#[AsCommand('dev:php-version', 'Returns version of PHP located source directory', ['dev:php-ver'])]
 class PhpVerCommand extends BaseCommand
 {
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -22,11 +22,19 @@ class PhpVerCommand extends BaseCommand
     {
         // Find php from source/php-src
         $file = SOURCE_PATH . '/php-src/main/php_version.h';
+        if (!file_exists($file)) {
+            $this->output->writeln('<error>PHP source not found, maybe you need to extract first ?</error>');
+
+            return static::FAILURE;
+        }
+
         $result = preg_match('/#define PHP_VERSION "([^"]+)"/', file_get_contents($file), $match);
         if ($result === false) {
             $this->output->writeln('<error>PHP source not found, maybe you need to extract first ?</error>');
+
             return static::FAILURE;
         }
+
         $this->output->writeln('<info>' . $match[1] . '</info>');
         return static::SUCCESS;
     }
