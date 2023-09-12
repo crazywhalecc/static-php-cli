@@ -1,0 +1,10 @@
+{
+  "alias": "spc-php.phar",
+  "banner": false,
+  "blacklist": [
+    ".github",
+    "tests"
+  ],
+  "git-commit-short": "git_commit_short",
+  "output": "spc.phar"
+}
