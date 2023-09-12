@@ -2,8 +2,15 @@
   "alias": "spc-php.phar",
   "banner": false,
   "blacklist": [
-    ".github",
-    "tests"
+    ".github"
+  ],
+  "directories": [
+    "config",
+    "src",
+    "vendor/psr",
+    "vendor/laravel/prompts",
+    "vendor/symfony",
+    "vendor/zhamao"
   ],
   "git-commit-short": "git_commit_short",
   "output": "spc.phar"
