@@ -199,11 +199,13 @@ Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./ph
 
 When using the project parameters `--build-embed` or `--build-all`, 
 the final compilation result will output a `libphp.a`, `php-config` and a series of header files, 
-stored in `buildroot/`, You can introduce them in your other projects.
+stored in `buildroot/`. You can introduce them in your other projects.
 
-If you know embed SAPI, you should know how to use it. 
+If you know [embed SAPI](https://github.com/php/php-src/tree/master/sapi/embed), you should know how to use it. 
 You may require the introduction of other libraries during compilation, 
 you can use `buildroot/bin/php-config` to obtain the compile-time configuration.
+
+For an advanced example of how to use this feature, take a look at [how to use it to build a static version of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/static.md).
 
 ## Contribution
 
