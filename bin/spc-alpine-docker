@@ -95,8 +95,9 @@ RUN apk update; \
 WORKDIR /app
 ADD ./src /app/src
 ADD ./composer.json /app/composer.json
+ADD ./composer.lock /app/composer.lock
 ADD ./bin /app/bin
-RUN composer update --no-dev --classmap-authoritative
+RUN composer install --no-dev --classmap-authoritative
 EOF
 fi
 

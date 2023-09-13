@@ -4,8 +4,7 @@ docker/libraries/
 docker/extensions/
 docker/source/
 
-# Composer file
-composer.lock
+# Vendor files
 /vendor/
 
 # default source extract directory
