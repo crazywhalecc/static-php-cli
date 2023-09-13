@@ -186,7 +186,9 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 采用项目参数 `--build-embed` 或 `--build-all` 时，最后编译结果会输出一个 `libphp.a`、`php-config` 以及一系列头文件，存放在 `buildroot/`，你可以在你的其他代码中引入它们。
 
-如果你知道 embed SAPI，你应该知道如何使用它。对于有可能编译用到引入其他库的问题，你可以使用 `buildroot/bin/php-config` 来获取编译时的配置。
+如果你知道 [embed SAPI](https://github.com/php/php-src/tree/master/sapi/embed)，你应该知道如何使用它。对于有可能编译用到引入其他库的问题，你可以使用 `buildroot/bin/php-config` 来获取编译时的配置。
+
+另外，有关如何使用此功能的高级示例，请查看[如何使用它构建 FrankenPHP 的静态版本](https://github.com/dunglas/frankenphp/blob/main/docs/static.md)。
 
 ## 贡献
 
