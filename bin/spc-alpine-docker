@@ -81,6 +81,7 @@ RUN apk update; \
         php82-pcntl \
         php82-phar \
         php82-posix \
+        php82-sodium \
         php82-tokenizer \
         php82-dom \
         php82-xml \
@@ -88,8 +89,9 @@ RUN apk update; \
         composer \
         pkgconfig \
         wget \
-        xz
-RUN ln -s /usr/bin/php82 /usr/bin/php
+        xz ; \
+  ln -s /usr/bin/php82 /usr/bin/php
+
 WORKDIR /app
 ADD ./src /app/src
 ADD ./composer.json /app/composer.json
