@@ -1,0 +1,96 @@
+name: Build Release Artifacts
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  build-release-artifacts:
+    name: "Build Release Artifacts"
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "8.1"
+        operating-system:
+          - "ubuntu-latest"
+          - "macos-latest"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: none
+          tools: composer:v2
+          php-version: "${{ matrix.php-version }}"
+          ini-values: memory_limit=-1
+
+      - name: "Get Composer Cache Directory"
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: "Cache Composer dependencies"
+        uses: "actions/cache@v3"
+        with:
+          path: "${{ steps.composer-cache.outputs.dir }}"
+          key: "php-${{ matrix.php-version }}-locked-composer-${{ hashFiles('**/composer.lock') }}"
+          restore-keys: |
+            php-${{ matrix.php-version }}-locked-composer-
+      - name: "Install locked dependencies"
+        run: "composer install --no-interaction --no-progress"
+
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v3
+        with:
+          path: downloads
+          key: php-${{ matrix.php-version }}-dependencies
+
+      # If there's no dependencies cache, fetch sources
+      - if: steps.cache-download.outputs.cache-hit != 'true'
+        name: "Download sources"
+        run: bin/spc download --with-php=${{ matrix.php-version }} --all
+
+      - name: "Build phpmicro"
+        run: |
+          SPC_USE_SUDO=yes bin/spc doctor --auto-fix
+          bin/spc build pcntl,posix,mbstring,tokenizer,phar --build-micro --debug
+
+      - name: "Build PHAR file"
+        run: "composer build:phar"
+
+      - name: "Generate Executable"
+        run: "bin/spc micro:combine spc.phar -O spc"
+
+      - name: "Archive Executable"
+        run: |
+          OS=""
+          if [ "${{ matrix.operating-system }}" = "ubuntu-latest" ]; then
+              OS="linux-x86_64"
+          elif [ "${{ matrix.operating-system }}" = "macos-latest" ]; then
+              OS="macos-x86_64"
+          fi
+          tar -czf spc-$OS.tar.gz spc
+          echo "filename=spc-$OS.tar.gz" >> $GITHUB_ENV
+          echo "OS=$OS" >> $GITHUB_ENV
+
+      - name: "Test Micro file"
+        run: "./spc dev:extensions"
+
+      - name: upload binaries to release
+        uses: softprops/action-gh-release@v1
+        if: ${{startsWith(github.ref, 'refs/tags/') }}
+        with:
+          files: ${{ env.filename }}
+
+      - name: "Upload Artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          path: spc
+          name: spc-${{ env.OS }}
