@@ -6,7 +6,6 @@ namespace SPC;
 
 use SPC\command\BuildCliCommand;
 use SPC\command\BuildLibsCommand;
-use SPC\command\DeployCommand;
 use SPC\command\dev\AllExtCommand;
 use SPC\command\dev\PhpVerCommand;
 use SPC\command\dev\SortConfigCommand;
@@ -39,7 +38,6 @@ final class ConsoleApplication extends Application
             [
                 new BuildCliCommand(),
                 new BuildLibsCommand(),
-                new DeployCommand(),
                 new DoctorCommand(),
                 new DownloadCommand(),
                 new DumpLicenseCommand(),
