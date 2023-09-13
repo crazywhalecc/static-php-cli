@@ -66,14 +66,23 @@ trait UnixBuilderTrait
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new RuntimeException('cli failed sanity check');
             }
+
             foreach ($this->exts as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
                 [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $ext->getDistName() . '"', false);
                 if ($ret !== 0) {
                     throw new RuntimeException('extension ' . $ext->getName() . ' failed compile check');
                 }
+
                 if (file_exists(ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php')) {
-                    [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php ' . ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php');
+                    // Trim additional content & escape special characters to allow inline usage
+                    $test = str_replace(
+                        ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
+                        ['', '', '', '\"', '\$'],
+                        file_get_contents(ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php')
+                    );
+
+                    [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
                     if ($ret !== 0) {
                         throw new RuntimeException('extension ' . $ext->getName() . ' failed sanity check');
                     }
