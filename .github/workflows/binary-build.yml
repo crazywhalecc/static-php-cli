@@ -1,0 +1,92 @@
+name: Build binary SPC
+
+on:
+    push:
+        branches: [ "main" ]
+    pull_request:
+        branches: [ "main" ]
+
+permissions:
+    contents: read
+
+jobs:
+    build-phar:
+        name: "Build PHAR"
+
+        runs-on: ${{ matrix.operating-system }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                dependencies:
+                    - "locked"
+                php-version:
+                    - "8.1"
+                operating-system:
+                    - "ubuntu-latest"
+                    - "macos-latest"
+
+        steps:
+            - name: "Checkout"
+              uses: "actions/checkout@v4"
+
+            - name: "Install PHP"
+              uses: "shivammathur/setup-php@v2"
+              with:
+                  coverage: none
+                  tools: composer:v2
+                  php-version: "${{ matrix.php-version }}"
+                  ini-values: memory_limit=-1
+
+            - name: "Get Composer Cache Directory"
+              id: composer-cache
+              run: |
+                  echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+            - name: "Cache Composer dependencies"
+              uses: "actions/cache@v3"
+              with:
+                  path: "${{ steps.composer-cache.outputs.dir }}"
+                  key: "php-${{ matrix.php-version }}-locked-composer-${{ hashFiles('**/composer.lock') }}"
+                  restore-keys: |
+                      php-${{ matrix.php-version }}-locked-composer-
+
+            - name: "Install locked dependencies"
+              run: "composer install --no-interaction --no-progress"
+
+            - name: "Cache SPC source & binary files"
+              uses: "actions/cache@v3"
+              with:
+                  path: "download"
+                  key: "spc-${{ matrix.php-version }}-download-files-${{ github.run_id }}"
+                  restore-keys: |
+                      spc-${{ matrix.php-version }}-download-files-
+
+            - if: matrix.operating-system != 'macos-latest'
+              name: "Install SPC source files"
+              run: CACHE_API_EXEC=yes ./bin/spc-alpine-docker download --with-php=${{ matrix.php-version }} --all
+
+            - if: matrix.operating-system != 'macos-latest'
+              name: "Build micro PHP binary for SPC"
+              run: ./bin/spc-alpine-docker build pcntl,posix,mbstring,tokenizer,phar --build-micro
+
+            - if: matrix.operating-system == 'macos-latest'
+              name: "Install SPC source files"
+              run: "bin/spc download --all"
+
+            - if: matrix.operating-system == 'macos-latest'
+              name: "Build micro PHP binary for SPC"
+              run: "bin/spc build pcntl,posix,mbstring,tokenizer,phar --build-micro"
+
+            - name: "Build PHAR file"
+              run: "vendor/bin/box compile"
+
+            - name: "Combine PHAR & micro binary"
+              run: "bin/spc micro:combine spc.phar -O spc-${{ matrix.operating-system }}-x86_64"
+
+            - name: "Compress binary"
+              run: tar -czvf spc-${{ matrix.operating-system }}-x86_64.tar.gz
+
+            - uses: actions/upload-artifact@v3
+              with:
+                  path: spc-${{ matrix.operating-system }}-x86_64.tar.gz
