@@ -92,8 +92,7 @@ RUN apk update; \
 RUN ln -s /usr/bin/php82 /usr/bin/php
 WORKDIR /app
 ADD ./src /app/src
-ADD ./composer.json /app/composer.json
-ADD ./composer.lock /app/composer.lock
+COPY ./composer.* /app/
 ADD ./bin /app/bin
 RUN composer install --no-dev --classmap-authoritative
 EOF
