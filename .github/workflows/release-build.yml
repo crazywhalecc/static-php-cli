@@ -60,7 +60,7 @@ jobs:
       - name: "Build phpmicro"
         run: |
           SPC_USE_SUDO=yes bin/spc doctor --auto-fix
-          bin/spc build pcntl,posix,mbstring,tokenizer,phar --build-micro --debug
+          bin/spc build pcntl,posix,mbstring,tokenizer,phar --build-micro
 
       - name: "Build PHAR file"
         run: "composer build:phar"
