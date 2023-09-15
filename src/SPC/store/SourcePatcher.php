@@ -158,6 +158,8 @@ class SourcePatcher
         $cli_c_bak = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c.bak';
         $micro_c = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c';
         $micro_c_bak = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c.bak';
+        $embed_c = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c';
+        $embed_c_bak = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c.bak';
 
         // Try to reverse backup file
         $find_str = 'const char HARDCODED_INI[] =';
@@ -168,13 +170,14 @@ class SourcePatcher
         $patch_str = "const char HARDCODED_INI[] =\n{$patch_str}";
 
         // Detect backup, if we have backup, it means we need to reverse first
-        if (file_exists($cli_c_bak) || file_exists($micro_c_bak)) {
+        if (file_exists($cli_c_bak) || file_exists($micro_c_bak) || file_exists($embed_c_bak)) {
             self::unpatchHardcodedINI();
         }
 
         // Backup it
         $result = file_put_contents($cli_c_bak, file_get_contents($cli_c));
         $result = $result && file_put_contents($micro_c_bak, file_get_contents($micro_c));
+        $result = $result && file_put_contents($embed_c_bak, file_get_contents($embed_c));
         if ($result === false) {
             return false;
         }
@@ -182,6 +185,7 @@ class SourcePatcher
         // Patch it
         FileSystem::replaceFileStr($cli_c, $find_str, $patch_str);
         FileSystem::replaceFileStr($micro_c, $find_str, $patch_str);
+        FileSystem::replaceFileStr($embed_c, $find_str, $patch_str);
         return true;
     }
 
@@ -191,13 +195,17 @@ class SourcePatcher
         $cli_c_bak = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c.bak';
         $micro_c = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c';
         $micro_c_bak = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c.bak';
-        if (!file_exists($cli_c_bak) && !file_exists($micro_c_bak)) {
+        $embed_c = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c';
+        $embed_c_bak = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c.bak';
+        if (!file_exists($cli_c_bak) && !file_exists($micro_c_bak) && !file_exists($embed_c_bak)) {
             return false;
         }
         $result = file_put_contents($cli_c, file_get_contents($cli_c_bak));
         $result = $result && file_put_contents($micro_c, file_get_contents($micro_c_bak));
+        $result = $result && file_put_contents($embed_c, file_get_contents($embed_c_bak));
         @unlink($cli_c_bak);
         @unlink($micro_c_bak);
+        @unlink($embed_c_bak);
         return $result;
     }
 }
