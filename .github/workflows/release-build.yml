@@ -45,17 +45,8 @@ jobs:
       - name: "Install locked dependencies"
         run: "composer install --no-interaction --no-progress"
 
-      # Cache downloaded source
-      - id: cache-download
-        uses: actions/cache@v3
-        with:
-          path: downloads
-          key: php-${{ matrix.php-version }}-dependencies
-
-      # If there's no dependencies cache, fetch sources
-      - if: steps.cache-download.outputs.cache-hit != 'true'
-        name: "Download sources"
-        run: bin/spc download --with-php=${{ matrix.php-version }} --all
+      - name: "Download sources"
+        run: bin/spc download --with-php=${{ matrix.php-version }} php-src,micro,pkg-config,onig,zlib
 
       - name: "Build phpmicro"
         run: |
