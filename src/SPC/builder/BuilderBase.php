@@ -53,7 +53,7 @@ abstract class BuilderBase
         }
 
         // if no libs specified, compile all supported libs
-        if ($libraries === [] && $this->isLibsOnly()) {
+        if ($libraries === [] && $this->libs_only) {
             $libraries = array_keys($support_lib_list);
         }
 
@@ -215,14 +215,6 @@ abstract class BuilderBase
         }
         logger()->info('Using configure: ' . implode(' ', $ret));
         return implode(' ', $ret);
-    }
-
-    /**
-     * Get libs only mode.
-     */
-    public function isLibsOnly(): bool
-    {
-        return $this->libs_only;
     }
 
     /**
