@@ -21,6 +21,7 @@ class BuildLibsCommand extends BuildCommand
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Build all libs that static-php-cli needed');
         $this->addOption('rebuild', 'r', null, 'Delete old build and rebuild');
+        $this->addOption('include-suggested', 'I', null, 'Build all library dependencies along with suggested ones');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -60,7 +61,7 @@ class BuildLibsCommand extends BuildCommand
             // 只编译 library 的情况下，标记
             $builder->setLibsOnly();
             // 编译和检查库完整
-            $builder->buildLibs($libraries);
+            $builder->buildLibs($libraries, $this->getOption('include-suggested'));
 
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build libs complete, used ' . $time . ' s !');

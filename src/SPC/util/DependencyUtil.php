@@ -71,7 +71,7 @@ class DependencyUtil
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function getLibsByDeps(array $libs): array
+    public static function getLibsByDeps(array $libs, bool $includeSuggested = false): array
     {
         $sorted = [];
         $visited = [];
@@ -92,7 +92,7 @@ class DependencyUtil
             }
         }
         foreach ($sorted_suggests as $suggest) {
-            if (in_array($suggest, $sorted)) {
+            if (in_array($suggest, $sorted, true) || $includeSuggested) {
                 $final[] = $suggest;
             }
         }

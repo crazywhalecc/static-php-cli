@@ -38,7 +38,7 @@ abstract class BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function buildLibs(array $libraries): void
+    public function buildLibs(array $libraries, bool $includeSuggested = false): void
     {
         // search all supported libs
         $support_lib_list = [];
@@ -63,7 +63,7 @@ abstract class BuilderBase
         }
 
         // append dependencies
-        $libraries = DependencyUtil::getLibsByDeps($libraries);
+        $libraries = DependencyUtil::getLibsByDeps($libraries, $includeSuggested);
 
         // add lib object for builder
         foreach ($libraries as $library) {

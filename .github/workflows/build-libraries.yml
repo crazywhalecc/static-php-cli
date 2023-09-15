@@ -112,7 +112,7 @@ jobs:
             - name: "Build library: ${{ matrix.library }}"
               run: |
                   SPC_USE_SUDO=yes bin/spc doctor --auto-fix
-                  bin/spc build:libs ${{ matrix.library }}
+                  bin/spc build:libs ${{ matrix.library }} --include-suggested
 
             - name: Upload binaries to release
               uses: softprops/action-gh-release@v1
