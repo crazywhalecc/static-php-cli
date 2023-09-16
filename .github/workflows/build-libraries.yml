@@ -62,31 +62,6 @@ jobs:
             - name: "Checkout"
               uses: "actions/checkout@v4"
 
-            - name: "Install PHP"
-              uses: "shivammathur/setup-php@v2"
-              with:
-                  coverage: none
-                  tools: composer:v2
-                  php-version: "${{ matrix.php-version }}"
-                  ini-values: memory_limit=-1
-
-            - name: "Get Composer Cache Directory"
-              id: composer-cache
-              run: |
-                  echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-            - name: "Cache Composer dependencies"
-              uses: "actions/cache@v3"
-              with:
-                  path: "${{ steps.composer-cache.outputs.dir }}"
-                  key: "php-${{ matrix.php-version }}-locked-composer-${{ hashFiles('**/composer.lock') }}"
-                  restore-keys: |
-                      php-${{ matrix.php-version }}-locked-composer-
-
-            - name: "Install locked dependencies"
-              run: "composer install --no-interaction --no-progress"
-
-            # Cache downloaded source
             - name: OS type
               id: os-type
               run: |
@@ -98,6 +73,19 @@ jobs:
                   fi
                   echo "OS=$OS" >> $GITHUB_ENV
 
+            - name: Download SPC bin artifact
+              id: download-spc-artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  branch: main
+                  workflow: release-build.yml
+                  name: "spc-${{ env.OS }}"
+
+            - name: Validate SPC bin
+              run: |
+                  chmod +x spc
+                  ./spc --version
+
             - id: cache-download
               uses: actions/cache@v3
               with:
@@ -107,18 +95,12 @@ jobs:
             # If there's no dependencies cache, fetch sources
             - if: steps.cache-download.outputs.cache-hit != 'true'
               name: "Download sources"
-              run: bin/spc download --with-php=${{ matrix.php-version }} --all
+              run: ./spc download --with-php=${{ matrix.php-version }} --all
 
             - name: "Build library: ${{ matrix.library }}"
               run: |
-                  SPC_USE_SUDO=yes bin/spc doctor --auto-fix
-                  bin/spc build:libs ${{ matrix.library }} --include-suggested
-
-            - name: Upload binaries to release
-              uses: softprops/action-gh-release@v1
-              if: ${{startsWith(github.ref, 'refs/tags/') }}
-              with:
-                  files: ${{ env.filename }}
+                  SPC_USE_SUDO=yes ./spc doctor --auto-fix
+                  ./spc build:libs ${{ matrix.library }} --include-suggested
 
             - name: "Upload Artifact"
               uses: actions/upload-artifact@v3
