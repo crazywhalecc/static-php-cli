@@ -27,7 +27,7 @@ jobs:
 
       # If there's no Composer cache, install dependencies
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
-        run: composer update --no-dev
+        run: composer install --no-dev
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
