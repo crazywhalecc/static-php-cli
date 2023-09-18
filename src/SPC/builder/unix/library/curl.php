@@ -39,8 +39,8 @@ trait curl
         } else {
             $extra .= '-DUSE_NGHTTP2=OFF ';
         }
-        // TODO: ldap is not supported yet
-        $extra .= '-DCURL_DISABLE_LDAP=ON ';
+        // lib:ldap
+        $extra .= $this->builder->getLib('ldap') ? '-DCURL_DISABLE_LDAP=OFF ' : '-DCURL_DISABLE_LDAP=ON ';
         // lib:zstd
         $extra .= $this->builder->getLib('zstd') ? '-DCURL_ZSTD=ON ' : '-DCURL_ZSTD=OFF ';
         // lib:idn2

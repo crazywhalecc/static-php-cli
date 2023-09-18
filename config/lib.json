@@ -139,6 +139,13 @@
             "libxml2"
         ]
     },
+    "ldap": {
+        "source": "ldap",
+        "static-libs-unix": [
+            "liblber.a",
+            "libldap.a"
+        ]
+    },
     "libavif": {
         "source": "libavif",
         "static-libs-unix": [
