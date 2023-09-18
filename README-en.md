@@ -214,7 +214,7 @@ If you are familiar with this project, you are also welcome to initiate a pull r
 
 The basic principles for contributing are as follows:
 
-- This project uses php-cs-fixer and phpstan as code formatting tools. Before contributing, please run `composer analyze` and `composer cs-fix` on the updated code.
+- This project uses php-cs-fixer and phpstan as code formatting tools. Before contributing, please run `composer analyse` and `composer cs-fix` on the updated code.
 - If other open source libraries are involved, the corresponding licenses should be provided. 
     Also, configuration files should be sorted using the command `sort-config` after modification.
     For more information about sorting commands, see the documentation.
