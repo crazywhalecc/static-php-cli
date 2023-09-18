@@ -16,7 +16,7 @@ class LinuxToolCheckList
     use UnixSystemUtilTrait;
 
     public const TOOLS_ALPINE = [
-        'perl', 'make', 'bison', 'flex',
+        'make', 'bison', 'flex',
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
@@ -24,9 +24,17 @@ class LinuxToolCheckList
     ];
 
     public const TOOLS_DEBIAN = [
-        'perl', 'make', 'bison', 'flex',
+        'make', 'bison', 'flex',
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
+        'bzip2', 'cmake', 'patch',
+        'xz',
+    ];
+
+    public const TOOLS_RHEL = [
+        'perl', 'make', 'bison', 'flex',
+        'git', 'autoconf', 'automake',
+        'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch',
         'xz',
     ];
@@ -39,6 +47,8 @@ class LinuxToolCheckList
 
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
+            'almalinux' => self::TOOLS_RHEL,
+            'rhel' => self::TOOLS_RHEL,
             default => self::TOOLS_DEBIAN,
         };
         $missing = [];

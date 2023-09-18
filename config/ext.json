@@ -153,9 +153,15 @@
     },
     "ldap": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "ldap"
+        ],
+        "lib-suggests": [
+            "openssl"
+        ],
+        "ext-suggests": [
+            "openssl"
         ]
     },
     "mbregex": {

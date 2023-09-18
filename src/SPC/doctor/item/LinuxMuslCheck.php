@@ -36,11 +36,18 @@ class LinuxMuslCheck
     #[AsFixItem('fix-musl')]
     public function fixMusl(array $distro): bool
     {
+        $rhel_install = 'dnf install tar wget git zip bison flex bzip2 cmake patch && \
+                         wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && \
+                         rm -f musl-1.2.4.tar.gz && cd musl-1.2.4 && 
+                         if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then export PATH="/usr/local/musl/bin:$PATH"
+                         fi && \
+                         ./configure --disable-shared --enable-wrapper=gcc && \
+                         make -j && make install && cd ..';
         $install_cmd = match ($distro['dist']) {
             'ubuntu', 'debian' => 'apt-get install musl musl-tools -y',
             'alpine' => 'apk add musl musl-utils musl-dev',
-            'rhel' => 'dnf install tar wget git zip bison flex bzip2 cmake patch && wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && rm musl-1.2.4.tar.gz && cd musl-1.2.4 && ./configure && make -j && make install && cd ..',
-            'almalinux' => 'dnf install bison flex bzip2 cmake patch && wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && rm musl-1.2.4.tar.gz && cd musl-1.2.4 && ./configure && make -j && make install && export PATH="/usr/local/musl/bin:$PATH" cd ..',
+            'rhel' => $rhel_install,
+            'almalinux' => $rhel_install,
             default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';
