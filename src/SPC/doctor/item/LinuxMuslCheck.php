@@ -24,7 +24,7 @@ class LinuxMuslCheck
         // non-exist, need to recognize distro
         $distro = SystemUtil::getOSRelease();
         return match ($distro['dist']) {
-            'ubuntu', 'alpine', 'debian' => CheckResult::fail('musl-libc is not installed on your system', 'fix-musl', [$distro]),
+            'ubuntu', 'alpine', 'debian', 'rhel', 'almalinux' => CheckResult::fail('musl-libc is not installed on your system', 'fix-musl', [$distro]),
             default => CheckResult::fail('musl-libc is not installed on your system'),
         };
     }
@@ -39,7 +39,9 @@ class LinuxMuslCheck
         $install_cmd = match ($distro['dist']) {
             'ubuntu', 'debian' => 'apt-get install musl musl-tools -y',
             'alpine' => 'apk add musl musl-utils musl-dev',
-            default => throw new RuntimeException('Current linux distro is not supported for auto-install musl packages'),
+            'rhel' => 'dnf install tar wget git zip bison flex bzip2 cmake patch && wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && rm musl-1.2.4.tar.gz && cd musl-1.2.4 && ./configure && make -j && make install && cd ..',
+            'almalinux' => 'dnf install bison flex bzip2 cmake patch && wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && rm musl-1.2.4.tar.gz && cd musl-1.2.4 && ./configure && make -j && make install && export PATH="/usr/local/musl/bin:$PATH" cd ..',
+            default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';
         if (get_current_user() !== 'root') {
