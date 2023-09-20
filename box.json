@@ -1,5 +1,5 @@
 {
-  "alias": "spc-php.phar",
+  "alias": "spc.phar",
   "banner": false,
   "blacklist": [
     ".github"
@@ -11,6 +11,9 @@
     "vendor/laravel/prompts",
     "vendor/symfony",
     "vendor/zhamao"
+  ],
+  "files-bin": [
+    "bin/spc-alpine-docker"
   ],
   "git-commit-short": "git_commit_short",
   "metadata": "ConsoleApplication::VERSION",
