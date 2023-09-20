@@ -7,6 +7,7 @@ if ! which docker >/dev/null; then
   echo "Docker is not installed, please install docker first !"
   exit 1
 fi
+
 DOCKER_EXECUTABLE="docker"
 # shellcheck disable=SC2046
 if [ $(id -u) -ne 0 ]; then
@@ -20,8 +21,6 @@ if [ $(id -u) -ne 0 ]; then
         DOCKER_EXECUTABLE="sudo docker"
     fi
 fi
-
-
 
 # to check if qemu-docker run
 if [ "$SPC_USE_ARCH" = "" ]; then
@@ -86,17 +85,17 @@ RUN apk update; \
         php82-dom \
         php82-xml \
         php82-xmlwriter \
-        composer \
         pkgconfig \
         wget \
         xz ; \
   ln -s /usr/bin/php82 /usr/bin/php
 
 WORKDIR /app
-ADD ./src /app/src
-COPY ./composer.* /app/
-ADD ./bin /app/bin
-RUN composer install --no-dev --classmap-authoritative
+# Using workaround for link to get GH action artifacts
+RUN wget https://nightly.link/crazywhalecc/static-php-cli/actions/runs/6206145910/spc-linux-x86_64.zip \
+  && unzip ./spc-linux-x86_64.zip \
+  && rm spc-linux-x86_64.zip
+RUN chmod +x ./spc
 EOF
 fi
 
@@ -109,4 +108,4 @@ fi
 
 # Run docker
 # shellcheck disable=SC2068
-$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" -v "$(pwd)"/config:/app/config -v "$(pwd)"/src:/app/src -v "$(pwd)"/buildroot:/app/buildroot -v "$(pwd)"/source:/app/source -v "$(pwd)"/downloads:/app/downloads cwcc-spc-$SPC_USE_ARCH bin/spc $@
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" -v "$(pwd)"/buildroot:/app/buildroot -v "$(pwd)"/source:/app/source -v "$(pwd)"/downloads:/app/downloads cwcc-spc-$SPC_USE_ARCH /app/spc $@
