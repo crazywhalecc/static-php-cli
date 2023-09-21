@@ -46,7 +46,6 @@
         "type": "filelist",
         "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
         "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
-        "path": "php-src/ext/ldap",
         "license": {
             "type": "file",
             "path": "LICENSE"
