@@ -59,4 +59,11 @@ const PKGCONF_PATCH_INCLUDEDIR = 8;
 const PKGCONF_PATCH_CUSTOM = 16;
 const PKGCONF_PATCH_ALL = 31;
 
+// autoconf flags
+const AUTOCONF_LIBS = 1;
+const AUTOCONF_CFLAGS = 2;
+const AUTOCONF_CPPFLAGS = 4;
+const AUTOCONF_LDFLAGS = 8;
+const AUTOCONF_ALL = 15;
+
 ConsoleLogger::$date_format = 'H:i:s';
