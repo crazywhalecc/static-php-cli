@@ -229,10 +229,6 @@ class LinuxBuilder extends BuilderBase
         if (php_uname('m') === $this->getOption('arch')) {
             $this->sanityCheck($build_target);
         }
-
-        if ($this->phar_patched) {
-            SourcePatcher::patchMicro(['phar'], true);
-        }
     }
 
     /**
@@ -290,6 +286,10 @@ class LinuxBuilder extends BuilderBase
         }
 
         $this->deployBinary(BUILD_TARGET_MICRO);
+
+        if ($this->phar_patched) {
+            SourcePatcher::patchMicro(['phar'], true);
+        }
     }
 
     /**
