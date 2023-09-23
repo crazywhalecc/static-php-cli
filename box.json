@@ -12,6 +12,9 @@
     "vendor/symfony",
     "vendor/zhamao"
   ],
+  "files": [
+    "bin/spc-alpine-docker"
+  ],
   "git-commit-short": "git_commit_short",
   "metadata": "ConsoleApplication::VERSION",
   "output": "spc.phar"

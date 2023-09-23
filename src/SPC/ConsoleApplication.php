@@ -12,6 +12,7 @@ use SPC\command\dev\SortConfigCommand;
 use SPC\command\DoctorCommand;
 use SPC\command\DownloadCommand;
 use SPC\command\DumpLicenseCommand;
+use SPC\command\ExportDockerShCommand;
 use SPC\command\ExtractCommand;
 use SPC\command\MicroCombineCommand;
 use Symfony\Component\Console\Application;
@@ -27,7 +28,8 @@ final class ConsoleApplication extends Application
 
     public function __construct()
     {
-        parent::__construct('static-php-cli', self::VERSION);
+        $name = !empty(getenv('SPC_FIX_DEPLOY_ROOT')) ? 'static-php-cli (Docker)' : 'static-php-cli';
+        parent::__construct($name, self::VERSION);
 
         global $argv;
 
@@ -43,6 +45,7 @@ final class ConsoleApplication extends Application
                 new DumpLicenseCommand(),
                 new ExtractCommand(),
                 new MicroCombineCommand(),
+                new ExportDockerShCommand(),
 
                 // Dev commands
                 new AllExtCommand(),

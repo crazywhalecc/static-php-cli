@@ -5,7 +5,7 @@ declare(strict_types=1);
 use ZM\Logger\ConsoleLogger;
 
 define('WORKING_DIR', getcwd());
-const ROOT_DIR = __DIR__ . '/../..';
+define('ROOT_DIR', Phar::running() !== '' ? Phar::running() : (__DIR__ . '/../..'));
 
 // CLI start time
 define('START_TIME', microtime(true));
