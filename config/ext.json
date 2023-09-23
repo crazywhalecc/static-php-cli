@@ -158,14 +158,11 @@
             "ldap"
         ],
         "lib-suggests": [
-            "openssl",
-            "zlib",
             "gmp",
             "libsodium"
         ],
         "ext-suggests": [
-            "openssl",
-            "zlib"
+            "openssl"
         ]
     },
     "mbregex": {
@@ -239,6 +236,9 @@
         "arg-type": "with",
         "lib-depends": [
             "openssl"
+        ],
+        "ext-depends": [
+            "zlib"
         ]
     },
     "pcntl": {
