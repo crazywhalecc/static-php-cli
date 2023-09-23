@@ -144,6 +144,11 @@
         "static-libs-unix": [
             "liblber.a",
             "libldap.a"
+        ],
+        "lib-suggests": [
+            "openssl",
+            "gmp",
+            "libsodium"
         ]
     },
     "libavif": {

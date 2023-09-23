@@ -42,15 +42,6 @@
             "path": "COPYING"
         }
     },
-    "ldap": {
-        "type": "filelist",
-        "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
-        "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "ext-event": {
         "type": "url",
         "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
@@ -157,6 +148,15 @@
         "url": "https://pecl.php.net/get/inotify",
         "path": "php-src/ext/inotify",
         "filename": "inotify.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ldap": {
+        "type": "filelist",
+        "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
+        "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
         "license": {
             "type": "file",
             "path": "LICENSE"
