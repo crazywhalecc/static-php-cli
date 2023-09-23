@@ -140,6 +140,10 @@
             "kerberos"
         ]
     },
+    "tonyenc": {
+        "type": "external",
+        "source": "tonyenc"
+    },
     "inotify": {
         "type": "external",
         "source": "inotify"

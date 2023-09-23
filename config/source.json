@@ -16,6 +16,16 @@
             "path": "LICENSE"
         }
     },
+    "tonyenc": {
+        "type": "git",
+        "path": "php-src/ext/tonyenc",
+        "rev": "main",
+        "url": "https://github.com/TNT-ma/tonyenc.git",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",
