@@ -41,11 +41,11 @@ class BuildCliCommand extends BuildCommand
         $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions'))));
 
         $rule = BUILD_TARGET_NONE;
-        $rule = $rule | ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
-        $rule = $rule | ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
-        $rule = $rule | ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
-        $rule = $rule | ($this->getOption('build-embed') ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
-        $rule = $rule | ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-embed') ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         if ($rule === BUILD_TARGET_NONE) {
             $this->output->writeln('<error>Please add at least one build target!</error>');
             $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
