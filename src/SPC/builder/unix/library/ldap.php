@@ -11,22 +11,22 @@ trait ldap
         shell()->cd($this->source_dir)
             ->exec(
                 $this->builder->configure_env . ' ' .
-                'CC="musl-gcc -I' . BUILD_INCLUDE_PATH . '" ' .
-                'LDFLAGS="-static -L' . BUILD_LIB_PATH . '" ' .
-                ($this->builder->getLib('openssl') && $this->builder->getExt('zlib') ? 'LIBS="-lssl -lcrypto -lz" ' : '') .
+                $this->builder->makeAutoconfFlags(AUTOCONF_LDFLAGS | AUTOCONF_CPPFLAGS) .
                 ' ./configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--disable-slapd ' .
                 '--disable-slurpd ' .
                 '--without-systemd ' .
+                '--without-cyrus-sasl ' .
                 ($this->builder->getLib('openssl') && $this->builder->getExt('zlib') ? '--with-tls=openssl ' : '') .
                 ($this->builder->getLib('gmp') ? '--with-mp=gmp ' : '') .
                 ($this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '') .
                 '--prefix='
             )
             ->exec('make clean')
-            ->exec('make depend')
+            // remove tests and doc to prevent compile failed with error: soelim not found
+            ->exec('sed -i -e "s/SUBDIRS= include libraries clients servers tests doc/SUBDIRS= include libraries clients servers/g" Makefile')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['ldap.pc', 'lber.pc']);
