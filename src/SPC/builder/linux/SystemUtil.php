@@ -121,7 +121,7 @@ class SystemUtil
 
     public static function checkCCFlag(string $flag, string $cc): string
     {
-        [$ret] = shell()->execWithResult("echo | {$cc} -E -x c - {$flag}");
+        [$ret] = shell()->execWithResult("echo | {$cc} -E -x c - {$flag} 2>/dev/null");
         if ($ret != 0) {
             return '';
         }
