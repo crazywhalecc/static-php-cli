@@ -153,6 +153,15 @@
             "path": "LICENSE"
         }
     },
+    "imap": {
+        "type": "git",
+        "url": "https://github.com/uw-imap/imap.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",

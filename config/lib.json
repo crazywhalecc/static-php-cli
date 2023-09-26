@@ -139,6 +139,12 @@
             "libxml2"
         ]
     },
+    "imap": {
+        "source": "imap",
+        "static-libs-unix": [
+            "libc-client.a"
+        ]
+    },
     "libavif": {
         "source": "libavif",
         "static-libs-unix": [
