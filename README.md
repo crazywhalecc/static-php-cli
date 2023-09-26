@@ -40,7 +40,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 ## 文档
 
-点击这里查看文档：<https://static-php-cli.zhamao.me>。
+点击这里查看文档：<https://static-php.dev>。
 
 ## 使用
 
@@ -54,7 +54,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 ### 支持的扩展情况
 
-[扩展支持列表](https://static-php-cli.zhamao.me/zh/guide/extensions.html)
+[扩展支持列表](https://static-php.dev/zh/guide/extensions.html)
 
 > 如果这里没有你需要的扩展，可以提交 Issue。
 
@@ -221,4 +221,4 @@ cat micro.sfx code.php > single-app && chmod +x single-app
 
 ## 进阶
 
-本项目重构分支为模块化编写。如果你对本项目感兴趣，想加入开发，可以参照文档的 [贡献指南](https://static-php-cli.zhamao.me) 贡献代码或文档。
+本项目重构分支为模块化编写。如果你对本项目感兴趣，想加入开发，可以参照文档的 [贡献指南](https://static-php.dev) 贡献代码或文档。
