@@ -41,7 +41,7 @@ Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`
 
 ## Docs
 
-docs here: <https://static-php-cli.zhamao.me>.
+docs here: <https://static-php.dev>.
 
 ## Simple Usage
 
@@ -55,7 +55,7 @@ If you don't compile yourself, you can download pre-compiled artifact from Actio
 
 ### Supported Extensions
 
-[Supported Extension List](https://static-php-cli.zhamao.me/en/guide/extensions.html)
+[Supported Extension List](https://static-php.dev/en/guide/extensions.html)
 
 > If there is no extension you need here, you can submit an issue.
 
@@ -254,4 +254,4 @@ and comply with the corresponding project's LICENSE.
 
 The refactoring branch of this project is written modularly. 
 If you are interested in this project and want to join the development,
-you can refer to the [Contribution Guide](https://static-php-cli.zhamao.me) of the documentation to contribute code or documentation.
+you can refer to the [Contribution Guide](https://static-php.dev) of the documentation to contribute code or documentation.
