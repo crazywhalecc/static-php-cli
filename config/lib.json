@@ -140,7 +140,7 @@
         ]
     },
     "imap": {
-        "source": "imap",
+        "source": "uwimap",
         "static-libs-unix": [
             "libc-client.a"
         ]
