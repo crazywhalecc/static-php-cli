@@ -83,12 +83,34 @@ EOL
             ->exec(
                 "{$this->builder->configure_env} make {$platform} " .
                 'EXTRACFLAGS="-fPIC" ' .
-                ($this->builder->getLib('openssl') === null ? ' SSLTYPE=none' : 'SPECIALAUTHENTICATORS=ssl SSLTYPE=unix')
+                ($this->builder->getLib('openssl') === null ? ' SSLTYPE=none' : 'SPECIALAUTHENTICATORS=ssl SSLTYPE=unix.nopwd')
             );
+        // todo: answer this with y automatically. using SSLTYPE=nopwd creates imap WITH ssl...
+        try {
+            shell()
+                ->exec("cp -rf {$this->source_dir}/c-client/c-client.a " . BUILD_LIB_PATH . '/libc-client.a')
+                ->exec("cp -rf {$this->source_dir}/c-client/*.c " . BUILD_LIB_PATH . '/')
+                ->exec("cp -rf {$this->source_dir}/c-client/*.h " . BUILD_INCLUDE_PATH . '/')
+                ->exec("cp -rf {$this->source_dir}/src/osdep/unix/*.h " . BUILD_INCLUDE_PATH . '/'); // throws an exception, no idea why since it works
+        } catch (\Throwable) {
+        }
+
         shell()
-            ->exec("cp -rf {$this->source_dir}/c-client/c-client.a " . BUILD_LIB_PATH . '/libc-client.a')
-            ->exec("cp -rf {$this->source_dir}/c-client/*.c " . BUILD_LIB_PATH . '/')
-            ->exec("cp -rf {$this->source_dir}/c-client/*.h " . BUILD_INCLUDE_PATH . '/')
-            ->exec("cp -rf {$this->source_dir}/src/osdep/unix/*.h " . BUILD_INCLUDE_PATH . '/');
+            ->exec(
+                'echo \'prefix=/opt/static-php-cli/buildroot
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: UW-IMAP
+Description: Imap server implementation by University of Washington
+Version: 2007f
+
+Requires:
+Libs: -L${libdir} -lc-client -pam
+Libs.private: -lpam
+Cflags: -I${includedir}
+\' > ' . BUILD_LIB_PATH . '/pkgconfig/libc-client.pc'
+            );
+        $this->patchPkgconfPrefix(['libc-client.pc']);
     }
 }

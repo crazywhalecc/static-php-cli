@@ -31,6 +31,17 @@ class LinuxToolCheckList
         'xz',
     ];
 
+    // todo: require those
+    public const PAM_TOOLS_DEBIAN = [
+        'autoconf', 'automake', 'autopoint',
+        'bison', 'bzip2', 'docbook5-xml',
+        'docbook-xsl-ns', 'flex', 'gettext',
+        'libaudit-dev', 'libdb-dev', 'libfl-dev',
+        'libselinux1-dev', 'libssl-dev', 'libtool',
+        'libxml2-utils', 'make', 'pkg-config',
+        'sed', 'w3m', 'xsltproc', 'xz-utils',
+    ];
+
     /** @noinspection PhpUnused */
     #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux')]
     public function checkCliTools(): ?CheckResult

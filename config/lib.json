@@ -140,15 +140,21 @@
         ]
     },
     "imap": {
-        "source": "uwimap",
+        "source": "imap",
         "static-libs-unix": [
             "libc-client.a"
+        ],
+        "lib-requires": [
+            "libpam"
         ]
     },
     "libpam": {
         "source": "libpam",
         "static-libs-unix": [
             "libpam.a"
+        ],
+        "lib-suggests": [
+            "openssl"
         ]
     },
     "libavif": {
