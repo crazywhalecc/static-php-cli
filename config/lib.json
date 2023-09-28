@@ -145,6 +145,12 @@
             "libc-client.a"
         ]
     },
+    "libpam": {
+        "source": "libpam",
+        "static-libs-unix": [
+            "libpam.a"
+        ]
+    },
     "libavif": {
         "source": "libavif",
         "static-libs-unix": [

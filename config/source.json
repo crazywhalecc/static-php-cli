@@ -162,6 +162,14 @@
             "path": "LICENSE"
         }
     },
+    "libpam": {
+        "type": "ghtar",
+        "repo": "linux-pam/linux-pam",
+        "license": {
+            "type": "file",
+            "path": "Copyright"
+        }
+    },
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",

@@ -134,7 +134,8 @@
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
-            "imap"
+            "imap",
+            "libpam"
         ],
         "lib-suggests": [
             "kerberos",
