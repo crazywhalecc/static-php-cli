@@ -8,7 +8,6 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
-use function Safe\xdiff_file_patch_binary;
 
 trait imap
 {
@@ -19,10 +18,9 @@ trait imap
      */
     protected function build(): void
     {
-        //        ext-imap is NOT thread safe, do not build with ZTS builds
-        //        if ($this->builder->getOption('enable-zts')) {
-        //            return;
-        //        }
+        if ($this->builder->getOption('enable-zts')) {
+            throw new WrongUsageException('ext-imap is not thread safe, do not build it with ZTS builds');
+        }
         if ($this->builder->getLib('openssl') !== null) {
             FileSystem::replaceFileStr(
                 $this->source_dir . '/Makefile',
