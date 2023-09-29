@@ -20,7 +20,7 @@ trait postgresql
         $builddir = BUILD_ROOT_PATH;
         $env = $this->builder->configure_env;
         $envs = $env;
-        $packages = 'openssl zlib  readline libxml-2.0'; // icu-uc icu-io icu-i18n libzstd
+        $packages = 'openssl zlib readline libxml-2.0'; // icu-uc icu-io icu-i18n libzstd
 
         $pkgconfig_executable = $builddir . '/bin/pkg-config';
         $output = shell()->execWithResult($env . " {$pkgconfig_executable} --cflags-only-I --static " . $packages);

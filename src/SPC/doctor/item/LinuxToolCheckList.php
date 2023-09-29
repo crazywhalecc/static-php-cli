@@ -41,6 +41,15 @@ class LinuxToolCheckList
         'libxml2-utils', 'make', 'pkg-config',
         'sed', 'w3m', 'xsltproc', 'xz-utils',
     ];
+    
+    // todo: require those
+    public const PAM_TOOLS_RHEL = [
+        'autoconf', 'automake', 'bison',
+        'bzip2', 'flex', 'make', 'gettext',
+        'pkg-config', 'sed', 'w3m', 'xz',
+        'libdb-devel', 'libselinux-devel',
+        'openssl-devel', 'libtool', 'libxml2', 
+        'docbook-xsl-ns', 'libxslt' ];
 
     /** @noinspection PhpUnused */
     #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux')]

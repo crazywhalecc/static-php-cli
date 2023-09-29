@@ -8,6 +8,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
+use function Safe\xdiff_file_patch_binary;
 
 trait imap
 {
@@ -25,28 +26,18 @@ trait imap
         if ($this->builder->getLib('openssl') !== null) {
             FileSystem::replaceFileStr(
                 $this->source_dir . '/Makefile',
-                'SSLINCLUDE=/usr/include/openssl',
-                'SSLINCLUDE=' . BUILD_INCLUDE_PATH
-            );
-            FileSystem::replaceFileStr(
-                $this->source_dir . '/Makefile',
-                'SSLLIB=/usr/lib',
-                'SSLLIB=' . BUILD_LIB_PATH
-            );
-            FileSystem::replaceFileStr(
-                $this->source_dir . '/Makefile',
                 '"-DMAC_OSX_KLUDGE=1',
                 ''
             );
             FileSystem::replaceFileStr(
                 $this->source_dir . '/src/osdep/unix/Makefile',
-                '-lcrypto -lz -lpam',
+                '-lcrypto -lz',
                 '-lcrypto'
             );
             FileSystem::replaceFileStr(
                 $this->source_dir . '/src/osdep/unix/Makefile',
                 '-lcrypto',
-                '-lcrypto -lz -lpam'
+                '-lcrypto -lz'
             );
             FileSystem::replaceFileStr(
                 $this->source_dir . '/src/osdep/unix/ssl_unix.c',
@@ -73,7 +64,7 @@ if (!(stream->con = (SSL *) SSL_new (stream->context)))
     SSL_set_tlsext_host_name(stream->con,host);
   }
 #endif
-  bio = BIO_new_socket (stream->tcpstream->tcpsi,BIO_NOCLOSE);"
+  bio = BIO_new_socket (stream->tcpstream->tcpsi,BIO_NOCLOSE);
 EOL
             );
         }
@@ -85,7 +76,7 @@ EOL
                 (
                     $this->builder->getLib('openssl') === null ?
                     'SSLTYPE=none' :
-                    'SPECIALAUTHENTICATORS=ssl SSLTYPE=unix.nopwd SSLINCLUDE=' . BUILD_INCLUDE_PATH
+                    'SPECIALAUTHENTICATORS=ssl SSLTYPE=unix.nopwd SSLINCLUDE=' . BUILD_INCLUDE_PATH . ' SSLLIB=' . BUILD_LIB_PATH
                 )
             );
         // todo: answer this with y automatically. using SSLTYPE=nopwd creates imap WITH ssl...
@@ -94,25 +85,9 @@ EOL
                 ->exec("cp -rf {$this->source_dir}/c-client/c-client.a " . BUILD_LIB_PATH . '/libc-client.a')
                 ->exec("cp -rf {$this->source_dir}/c-client/*.c " . BUILD_LIB_PATH . '/')
                 ->exec("cp -rf {$this->source_dir}/c-client/*.h " . BUILD_INCLUDE_PATH . '/')
-                ->exec("cp -rf {$this->source_dir}/src/osdep/unix/*.h " . BUILD_INCLUDE_PATH . '/'); // throws an exception, no idea why since it works
+                ->exec("cp -rf {$this->source_dir}/src/osdep/unix/*.h " . BUILD_INCLUDE_PATH . '/');
         } catch (\Throwable) {
+            // last command throws an exception, no idea why since it works
         }
-
-        shell()
-            ->exec(
-                'echo \'prefix=/opt/static-php-cli/buildroot
-libdir=${prefix}/lib
-includedir=${prefix}/include
-
-Name: UW-IMAP
-Description: Imap server implementation by University of Washington
-Version: 2007f
-
-Requires:
-Libs: -L${libdir} -lc-client
-Cflags: -I${includedir}
-\' > ' . BUILD_LIB_PATH . '/pkgconfig/libc-client.pc'
-            );
-        $this->patchPkgconfPrefix(['libc-client.pc']);
     }
 }
