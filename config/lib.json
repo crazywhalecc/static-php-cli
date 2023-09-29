@@ -143,9 +143,6 @@
         "source": "imap",
         "static-libs-unix": [
             "libc-client.a"
-        ],
-        "lib-requires": [
-            "libpam"
         ]
     },
     "libpam": {

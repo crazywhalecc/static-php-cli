@@ -134,11 +134,11 @@
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
-            "imap",
-            "libpam"
+            "imap"
         ],
         "lib-suggests": [
             "kerberos",
+            "libpam",
             "openssl"
         ]
     },

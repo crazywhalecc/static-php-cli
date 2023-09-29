@@ -77,13 +77,16 @@ if (!(stream->con = (SSL *) SSL_new (stream->context)))
 EOL
             );
         }
-        $platform = 'lr5';
         shell()->cd($this->source_dir)
             ->exec('touch ip6')
             ->exec(
-                "{$this->builder->configure_env} make {$platform} " .
+                "{$this->builder->configure_env} make slx " .
                 'EXTRACFLAGS="-fPIC" ' .
-                ($this->builder->getLib('openssl') === null ? ' SSLTYPE=none' : 'SPECIALAUTHENTICATORS=ssl SSLTYPE=unix.nopwd')
+                (
+                    $this->builder->getLib('openssl') === null ?
+                    'SSLTYPE=none' :
+                    'SPECIALAUTHENTICATORS=ssl SSLTYPE=unix.nopwd SSLINCLUDE=' . BUILD_INCLUDE_PATH
+                )
             );
         // todo: answer this with y automatically. using SSLTYPE=nopwd creates imap WITH ssl...
         try {
@@ -106,8 +109,7 @@ Description: Imap server implementation by University of Washington
 Version: 2007f
 
 Requires:
-Libs: -L${libdir} -lc-client -pam
-Libs.private: -lpam
+Libs: -L${libdir} -lc-client
 Cflags: -I${includedir}
 \' > ' . BUILD_LIB_PATH . '/pkgconfig/libc-client.pc'
             );

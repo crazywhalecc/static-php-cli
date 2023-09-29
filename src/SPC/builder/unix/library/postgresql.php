@@ -64,7 +64,7 @@ trait postgresql
                 '--without-zstd ' .
                 '--without-perl ' .
                 '--without-python ' .
-                '--without-pam ' .
+                ($this->builder->getLib('pam') ? '--with-pam ' : '--without-pam ') .
                 '--without-ldap ' .
                 '--without-bonjour ' .
                 '--without-tcl '
