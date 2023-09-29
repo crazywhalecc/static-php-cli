@@ -29,11 +29,6 @@ final class ConsoleApplication extends Application
     {
         parent::__construct('static-php-cli', self::VERSION);
 
-        global $argv;
-
-        // Detailed debugging errors are not displayed in the production environment. Only the error display provided by Symfony console is used.
-        $this->setCatchExceptions(file_exists(ROOT_DIR . '/.prod') || !in_array('--debug', $argv));
-
         $this->addCommands(
             [
                 new BuildCliCommand(),
