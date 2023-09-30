@@ -40,7 +40,7 @@ class LinuxToolCheckList
     ];
 
     /** @noinspection PhpUnused */
-    #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux')]
+    #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux', level: 999)]
     public function checkCliTools(): ?CheckResult
     {
         $distro = SystemUtil::getOSRelease();
