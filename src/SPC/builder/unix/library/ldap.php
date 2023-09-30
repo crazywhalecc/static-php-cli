@@ -8,6 +8,13 @@ trait ldap
 {
     protected function build(): void
     {
+        $alt = '';
+        // openssl support
+        $alt .= $this->builder->getLib('openssl') && $this->builder->getExt('zlib') ? '--with-tls=openssl ' : '';
+        // gmp support
+        $alt .= $this->builder->getLib('gmp') ? '--with-mp=gmp ' : '';
+        // libsodium support
+        $alt .= $this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '';
         shell()->cd($this->source_dir)
             ->exec(
                 $this->builder->configure_env . ' ' .
@@ -19,9 +26,7 @@ trait ldap
                 '--disable-slurpd ' .
                 '--without-systemd ' .
                 '--without-cyrus-sasl ' .
-                ($this->builder->getLib('openssl') && $this->builder->getExt('zlib') ? '--with-tls=openssl ' : '') .
-                ($this->builder->getLib('gmp') ? '--with-mp=gmp ' : '') .
-                ($this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '') .
+                $alt .
                 '--prefix='
             )
             ->exec('make clean')
