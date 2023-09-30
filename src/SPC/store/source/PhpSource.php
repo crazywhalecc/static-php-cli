@@ -45,7 +45,6 @@ class PhpSource extends CustomSourceBase
         return [
             'type' => 'url',
             'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
-            // 'url' => "https://mirrors.zhamao.xin/php/php-{$version}.tar.gz",
         ];
     }
 }

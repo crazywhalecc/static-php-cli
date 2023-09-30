@@ -57,15 +57,14 @@ trait postgresql
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
                 '--with-libxml ' .
+                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
-                '--without-ldap ' .
+                ($this->builder->getLib('pam') ? '--with-pam ' : '--without-pam ') .
                 '--without-libxslt ' .
                 '--without-lz4 ' .
                 '--without-zstd ' .
                 '--without-perl ' .
                 '--without-python ' .
-                ($this->builder->getLib('pam') ? '--with-pam ' : '--without-pam ') .
-                '--without-ldap ' .
                 '--without-bonjour ' .
                 '--without-tcl '
             );

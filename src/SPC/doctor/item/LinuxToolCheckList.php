@@ -31,6 +31,15 @@ class LinuxToolCheckList
         'xz',
     ];
 
+    public const TOOLS_RHEL = [
+        'perl', 'make', 'bison', 'flex',
+        'git', 'autoconf', 'automake',
+        'tar', 'unzip', 'gzip', 'gcc',
+        'bzip2', 'cmake', 'patch',
+        'xz',
+        'wget', // to get musl
+    ];
+
     // todo: require those
     public const PAM_TOOLS_DEBIAN = [
         'autoconf', 'automake', 'autopoint',
@@ -49,16 +58,19 @@ class LinuxToolCheckList
         'pkg-config', 'sed', 'w3m', 'xz',
         'libdb-devel', 'libselinux-devel',
         'openssl-devel', 'libtool', 'libxml2', 
-        'docbook-xsl-ns', 'libxslt' ];
+        'docbook-xsl-ns', 'libxslt'
+    ];
 
     /** @noinspection PhpUnused */
-    #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux')]
+    #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux', level: 999)]
     public function checkCliTools(): ?CheckResult
     {
         $distro = SystemUtil::getOSRelease();
 
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
+            'almalinux' => self::TOOLS_RHEL,
+            'rhel' => self::TOOLS_RHEL,
             default => self::TOOLS_DEBIAN,
         };
         $missing = [];
@@ -69,7 +81,11 @@ class LinuxToolCheckList
         }
         if (!empty($missing)) {
             return match ($distro['dist']) {
-                'ubuntu', 'alpine', 'debian' => CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]),
+                'ubuntu',
+                'alpine',
+                'rhel',
+                'almalinux',
+                'debian' => CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]),
                 default => CheckResult::fail(implode(', ', $missing) . ' not installed on your system'),
             };
         }
@@ -100,7 +116,9 @@ class LinuxToolCheckList
         $install_cmd = match ($distro['dist']) {
             'ubuntu', 'debian' => 'apt-get install -y',
             'alpine' => 'apk add',
-            default => throw new RuntimeException('Current linux distro is not supported for auto-install musl packages'),
+            'rhel' => 'dnf install -y',
+            'almalinux' => 'dnf install -y',
+            default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';
         if (get_current_user() !== 'root') {
@@ -108,7 +126,9 @@ class LinuxToolCheckList
             logger()->warning('Current user is not root, using sudo for running command');
         }
         try {
-            shell(true)->exec($prefix . $install_cmd . ' ' . implode(' ', str_replace('xz', 'xz-utils', $missing)));
+            $is_rhel = in_array($distro['dist'], ['rhel', 'almalinux']);
+            $to_install = $is_rhel ? $missing : str_replace('xz', 'xz-utils', $missing);
+            shell(true)->exec($prefix . $install_cmd . ' ' . implode(' ', $to_install));
         } catch (RuntimeException) {
             return false;
         }

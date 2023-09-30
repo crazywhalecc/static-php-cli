@@ -24,7 +24,7 @@ class LinuxMuslCheck
         // non-exist, need to recognize distro
         $distro = SystemUtil::getOSRelease();
         return match ($distro['dist']) {
-            'ubuntu', 'alpine', 'debian' => CheckResult::fail('musl-libc is not installed on your system', 'fix-musl', [$distro]),
+            'ubuntu', 'alpine', 'debian', 'rhel', 'almalinux' => CheckResult::fail('musl-libc is not installed on your system', 'fix-musl', [$distro]),
             default => CheckResult::fail('musl-libc is not installed on your system'),
         };
     }
@@ -36,10 +36,18 @@ class LinuxMuslCheck
     #[AsFixItem('fix-musl')]
     public function fixMusl(array $distro): bool
     {
+        $rhel_install = 'wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && \
+                         rm -f musl-1.2.4.tar.gz && cd musl-1.2.4 && 
+                         if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile
+                         fi && \
+                         ./configure --enable-wrapper=gcc && \
+                         make -j && make install && cd .. && rm -rf musl-1.2.4';
         $install_cmd = match ($distro['dist']) {
             'ubuntu', 'debian' => 'apt-get install musl musl-tools -y',
             'alpine' => 'apk add musl musl-utils musl-dev',
-            default => throw new RuntimeException('Current linux distro is not supported for auto-install musl packages'),
+            'rhel' => $rhel_install,
+            'almalinux' => $rhel_install,
+            default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';
         if (get_current_user() !== 'root') {

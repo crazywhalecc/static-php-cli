@@ -155,9 +155,16 @@
     },
     "ldap": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "ldap"
+        ],
+        "lib-suggests": [
+            "gmp",
+            "libsodium"
+        ],
+        "ext-suggests": [
+            "openssl"
         ]
     },
     "mbregex": {
@@ -231,6 +238,9 @@
         "arg-type": "with",
         "lib-depends": [
             "openssl"
+        ],
+        "ext-depends": [
+            "zlib"
         ]
     },
     "pcntl": {

@@ -201,10 +201,6 @@ class MacOSBuilder extends BuilderBase
         if (php_uname('m') === $this->getOption('arch')) {
             $this->sanityCheck($build_target);
         }
-
-        if ($this->phar_patched) {
-            SourcePatcher::patchMicro(['phar'], true);
-        }
     }
 
     /**
@@ -258,6 +254,10 @@ class MacOSBuilder extends BuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec("make -j{$this->concurrency} {$vars} micro");
         $this->deployBinary(BUILD_TARGET_MICRO);
+
+        if ($this->phar_patched) {
+            SourcePatcher::patchMicro(['phar'], true);
+        }
     }
 
     /**

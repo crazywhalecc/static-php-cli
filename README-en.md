@@ -41,7 +41,7 @@ Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`
 
 ## Docs
 
-docs here: <https://static-php-cli.zhamao.me>.
+docs here: <https://static-php.dev>.
 
 ## Simple Usage
 
@@ -49,13 +49,13 @@ Please first select the extension you want to compile based on the extension lis
 
 ### Direct Download
 
-If you don't compile yourself, you can download pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.zhamao.xin/static-php-cli/)
+If you don't compile yourself, you can download pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.static-php.dev/static-php-cli/common/)
 
 > self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
 
 ### Supported Extensions
 
-[Supported Extension List](https://static-php-cli.zhamao.me/en/guide/extensions.html)
+[Supported Extension List](https://static-php.dev/en/guide/extensions.html)
 
 > If there is no extension you need here, you can submit an issue.
 
@@ -214,7 +214,7 @@ If you are familiar with this project, you are also welcome to initiate a pull r
 
 The basic principles for contributing are as follows:
 
-- This project uses php-cs-fixer and phpstan as code formatting tools. Before contributing, please run `composer analyze` and `composer cs-fix` on the updated code.
+- This project uses php-cs-fixer and phpstan as code formatting tools. Before contributing, please run `composer analyse` and `composer cs-fix` on the updated code.
 - If other open source libraries are involved, the corresponding licenses should be provided. 
     Also, configuration files should be sorted using the command `sort-config` after modification.
     For more information about sorting commands, see the documentation.
@@ -254,4 +254,4 @@ and comply with the corresponding project's LICENSE.
 
 The refactoring branch of this project is written modularly. 
 If you are interested in this project and want to join the development,
-you can refer to the [Contribution Guide](https://static-php-cli.zhamao.me) of the documentation to contribute code or documentation.
+you can refer to the [Contribution Guide](https://static-php.dev) of the documentation to contribute code or documentation.

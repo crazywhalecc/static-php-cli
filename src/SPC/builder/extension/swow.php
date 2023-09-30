@@ -7,7 +7,6 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\exception\RuntimeException;
 use SPC\util\CustomExt;
-use SPC\util\Util;
 
 #[CustomExt('swow')]
 class swow extends Extension
@@ -25,7 +24,7 @@ class swow extends Extension
      */
     public function patchBeforeBuildconf(): bool
     {
-        if (Util::getPHPVersionID() >= 80000 && !is_link(SOURCE_PATH . '/php-src/ext/swow')) {
+        if ($this->builder->getPHPVersionID() >= 80000 && !is_link(SOURCE_PATH . '/php-src/ext/swow')) {
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('cd ' . SOURCE_PATH . '/php-src/ext && mklink /D swow swow-src\ext');
             } else {

@@ -145,6 +145,18 @@
             "libc-client.a"
         ]
     },
+    "ldap": {
+        "source": "ldap",
+        "static-libs-unix": [
+            "liblber.a",
+            "libldap.a"
+        ],
+        "lib-suggests": [
+            "openssl",
+            "gmp",
+            "libsodium"
+        ]
+    },
     "libpam": {
         "source": "libpam",
         "static-libs-unix": [

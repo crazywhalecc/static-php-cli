@@ -161,6 +161,15 @@
             "type": "file",
             "path": "LICENSE"
         }
+    }
+    "ldap": {
+        "type": "filelist",
+        "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
+        "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
     },
     "libpam": {
         "type": "ghtar",
@@ -258,7 +267,7 @@
     },
     "libwebp": {
         "type": "url",
-        "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.0.tar.gz",
+        "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.2.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
