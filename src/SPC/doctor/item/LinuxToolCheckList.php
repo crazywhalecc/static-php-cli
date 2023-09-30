@@ -36,7 +36,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch',
-        'xz',
+        'xz', 'wget', // to get musl
     ];
 
     /** @noinspection PhpUnused */
