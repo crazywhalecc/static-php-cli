@@ -36,13 +36,12 @@ class LinuxMuslCheck
     #[AsFixItem('fix-musl')]
     public function fixMusl(array $distro): bool
     {
-        $rhel_install = 'dnf install tar wget git zip bison flex bzip2 cmake patch && \
-                         wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && \
+        $rhel_install = 'wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && \
                          rm -f musl-1.2.4.tar.gz && cd musl-1.2.4 && 
-                         if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then export PATH="/usr/local/musl/bin:$PATH"
+                         if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile
                          fi && \
-                         ./configure --disable-shared --enable-wrapper=gcc && \
-                         make -j && make install && cd ..';
+                         ./configure --enable-wrapper=gcc && \
+                         make -j && make install && cd .. && rm -rf musl-1.2.4';
         $install_cmd = match ($distro['dist']) {
             'ubuntu', 'debian' => 'apt-get install musl musl-tools -y',
             'alpine' => 'apk add musl musl-utils musl-dev',
