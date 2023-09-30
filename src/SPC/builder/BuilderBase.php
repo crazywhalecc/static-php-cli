@@ -227,12 +227,22 @@ abstract class BuilderBase
 
     /**
      * Get PHP Version ID from php-src/main/php_version.h
+     *
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function getPHPVersionID(): int
     {
+        if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            throw new WrongUsageException('PHP source files are not available, you need to download them first');
+        }
+
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
-        preg_match('/PHP_VERSION_ID (\d+)/', $file, $match);
-        return intval($match[1]);
+        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
+            return intval($match[1]);
+        }
+
+        throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
     }
 
     /**
