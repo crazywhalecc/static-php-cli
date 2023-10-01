@@ -161,7 +161,7 @@
             "type": "file",
             "path": "LICENSE"
         }
-    }
+    },
     "ldap": {
         "type": "filelist",
         "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
