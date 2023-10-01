@@ -11,6 +11,7 @@ class icu extends LinuxLibraryBase
     protected function build(): void
     {
         $root = BUILD_ROOT_PATH;
+        $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
         $cppflag = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1  -DU_STATIC_IMPLEMENTATION=1"';
         shell()->cd($this->source_dir . '/source')
             ->exec(
@@ -28,7 +29,7 @@ class icu extends LinuxLibraryBase
                 "--prefix={$root}"
             )
             ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
+            ->exec("LD_LIBRARY_PATH=/usr/local/musl/{$arch}/lib make -j{$this->builder->concurrency}")
             ->exec('make install');
     }
 }

@@ -36,7 +36,8 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch',
-        'xz',
+        'xz', 'g++', 'libtool',
+        'curl', // needed to download openssl
         'wget', // to get musl
     ];
 

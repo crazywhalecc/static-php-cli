@@ -10,7 +10,7 @@ trait ldap
     {
         $alt = '';
         // openssl support
-        $alt .= $this->builder->getLib('openssl') && $this->builder->getExt('zlib') ? '--with-tls=openssl ' : '';
+        $alt .= $this->builder->getLib('openssl') ? '--with-tls=openssl ' : '';
         // gmp support
         $alt .= $this->builder->getLib('gmp') ? '--with-mp=gmp ' : '';
         // libsodium support
@@ -23,7 +23,6 @@ trait ldap
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--disable-slapd ' .
-                '--disable-slurpd ' .
                 '--without-systemd ' .
                 '--without-cyrus-sasl ' .
                 $alt .

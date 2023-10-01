@@ -41,12 +41,14 @@ class LinuxBuilder extends BuilderBase
         logger()->debug('Current OS: ' . SystemUtil::getOSRelease()['dist'] . ' ' . SystemUtil::getOSRelease()['ver']);
         // ---------- set necessary options ----------
         // set C Compiler (default: alpine: gcc, others: musl-gcc)
-        $this->setOptionIfNotExist('cc', match (SystemUtil::getOSRelease()['dist']) {
-            'alpine' => 'gcc',
-            default => 'musl-gcc'
-        });
+        $compiler_prefix = match (arch2gnu(php_uname('m'))) {
+            'x86_64' => 'x86_64-linux-musl-',
+            'aarch64' => 'aarch64-linux-musl-',
+        };
+        $this->setOptionIfNotExist('library_path', '/usr/local/musl/lib:/usr/local/musl/' . substr($compiler_prefix, 0, -1) . '/lib');
+        $this->setOptionIfNotExist('cc', "{$compiler_prefix}gcc");
         // set C++ Compiler (default: g++)
-        $this->setOptionIfNotExist('cxx', 'g++');
+        $this->setOptionIfNotExist('cxx', "{$compiler_prefix}g++");
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));
         $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
@@ -270,6 +272,7 @@ class LinuxBuilder extends BuilderBase
      *
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function buildMicro(string $extra_libs, string $use_lld, string $cflags): void
     {
