@@ -44,6 +44,7 @@ class LinuxBuilder extends BuilderBase
         $compiler_prefix = match (arch2gnu(php_uname('m'))) {
             'x86_64' => 'x86_64-linux-musl-',
             'aarch64' => 'aarch64-linux-musl-',
+            default => ''
         };
         $this->setOptionIfNotExist('library_path', '/usr/local/musl/lib:/usr/local/musl/' . substr($compiler_prefix, 0, -1) . '/lib');
         $this->setOptionIfNotExist('cc', "{$compiler_prefix}gcc");
