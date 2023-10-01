@@ -19,7 +19,7 @@ class libxml2 extends LinuxLibraryBase
     public function build(): void
     {
         $enable_zlib = $this->builder->getLib('zlib') ? 'ON' : 'OFF';
-        // $enable_icu = $this->builder->getLib('icu') ? 'ON' : 'OFF';
+        $enable_icu = $this->builder->getLib('icu') ? 'ON' : 'OFF';
         $enable_xz = $this->builder->getLib('xz') ? 'ON' : 'OFF';
 
         FileSystem::resetDir($this->source_dir . '/build');
@@ -34,7 +34,7 @@ class libxml2 extends LinuxLibraryBase
                 '-DLIBXML2_WITH_ICONV=ON ' .
                 '-DIconv_IS_BUILT_IN=OFF ' .
                 "-DLIBXML2_WITH_ZLIB={$enable_zlib} " .
-                '-DLIBXML2_WITH_ICU=OFF ' .
+                "-DLIBXML2_WITH_ICU={$enable_icu} " .
                 "-DLIBXML2_WITH_LZMA={$enable_xz} " .
                 '-DLIBXML2_WITH_PYTHON=OFF ' .
                 '-DLIBXML2_WITH_PROGRAMS=OFF ' .
@@ -42,6 +42,8 @@ class libxml2 extends LinuxLibraryBase
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+            ->exec('make install')
+            ->exec('mv ' . BUILD_ROOT_PATH . '/lib64/pkgconfig/* ' . BUILD_ROOT_PATH . '/lib/pkgconfig/')
+            ->exec('mv ' . BUILD_ROOT_PATH . '/lib64/*.a ' . BUILD_ROOT_PATH . '/lib/');
     }
 }

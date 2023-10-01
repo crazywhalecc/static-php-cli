@@ -188,8 +188,10 @@ class LinuxBuilder extends BuilderBase
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
+        $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                'LD_LIBRARY_PATH=/usr/local/musl/' . $arch . '/lib ' .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
