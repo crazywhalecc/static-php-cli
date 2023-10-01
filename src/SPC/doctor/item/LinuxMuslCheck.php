@@ -13,6 +13,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
+use SPC\store\FileSystem;
 
 class LinuxMuslCheck
 {
@@ -24,8 +25,9 @@ class LinuxMuslCheck
     public function checkMusl(): CheckResult
     {
         $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
-        $file = "/usr/local/musl/{$arch}/lib/libc.a";
-        if (file_exists($file)) {
+        $cross_compile_lib = "/usr/local/musl/{$arch}/lib/libc.a";
+        $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
+        if (file_exists($musl_wrapper_lib) && file_exists($cross_compile_lib)) {
             return CheckResult::ok();
         }
         return CheckResult::fail('musl-libc is not installed on your system', 'fix-musl');
@@ -40,31 +42,32 @@ class LinuxMuslCheck
     #[AsFixItem('fix-musl')]
     public function fixMusl(): bool
     {
-        $distro = SystemUtil::getOSRelease();
-        $source = [
+        $musl_source = [
+            'type' => 'url',
+            'url' => 'https://musl.libc.org/releases/musl-1.2.4.tar.gz',
+        ];
+        $musl_cross_compile_source = [
             'type' => 'git',
             'url' => 'https://github.com/richfelker/musl-cross-make',
             'rev' => 'master',
         ];
-        Downloader::downloadSource('musl-cross-make', $source);
+        Downloader::downloadSource('musl-cross-make', $musl_cross_compile_source);
+        Downloader::downloadSource('musl-1.2.4', $musl_source);
+        FileSystem::extractSource('musl-1.2.4', DOWNLOAD_PATH . '/musl-1.2.4.tar.gz');
         $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
         $install_musl_wrapper_cmd = 'cd ' . DOWNLOAD_PATH . '/musl-cross-make && \
-                       make install TARGET=' . $arch . ' OUTPUT=/usr/local/musl -j && \
-                       if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile
-                       fi && \
-                       source ~/.bash_profile';
-        $rhel_install = 'wget https://musl.libc.org/releases/musl-1.2.4.tar.gz && tar -zxvf musl-1.2.4.tar.gz && \
-                         rm -f musl-1.2.4.tar.gz && cd musl-1.2.4 && 
-                         if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile
-                         fi && \
+                       make install TARGET=' . $arch . ' OUTPUT=/usr/local/musl -j';
+        $musl_install = 'cd ' . SOURCE_PATH . '/musl-1.2.4 && \
                          ./configure --enable-wrapper=gcc && \
-                         make -j && make install && cd .. && rm -rf musl-1.2.4';
-        $install_cmd = match ($distro['dist']) {
+                         make -j && make install';
+        $musl_install_cmd = match (SystemUtil::getOSRelease()['dist']) {
             'ubuntu', 'debian' => 'apt-get install musl musl-tools -y',
             'alpine' => 'apk add musl musl-utils musl-dev',
-            'redhat' => $rhel_install,
-            default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
+            default => $musl_install,
         };
+        $fix_path = 'if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile
+                     fi && \
+                     source ~/.bash_profile';
         $prefix = '';
         if (get_current_user() !== 'root') {
             $prefix = 'sudo ';
@@ -72,8 +75,9 @@ class LinuxMuslCheck
         }
         try {
             shell(true)
-                ->exec($prefix . $install_cmd)
-                ->exec($install_musl_wrapper_cmd);
+                ->exec($prefix . $musl_install_cmd)
+                ->exec($install_musl_wrapper_cmd)
+                ->exec($prefix . $fix_path);
             return true;
         } catch (RuntimeException) {
             return false;
