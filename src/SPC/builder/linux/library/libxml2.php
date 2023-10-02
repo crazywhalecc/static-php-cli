@@ -42,12 +42,12 @@ class libxml2 extends LinuxLibraryBase
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install')
-            ->exec('cp -rf ' . BUILD_ROOT_PATH . '/lib64/* ' . BUILD_ROOT_PATH . '/lib/');
+            ->exec('make install');
         FileSystem::replaceFileStr(
-            BUILD_ROOT_PATH . '/lib/pkgconfig/libxml-2.0.pc',
+            BUILD_ROOT_PATH . '/lib64/pkgconfig/libxml-2.0.pc',
             '-licudata -licui18n -licuuc',
             '-licui18n -licuuc -licudata'
         );
+        shell()->exec('cp -rf ' . BUILD_ROOT_PATH . '/lib64/* ' . BUILD_ROOT_PATH . '/lib/');
     }
 }
