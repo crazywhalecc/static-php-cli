@@ -55,7 +55,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): bool|int
+    public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): false|int
     {
         return self::replaceFile($filename, REPLACE_FILE_STR, $search, $replace);
     }
@@ -63,7 +63,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): bool|int
+    public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): false|int
     {
         return self::replaceFile($filename, REPLACE_FILE_PREG, $search, $replace);
     }
@@ -71,7 +71,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFileUser(string $filename, mixed $callback = null): bool|int
+    public static function replaceFileUser(string $filename, mixed $callback = null): false|int
     {
         return self::replaceFile($filename, REPLACE_FILE_USER, $callback);
     }
@@ -445,7 +445,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): bool|int
+    private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): false|int
     {
         logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);
         $file = self::readFile($filename);
