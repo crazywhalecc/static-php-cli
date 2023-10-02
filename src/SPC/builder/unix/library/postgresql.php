@@ -21,7 +21,9 @@ trait postgresql
         $env = $this->builder->configure_env;
         $envs = $env;
         $packages = 'openssl zlib  readline libxml-2.0'; // icu-uc icu-io icu-i18n libzstd
-
+        if ($this->builder->getLib('icu')) {
+            $packages .= ' icu-uc icu-io icu-i18n ';
+        }
         $pkgconfig_executable = $builddir . '/bin/pkg-config';
         $output = shell()->execWithResult($env . " {$pkgconfig_executable} --cflags-only-I --static " . $packages);
         if (!empty($output[1][0])) {
