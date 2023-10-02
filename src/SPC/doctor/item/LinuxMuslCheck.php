@@ -51,12 +51,14 @@ class LinuxMuslCheck
             'url' => 'https://github.com/richfelker/musl-cross-make',
             'rev' => 'master',
         ];
+        $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
+        $cross_compile_lib = "/usr/local/musl/{$arch}/lib/libc.a";
+        $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         Downloader::downloadSource('musl-cross-make', $musl_cross_compile_source);
         Downloader::downloadSource('musl-1.2.4', $musl_source);
         FileSystem::extractSource('musl-1.2.4', DOWNLOAD_PATH . '/musl-1.2.4.tar.gz');
-        $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
         $install_musl_wrapper_cmd = 'cd ' . DOWNLOAD_PATH . '/musl-cross-make && \
-                       make install TARGET=' . $arch . ' OUTPUT=/usr/local/musl -j';
+                       make install TARGET=' . $arch . ' OUTPUT=/usr/local/musl CFLAGS="-fPIE" -j';
         $musl_install = 'cd ' . SOURCE_PATH . '/musl-1.2.4 && \
                          ./configure --enable-wrapper=gcc && \
                          make -j && make install';
@@ -65,19 +67,22 @@ class LinuxMuslCheck
             'alpine' => 'apk add musl musl-utils musl-dev',
             default => $musl_install,
         };
-        $fix_path = 'if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile
-                     fi && \
-                     source ~/.bash_profile';
+        $fix_path = 'if [[ ! "$PATH" =~ (^|:)"/usr/local/musl/bin"(:|$) ]]; then echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile && export PATH=/usr/local/musl/bin:$PATH
+                     fi';
         $prefix = '';
         if (get_current_user() !== 'root') {
             $prefix = 'sudo ';
             logger()->warning('Current user is not root, using sudo for running command');
         }
         try {
-            shell(true)
-                ->exec($prefix . $musl_install_cmd)
-                ->exec($install_musl_wrapper_cmd)
-                ->exec($prefix . $fix_path);
+            if (!file_exists($musl_wrapper_lib)) {
+                shell(true)->exec($prefix . $musl_install_cmd);
+            }
+            if (!file_exists($cross_compile_lib)) {
+                shell(true)->exec($prefix . $install_musl_wrapper_cmd);
+            }
+
+            shell(true)->exec($prefix . $fix_path);
             return true;
         } catch (RuntimeException) {
             return false;

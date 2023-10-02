@@ -336,7 +336,7 @@ class LinuxBuilder extends BuilderBase
     public function buildEmbed(string $extra_libs, string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
             'EXTRA_LIBS' => $extra_libs,
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
