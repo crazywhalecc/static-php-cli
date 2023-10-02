@@ -21,6 +21,9 @@ trait postgresql
         $env = $this->builder->configure_env;
         $envs = $env;
         $packages = 'openssl zlib readline libxml-2.0'; // icu-uc icu-io icu-i18n libzstd
+        if ($this->builder->getLib('ldap')) {
+            $packages .= ' ldap';
+        }
 
         $pkgconfig_executable = $builddir . '/bin/pkg-config';
         $output = shell()->execWithResult($env . " {$pkgconfig_executable} --cflags-only-I --static " . $packages);
@@ -36,7 +39,11 @@ trait postgresql
         $output = shell()->execWithResult($env . " {$pkgconfig_executable} --libs-only-l --static " . $packages);
         if (!empty($output[1][0])) {
             $libs = $output[1][0];
-            $envs .= " LIBS=\"{$libs}\" ";
+            $libcpp = '';
+            if ($this->builder->getLib('icu')) {
+                $libcpp = $this instanceof MacOSLibraryBase ? ' -lc++' : ' -lstdc++';
+            }
+            $envs .= " LIBS=\"{$libs}{$libcpp}\"";
         }
 
         FileSystem::resetDir($this->source_dir . '/build');
@@ -57,8 +64,8 @@ trait postgresql
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
                 '--with-libxml ' .
-                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
+                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
                 ($this->builder->getLib('pam') ? '--with-pam ' : '--without-pam ') .
                 '--without-libxslt ' .
                 '--without-lz4 ' .
