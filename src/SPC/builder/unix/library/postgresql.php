@@ -36,7 +36,8 @@ trait postgresql
         $output = shell()->execWithResult($env . " {$pkgconfig_executable} --libs-only-l --static " . $packages);
         if (!empty($output[1][0])) {
             $libs = $output[1][0];
-            $envs .= " LIBS=\"{$libs}\" ";
+            $libcpp = $this instanceof MacOSLibraryBase ? ' -lc++' : ' -lstdc++ ';
+            $envs .= " LIBS=\"{$libs} {$libcpp} \" ";
         }
 
         FileSystem::resetDir($this->source_dir . '/build');
@@ -74,9 +75,7 @@ trait postgresql
             ->exec($envs . ' make -C src/bin/pg_config install')
             ->exec($envs . ' make -C src/include install')
             ->exec($envs . ' make -C src/common install')
-            ->exec($envs . ' make -C src/backend/port install')
             ->exec($envs . ' make -C src/port install')
-            ->exec($envs . ' make -C src/backend/libpq install')
             ->exec($envs . ' make -C src/interfaces/libpq install');
 
         // remove dynamic libs
