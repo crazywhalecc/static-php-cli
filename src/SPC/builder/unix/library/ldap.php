@@ -19,6 +19,7 @@ trait ldap
             ->exec(
                 $this->builder->configure_env . ' ' .
                 $this->builder->makeAutoconfFlags(AUTOCONF_LDFLAGS | AUTOCONF_CPPFLAGS) .
+                'LIBS="-lssl -lcrypto -lz"' .
                 ' ./configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .

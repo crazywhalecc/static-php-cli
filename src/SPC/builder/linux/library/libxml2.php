@@ -43,7 +43,6 @@ class libxml2 extends LinuxLibraryBase
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install')
-            ->exec('mv ' . BUILD_ROOT_PATH . '/lib64/pkgconfig/* ' . BUILD_ROOT_PATH . '/lib/pkgconfig/')
-            ->exec('mv ' . BUILD_ROOT_PATH . '/lib64/*.a ' . BUILD_ROOT_PATH . '/lib/');
+            ->exec('cp -rf ' . BUILD_ROOT_PATH . '/lib64/* ' . BUILD_ROOT_PATH . '/lib/');
     }
 }

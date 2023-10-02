@@ -30,6 +30,6 @@ class icu extends LinuxLibraryBase
             )
             ->exec('make clean')
             ->exec("LD_LIBRARY_PATH=/usr/local/musl/{$arch}/lib make -j{$this->builder->concurrency}")
-            ->exec('make install');
+            ->exec("LD_LIBRARY_PATH=/usr/local/musl/{$arch}/lib make install");
     }
 }
