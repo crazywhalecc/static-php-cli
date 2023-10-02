@@ -36,7 +36,10 @@ trait postgresql
         $output = shell()->execWithResult($env . " {$pkgconfig_executable} --libs-only-l --static " . $packages);
         if (!empty($output[1][0])) {
             $libs = $output[1][0];
-            $libcpp = $this instanceof MacOSLibraryBase ? ' -lc++ ' : ' -lstdc++ ';
+            $libcpp = '';
+            if ($this->builder->getLib('icu')) {
+                $libcpp = $this instanceof MacOSLibraryBase ? ' -lc++ ' : ' -lstdc++ ';
+            }
             $envs .= " LIBS=\"{$libs} {$libcpp} \" ";
         }
 
