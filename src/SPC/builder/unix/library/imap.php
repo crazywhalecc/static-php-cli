@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -42,10 +43,20 @@ trait imap
         if ($this->builder->getOption('enable-zts')) {
             throw new WrongUsageException('ext-imap is not thread safe, do not build it with ZTS builds');
         }
+        $distro = match (SystemUtil::getOSRelease()['distro']) {
+            'centos' => 'slx',
+            'almalinux' => 'slx',
+            'rhel' => 'slx',
+            'alpine' => 'slx',
+            default => 'ldb'
+        };
+        if ($distro === 'ldb' && !$this->builder->getLib('libpam')) {
+            throw new WrongUsageException('ext-imap built on your system requires libpam, please build with --with-libs=libpam');
+        }
         shell()->cd($this->source_dir)
             ->exec('touch ip6')
             ->exec(
-                "{$this->builder->configure_env} make slx " .
+                "{$this->builder->configure_env} make {$distro} " .
                 'EXTRACFLAGS="-fPIC" ' .
                 (
                     $this->builder->getLib('openssl') ?
