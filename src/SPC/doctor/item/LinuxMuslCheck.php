@@ -24,7 +24,7 @@ class LinuxMuslCheck
         // non-exist, need to recognize distro
         $distro = SystemUtil::getOSRelease();
         return match ($distro['dist']) {
-            'ubuntu', 'alpine', 'debian', 'rhel', 'almalinux' => CheckResult::fail('musl-libc is not installed on your system', 'fix-musl', [$distro]),
+            'ubuntu', 'alpine', 'debian', 'redhat' => CheckResult::fail('musl-libc is not installed on your system', 'fix-musl', [$distro]),
             default => CheckResult::fail('musl-libc is not installed on your system'),
         };
     }
@@ -45,8 +45,7 @@ class LinuxMuslCheck
         $install_cmd = match ($distro['dist']) {
             'ubuntu', 'debian' => 'apt-get install musl musl-tools -y',
             'alpine' => 'apk add musl musl-utils musl-dev',
-            'rhel' => $rhel_install,
-            'almalinux' => $rhel_install,
+            'redhat' => $rhel_install,
             default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';

@@ -44,10 +44,7 @@ trait imap
             throw new WrongUsageException('ext-imap is not thread safe, do not build it with ZTS builds');
         }
         $distro = match (SystemUtil::getOSRelease()['distro']) {
-            'centos' => 'slx',
-            'almalinux' => 'slx',
-            'rhel' => 'slx',
-            'alpine' => 'slx',
+            'redhat', 'alpine' => 'slx',
             default => 'ldb'
         };
         if ($distro === 'ldb' && !$this->builder->getLib('libpam')) {
