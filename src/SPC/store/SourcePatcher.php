@@ -141,6 +141,8 @@ class SourcePatcher
         }
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
 
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
+
         // call extension patch before make
         foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeMake() === true) {

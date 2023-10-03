@@ -10,6 +10,7 @@ use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 
 class LinuxBuilder extends BuilderBase
@@ -223,6 +224,9 @@ class LinuxBuilder extends BuilderBase
         }
         if ($enableEmbed) {
             logger()->info('building embed');
+            if ($enableMicro) {
+                FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
+            }
             $this->buildEmbed($extra_libs, $use_lld);
         }
 
