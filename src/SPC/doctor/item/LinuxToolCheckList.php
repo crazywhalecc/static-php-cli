@@ -83,7 +83,7 @@ class LinuxToolCheckList
             return match ($distro['dist']) {
                 'ubuntu',
                 'alpine',
-                'redhat' .
+                'redhat',
                 'debian' => CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]),
                 default => CheckResult::fail(implode(', ', $missing) . ' not installed on your system'),
             };
