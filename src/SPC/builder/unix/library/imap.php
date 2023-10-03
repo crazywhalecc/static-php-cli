@@ -26,8 +26,8 @@ trait imap
             );
             SourcePatcher::patchFile('1007_openssl1.1_autoverify.patch', $this->source_dir);
             SourcePatcher::patchFile('2014_openssl1.1.1_sni.patch', $this->source_dir);
-            FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'SSLINCLUDE=/usr/include/openssl', 'SSLINCLUDE=' . BUILD_INCLUDE_PATH . '/openssl');
-            FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'SSLINCLUDE=/usr/lib', 'SSLINCLUDE=' . BUILD_LIB_PATH);
+            FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'SSLINCLUDE=/usr/include/openssl', 'SSLINCLUDE=' . BUILD_INCLUDE_PATH);
+            FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'SSLLIB=/usr/lib', 'SSLLIB=' . BUILD_LIB_PATH);
             return true;
         }
         return false;
