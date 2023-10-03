@@ -1,0 +1,42 @@
+Bug-Debian: https://bugs.debian.org/916041
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1834340
+Description: 
+ Google IMAP servers require SNI if TLSv1.3 is used,
+ otherwise it sends a self-signed certificate which
+ fails validation.
+
+ OpenSSL support/versions:
+ - TLSv1.3 on 1.1.1,
+ - a2i_IPADDRESS() on 0.9.8'ish,
+ - SSL_set_tlsext_host_name() on 0.9.8'ish/1.0.0;
+ per 'git blame/describe' and the CHANGES file.
+
+ So check for TLSv1.3 support / OpenSSL 1.1.1
+ not to incur behavior changes on pre-TLSv1.3,
+ and set host_name to 'host' (ssl_open_verify()
+ validates this, via 'ssl_last_host' variable)
+
+ This patch just combines these two patches:
+ - BTS#916041 (message #5) by Ed Spiridonov,
+ - LP#1834340 (comment #6) by David Zuelke.
+Author: Mauricio Faria de Oliveira <mfo@canonical.com>
+ 
+Index: uw-imap-2007f~dfsg/src/osdep/unix/ssl_unix.c
+===================================================================
+--- uw-imap-2007f~dfsg.orig/src/osdep/unix/ssl_unix.c
++++ uw-imap-2007f~dfsg/src/osdep/unix/ssl_unix.c
+@@ -266,6 +266,14 @@ static char *ssl_start_work (SSLSTREAM *
+ 				/* create connection */
+   if (!(stream->con = (SSL *) SSL_new (stream->context)))
+     return "SSL connection failed";
++#if OPENSSL_VERSION_NUMBER >= 0x10101000
++  /* Use SNI in case server requires it with TLSv1.3.
++   * Literal IP addresses not permitted per RFC 6066. */
++  if (!a2i_IPADDRESS(host)) {
++    ERR_clear_error();
++    SSL_set_tlsext_host_name(stream->con,host);
++  }
++#endif
+   bio = BIO_new_socket (stream->tcpstream->tcpsi,BIO_NOCLOSE);
+   SSL_set_bio (stream->con,bio,bio);
+   SSL_set_connect_state (stream->con);
