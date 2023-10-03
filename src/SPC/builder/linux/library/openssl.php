@@ -24,6 +24,7 @@ use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 
 class openssl extends LinuxLibraryBase
 {
@@ -75,6 +76,12 @@ class openssl extends LinuxLibraryBase
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
             ->exec("make install_sw DESTDIR={$destdir}");
+
+        FileSystem::replaceFileStr(
+            $destdir . '/lib/pkgconfig/openssl.pc',
+            'Requires: libssl libcrypto',
+            'Requires: libssl libcrypto zlib'
+        );
         $this->patchPkgconfPrefix(['libssl.pc', 'openssl.pc', 'libcrypto.pc']);
     }
 }

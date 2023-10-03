@@ -237,9 +237,7 @@
         "type": "builtin",
         "arg-type": "with",
         "lib-depends": [
-            "openssl"
-        ],
-        "ext-depends": [
+            "openssl",
             "zlib"
         ]
     },
