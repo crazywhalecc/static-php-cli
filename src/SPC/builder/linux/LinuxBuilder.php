@@ -37,7 +37,7 @@ class LinuxBuilder extends BuilderBase
     public function __construct(array $options = [])
     {
         $this->options = $options;
-
+        logger()->debug('Current OS: ' . SystemUtil::getOSRelease()['dist'] . ' ' . SystemUtil::getOSRelease()['ver']);
         // ---------- set necessary options ----------
         // set C Compiler (default: alpine: gcc, others: musl-gcc)
         $this->setOptionIfNotExist('cc', match (SystemUtil::getOSRelease()['dist']) {
