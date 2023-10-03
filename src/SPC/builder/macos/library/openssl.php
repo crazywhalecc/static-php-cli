@@ -23,6 +23,7 @@ namespace SPC\builder\macos\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 
 class openssl extends MacOSLibraryBase
 {
@@ -35,8 +36,6 @@ class openssl extends MacOSLibraryBase
      */
     protected function build(): void
     {
-        [$lib,,$destdir] = SEPARATED_PATH;
-
         // lib:zlib
         $extra = '';
         $ex_lib = '';
@@ -50,13 +49,19 @@ class openssl extends MacOSLibraryBase
             ->exec(
                 "{$this->builder->configure_env} ./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/
-                "--libdir={$lib} " .
+                '--libdir=' . BUILD_LIB_PATH . ' ' .
                 '--openssldir=/System/Library/OpenSSL ' .
                 "darwin64-{$this->builder->getOption('arch')}-cc"
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
-            ->exec("make install_sw DESTDIR={$destdir}");
+            ->exec('make install_sw DESTDIR=' . BUILD_ROOT_PATH);
+
+        FileSystem::replaceFileStr(
+            BUILD_ROOT_PATH . '/lib/pkgconfig/openssl.pc',
+            'Requires: libssl libcrypto',
+            'Requires: libssl libcrypto zlib'
+        );
         $this->patchPkgconfPrefix(['libssl.pc', 'openssl.pc', 'libcrypto.pc']);
     }
 }
