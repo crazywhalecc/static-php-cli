@@ -228,6 +228,12 @@ class LinuxBuilder extends BuilderBase
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed($extra_libs, $use_lld);
+            // php-config puts extra_libs in wrong order, fix it here...
+            FileSystem::replaceFileRegex(
+                BUILD_ROOT_PATH . '/bin/php-config',
+                '/libs="\s*-lstdc\+\+\s+(.*)"/',
+                'libs="$1 -lstdc++"'
+            );
         }
 
         if (php_uname('m') === $this->getOption('arch')) {
