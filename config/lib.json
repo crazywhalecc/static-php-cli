@@ -143,6 +143,9 @@
         "source": "imap",
         "static-libs-unix": [
             "libc-client.a"
+        ],
+        "lib-suggests": [
+            "openssl"
         ]
     },
     "ldap": {
