@@ -32,6 +32,11 @@ trait libwebp
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         // patch pkgconfig
+        FileSystem::replaceFileRegex(
+            BUILD_LIB_PATH . '/pkgconfig/libwebp.pc',
+            '/Libs: -L\$\{libdir} -lwebp.*/',
+            'Libs: -L${libdir} -lwebp -lwebpdecoder -lwebpdemux -lwebpmux'
+        );
         $this->patchPkgconfPrefix(['libsharpyuv.pc', 'libwebp.pc', 'libwebpdecoder.pc', 'libwebpdemux.pc', 'libwebpmux.pc'], PKGCONF_PATCH_PREFIX | PKGCONF_PATCH_LIBDIR);
         $this->patchPkgconfPrefix(['libsharpyuv.pc'], PKGCONF_PATCH_CUSTOM, ['/^includedir=.*$/m', 'includedir=${prefix}/include/webp']);
         $this->cleanLaFiles();

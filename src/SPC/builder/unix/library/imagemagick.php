@@ -16,7 +16,7 @@ trait imagemagick
      */
     protected function build(): void
     {
-        $extra = '--without-jxl --without-xml --without-zstd --without-x --disable-openmp ';
+        $extra = '--without-jxl --without-xml --without-x --disable-openmp ';
         // libzip support
         $extra .= $this->builder->getLib('libzip') ? '--with-zip ' : '--without-zip ';
         // jpeg support
@@ -26,7 +26,7 @@ trait imagemagick
         // webp support
         $extra .= $this->builder->getLib('libwebp') ? '--with-webp ' : '';
         // zstd support
-        // $extra .= $this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ';
+        $extra .= $this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ';
         // freetype support
         $extra .= $this->builder->getLib('freetype') ? '--with-freetype ' : '--without-freetype ';
 
