@@ -231,8 +231,8 @@ class LinuxBuilder extends BuilderBase
             // php-config puts extra_libs in wrong order, fix it here...
             FileSystem::replaceFileRegex(
                 BUILD_ROOT_PATH . '/bin/php-config',
-                '/libs="\s*-lstdc\+\+\s+(.*)"/',
-                'libs="$1 -lstdc++"'
+                '/libs="\s*(.*)\s*-lstdc\+\+\s+(.*)"/',
+                'libs="$1 $2 -lstdc++"'
             );
         }
 
