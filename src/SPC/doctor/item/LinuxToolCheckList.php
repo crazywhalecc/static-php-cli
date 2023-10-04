@@ -41,7 +41,17 @@ class LinuxToolCheckList
         'wget', // to get musl
     ];
 
-    // todo: require those
+    public const PAM_TOOLS_ALPINE = [
+        'autoconf', 'automake', 'autopoint',
+        'bison', 'bzip2', 'docbook5-xml',
+        'docbook-xsl-ns', 'flex', 'gettext',
+        'libaudit-dev', 'libdb-dev', 'libfl-dev',
+        'libselinux1-dev', 'libssl-dev', 'libtool',
+        'libxml2-utils', 'make', 'pkg-config',
+        'sed', 'w3m', 'xsltproc', 'xz-utils',
+        'libpam0g-dev',
+    ];
+
     public const PAM_TOOLS_DEBIAN = [
         'autoconf', 'automake', 'autopoint',
         'bison', 'bzip2', 'docbook5-xml',
@@ -53,7 +63,6 @@ class LinuxToolCheckList
         'libpam0g-dev',
     ];
 
-    // todo: require those
     public const PAM_TOOLS_RHEL = [
         'autoconf', 'automake', 'bison',
         'bzip2', 'flex', 'make', 'gettext',
@@ -70,7 +79,7 @@ class LinuxToolCheckList
         $distro = SystemUtil::getOSRelease();
 
         $required = match ($distro['dist']) {
-            'alpine' => array_unique(array_merge(self::TOOLS_ALPINE, self::PAM_TOOLS_RHEL)),
+            'alpine' => array_unique(array_merge(self::TOOLS_ALPINE, self::PAM_TOOLS_ALPINE)),
             'redhat' => array_unique(array_merge(self::TOOLS_RHEL, self::PAM_TOOLS_RHEL)),
             default => array_unique(array_merge(self::TOOLS_DEBIAN, self::PAM_TOOLS_DEBIAN)),
         };
