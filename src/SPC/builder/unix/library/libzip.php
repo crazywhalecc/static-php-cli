@@ -29,8 +29,8 @@ trait libzip
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                "{$this->builder->configure_env} " . ' cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
+                $this->builder->configure_env . ' cmake ' .
+                $this->builder->makeCmakeArgs() . ' ' .
                 '-DENABLE_GNUTLS=OFF ' .
                 '-DENABLE_MBEDTLS=OFF ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
@@ -43,6 +43,18 @@ trait libzip
             )
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+        $required_libs = '-lzip';
+        if ($this->builder->getLib('openssl')) {
+            $required_libs .= ' -lssl -lcrypto -lz';
+        }
+        if ($this->builder->getLib('bzip2')) {
+            $required_libs .= ' -lbz2';
+        }
+        FileSystem::replaceFileRegex(
+            BUILD_LIB_PATH . '/pkgconfig/libzip.pc',
+            '/Libs: .*/',
+            'Libs:  -L${libdir} ' . $required_libs
+        );
         $this->patchPkgconfPrefix(['libzip.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

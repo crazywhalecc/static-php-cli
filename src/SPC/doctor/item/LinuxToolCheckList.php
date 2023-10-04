@@ -59,7 +59,7 @@ class LinuxToolCheckList
         'pkg-config', 'sed', 'w3m', 'xz',
         'libdb-devel', 'libselinux-devel',
         'openssl-devel', 'libtool', 'libxml2',
-        'docbook-xsl-ns', 'libxslt',
+        'docbook-xsl-ns', 'libxslt', 'gettext-autopoint',
     ];
 
     /** @noinspection PhpUnused */
