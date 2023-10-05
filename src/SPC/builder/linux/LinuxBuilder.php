@@ -202,7 +202,7 @@ class LinuxBuilder extends BuilderBase
                 '--disable-phpdbg ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enableEmbed ? '--enable-embed=static --disable-opcache-jit ' : '--disable-embed ') .
+                ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
