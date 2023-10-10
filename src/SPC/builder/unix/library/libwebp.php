@@ -35,7 +35,7 @@ trait libwebp
         FileSystem::replaceFileRegex(
             BUILD_LIB_PATH . '/pkgconfig/libwebp.pc',
             '/Libs: -L\$\{libdir} -lwebp.*/',
-            'Libs: -L${libdir} -lwebp -lwebpdecoder -lwebpdemux -lwebpmux'
+            'Libs: -L${libdir} -lwebp -lwebpdecoder -lwebpdemux -lwebpmux -lsharpyuv'
         );
         $this->patchPkgconfPrefix(['libsharpyuv.pc', 'libwebp.pc', 'libwebpdecoder.pc', 'libwebpdemux.pc', 'libwebpmux.pc'], PKGCONF_PATCH_PREFIX | PKGCONF_PATCH_LIBDIR);
         $this->patchPkgconfPrefix(['libsharpyuv.pc'], PKGCONF_PATCH_CUSTOM, ['/^includedir=.*$/m', 'includedir=${prefix}/include/webp']);
