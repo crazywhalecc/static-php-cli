@@ -58,8 +58,9 @@ class LinuxMuslCheck
             $prefix = 'sudo ';
             logger()->warning('Current user is not root, using sudo for running command');
         }
+        $profile = file_exists('~/.bash_profile') ? '~/.bash_profile' : '~/.profile';
         if (!getenv('PATH') || !str_contains(getenv('PATH'), '/usr/local/musl/bin')) {
-            $fix_path = 'echo "export PATH=/usr/local/musl/bin:$PATH" >> ~/.bash_profile && export PATH=/usr/local/musl/bin:$PATH';
+            $fix_path = 'echo "export PATH=/usr/local/musl/bin:$PATH" >> ' . $profile . ' && export PATH=/usr/local/musl/bin:$PATH';
             shell(true)->exec($prefix . $fix_path);
         }
     }
