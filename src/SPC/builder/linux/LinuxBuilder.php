@@ -217,22 +217,22 @@ class LinuxBuilder extends BuilderBase
 
         if ($enableCli) {
             logger()->info('building cli');
-            $this->buildCli($extra_libs, $use_lld);
+            $this->buildCli($use_lld);
         }
         if ($enableFpm) {
             logger()->info('building fpm');
-            $this->buildFpm($extra_libs, $use_lld);
+            $this->buildFpm($use_lld);
         }
         if ($enableMicro) {
             logger()->info('building micro');
-            $this->buildMicro($extra_libs, $use_lld, $cflags);
+            $this->buildMicro($use_lld, $cflags);
         }
         if ($enableEmbed) {
             logger()->info('building embed');
             if ($enableMicro) {
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
-            $this->buildEmbed($extra_libs, $use_lld);
+            $this->buildEmbed($use_lld);
             // php-config puts extra_libs in wrong order, fix it here...
             FileSystem::replaceFileRegex(
                 BUILD_ROOT_PATH . '/bin/php-config',
@@ -252,11 +252,11 @@ class LinuxBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(string $extra_libs, string $use_lld): void
+    public function buildCli(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
-            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LIBS' => $this->getOption('extra-libs'),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
         shell()->cd(SOURCE_PATH . '/php-src')
@@ -277,7 +277,7 @@ class LinuxBuilder extends BuilderBase
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function buildMicro(string $extra_libs, string $use_lld, string $cflags): void
+    public function buildMicro(string $use_lld, string $cflags): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new RuntimeException('phpmicro only support PHP >= 8.0!');
@@ -290,7 +290,7 @@ class LinuxBuilder extends BuilderBase
         $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $enable_fake_cli,
-            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LIBS' => $this->getOption('extra-libs'),
             'EXTRA_LDFLAGS_PROGRAM' => "{$cflags} {$use_lld} -all-static",
         ]);
         shell()->cd(SOURCE_PATH . '/php-src')
@@ -314,11 +314,11 @@ class LinuxBuilder extends BuilderBase
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public function buildFpm(string $extra_libs, string $use_lld): void
+    public function buildFpm(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
-            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LIBS' => $this->getOption('extra-libs'),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
 
@@ -333,11 +333,11 @@ class LinuxBuilder extends BuilderBase
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 
-    public function buildEmbed(string $extra_libs, string $use_lld): void
+    public function buildEmbed(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
-            'EXTRA_LIBS' => $extra_libs,
+            'EXTRA_LIBS' => $this->getOption('extra-libs'),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
 
