@@ -13,10 +13,15 @@ use SPC\store\SourcePatcher;
 
 trait imap
 {
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
     public function patchBeforeBuild(): bool
     {
         if ($this->builder->getLib('openssl')) {
             FileSystem::replaceFileStr($this->source_dir . '/Makefile', '-DMAC_OSX_KLUDGE=1', '');
+            FileSystem::replaceFileStr($this->source_dir . '/src/osdep/unix/Makefile', 'CC=cc', 'CC=' . $this->builder->getOption('cc'));
             FileSystem::replaceFileStr($this->source_dir . '/src/osdep/unix/Makefile', '-lcrypto -lz', '-lcrypto');
             FileSystem::replaceFileStr($this->source_dir . '/src/osdep/unix/Makefile', '-lcrypto', '-lcrypto -lz');
             FileSystem::replaceFileStr(
@@ -51,6 +56,7 @@ trait imap
             throw new WrongUsageException('ext-imap built on your system requires libpam, please build with --with-libs=libpam');
         }
         shell()->cd($this->source_dir)
+            ->exec('make clean')
             ->exec('touch ip6')
             ->exec(
                 "{$this->builder->configure_env} make {$distro} " .

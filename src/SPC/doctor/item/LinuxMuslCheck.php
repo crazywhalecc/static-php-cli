@@ -58,7 +58,8 @@ class LinuxMuslCheck
         Downloader::downloadSource('musl-1.2.4', $musl_source);
         FileSystem::extractSource('musl-1.2.4', DOWNLOAD_PATH . '/musl-1.2.4.tar.gz');
         $install_musl_wrapper_cmd = 'cd ' . DOWNLOAD_PATH . '/musl-cross-make && \
-                       make install TARGET=' . $arch . ' OUTPUT=/usr/local/musl CFLAGS="-fPIE" -j';
+                       make install TARGET=' . $arch . ' CFLAGS="-fPIE" -j && \
+                       cd -rf output/* /usr/local/musl';
         $musl_install = 'cd ' . SOURCE_PATH . '/musl-1.2.4 && \
                          ./configure --enable-wrapper=gcc && \
                          make -j && make install';
