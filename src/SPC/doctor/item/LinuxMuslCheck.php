@@ -40,28 +40,33 @@ class LinuxMuslCheck
      * @throws WrongUsageException
      */
     #[AsFixItem('fix-musl')]
-    public function fixMusl(): void
+    public function fixMusl(): bool
     {
         $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         $cross_compile_lib = '/usr/local/musl/lib/libc.a';
 
-        if (!file_exists($musl_wrapper_lib)) {
-            $this->installMuslWrapper();
-        }
-        if (!file_exists($cross_compile_lib)) {
-            $this->installMuslCrossMake($arch);
-        }
+        try {
+            if (!file_exists($musl_wrapper_lib)) {
+                $this->installMuslWrapper();
+            }
+            if (!file_exists($cross_compile_lib)) {
+                $this->installMuslCrossMake($arch);
+            }
 
-        $prefix = '';
-        if (get_current_user() !== 'root') {
-            $prefix = 'sudo ';
-            logger()->warning('Current user is not root, using sudo for running command');
-        }
-        $profile = file_exists('~/.bash_profile') ? '~/.bash_profile' : '~/.profile';
-        if (!getenv('PATH') || !str_contains(getenv('PATH'), '/usr/local/musl/bin')) {
-            $fix_path = 'echo "export PATH=/usr/local/musl/bin:$PATH" >> ' . $profile . ' && export PATH=/usr/local/musl/bin:$PATH';
-            shell(true)->exec($prefix . $fix_path);
+            $prefix = '';
+            if (get_current_user() !== 'root') {
+                $prefix = 'sudo ';
+                logger()->warning('Current user is not root, using sudo for running command');
+            }
+            $profile = file_exists('~/.bash_profile') ? '~/.bash_profile' : '~/.profile';
+            if (!getenv('PATH') || !str_contains(getenv('PATH'), '/usr/local/musl/bin')) {
+                $fix_path = 'echo "export PATH=/usr/local/musl/bin:$PATH" >> ' . $profile . ' && export PATH=/usr/local/musl/bin:$PATH';
+                shell(true)->exec($prefix . $fix_path);
+            }
+            return true;
+        } catch (RuntimeException) {
+            return false;
         }
     }
 
