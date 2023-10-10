@@ -29,7 +29,9 @@ trait snappy
                 '../..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install')
-            ->exec('cp -rf ' . BUILD_ROOT_PATH . '/lib64/* ' . BUILD_ROOT_PATH . '/lib/');
+            ->exec('make install');
+        if (file_exists(BUILD_ROOT_PATH . '/lib64/libsnappy.a')) {
+            shell()->exec('cp -rf ' . BUILD_ROOT_PATH . '/lib64/* ' . BUILD_ROOT_PATH . '/lib/');
+        }
     }
 }

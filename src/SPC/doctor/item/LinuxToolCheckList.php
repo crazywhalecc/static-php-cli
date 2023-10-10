@@ -59,7 +59,7 @@ class LinuxToolCheckList
         'libaudit-dev', 'libdb-dev', 'libfl-dev',
         'libselinux1-dev', 'libssl-dev', 'libtool',
         'libxml2-utils', 'make', 'pkg-config',
-        'sed', 'w3m', 'xsltproc', 'xz-utils',
+        'sed', 'w3m', 'xsltproc', 'xz',
         'libpam0g-dev',
     ];
 
