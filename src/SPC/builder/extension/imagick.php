@@ -12,17 +12,27 @@ class imagick extends Extension
 {
     public function patchBeforeBuildconf(): bool
     {
-        // linux need to link library manually, we add it to extra-libs
         $extra_libs = $this->builder->getOption('extra-libs', '');
-        if (!str_contains($extra_libs, 'libMagickCore')) {
-            $extra_libs .= ' /usr/lib/libMagick++-7.Q16HDRI.a /usr/lib/libMagickCore-7.Q16HDRI.a /usr/lib/libMagickWand-7.Q16HDRI.a ';
-        }
-        $extra_libs .= $this->builder->getLib('libzip') ? '-lzip ' : '';
-        $extra_libs .= $this->builder->getLib('libjpeg') ? '-ljpeg ' : '';
-        $extra_libs .= $this->builder->getLib('libpng') ? '-lpng ' : '';
-        $extra_libs .= $this->builder->getLib('libwebp') ? '-lwebp ' : '';
-        $extra_libs .= $this->builder->getLib('zstd') ? '-lzstd ' : '';
-        $extra_libs .= $this->builder->getLib('freetype') ? '-lfreetype ' : '';
+        $LIB_PATH = BUILD_LIB_PATH;
+        // always add these even if they aren't needed, php-imagick pulls MagickWand before MagickCore which leads to undefined references
+        $extra_libs .= " {$LIB_PATH}/libMagick++-7.Q16HDRI.a {$LIB_PATH}/libMagickWand-7.Q16HDRI.a  {$LIB_PATH}/libMagickCore-7.Q16HDRI.a ";
+        $extra_libs .= $this->builder->getLib('libzip') ? "{$LIB_PATH}/libzip.a " : '';
+        $extra_libs .= $this->builder->getLib('libjpeg') ? "{$LIB_PATH}/libjpeg.a " : '';
+        $extra_libs .= $this->builder->getLib('libpng') ? "{$LIB_PATH}/libpng.a " : '';
+        $extra_libs .= $this->builder->getLib('libwebp') ? "{$LIB_PATH}/libwebp.a " : '';
+        $extra_libs .= $this->builder->getLib('zstd') ? "{$LIB_PATH}/libzstd.a " : '';
+        $extra_libs .= $this->builder->getLib('freetype') ? "{$LIB_PATH}/libfreetype.a " : '';
+        $this->builder->setOption('extra-libs', $extra_libs);
+        return true;
+    }
+
+    public function patchBeforeMake(): bool
+    {
+        $extra_libs = $this->builder->getOption('extra-libs', '');
+        $LIB_PATH = BUILD_LIB_PATH;
+        // always add these even if they aren't needed, php-imagick pulls MagickWand before MagickCore which leads to undefined references
+        $extra_libs .= " {$LIB_PATH}/libMagick++-7.Q16HDRI.a {$LIB_PATH}/libMagickWand-7.Q16HDRI.a  {$LIB_PATH}/libMagickCore-7.Q16HDRI.a ";
+        $extra_libs .= '-lgomp ';
         $this->builder->setOption('extra-libs', $extra_libs);
         return true;
     }
