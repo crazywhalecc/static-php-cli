@@ -59,7 +59,7 @@ trait imap
             ->exec('make clean')
             ->exec('touch ip6')
             ->exec(
-                "{$this->builder->configure_env} make {$distro} " .
+                "yes | {$this->builder->configure_env} make {$distro} " .
                 'EXTRACFLAGS="-fPIC" ' .
                 (
                     $this->builder->getLib('openssl') ?
@@ -67,7 +67,6 @@ trait imap
                         : 'SSLTYPE=none'
                 )
             );
-        // todo: answer this with y automatically. using SSLTYPE=nopwd creates imap WITH ssl...
         try {
             shell()
                 ->exec("cp -rf {$this->source_dir}/c-client/c-client.a " . BUILD_LIB_PATH . '/libc-client.a')
