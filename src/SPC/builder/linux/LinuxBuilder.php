@@ -40,16 +40,22 @@ class LinuxBuilder extends BuilderBase
         $this->options = $options;
         logger()->debug('Current OS: ' . SystemUtil::getOSRelease()['dist'] . ' ' . SystemUtil::getOSRelease()['ver']);
         // ---------- set necessary options ----------
-        // set C Compiler (default: alpine: gcc, others: musl-gcc)
-        $compiler_prefix = match (arch2gnu(php_uname('m'))) {
-            'x86_64' => 'x86_64-linux-musl-',
-            'aarch64' => 'aarch64-linux-musl-',
-            default => ''
-        };
-        $this->setOptionIfNotExist('library_path', '/usr/local/musl/lib:/usr/local/musl/' . substr($compiler_prefix, 0, -1) . '/lib');
-        $this->setOptionIfNotExist('cc', "{$compiler_prefix}gcc");
-        // set C++ Compiler (default: g++)
-        $this->setOptionIfNotExist('cxx', "{$compiler_prefix}g++");
+        if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
+            $this->setOptionIfNotExist('cc', 'gcc');
+            // set C++ Compiler (default: g++)
+            $this->setOptionIfNotExist('cxx', 'g++');
+        } else {
+            $compiler_prefix = match (arch2gnu(php_uname('m'))) {
+                'x86_64' => 'x86_64-linux-musl-',
+                'aarch64' => 'aarch64-linux-musl-',
+                default => ''
+            };
+            $this->setOptionIfNotExist('library_path', '/usr/local/musl/lib:/usr/local/musl/' . substr($compiler_prefix, 0, -1) . '/lib');
+            // set C Compiler (default: alpine: gcc, others: musl-gcc)
+            $this->setOptionIfNotExist('cc', "{$compiler_prefix}gcc");
+            // set C++ Compiler (default: g++)
+            $this->setOptionIfNotExist('cxx', "{$compiler_prefix}g++");
+        }
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));
         $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
@@ -137,7 +143,7 @@ class LinuxBuilder extends BuilderBase
         } else {
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
         }
-        // add libstdc++, some extensions or libraries need it (C++ cannot be linked statically)
+        // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lstdc++ ' : '');
         $this->setOption('extra-libs', $extra_libs);
 
@@ -191,7 +197,7 @@ class LinuxBuilder extends BuilderBase
         $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                'LD_LIBRARY_PATH=/usr/local/musl/' . $arch . '/lib ' .
+                (SystemUtil::getOSRelease()['dist'] === 'alpine' ? '' : "LD_LIBRARY_PATH=/usr/local/musl/{$arch}/lib ") .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .

@@ -148,14 +148,12 @@ abstract class BuilderBase
     {
         // judge cpp-extension
         $exts = array_keys($this->getExts());
-        $cpp = false;
         foreach ($exts as $ext) {
             if (Config::getExt($ext, 'cpp-extension', false) === true) {
-                $cpp = true;
-                break;
+                return true;
             }
         }
-        return $cpp;
+        return false;
     }
 
     /**

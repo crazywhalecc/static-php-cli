@@ -20,7 +20,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
-        'g++', 'patch',
+        'g++', 'patch', 'curl',
     ];
 
     public const TOOLS_DEBIAN = [
@@ -28,7 +28,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
-        'xz',
+        'xz', 'curl',
     ];
 
     public const TOOLS_RHEL = [
@@ -42,14 +42,14 @@ class LinuxToolCheckList
     ];
 
     public const PAM_TOOLS_ALPINE = [
-        'autoconf', 'automake', 'autopoint',
-        'bison', 'bzip2', 'docbook5-xml',
-        'docbook-xsl-ns', 'flex', 'gettext',
-        'libaudit-dev', 'libdb-dev', 'libfl-dev',
-        'libselinux1-dev', 'libssl-dev', 'libtool',
-        'libxml2-utils', 'make', 'pkg-config',
-        'sed', 'w3m', 'xsltproc', 'xz-utils',
-        'libpam0g-dev',
+        'autoconf', 'automake', 'gettext',
+        'bison', 'bzip2', 'docbook-xml',
+        'docbook-xsl', 'flex', 'gettext',
+        'audit-dev', 'db-dev', 'flex-libs',
+        'libselinux-dev', 'openssl-dev', 'libtool',
+        'libxml2-utils', 'make', 'pkgconfig',
+        'sed', 'w3m', 'libxslt-dev', 'xz',
+        'linux-pam-dev',
     ];
 
     public const PAM_TOOLS_DEBIAN = [
@@ -134,7 +134,7 @@ class LinuxToolCheckList
             logger()->warning('Current user is not root, using sudo for running command');
         }
         try {
-            $to_install = $distro['dist'] === 'redhat' ? $missing : str_replace('xz', 'xz-utils', $missing);
+            $to_install = $distro['dist'] !== 'debian' ? $missing : str_replace('xz', 'xz-utils', $missing);
             shell(true)->exec($prefix . $install_cmd . ' ' . implode(' ', $to_install));
         } catch (RuntimeException) {
             return false;
