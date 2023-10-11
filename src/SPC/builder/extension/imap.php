@@ -6,6 +6,7 @@ namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
 use SPC\exception\FileSystemException;
+use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
@@ -14,6 +15,9 @@ class imap extends Extension
 {
     public function getUnixConfigureArg(): string
     {
+        if ($this->builder->getOption('enable-zts')) {
+            throw new WrongUsageException('ext-imap is not thread safe, do not build it with ZTS builds');
+        }
         $arg = '--with-imap=' . BUILD_ROOT_PATH;
         if ($this->builder->getLib('openssl') !== null) {
             $arg .= ' --with-imap-ssl=' . BUILD_ROOT_PATH;

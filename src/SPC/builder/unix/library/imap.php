@@ -45,9 +45,6 @@ trait imap
      */
     protected function build(): void
     {
-        if ($this->builder->getOption('enable-zts')) {
-            throw new WrongUsageException('ext-imap is not thread safe, do not build it with ZTS builds');
-        }
         $distro = match (SystemUtil::getOSRelease()['dist']) {
             'redhat', 'alpine' => 'slx',
             default => 'ldb'
