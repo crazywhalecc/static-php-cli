@@ -42,19 +42,12 @@ class LinuxBuilder extends BuilderBase
         // ---------- set necessary options ----------
         if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
             $this->setOptionIfNotExist('cc', 'gcc');
-            // set C++ Compiler (default: g++)
             $this->setOptionIfNotExist('cxx', 'g++');
         } else {
-            $compiler_prefix = match (arch2gnu(php_uname('m'))) {
-                'x86_64' => 'x86_64-linux-musl-',
-                'aarch64' => 'aarch64-linux-musl-',
-                default => ''
-            };
-            $this->setOptionIfNotExist('library_path', '/usr/local/musl/lib:/usr/local/musl/' . substr($compiler_prefix, 0, -1) . '/lib');
-            // set C Compiler (default: alpine: gcc, others: musl-gcc)
-            $this->setOptionIfNotExist('cc', "{$compiler_prefix}gcc");
-            // set C++ Compiler (default: g++)
-            $this->setOptionIfNotExist('cxx', "{$compiler_prefix}g++");
+            $arch = arch2gnu(php_uname('m'));
+            $this->setOptionIfNotExist('library_path', '/usr/local/musl/lib');
+            $this->setOptionIfNotExist('cc', "{$arch}-linux-musl-gcc");
+            $this->setOptionIfNotExist('cxx', "{$arch}-linux-musl-g++");
         }
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));
@@ -62,7 +55,7 @@ class LinuxBuilder extends BuilderBase
 
         // ---------- set necessary compile environments ----------
         // set libc
-        $this->libc = $this->getOption('cc', 'gcc') === 'musl-gcc' ? 'musl_wrapper' : 'musl'; // SystemUtil::selectLibc($this->cc);
+        $this->libc = str_ends_with($this->getOption('cc', 'gcc'), 'musl-gcc') ? 'musl_wrapper' : 'musl'; // SystemUtil::selectLibc($this->cc);
         // concurrency
         $this->concurrency = SystemUtil::getCpuCount();
         // cflags
@@ -144,7 +137,7 @@ class LinuxBuilder extends BuilderBase
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
         }
         // add libstdc++, some extensions or libraries need it
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lstdc++ ' : '');
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '/usr/local/musl/lib/libstdc++.a ' : '');
         $this->setOption('extra-libs', $extra_libs);
 
         $cflags = $this->arch_c_flags;
@@ -153,7 +146,7 @@ class LinuxBuilder extends BuilderBase
         switch ($this->libc) {
             case 'musl_wrapper':
             case 'glibc':
-                $cflags .= ' -static-libgcc -I"' . BUILD_INCLUDE_PATH . '"';
+                $cflags .= ' -static-libgcc -static-libstdc++ -I"' . BUILD_INCLUDE_PATH . '"';
                 break;
             case 'musl':
                 if (str_ends_with($this->getOption('cc'), 'clang') && SystemUtil::findCommand('lld')) {
@@ -194,10 +187,9 @@ class LinuxBuilder extends BuilderBase
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
-        $arch = arch2gnu(php_uname('m')) === 'x86_64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                (SystemUtil::getOSRelease()['dist'] === 'alpine' ? '' : "LD_LIBRARY_PATH=/usr/local/musl/{$arch}/lib ") .
+                (SystemUtil::getOSRelease()['dist'] === 'alpine' ? '' : 'LD_LIBRARY_PATH=/usr/local/musl/lib ') .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
@@ -209,10 +201,10 @@ class LinuxBuilder extends BuilderBase
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
                 ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
+                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $this->makeExtensionArgs() . ' ' .
                 $envs
             );

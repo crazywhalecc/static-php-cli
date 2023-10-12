@@ -28,7 +28,7 @@ trait snappy
                 '-DSNAPPY_BUILD_BENCHMARKS=OFF ' .
                 '../..'
             )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
+            ->exec("cmake --build . -j{$this->builder->concurrency}")
             ->exec('make install');
         if (file_exists(BUILD_ROOT_PATH . '/lib64/libsnappy.a')) {
             shell()->exec('cp -rf ' . BUILD_ROOT_PATH . '/lib64/* ' . BUILD_ROOT_PATH . '/lib/');
