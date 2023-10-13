@@ -125,18 +125,18 @@
             "libMagickWand-7.Q16HDRI.a"
         ],
         "lib-depends": [
-            "zlib",
-            "libpng",
-            "libjpeg",
-            "bzip2",
-            "libwebp",
-            "freetype"
+            "zlib"
         ],
         "lib-suggests": [
             "zstd",
             "xz",
             "libzip",
-            "libxml2"
+            "libpng",
+            "libxml2",
+            "bzip2",
+            "libwebp",
+            "libjpeg",
+            "freetype"
         ]
     },
     "imap": {
