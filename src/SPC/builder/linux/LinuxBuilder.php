@@ -137,7 +137,7 @@ class LinuxBuilder extends BuilderBase
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
         }
         // add libstdc++, some extensions or libraries need it
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '/usr/local/musl/lib/libstdc++.a ' : '');
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lstdc++ ' : '');
         $this->setOption('extra-libs', $extra_libs);
 
         $cflags = $this->arch_c_flags;
