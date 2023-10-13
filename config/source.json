@@ -128,8 +128,8 @@
         }
     },
     "icu": {
-        "type": "ghtar",
-        "repo": "unicode-org/icu",
+        "type": "url",
+        "url": "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-src.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
