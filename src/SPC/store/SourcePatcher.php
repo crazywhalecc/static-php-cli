@@ -118,6 +118,30 @@ class SourcePatcher
     }
 
     /**
+     * Use existing patch file for patching
+     *
+     * @param  string           $patch_name Patch file name in src/globals/patch/
+     * @param  string           $cwd        Working directory for patch command
+     * @param  bool             $reverse    Reverse patches (default: False)
+     * @throws RuntimeException
+     */
+    public static function patchFile(string $patch_name, string $cwd, bool $reverse = false): bool
+    {
+        if (!file_exists(ROOT_DIR . "/src/globals/patch/{$patch_name}")) {
+            return false;
+        }
+
+        $patch_file = ROOT_DIR . "/src/globals/patch/{$patch_name}";
+        $patch_str = str_replace('/', DIRECTORY_SEPARATOR, $patch_file);
+
+        f_passthru(
+            'cd ' . $cwd . ' && ' .
+            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patch_str . ' | patch -p1 ' . ($reverse ? '-R' : '')
+        );
+        return true;
+    }
+
+    /**
      * @throws FileSystemException
      */
     public static function patchOpenssl11Darwin(): bool
