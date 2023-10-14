@@ -20,6 +20,19 @@ class SystemUtil
             'ver' => 'unknown',
         ];
         switch (true) {
+            case file_exists('/etc/centos-release'):
+                $lines = file('/etc/centos-release');
+                goto rh;
+            case file_exists('/etc/redhat-release'):
+                $lines = file('/etc/redhat-release');
+                rh:
+                foreach ($lines as $line) {
+                    if (preg_match('/release\s+(\d*(\.\d+)*)/', $line, $matches)) {
+                        $ret['dist'] = 'redhat';
+                        $ret['ver'] = $matches[1];
+                    }
+                }
+                break;
             case file_exists('/etc/os-release'):
                 $lines = file('/etc/os-release');
                 foreach ($lines as $line) {
@@ -34,19 +47,6 @@ class SystemUtil
                 $ret['ver'] = trim($ret['ver'], '"\'');
                 if (strcasecmp($ret['dist'], 'centos') === 0) {
                     $ret['dist'] = 'redhat';
-                }
-                break;
-            case file_exists('/etc/centos-release'):
-                $lines = file('/etc/centos-release');
-                goto rh;
-            case file_exists('/etc/redhat-release'):
-                $lines = file('/etc/redhat-release');
-                rh:
-                foreach ($lines as $line) {
-                    if (preg_match('/release\s+(\d+(\.\d+)*)/', $line, $matches)) {
-                        $ret['dist'] = 'redhat';
-                        $ret['ver'] = $matches[1];
-                    }
                 }
                 break;
         }
