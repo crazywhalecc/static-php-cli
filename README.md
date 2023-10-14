@@ -4,6 +4,8 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 **If you are using English, see [English README](README-en.md).**
 
+> 项目别名：standalone-php-compiler
+
 编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！（cli SAPI）
 
 <img width="600" alt="截屏2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
