@@ -55,7 +55,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): bool|int
+    public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): false|int
     {
         return self::replaceFile($filename, REPLACE_FILE_STR, $search, $replace);
     }
@@ -63,7 +63,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): bool|int
+    public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): false|int
     {
         return self::replaceFile($filename, REPLACE_FILE_PREG, $search, $replace);
     }
@@ -71,7 +71,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFileUser(string $filename, mixed $callback = null): bool|int
+    public static function replaceFileUser(string $filename, mixed $callback = null): false|int
     {
         return self::replaceFile($filename, REPLACE_FILE_USER, $callback);
     }
@@ -163,7 +163,6 @@ class FileSystem
                 self::emitSourceExtractHook($name);
                 return;
             }
-
             if (PHP_OS_FAMILY === 'Darwin' || PHP_OS_FAMILY === 'Linux') {
                 if (f_mkdir(directory: $target, recursive: true) !== true) {
                     throw new FileSystemException('create ' . $name . 'source dir failed');
@@ -256,14 +255,13 @@ class FileSystem
     /**
      * 递归或非递归扫描目录，可返回相对目录的文件列表或绝对目录的文件列表
      *
-     * @param  string      $dir         目录
-     * @param  bool        $recursive   是否递归扫描子目录
-     * @param  bool|string $relative    是否返回相对目录，如果为true则返回相对目录，如果为false则返回绝对目录
-     * @param  bool        $include_dir 非递归模式下，是否包含目录
-     * @return array|false
+     * @param string      $dir         目录
+     * @param bool        $recursive   是否递归扫描子目录
+     * @param bool|string $relative    是否返回相对目录，如果为true则返回相对目录，如果为false则返回绝对目录
+     * @param bool        $include_dir 非递归模式下，是否包含目录
      * @since 2.5
      */
-    public static function scanDirFiles(string $dir, bool $recursive = true, bool|string $relative = false, bool $include_dir = false): bool|array
+    public static function scanDirFiles(string $dir, bool $recursive = true, bool|string $relative = false, bool $include_dir = false): array|false
     {
         $dir = self::convertPath($dir);
         // 不是目录不扫，直接 false 处理
@@ -403,7 +401,7 @@ class FileSystem
      * @param  mixed               ...$args Arguments passed to file_put_contents
      * @throws FileSystemException
      */
-    public static function writeFile(string $path, mixed $content, ...$args): bool|string|int
+    public static function writeFile(string $path, mixed $content, ...$args): bool|int|string
     {
         $dir = pathinfo($path, PATHINFO_DIRNAME);
         if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
@@ -446,7 +444,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): bool|int
+    private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): false|int
     {
         logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);
         $file = self::readFile($filename);
