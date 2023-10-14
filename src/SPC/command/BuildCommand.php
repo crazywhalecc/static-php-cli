@@ -28,7 +28,7 @@ abstract class BuildCommand extends BaseCommand
                 break;
         }
 
-        $this->addOption('with-clean', null, null, 'fresh build, `make clean` before `make`');
+        $this->addOption('with-clean', null, null, 'fresh build, remove `source` dir before `make`');
         $this->addOption('bloat', null, null, 'add all libraries into binary');
     }
 }
