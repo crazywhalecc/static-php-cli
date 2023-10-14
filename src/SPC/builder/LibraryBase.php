@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
-use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -18,6 +17,8 @@ abstract class LibraryBase
     protected string $source_dir;
 
     protected array $dependencies = [];
+
+    protected bool $patched = false;
 
     /**
      * @throws RuntimeException
@@ -130,10 +131,15 @@ abstract class LibraryBase
      */
     public function tryBuild(bool $force_build = false): int
     {
+        if (file_exists($this->source_dir . '/.spc.patched')) {
+            $this->patched = true;
+        }
         // force means just build
         if ($force_build) {
             logger()->info('Building required library [' . static::NAME . ']');
-            $this->patchBeforeBuild();
+            if (!$this->patched && $this->patchBeforeBuild()) {
+                file_put_contents($this->source_dir . '/.spc.patched', 'PATCHED!!!');
+            }
             $this->build();
             return BUILD_STATUS_OK;
         }
@@ -153,7 +159,7 @@ abstract class LibraryBase
             }
         }
         // pkg-config is treated specially. If it is pkg-config, check if the pkg-config binary exists
-        if ($this instanceof MacOSLibraryBase && static::NAME === 'pkg-config' && !file_exists(BUILD_ROOT_PATH . '/bin/pkg-config')) {
+        if (static::NAME === 'pkg-config' && !file_exists(BUILD_ROOT_PATH . '/bin/pkg-config')) {
             $this->tryBuild(true);
             return BUILD_STATUS_OK;
         }
