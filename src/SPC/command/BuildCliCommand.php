@@ -7,6 +7,7 @@ namespace SPC\command;
 use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
 use SPC\util\LicenseDumper;
@@ -70,6 +71,10 @@ class BuildCliCommand extends BuildCommand
                 logger()->warning('some extensions will be enabled due to dependencies: ' . implode(',', $not_included));
             }
             sleep(2);
+            if ($this->input->getOption('with-clean')) {
+                logger()->info('Cleaning source dir...');
+                FileSystem::removeDir(SOURCE_PATH);
+            }
             // compile libraries
             $builder->buildLibs($libraries);
             // check extensions
