@@ -52,7 +52,7 @@ class SourceExtractor
         // start check
         foreach ($sources_extracted as $source => $item) {
             if (Config::getSource($source) === null) {
-                throw new WrongUsageException("Source [{$source}] not exists, please check name and correct it !");
+                throw new WrongUsageException("Source [{$source}] does not exist, please check the name and correct it !");
             }
             if (!isset($lock[$source])) {
                 throw new WrongUsageException('Source [' . $source . '] not downloaded or not locked, you should download it first !');
