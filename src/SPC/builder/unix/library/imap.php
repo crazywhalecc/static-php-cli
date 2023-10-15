@@ -52,17 +52,16 @@ trait imap
         if ($distro === 'ldb' && !$this->builder->getLib('libpam')) {
             throw new WrongUsageException('ext-imap built on your system requires libpam, please build with --with-libs=libpam');
         }
+        if ($this->builder->getLib('openssl')) {
+            $ssl_options = 'SPECIALAUTHENTICATORS=ssl SSLTYPE=unix.nopwd SSLINCLUDE=' . BUILD_INCLUDE_PATH . ' SSLLIB=' . BUILD_LIB_PATH;
+        } else {
+            $ssl_options = 'SSLTYPE=none';
+        }
         shell()->cd($this->source_dir)
             ->exec('make clean')
             ->exec('touch ip6')
             ->exec(
-                "yes | {$this->builder->configure_env} make {$distro} " .
-                'EXTRACFLAGS="-fPIC" ' .
-                (
-                    $this->builder->getLib('openssl') ?
-                        ('SPECIALAUTHENTICATORS=ssl SSLTYPE=unix.nopwd SSLINCLUDE=' . BUILD_INCLUDE_PATH . ' SSLLIB=' . BUILD_LIB_PATH)
-                        : 'SSLTYPE=none'
-                )
+                "yes | {$this->builder->configure_env} make {$distro} {$ssl_options}"
             );
         try {
             shell()
