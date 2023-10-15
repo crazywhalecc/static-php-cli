@@ -59,6 +59,7 @@ RUN apk update; \
     apk add --no-cache \
         autoconf \
         automake \
+        gettext \
         bash \
         binutils \
         bison \
@@ -89,8 +90,7 @@ RUN apk update; \
         composer \
         pkgconfig \
         wget \
-        xz ; \
-  ln -s /usr/bin/php82 /usr/bin/php
+        xz
 
 WORKDIR /app
 ADD ./src /app/src
