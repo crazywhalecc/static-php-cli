@@ -60,6 +60,7 @@ function osfamily2dir(): string
         'Windows', 'WINNT', 'Cygwin' => 'windows',
         'Darwin' => 'macos',
         'Linux' => 'linux',
+        'BSD' => 'freebsd',
         default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
     };
 }
