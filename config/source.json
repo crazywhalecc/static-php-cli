@@ -340,7 +340,7 @@
         "type": "ghrel",
         "repo": "mongodb/mongo-php-driver",
         "path": "php-src/ext/mongodb",
-        "match": "mongodb.+\\.zip",
+        "match": "mongodb.+\\.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
