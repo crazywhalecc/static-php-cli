@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
@@ -31,6 +32,7 @@ class BuilderProvider
             // ),
             'Darwin' => new MacOSBuilder($input->getOptions()),
             'Linux' => new LinuxBuilder($input->getOptions()),
+            'BSD' => new BSDBuilder($input->getOptions()),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
     }

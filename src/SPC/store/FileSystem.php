@@ -163,7 +163,7 @@ class FileSystem
                 self::emitSourceExtractHook($name);
                 return;
             }
-            if (PHP_OS_FAMILY === 'Darwin' || PHP_OS_FAMILY === 'Linux') {
+            if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
                 if (f_mkdir(directory: $target, recursive: true) !== true) {
                     throw new FileSystemException('create ' . $name . 'source dir failed');
                 }

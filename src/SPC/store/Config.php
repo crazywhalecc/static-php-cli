@@ -54,6 +54,7 @@ class Config
                 'Windows' => ['-windows', '-win', ''],
                 'Darwin' => ['-macos', '-unix', ''],
                 'Linux' => ['-linux', '-unix', ''],
+                'BSD' => ['-freebsd', '-bsd', '-unix', ''],
                 default => throw new WrongUsageException('OS ' . PHP_OS_FAMILY . ' is not supported'),
             };
             foreach ($m_key as $v) {
@@ -98,6 +99,7 @@ class Config
                 'Windows' => ['-windows', '-win', ''],
                 'Darwin' => ['-macos', '-unix', ''],
                 'Linux' => ['-linux', '-unix', ''],
+                'BSD' => ['-freebsd', '-bsd', '-unix', ''],
                 default => throw new WrongUsageException('OS ' . PHP_OS_FAMILY . ' is not supported'),
             };
             foreach ($m_key as $v) {
