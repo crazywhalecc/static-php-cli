@@ -46,6 +46,7 @@ class Extension
                 break;
             case 'Darwin':
             case 'Linux':
+            case 'BSD':
                 $arg .= $this->getUnixConfigureArg();
                 break;
         }
