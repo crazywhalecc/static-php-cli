@@ -189,7 +189,7 @@ class LinuxBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                (SystemUtil::getOSRelease()['dist'] === 'alpine' ? '' : 'LD_LIBRARY_PATH=/usr/local/musl/lib ') .
+                (SystemUtil::getOSRelease()['dist'] === 'alpine' ? '' : 'LD_LIBRARY_PATH=/usr/local/musl/x86_64-linux-musl/lib ') .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
