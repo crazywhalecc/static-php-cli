@@ -8,10 +8,12 @@ Compile a purely static php-cli binary file with various extensions to make PHP 
 
 <img width="600" alt="2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
 
-You can also use the micro binary file to combine php binary and php source code into one for distribution!
-This feature is provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro). (micro SAPI)
+You can also use the micro binary file to combine php binary and php source code into one for distribution! (micro SAPI)
 
 <img width="600" alt="2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
+
+> This SAPI feature is from the [Fork](https://github.com/crazywhalecc/phpmicro) of [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
+
 
 [![Version](https://img.shields.io/badge/Version-2.0--rc5-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
