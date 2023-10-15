@@ -10,9 +10,11 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 <img width="600" alt="截屏2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
 
-同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！（由 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 提供支持）（micro SAPI）
+同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！（micro SAPI）
 
 <img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
+
+> 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/dixyes/phpmicro)。
 
 [![Version](https://img.shields.io/badge/Version-2.0--rc5-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
