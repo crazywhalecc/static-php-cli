@@ -35,6 +35,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 | macOS   | CI, Local | Local     |
 | Linux   | CI, Local | CI, Local |
 | Windows |           |           |
+| FreeBSD | Local     | Local     |
 
 > macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
 

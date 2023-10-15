@@ -34,6 +34,7 @@ Here is the architecture support status, where `CI` represents support for GitHu
 | macOS   | CI, Local | Local     |
 | Linux   | CI, Local | CI, Local |
 | Windows |           |           |
+| FreeBSD | Local     | Local     |
 
 > macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
