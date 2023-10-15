@@ -59,9 +59,12 @@ class SourceExtractor
             }
 
             // check source dir exist
-            $check = $lock[$source]['move_path'] === null ? SOURCE_PATH . '/' . $source : SOURCE_PATH . '/' . $lock[$source]['move_path'];
+            $check = $lock[$source]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (SOURCE_PATH . '/' . $lock[$source]['move_path']);
             if (!is_dir($check)) {
+                logger()->debug('Extracting source [' . $source . '] to ' . $check . ' ...');
                 FileSystem::extractSource($source, DOWNLOAD_PATH . '/' . ($lock[$source]['filename'] ?? $lock[$source]['dirname']), $lock[$source]['move_path']);
+            } else {
+                logger()->debug('Source [' . $source . '] already extracted in ' . $check . ', skip !');
             }
         }
     }

@@ -132,6 +132,7 @@ class FileSystem
                 break;
             case 'Linux':
             case 'Darwin':
+            case 'BSD':
                 f_passthru('cp -r "' . $src_path . '" "' . $dst_path . '"');
                 break;
         }
@@ -154,7 +155,7 @@ class FileSystem
         if ($move_path !== null) {
             $move_path = SOURCE_PATH . '/' . $move_path;
         }
-        logger()->info("extracting {$name} source");
+        logger()->info("extracting {$name} source to " . ($move_path ?? SOURCE_PATH . "/{$name}") . ' ...');
         try {
             $target = $move_path ?? (SOURCE_PATH . "/{$name}");
             // Git source, just move
