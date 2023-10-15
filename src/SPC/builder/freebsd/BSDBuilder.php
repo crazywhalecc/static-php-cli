@@ -192,13 +192,14 @@ class BSDBuilder extends BuilderBase
             // link resolv library (macOS needs it)
             'EXTRA_LIBS' => "{$this->getOption('extra-libs')} /usr/lib/libm.a",
         ];
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec('strip --strip-all micro.sfx');
-        }
         $vars = SystemUtil::makeEnvVarString($vars);
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec("make -j{$this->concurrency} {$vars} micro");
+
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec('strip --strip-all micro.sfx');
+        }
         $this->deployBinary(BUILD_TARGET_MICRO);
 
         if ($this->phar_patched) {
