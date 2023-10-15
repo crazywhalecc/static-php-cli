@@ -16,6 +16,7 @@ final class CheckListHandlerTest extends TestCase
     {
         $list = new CheckListHandler();
 
-        $this->assertCount(6, $list->runChecks());
+        $id = $list->runChecks();
+        $this->assertCount(7, $id);
     }
 }
