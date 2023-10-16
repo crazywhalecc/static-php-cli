@@ -23,6 +23,7 @@ class BuildCliCommand extends BuildCommand
     {
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
+        $this->addOption('rebuild', 'r', null, 'Delete old build and rebuild');
         $this->addOption('build-micro', null, null, 'build micro');
         $this->addOption('build-cli', null, null, 'build cli');
         $this->addOption('build-fpm', null, null, 'build fpm');
