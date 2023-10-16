@@ -22,13 +22,12 @@ trait snappy
             ->exec(
                 "{$this->builder->configure_env} cmake " .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DCMAKE_INSTALL_PREFIX=' . escapeshellarg(BUILD_ROOT_PATH) . ' ' .
+                "{$this->builder->makeCmakeArgs()} " .
                 '-DSNAPPY_BUILD_TESTS=OFF ' .
                 '-DSNAPPY_BUILD_BENCHMARKS=OFF ' .
                 '../..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
     }
 }

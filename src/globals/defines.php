@@ -13,8 +13,8 @@ define('START_TIME', microtime(true));
 define('BUILD_ROOT_PATH', is_string($a = getenv('BUILD_ROOT_PATH')) ? $a : (WORKING_DIR . '/buildroot'));
 define('SOURCE_PATH', is_string($a = getenv('SOURCE_PATH')) ? $a : (WORKING_DIR . '/source'));
 define('DOWNLOAD_PATH', is_string($a = getenv('DOWNLOAD_PATH')) ? $a : (WORKING_DIR . '/downloads'));
+define('BUILD_BIN_PATH', is_string($a = getenv('INSTALL_BIN_PATH')) ? $a : (BUILD_ROOT_PATH . '/bin'));
 define('BUILD_LIB_PATH', is_string($a = getenv('INSTALL_LIB_PATH')) ? $a : (BUILD_ROOT_PATH . '/lib'));
-const BUILD_DEPS_PATH = BUILD_ROOT_PATH;
 define('BUILD_INCLUDE_PATH', is_string($a = getenv('INSTALL_INCLUDE_PATH')) ? $a : (BUILD_ROOT_PATH . '/include'));
 define('SEPARATED_PATH', [
     '/' . pathinfo(BUILD_LIB_PATH)['basename'], // lib
