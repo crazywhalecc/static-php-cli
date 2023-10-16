@@ -270,7 +270,7 @@
         "regex": "/href=\"(?<file>libxslt-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "license": {
             "type": "file",
-            "text": "COPYING"
+            "path": "COPYING"
         }
     },
     "libyaml": {
