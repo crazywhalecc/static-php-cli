@@ -10,11 +10,13 @@ class icu extends LinuxLibraryBase
 
     protected function build(): void
     {
-        $root = BUILD_ROOT_PATH;
-        $cppflag = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1  -DU_STATIC_IMPLEMENTATION=1"';
+        $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1  -DU_STATIC_IMPLEMENTATION=1"';
+        $cxxflags = 'CXXFLAGS="-std=c++11"';
+        $ldflags = 'LDFLAGS="-static"';
         shell()->cd($this->source_dir . '/source')
             ->exec(
-                "{$this->builder->configure_env} {$cppflag} ./runConfigureICU Linux " .
+                "{$this->builder->configure_env} {$cppflags} {$cxxflags} {$ldflags} " .
+                './runConfigureICU Linux ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--with-data-packaging=static ' .
@@ -25,7 +27,7 @@ class icu extends LinuxLibraryBase
                 '--enable-tools=yes ' .
                 '--enable-tests=no ' .
                 '--enable-samples=no ' .
-                "--prefix={$root}"
+                '--prefix=' . BUILD_ROOT_PATH
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
