@@ -40,5 +40,11 @@ class libxml2 extends LinuxLibraryBase
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libxml-2.0.pc',
+            '-licudata -licui18n -licuuc',
+            '-licui18n -licuuc -licudata'
+        );
     }
 }
