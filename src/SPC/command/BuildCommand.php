@@ -30,5 +30,6 @@ abstract class BuildCommand extends BaseCommand
 
         $this->addOption('with-clean', null, null, 'fresh build, remove `source` dir before `make`');
         $this->addOption('bloat', null, null, 'add all libraries into binary');
+        $this->addOption('disable-opcache-jit', null, null, 'disables opcache-jit');
     }
 }

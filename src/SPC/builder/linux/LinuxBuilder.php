@@ -181,6 +181,7 @@ class LinuxBuilder extends BuilderBase
             $maxExecutionTimers = '';
             $zts = '';
         }
+        $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
 
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
@@ -202,6 +203,7 @@ class LinuxBuilder extends BuilderBase
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
                 ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
                 ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
+                $disable_jit .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
@@ -334,7 +336,7 @@ class LinuxBuilder extends BuilderBase
     public function buildEmbed(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
             'EXTRA_LIBS' => $this->getOption('extra-libs'),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
