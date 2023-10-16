@@ -102,8 +102,11 @@ class LicenseDumper
     /**
      * @throws RuntimeException
      */
-    private function loadSourceFile(string $source_name, string $in_path, ?string $custom_base_path = null): string
+    private function loadSourceFile(string $source_name, ?string $in_path, ?string $custom_base_path = null): string
     {
+        if (is_null($in_path)) {
+            throw new RuntimeException('source [' . $source_name . '] license file is not set, please check config/source.json');
+        }
         if (!file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path)) {
             throw new RuntimeException('source [' . $source_name . '] license file [' . $in_path . '] not exist');
         }
