@@ -140,19 +140,8 @@ class LinuxBuilder extends BuilderBase
 
         $cflags = $this->arch_c_flags;
         $use_lld = '';
-
-        switch ($this->libc) {
-            case 'musl_wrapper':
-            case 'glibc':
-                $cflags .= ' -static-libgcc -I"' . BUILD_INCLUDE_PATH . '"';
-                break;
-            case 'musl':
-                if (str_ends_with($this->getOption('cc'), 'clang') && SystemUtil::findCommand('lld')) {
-                    $use_lld = '-Xcompiler -fuse-ld=lld';
-                }
-                break;
-            default:
-                throw new WrongUsageException('libc ' . $this->libc . ' is not implemented yet');
+        if (str_ends_with($this->getOption('cc'), 'clang') && SystemUtil::findCommand('lld')) {
+            $use_lld = '-Xcompiler -fuse-ld=lld';
         }
 
         $envs = $this->pkgconf_env . ' ' . SystemUtil::makeEnvVarString([
@@ -179,6 +168,7 @@ class LinuxBuilder extends BuilderBase
             $maxExecutionTimers = '';
             $zts = '';
         }
+        $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
 
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
@@ -197,11 +187,12 @@ class LinuxBuilder extends BuilderBase
                 '--disable-phpdbg ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enableEmbed ? '--enable-embed=static --disable-opcache-jit ' : '--disable-embed ') .
+                ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
+                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
+                $disable_jit .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $this->makeExtensionArgs() . ' ' .
                 $envs
             );
