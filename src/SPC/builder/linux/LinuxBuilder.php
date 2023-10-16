@@ -41,10 +41,14 @@ class LinuxBuilder extends BuilderBase
         if (SystemUtil::isMuslDist()) {
             $this->setOptionIfNotExist('cc', 'gcc');
             $this->setOptionIfNotExist('cxx', 'g++');
+            $this->setOptionIfNotExist('library_path', '');
+            $this->setOptionIfNotExist('ld_library_path', '');
         } else {
             $arch = arch2gnu(php_uname('m'));
             $this->setOptionIfNotExist('cc', "{$arch}-linux-musl-gcc");
             $this->setOptionIfNotExist('cxx', "{$arch}-linux-musl-g++");
+            $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
+            $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
         }
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));
@@ -174,7 +178,7 @@ class LinuxBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                (!SystemUtil::isMuslDist() ? "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib " : '') .
+                "{$this->getOption('ld_library_path')} " .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .

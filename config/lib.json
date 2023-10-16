@@ -434,7 +434,10 @@
             "readline"
         ],
         "lib-suggests": [
-            "icu"
+            "icu",
+            "libxslt",
+            "ldap",
+            "zstd"
         ]
     },
     "pthreads4w": {
@@ -464,10 +467,9 @@
             "libsnappy.a"
         ],
         "headers-unix": [
+            "snappy.h",
             "snappy-c.h",
             "snappy-sinksource.h",
-            "snappy.h",
-            "snappy-stubs-internal.h",
             "snappy-stubs-public.h"
         ],
         "lib-depends": [
