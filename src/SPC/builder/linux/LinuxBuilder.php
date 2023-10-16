@@ -18,9 +18,6 @@ class LinuxBuilder extends BuilderBase
     /** Unix compatible builder methods */
     use UnixBuilderTrait;
 
-    /** @var string Using libc [musl,glibc] */
-    public string $libc;
-
     /** @var array Tune cflags */
     public array $tune_c_flags;
 
@@ -40,20 +37,19 @@ class LinuxBuilder extends BuilderBase
         $this->options = $options;
 
         // ---------- set necessary options ----------
-        // set C Compiler (default: alpine: gcc, others: musl-gcc)
-        $this->setOptionIfNotExist('cc', match (SystemUtil::getOSRelease()['dist']) {
-            'alpine' => 'gcc',
-            default => 'musl-gcc'
-        });
-        // set C++ Compiler (default: g++)
-        $this->setOptionIfNotExist('cxx', 'g++');
+        // set C/C++ compilers (default: alpine: gcc, others: musl-cross-make)
+        if (SystemUtil::isMuslDist()) {
+            $this->setOptionIfNotExist('cc', 'gcc');
+            $this->setOptionIfNotExist('cxx', 'g++');
+        } else {
+            $arch = arch2gnu(php_uname('m'));
+            $this->setOptionIfNotExist('cc', "{$arch}-linux-musl-gcc");
+            $this->setOptionIfNotExist('cxx', "{$arch}-linux-musl-g++");
+        }
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));
         $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
 
-        // ---------- set necessary compile environments ----------
-        // set libc
-        $this->libc = $this->getOption('cc', 'gcc') === 'musl-gcc' ? 'musl_wrapper' : 'musl'; // SystemUtil::selectLibc($this->cc);
         // concurrency
         $this->concurrency = SystemUtil::getCpuCount();
         // cflags
@@ -81,7 +77,7 @@ class LinuxBuilder extends BuilderBase
             'CXX' => $this->getOption('cxx'),
             'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
         ]);
-        // cross-compile does not support yet
+        // cross-compiling is not supported yet
         /*if (php_uname('m') !== $this->arch) {
             $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
             logger()->info('using cross compile prefix: ' . $this->cross_compile_prefix);
@@ -134,7 +130,7 @@ class LinuxBuilder extends BuilderBase
         } else {
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
         }
-        // add libstdc++, some extensions or libraries need it (C++ cannot be linked statically)
+        // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lstdc++ ' : '');
         $this->setOption('extra-libs', $extra_libs);
 
@@ -174,9 +170,11 @@ class LinuxBuilder extends BuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $arch = arch2gnu(php_uname('m'));
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                (!SystemUtil::isMuslDist() ? "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib " : '') .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .

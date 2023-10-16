@@ -53,6 +53,11 @@ class SystemUtil
         return $ret;
     }
 
+    public static function isMuslDist(): bool
+    {
+        return static::getOSRelease()['dist'] === 'alpine';
+    }
+
     public static function getCpuCount(): int
     {
         $ncpu = 1;
