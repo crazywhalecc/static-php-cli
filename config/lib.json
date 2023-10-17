@@ -122,8 +122,8 @@
         "source": "imagemagick",
         "static-libs-unix": [
             "libMagick++-7.Q16HDRI.a",
-            "libMagickCore-7.Q16HDRI.a",
-            "libMagickWand-7.Q16HDRI.a"
+            "libMagickWand-7.Q16HDRI.a",
+            "libMagickCore-7.Q16HDRI.a"
         ],
         "lib-depends": [
             "zlib",

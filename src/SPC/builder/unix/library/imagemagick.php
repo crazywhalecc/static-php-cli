@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -30,7 +31,7 @@ trait imagemagick
         ];
         foreach ($optional_libs as $lib => $option) {
             $extra .= $this->builder->getLib($lib) ? "--with-{$option} " : "--without-{$option} ";
-            if ($this->builder->getLib($lib)) {
+            if ($this->builder->getLib($lib) instanceof LinuxLibraryBase) {
                 $required_libs .= ' ' . $this->builder->getLib($lib)->getStaticLibFiles();
             }
         }
