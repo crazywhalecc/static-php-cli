@@ -44,6 +44,11 @@ class curl extends MacOSLibraryBase
             '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m',
             'FALSE'
         );
+        FileSystem::replaceFileRegex(
+            SOURCE_PATH . '/curl/CMakeLists.txt',
+            '/NOT CORESERVICES_FRAMEWORK/m',
+            'FALSE'
+        );
         return true;
     }
 }

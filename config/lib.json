@@ -63,6 +63,7 @@
         ],
         "frameworks": [
             "CoreFoundation",
+            "CoreServices",
             "SystemConfiguration"
         ]
     },
