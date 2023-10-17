@@ -223,7 +223,7 @@
     "libpng": {
         "source": "libpng",
         "static-libs-unix": [
-            "libpng.a"
+            "libpng16.a"
         ],
         "static-libs-windows": [
             "libpng16_static.lib"
