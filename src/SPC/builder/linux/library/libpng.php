@@ -67,7 +67,6 @@ class libpng extends LinuxLibraryBase
             ->exec('chmod +x ./install-sh')
             ->exec(
                 "{$this->builder->configure_env} ./configure " .
-                "--host={$this->builder->getOption('gnu-arch')}-unknown-linux " .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .
@@ -77,9 +76,7 @@ class libpng extends LinuxLibraryBase
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
-            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
-            ->cd(BUILD_LIB_PATH)
-            ->exec('ln -sf libpng16.a libpng.a');
+            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
         $this->cleanLaFiles();
     }
