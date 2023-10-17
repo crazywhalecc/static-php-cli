@@ -21,9 +21,16 @@ trait postgresql
         $env = $this->builder->configure_env;
         $envs = $env;
         $packages = 'openssl zlib readline libxml-2.0 zlib';
-        foreach (['zstd', 'ldap', 'pam', 'libxslt'] as $lib) {
+        $optional_packages = [
+            'zstd' => 'libzstd',
+            'ldap' => 'ldap',
+            'libpam' => 'libpam',
+            'libxslt' => 'libxslt',
+            'icu' => 'icu-i18n',
+        ];
+        foreach ($optional_packages as $lib => $pkg) {
             if ($this->getBuilder()->getLib($lib)) {
-                $packages .= ' ' . $lib;
+                $packages .= ' ' . $pkg;
             }
         }
 
@@ -62,11 +69,11 @@ trait postgresql
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
                 '--with-libxml ' .
-                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
-                ($this->builder->getLib('pam') ? '--with-pam ' : '--without-pam ') .
-                ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
+                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
+                ($this->builder->getLib('libpam') ? '--with-pam ' : '--without-pam ') .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
+                ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
                 '--without-lz4 ' .
                 '--without-perl ' .
                 '--without-python ' .

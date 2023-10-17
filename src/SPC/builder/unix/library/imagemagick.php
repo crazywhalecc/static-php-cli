@@ -16,23 +16,31 @@ trait imagemagick
      */
     protected function build(): void
     {
-        $extra = '--without-jxl --without-xml --without-zstd --without-x --disable-openmp ';
-        // libzip support
-        $extra .= $this->builder->getLib('libzip') ? '--with-zip ' : '--without-zip ';
-        // jpeg support
-        $extra .= $this->builder->getLib('libjpeg') ? '--with-jpeg ' : '';
-        // png support
-        $extra .= $this->builder->getLib('libpng') ? '--with-png ' : '';
-        // webp support
-        $extra .= $this->builder->getLib('libwebp') ? '--with-webp ' : '';
-        // zstd support
-        // $extra .= $this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ';
-        // freetype support
-        $extra .= $this->builder->getLib('freetype') ? '--with-freetype ' : '--without-freetype ';
+        $extra = '--without-jxl --without-x --disable-openmp ';
+        $required_libs = '';
+        $optional_libs = [
+            'libzip' => 'zip',
+            'libjpeg' => 'jpeg',
+            'libpng' => 'png',
+            'libwebp' => 'webp',
+            'libxml2' => 'xml',
+            'zlib' => 'zlib',
+            'zstd' => 'zstd',
+            'freetype' => 'freetype',
+        ];
+        foreach ($optional_libs as $lib => $option) {
+            $extra .= $this->builder->getLib($lib) ? "--with-{$option} " : "--without-{$option} ";
+            if ($this->builder->getLib($lib)) {
+                $required_libs .= ' ' . $this->builder->getLib($lib)->getStaticLibFiles();
+            }
+        }
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                "{$this->builder->configure_env} " .
+                'LDFLAGS="-static" ' .
+                "LIBS='{$required_libs}' " .
+                './configure ' .
                 '--enable-static --disable-shared ' .
                 $extra .
                 '--prefix='
