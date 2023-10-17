@@ -41,12 +41,16 @@ class LinuxBuilder extends BuilderBase
         if (SystemUtil::isMuslDist()) {
             $this->setOptionIfNotExist('cc', 'gcc');
             $this->setOptionIfNotExist('cxx', 'g++');
+            $this->setOptionIfNotExist('ar', 'ar');
+            $this->setOptionIfNotExist('ld', 'ld');
             $this->setOptionIfNotExist('library_path', '');
             $this->setOptionIfNotExist('ld_library_path', '');
         } else {
             $arch = arch2gnu(php_uname('m'));
             $this->setOptionIfNotExist('cc', "{$arch}-linux-musl-gcc");
             $this->setOptionIfNotExist('cxx', "{$arch}-linux-musl-g++");
+            $this->setOptionIfNotExist('ar', "{$arch}-linux-musl-ar");
+            $this->setOptionIfNotExist('ld', "{$arch}-linux-musl-ld");
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
         }
@@ -79,6 +83,8 @@ class LinuxBuilder extends BuilderBase
             ...$vars,
             'CC' => $this->getOption('cc'),
             'CXX' => $this->getOption('cxx'),
+            'AR' => $this->getOption('ar'),
+            'LD' => $this->getOption('ld'),
             'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
         ]);
         // cross-compiling is not supported yet
@@ -147,6 +153,8 @@ class LinuxBuilder extends BuilderBase
         $envs = $this->pkgconf_env . ' ' . SystemUtil::makeEnvVarString([
             'CC' => $this->getOption('cc'),
             'CXX' => $this->getOption('cxx'),
+            'AR' => $this->getOption('ar'),
+            'LD' => $this->getOption('ld'),
             'CFLAGS' => $cflags,
             'LIBS' => '-ldl -lpthread',
             'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
@@ -174,7 +182,6 @@ class LinuxBuilder extends BuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
-        $arch = arch2gnu(php_uname('m'));
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -237,7 +244,7 @@ class LinuxBuilder extends BuilderBase
     public function buildCli(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
             'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
@@ -270,7 +277,7 @@ class LinuxBuilder extends BuilderBase
 
         $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
         $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $enable_fake_cli,
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $enable_fake_cli,
             'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
             'EXTRA_LDFLAGS_PROGRAM' => "{$cflags} {$use_lld} -all-static",
         ]);
@@ -298,7 +305,7 @@ class LinuxBuilder extends BuilderBase
     public function buildFpm(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
             'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
@@ -317,7 +324,7 @@ class LinuxBuilder extends BuilderBase
     public function buildEmbed(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
+            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
             'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
         ]);
