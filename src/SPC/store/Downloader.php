@@ -99,12 +99,18 @@ class Downloader
             hooks: [[CurlHook::class, 'setupGithubToken']],
         ), true);
         $url = null;
-        foreach ($data[0]['assets'] as $asset) {
-            if (preg_match('|' . $source['match'] . '|', $asset['name'])) {
-                $url = $asset['browser_download_url'];
-                break;
+        foreach ($data as $release) {
+            if ($release['prerelease'] === true) {
+                continue;
+            }
+            foreach ($release['assets'] as $asset) {
+                if (preg_match('|' . $source['match'] . '|', $asset['name'])) {
+                    $url = $asset['browser_download_url'];
+                    break 2;
+                }
             }
         }
+
         if (!$url) {
             throw new DownloaderException("failed to find {$name} source");
         }
