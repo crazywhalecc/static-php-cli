@@ -498,7 +498,7 @@
     },
     "zlib": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "arg-type-windows": "enable",
         "lib-depends": [
             "zlib"
