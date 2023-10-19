@@ -42,7 +42,7 @@ class LinuxBuilder extends BuilderBase
             $this->setOptionIfNotExist('cc', 'gcc');
             $this->setOptionIfNotExist('cxx', 'g++');
             $this->setOptionIfNotExist('ar', 'ar');
-            $this->setOptionIfNotExist('ld', 'ld');
+            $this->setOptionIfNotExist('ld', 'ld.gold');
             $this->setOptionIfNotExist('library_path', '');
             $this->setOptionIfNotExist('ld_library_path', '');
         } else {
@@ -50,7 +50,7 @@ class LinuxBuilder extends BuilderBase
             $this->setOptionIfNotExist('cc', "{$arch}-linux-musl-gcc");
             $this->setOptionIfNotExist('cxx', "{$arch}-linux-musl-g++");
             $this->setOptionIfNotExist('ar', "{$arch}-linux-musl-ar");
-            $this->setOptionIfNotExist('ld', "{$arch}-linux-musl-ld");
+            $this->setOptionIfNotExist('ld', "/usr/local/musl/{$arch}-linux-musl/bin/ld.gold");
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
         }
