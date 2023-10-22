@@ -8,8 +8,10 @@ use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\Downloader;
+use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,12 +35,18 @@ class DownloadCommand extends BaseCommand
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
+        $this->addOption('by-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
+        $this->addOption('without-suggests', null, null, 'Do not fetch suggested sources when using --by-extensions');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
     {
-        // --all 等于 "" ""，也就是所有东西都要下载
-        if ($input->getOption('all') || $input->getOption('clean') || $input->getOption('from-zip')) {
+        if (
+            $input->getOption('all')
+            || $input->getOption('clean')
+            || $input->getOption('from-zip')
+            || $input->getOption('by-extensions')
+        ) {
             $input->setArgument('sources', '');
         }
         parent::initialize($input, $output);
@@ -73,40 +81,7 @@ class DownloadCommand extends BaseCommand
 
         // --from-zip
         if ($path = $this->getOption('from-zip')) {
-            if (!file_exists($path)) {
-                logger()->critical('File ' . $path . ' not exist or not a zip archive.');
-                return static::FAILURE;
-            }
-            // remove old download files first
-            if (is_dir(DOWNLOAD_PATH)) {
-                logger()->warning('You are doing some operations that not recoverable: removing directories below');
-                logger()->warning(DOWNLOAD_PATH);
-                logger()->alert('I will remove these dir after 5 seconds !');
-                sleep(5);
-                f_passthru((PHP_OS_FAMILY === 'Windows' ? 'rmdir /s /q ' : 'rm -rf ') . DOWNLOAD_PATH);
-            }
-            // unzip command check
-            if (PHP_OS_FAMILY !== 'Windows' && !$this->findCommand('unzip')) {
-                logger()->critical('Missing unzip command, you need to install it first !');
-                logger()->critical('You can use "bin/spc doctor" command to check and install required tools');
-                return static::FAILURE;
-            }
-            // create downloads
-            try {
-                if (PHP_OS_FAMILY !== 'Windows') {
-                    f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($path));
-                }
-                // Windows TODO
-
-                if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
-                    throw new RuntimeException('.lock.json not exist in "downloads/"');
-                }
-            } catch (RuntimeException $e) {
-                logger()->critical('Extract failed: ' . $e->getMessage());
-                return static::FAILURE;
-            }
-            logger()->info('Extract success');
-            return static::SUCCESS;
+            return $this->downloadFromZip($path);
         }
 
         // Define PHP major version
@@ -133,10 +108,17 @@ class DownloadCommand extends BaseCommand
             Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
         }
 
-        // get source list that will be downloaded
-        $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
-        if (empty($sources)) {
-            $sources = array_keys(Config::getSources());
+        // --by-extensions
+        if ($by_ext = $this->getOption('by-extensions')) {
+            $ext = array_map('trim', array_filter(explode(',', $by_ext)));
+            $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggests'));
+            array_unshift($sources, 'php-src', 'micro', 'pkg-config');
+        } else {
+            // get source list that will be downloaded
+            $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
+            if (empty($sources)) {
+                $sources = array_keys(Config::getSources());
+            }
         }
         $chosen_sources = $sources;
 
@@ -176,5 +158,65 @@ class DownloadCommand extends BaseCommand
         $time = round(microtime(true) - START_TIME, 3);
         logger()->info('Download complete, used ' . $time . ' s !');
         return static::SUCCESS;
+    }
+
+    private function downloadFromZip(string $path): int
+    {
+        if (!file_exists($path)) {
+            logger()->critical('File ' . $path . ' not exist or not a zip archive.');
+            return static::FAILURE;
+        }
+        // remove old download files first
+        if (is_dir(DOWNLOAD_PATH)) {
+            logger()->warning('You are doing some operations that not recoverable: removing directories below');
+            logger()->warning(DOWNLOAD_PATH);
+            logger()->alert('I will remove these dir after 5 seconds !');
+            sleep(5);
+            f_passthru((PHP_OS_FAMILY === 'Windows' ? 'rmdir /s /q ' : 'rm -rf ') . DOWNLOAD_PATH);
+        }
+        // unzip command check
+        if (PHP_OS_FAMILY !== 'Windows' && !$this->findCommand('unzip')) {
+            logger()->critical('Missing unzip command, you need to install it first !');
+            logger()->critical('You can use "bin/spc doctor" command to check and install required tools');
+            return static::FAILURE;
+        }
+        // create downloads
+        try {
+            if (PHP_OS_FAMILY !== 'Windows') {
+                f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($path));
+            }
+            // Windows TODO
+
+            if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+                throw new RuntimeException('.lock.json not exist in "downloads/"');
+            }
+        } catch (RuntimeException $e) {
+            logger()->critical('Extract failed: ' . $e->getMessage());
+            return static::FAILURE;
+        }
+        logger()->info('Extract success');
+        return static::SUCCESS;
+    }
+
+    /**
+     * Calculate the sources by extensions
+     *
+     * @param  array               $extensions extension list
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
+    private function calculateSourcesByExt(array $extensions, bool $include_suggests = true): array
+    {
+        [$extensions, $libraries] = $include_suggests ? DependencyUtil::getAllExtLibsByDeps($extensions) : DependencyUtil::getExtLibsByDeps($extensions);
+        $sources = [];
+        foreach ($extensions as $extension) {
+            if (Config::getExt($extension, 'type') === 'external') {
+                $sources[] = Config::getExt($extension, 'source');
+            }
+        }
+        foreach ($libraries as $library) {
+            $sources[] = Config::getLib($library, 'source');
+        }
+        return array_values(array_unique($sources));
     }
 }
