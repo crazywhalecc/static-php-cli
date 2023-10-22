@@ -61,25 +61,7 @@ class LinuxMuslCheck
             if (!file_exists($cross_compile_lib) || !file_exists($cross_compile_gcc)) {
                 $this->installMuslCrossMake();
             }
-
-            $prefix = '';
-            if (get_current_user() !== 'root') {
-                $prefix = 'sudo ';
-                logger()->warning('Current user is not root, using sudo for running command');
-            }
-            $profile = '/etc/profile';
-            if (file_exists('~/.bash_profile')) {
-                $profile = '~/.bash_profile';
-            } elseif (file_exists('~/.profile')) {
-                $profile = '~/.profile';
-            }
-            if (!file_exists($profile)) {
-                shell(true)->exec($prefix . 'touch ' . $profile);
-            }
-            if (!getenv('PATH') || !str_contains(getenv('PATH'), '/usr/local/musl/bin')) {
-                $fix_path = 'echo "export PATH=/usr/local/musl/bin:$PATH" >> ' . $profile . ' && export PATH=/usr/local/musl/bin:$PATH';
-                shell(true)->exec($prefix . $fix_path);
-            }
+            // TODO: add path using putenv instead of editing /etc/profile
             return true;
         } catch (RuntimeException) {
             return false;
@@ -98,32 +80,36 @@ class LinuxMuslCheck
             $prefix = 'sudo ';
             logger()->warning('Current user is not root, using sudo for running command');
         }
+        $musl_version_name = 'musl-1.2.4';
         $musl_source = [
             'type' => 'url',
-            'url' => 'https://musl.libc.org/releases/musl-1.2.4.tar.gz',
+            'url' => "https://musl.libc.org/releases/{$musl_version_name}.tar.gz",
         ];
-        Downloader::downloadSource('musl-1.2.4', $musl_source);
-        FileSystem::extractSource('musl-1.2.4', DOWNLOAD_PATH . '/musl-1.2.4.tar.gz');
-        $musl_gcc_install_cmd = 'cd ' . SOURCE_PATH . '/musl-1.2.4 && \
-                         ./configure --enable-wrapper=gcc && \
-                         make -j && make install';
-        shell(true)->exec($prefix . $musl_gcc_install_cmd);
+        Downloader::downloadSource($musl_version_name, $musl_source);
+        FileSystem::extractSource($musl_version_name, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
+        shell(true)->cd(SOURCE_PATH . "/{$musl_version_name}")
+            ->exec('./configure --enable-wrapper=gcc')
+            ->exec('make -j')
+            ->exec("{$prefix}make install");
     }
 
     /**
      * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function installMuslCrossMake(): void
     {
         $arch = arch2gnu(php_uname('m'));
         $musl_compile_source = [
             'type' => 'url',
-            'url' => "https://musl.cc/{$arch}-linux-musl-cross.tgz",
+            'url' => "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/{$arch}-musl-toolchain.tgz",
         ];
+        logger()->info('Downloading ' . $musl_compile_source['url']);
         Downloader::downloadSource('musl-compile', $musl_compile_source);
-        FileSystem::extractSource('musl-compile', DOWNLOAD_PATH . "/{$arch}-linux-musl-cross.tgz");
+        logger()->info('Extracting musl-cross');
+        FileSystem::extractSource('musl-compile', DOWNLOAD_PATH . "/{$arch}-musl-toolchain.tgz");
         shell(true)->exec('cp -rf ' . SOURCE_PATH . '/musl-compile/* /usr/local/musl');
     }
 }
