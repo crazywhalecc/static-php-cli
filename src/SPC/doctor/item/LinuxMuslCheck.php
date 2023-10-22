@@ -80,6 +80,7 @@ class LinuxMuslCheck
             $prefix = 'sudo ';
             logger()->warning('Current user is not root, using sudo for running command');
         }
+        // The hardcoded version here is to be consistent with the version compiled by `musl-cross-toolchain`.
         $musl_version_name = 'musl-1.2.4';
         $musl_source = [
             'type' => 'url',
