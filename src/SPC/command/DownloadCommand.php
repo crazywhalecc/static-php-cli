@@ -8,8 +8,10 @@ use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\Downloader;
+use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,6 +36,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
         $this->addOption('by-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
+        $this->addOption('without-suggests', null, null, 'Do not fetch suggested sources when using --by-extensions');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -105,10 +108,17 @@ class DownloadCommand extends BaseCommand
             Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
         }
 
-        // get source list that will be downloaded
-        $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
-        if (empty($sources)) {
-            $sources = array_keys(Config::getSources());
+        // --by-extensions
+        if ($by_ext = $this->getOption('by-extensions')) {
+            $ext = array_map('trim', array_filter(explode(',', $by_ext)));
+            $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggests'));
+            array_unshift($sources, 'php-src', 'micro', 'pkg-config');
+        } else {
+            // get source list that will be downloaded
+            $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
+            if (empty($sources)) {
+                $sources = array_keys(Config::getSources());
+            }
         }
         $chosen_sources = $sources;
 
@@ -186,5 +196,27 @@ class DownloadCommand extends BaseCommand
         }
         logger()->info('Extract success');
         return static::SUCCESS;
+    }
+
+    /**
+     * Calculate the sources by extensions
+     *
+     * @param  array               $extensions extension list
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
+    private function calculateSourcesByExt(array $extensions, bool $include_suggests = true): array
+    {
+        [$extensions, $libraries] = $include_suggests ? DependencyUtil::getAllExtLibsByDeps($extensions) : DependencyUtil::getExtLibsByDeps($extensions);
+        $sources = [];
+        foreach ($extensions as $extension) {
+            if (Config::getExt($extension, 'type') === 'external') {
+                $sources[] = Config::getExt($extension, 'source');
+            }
+        }
+        foreach ($libraries as $library) {
+            $sources[] = Config::getLib($library, 'source');
+        }
+        return array_values(array_unique($sources));
     }
 }

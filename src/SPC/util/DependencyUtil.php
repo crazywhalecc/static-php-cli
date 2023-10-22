@@ -99,6 +99,43 @@ class DependencyUtil
         return $final;
     }
 
+    public static function getAllExtLibsByDeps(array $exts): array
+    {
+        $sorted = [];
+        $visited = [];
+        $not_included_exts = [];
+        foreach ($exts as $ext) {
+            if (!isset($visited[$ext])) {
+                self::visitExtAllDeps($ext, $visited, $sorted);
+            }
+        }
+        $libs = [];
+        foreach ($sorted as $ext) {
+            if (!in_array($ext, $exts)) {
+                $not_included_exts[] = $ext;
+            }
+            foreach (array_merge(Config::getExt($ext, 'lib-depends', []), Config::getExt($ext, 'lib-suggests', [])) as $dep) {
+                if (!in_array($dep, $libs)) {
+                    $libs[] = $dep;
+                }
+            }
+        }
+        return [$sorted, self::getAllLibsByDeps($libs), $not_included_exts];
+    }
+
+    public static function getAllLibsByDeps(array $libs): array
+    {
+        $sorted = [];
+        $visited = [];
+
+        foreach ($libs as $lib) {
+            if (!isset($visited[$lib])) {
+                self::visitLibAllDeps($lib, $visited, $sorted);
+            }
+        }
+        return $sorted;
+    }
+
     /**
      * @throws FileSystemException
      * @throws RuntimeException
