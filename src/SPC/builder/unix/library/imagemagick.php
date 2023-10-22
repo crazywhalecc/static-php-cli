@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\linux\LinuxBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -39,9 +38,10 @@ trait imagemagick
             }
         }
 
+        $ldflags = $this instanceof LinuxLibraryBase ? ('LDFLAGS="-static" ') : '';
         shell()->cd($this->source_dir)
             ->exec(
-                ($this->builder instanceof LinuxBuilder ? ('LDFLAGS="-static -L' . BUILD_LIB_PATH . '" ') : '') .
+                $ldflags .
                 "LIBS='{$required_libs}' " .
                 './configure ' .
                 '--enable-static --disable-shared ' .
