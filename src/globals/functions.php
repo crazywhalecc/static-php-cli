@@ -110,6 +110,12 @@ function f_mkdir(string $directory, int $permissions = 0777, bool $recursive = f
     return mkdir($directory, $permissions, $recursive);
 }
 
+function f_putenv(string $env): bool
+{
+    logger()->debug('Setting env: ' . $env);
+    return putenv($env);
+}
+
 function shell(?bool $debug = null): UnixShell
 {
     return new UnixShell($debug);
