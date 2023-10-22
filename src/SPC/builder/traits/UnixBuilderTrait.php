@@ -21,9 +21,6 @@ trait UnixBuilderTrait
     /** @var string cmake toolchain file */
     public string $cmake_toolchain_file;
 
-    /** @var string configure environments */
-    public string $configure_env;
-
     /**
      * @throws WrongUsageException
      * @throws FileSystemException
@@ -145,7 +142,7 @@ trait UnixBuilderTrait
      */
     public function makeCmakeArgs(): string
     {
-        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . $this->getOption('cc') . ' ' : '';
+        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
         return $extra .
             '-DCMAKE_BUILD_TYPE=Release ' .
             '-DCMAKE_INSTALL_PREFIX=/ ' .

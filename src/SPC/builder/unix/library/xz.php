@@ -17,7 +17,7 @@ trait xz
     {
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 "--host={$this->builder->getOption('gnu-arch')}-unknown-linux " .

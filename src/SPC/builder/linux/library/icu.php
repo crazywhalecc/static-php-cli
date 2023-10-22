@@ -15,7 +15,7 @@ class icu extends LinuxLibraryBase
         $ldflags = 'LDFLAGS="-static"';
         shell()->cd($this->source_dir . '/source')
             ->exec(
-                "{$this->builder->configure_env} {$cppflags} {$cxxflags} {$ldflags} " .
+                "{$cppflags} {$cxxflags} {$ldflags} " .
                 './runConfigureICU Linux ' .
                 '--enable-static ' .
                 '--disable-shared ' .

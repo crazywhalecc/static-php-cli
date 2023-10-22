@@ -19,7 +19,7 @@ trait zstd
         FileSystem::resetDir($this->source_dir . '/build/cmake/build');
         shell()->cd($this->source_dir . '/build/cmake/build')
             ->exec(
-                "{$this->builder->configure_env} cmake " .
+                'cmake ' .
                 "{$this->builder->makeCmakeArgs()} " .
                 '-DZSTD_BUILD_STATIC=ON ' .
                 '-DZSTD_BUILD_SHARED=OFF ' .

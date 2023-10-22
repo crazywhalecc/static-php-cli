@@ -53,7 +53,7 @@ class nghttp2 extends MacOSLibraryBase
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} " . ' ./configure ' .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 "--host={$this->builder->getOption('gnu-arch')}-apple-darwin " .

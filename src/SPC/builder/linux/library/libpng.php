@@ -66,7 +66,7 @@ class libpng extends LinuxLibraryBase
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .

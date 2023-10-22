@@ -21,9 +21,6 @@ class LinuxBuilder extends BuilderBase
     /** @var array Tune cflags */
     public array $tune_c_flags;
 
-    /** @var string pkg-config env, including PKG_CONFIG_PATH, PKG_CONFIG */
-    public string $pkgconf_env;
-
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -39,21 +36,33 @@ class LinuxBuilder extends BuilderBase
         // ---------- set necessary options ----------
         // set C/C++ compilers (default: alpine: gcc, others: musl-cross-make)
         if (SystemUtil::isMuslDist()) {
-            $this->setOptionIfNotExist('cc', 'gcc');
-            $this->setOptionIfNotExist('cxx', 'g++');
-            $this->setOptionIfNotExist('ar', 'ar');
-            $this->setOptionIfNotExist('ld', 'ld.gold');
-            $this->setOptionIfNotExist('library_path', '');
-            $this->setOptionIfNotExist('ld_library_path', '');
+            f_putenv("CC={$this->getOption('cc', 'gcc')}");
+            f_putenv("CXX={$this->getOption('cxx', 'g++')}");
+            f_putenv("AR={$this->getOption('ar', 'ar')}");
+            f_putenv("LD={$this->getOption('ld', 'ld.gold')}");
         } else {
             $arch = arch2gnu(php_uname('m'));
-            $this->setOptionIfNotExist('cc', "{$arch}-linux-musl-gcc");
-            $this->setOptionIfNotExist('cxx', "{$arch}-linux-musl-g++");
-            $this->setOptionIfNotExist('ar', "{$arch}-linux-musl-ar");
-            $this->setOptionIfNotExist('ld', "/usr/local/musl/{$arch}-linux-musl/bin/ld.gold");
+            f_putenv("CC={$this->getOption('cc', "{$arch}-linux-musl-gcc")}");
+            f_putenv("CXX={$this->getOption('cxx', "{$arch}-linux-musl-g++")}");
+            f_putenv("AR={$this->getOption('ar', "{$arch}-linux-musl-ar")}");
+            f_putenv("LD={$this->getOption('ld', "/usr/local/musl/{$arch}-linux-musl/bin/ld.gold")}");
+            f_putenv('PATH=/usr/local/musl/bin:/usr/local/musl/' . $arch . '-linux-musl/bin:' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
+
+            // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
+
+            // check musl-cross make installed if we use musl-cross-make
+            if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc")) {
+                throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
+            }
         }
+
+        // set PKG_CONFIG
+        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        // set PKG_CONFIG_PATH
+        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
+
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));
         $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
@@ -61,32 +70,18 @@ class LinuxBuilder extends BuilderBase
         // concurrency
         $this->concurrency = SystemUtil::getCpuCount();
         // cflags
-        $this->arch_c_flags = SystemUtil::getArchCFlags($this->getOption('cc'), $this->getOption('arch'));
-        $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->getOption('cxx'), $this->getOption('arch'));
-        $this->tune_c_flags = SystemUtil::checkCCFlags(SystemUtil::getTuneCFlags($this->getOption('arch')), $this->getOption('cc'));
+        $this->arch_c_flags = SystemUtil::getArchCFlags(getenv('CC'), $this->getOption('arch'));
+        $this->arch_cxx_flags = SystemUtil::getArchCFlags(getenv('CXX'), $this->getOption('arch'));
+        $this->tune_c_flags = SystemUtil::checkCCFlags(SystemUtil::getTuneCFlags($this->getOption('arch')), getenv('CC'));
         // cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile(
             'Linux',
             $this->getOption('arch'),
             $this->arch_c_flags,
-            $this->getOption('cc'),
-            $this->getOption('cxx'),
+            getenv('CC'),
+            getenv('CXX'),
         );
-        // pkg-config
-        $vars = [
-            'PKG_CONFIG' => BUILD_ROOT_PATH . '/bin/pkg-config',
-            'PKG_CONFIG_PATH' => BUILD_LIB_PATH . '/pkgconfig',
-        ];
-        $this->pkgconf_env = SystemUtil::makeEnvVarString($vars);
-        // configure environment
-        $this->configure_env = SystemUtil::makeEnvVarString([
-            ...$vars,
-            'CC' => $this->getOption('cc'),
-            'CXX' => $this->getOption('cxx'),
-            'AR' => $this->getOption('ar'),
-            'LD' => $this->getOption('ld'),
-            'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
-        ]);
+
         // cross-compiling is not supported yet
         /*if (php_uname('m') !== $this->arch) {
             $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
@@ -141,23 +136,19 @@ class LinuxBuilder extends BuilderBase
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
         }
         // add libstdc++, some extensions or libraries need it
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lstdc++ ' : '');
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
         $this->setOption('extra-libs', $extra_libs);
 
         $cflags = $this->arch_c_flags;
         $use_lld = '';
-        if (str_ends_with($this->getOption('cc'), 'clang') && SystemUtil::findCommand('lld')) {
+        if (str_ends_with(getenv('CC'), 'clang') && SystemUtil::findCommand('lld')) {
             $use_lld = '-Xcompiler -fuse-ld=lld';
         }
 
-        $envs = $this->pkgconf_env . ' ' . SystemUtil::makeEnvVarString([
-            'CC' => $this->getOption('cc'),
-            'CXX' => $this->getOption('cxx'),
-            'AR' => $this->getOption('ar'),
-            'LD' => $this->getOption('ld'),
+        // prepare build php envs
+        $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
             'LIBS' => '-ldl -lpthread',
-            'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
         ]);
 
         SourcePatcher::patchBeforeBuildconf($this);
@@ -185,7 +176,6 @@ class LinuxBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                "{$this->getOption('ld_library_path')} " .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
@@ -203,7 +193,7 @@ class LinuxBuilder extends BuilderBase
                 $zts .
                 $maxExecutionTimers .
                 $this->makeExtensionArgs() . ' ' .
-                $envs
+                $envs_build_php
             );
 
         SourcePatcher::patchBeforeMake($this);
@@ -262,13 +252,14 @@ class LinuxBuilder extends BuilderBase
     /**
      * Build phpmicro sapi
      *
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function buildMicro(string $use_lld, string $cflags): void
     {
         if ($this->getPHPVersionID() < 80000) {
-            throw new RuntimeException('phpmicro only support PHP >= 8.0!');
+            throw new WrongUsageException('phpmicro only support PHP >= 8.0!');
         }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
@@ -321,6 +312,11 @@ class LinuxBuilder extends BuilderBase
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 
+    /**
+     * Build embed sapi
+     *
+     * @throws RuntimeException
+     */
     public function buildEmbed(string $use_lld): void
     {
         $vars = SystemUtil::makeEnvVarString([

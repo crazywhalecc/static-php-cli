@@ -25,7 +25,7 @@ class libxml2 extends MacOSLibraryBase
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                "{$this->builder->configure_env} " . ' cmake ' .
+                'cmake ' .
                 // '--debug-find ' .
                 "{$this->builder->makeCmakeArgs()} " .
                 '-DBUILD_SHARED_LIBS=OFF ' .

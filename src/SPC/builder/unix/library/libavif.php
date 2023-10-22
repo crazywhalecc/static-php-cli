@@ -22,12 +22,7 @@ trait libavif
         FileSystem::resetDir($this->source_dir . '/build');
         // Start build
         shell()->cd($this->source_dir . '/build')
-            ->exec(
-                "{$this->builder->configure_env} cmake " .
-                $this->builder->makeCmakeArgs() . ' ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '..'
-            )
+            ->exec("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         // patch pkgconfig

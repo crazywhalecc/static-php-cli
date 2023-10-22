@@ -19,11 +19,11 @@ abstract class BuildCommand extends BaseCommand
                 $this->addOption('arch', null, InputOption::VALUE_REQUIRED, 'architecture, "x64" or "arm64"', 'x64');
                 break;
             case 'Linux':
-                $this->addOption('no-system-static', null, null, 'do not use system static libraries');
-                // no break
             case 'Darwin':
                 $this->addOption('cc', null, InputOption::VALUE_REQUIRED, 'C compiler');
                 $this->addOption('cxx', null, InputOption::VALUE_REQUIRED, 'C++ compiler');
+                $this->addOption('ar', null, InputOption::VALUE_REQUIRED, 'ar');
+                $this->addOption('ld', null, InputOption::VALUE_REQUIRED, 'ld');
                 $this->addOption('arch', null, InputOption::VALUE_REQUIRED, 'architecture', php_uname('m'));
                 break;
         }

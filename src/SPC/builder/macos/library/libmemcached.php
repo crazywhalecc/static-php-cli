@@ -18,7 +18,7 @@ class libmemcached extends MacOSLibraryBase
         shell()->cd($this->source_dir)
             ->exec('chmod +x configure')
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static --disable-shared ' .
                 '--disable-sasl ' .
                 "--prefix={$rootdir}"

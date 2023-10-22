@@ -146,7 +146,6 @@
     },
     "intl": {
         "type": "builtin",
-        "cpp-extension": true,
         "lib-depends": [
             "icu"
         ]

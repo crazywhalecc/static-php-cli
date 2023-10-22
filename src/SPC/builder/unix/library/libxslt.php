@@ -26,7 +26,6 @@ trait libxslt
         }
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} " .
                 'CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ' .
                 "{$this->builder->getOption('library_path')} " .
                 "{$this->builder->getOption('ld_library_path')} " .

@@ -20,7 +20,7 @@ class libffi extends MacOSLibraryBase
         [, , $destdir] = SEPARATED_PATH;
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 "--host={$this->builder->getOption('arch')}-apple-darwin " .

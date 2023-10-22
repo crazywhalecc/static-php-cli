@@ -18,8 +18,7 @@ trait postgresql
     protected function build(): void
     {
         $builddir = BUILD_ROOT_PATH;
-        $env = $this->builder->configure_env;
-        $envs = $env;
+        $envs = '';
         $packages = 'openssl zlib readline libxml-2.0 zlib';
         $optional_packages = [
             'zstd' => 'libzstd',
@@ -34,18 +33,17 @@ trait postgresql
             }
         }
 
-        $pkgconfig_executable = $builddir . '/bin/pkg-config';
-        $output = shell()->execWithResult($env . " {$pkgconfig_executable} --cflags-only-I --static " . $packages);
+        $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
         if (!empty($output[1][0])) {
             $cppflags = $output[1][0];
             $envs .= " CPPFLAGS=\"{$cppflags}\"";
         }
-        $output = shell()->execWithResult($env . " {$pkgconfig_executable} --libs-only-L --static " . $packages);
+        $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
         if (!empty($output[1][0])) {
             $ldflags = $output[1][0];
             $envs .= $this instanceof MacOSLibraryBase ? " LDFLAGS=\"{$ldflags}\" " : " LDFLAGS=\"{$ldflags} -static\" ";
         }
-        $output = shell()->execWithResult($env . " {$pkgconfig_executable} --libs-only-l --static " . $packages);
+        $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
         if (!empty($output[1][0])) {
             $libs = $output[1][0];
             $envs .= " LIBS=\"{$libs} -lstdc++\" ";

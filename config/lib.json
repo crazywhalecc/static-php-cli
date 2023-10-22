@@ -111,6 +111,7 @@
     },
     "icu": {
         "source": "icu",
+        "cpp-library": true,
         "static-libs-unix": [
             "libicui18n.a",
             "libicuio.a",
@@ -129,13 +130,13 @@
             "zlib",
             "libpng",
             "libjpeg",
-            "bzip2",
             "libwebp",
             "freetype"
         ],
         "lib-suggests": [
             "zstd",
             "xz",
+            "bzip2",
             "libzip",
             "libxml2"
         ]

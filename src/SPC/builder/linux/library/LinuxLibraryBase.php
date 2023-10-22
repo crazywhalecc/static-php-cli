@@ -33,15 +33,4 @@ abstract class LinuxLibraryBase extends LibraryBase
     {
         return $this->builder;
     }
-
-    protected function makeFakePkgconfs(): void
-    {
-        $workspace = BUILD_ROOT_PATH;
-        if ($workspace === '/') {
-            $workspace = '';
-        }
-        foreach ($this->pkgconfs as $name => $content) {
-            file_put_contents(BUILD_LIB_PATH . "/pkgconfig/{$name}", "prefix={$workspace}\n" . $content);
-        }
-    }
 }

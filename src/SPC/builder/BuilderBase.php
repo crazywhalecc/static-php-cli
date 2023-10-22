@@ -113,6 +113,16 @@ abstract class BuilderBase
     }
 
     /**
+     * Get all library objects.
+     *
+     * @return LibraryBase[]
+     */
+    public function getLibs(): array
+    {
+        return $this->libs;
+    }
+
+    /**
      * Add extension to build.
      */
     public function addExt(Extension $extension): void
@@ -139,17 +149,23 @@ abstract class BuilderBase
     }
 
     /**
-     * Check if there is a cpp extension.
+     * Check if there is a cpp extensions or libraries.
      *
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function hasCppExtension(): bool
+    public function hasCpp(): bool
     {
         // judge cpp-extension
         $exts = array_keys($this->getExts());
         foreach ($exts as $ext) {
             if (Config::getExt($ext, 'cpp-extension', false) === true) {
+                return true;
+            }
+        }
+        $libs = array_keys($this->getLibs());
+        foreach ($libs as $lib) {
+            if (Config::getLib($lib, 'cpp-library', false) === true) {
                 return true;
             }
         }

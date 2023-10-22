@@ -8,13 +8,8 @@ trait pkgconfig
 {
     protected function build(): void
     {
-        $macos_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig/" ' .
-            "CC='{$this->builder->getOption('cc')}' " .
-            "CXX='{$this->builder->getOption('cxx')}' " .
-            "CFLAGS='{$this->builder->arch_c_flags} -Wimplicit-function-declaration' ";
-        $linux_env = 'PKG_CONFIG_PATH="' . BUILD_LIB_PATH . '/pkgconfig" ' .
-            "CC='{$this->builder->getOption('cc')}' " .
-            "CXX='{$this->builder->getOption('cxx')}' ";
+        $macos_env = "CFLAGS='{$this->builder->arch_c_flags} -Wimplicit-function-declaration' ";
+        $linux_env = 'LDFLAGS=--static ';
 
         shell()->cd($this->source_dir)
             ->exec(

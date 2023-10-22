@@ -17,7 +17,7 @@ trait readline
     {
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static=yes ' .
                 '--enable-shared=no ' .
                 '--prefix= ' .
