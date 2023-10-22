@@ -261,8 +261,11 @@ class Downloader
 
         if ($source === null) {
             logger()->warning('Source {name} unknown. Skipping.', ['name' => $name]);
-
             return;
+        }
+
+        if (!is_dir(DOWNLOAD_PATH)) {
+            FileSystem::createDir(DOWNLOAD_PATH);
         }
 
         // load lock file

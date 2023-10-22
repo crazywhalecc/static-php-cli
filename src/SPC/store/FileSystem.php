@@ -152,6 +152,9 @@ class FileSystem
         if (self::$_extract_hook === []) {
             SourcePatcher::init();
         }
+        if (!is_dir(SOURCE_PATH)) {
+            self::createDir(SOURCE_PATH);
+        }
         if ($move_path !== null) {
             $move_path = SOURCE_PATH . '/' . $move_path;
         }
