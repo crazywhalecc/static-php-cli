@@ -88,7 +88,7 @@ class LinuxMuslCheck
         Downloader::downloadSource($musl_version_name, $musl_source);
         FileSystem::extractSource($musl_version_name, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
         shell(true)->cd(SOURCE_PATH . "/{$musl_version_name}")
-            ->exec('./configure --enable-wrapper=gcc')
+            ->exec('./configure')
             ->exec('make -j')
             ->exec("{$prefix}make install");
     }
