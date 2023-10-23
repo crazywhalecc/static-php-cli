@@ -2,7 +2,7 @@
 
 Build single static PHP binary, with PHP project together, with popular extensions included.
 
-The project name is static-php-cli, but it actually supports cli, fpm, micro and embed SAPI 😎
+The project name is static-php-cli, but it actually supports **cli**, **fpm**, **micro** and **embed** SAPI 😎
 
 Compile a purely static php-cli binary file with various extensions to make PHP applications more portable! (cli SAPI)
 
