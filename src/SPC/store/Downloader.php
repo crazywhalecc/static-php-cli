@@ -335,7 +335,7 @@ class Downloader
                 logger()->warning('Deleting download file: ' . $filename);
                 unlink(DOWNLOAD_PATH . '/' . $filename);
             }
-            throw $e;
+            throw new DownloaderException('Download failed! ' . $e->getMessage());
         }
     }
 
