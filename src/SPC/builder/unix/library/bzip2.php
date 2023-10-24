@@ -10,7 +10,7 @@ trait bzip2
     {
         shell()->cd($this->source_dir)
             ->exec("make PREFIX='" . BUILD_ROOT_PATH . "' clean")
-            ->exec("make -j{$this->builder->concurrency} PREFIX='" . BUILD_ROOT_PATH . "' libbz2.a")
+            ->exec("make -j{$this->builder->concurrency} {$this->builder->getEnvString()} PREFIX='" . BUILD_ROOT_PATH . "' libbz2.a")
             ->exec('cp libbz2.a ' . BUILD_LIB_PATH)
             ->exec('cp bzlib.h ' . BUILD_INCLUDE_PATH);
     }

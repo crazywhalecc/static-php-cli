@@ -45,8 +45,8 @@ class LinuxBuilder extends BuilderBase
             f_putenv("CC={$this->getOption('cc', "{$arch}-linux-musl-gcc")}");
             f_putenv("CXX={$this->getOption('cxx', "{$arch}-linux-musl-g++")}");
             f_putenv("AR={$this->getOption('ar', "{$arch}-linux-musl-ar")}");
-            f_putenv("LD={$this->getOption('ld', "/usr/local/musl/{$arch}-linux-musl/bin/ld.gold")}");
-            f_putenv('PATH=/usr/local/musl/bin:/usr/local/musl/' . $arch . '-linux-musl/bin:' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
+            f_putenv("LD={$this->getOption('ld', 'ld.gold')}");
+            f_putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
 
             // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
@@ -176,6 +176,7 @@ class LinuxBuilder extends BuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                "{$this->getOption('ld_library_path')} " .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
