@@ -14,7 +14,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 > 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/crazywhalecc/phpmicro)。
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc5-pink.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--rc7-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
@@ -22,6 +22,10 @@ Build single static PHP binary, with PHP project together, with popular extensio
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 > 项目名称是 static-php-cli，但其实支持 cli、fpm、micro 和 embed SAPI 😎
+
+## 文档
+
+目前 README 编写了基本用法。有关 static-php-cli 所有的功能，请点击这里查看文档：<https://static-php.dev>。
 
 ## 编译环境需求
 
@@ -40,10 +44,6 @@ Build single static PHP binary, with PHP project together, with popular extensio
 > macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
 
 目前支持编译的 PHP 版本为：`7.3`，`7.4`，`8.0`，`8.1`，`8.2`，`8.3`。
-
-## 文档
-
-点击这里查看文档：<https://static-php.dev>。
 
 ## 使用
 

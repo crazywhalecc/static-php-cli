@@ -24,6 +24,11 @@ You can also use the micro binary file to combine php binary and php source code
 [![](https://img.shields.io/badge/Extension%20Counter-55+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
+## Docs
+
+The current README contains basic usage. For all the features of static-php-cli,
+see <https://static-php.dev>.
+
 ## Compilation Requirements
 
 Yes, this project is written in PHP, pretty funny.
@@ -42,10 +47,6 @@ Here is the architecture support status, where `CI` represents support for GitHu
 > macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
 Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`, `8.2`, `8.3`.
-
-## Docs
-
-docs here: <https://static-php.dev>.
 
 ## Simple Usage
 
@@ -190,7 +191,8 @@ cd buildroot/bin/
 ### micro.sfx Usage
 
 > phpmicro is a SelF-extracted eXecutable SAPI module,
-> provided by [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
+> provided by [phpmicro](https://github.com/dixyes/phpmicro) project.
+> But this project is using a [fork](https://github.com/crazywhalecc/phpmicro) of phpmicro, because we need to add some features to it.
 > It can put php runtime and your source code together.
 
 When using the parameter `--build-all` or `--build-micro`,
