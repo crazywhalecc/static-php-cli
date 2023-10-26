@@ -27,7 +27,15 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 目前 README 编写了基本用法。有关 static-php-cli 所有的功能，请点击这里查看文档：<https://static-php.dev>。
 
-## 编译环境需求
+## 自托管直接下载
+
+如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.static-php.dev/static-php-cli/common/)
+
+> 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+
+## 使用 static-php-cli 构建 PHP
+
+### 编译环境需求
 
 是的，本项目采用 PHP 编写，编译前需要一个 PHP 环境，比较滑稽。
 但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含 mbstring、pcntl 扩展和 PHP 版本大于等于 8.1 即可。
@@ -44,14 +52,6 @@ Build single static PHP binary, with PHP project together, with popular extensio
 > macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
 
 目前支持编译的 PHP 版本为：`7.3`，`7.4`，`8.0`，`8.1`，`8.2`，`8.3`。
-
-## 自托管直接下载
-
-如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.static-php.dev/static-php-cli/common/)
-
-> 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
-
-## 使用 static-php-cli 构建 PHP
 
 ### 支持的扩展情况
 

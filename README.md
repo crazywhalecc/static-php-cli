@@ -29,7 +29,15 @@ You can also use the micro binary file to combine php binary and php source code
 The current README contains basic usage. For all the features of static-php-cli,
 see <https://static-php.dev>.
 
-## Compilation Requirements
+## Direct Download
+
+If you don't want to compile yourself, you can download example pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.static-php.dev/static-php-cli/common/)
+
+> self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+
+## Use static-php-cli to build PHP
+
+### Compilation Requirements
 
 Yes, this project is written in PHP, pretty funny.
 But static-php-cli runtime only requires an environment above PHP 8.1 and `mbstring`, `pcntl` extension.
@@ -47,14 +55,6 @@ Here is the architecture support status, where `CI` represents support for GitHu
 > macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
 Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`, `8.2`, `8.3`.
-
-## Direct Download
-
-If you don't want to compile yourself, you can download example pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.static-php.dev/static-php-cli/common/)
-
-> self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
-
-## Use static-php-cli to build PHP
 
 ### Supported Extensions
 
