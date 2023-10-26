@@ -45,25 +45,26 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 目前支持编译的 PHP 版本为：`7.3`，`7.4`，`8.0`，`8.1`，`8.2`，`8.3`。
 
-## 使用
+## 自托管直接下载
 
-请先根据下方扩展列表选择你要编译的扩展。
-
-### 自托管直接下载
-
-如果你不想自行编译，可以从本项目现有的 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.static-php.dev/static-php-cli/common/)
+如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.static-php.dev/static-php-cli/common/)
 
 > 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
 
+## 使用 static-php-cli 构建 PHP
+
 ### 支持的扩展情况
 
-[扩展支持列表](https://static-php.dev/zh/guide/extensions.html)
+请先根据下方扩展列表选择你要编译的扩展。
+
+- [扩展支持列表](https://static-php.dev/zh/guide/extensions.html)
+- [编译命令生成器](https://static-php.dev/zh/guide/cli-generator.html)
 
 > 如果这里没有你需要的扩展，可以提交 Issue。
 
 ### 使用 Actions 构建
 
-使用 GitHub Action 可以方便地构建一个静态编译的 PHP 和 phpmicro，同时可以自行定义要编译的扩展。
+使用 GitHub Action 可以方便地构建一个静态编译的 PHP，同时可以自行定义要编译的扩展。
 
 1. Fork 本项目。
 2. 进入项目的 Actions，选择 CI。

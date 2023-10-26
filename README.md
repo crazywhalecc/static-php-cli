@@ -48,25 +48,26 @@ Here is the architecture support status, where `CI` represents support for GitHu
 
 Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`, `8.2`, `8.3`.
 
-## Simple Usage
+## Direct Download
 
-Please first select the extension you want to compile based on the extension list below.
-
-### Direct Download
-
-If you don't compile yourself, you can download example pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.static-php.dev/static-php-cli/common/)
+If you don't want to compile yourself, you can download example pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.static-php.dev/static-php-cli/common/)
 
 > self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
 
+## Use static-php-cli to build PHP
+
 ### Supported Extensions
 
-[Supported Extension List](https://static-php.dev/en/guide/extensions.html)
+Please first select the extension you want to compile based on the extension list below.
+
+- [Supported Extension List](https://static-php.dev/en/guide/extensions.html)
+- [Command Generator](https://static-php.dev/en/guide/cli-generator.html)
 
 > If an extension you need is missing, you can submit an issue.
 
 ### GitHub Actions Build
 
-Use GitHub Action to easily build a statically compiled PHP and phpmicro,
+Use GitHub Action to easily build a statically compiled PHP,
 and at the same time define the extensions to be compiled by yourself.
 
 1. Fork me.
