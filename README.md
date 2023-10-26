@@ -172,7 +172,9 @@ In addition, we build NTS by default. If you are going to build ZTS version, jus
 
 Adding option `--no-strip` can produce binaries with debug symbols, in order to debug (using gdb). Disabling strip will increase the size of static binary.
 
-### php-cli Usage
+## Different SAPI Usage
+
+### Use cli
 
 > php-cli is a single static binary, you can use it like normal php installed on your system.
 
@@ -189,7 +191,7 @@ cd buildroot/bin/
 ./php your_project.phar # run your phar (project archive)
 ```
 
-### micro.sfx Usage
+### Use micro
 
 > phpmicro is a SelF-extracted eXecutable SAPI module,
 > provided by [phpmicro](https://github.com/dixyes/phpmicro) project.
@@ -225,7 +227,7 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 > In some cases, PHAR files may not run in a micro environment.
 
-### php-fpm Usage
+### Use fpm
 
 When using the parameter `--build-all` or `--build-fpm`,
 the final compilation result will output a file named `./php-fpm`,
@@ -236,7 +238,7 @@ Because php-fpm must specify a configuration file before running, the php-fpm co
 
 Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./php-fpm -y php-fpm.conf`.
 
-### Embed Usage
+### Use embed
 
 When using the project parameters `--build-embed` or `--build-all`,
 the final compilation result will output a `libphp.a`, `php-config` and a series of header files,

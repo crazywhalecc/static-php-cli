@@ -161,7 +161,9 @@ chmod +x bin/spc
 
 同时，你也可以使用参数 `--no-strip` 来关闭裁剪，关闭裁剪后可以使用 gdb 等工具调试，但这样会让静态二进制体积变大。
 
-### 使用 php-cli
+## 不同 SAPI 的使用
+
+### 使用 cli
 
 > php-cli 是一个静态的二进制文件，类似 Go、Rust 语言编译后的单个可移植的二进制文件。
 
@@ -176,7 +178,7 @@ cd buildroot/bin/
 ./php your_project.phar # 运行打包为 phar 单文件的项目
 ```
 
-### 使用 micro.sfx
+### 使用 micro
 
 > phpmicro 是一个提供自执行二进制 PHP 的项目，本项目依赖 phpmicro 进行编译自执行二进制。详见 [dixyes/phpmicro](https://github.com/dixyes/phpmicro)。
 
@@ -206,7 +208,7 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 > 有些情况下的 phar 文件或 PHP 项目可能无法在 micro 环境下运行。
 
-### 使用 php-fpm
+### 使用 fpm
 
 采用项目参数 `--build-fpm` 或 `--build-all` 时，最后编译结果会输出一个 `./php-fpm` 的文件。
 该文件存放在 `buildroot/bin/` 目录，拷贝出来即可使用。
@@ -216,7 +218,7 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 指定 `php-fpm.conf` 可以使用命令参数 `-y`，例如：`./php-fpm -y php-fpm.conf`。
 
-### 使用 php-embed
+### 使用 embed
 
 采用项目参数 `--build-embed` 或 `--build-all` 时，最后编译结果会输出一个 `libphp.a`、`php-config` 以及一系列头文件，存放在 `buildroot/`，你可以在你的其他代码中引入它们。
 
