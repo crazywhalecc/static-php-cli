@@ -319,6 +319,18 @@ abstract class BuilderBase
         $this->options[$key] = $value;
     }
 
+    public function getEnvString(array $vars = ['cc', 'cxx', 'ar', 'ld']): string
+    {
+        $env = [];
+        foreach ($vars as $var) {
+            $var = strtoupper($var);
+            if (getenv($var) !== false) {
+                $env[] = "{$var}=" . getenv($var);
+            }
+        }
+        return implode(' ', $env);
+    }
+
     /**
      * Check if all libs are downloaded.
      * If not, throw exception.
