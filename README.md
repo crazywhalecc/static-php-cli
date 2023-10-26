@@ -42,15 +42,15 @@ If you don't want to compile yourself, you can download example pre-compiled art
 Yes, this project is written in PHP, pretty funny.
 But static-php-cli runtime only requires an environment above PHP 8.1 and `mbstring`, `pcntl` extension.
 
-Here is the architecture support status, where `CI` represents support for GitHub Action builds,
-`Local` represents support for local builds, and blank represents not currently supported.
+Here is the architecture support status, where :octocat: represents support for GitHub Action builds,
+:computer: represents support for local manual builds, and blank represents not currently supported.
 
-|         | x86_64    | aarch64   |
-|---------|-----------|-----------|
-| macOS   | CI, Local | Local     |
-| Linux   | CI, Local | CI, Local |
-| Windows |           |           |
-| FreeBSD | Local     | Local     |
+|         | x86_64               | aarch64              |
+|---------|----------------------|----------------------|
+| macOS   | :octocat: :computer: | :computer:           |
+| Linux   | :octocat: :computer: | :octocat: :computer: |
+| Windows |                      |                      |
+| FreeBSD | :computer:           | :computer:           |
 
 > macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
