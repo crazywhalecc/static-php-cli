@@ -14,6 +14,7 @@ class imagick extends Extension
     {
         // imagick may call omp_pause_all which requires -lgomp
         $extra_libs = $this->builder->getOption('extra-libs', '');
+        $extra_libs .= ' -lgomp ';
         $this->builder->setOption('extra-libs', $extra_libs);
         return true;
     }
