@@ -232,7 +232,7 @@
     },
     "openssl": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
             "openssl"
         ],
