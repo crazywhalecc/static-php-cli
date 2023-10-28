@@ -35,8 +35,8 @@ class DownloadCommand extends BaseCommand
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
-        $this->addOption('by-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
-        $this->addOption('without-suggests', null, null, 'Do not fetch suggested sources when using --by-extensions');
+        $this->addOption('for-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
+        $this->addOption('without-suggestions', null, null, 'Do not fetch suggested sources when using --for-extensions');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -45,7 +45,7 @@ class DownloadCommand extends BaseCommand
             $input->getOption('all')
             || $input->getOption('clean')
             || $input->getOption('from-zip')
-            || $input->getOption('by-extensions')
+            || $input->getOption('for-extensions')
         ) {
             $input->setArgument('sources', '');
         }
@@ -108,10 +108,10 @@ class DownloadCommand extends BaseCommand
             Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
         }
 
-        // --by-extensions
-        if ($by_ext = $this->getOption('by-extensions')) {
+        // --for-extensions
+        if ($by_ext = $this->getOption('for-extensions')) {
             $ext = array_map('trim', array_filter(explode(',', $by_ext)));
-            $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggests'));
+            $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggestions'));
             array_unshift($sources, 'php-src', 'micro', 'pkg-config');
         } else {
             // get source list that will be downloaded

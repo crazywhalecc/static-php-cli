@@ -126,7 +126,7 @@ chmod +x bin/spc
 # 拉取所有依赖库
 ./bin/spc fetch --all
 # 只拉取编译指定扩展需要的所有依赖
-./bin/spc download --by-extensions=openssl,pcntl,mbstring,pdo_sqlite
+./bin/spc download --for-extensions=openssl,pcntl,mbstring,pdo_sqlite
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 ```

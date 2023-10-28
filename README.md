@@ -137,7 +137,7 @@ Basic usage for building php and micro with some extensions:
 # fetch all libraries
 ./bin/spc download --all
 # only fetch necessary sources by needed extensions
-./bin/spc download --by-extensions=openssl,pcntl,mbstring,pdo_sqlite
+./bin/spc download --for-extensions=openssl,pcntl,mbstring,pdo_sqlite
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
 ./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-cli --build-micro
 ```
