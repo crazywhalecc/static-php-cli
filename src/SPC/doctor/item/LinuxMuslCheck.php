@@ -26,7 +26,7 @@ class LinuxMuslCheck
         }
 
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
-        if (file_exists($musl_wrapper_lib)) {
+        if (file_exists($musl_wrapper_lib) && file_exists('/usr/local/musl/bin/musl-gcc')) {
             return CheckResult::ok();
         }
         return CheckResult::fail('musl-wrapper is not installed on your system', 'fix-musl-wrapper');
@@ -71,7 +71,7 @@ class LinuxMuslCheck
             Downloader::downloadSource($musl_version_name, $musl_source);
             FileSystem::extractSource($musl_version_name, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
             logger()->info('Installing musl wrapper');
-            shell(true)->cd(SOURCE_PATH . "/{$musl_version_name}")
+            shell()->cd(SOURCE_PATH . "/{$musl_version_name}")
                 ->exec('./configure')
                 ->exec('make -j')
                 ->exec("{$prefix}make install");
@@ -106,7 +106,7 @@ class LinuxMuslCheck
             Downloader::downloadSource('musl-compile', $musl_compile_source);
             logger()->info('Extracting musl-cross');
             FileSystem::extractSource('musl-compile', DOWNLOAD_PATH . "/{$arch}-musl-toolchain.tgz");
-            shell(true)->exec($prefix . 'cp -rf ' . SOURCE_PATH . '/musl-compile/* /usr/local/musl');
+            shell()->exec($prefix . 'cp -rf ' . SOURCE_PATH . '/musl-compile/* /usr/local/musl');
             return true;
         } catch (RuntimeException) {
             return false;
