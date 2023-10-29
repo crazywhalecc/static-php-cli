@@ -26,7 +26,7 @@ class LinuxMuslCheck
         }
 
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
-        if (file_exists($musl_wrapper_lib) && file_exists('/usr/local/musl/bin/musl-gcc')) {
+        if (file_exists($musl_wrapper_lib) && file_exists('/usr/local/musl/lib/libc.a')) {
             return CheckResult::ok();
         }
         return CheckResult::fail('musl-wrapper is not installed on your system', 'fix-musl-wrapper');
@@ -72,7 +72,7 @@ class LinuxMuslCheck
             FileSystem::extractSource($musl_version_name, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
             logger()->info('Installing musl wrapper');
             shell()->cd(SOURCE_PATH . "/{$musl_version_name}")
-                ->exec('./configure')
+                ->exec('./configure --disable-gcc-wrapper')
                 ->exec('make -j')
                 ->exec("{$prefix}make install");
             // TODO: add path using putenv instead of editing /etc/profile
