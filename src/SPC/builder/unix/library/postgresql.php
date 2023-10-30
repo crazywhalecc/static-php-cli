@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -46,7 +47,11 @@ trait postgresql
         $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
         if (!empty($output[1][0])) {
             $libs = $output[1][0];
-            $envs .= " LIBS=\"{$libs} -lstdc++\" ";
+            $libcpp = '';
+            if ($this->builder->getLib('icu')) {
+                $libcpp = $this instanceof LinuxLibraryBase ? ' -lstdc++' : ' -lc++';
+            }
+            $envs .= " LIBS=\"{$libs}{$libcpp}\" ";
         }
 
         FileSystem::resetDir($this->source_dir . '/build');
