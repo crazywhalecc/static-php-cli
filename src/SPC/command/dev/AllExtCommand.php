@@ -14,6 +14,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+use function Laravel\Prompts\table;
+
 #[AsCommand('dev:extensions', 'Helper command that lists available extension details', ['list-ext'])]
 class AllExtCommand extends BaseCommand
 {
@@ -62,7 +64,7 @@ class AllExtCommand extends BaseCommand
         if ($data === []) {
             $style->warning('Unknown extension selected: ' . implode(',', $extensions));
         } else {
-            $style->table(
+            table(
                 ['Extension', 'lib-depends', 'lib-suggests', 'ext-depends', 'ext-suggests', 'unix-only'],
                 $data
             );
