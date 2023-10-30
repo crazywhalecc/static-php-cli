@@ -94,6 +94,8 @@ Here's how to download from GitHub Actions:
 
 You can also download binaries from a self-hosted server: [enter](https://dl.static-php.dev/static-php-cli/spc-bin/nightly/).
 
+> SPC single-file binary is built by phpmicro and box.
+
 ### Manual build (using source code)
 
 Clone repo first:
