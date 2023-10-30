@@ -8,8 +8,8 @@ use SPC\doctor\CheckListHandler;
 use SPC\doctor\CheckResult;
 use SPC\exception\RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
+
+use function Laravel\Prompts\confirm;
 
 #[AsCommand('doctor', 'Diagnose whether the current environment can compile normally')]
 class DoctorCommand extends BaseCommand
@@ -49,9 +49,8 @@ class DoctorCommand extends BaseCommand
                             throw new RuntimeException('Some check items can not be fixed !');
                         case FIX_POLICY_PROMPT:
                             if ($result->getFixItem() !== '') {
-                                $helper = new QuestionHelper();
-                                $question = new ConfirmationQuestion('Do you want to fix it? [Y/n] ', true);
-                                if ($helper->ask($this->input, $this->output, $question)) {
+                                $question = confirm('Do you want to fix it?');
+                                if ($question) {
                                     $checker->emitFix($this->output, $result);
                                 } else {
                                     throw new RuntimeException('You cancelled fix');
