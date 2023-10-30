@@ -140,10 +140,6 @@ class LinuxBuilder extends BuilderBase
         $this->setOption('extra-libs', $extra_libs);
 
         $cflags = $this->arch_c_flags;
-        $use_lld = '';
-        if (str_ends_with(getenv('CC'), 'clang') && SystemUtil::findCommand('lld')) {
-            $use_lld = '-Xcompiler -fuse-ld=lld';
-        }
 
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
@@ -203,22 +199,22 @@ class LinuxBuilder extends BuilderBase
 
         if ($enableCli) {
             logger()->info('building cli');
-            $this->buildCli($use_lld);
+            $this->buildCli();
         }
         if ($enableFpm) {
             logger()->info('building fpm');
-            $this->buildFpm($use_lld);
+            $this->buildFpm();
         }
         if ($enableMicro) {
             logger()->info('building micro');
-            $this->buildMicro($use_lld, $cflags);
+            $this->buildMicro();
         }
         if ($enableEmbed) {
             logger()->info('building embed');
             if ($enableMicro) {
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
-            $this->buildEmbed($use_lld);
+            $this->buildEmbed();
         }
 
         if (php_uname('m') === $this->getOption('arch')) {
@@ -232,13 +228,9 @@ class LinuxBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(string $use_lld): void
+    public function buildCli(): void
     {
-        $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
-            'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
-            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
-        ]);
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make -j{$this->concurrency} {$vars} cli");
@@ -257,7 +249,7 @@ class LinuxBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function buildMicro(string $use_lld, string $cflags): void
+    public function buildMicro(): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new WrongUsageException('phpmicro only support PHP >= 8.0!');
@@ -267,12 +259,9 @@ class LinuxBuilder extends BuilderBase
             SourcePatcher::patchMicro(['phar']);
         }
 
-        $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-        $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $enable_fake_cli,
-            'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
-            'EXTRA_LDFLAGS_PROGRAM' => "{$cflags} {$use_lld} -all-static",
-        ]);
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars([
+            'EXTRA_CFLAGS' => $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '',
+        ]));
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make -j{$this->concurrency} {$vars} micro");
@@ -294,14 +283,9 @@ class LinuxBuilder extends BuilderBase
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public function buildFpm(string $use_lld): void
+    public function buildFpm(): void
     {
-        $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
-            'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
-            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
-        ]);
-
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make -j{$this->concurrency} {$vars} fpm");
@@ -318,17 +302,30 @@ class LinuxBuilder extends BuilderBase
      *
      * @throws RuntimeException
      */
-    public function buildEmbed(string $use_lld): void
+    public function buildEmbed(): void
     {
-        $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident -fPIE ' . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)),
-            'EXTRA_LIBS' => $this->getOption('extra-libs', ''),
-            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static",
-        ]);
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
 
         shell()
             ->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec('make INSTALL_ROOT=' . BUILD_ROOT_PATH . " -j{$this->concurrency} {$vars} install");
+    }
+
+    private function getBuildVars($input = []): array
+    {
+        $use_lld = '';
+        if (str_ends_with(getenv('CC'), 'clang') && SystemUtil::findCommand('lld')) {
+            $use_lld = '-Xcompiler -fuse-ld=lld';
+        }
+        $optimization = $this->getOption('no-strip', false) ? '-g -O0' : '-g0 -0s';
+        $cflags = isset($input['EXTRA_CFLAGS']) && $input['EXTRA_CFLAGS'] ? " {$input['EXTRA_CFLAGS']}" : '';
+        $libs = isset($input['EXTRA_LIBS']) && $input['EXTRA_LIBS'] ? " {$input['EXTRA_LIBS']}" : '';
+        $ldflags = isset($input['EXTRA_LDFLAGS_PROGRAM']) && $input['EXTRA_LDFLAGS_PROGRAM'] ? " {$input['EXTRA_LDFLAGS_PROGRAM']}" : '';
+        return [
+            'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $cflags,
+            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs,
+            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
+        ];
     }
 }
