@@ -24,7 +24,6 @@ trait postgresql
         $optional_packages = [
             'zstd' => 'libzstd',
             'ldap' => 'ldap',
-            'libpam' => 'libpam',
             'libxslt' => 'libxslt',
             'icu' => 'icu-i18n',
         ];
@@ -74,12 +73,12 @@ trait postgresql
                 '--with-libxml ' .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
                 ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
-                ($this->builder->getLib('libpam') ? '--with-pam ' : '--without-pam ') .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
                 ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
                 '--without-lz4 ' .
                 '--without-perl ' .
                 '--without-python ' .
+                '--without-pam ' .
                 '--without-bonjour ' .
                 '--without-tcl '
             );
