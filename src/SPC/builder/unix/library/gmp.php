@@ -17,7 +17,7 @@ trait gmp
     {
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static --disable-shared ' .
                 '--prefix='
             )

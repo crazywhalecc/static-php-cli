@@ -113,6 +113,16 @@ abstract class BuilderBase
     }
 
     /**
+     * Get all library objects.
+     *
+     * @return LibraryBase[]
+     */
+    public function getLibs(): array
+    {
+        return $this->libs;
+    }
+
+    /**
      * Add extension to build.
      */
     public function addExt(Extension $extension): void
@@ -139,17 +149,23 @@ abstract class BuilderBase
     }
 
     /**
-     * Check if there is a cpp extension.
+     * Check if there is a cpp extensions or libraries.
      *
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function hasCppExtension(): bool
+    public function hasCpp(): bool
     {
         // judge cpp-extension
         $exts = array_keys($this->getExts());
         foreach ($exts as $ext) {
             if (Config::getExt($ext, 'cpp-extension', false) === true) {
+                return true;
+            }
+        }
+        $libs = array_keys($this->getLibs());
+        foreach ($libs as $lib) {
+            if (Config::getLib($lib, 'cpp-library', false) === true) {
                 return true;
             }
         }
@@ -301,6 +317,18 @@ abstract class BuilderBase
     public function setOption(string $key, mixed $value): void
     {
         $this->options[$key] = $value;
+    }
+
+    public function getEnvString(array $vars = ['cc', 'cxx', 'ar', 'ld']): string
+    {
+        $env = [];
+        foreach ($vars as $var) {
+            $var = strtoupper($var);
+            if (getenv($var) !== false) {
+                $env[] = "{$var}=" . getenv($var);
+            }
+        }
+        return implode(' ', $env);
     }
 
     /**

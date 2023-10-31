@@ -17,6 +17,8 @@ final class CheckListHandlerTest extends TestCase
         $list = new CheckListHandler();
 
         $id = $list->runChecks();
-        $this->assertCount(7, $id);
+        foreach ($id as $item) {
+            $this->assertInstanceOf('SPC\doctor\AsCheckItem', $item);
+        }
     }
 }

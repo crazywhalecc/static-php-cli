@@ -23,7 +23,7 @@ trait libwebp
         // Start build
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                "{$this->builder->configure_env} cmake " .
+                'cmake ' .
                 $this->builder->makeCmakeArgs() . ' ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DWEBP_BUILD_EXTRAS=ON ' .

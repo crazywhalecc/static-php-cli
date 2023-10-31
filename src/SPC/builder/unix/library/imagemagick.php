@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -16,23 +17,33 @@ trait imagemagick
      */
     protected function build(): void
     {
-        $extra = '--without-jxl --without-xml --without-zstd --without-x --disable-openmp ';
-        // libzip support
-        $extra .= $this->builder->getLib('libzip') ? '--with-zip ' : '--without-zip ';
-        // jpeg support
-        $extra .= $this->builder->getLib('libjpeg') ? '--with-jpeg ' : '';
-        // png support
-        $extra .= $this->builder->getLib('libpng') ? '--with-png ' : '';
-        // webp support
-        $extra .= $this->builder->getLib('libwebp') ? '--with-webp ' : '';
-        // zstd support
-        // $extra .= $this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ';
-        // freetype support
-        $extra .= $this->builder->getLib('freetype') ? '--with-freetype ' : '--without-freetype ';
+        // TODO: imagemagick build with bzip2 failed with bugs, we need to fix it in the future
+        $extra = '--without-jxl --without-x --disable-openmp --without-bzlib ';
+        $required_libs = '';
+        $optional_libs = [
+            'libzip' => 'zip',
+            'libjpeg' => 'jpeg',
+            'libpng' => 'png',
+            'libwebp' => 'webp',
+            'libxml2' => 'xml',
+            'zlib' => 'zlib',
+            'xz' => 'lzma',
+            'zstd' => 'zstd',
+            'freetype' => 'freetype',
+        ];
+        foreach ($optional_libs as $lib => $option) {
+            $extra .= $this->builder->getLib($lib) ? "--with-{$option} " : "--without-{$option} ";
+            if ($this->builder->getLib($lib) instanceof LinuxLibraryBase) {
+                $required_libs .= ' ' . $this->builder->getLib($lib)->getStaticLibFiles();
+            }
+        }
 
+        $ldflags = $this instanceof LinuxLibraryBase ? ('LDFLAGS="-static" ') : '';
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                $ldflags .
+                "LIBS='{$required_libs}' " .
+                './configure ' .
                 '--enable-static --disable-shared ' .
                 $extra .
                 '--prefix='

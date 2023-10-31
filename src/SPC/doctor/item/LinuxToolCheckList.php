@@ -20,7 +20,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
-        'g++', 'patch',
+        'g++', 'patch', 'binutils-gold',
     ];
 
     public const TOOLS_DEBIAN = [

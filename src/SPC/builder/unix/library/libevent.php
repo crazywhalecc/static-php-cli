@@ -21,7 +21,7 @@ trait libevent
         // Start build
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                "{$this->builder->configure_env} cmake " .
+                'cmake ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '-DCMAKE_BUILD_TYPE=Release ' .

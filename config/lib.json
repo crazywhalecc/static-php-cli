@@ -111,6 +111,7 @@
     },
     "icu": {
         "source": "icu",
+        "cpp-library": true,
         "static-libs-unix": [
             "libicui18n.a",
             "libicuio.a",
@@ -122,20 +123,20 @@
         "source": "imagemagick",
         "static-libs-unix": [
             "libMagick++-7.Q16HDRI.a",
-            "libMagickCore-7.Q16HDRI.a",
-            "libMagickWand-7.Q16HDRI.a"
+            "libMagickWand-7.Q16HDRI.a",
+            "libMagickCore-7.Q16HDRI.a"
         ],
         "lib-depends": [
             "zlib",
             "libpng",
             "libjpeg",
-            "bzip2",
             "libwebp",
             "freetype"
         ],
         "lib-suggests": [
             "zstd",
             "xz",
+            "bzip2",
             "libzip",
             "libxml2"
         ]
@@ -434,7 +435,10 @@
             "readline"
         ],
         "lib-suggests": [
-            "icu"
+            "icu",
+            "libxslt",
+            "ldap",
+            "zstd"
         ]
     },
     "pthreads4w": {
@@ -464,10 +468,9 @@
             "libsnappy.a"
         ],
         "headers-unix": [
+            "snappy.h",
             "snappy-c.h",
             "snappy-sinksource.h",
-            "snappy.h",
-            "snappy-stubs-internal.h",
             "snappy-stubs-public.h"
         ],
         "lib-depends": [

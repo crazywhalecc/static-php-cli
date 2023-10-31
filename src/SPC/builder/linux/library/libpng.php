@@ -20,35 +20,13 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\store\FileSystem;
 
 class libpng extends LinuxLibraryBase
 {
     public const NAME = 'libpng';
-
-    /**
-     * @throws FileSystemException
-     */
-    public function patchBeforeBuild(): bool
-    {
-        FileSystem::replaceFileStr(
-            SOURCE_PATH . '/libpng/configure',
-            '-lz',
-            BUILD_LIB_PATH . '/libz.a'
-        );
-        if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
-            FileSystem::replaceFileStr(
-                SOURCE_PATH . '/libpng/configure',
-                '-lm',
-                '/usr/lib/libm.a'
-            );
-        }
-        return true;
-    }
 
     /**
      * @throws FileSystemException
@@ -66,7 +44,8 @@ class libpng extends LinuxLibraryBase
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                'LDFLAGS="-L' . BUILD_LIB_PATH . '" ' .
+                './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .
@@ -75,7 +54,7 @@ class libpng extends LinuxLibraryBase
                 '--prefix='
             )
             ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
+            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I{$this->source_dir} -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
             ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
         $this->cleanLaFiles();

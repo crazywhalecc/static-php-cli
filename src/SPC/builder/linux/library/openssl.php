@@ -41,8 +41,8 @@ class openssl extends LinuxLibraryBase
         $extra = '';
         $ex_lib = '-ldl -pthread';
 
-        $env = $this->builder->pkgconf_env . " CFLAGS='{$this->builder->arch_c_flags}'";
-        $env .= " CC='{$this->builder->getOption('cc')} -static -idirafter " . BUILD_INCLUDE_PATH .
+        $env = "CFLAGS='{$this->builder->arch_c_flags}'";
+        $env .= " CC='" . getenv('CC') . ' -static -idirafter ' . BUILD_INCLUDE_PATH .
             ' -idirafter /usr/include/ ' .
             ' -idirafter /usr/include/' . $this->builder->getOption('arch') . '-linux-gnu/ ' .
             "' ";
@@ -60,11 +60,11 @@ class openssl extends LinuxLibraryBase
 
         $ex_lib = trim($ex_lib);
 
-        $clang_postfix = SystemUtil::getCCType($this->builder->getOption('cc')) === 'clang' ? '-clang' : '';
+        $clang_postfix = SystemUtil::getCCType(getenv('CC')) === 'clang' ? '-clang' : '';
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} {$env} ./Configure no-shared {$extra} " .
+                "{$env} ./Configure no-shared {$extra} " .
                 '--prefix=/ ' .
                 '--libdir=lib ' .
                 '-static ' .

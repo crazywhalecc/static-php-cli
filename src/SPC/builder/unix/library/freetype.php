@@ -27,7 +27,7 @@ trait freetype
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static --disable-shared --without-harfbuzz --prefix= ' .
                 $suggested
             )

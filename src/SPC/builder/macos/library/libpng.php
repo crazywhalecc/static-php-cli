@@ -44,7 +44,7 @@ class libpng extends MacOSLibraryBase
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 "--host={$this->builder->getOption('gnu-arch')}-apple-darwin " .
                 '--disable-shared ' .
                 '--enable-static ' .

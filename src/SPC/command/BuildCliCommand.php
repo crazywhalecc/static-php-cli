@@ -30,6 +30,7 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('build-all', null, null, 'build cli, micro, fpm, embed');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('enable-zts', null, null, 'enable ZTS support');
+        $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
         $this->addOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
         $this->addOption('with-micro-fake-cli', null, null, 'Enable phpmicro fake cli');
     }

@@ -19,7 +19,7 @@ trait brotli
         FileSystem::resetDir($this->source_dir . '/build-dir');
         shell()->cd($this->source_dir . '/build-dir')
             ->exec(
-                $this->builder->configure_env . ' cmake ' .
+                'cmake ' .
                 "{$this->builder->makeCmakeArgs()} " .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '..'

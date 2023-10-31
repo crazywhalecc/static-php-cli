@@ -146,7 +146,6 @@
     },
     "intl": {
         "type": "builtin",
-        "cpp-extension": true,
         "lib-depends": [
             "icu"
         ]
@@ -233,7 +232,7 @@
     },
     "openssl": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
             "openssl"
         ],

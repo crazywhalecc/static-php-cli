@@ -59,105 +59,110 @@ class DownloadCommand extends BaseCommand
      */
     public function handle(): int
     {
-        // 删除旧资源
-        if ($this->getOption('clean')) {
-            logger()->warning('You are doing some operations that not recoverable: removing directories below');
-            logger()->warning(SOURCE_PATH);
-            logger()->warning(DOWNLOAD_PATH);
-            logger()->warning(BUILD_ROOT_PATH);
-            logger()->alert('I will remove these dir after 5 seconds !');
-            sleep(5);
-            if (PHP_OS_FAMILY === 'Windows') {
-                f_passthru('rmdir /s /q ' . SOURCE_PATH);
-                f_passthru('rmdir /s /q ' . DOWNLOAD_PATH);
-                f_passthru('rmdir /s /q ' . BUILD_ROOT_PATH);
-            } else {
-                f_passthru('rm -rf ' . SOURCE_PATH . '/*');
-                f_passthru('rm -rf ' . DOWNLOAD_PATH . '/*');
-                f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
+        try {
+            if ($this->getOption('clean')) {
+                logger()->warning('You are doing some operations that not recoverable: removing directories below');
+                logger()->warning(SOURCE_PATH);
+                logger()->warning(DOWNLOAD_PATH);
+                logger()->warning(BUILD_ROOT_PATH);
+                logger()->alert('I will remove these dir after 5 seconds !');
+                sleep(5);
+                if (PHP_OS_FAMILY === 'Windows') {
+                    f_passthru('rmdir /s /q ' . SOURCE_PATH);
+                    f_passthru('rmdir /s /q ' . DOWNLOAD_PATH);
+                    f_passthru('rmdir /s /q ' . BUILD_ROOT_PATH);
+                } else {
+                    f_passthru('rm -rf ' . SOURCE_PATH . '/*');
+                    f_passthru('rm -rf ' . DOWNLOAD_PATH . '/*');
+                    f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
+                }
+                return static::FAILURE;
             }
+
+            // --from-zip
+            if ($path = $this->getOption('from-zip')) {
+                return $this->downloadFromZip($path);
+            }
+
+            // Define PHP major version
+            $ver = $this->php_major_ver = $this->getOption('with-php') ?? '8.1';
+            define('SPC_BUILD_PHP_VERSION', $ver);
+            preg_match('/^\d+\.\d+$/', $ver, $matches);
+            if (!$matches) {
+                logger()->error("bad version arg: {$ver}, x.y required!");
+                return static::FAILURE;
+            }
+
+            // Use shallow-clone can reduce git resource download
+            if ($this->getOption('shallow-clone')) {
+                define('GIT_SHALLOW_CLONE', true);
+            }
+
+            // To read config
+            Config::getSource('openssl');
+
+            // use openssl 1.1
+            if ($this->getOption('with-openssl11')) {
+                logger()->debug('Using openssl 1.1');
+                Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
+            }
+
+            // --for-extensions
+            if ($for_ext = $this->getOption('for-extensions')) {
+                $ext = array_map('trim', array_filter(explode(',', $for_ext)));
+                $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggestions'));
+                array_unshift($sources, 'php-src', 'micro', 'pkg-config');
+            } else {
+                // get source list that will be downloaded
+                $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
+                if (empty($sources)) {
+                    $sources = array_keys(Config::getSources());
+                }
+            }
+            $chosen_sources = $sources;
+
+            // Process -U options
+            $custom_urls = [];
+            foreach ($this->input->getOption('custom-url') as $value) {
+                [$source_name, $url] = explode(':', $value, 2);
+                $custom_urls[$source_name] = $url;
+            }
+
+            // Download them
+            f_mkdir(DOWNLOAD_PATH);
+            $cnt = count($chosen_sources);
+            $ni = 0;
+            foreach ($chosen_sources as $source) {
+                ++$ni;
+                if (isset($custom_urls[$source])) {
+                    $config = Config::getSource($source);
+                    $new_config = [
+                        'type' => 'url',
+                        'url' => $custom_urls[$source],
+                    ];
+                    if (isset($config['path'])) {
+                        $new_config['path'] = $config['path'];
+                    }
+                    if (isset($config['filename'])) {
+                        $new_config['filename'] = $config['filename'];
+                    }
+                    logger()->info("Fetching source {$source} from custom url [{$ni}/{$cnt}]");
+                    Downloader::downloadSource($source, $new_config, true);
+                } else {
+                    logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
+                    Downloader::downloadSource($source, Config::getSource($source));
+                }
+            }
+            $time = round(microtime(true) - START_TIME, 3);
+            logger()->info('Download complete, used ' . $time . ' s !');
+            return static::SUCCESS;
+        } catch (DownloaderException $e) {
+            logger()->error($e->getMessage());
+            return static::FAILURE;
+        } catch (WrongUsageException $e) {
+            logger()->critical($e->getMessage());
             return static::FAILURE;
         }
-
-        // --from-zip
-        if ($path = $this->getOption('from-zip')) {
-            return $this->downloadFromZip($path);
-        }
-
-        // Define PHP major version
-        $ver = $this->php_major_ver = $this->getOption('with-php') ?? '8.1';
-        define('SPC_BUILD_PHP_VERSION', $ver);
-        preg_match('/^\d+\.\d+$/', $ver, $matches);
-        if (!$matches) {
-            logger()->error("bad version arg: {$ver}, x.y required!");
-            return static::FAILURE;
-        }
-
-        // Use shallow-clone can reduce git resource download
-        if ($this->getOption('shallow-clone')) {
-            define('GIT_SHALLOW_CLONE', true);
-        }
-
-        // To read config
-        Config::getSource('openssl');
-
-        // use openssl 1.1
-        if ($this->getOption('with-openssl11')) {
-            logger()->debug('Using openssl 1.1');
-            // 手动修改配置
-            Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
-        }
-
-        // --for-extensions
-        if ($by_ext = $this->getOption('for-extensions')) {
-            $ext = array_map('trim', array_filter(explode(',', $by_ext)));
-            $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggestions'));
-            array_unshift($sources, 'php-src', 'micro', 'pkg-config');
-        } else {
-            // get source list that will be downloaded
-            $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
-            if (empty($sources)) {
-                $sources = array_keys(Config::getSources());
-            }
-        }
-        $chosen_sources = $sources;
-
-        // Process -U options
-        $custom_urls = [];
-        foreach ($this->input->getOption('custom-url') as $value) {
-            [$source_name, $url] = explode(':', $value, 2);
-            $custom_urls[$source_name] = $url;
-        }
-
-        // Download them
-        f_mkdir(DOWNLOAD_PATH);
-        $cnt = count($chosen_sources);
-        $ni = 0;
-        foreach ($chosen_sources as $source) {
-            ++$ni;
-            if (isset($custom_urls[$source])) {
-                $config = Config::getSource($source);
-                $new_config = [
-                    'type' => 'url',
-                    'url' => $custom_urls[$source],
-                ];
-                if (isset($config['path'])) {
-                    $new_config['path'] = $config['path'];
-                }
-                if (isset($config['filename'])) {
-                    $new_config['filename'] = $config['filename'];
-                }
-                logger()->info("Fetching source {$source} from custom url [{$ni}/{$cnt}]");
-                Downloader::downloadSource($source, $new_config, true);
-            } else {
-                logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
-                Downloader::downloadSource($source, Config::getSource($source));
-            }
-        }
-        // 打印拉取资源用时
-        $time = round(microtime(true) - START_TIME, 3);
-        logger()->info('Download complete, used ' . $time . ' s !');
-        return static::SUCCESS;
     }
 
     private function downloadFromZip(string $path): int

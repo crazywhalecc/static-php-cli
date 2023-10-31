@@ -17,7 +17,6 @@ trait ldap
         $alt .= $this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '';
         shell()->cd($this->source_dir)
             ->exec(
-                $this->builder->configure_env . ' ' .
                 $this->builder->makeAutoconfFlags(AUTOCONF_LDFLAGS | AUTOCONF_CPPFLAGS) .
                 ' ./configure ' .
                 '--enable-static ' .

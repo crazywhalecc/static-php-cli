@@ -32,9 +32,16 @@ class MacOSBuilder extends BuilderBase
 
         // ---------- set necessary options ----------
         // set C Compiler (default: clang)
-        $this->setOptionIfNotExist('cc', 'clang');
+        f_putenv('CC=' . $this->getOption('cc', 'clang'));
         // set C++ Composer (default: clang++)
-        $this->setOptionIfNotExist('cxx', 'clang++');
+        f_putenv('CXX=' . $this->getOption('cxx', 'clang++'));
+        // set PATH
+        f_putenv('PATH=' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
+        // set PKG_CONFIG
+        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        // set PKG_CONFIG_PATH
+        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig/');
+
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));
         $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
@@ -47,15 +54,6 @@ class MacOSBuilder extends BuilderBase
         $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
         // cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->getOption('arch'), $this->arch_c_flags);
-        // configure environment
-        $this->configure_env = SystemUtil::makeEnvVarString([
-            'PKG_CONFIG' => BUILD_ROOT_PATH . '/bin/pkg-config',
-            'PKG_CONFIG_PATH' => BUILD_LIB_PATH . '/pkgconfig/',
-            'CC' => $this->getOption('cc'),
-            'CXX' => $this->getOption('cxx'),
-            'CFLAGS' => "{$this->arch_c_flags} -Wimplicit-function-declaration -Os",
-            'PATH' => BUILD_ROOT_PATH . '/bin:' . getenv('PATH'),
-        ]);
 
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
@@ -134,7 +132,7 @@ class MacOSBuilder extends BuilderBase
         // add macOS frameworks
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . $this->getFrameworks(true);
         // add libc++, some extensions or libraries need it (C++ cannot be linked statically)
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCppExtension() ? '-lc++ ' : '');
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lc++ ' : '');
         if (!$this->getOption('bloat', false)) {
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
         } else {
@@ -174,8 +172,7 @@ class MacOSBuilder extends BuilderBase
                 ($enableMicro ? '--enable-micro ' : '--disable-micro ') .
                 $json_74 .
                 $zts .
-                $this->makeExtensionArgs() . ' ' .
-                $this->configure_env
+                $this->makeExtensionArgs()
             );
 
         SourcePatcher::patchBeforeMake($this);
@@ -231,12 +228,14 @@ class MacOSBuilder extends BuilderBase
     /**
      * Build phpmicro sapi
      *
-     * @throws FileSystemException|RuntimeException
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function buildMicro(): void
     {
         if ($this->getPHPVersionID() < 80000) {
-            throw new RuntimeException('phpmicro only support PHP >= 8.0!');
+            throw new WrongUsageException('phpmicro only support PHP >= 8.0!');
         }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
@@ -285,6 +284,11 @@ class MacOSBuilder extends BuilderBase
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 
+    /**
+     * Build embed sapi
+     *
+     * @throws RuntimeException
+     */
     public function buildEmbed(): void
     {
         $vars = SystemUtil::makeEnvVarString([
