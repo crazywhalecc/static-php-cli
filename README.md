@@ -27,7 +27,7 @@ You can also use the micro binary file to combine php binary and php source code
 ## Docs
 
 The current README contains basic usage. For all the features of static-php-cli,
-see <https://static-php.dev>.
+see <https://static-php.dev> .
 
 ## Direct Download
 
