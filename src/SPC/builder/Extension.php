@@ -164,6 +164,34 @@ class Extension
     }
 
     /**
+     * Run compile check if build target is cli
+     * If you need to run some check, overwrite this or add your assert in src/globals/tests/{extension_name}.php
+     *
+     * @throws RuntimeException
+     */
+    public function runCheck(): void
+    {
+        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $this->getDistName() . '"', false);
+        if ($ret !== 0) {
+            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+        }
+
+        if (file_exists(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php')) {
+            // Trim additional content & escape special characters to allow inline usage
+            $test = str_replace(
+                ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
+                ['', '', '', '\"', '\$'],
+                file_get_contents(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php')
+            );
+
+            [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
+            if ($ret !== 0) {
+                throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
+            }
+        }
+    }
+
+    /**
      * @throws RuntimeException
      */
     protected function addLibraryDependency(string $name, bool $optional = false): void
