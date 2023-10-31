@@ -132,12 +132,13 @@
     },
     "imap": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
             "imap"
         ],
         "lib-suggests": [
-            "kerberos"
+            "kerberos",
+            "openssl"
         ]
     },
     "inotify": {
@@ -234,7 +235,8 @@
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
-            "openssl"
+            "openssl",
+            "zlib"
         ],
         "ext-depends": [
             "zlib"

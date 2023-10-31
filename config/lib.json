@@ -141,6 +141,15 @@
             "libxml2"
         ]
     },
+    "imap": {
+        "source": "imap",
+        "static-libs-unix": [
+            "libc-client.a"
+        ],
+        "lib-suggests": [
+            "openssl"
+        ]
+    },
     "ldap": {
         "source": "ldap",
         "static-libs-unix": [

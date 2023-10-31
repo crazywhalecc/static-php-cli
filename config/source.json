@@ -144,6 +144,15 @@
             "path": "LICENSE"
         }
     },
+    "imap": {
+        "type": "git",
+        "url": "https://github.com/uw-imap/imap.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "inotify": {
         "type": "url",
         "url": "https://pecl.php.net/get/inotify",
