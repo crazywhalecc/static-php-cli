@@ -9,6 +9,7 @@
     "src",
     "vendor/psr",
     "vendor/laravel/prompts",
+    "vendor/illuminate",
     "vendor/symfony",
     "vendor/zhamao"
   ],
