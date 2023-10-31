@@ -66,7 +66,7 @@ trait UnixBuilderTrait
 
             foreach ($this->exts as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
-                $ext->runCheck();
+                $ext->runCliCheck();
             }
         }
 

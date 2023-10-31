@@ -166,10 +166,11 @@ class Extension
     /**
      * Run compile check if build target is cli
      * If you need to run some check, overwrite this or add your assert in src/globals/tests/{extension_name}.php
+     * If check failed, throw RuntimeException
      *
      * @throws RuntimeException
      */
-    public function runCheck(): void
+    public function runCliCheck(): void
     {
         [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
