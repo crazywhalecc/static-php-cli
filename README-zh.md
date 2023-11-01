@@ -16,7 +16,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 [![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
-[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli-hosted/build-php-common.yml?branch=refactor&label=Build%20Common%20Extensions&style=flat-square)](https://github.com/crazywhalecc/static-php-cli-hosted/actions/workflows/build-php-common.yml)
+[![](https://img.shields.io/github/actions/workflow/status/static-php/static-php-cli-hosted/build-php-common.yml?branch=refactor&label=Build%20Common%20Extensions&style=flat-square)](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml)
 [![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
