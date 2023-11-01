@@ -12,7 +12,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 <img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
 
-> 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/crazywhalecc/phpmicro)。
+> 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/static-php/phpmicro)。
 
 [![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
