@@ -216,7 +216,7 @@
     },
     "libmemcached": {
         "type": "git",
-        "url": "https://github.com/crazywhalecc/libmemcached-macos.git",
+        "url": "https://github.com/static-php/libmemcached-macos.git",
         "rev": "master",
         "license": {
             "type": "file",
