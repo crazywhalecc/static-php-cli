@@ -257,7 +257,7 @@ For an advanced example of how to use this feature, take a look at [how to use i
 If the extension you need is missing, you can create an issue.
 If you are familiar with this project, you are also welcome to initiate a pull request.
 
-If you want to contribute document content, please go to [crazywhalecc/static-php-cli-docs](https://github.com/crazywhalecc/static-php-cli-docs).
+If you want to contribute document content, please go to [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs).
 
 Part of the English document is written by me, and part is translated by Google,
 and there may be inaccurate descriptions, strange or offensive expressions.
