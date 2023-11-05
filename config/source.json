@@ -154,19 +154,19 @@
             "path": "LICENSE"
         }
     },
-    "libargon2": {
-        "type": "git",
-        "rev": "master",
-        "url": "https://github.com/mpociot/phc-winner-argon2",
+    "ldap": {
+        "type": "filelist",
+        "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
+        "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
-    "ldap": {
-        "type": "filelist",
-        "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
-        "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
+    "libargon2": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/mpociot/phc-winner-argon2",
         "license": {
             "type": "file",
             "path": "LICENSE"

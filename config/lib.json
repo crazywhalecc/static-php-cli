@@ -141,12 +141,6 @@
             "libxml2"
         ]
     },
-    "libargon2": {
-        "source": "libargon2",
-        "static-libs-unix": [
-            "libargon2.a"
-        ]
-    },
     "ldap": {
         "source": "ldap",
         "static-libs-unix": [
@@ -157,6 +151,12 @@
             "openssl",
             "gmp",
             "libsodium"
+        ]
+    },
+    "libargon2": {
+        "source": "libargon2",
+        "static-libs-unix": [
+            "libargon2.a"
         ]
     },
     "libavif": {
