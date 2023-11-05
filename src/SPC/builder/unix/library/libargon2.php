@@ -11,7 +11,7 @@ trait libargon2
     protected function build()
     {
         shell()->cd($this->source_dir)
-            ->exec("make {$this->builder->configure_env} PREFIX='' clean")
+            ->exec("make PREFIX='' clean")
             ->exec("make -j{$this->builder->concurrency} PREFIX=''")
             ->exec("make install PREFIX='' DESTDIR=" . BUILD_ROOT_PATH);
 
