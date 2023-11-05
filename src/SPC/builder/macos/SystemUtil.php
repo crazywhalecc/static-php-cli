@@ -10,11 +10,11 @@ use SPC\exception\WrongUsageException;
 
 class SystemUtil
 {
-    /** macOS 兼容 unix 的系统工具 */
+    /** Unix System Util Compatible */
     use UnixSystemUtilTrait;
 
     /**
-     * 获取系统 CPU 逻辑内核数
+     * Get Logic CPU Count for macOS
      *
      * @throws RuntimeException
      */
@@ -29,9 +29,10 @@ class SystemUtil
     }
 
     /**
-     * 获取不同架构对应的 cflags 参数
+     * Get Target Arch CFlags
      *
-     * @param  string              $arch 架构名称
+     * @param  string              $arch Arch Name
+     * @return string              return Arch CFlags string
      * @throws WrongUsageException
      */
     public static function getArchCFlags(string $arch): string

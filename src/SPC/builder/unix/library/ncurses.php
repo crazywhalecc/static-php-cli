@@ -6,11 +6,11 @@ namespace SPC\builder\unix\library;
 
 trait ncurses
 {
-    protected function build()
+    protected function build(): void
     {
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--enable-overwrite ' .

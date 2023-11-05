@@ -8,7 +8,7 @@
     },
     "apcu": {
         "type": "url",
-        "url": "http://pecl.php.net/get/APCu",
+        "url": "https://pecl.php.net/get/APCu",
         "path": "php-src/ext/apcu",
         "filename": "apcu.tgz",
         "license": {
@@ -51,6 +51,15 @@
             "path": "LICENSE"
         }
     },
+    "ext-glfw": {
+        "type": "git",
+        "url": "https://github.com/mario-deluna/php-glfw",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-imagick": {
         "type": "url",
         "url": "https://pecl.php.net/get/imagick",
@@ -61,9 +70,29 @@
             "path": "LICENSE"
         }
     },
+    "ext-memcache": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/memcache",
+        "path": "php-src/ext/memcache",
+        "filename": "memcache.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-snappy": {
+        "type": "git",
+        "path": "php-src/ext/snappy",
+        "rev": "master",
+        "url": "https://github.com/kjdev/php-ext-snappy",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ssh2": {
         "type": "url",
-        "url": "http://pecl.php.net/get/ssh2",
+        "url": "https://pecl.php.net/get/ssh2",
         "path": "php-src/ext/ssh2",
         "filename": "ssh2.tgz",
         "license": {
@@ -91,17 +120,17 @@
         }
     },
     "gmp": {
-        "type": "filelist",
-        "url": "https://gmplib.org/download/gmp/",
-        "regex": "/href=\"(?<file>gmp-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "type": "ghtagtar",
+        "repo": "alisw/GMP",
         "license": {
             "type": "text",
             "text": "Since version 6, GMP is distributed under the dual licenses, GNU LGPL v3 and GNU GPL v2. These licenses make the library free to use, share, and improve, and allow you to pass on the result. The GNU licenses give freedoms, but also set firm restrictions on the use with non-free programs."
         }
     },
     "icu": {
-        "type": "url",
-        "url": "https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz",
+        "type": "ghrel",
+        "repo": "unicode-org/icu",
+        "match": "icu4c.+-src\\.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -117,7 +146,7 @@
     },
     "inotify": {
         "type": "url",
-        "url": "http://pecl.php.net/get/inotify",
+        "url": "https://pecl.php.net/get/inotify",
         "path": "php-src/ext/inotify",
         "filename": "inotify.tgz",
         "license": {
@@ -129,6 +158,15 @@
         "type": "git",
         "rev": "master",
         "url": "https://github.com/mpociot/phc-winner-argon2",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ldap": {
+        "type": "filelist",
+        "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
+        "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -185,22 +223,22 @@
             "path": "COPYING"
         }
     },
+    "libmemcached": {
+        "type": "git",
+        "url": "https://github.com/static-php/libmemcached-macos.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libpng": {
         "type": "git",
         "url": "https://git.code.sf.net/p/libpng/code",
         "rev": "libpng16",
         "license": {
-            "type": "text",
-            "text": "COPYRIGHT NOTICE, DISCLAIMER, and LICENSE\n=========================================\n\nPNG Reference Library License version 2\n---------------------------------------\n\n * Copyright (c) 1995-2019 The PNG Reference Library Authors.\n * Copyright (c) 2018-2019 Cosmin Truta.\n * Copyright (c) 2000-2002, 2004, 2006-2018 Glenn Randers-Pehrson.\n * Copyright (c) 1996-1997 Andreas Dilger.\n * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.\n\nThe software is supplied \"as is\", without warranty of any kind,\nexpress or implied, including, without limitation, the warranties\nof merchantability, fitness for a particular purpose, title, and\nnon-infringement.  In no event shall the Copyright owners, or\nanyone distributing the software, be liable for any damages or\nother liability, whether in contract, tort or otherwise, arising\nfrom, out of, or in connection with the software, or the use or\nother dealings in the software, even if advised of the possibility\nof such damage.\n\nPermission is hereby granted to use, copy, modify, and distribute\nthis software, or portions hereof, for any purpose, without fee,\nsubject to the following restrictions:\n\n 1. The origin of this software must not be misrepresented; you\n    must not claim that you wrote the original software.  If you\n    use this software in a product, an acknowledgment in the product\n    documentation would be appreciated, but is not required.\n\n 2. Altered source versions must be plainly marked as such, and must\n    not be misrepresented as being the original software.\n\n 3. This Copyright notice may not be removed or altered from any\n    source or altered source distribution.\n\n\nPNG Reference Library License version 1 (for libpng 0.5 through 1.6.35)\n-----------------------------------------------------------------------\n\nlibpng versions 1.0.7, July 1, 2000, through 1.6.35, July 15, 2018 are\nCopyright (c) 2000-2002, 2004, 2006-2018 Glenn Randers-Pehrson, are\nderived from libpng-1.0.6, and are distributed according to the same\ndisclaimer and license as libpng-1.0.6 with the following individuals\nadded to the list of Contributing Authors:\n\n    Simon-Pierre Cadieux\n    Eric S. Raymond\n    Mans Rullgard\n    Cosmin Truta\n    Gilles Vollant\n    James Yu\n    Mandar Sahastrabuddhe\n    Google Inc.\n    Vadim Barkov\n\nand with the following additions to the disclaimer:\n\n    There is no warranty against interference with your enjoyment of\n    the library or against infringement.  There is no warranty that our\n    efforts or the library will fulfill any of your particular purposes\n    or needs.  This library is provided with all faults, and the entire\n    risk of satisfactory quality, performance, accuracy, and effort is\n    with the user.\n\nSome files in the \"contrib\" directory and some configure-generated\nfiles that are distributed with libpng have other copyright owners, and\nare released under other open source licenses.\n\nlibpng versions 0.97, January 1998, through 1.0.6, March 20, 2000, are\nCopyright (c) 1998-2000 Glenn Randers-Pehrson, are derived from\nlibpng-0.96, and are distributed according to the same disclaimer and\nlicense as libpng-0.96, with the following individuals added to the\nlist of Contributing Authors:\n\n    Tom Lane\n    Glenn Randers-Pehrson\n    Willem van Schaik\n\nlibpng versions 0.89, June 1996, through 0.96, May 1997, are\nCopyright (c) 1996-1997 Andreas Dilger, are derived from libpng-0.88,\nand are distributed according to the same disclaimer and license as\nlibpng-0.88, with the following individuals added to the list of\nContributing Authors:\n\n    John Bowler\n    Kevin Bracey\n    Sam Bushell\n    Magnus Holmgren\n    Greg Roelofs\n    Tom Tanner\n\nSome files in the \"scripts\" directory have other copyright owners,\nbut are released under this license.\n\nlibpng versions 0.5, May 1995, through 0.88, January 1996, are\nCopyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.\n\nFor the purposes of this copyright and license, \"Contributing Authors\"\nis defined as the following set of individuals:\n\n    Andreas Dilger\n    Dave Martindale\n    Guy Eric Schalnat\n    Paul Schmidt\n    Tim Wegner\n\nThe PNG Reference Library is supplied \"AS IS\".  The Contributing\nAuthors and Group 42, Inc. disclaim all warranties, expressed or\nimplied, including, without limitation, the warranties of\nmerchantability and of fitness for any purpose.  The Contributing\nAuthors and Group 42, Inc. assume no liability for direct, indirect,\nincidental, special, exemplary, or consequential damages, which may\nresult from the use of the PNG Reference Library, even if advised of\nthe possibility of such damage.\n\nPermission is hereby granted to use, copy, modify, and distribute this\nsource code, or portions hereof, for any purpose, without fee, subject\nto the following restrictions:\n\n 1. The origin of this source code must not be misrepresented.\n\n 2. Altered versions must be plainly marked as such and must not\n    be misrepresented as being the original source.\n\n 3. This Copyright notice may not be removed or altered from any\n    source or altered source distribution.\n\nThe Contributing Authors and Group 42, Inc. specifically permit,\nwithout fee, and encourage the use of this source code as a component\nto supporting the PNG file format in commercial products.  If you use\nthis source code in a product, acknowledgment is not required but would\nbe appreciated.\n"
-        }
-    },
-    "libressl": {
-        "type": "filelist",
-        "url": "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/",
-        "regex": "/href=\"(?<file>libressl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
-        "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "LICENSE"
         }
     },
     "libsodium": {
@@ -221,8 +259,8 @@
         }
     },
     "libwebp": {
-        "type": "ghtagtar",
-        "repo": "webmproject/libwebp",
+        "type": "url",
+        "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.2.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -230,10 +268,19 @@
     },
     "libxml2": {
         "type": "url",
-        "url": "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.14/libxml2-v2.9.14.tar.gz",
+        "url": "https://github.com/GNOME/libxml2/archive/refs/tags/v2.9.14.tar.gz",
         "license": {
             "type": "file",
             "path": "Copyright"
+        }
+    },
+    "libxslt": {
+        "type": "filelist",
+        "url": "https://download.gnome.org/sources/libxslt/1.1/",
+        "regex": "/href=\"(?<file>libxslt-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "libyaml": {
@@ -262,11 +309,21 @@
             "path": "COPYING"
         }
     },
+    "memcached": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/memcached",
+        "path": "php-src/ext/memcached",
+        "filename": "memcached.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "micro": {
         "type": "git",
         "path": "php-src/sapi/micro",
         "rev": "master",
-        "url": "https://github.com/crazywhalecc/phpmicro",
+        "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -328,7 +385,8 @@
         }
     },
     "postgresql": {
-        "type": "custom",
+        "type": "url",
+        "url": "https://ftp.postgresql.org/pub/source/v15.1/postgresql-15.1.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"
@@ -336,7 +394,7 @@
     },
     "protobuf": {
         "type": "url",
-        "url": "http://pecl.php.net/get/protobuf",
+        "url": "https://pecl.php.net/get/protobuf",
         "path": "php-src/ext/protobuf",
         "filename": "protobuf.tgz",
         "license": {
@@ -372,9 +430,19 @@
             "path": "COPYING"
         }
     },
+    "snappy": {
+        "type": "git",
+        "repo": "google/snappy",
+        "rev": "main",
+        "url": "https://github.com/google/snappy",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "sqlite": {
         "type": "url",
-        "url": "https://www.sqlite.org/2023/sqlite-autoconf-3410100.tar.gz",
+        "url": "https://www.sqlite.org/2023/sqlite-autoconf-3430200.tar.gz",
         "license": {
             "type": "text",
             "text": "The author disclaims copyright to this source code.  In place of\na legal notice, here is a blessing:\n\n  *   May you do good and not evil.\n  *   May you find forgiveness for yourself and forgive others.\n  *   May you share freely, never taking more than you give."
@@ -395,6 +463,16 @@
         "rev": "ci",
         "url": "https://github.com/swow/swow",
         "patch": "patchSwow",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "xlswriter": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/xlswriter",
+        "path": "php-src/ext/xlswriter",
+        "filename": "xlswriter.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"

@@ -15,18 +15,17 @@ use SPC\store\Config;
 class DependencyUtil
 {
     /**
-     * 根据需要的 ext 列表获取依赖的 lib 列表，同时根据依赖关系排序
+     * Obtain the dependent lib list according to the required ext list, and sort according to the dependency
      *
-     * @param  array               $exts            要获取 libs 依赖的列表
-     * @param  array               $additional_libs 额外要添加的库列表，用于激活 lib-suggests 触发的额外库特性
-     * @return array               返回一个包含三个数组的数组，第一个是排序后的 ext 列表，第二个是排序后的 lib 列表，第三个是没有传入但是依赖了的 ext 列表
+     * @param  array               $exts            extensions list
+     * @param  array               $additional_libs List of additional libraries to add to activate the extra library features triggered by lib-suggests
+     * @return array               Returns an array containing three arrays, [extensions, libraries, not included extensions]
      * @throws WrongUsageException
      * @throws RuntimeException
      * @throws FileSystemException
      */
     public static function getExtLibsByDeps(array $exts, array $additional_libs = []): array
     {
-        // 先对扩展列表进行一个依赖筛选
         $sorted = [];
         $visited = [];
         $not_included_exts = [];
@@ -49,7 +48,7 @@ class DependencyUtil
             }
         }
         $libs = $additional_libs;
-        // 遍历每一个 ext 的 libs
+
         foreach ($final as $ext) {
             if (!in_array($ext, $exts)) {
                 $not_included_exts[] = $ext;
@@ -98,6 +97,43 @@ class DependencyUtil
             }
         }
         return $final;
+    }
+
+    public static function getAllExtLibsByDeps(array $exts): array
+    {
+        $sorted = [];
+        $visited = [];
+        $not_included_exts = [];
+        foreach ($exts as $ext) {
+            if (!isset($visited[$ext])) {
+                self::visitExtAllDeps($ext, $visited, $sorted);
+            }
+        }
+        $libs = [];
+        foreach ($sorted as $ext) {
+            if (!in_array($ext, $exts)) {
+                $not_included_exts[] = $ext;
+            }
+            foreach (array_merge(Config::getExt($ext, 'lib-depends', []), Config::getExt($ext, 'lib-suggests', [])) as $dep) {
+                if (!in_array($dep, $libs)) {
+                    $libs[] = $dep;
+                }
+            }
+        }
+        return [$sorted, self::getAllLibsByDeps($libs), $not_included_exts];
+    }
+
+    public static function getAllLibsByDeps(array $libs): array
+    {
+        $sorted = [];
+        $visited = [];
+
+        foreach ($libs as $lib) {
+            if (!isset($visited[$lib])) {
+                self::visitLibAllDeps($lib, $visited, $sorted);
+            }
+        }
+        return $sorted;
     }
 
     /**

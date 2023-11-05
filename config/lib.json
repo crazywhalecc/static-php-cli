@@ -42,14 +42,14 @@
             "curl"
         ],
         "lib-depends-unix": [
+            "openssl",
             "zlib"
         ],
         "lib-suggests": [
             "libssh2",
             "brotli",
             "nghttp2",
-            "zstd",
-            "openssl"
+            "zstd"
         ],
         "lib-suggests-windows": [
             "zlib",
@@ -63,6 +63,7 @@
         ],
         "frameworks": [
             "CoreFoundation",
+            "CoreServices",
             "SystemConfiguration"
         ]
     },
@@ -84,6 +85,18 @@
             "brotli"
         ]
     },
+    "glfw": {
+        "source": "ext-glfw",
+        "static-libs-unix": [
+            "libglfw3.a"
+        ],
+        "frameworks": [
+            "CoreVideo",
+            "OpenGL",
+            "Cocoa",
+            "IOKit"
+        ]
+    },
     "gmp": {
         "source": "gmp",
         "static-libs-unix": [
@@ -98,6 +111,7 @@
     },
     "icu": {
         "source": "icu",
+        "cpp-library": true,
         "static-libs-unix": [
             "libicui18n.a",
             "libicuio.a",
@@ -109,20 +123,20 @@
         "source": "imagemagick",
         "static-libs-unix": [
             "libMagick++-7.Q16HDRI.a",
-            "libMagickCore-7.Q16HDRI.a",
-            "libMagickWand-7.Q16HDRI.a"
+            "libMagickWand-7.Q16HDRI.a",
+            "libMagickCore-7.Q16HDRI.a"
         ],
         "lib-depends": [
             "zlib",
             "libpng",
             "libjpeg",
-            "bzip2",
             "libwebp",
             "freetype"
         ],
         "lib-suggests": [
             "zstd",
             "xz",
+            "bzip2",
             "libzip",
             "libxml2"
         ]
@@ -131,6 +145,18 @@
         "source": "libargon2",
         "static-libs-unix": [
             "libargon2.a"
+        ]
+    },
+    "ldap": {
+        "source": "ldap",
+        "static-libs-unix": [
+            "liblber.a",
+            "libldap.a"
+        ],
+        "lib-suggests": [
+            "openssl",
+            "gmp",
+            "libsodium"
         ]
     },
     "libavif": {
@@ -194,10 +220,17 @@
             "libmcrypt.a"
         ]
     },
+    "libmemcached": {
+        "source": "libmemcached",
+        "static-libs-unix": [
+            "libmemcached.a",
+            "libmemcachedutil.a"
+        ]
+    },
     "libpng": {
         "source": "libpng",
         "static-libs-unix": [
-            "libpng.a"
+            "libpng16.a"
         ],
         "static-libs-windows": [
             "libpng16_static.lib"
@@ -266,17 +299,27 @@
             "libxml2"
         ],
         "lib-depends": [
-            "libiconv"
+            "libiconv",
+            "zlib"
         ],
         "lib-suggests": [
             "xz",
-            "zlib"
+            "icu"
         ],
         "lib-suggests-windows": [
             "icu",
             "xz",
-            "zlib",
             "pthreads4w"
+        ]
+    },
+    "libxslt": {
+        "source": "libxslt",
+        "static-libs-unix": [
+            "libxslt.a",
+            "libexslt.a"
+        ],
+        "lib-depends": [
+            "libxml2"
         ]
     },
     "libyaml": {
@@ -386,7 +429,22 @@
     "postgresql": {
         "source": "postgresql",
         "static-libs-unix": [
-            "libpg.a"
+            "libpq.a",
+            "libpgport.a",
+            "libpgcommon.a"
+        ],
+        "lib-depends": [
+            "libiconv",
+            "libxml2",
+            "openssl",
+            "zlib",
+            "readline"
+        ],
+        "lib-suggests": [
+            "icu",
+            "libxslt",
+            "ldap",
+            "zstd"
         ]
     },
     "pthreads4w": {
@@ -408,6 +466,21 @@
         ],
         "lib-depends": [
             "ncurses"
+        ]
+    },
+    "snappy": {
+        "source": "snappy",
+        "static-libs-unix": [
+            "libsnappy.a"
+        ],
+        "headers-unix": [
+            "snappy.h",
+            "snappy-c.h",
+            "snappy-sinksource.h",
+            "snappy-stubs-public.h"
+        ],
+        "lib-depends": [
+            "zlib"
         ]
     },
     "sqlite": {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux;
 
-use JetBrains\PhpStorm\ArrayShape;
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -13,7 +12,7 @@ class SystemUtil
 {
     use UnixSystemUtilTrait;
 
-    #[ArrayShape(['dist' => 'mixed|string', 'ver' => 'mixed|string'])]
+    /** @noinspection PhpMissingBreakStatementInspection */
     public static function getOSRelease(): array
     {
         $ret = [
@@ -21,6 +20,19 @@ class SystemUtil
             'ver' => 'unknown',
         ];
         switch (true) {
+            case file_exists('/etc/centos-release'):
+                $lines = file('/etc/centos-release');
+                goto rh;
+            case file_exists('/etc/redhat-release'):
+                $lines = file('/etc/redhat-release');
+                rh:
+                foreach ($lines as $line) {
+                    if (preg_match('/release\s+(\d*(\.\d+)*)/', $line, $matches)) {
+                        $ret['dist'] = 'redhat';
+                        $ret['ver'] = $matches[1];
+                    }
+                }
+                break;
             case file_exists('/etc/os-release'):
                 $lines = file('/etc/os-release');
                 foreach ($lines as $line) {
@@ -37,21 +49,13 @@ class SystemUtil
                     $ret['dist'] = 'redhat';
                 }
                 break;
-            case file_exists('/etc/centos-release'):
-                $lines = file('/etc/centos-release');
-                goto rh;
-            case file_exists('/etc/redhat-release'):
-                $lines = file('/etc/redhat-release');
-                rh:
-                foreach ($lines as $line) {
-                    if (preg_match('/release\s+(\d+(\.\d+)*)/', $line, $matches)) {
-                        $ret['dist'] = 'redhat';
-                        $ret['ver'] = $matches[1];
-                    }
-                }
-                break;
         }
         return $ret;
+    }
+
+    public static function isMuslDist(): bool
+    {
+        return static::getOSRelease()['dist'] === 'alpine';
     }
 
     public static function getCpuCount(): int
@@ -81,6 +85,8 @@ class SystemUtil
 
     /**
      * @throws RuntimeException
+     * @throws WrongUsageException
+     * @throws WrongUsageException
      */
     public static function getArchCFlags(string $cc, string $arch): string
     {
@@ -120,7 +126,7 @@ class SystemUtil
 
     public static function checkCCFlag(string $flag, string $cc): string
     {
-        [$ret] = shell()->execWithResult("echo | {$cc} -E -x c - {$flag}");
+        [$ret] = shell()->execWithResult("echo | {$cc} -E -x c - {$flag} 2>/dev/null");
         if ($ret != 0) {
             return '';
         }
@@ -129,6 +135,7 @@ class SystemUtil
 
     /**
      * @throws RuntimeException
+     * @noinspection PhpUnused
      */
     public static function getCrossCompilePrefix(string $cc, string $arch): string
     {
@@ -159,6 +166,7 @@ class SystemUtil
         return null;
     }
 
+    /** @noinspection PhpUnused */
     public static function findStaticLibs(array $names): ?array
     {
         $ret = [];
@@ -187,6 +195,7 @@ class SystemUtil
         return null;
     }
 
+    /** @noinspection PhpUnused */
     public static function findHeaders(array $names): ?array
     {
         $ret = [];

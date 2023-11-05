@@ -6,9 +6,9 @@ namespace SPC\exception;
 
 class ExceptionHandler
 {
-    protected $whoops;
+    protected mixed $whoops = null;
 
-    private static $obj;
+    private static ?ExceptionHandler $obj = null;
 
     private function __construct()
     {
@@ -32,14 +32,6 @@ class ExceptionHandler
         return self::$obj;
     }
 
-    public function getWhoops()
-    {
-        return $this->whoops;
-    }
-
-    /**
-     * 处理异常
-     */
     public function handle(\Throwable $e): void
     {
         if (is_null($this->whoops)) {
@@ -47,7 +39,8 @@ class ExceptionHandler
             logger()->error($e->getTraceAsString());
             return;
         }
-
         $this->whoops->handleException($e);
+
+        logger()->critical('You can report this exception to static-php-cli GitHub repo.');
     }
 }

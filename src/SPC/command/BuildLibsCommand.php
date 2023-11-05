@@ -15,14 +15,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand('build:libs', 'Build dependencies')]
 class BuildLibsCommand extends BuildCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('libraries', InputArgument::REQUIRED, 'The libraries will be compiled, comma separated');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Build all libs that static-php-cli needed');
     }
 
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(InputInterface $input, OutputInterface $output): void
     {
         // --all 等于 ""
         if ($input->getOption('all')) {
@@ -63,7 +63,7 @@ class BuildLibsCommand extends BuildCommand
 
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build libs complete, used ' . $time . ' s !');
-            return 0;
+            return static::SUCCESS;
         } catch (\Throwable $e) {
             if ($this->getOption('debug')) {
                 ExceptionHandler::getInstance()->handle($e);
@@ -71,7 +71,7 @@ class BuildLibsCommand extends BuildCommand
                 logger()->critical('Build failed with ' . get_class($e) . ': ' . $e->getMessage());
                 logger()->critical('Please check with --debug option to see more details.');
             }
-            return 1;
+            return static::FAILURE;
         }
     }
 }

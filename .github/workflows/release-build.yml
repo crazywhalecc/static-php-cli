@@ -1,0 +1,47 @@
+name: Upload SPC Binary (Release)
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  build-release-artifacts:
+    name: "Upload SPC Binary (Release)"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operating-system:
+          - "linux-x86_64"
+          - "macos-x86_64"
+          - "linux-aarch64"
+          - "macos-aarch64"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: Reuse static-php-cli-hosted artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          repo: static-php/static-php-cli-hosted
+          branch: master
+          workflow: build-spc-release.yml
+          name: "spc-${{ matrix.operating-system }}"
+
+      - name: "Archive Executable"
+        run: |
+          tar -czf spc-${{ matrix.operating-system }}.tar.gz spc
+          echo "filename=spc-${{ matrix.operating-system }}.tar.gz" >> $GITHUB_ENV
+
+      - name: upload binaries to release
+        uses: softprops/action-gh-release@v1
+        if: ${{startsWith(github.ref, 'refs/tags/') }}
+        with:
+          files: ${{ env.filename }}
+
+      - name: "Upload Artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          path: spc
+          name: spc-${{ matrix.operating-system }}

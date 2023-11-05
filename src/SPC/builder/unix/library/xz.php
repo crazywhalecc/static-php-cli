@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+
 trait xz
 {
-    public function build()
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public function build(): void
     {
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
-                "--host={$this->builder->gnu_arch}-unknown-linux " .
+                "--host={$this->builder->getOption('gnu-arch')}-unknown-linux " .
                 '--disable-scripts ' .
                 '--disable-doc ' .
                 '--with-libiconv ' .

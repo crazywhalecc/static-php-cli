@@ -9,20 +9,21 @@
         }
     ],
     "require": {
-        "php": ">= 8.0",
-        "ext-tokenizer": "*",
-        "ext-iconv": "*",
-        "symfony/console": "^6 || ^5 || ^4",
-        "zhamao/logger": "^1.0",
-        "crazywhalecc/cli-helper": "^0.1.0",
-        "nunomaduro/collision": "*",
-        "ext-pcntl": "*"
+        "php": ">= 8.1",
+        "ext-mbstring": "*",
+        "ext-pcntl": "*",
+        "laravel/prompts": "^0.1.12",
+        "symfony/console": "^5.4 || ^6 || ^7",
+        "zhamao/logger": "^1.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.2 != 3.7.0",
-        "phpstan/phpstan": "^1.1",
         "captainhook/captainhook": "^5.10",
-        "captainhook/plugin-composer": "^5.3"
+        "captainhook/plugin-composer": "^5.3",
+        "friendsofphp/php-cs-fixer": "^3.25",
+        "humbug/box": "^4.3",
+        "nunomaduro/collision": "^7.8",
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^10.3"
     },
     "autoload": {
         "psr-4": {
@@ -33,13 +34,19 @@
             "src/globals/functions.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "SPC\\Tests\\": "tests/SPC"
+        }
+    },
     "bin": [
         "bin/spc"
     ],
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",
         "cs-fix": "php-cs-fixer fix",
-        "test": "bin/phpunit --no-coverage"
+        "test": "vendor/bin/phpunit tests/ --no-coverage",
+        "build:phar": "vendor/bin/box compile"
     },
     "config": {
         "allow-plugins": {

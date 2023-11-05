@@ -20,11 +20,18 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+
 class nghttp2 extends MacOSLibraryBase
 {
     public const NAME = 'nghttp2';
 
-    protected function build()
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    protected function build(): void
     {
         $args = $this->builder->makeAutoconfArgs(static::NAME, [
             'zlib' => null,
@@ -46,10 +53,10 @@ class nghttp2 extends MacOSLibraryBase
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} " . ' ./configure ' .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
-                "--host={$this->builder->gnu_arch}-apple-darwin " .
+                "--host={$this->builder->getOption('gnu-arch')}-apple-darwin " .
                 '--enable-lib-only ' .
                 '--with-boost=no ' .
                 $args . ' ' .

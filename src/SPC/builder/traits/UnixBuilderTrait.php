@@ -7,31 +7,24 @@ namespace SPC\builder\traits;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 
 trait UnixBuilderTrait
 {
-    /** @var string 设置的命令前缀，设置为 set -x 可以在终端打印命令 */
-    public string $set_x = 'set -x';
-
-    /** @var string C 编译器命令 */
-    public string $cc;
-
-    /** @var string C++ 编译器命令 */
-    public string $cxx;
-
-    /** @var string cflags 参数 */
+    /** @var string cflags */
     public string $arch_c_flags;
 
-    /** @var string C++ flags 参数 */
+    /** @var string C++ flags */
     public string $arch_cxx_flags;
 
     /** @var string cmake toolchain file */
     public string $cmake_toolchain_file;
 
-    /** @var string configure 环境依赖的变量 */
-    public string $configure_env;
-
+    /**
+     * @throws WrongUsageException
+     * @throws FileSystemException
+     */
     public function getAllStaticLibFiles(): array
     {
         $libs = [];
@@ -70,14 +63,23 @@ trait UnixBuilderTrait
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new RuntimeException('cli failed sanity check');
             }
+
             foreach ($this->exts as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
                 [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $ext->getDistName() . '"', false);
                 if ($ret !== 0) {
                     throw new RuntimeException('extension ' . $ext->getName() . ' failed compile check');
                 }
+
                 if (file_exists(ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php')) {
-                    [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php ' . ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php');
+                    // Trim additional content & escape special characters to allow inline usage
+                    $test = str_replace(
+                        ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
+                        ['', '', '', '\"', '\$'],
+                        file_get_contents(ROOT_DIR . '/src/globals/tests/' . $ext->getName() . '.php')
+                    );
+
+                    [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
                     if ($ret !== 0) {
                         throw new RuntimeException('extension ' . $ext->getName() . ' failed sanity check');
                     }
@@ -125,7 +127,7 @@ trait UnixBuilderTrait
     }
 
     /**
-     * 清理编译好的文件
+     * Run php clean
      *
      * @throws RuntimeException
      */
@@ -140,12 +142,35 @@ trait UnixBuilderTrait
      */
     public function makeCmakeArgs(): string
     {
-        [$lib, $include] = SEPARATED_PATH;
-        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . $this->cc . ' ' : '';
-        return $extra . '-DCMAKE_BUILD_TYPE=Release ' .
+        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
+        return $extra .
+            '-DCMAKE_BUILD_TYPE=Release ' .
             '-DCMAKE_INSTALL_PREFIX=/ ' .
-            "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-            "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
+            '-DCMAKE_INSTALL_BINDIR=/bin ' .
+            '-DCMAKE_INSTALL_LIBDIR=/lib ' .
+            '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
             "-DCMAKE_TOOLCHAIN_FILE={$this->cmake_toolchain_file}";
+    }
+
+    /**
+     * Generate configure flags
+     */
+    public function makeAutoconfFlags(int $flag = AUTOCONF_ALL): string
+    {
+        $extra = '';
+        // TODO: add auto pkg-config support
+        if (($flag & AUTOCONF_LIBS) === AUTOCONF_LIBS) {
+            $extra .= 'LIBS="' . BUILD_LIB_PATH . '" ';
+        }
+        if (($flag & AUTOCONF_CFLAGS) === AUTOCONF_CFLAGS) {
+            $extra .= 'CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
+        }
+        if (($flag & AUTOCONF_CPPFLAGS) === AUTOCONF_CPPFLAGS) {
+            $extra .= 'CPPFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
+        }
+        if (($flag & AUTOCONF_LDFLAGS) === AUTOCONF_LDFLAGS) {
+            $extra .= 'LDFLAGS="-L' . BUILD_LIB_PATH . '" ';
+        }
+        return $extra;
     }
 }

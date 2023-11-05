@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+
 trait readline
 {
-    protected function build()
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    protected function build(): void
     {
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static=yes ' .
                 '--enable-shared=no ' .
                 '--prefix= ' .

@@ -6,139 +6,53 @@ namespace SPC\store;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\LinuxBuilder;
-use SPC\builder\linux\SystemUtil;
-use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\util\Util;
 
 class SourcePatcher
 {
-    public static function init()
+    public static function init(): void
     {
-        FileSystem::addSourceExtractHook('swow', [SourcePatcher::class, 'patchSwow']);
+        // FileSystem::addSourceExtractHook('swow', [SourcePatcher::class, 'patchSwow']);
         FileSystem::addSourceExtractHook('micro', [SourcePatcher::class, 'patchMicro']);
         FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl11Darwin']);
     }
 
-    public static function patchPHPBuildconf(BuilderBase $builder): void
+    /**
+     * Source patcher runner before buildconf
+     *
+     * @param BuilderBase $builder Builder
+     */
+    public static function patchBeforeBuildconf(BuilderBase $builder): void
     {
-        if ($builder->getExt('curl')) {
-            logger()->info('patching before-configure for curl checks');
-            $file1 = "AC_DEFUN([PHP_CHECK_LIBRARY], [\n  $3\n])";
-            $files = FileSystem::readFile(SOURCE_PATH . '/php-src/ext/curl/config.m4');
-            $file2 = 'AC_DEFUN([PHP_CHECK_LIBRARY], [
-  save_old_LDFLAGS=$LDFLAGS
-  ac_stuff="$5"
-
-  save_ext_shared=$ext_shared
-  ext_shared=yes
-  PHP_EVAL_LIBLINE([$]ac_stuff, LDFLAGS)
-  AC_CHECK_LIB([$1],[$2],[
-    LDFLAGS=$save_old_LDFLAGS
-    ext_shared=$save_ext_shared
-    $3
-  ],[
-    LDFLAGS=$save_old_LDFLAGS
-    ext_shared=$save_ext_shared
-    unset ac_cv_lib_$1[]_$2
-    $4
-  ])dnl
-])';
-            file_put_contents(SOURCE_PATH . '/php-src/ext/curl/config.m4', $file1 . "\n" . $files . "\n" . $file2);
-        }
-
-        // if ($builder->getExt('pdo_sqlite')) {
-        //    FileSystem::replaceFile()
-        // }
-    }
-
-    public static function patchSwow(): bool
-    {
-        if (Util::getPHPVersionID() >= 80000) {
-            if (PHP_OS_FAMILY === 'Windows') {
-                f_passthru('cd ' . SOURCE_PATH . '/php-src/ext && mklink /D swow swow-src\ext');
-            } else {
-                f_passthru('cd ' . SOURCE_PATH . '/php-src/ext && ln -s swow-src/ext swow');
+        foreach ($builder->getExts() as $ext) {
+            if ($ext->patchBeforeBuildconf() === true) {
+                logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
             }
-            return true;
         }
-        return false;
     }
 
-    public static function patchPHPConfigure(BuilderBase $builder): void
+    /**
+     * Source patcher runner before configure
+     *
+     * @param  BuilderBase         $builder Builder
+     * @throws FileSystemException
+     */
+    public static function patchBeforeConfigure(BuilderBase $builder): void
     {
-        $frameworks = $builder instanceof MacOSBuilder ? ' ' . $builder->getFrameworks(true) . ' ' : '';
-        $patch = [];
-        if ($curl = $builder->getExt('curl')) {
-            $patch[] = ['curl check', '/-lcurl/', $curl->getLibFilesString() . $frameworks];
+        foreach ($builder->getExts() as $ext) {
+            if ($ext->patchBeforeConfigure() === true) {
+                logger()->info('Extension [' . $ext->getName() . '] patched before configure');
+            }
         }
-        if ($bzip2 = $builder->getExt('bz2')) {
-            $patch[] = ['bzip2 check', '/-lbz2/', $bzip2->getLibFilesString() . $frameworks];
-        }
-        if ($pdo_sqlite = $builder->getExt('pdo_sqlite')) {
-            $patch[] = ['pdo_sqlite linking', '/sqlite3_column_table_name=yes/', 'sqlite3_column_table_name=no'];
-        }
-        if ($event = $builder->getExt('event')) {
-            $patch[] = ['event check', '/-levent_openssl/', $event->getLibFilesString()];
-        }
-        if ($readline = $builder->getExt('readline')) {
-            $patch[] = ['readline patch', '/-lncurses/', $readline->getLibFilesString()];
-        }
-        if ($ssh2 = $builder->getExt('ssh2')) {
-            $patch[] = ['ssh2 patch', '/-lssh2/', $ssh2->getLibFilesString()];
-        }
-        $patch[] = ['disable capstone', '/have_capstone="yes"/', 'have_capstone="no"'];
-        foreach ($patch as $item) {
-            logger()->info('Patching configure: ' . $item[0]);
-            FileSystem::replaceFile(SOURCE_PATH . '/php-src/configure', REPLACE_FILE_PREG, $item[1], $item[2]);
-        }
+        // patch capstone
+        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
     }
 
-    public static function patchUnixLibpng(): void
-    {
-        FileSystem::replaceFile(
-            SOURCE_PATH . '/libpng/configure',
-            REPLACE_FILE_STR,
-            '-lz',
-            BUILD_LIB_PATH . '/libz.a'
-        );
-        if (SystemUtil::getOSRelease()['dist'] === 'alpine') {
-            FileSystem::replaceFile(
-                SOURCE_PATH . '/libpng/configure',
-                REPLACE_FILE_STR,
-                '-lm',
-                '/usr/lib/libm.a'
-            );
-        }
-    }
-
-    public static function patchUnixSsh2(): void
-    {
-        FileSystem::replaceFile(
-            SOURCE_PATH . '/php-src/configure',
-            REPLACE_FILE_STR,
-            '-lssh2',
-            BUILD_LIB_PATH . '/libssh2.a'
-        );
-    }
-
-    public static function patchCurlMacOS(): void
-    {
-        FileSystem::replaceFile(
-            SOURCE_PATH . '/curl/CMakeLists.txt',
-            REPLACE_FILE_PREG,
-            '/NOT COREFOUNDATION_FRAMEWORK/m',
-            'FALSE'
-        );
-        FileSystem::replaceFile(
-            SOURCE_PATH . '/curl/CMakeLists.txt',
-            REPLACE_FILE_PREG,
-            '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m',
-            'FALSE'
-        );
-    }
-
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
     public static function patchMicro(?array $list = null, bool $reverse = false): bool
     {
         if (!file_exists(SOURCE_PATH . '/php-src/sapi/micro/php_micro.c')) {
@@ -156,7 +70,7 @@ class SourcePatcher
         if ($major_ver === '74') {
             return false;
         }
-        $check = !defined('DEBUG_MODE') ? ' -q' : '';
+        // $check = !defined('DEBUG_MODE') ? ' -q' : '';
         // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
 
         $default = [
@@ -176,7 +90,7 @@ class SourcePatcher
         }
         $patch_list = $list ?? $default;
         $patches = [];
-        $serial = ['80', '81', '82'];
+        $serial = ['80', '81', '82', '83'];
         foreach ($patch_list as $patchName) {
             if (file_exists(SOURCE_PATH . "/php-src/sapi/micro/patches/{$patchName}.patch")) {
                 $patches[] = "sapi/micro/patches/{$patchName}.patch";
@@ -203,33 +117,121 @@ class SourcePatcher
         return true;
     }
 
+    /**
+     * Use existing patch file for patching
+     *
+     * @param  string           $patch_name Patch file name in src/globals/patch/
+     * @param  string           $cwd        Working directory for patch command
+     * @param  bool             $reverse    Reverse patches (default: False)
+     * @throws RuntimeException
+     */
+    public static function patchFile(string $patch_name, string $cwd, bool $reverse = false): bool
+    {
+        if (!file_exists(ROOT_DIR . "/src/globals/patch/{$patch_name}")) {
+            return false;
+        }
+
+        $patch_file = ROOT_DIR . "/src/globals/patch/{$patch_name}";
+        $patch_str = str_replace('/', DIRECTORY_SEPARATOR, $patch_file);
+
+        f_passthru(
+            'cd ' . $cwd . ' && ' .
+            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patch_str . ' | patch -p1 ' . ($reverse ? '-R' : '')
+        );
+        return true;
+    }
+
+    /**
+     * @throws FileSystemException
+     */
     public static function patchOpenssl11Darwin(): bool
     {
         if (PHP_OS_FAMILY === 'Darwin' && !file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && file_exists(SOURCE_PATH . '/openssl/test/v3ext.c')) {
-            FileSystem::replaceFile(
-                SOURCE_PATH . '/openssl/test/v3ext.c',
-                REPLACE_FILE_STR,
-                '#include <stdio.h>',
-                '#include <stdio.h>' . PHP_EOL . '#include <string.h>'
-            );
+            FileSystem::replaceFileStr(SOURCE_PATH . '/openssl/test/v3ext.c', '#include <stdio.h>', '#include <stdio.h>' . PHP_EOL . '#include <string.h>');
             return true;
         }
         return false;
     }
 
-    public static function patchPHPAfterConfigure(BuilderBase $param)
+    /**
+     * @throws FileSystemException
+     */
+    public static function patchBeforeMake(BuilderBase $builder): void
     {
-        if ($param instanceof LinuxBuilder) {
-            FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_STRLCPY 1$/m', '');
-            FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_STRLCAT 1$/m', '');
+        // Try to fix debian environment build lack HAVE_STRLCAT problem
+        if ($builder instanceof LinuxBuilder) {
+            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCPY 1$/m', '');
+            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCAT 1$/m', '');
         }
-        FileSystem::replaceFile(SOURCE_PATH . '/php-src/main/php_config.h', REPLACE_FILE_PREG, '/^#define HAVE_OPENPTY 1$/m', '');
+        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
 
-        // patch openssl3 with php8.0 bug
-        if (file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && Util::getPHPVersionID() < 80100) {
-            $openssl_c = file_get_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c');
-            $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
-            file_put_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c', $openssl_c);
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
+
+        // call extension patch before make
+        foreach ($builder->getExts() as $ext) {
+            if ($ext->patchBeforeMake() === true) {
+                logger()->info('Extension [' . $ext->getName() . '] patched before make');
+            }
         }
+    }
+
+    /**
+     * @throws FileSystemException
+     */
+    public static function patchHardcodedINI(array $ini = []): bool
+    {
+        $cli_c = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c';
+        $cli_c_bak = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c.bak';
+        $micro_c = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c';
+        $micro_c_bak = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c.bak';
+        $embed_c = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c';
+        $embed_c_bak = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c.bak';
+
+        // Try to reverse backup file
+        $find_str = 'const char HARDCODED_INI[] =';
+        $patch_str = '';
+        foreach ($ini as $key => $value) {
+            $patch_str .= "\"{$key}={$value}\\n\"\n";
+        }
+        $patch_str = "const char HARDCODED_INI[] =\n{$patch_str}";
+
+        // Detect backup, if we have backup, it means we need to reverse first
+        if (file_exists($cli_c_bak) || file_exists($micro_c_bak) || file_exists($embed_c_bak)) {
+            self::unpatchHardcodedINI();
+        }
+
+        // Backup it
+        $result = file_put_contents($cli_c_bak, file_get_contents($cli_c));
+        $result = $result && file_put_contents($micro_c_bak, file_get_contents($micro_c));
+        $result = $result && file_put_contents($embed_c_bak, file_get_contents($embed_c));
+        if ($result === false) {
+            return false;
+        }
+
+        // Patch it
+        FileSystem::replaceFileStr($cli_c, $find_str, $patch_str);
+        FileSystem::replaceFileStr($micro_c, $find_str, $patch_str);
+        FileSystem::replaceFileStr($embed_c, $find_str, $patch_str);
+        return true;
+    }
+
+    public static function unpatchHardcodedINI(): bool
+    {
+        $cli_c = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c';
+        $cli_c_bak = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c.bak';
+        $micro_c = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c';
+        $micro_c_bak = SOURCE_PATH . '/php-src/sapi/micro/php_micro.c.bak';
+        $embed_c = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c';
+        $embed_c_bak = SOURCE_PATH . '/php-src/sapi/embed/php_embed.c.bak';
+        if (!file_exists($cli_c_bak) && !file_exists($micro_c_bak) && !file_exists($embed_c_bak)) {
+            return false;
+        }
+        $result = file_put_contents($cli_c, file_get_contents($cli_c_bak));
+        $result = $result && file_put_contents($micro_c, file_get_contents($micro_c_bak));
+        $result = $result && file_put_contents($embed_c, file_get_contents($embed_c_bak));
+        @unlink($cli_c_bak);
+        @unlink($micro_c_bak);
+        @unlink($embed_c_bak);
+        return $result;
     }
 }

@@ -4,30 +4,38 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
+
 trait libwebp
 {
-    protected function build()
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
+    protected function build(): void
     {
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)
-            ->exec('./autogen.sh')
+        // CMake needs a clean build directory
+        FileSystem::resetDir($this->source_dir . '/build');
+        // Start build
+        shell()->cd($this->source_dir . '/build')
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--prefix= ' .
-                '--enable-libwebpdecoder ' .
-                '--enable-libwebpextras ' .
-                '--disable-tiff ' .
-                '--disable-gl ' .
-                '--disable-sdl ' .
-                '--disable-wic'
+                'cmake ' .
+                $this->builder->makeCmakeArgs() . ' ' .
+                '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DWEBP_BUILD_EXTRAS=ON ' .
+                '..'
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . $destdir);
-        $this->patchPkgconfPrefix(['libsharpyuv.pc', 'libwebp.pc', 'libwebpdecoder.pc', 'libwebpdemux.pc', 'libwebpmux.pc'], PKGCONF_PATCH_PREFIX);
+            ->exec("cmake --build . -j {$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+        // patch pkgconfig
+        $this->patchPkgconfPrefix(['libsharpyuv.pc', 'libwebp.pc', 'libwebpdecoder.pc', 'libwebpdemux.pc', 'libwebpmux.pc'], PKGCONF_PATCH_PREFIX | PKGCONF_PATCH_LIBDIR);
+        $this->patchPkgconfPrefix(['libsharpyuv.pc'], PKGCONF_PATCH_CUSTOM, ['/^includedir=.*$/m', 'includedir=${prefix}/include/webp']);
         $this->cleanLaFiles();
+        // fix imagemagick binary linking issue
+        $this->patchPkgconfPrefix(['libwebp.pc'], PKGCONF_PATCH_CUSTOM, ['/-lwebp$/m', '-lwebp -lsharpyuv']);
     }
 }

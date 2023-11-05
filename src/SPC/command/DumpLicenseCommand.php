@@ -18,9 +18,9 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand('dump-license', 'Dump licenses for required libraries')]
 class DumpLicenseCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
-        $this->addOption('by-extensions', null, InputOption::VALUE_REQUIRED, 'Dump by extensions and related libraries', null);
+        $this->addOption('for-extensions', null, InputOption::VALUE_REQUIRED, 'Dump by extensions and related libraries', null);
         $this->addOption('without-php', null, InputOption::VALUE_NONE, 'Dump without php-src');
         $this->addOption('by-libs', null, InputOption::VALUE_REQUIRED, 'Dump by libraries', null);
         $this->addOption('by-sources', null, InputOption::VALUE_REQUIRED, 'Dump by original sources (source.json)', null);
@@ -35,11 +35,11 @@ class DumpLicenseCommand extends BaseCommand
     public function handle(): int
     {
         $dumper = new LicenseDumper();
-        if ($this->getOption('by-extensions') !== null) {
+        if ($this->getOption('for-extensions') !== null) {
             // 从参数中获取要编译的 extensions，并转换为数组
-            $extensions = array_map('trim', array_filter(explode(',', $this->getOption('by-extensions'))));
+            $extensions = array_map('trim', array_filter(explode(',', $this->getOption('for-extensions'))));
             // 根据提供的扩展列表获取依赖库列表并编译
-            [$extensions, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps($extensions);
+            [$extensions, $libraries] = DependencyUtil::getExtLibsByDeps($extensions);
             $dumper->addExts($extensions);
             $dumper->addLibs($libraries);
             if (!$this->getOption('without-php')) {
@@ -50,7 +50,7 @@ class DumpLicenseCommand extends BaseCommand
             $this->output->writeln('Dump license with libraries: ' . implode(', ', $libraries));
             $this->output->writeln('Dump license with' . ($this->getOption('without-php') ? 'out' : '') . ' php-src');
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
-            return 0;
+            return static::SUCCESS;
         }
         if ($this->getOption('by-libs') !== null) {
             $libraries = array_map('trim', array_filter(explode(',', $this->getOption('by-libs'))));
@@ -58,16 +58,16 @@ class DumpLicenseCommand extends BaseCommand
             $dumper->addLibs($libraries);
             $dumper->dump($this->getOption('dump-dir'));
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
-            return 0;
+            return static::SUCCESS;
         }
         if ($this->getOption('by-sources') !== null) {
             $sources = array_map('trim', array_filter(explode(',', $this->getOption('by-sources'))));
             $dumper->addSources($sources);
             $dumper->dump($this->getOption('dump-dir'));
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
-            return 0;
+            return static::SUCCESS;
         }
-        $this->output->writeln('You must use one of "--by-extensions=", "--by-libs=", "--by-sources=" to dump');
-        return 1;
+        $this->output->writeln('You must use one of "--for-extensions=", "--by-libs=", "--by-sources=" to dump');
+        return static::FAILURE;
     }
 }

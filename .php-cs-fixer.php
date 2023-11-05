@@ -65,5 +65,5 @@ return (new PhpCsFixer\Config())
         'phpdoc_var_without_name' => false,
     ])
     ->setFinder(
-        PhpCsFixer\Finder::create()->in(__DIR__ . '/src')
+        PhpCsFixer\Finder::create()->in([__DIR__ . '/src', __DIR__ . '/tests/SPC'])
     );

@@ -6,13 +6,13 @@ namespace SPC\builder\unix\library;
 
 trait libiconv
 {
-    protected function build()
+    protected function build(): void
     {
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--prefix='

@@ -20,11 +20,20 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
+
 class openssl extends MacOSLibraryBase
 {
     public const NAME = 'openssl';
 
-    protected function build()
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
+    protected function build(): void
     {
         [$lib,,$destdir] = SEPARATED_PATH;
 
@@ -39,10 +48,11 @@ class openssl extends MacOSLibraryBase
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./Configure no-shared {$extra} " .
+                "./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/
                 "--libdir={$lib} " .
-                " darwin64-{$this->builder->arch}-cc"
+                '--openssldir=/System/Library/OpenSSL ' .
+                "darwin64-{$this->builder->getOption('arch')}-cc"
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")

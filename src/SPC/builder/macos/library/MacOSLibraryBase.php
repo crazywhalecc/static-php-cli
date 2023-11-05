@@ -8,6 +8,8 @@ use SPC\builder\BuilderBase;
 use SPC\builder\LibraryBase;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\traits\UnixLibraryTrait;
+use SPC\exception\FileSystemException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 
 abstract class MacOSLibraryBase extends LibraryBase
@@ -27,7 +29,8 @@ abstract class MacOSLibraryBase extends LibraryBase
     }
 
     /**
-     * 获取当前 lib 库依赖的 macOS framework
+     * @throws WrongUsageException
+     * @throws FileSystemException
      */
     public function getFrameworks(): array
     {

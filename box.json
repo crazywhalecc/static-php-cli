@@ -1,0 +1,19 @@
+{
+  "alias": "spc-php.phar",
+  "banner": false,
+  "blacklist": [
+    ".github"
+  ],
+  "directories": [
+    "config",
+    "src",
+    "vendor/psr",
+    "vendor/laravel/prompts",
+    "vendor/illuminate",
+    "vendor/symfony",
+    "vendor/zhamao"
+  ],
+  "git-commit-short": "git_commit_short",
+  "metadata": "ConsoleApplication::VERSION",
+  "output": "spc.phar"
+}

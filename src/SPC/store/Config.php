@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\store;
 
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
 /**
@@ -55,6 +54,7 @@ class Config
                 'Windows' => ['-windows', '-win', ''],
                 'Darwin' => ['-macos', '-unix', ''],
                 'Linux' => ['-linux', '-unix', ''],
+                'BSD' => ['-freebsd', '-bsd', '-unix', ''],
                 default => throw new WrongUsageException('OS ' . PHP_OS_FAMILY . ' is not supported'),
             };
             foreach ($m_key as $v) {
@@ -83,7 +83,6 @@ class Config
 
     /**
      * @throws FileSystemException
-     * @throws RuntimeException
      * @throws WrongUsageException
      */
     public static function getExt(string $name, ?string $key = null, mixed $default = null)
@@ -100,6 +99,7 @@ class Config
                 'Windows' => ['-windows', '-win', ''],
                 'Darwin' => ['-macos', '-unix', ''],
                 'Linux' => ['-linux', '-unix', ''],
+                'BSD' => ['-freebsd', '-bsd', '-unix', ''],
                 default => throw new WrongUsageException('OS ' . PHP_OS_FAMILY . ' is not supported'),
             };
             foreach ($m_key as $v) {
@@ -126,6 +126,9 @@ class Config
         return self::$ext;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function getSources(): array
     {
         if (self::$source === null) {

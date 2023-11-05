@@ -13,9 +13,7 @@ class CustomExt
 {
     private static array $custom_ext_class = [];
 
-    public function __construct(protected string $ext_name)
-    {
-    }
+    public function __construct(protected string $ext_name) {}
 
     /**
      * Load all custom extension classes

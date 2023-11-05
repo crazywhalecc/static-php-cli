@@ -22,32 +22,30 @@ namespace SPC\builder\linux\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\store\SourcePatcher;
+use SPC\exception\WrongUsageException;
 
 class libpng extends LinuxLibraryBase
 {
     public const NAME = 'libpng';
 
     /**
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
-    public function build()
+    public function build(): void
     {
-        $optimizations = match ($this->builder->arch) {
+        $optimizations = match ($this->builder->getOption('arch')) {
             'x86_64' => '--enable-intel-sse ',
             'arm64' => '--enable-arm-neon ',
             default => '',
         };
-
-        // patch configure
-        SourcePatcher::patchUnixLibpng();
-
         shell()->cd($this->source_dir)
             ->exec('chmod +x ./configure')
+            ->exec('chmod +x ./install-sh')
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
-                "--host={$this->builder->gnu_arch}-unknown-linux " .
+                'LDFLAGS="-L' . BUILD_LIB_PATH . '" ' .
+                './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .
@@ -56,10 +54,8 @@ class libpng extends LinuxLibraryBase
                 '--prefix='
             )
             ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
-            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
-            ->cd(BUILD_LIB_PATH)
-            ->exec('ln -sf libpng16.a libpng.a');
+            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I{$this->source_dir} -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
+            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
         $this->cleanLaFiles();
     }

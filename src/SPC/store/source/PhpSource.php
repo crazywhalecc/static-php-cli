@@ -6,6 +6,7 @@ namespace SPC\store\source;
 
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\Downloader;
 
@@ -16,8 +17,9 @@ class PhpSource extends CustomSourceBase
     /**
      * @throws DownloaderException
      * @throws RuntimeException
+     * @throws FileSystemException
      */
-    public function fetch()
+    public function fetch(): void
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.1';
         Downloader::downloadSource('php-src', self::getLatestPHPInfo($major));
@@ -33,13 +35,16 @@ class PhpSource extends CustomSourceBase
     {
         // 查找最新的小版本号
         $info = json_decode(Downloader::curlExec(url: "https://www.php.net/releases/index.php?json&version={$major_version}"), true);
+        if (!isset($info['version'])) {
+            throw new DownloaderException("Version {$major_version} not found.");
+        }
+
         $version = $info['version'];
 
         // 从官网直接下载
         return [
             'type' => 'url',
             'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
-            // 'url' => "https://mirrors.zhamao.xin/php/php-{$version}.tar.gz",
         ];
     }
 }

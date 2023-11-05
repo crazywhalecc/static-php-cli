@@ -55,23 +55,25 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): bool|int
+    public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): false|int
     {
-        logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);
-        $file = self::readFile($filename);
-        switch ($replace_type) {
-            case REPLACE_FILE_STR:
-            default:
-                $file = str_replace($callback_or_search, $to_replace, $file);
-                break;
-            case REPLACE_FILE_PREG:
-                $file = preg_replace($callback_or_search, $to_replace, $file);
-                break;
-            case REPLACE_FILE_USER:
-                $file = $callback_or_search($file);
-                break;
-        }
-        return file_put_contents($filename, $file);
+        return self::replaceFile($filename, REPLACE_FILE_STR, $search, $replace);
+    }
+
+    /**
+     * @throws FileSystemException
+     */
+    public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): false|int
+    {
+        return self::replaceFile($filename, REPLACE_FILE_PREG, $search, $replace);
+    }
+
+    /**
+     * @throws FileSystemException
+     */
+    public static function replaceFileUser(string $filename, mixed $callback = null): false|int
+    {
+        return self::replaceFile($filename, REPLACE_FILE_USER, $callback);
     }
 
     /**
@@ -117,6 +119,9 @@ class FileSystem
         return null;
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public static function copyDir(string $from, string $to): void
     {
         $dst_path = FileSystem::convertPath($to);
@@ -127,6 +132,7 @@ class FileSystem
                 break;
             case 'Linux':
             case 'Darwin':
+            case 'BSD':
                 f_passthru('cp -r "' . $src_path . '" "' . $dst_path . '"');
                 break;
         }
@@ -146,10 +152,13 @@ class FileSystem
         if (self::$_extract_hook === []) {
             SourcePatcher::init();
         }
+        if (!is_dir(SOURCE_PATH)) {
+            self::createDir(SOURCE_PATH);
+        }
         if ($move_path !== null) {
             $move_path = SOURCE_PATH . '/' . $move_path;
         }
-        logger()->info("extracting {$name} source");
+        logger()->info("extracting {$name} source to " . ($move_path ?? SOURCE_PATH . "/{$name}") . ' ...');
         try {
             $target = $move_path ?? (SOURCE_PATH . "/{$name}");
             // Git source, just move
@@ -158,8 +167,7 @@ class FileSystem
                 self::emitSourceExtractHook($name);
                 return;
             }
-
-            if (PHP_OS_FAMILY === 'Darwin' || PHP_OS_FAMILY === 'Linux') {
+            if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
                 if (f_mkdir(directory: $target, recursive: true) !== true) {
                     throw new FileSystemException('create ' . $name . 'source dir failed');
                 }
@@ -251,14 +259,13 @@ class FileSystem
     /**
      * 递归或非递归扫描目录，可返回相对目录的文件列表或绝对目录的文件列表
      *
-     * @param  string      $dir         目录
-     * @param  bool        $recursive   是否递归扫描子目录
-     * @param  bool|string $relative    是否返回相对目录，如果为true则返回相对目录，如果为false则返回绝对目录
-     * @param  bool        $include_dir 非递归模式下，是否包含目录
-     * @return array|false
+     * @param string      $dir         目录
+     * @param bool        $recursive   是否递归扫描子目录
+     * @param bool|string $relative    是否返回相对目录，如果为true则返回相对目录，如果为false则返回绝对目录
+     * @param bool        $include_dir 非递归模式下，是否包含目录
      * @since 2.5
      */
-    public static function scanDirFiles(string $dir, bool $recursive = true, bool|string $relative = false, bool $include_dir = false): bool|array
+    public static function scanDirFiles(string $dir, bool $recursive = true, bool|string $relative = false, bool $include_dir = false): array|false
     {
         $dir = self::convertPath($dir);
         // 不是目录不扫，直接 false 处理
@@ -320,28 +327,7 @@ class FileSystem
         foreach ($files as $v) {
             $pathinfo = pathinfo($v);
             if (($pathinfo['extension'] ?? '') == 'php') {
-                $path = rtrim($dir, '/') . '/' . rtrim($pathinfo['dirname'], './') . '/' . $pathinfo['basename'];
-
-                // 过滤不包含类的文件
-                $tokens = token_get_all(self::readFile($path));
-                $found = false;
-                foreach ($tokens as $token) {
-                    if (!is_array($token)) {
-                        continue;
-                    }
-                    if ($token[0] === T_CLASS) {
-                        $found = true;
-                        break;
-                    }
-                }
-                if (!$found) {
-                    continue;
-                }
-
-                if ($rule === null) { // 规则未设置回调时候，使用默认的识别过滤规则
-                    /*if (substr(file_get_contents($dir . '/' . $v), 6, 6) == '#plain') {
-                        continue;
-                    }*/
+                if ($rule === null) {
                     if (file_exists($dir . '/' . $pathinfo['basename'] . '.ignore')) {
                         continue;
                     }
@@ -405,6 +391,9 @@ class FileSystem
         return rmdir($dir);
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function createDir(string $path): void
     {
         if (!is_dir($path) && !f_mkdir($path, 0755, true) && !is_dir($path)) {
@@ -412,7 +401,11 @@ class FileSystem
         }
     }
 
-    public static function writeFile(string $path, $content, ...$args): bool|string|int
+    /**
+     * @param  mixed               ...$args Arguments passed to file_put_contents
+     * @throws FileSystemException
+     */
+    public static function writeFile(string $path, mixed $content, ...$args): bool|int|string
     {
         $dir = pathinfo($path, PATHINFO_DIRNAME);
         if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
@@ -434,12 +427,47 @@ class FileSystem
         self::createDir($dir_name);
     }
 
-    public static function addSourceExtractHook(string $name, callable $callback)
+    public static function addSourceExtractHook(string $name, callable $callback): void
     {
         self::$_extract_hook[$name][] = $callback;
     }
 
-    private static function emitSourceExtractHook(string $name)
+    /**
+     * Check whether the path is a relative path (judging according to whether the first character is "/")
+     *
+     * @param string $path Path
+     */
+    public static function isRelativePath(string $path): bool
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            return !(strlen($path) > 2 && ctype_alpha($path[0]) && $path[1] === ':');
+        }
+        return strlen($path) > 0 && $path[0] !== '/';
+    }
+
+    /**
+     * @throws FileSystemException
+     */
+    private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): false|int
+    {
+        logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);
+        $file = self::readFile($filename);
+        switch ($replace_type) {
+            case REPLACE_FILE_STR:
+            default:
+                $file = str_replace($callback_or_search, $to_replace, $file);
+                break;
+            case REPLACE_FILE_PREG:
+                $file = preg_replace($callback_or_search, $to_replace, $file);
+                break;
+            case REPLACE_FILE_USER:
+                $file = $callback_or_search($file);
+                break;
+        }
+        return file_put_contents($filename, $file);
+    }
+
+    private static function emitSourceExtractHook(string $name): void
     {
         foreach ((self::$_extract_hook[$name] ?? []) as $hook) {
             if ($hook() === true) {

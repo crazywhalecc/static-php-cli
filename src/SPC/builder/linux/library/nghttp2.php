@@ -20,11 +20,20 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
+
 class nghttp2 extends LinuxLibraryBase
 {
     public const NAME = 'nghttp2';
 
-    public function build()
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
+    public function build(): void
     {
         $args = $this->builder->makeAutoconfArgs(static::NAME, [
             'zlib' => null,
@@ -46,10 +55,10 @@ class nghttp2 extends LinuxLibraryBase
 
         shell()->cd($this->source_dir)
             ->exec(
-                "{$this->builder->configure_env} ./configure " .
+                './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
-                "--host={$this->builder->gnu_arch}-unknown-linux " .
+                "--host={$this->builder->getOption('gnu-arch')}-unknown-linux " .
                 '--enable-lib-only ' .
                 '--with-boost=no ' .
                 $args . ' ' .

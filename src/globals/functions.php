@@ -8,17 +8,15 @@ use SPC\util\UnixShell;
 use ZM\Logger\ConsoleLogger;
 
 /**
- * 判断传入的数组是否为关联数组
- *
- * @param mixed $array
+ * Judge if an array is an associative array
  */
-function is_assoc_array($array): bool
+function is_assoc_array(mixed $array): bool
 {
     return is_array($array) && (!empty($array) && array_keys($array) !== range(0, count($array) - 1));
 }
 
 /**
- * 助手方法，返回一个 Logger 实例
+ * Return a logger instance
  */
 function logger(): LoggerInterface
 {
@@ -30,7 +28,8 @@ function logger(): LoggerInterface
 }
 
 /**
- * @param  string              $arch 架构名称转换为 GNU 标准形式
+ * Transfer architecture name to gnu triplet
+ *
  * @throws WrongUsageException
  */
 function arch2gnu(string $arch): string
@@ -50,7 +49,7 @@ function quote(string $str, string $quote = '"'): string
 }
 
 /**
- * 将不同系统环境的编译使用工具集的文件夹名称进行一个返回
+ * Get Family name of current OS
  *
  * @throws WrongUsageException
  */
@@ -61,12 +60,13 @@ function osfamily2dir(): string
         'Windows', 'WINNT', 'Cygwin' => 'windows',
         'Darwin' => 'macos',
         'Linux' => 'linux',
+        'BSD' => 'freebsd',
         default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
     };
 }
 
 /**
- * 执行shell，直接输出在终端，出现错误抛出异常
+ * Execute the shell command, and the output will be directly printed in the terminal. If there is an error, an exception will be thrown
  *
  * @throws \SPC\exception\RuntimeException
  */
@@ -92,12 +92,9 @@ function f_passthru(string $cmd): ?bool
 }
 
 /**
- * 执行命令，不输出内容，返回执行结果和内容
- *
- * @param mixed $output
- * @param mixed $result_code
+ * Execute a command, return the output and result code
  */
-function f_exec(string $command, &$output, &$result_code): bool|string
+function f_exec(string $command, mixed &$output, mixed &$result_code): bool|string
 {
     logger()->debug('Running command (no output) : ' . $command);
     return exec($command, $output, $result_code);
@@ -111,6 +108,12 @@ function f_mkdir(string $directory, int $permissions = 0777, bool $recursive = f
     }
     logger()->debug('Making new directory ' . ($recursive ? 'recursive' : '') . ': ' . $directory);
     return mkdir($directory, $permissions, $recursive);
+}
+
+function f_putenv(string $env): bool
+{
+    logger()->debug('Setting env: ' . $env);
+    return putenv($env);
 }
 
 function shell(?bool $debug = null): UnixShell

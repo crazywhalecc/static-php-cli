@@ -54,7 +54,7 @@ jobs:
 
       # If there's no Composer cache, install dependencies
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
-        run: composer update --no-dev
+        run: composer update --no-dev --classmap-authoritative
 
       # Cache downloaded source
       - id: cache-download
@@ -115,8 +115,3 @@ jobs:
             buildroot/build-extensions.json
             buildroot/build-libraries.json
 
-      # Upload downloaded files
-      - uses: actions/upload-artifact@v3
-        with:
-          name: download-files
-          path: downloads/

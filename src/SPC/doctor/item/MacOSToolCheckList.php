@@ -29,7 +29,6 @@ class MacOSToolCheckList
         'xz',
         'gzip',
         'bzip2',
-        'gotop',
         'cmake',
     ];
 
@@ -74,7 +73,7 @@ class MacOSToolCheckList
     {
         foreach ($missing as $cmd) {
             try {
-                shell(true)->exec('brew install ' . escapeshellarg($cmd));
+                shell(true)->exec('brew install --formula ' . escapeshellarg($cmd));
             } catch (RuntimeException) {
                 return false;
             }

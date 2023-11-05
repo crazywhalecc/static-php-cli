@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait libzip
 {
-    protected function build()
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    protected function build(): void
     {
         $extra = '';
         // lib:bzip2
@@ -23,7 +29,7 @@ trait libzip
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                "{$this->builder->configure_env} " . ' cmake ' .
+                'cmake ' .
                 "{$this->builder->makeCmakeArgs()} " .
                 '-DENABLE_GNUTLS=OFF ' .
                 '-DENABLE_MBEDTLS=OFF ' .

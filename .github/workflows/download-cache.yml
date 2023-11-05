@@ -1,0 +1,40 @@
+name: archive download sources weekly
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "* 14 * * 5"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  download:
+    name: cache download sources
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: [ "8.0", "8.1", "8.2" ]
+    steps:
+      - uses: actions/checkout@v3
+
+      # Cache composer dependencies
+      - id: cache-composer-deps
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-dependencies
+
+      # If there's no Composer cache, install dependencies
+      - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
+        run: composer update --no-dev
+
+      # If there's no dependencies cache, fetch sources, with or without debug
+      - if: steps.cache-download.outputs.cache-hit != 'true'
+        run: ./bin/spc download --with-php=${{ matrix.php-version }} --all --debug
+
+      # Upload downloaded files
+      - uses: actions/upload-artifact@v3
+        with:
+          name: download-files-${{ matrix.php-version }}
+          path: downloads/

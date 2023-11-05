@@ -13,16 +13,15 @@ class mongodb extends Extension
     public function getUnixConfigureArg(): string
     {
         $arg = ' --enable-mongodb ';
-        $arg .= ' --with-mongodb-system-libs=no ';
+        $arg .= ' --with-mongodb-system-libs=no --with-mongodb-client-side-encryption=no ';
         $arg .= ' --with-mongodb-sasl=no  ';
         if ($this->builder->getLib('openssl')) {
             $arg .= '--with-mongodb-ssl=openssl';
         }
-        if ($this->builder->getLib('icu')) {
-            $arg .= ' --with-mongodb-icu=yes ';
-        } else {
-            $arg .= ' --with-mongodb-icu=no ';
-        }
+        $arg .= $this->builder->getLib('icu') ? ' --with-mongodb-icu=yes ' : ' --with-mongodb-icu=no ';
+        $arg .= $this->builder->getLib('zstd') ? ' --with-mongodb-zstd=yes ' : ' --with-mongodb-zstd=no ';
+        // $arg .= $this->builder->getLib('snappy') ? ' --with-mongodb-snappy=yes ' : ' --with-mongodb-snappy=no ';
+        $arg .= $this->builder->getLib('zlib') ? ' --with-mongodb-zlib=yes ' : ' --with-mongodb-zlib=bundled ';
         return $arg;
     }
 }

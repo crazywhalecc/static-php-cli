@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait curl
 {
-    protected function build()
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    protected function build(): void
     {
         $extra = '';
         // lib:openssl
@@ -33,8 +39,8 @@ trait curl
         } else {
             $extra .= '-DUSE_NGHTTP2=OFF ';
         }
-        // TODO: ldap is not supported yet
-        $extra .= '-DCURL_DISABLE_LDAP=ON ';
+        // lib:ldap
+        $extra .= $this->builder->getLib('ldap') ? '-DCURL_DISABLE_LDAP=OFF ' : '-DCURL_DISABLE_LDAP=ON ';
         // lib:zstd
         $extra .= $this->builder->getLib('zstd') ? '-DCURL_ZSTD=ON ' : '-DCURL_ZSTD=OFF ';
         // lib:idn2
@@ -45,7 +51,8 @@ trait curl
         FileSystem::resetDir($this->source_dir . '/build');
         // compile！
         shell()->cd($this->source_dir . '/build')
-            ->exec("{$this->builder->configure_env} cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF {$extra} ..")
+            ->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ../CMakeLists.txt')
+            ->exec("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF {$extra} ..")
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         // patch pkgconf

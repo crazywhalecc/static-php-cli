@@ -34,7 +34,7 @@ class Extension
     /**
      * 获取开启该扩展的 PHP 编译添加的参数
      *
-     * @throws FileSystemException|RuntimeException
+     * @throws FileSystemException
      * @throws WrongUsageException
      */
     public function getConfigureArg(): string
@@ -46,6 +46,7 @@ class Extension
                 break;
             case 'Darwin':
             case 'Linux':
+            case 'BSD':
                 $arg .= $this->getUnixConfigureArg();
                 break;
         }
@@ -56,7 +57,6 @@ class Extension
      * 根据 ext 的 arg-type 获取对应开启的参数，一般都是 --enable-xxx 和 --with-xxx
      *
      * @throws FileSystemException
-     * @throws RuntimeException
      * @throws WrongUsageException
      */
     public function getEnableArg(): string
@@ -134,6 +134,33 @@ class Extension
     public function getUnixConfigureArg(): string
     {
         return '';
+    }
+
+    /**
+     * Patch code before ./buildconf
+     * If you need to patch some code, overwrite this and return true
+     */
+    public function patchBeforeBuildconf(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before ./configure
+     * If you need to patch some code, overwrite this and return true
+     */
+    public function patchBeforeConfigure(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before make
+     * If you need to patch some code, overwrite this and return true
+     */
+    public function patchBeforeMake(): bool
+    {
+        return false;
     }
 
     /**

@@ -14,4 +14,9 @@ class mbregex extends Extension
     {
         return 'mbstring';
     }
+
+    public function getConfigureArg(): string
+    {
+        return '';
+    }
 }

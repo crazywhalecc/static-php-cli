@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
-use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 
-/**
- * Lib 库的基类操作对象
- */
 abstract class LibraryBase
 {
-    /** @var string lib 依赖名称，必须重写 */
+    /** @var string */
     public const NAME = 'unknown';
 
-    /** @var string lib 依赖的根目录 */
     protected string $source_dir;
 
-    /** @var array 依赖列表 */
     protected array $dependencies = [];
+
+    protected bool $patched = false;
 
     /**
      * @throws RuntimeException
@@ -35,7 +32,7 @@ abstract class LibraryBase
     }
 
     /**
-     * 获取 lib 库的根目录
+     * Get current lib source root dir.
      */
     public function getSourceDir(): string
     {
@@ -43,10 +40,9 @@ abstract class LibraryBase
     }
 
     /**
-     * 获取当前 lib 库的所有依赖列表
+     * Get current lib dependencies.
      *
-     * @param  bool                       $recursive 是否递归获取（默认为 False）
-     * @return array<string, LibraryBase> 依赖的 Map
+     * @return array<string, LibraryBase>
      */
     public function getDependencies(bool $recursive = false): array
     {
@@ -55,7 +51,6 @@ abstract class LibraryBase
             return $this->dependencies;
         }
 
-        // 下面为递归获取依赖列表，根据依赖顺序
         $deps = [];
 
         $added = 1;
@@ -78,20 +73,21 @@ abstract class LibraryBase
     }
 
     /**
-     * 计算依赖列表，不符合依赖将抛出异常
+     * Calculate dependencies for current library.
      *
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function calcDependency(): void
     {
-        // 先从配置文件添加依赖，这里根据不同的操作系统分别选择不同的元信息
+        // Add dependencies from the configuration file. Here, choose different metadata based on the operating system.
         /*
-        选择规则：
-            如果是 Windows 系统，则依次尝试有无 lib-depends-windows、lib-depends-win、lib-depends。
-            如果是 macOS 系统，则依次尝试 lib-depends-darwin、lib-depends-unix、lib-depends。
-            如果是 Linux 系统，则依次尝试 lib-depends-linux、lib-depends-unix、lib-depends。
-         */
+        Rules:
+            If it is a Windows system, try the following dependencies in order: lib-depends-windows, lib-depends-win, lib-depends.
+            If it is a macOS system, try the following dependencies in order: lib-depends-darwin, lib-depends-unix, lib-depends.
+            If it is a Linux system, try the following dependencies in order: lib-depends-linux, lib-depends-unix, lib-depends.
+        */
         foreach (Config::getLib(static::NAME, 'lib-depends', []) as $dep_name) {
             $this->addLibraryDependency($dep_name);
         }
@@ -101,11 +97,10 @@ abstract class LibraryBase
     }
 
     /**
-     * 获取当前库编译出来获取到的静态库文件列表
+     * Get config static libs.
      *
-     * @return string[]            获取编译出来后的需要的静态库文件列表
      * @throws FileSystemException
-     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function getStaticLibs(): array
     {
@@ -113,11 +108,10 @@ abstract class LibraryBase
     }
 
     /**
-     * 获取当前 lib 编译出来的 C Header 文件列表
+     * Get config headers.
      *
-     * @return string[]            获取编译出来后需要的 C Header 文件列表
      * @throws FileSystemException
-     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public function getHeaders(): array
     {
@@ -125,73 +119,89 @@ abstract class LibraryBase
     }
 
     /**
-     * 证明该库是否已编译好且就绪，如果没有就绪，内部会调用 build 来进行构建该库
+     * Try to build this library, before build, we check first.
+     *
+     * BUILD_STATUS_OK if build success
+     * BUILD_STATUS_ALREADY if already built
+     * BUILD_STATUS_FAILED if build failed
      *
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function tryBuild(bool $force_build = false): int
     {
-        // 传入 true，表明直接编译
+        if (file_exists($this->source_dir . '/.spc.patched')) {
+            $this->patched = true;
+        }
+        // force means just build
         if ($force_build) {
             logger()->info('Building required library [' . static::NAME . ']');
+            if (!$this->patched && $this->patchBeforeBuild()) {
+                file_put_contents($this->source_dir . '/.spc.patched', 'PATCHED!!!');
+            }
             $this->build();
             return BUILD_STATUS_OK;
         }
 
-        // 看看这些库是不是存在，如果不存在，则调用编译并返回结果状态
+        // check if these libraries exist, if not, invoke compilation and return the result status
         foreach ($this->getStaticLibs() as $name) {
             if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
                 $this->tryBuild(true);
                 return BUILD_STATUS_OK;
             }
         }
-        // 头文件同理
+        // header files the same
         foreach ($this->getHeaders() as $name) {
             if (!file_exists(BUILD_INCLUDE_PATH . "/{$name}")) {
                 $this->tryBuild(true);
                 return BUILD_STATUS_OK;
             }
         }
-        // pkg-config 做特殊处理，如果是 pkg-config 就检查有没有 pkg-config 二进制
-        if ($this instanceof MacOSLibraryBase && static::NAME === 'pkg-config' && !file_exists(BUILD_ROOT_PATH . '/bin/pkg-config')) {
+        // pkg-config is treated specially. If it is pkg-config, check if the pkg-config binary exists
+        if (static::NAME === 'pkg-config' && !file_exists(BUILD_ROOT_PATH . '/bin/pkg-config')) {
             $this->tryBuild(true);
             return BUILD_STATUS_OK;
         }
-        // 到这里说明所有的文件都存在，就跳过编译
+        // if all the files exist at this point, skip the compilation process
         return BUILD_STATUS_ALREADY;
     }
 
     /**
-     * 获取构建当前 lib 的 Builder 对象
+     * Patch before build, overwrite this and return true to patch libs.
+     */
+    public function patchBeforeBuild(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get current builder object.
      */
     abstract public function getBuilder(): BuilderBase;
 
     /**
-     * 构建该库需要调用的命令和操作
+     * Build this library.
      *
      * @throws RuntimeException
      */
     abstract protected function build();
 
     /**
-     * 添加 lib 库的依赖库
+     * Add lib dependency
      *
-     * @param  string           $name     依赖名称
-     * @param  bool             $optional 是否是可选依赖（默认为 False）
      * @throws RuntimeException
      */
     protected function addLibraryDependency(string $name, bool $optional = false): void
     {
-        // Log::i("add $name as dep of {$this->name}");
         $dep_lib = $this->getBuilder()->getLib($name);
-        if (!$dep_lib) {
-            if (!$optional) {
-                throw new RuntimeException(static::NAME . " requires library {$name}");
-            }
-            logger()->debug('enabling ' . static::NAME . " without {$name}");
-        } else {
+        if ($dep_lib) {
             $this->dependencies[$name] = $dep_lib;
+            return;
         }
+        if (!$optional) {
+            throw new RuntimeException(static::NAME . " requires library {$name}");
+        }
+        logger()->debug('enabling ' . static::NAME . " without {$name}");
     }
 }

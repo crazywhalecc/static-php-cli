@@ -4,8 +4,7 @@ docker/libraries/
 docker/extensions/
 docker/source/
 
-# Composer file
-composer.lock
+# Vendor files
 /vendor/
 
 # default source extract directory
@@ -17,11 +16,15 @@ composer.lock
 # default source build root directory
 /buildroot/
 
-# php cs fixer cache file
+# tools cache files
 .php-cs-fixer.cache
+.phpunit.result.cache
 
 # exclude self-runtime
 /bin/*
 !/bin/spc
 !/bin/setup-runtime
 !/bin/spc-alpine-docker
+
+# default test directory
+/tests/var/

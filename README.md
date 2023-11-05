@@ -1,221 +1,292 @@
 # static-php-cli
 
-Compile A Statically Linked PHP With Swoole and other Extensions. 
+Build single static PHP binary, with PHP project together, with popular extensions included.
 
-If you are using English, see [English README](README-en.md).
+🌐 **[中文](README-zh.md)** | **[English](README.md)**
 
-编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！（cli SAPI）
+The project name is static-php-cli, but it actually supports cli, fpm, micro and embed SAPI 😎
 
-<img width="600" alt="截屏2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
+Compile a purely static php-cli binary file with various extensions to make PHP applications more portable! (cli SAPI)
 
-同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！（由 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 提供支持）（micro SAPI）
+<img width="600" alt="2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
 
-<img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
+You can also use the micro binary file to combine php binary and php source code into one for distribution! (micro SAPI)
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc1-pink.svg?style=flat-square)]()
+<img width="600" alt="2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
+
+> This SAPI feature is from the [Fork](https://github.com/static-php/phpmicro) of [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
+
+[![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
-[![](https://img.shields.io/badge/Extension%20Counter-50+-yellow.svg?style=flat-square)]()
+
+[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
-## 编译环境需求
+## Docs
 
-是的，本项目采用 PHP 编写，编译前需要一个 PHP 环境，比较滑稽。
-但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含 tokenizer 扩展和 PHP 版本大于等于 8.0 即可。
+The current README contains basic usage. For all the features of static-php-cli,
+see <https://static-php.dev> .
 
-下面是架构支持情况，`CI` 代表支持 GitHub Action 构建，`Local` 代表支持本地构建，空 代表暂不支持。
+## Direct Download
 
-|         | x86_64    | aarch64   |
-|---------|-----------|-----------|
-| macOS   | CI, Local | Local     |
-| Linux   | CI, Local | CI, Local |
-| Windows |           |           |
+If you don't want to compile yourself, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml), or from [self-hosted server](https://dl.static-php.dev/static-php-cli/common/).
 
-> macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
+> self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
 
-目前支持编译的 PHP 版本为：`7.4`，`8.0`，`8.1`，`8.2`。
+## Use static-php-cli to build PHP
 
-## 使用
+### Compilation Requirements
 
-请先根据下方扩展列表选择你要编译的扩展。
+Yes, this project is written in PHP, pretty funny.
+But static-php-cli runtime only requires an environment above PHP 8.1 and `mbstring`, `pcntl` extension.
 
-### 自托管直接下载
+Here is the architecture support status, where :octocat: represents support for GitHub Action builds,
+:computer: represents support for local manual builds, and blank represents not currently supported.
 
-如果你不想自行编译，可以从本项目现有的 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.zhamao.xin/static-php-cli/)
+|         | x86_64               | aarch64              |
+|---------|----------------------|----------------------|
+| macOS   | :octocat: :computer: | :computer:           |
+| Linux   | :octocat: :computer: | :octocat: :computer: |
+| Windows |                      |                      |
+| FreeBSD | :computer:           | :computer:           |
 
-> 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+> macOS-arm64 is not supported for GitHub Actions, if you are going to build on arm, you can build it manually on your own machine.
 
-### 支持的扩展情况
+Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`, `8.2`, `8.3`.
 
-[扩展支持列表](/ext-support.md)
+### Supported Extensions
 
-> 如果这里没有你需要的扩展，可以提交 Issue。
+Please first select the extension you want to compile based on the extension list below.
 
-### 使用 Actions 构建
+- [Supported Extension List](https://static-php.dev/en/guide/extensions.html)
+- [Command Generator](https://static-php.dev/en/guide/cli-generator.html)
 
-使用 GitHub Action 可以方便地构建一个静态编译的 PHP 和 phpmicro，同时可以自行定义要编译的扩展。
+> If an extension you need is missing, you can submit an issue.
 
-1. Fork 本项目。
-2. 进入项目的 Actions，选择 CI。
-3. 选择 `Run workflow`，填入你要编译的 PHP 版本、目标类型、扩展列表。（扩展列表使用英文逗号分割，例如 `bcmath,curl,mbstring`）
-4. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
+### GitHub Actions Build
 
-如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
+Use GitHub Action to easily build a statically compiled PHP,
+and at the same time define the extensions to be compiled by yourself.
 
-### 手动构建
+1. Fork me.
+2. Go to the Actions of the project and select `CI`.
+3. Select `Run workflow`, fill in the PHP version you want to compile, the target type, and the list of extensions. (extensions comma separated, e.g. `bcmath,curl,mbstring`)
+4. After waiting for about a period of time, enter the corresponding task and get `Artifacts`.
 
-先克隆本项目：
+If you enable `debug`, all logs will be output at build time, including compiled logs, for troubleshooting.
+
+- When using ubuntu-latest, it will build linux-x86_64 binary.
+- When using macos-latest, it will build macOS-x86_64 binary.
+
+### Manual build (using SPC binary)
+
+This project provides a binary file of static-php-cli.
+You can directly download the binary file of the corresponding platform and then use it to build static PHP.
+Currently, the platforms supported by `spc` binary are Linux and macOS.
+
+Here's how to download from GitHub Actions:
+
+1. Enter [GitHub Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml).
+2. Select the latest build task, select `Artifacts`, and download the binary file of the corresponding platform.
+3. Unzip the `.zip` file. After decompressing, add execution permissions to it: `chmod +x ./spc`.
+
+You can also download binaries from a self-hosted server: [enter](https://dl.static-php.dev/static-php-cli/spc-bin/nightly/).
+
+> SPC single-file binary is built by phpmicro and box.
+
+### Manual build (using source code)
+
+Clone repo first:
 
 ```bash
 git clone https://github.com/crazywhalecc/static-php-cli.git
 ```
 
-如果你本机没有安装 PHP，你可以通过命令下载静态编译好的 php-cli 和 Composer。
+If you have not installed php on your system, you can use package management to install PHP (such as brew, apt, yum, apk etc.).
 
-下载的 php 和 Composer 将保存为 `bin/php` 和 `bin/composer`。
+And you can also download single-file php binary and composer using command `bin/setup-runtime`.
+The PHP runtime for static-php-cli itself will be downloaded at `bin/php`, and composer is at `bin/composer`.
 
 ```bash
 cd static-php-cli
 chmod +x bin/setup-runtime
+# It will download php-cli from self-hosted server and composer from getcomposer.org
 ./bin/setup-runtime
 
-# 使用独立的 php 运行 static-php-cli
+# Use this php runtime to run static-php-cli compiler
 ./bin/php bin/spc
 
-# 使用 composer
+# Use composer
 ./bin/php bin/composer
-```
 
-下面是使用 static-php-cli 编译静态 php 和 micro 的基础用法：
-
-```bash
-# 克隆本项目
+# Initialize this project
 cd static-php-cli
 composer update
 chmod +x bin/spc
-# 检查环境依赖，并根据提示的命令安装缺失的编译工具（目前仅支持 macOS，Linux 后续会支持）
-./bin/spc doctor
-# 拉取所有依赖库
-./bin/spc fetch --all
-# 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
-./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 ```
 
-你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.4 ~ 8.2：
+### Use static-php-cli
+
+Basic usage for building php and micro with some extensions:
+
+> If you are using the packaged `spc` binary, you need to replace `bin/spc` with `./spc` in the following commands.
 
 ```bash
-# 优先考虑使用 >= 8.0 的 PHP 版本
+# Check system tool dependencies, fix them automatically
+./bin/spc doctor
+# fetch all libraries
+./bin/spc download --all
+# only fetch necessary sources by needed extensions
+./bin/spc download --for-extensions=openssl,pcntl,mbstring,pdo_sqlite
+# with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
+./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-cli --build-micro
+```
+
+You can also use the parameter `--with-php=x.y` to specify the downloaded PHP version, currently supports 7.4 ~ 8.2:
+
+```bash
+# Using PHP >= 8.0 is recommended, because PHP7 cannot use phpmicro
 ./bin/spc fetch --with-php=8.2 --all
 ```
 
-其中，目前支持构建 cli，micro，fpm 三种静态二进制，使用以下参数的一个或多个来指定编译的 SAPI：
+Now we support `cli`, `micro`, `fpm`, you can use one or more of the following parameters to specify the compiled SAPI:
 
-- `--build-cli`：构建 cli 二进制
-- `--build-micro`：构建 phpmicro 自执行二进制
-- `--build-fpm`：构建 fpm
-- `--build-all`：构建所有
+- `--build-cli`: build static cli executable
+- `--build-micro`: build static phpmicro self-extracted executable
+- `--build-fpm`: build static fpm binary
+- `--build-embed`: build embed (libphp)
+- `--build-all`: build all
 
-如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：
+If anything goes wrong, use `--debug` option to display full terminal output:
 
 ```bash
 ./bin/spc build openssl,pcntl,mbstring --debug --build-all
 ./bin/spc fetch --all --debug
 ```
 
-此外，默认编译的 PHP 为 NTS 版本。如需编译线程安全版本（ZTS），只需添加参数 `--enable-zts` 即可。
+In addition, we build NTS by default. If you are going to build ZTS version, just add `--enable-zts` option.
 
 ```bash
 ./bin/spc build openssl,pcntl --build-all --enable-zts
 ```
 
-同时，你也可以使用参数 `--no-strip` 来关闭裁剪，关闭裁剪后可以使用 gdb 等工具调试，但这样会让静态二进制体积变大。
+Adding option `--no-strip` can produce binaries with debug symbols, in order to debug (using gdb). Disabling strip will increase the size of static binary.
 
-### 使用 php-cli
+## Different SAPI Usage
 
-> php-cli 是一个静态的二进制文件，类似 Go、Rust 语言编译后的单个可移植的二进制文件。
+### Use cli
 
-采用参数 `--build-cli` 或`--build-all` 参数时，最后编译结果会输出一个 `./php` 的二进制文件，此文件可分发、可直接使用。
-该文件编译后会存放在 `buildroot/bin/` 目录中，名称为 `php`，拷贝出来即可。
+> php-cli is a single static binary, you can use it like normal php installed on your system.
+
+When using the parameter `--build-cli` or `--build-all`,
+the final compilation result will output a binary file named `./php`,
+which can be distributed and used directly.
+This file will be located in the directory `buildroot/bin/`, copy it out for use.
 
 ```bash
 cd buildroot/bin/
-./php -v                # 检查版本
-./php -m                # 检查编译的扩展
-./php your_code.php     # 运行代码
-./php your_project.phar # 运行打包为 phar 单文件的项目
+./php -v                # check version
+./php -m                # check extensions
+./php your_code.php     # run your php code
+./php your_project.phar # run your phar (project archive)
 ```
 
-### 使用 micro.sfx
+### Use micro
 
-> phpmicro 是一个提供自执行二进制 PHP 的项目，本项目依赖 phpmicro 进行编译自执行二进制。详见 [dixyes/phpmicro](https://github.com/dixyes/phpmicro)。
+> phpmicro is a SelF-extracted eXecutable SAPI module,
+> provided by [phpmicro](https://github.com/dixyes/phpmicro) project.
+> But this project is using a [fork](https://github.com/static-php/phpmicro) of phpmicro, because we need to add some features to it.
+> It can put php runtime and your source code together.
 
-采用项目参数 `--build-micro` 或 `--build-all` 时，最后编译结果会输出一个 `./micro.sfx` 的文件，此文件需要配合你的 PHP 源码使用。
-该文件编译后会存放在 `buildroot/bin/` 目录中，拷贝出来即可。
+When using the parameter `--build-all` or `--build-micro`,
+the final compilation result will output a file named `./micro.sfx`,
+which needs to be used with your PHP source code like `code.php`.
+This file will be located in the path `buildroot/bin/micro.sfx`, simply copy it out for use.
 
-使用时应准备好你的项目源码文件，可以是单个 PHP 文件，也可以是 Phar 文件。
+Prepare your project source code, which can be a single PHP file or a Phar file, for use.
 
 ```bash
 echo "<?php echo 'Hello world' . PHP_EOL;" > code.php
 cat micro.sfx code.php > single-app && chmod +x single-app
 ./single-app
-
-# 如果打包 PHAR 文件，仅需把 code.php 更换为 phar 文件路径即可
 ```
 
-> 有些情况下的 phar 文件可能无法在 micro 环境下运行。
+If you package a PHAR file, just replace `code.php` with the phar file path.
+You can use [box-project/box](https://github.com/box-project/box) to package your CLI project as Phar,
+It is then combined with phpmicro to produce a standalone executable binary.
 
-### 使用 php-fpm
+```bash
+# Use the micro.sfx generated by static-php-cli to combine,
+bin/spc micro:combine my-app.phar
+# or you can directly use the cat command to combine them.
+cat buildroot/bin/micro.sfx my-app.phar > my-app && chmod +x my-app
 
-采用项目参数 `--build-fpm` 或 `--build-all` 时，最后编译结果会输出一个 `./php-fpm` 的文件。
-该文件存放在 `buildroot/bin/` 目录，拷贝出来即可使用。
+# Use micro:combine combination to inject INI options into the binary.
+bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=system" --output my-app-2
+```
 
-在正常的 Linux 发行版和 macOS 系统中，安装 php-fpm 后包管理会自动生成默认的 fpm 配置文件。
-因为 php-fpm 必须指定配置文件才可启动，本项目编译的 php-fpm 不会带任何配置文件，所以需自行编写 `php-fpm.conf` 和 `pool.conf` 配置文件。
+> In some cases, PHAR files may not run in a micro environment.
 
-指定 `php-fpm.conf` 可以使用命令参数 `-y`，例如：`./php-fpm -y php-fpm.conf`。
+### Use fpm
 
-## 项目支持情况
+When using the parameter `--build-all` or `--build-fpm`,
+the final compilation result will output a file named `./php-fpm`,
+This file will be located in the path `buildroot/bin/`, simply copy it out for use.
 
-- [X] 基础结构编写（采用 `symfony/console`）
-- [X] 错误处理
-- [X] macOS 支持
-- [ ] Windows 支持
-- [X] Linux 支持
-- [X] PHP 7.4 支持
-- [X] fpm 支持
+In normal Linux distributions and macOS systems, the package manager will automatically generate a default fpm configuration file after installing php-fpm.
+Because php-fpm must specify a configuration file before running, the php-fpm compiled by this project will not have any configuration files, so you need to write `php-fpm.conf` and `pool.conf` configuration files yourself.
 
-更多功能和特性正在陆续支持中，详见：https://github.com/crazywhalecc/static-php-cli/issues/32
+Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./php-fpm -y php-fpm.conf`.
 
-## 贡献
+### Use embed
 
-目前支持的扩展较少，如果缺少你需要的扩展，可发起 Issue。如果你对本项目较熟悉，也欢迎为本项目发起 Pull Request。
+When using the project parameters `--build-embed` or `--build-all`,
+the final compilation result will output a `libphp.a`, `php-config` and a series of header files,
+stored in `buildroot/`. You can introduce them in your other projects.
 
-贡献基本原则如下：
+If you know [embed SAPI](https://github.com/php/php-src/tree/master/sapi/embed), you should know how to use it.
+You may require the introduction of other libraries during compilation,
+you can use `buildroot/bin/php-config` to obtain the compile-time configuration.
 
-- 项目采用了 php-cs-fixer、phpstan 作为代码规范工具，贡献前请对更新的代码执行 `composer analyze` 和 `composer cs-fix`。
-- 涉及到其他开源库的部分应提供对应库的协议，同时对配置文件在修改后采用命令 `sort-config` 排序。有关排序的命令，见文档。
-- 应遵循命名规范，例如扩展名称应采取 PHP 内注册的扩展名本身，外部库名应遵循项目本身的名称，内部逻辑的函数、类名、变量等应遵循驼峰、下划线等格式，禁止同一模块混用。
-- 涉及编译外部库的命令和 Patch 时应注意兼容不同操作系统。
+For an advanced example of how to use this feature, take a look at [how to use it to build a static version of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/static.md).
 
-另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
+## Contribution
 
-## 赞助本项目
+If the extension you need is missing, you can create an issue.
+If you are familiar with this project, you are also welcome to initiate a pull request.
 
-你可以在 [我的个人赞助页](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md) 支持我和我的项目。
+If you want to contribute documentation, please go to [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs).
 
-## 开源协议
+Now there is a [static-php](https://github.com/static-php) organization, which is used to store the repo related to the project.
 
-本项目依据旧版本惯例采用 MIT License 开源，自身的部分代码引用或修改自以下项目：
+Part of the English document is written by me, and part is translated by Google,
+and there may be inaccurate descriptions, strange or offensive expressions.
+If you are a native English speaker, some corrections to the documentation are welcome.
 
-- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)（木兰宽松许可证）
-- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE、SWOOLE-CLI LICENSE）
+## Sponsor this project
 
-因本项目的特殊性，使用项目编译过程中会使用很多其他开源项目，例如 curl、protobuf 等，它们都有各自的开源协议。
-请在编译完成后，使用命令 `bin/spc dump-license` 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。
+You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md).
 
-## 进阶
+## Open-Source License
 
-本项目重构分支为模块化编写。
+This project itself is based on MIT License,
+some newly added extensions and dependencies may originate from the following projects (including but not limited to),
+and the headers of these code files will also be given additional instructions LICENSE and AUTHOR:
 
-TODO：这部分将在基础功能完成后编写完成。
+- [dixyes/lwmbs](https://github.com/dixyes/lwmbs) (Mulun Permissive License)
+- [swoole/swoole-cli](https://github.com/swoole/swoole-cli) (Apache 2.0 LICENSE+SWOOLE-CLI LICENSE)
+
+Due to the special nature of this project,
+many other open source projects such as curl and protobuf will be used during the project compilation process,
+and they all have their own open source licenses.
+
+Please use the `bin/spc dump-license` command to export the open source licenses used in the project after compilation,
+and comply with the corresponding project's LICENSE.
+
+## Advanced
+
+The refactoring branch of this project is written modularly.
+If you are interested in this project and want to join the development,
+you can refer to the [Contribution Guide](https://static-php.dev) of the documentation to contribute code or documentation.
