@@ -169,14 +169,14 @@
         "arg-type": "custom",
         "ext-depends": [
             "mbstring"
+        ],
+        "lib-depends": [
+            "onig"
         ]
     },
     "mbstring": {
         "type": "builtin",
-        "arg-type": "custom",
-        "lib-depends": [
-            "onig"
-        ]
+        "arg-type": "custom"
     },
     "memcache": {
         "type": "external",
