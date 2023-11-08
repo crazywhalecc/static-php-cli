@@ -51,6 +51,16 @@
             "path": "LICENSE"
         }
     },
+    "rar": {
+        "type": "git",
+        "url": "https://github.com/static-php/php-rar.git",
+        "path": "php-src/ext/rar",
+        "rev": "issue-php82",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-glfw": {
         "type": "git",
         "url": "https://github.com/mario-deluna/php-glfw",

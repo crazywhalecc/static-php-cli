@@ -277,6 +277,11 @@
             "sqlite"
         ]
     },
+    "rar": {
+        "type": "external",
+        "source": "rar",
+        "cpp-extension": true
+    },
     "pgsql": {
         "type": "builtin",
         "arg-type": "with-prefix",
