@@ -7,7 +7,6 @@ namespace SPC\builder\linux\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
-use SPC\store\SourcePatcher;
 
 class imap extends LinuxLibraryBase
 {
