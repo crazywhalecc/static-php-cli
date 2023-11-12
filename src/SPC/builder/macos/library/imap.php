@@ -2,23 +2,25 @@
 
 declare(strict_types=1);
 
-namespace SPC\builder\linux\library;
+namespace SPC\builder\macos\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 
-class imap extends LinuxLibraryBase
+class imap extends MacOSLibraryBase
 {
     public const NAME = 'imap';
 
     /**
      * @throws FileSystemException
+     * @throws RuntimeException
      */
     public function patchBeforeBuild(): bool
     {
-        $cc = getenv('CC') ?: 'gcc';
+        $cc = getenv('CC') ?: 'clang';
+        SourcePatcher::patchFile('0001_imap_macos.patch', $this->source_dir);
         // FileSystem::replaceFileStr($this->source_dir . '/Makefile', '-DMAC_OSX_KLUDGE=1', '');
         FileSystem::replaceFileStr($this->source_dir . '/src/osdep/unix/Makefile', 'CC=cc', "CC={$cc}");
         /* FileSystem::replaceFileStr($this->source_dir . '/src/osdep/unix/Makefile', '-lcrypto -lz', '-lcrypto');
@@ -49,7 +51,7 @@ class imap extends LinuxLibraryBase
             ->exec('make clean')
             ->exec('touch ip6')
             ->exec(
-                "yes | make slx {$ssl_options}"
+                "yes | EXTRACFLAGS='-Wimplicit-function-declaration -include $(xcrun --show-sdk-path)/usr/include/poll.h -include $(xcrun --show-sdk-path)/usr/include/time.h -include $(xcrun --show-sdk-path)/usr/include/utime.h' make osx {$ssl_options}"
             );
         try {
             shell()
