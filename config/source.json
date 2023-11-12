@@ -146,7 +146,7 @@
     },
     "imap": {
         "type": "git",
-        "url": "https://github.com/uw-imap/imap.git",
+        "url": "https://github.com/static-php/imap.git",
         "rev": "master",
         "license": {
             "type": "file",
