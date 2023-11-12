@@ -14,24 +14,24 @@ You can also use the micro binary file to combine php binary and php source code
 
 <img width="600" alt="2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
 
-> This SAPI feature is from the [Fork](https://github.com/crazywhalecc/phpmicro) of [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
+> This SAPI feature is from the [Fork](https://github.com/static-php/phpmicro) of [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc7-pink.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
 
-[![](https://img.shields.io/badge/Extension%20Counter-55+-yellow.svg?style=flat-square)]()
+[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 ## Docs
 
 The current README contains basic usage. For all the features of static-php-cli,
-see <https://static-php.dev>.
+see <https://static-php.dev> .
 
 ## Direct Download
 
-If you don't want to compile yourself, you can download example pre-compiled artifact from Actions, or from self-hosted server: [Here](https://dl.static-php.dev/static-php-cli/common/)
+If you don't want to compile yourself, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml), or from [self-hosted server](https://dl.static-php.dev/static-php-cli/common/).
 
 > self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
 
@@ -197,7 +197,7 @@ cd buildroot/bin/
 
 > phpmicro is a SelF-extracted eXecutable SAPI module,
 > provided by [phpmicro](https://github.com/dixyes/phpmicro) project.
-> But this project is using a [fork](https://github.com/crazywhalecc/phpmicro) of phpmicro, because we need to add some features to it.
+> But this project is using a [fork](https://github.com/static-php/phpmicro) of phpmicro, because we need to add some features to it.
 > It can put php runtime and your source code together.
 
 When using the parameter `--build-all` or `--build-micro`,
@@ -257,12 +257,13 @@ For an advanced example of how to use this feature, take a look at [how to use i
 If the extension you need is missing, you can create an issue.
 If you are familiar with this project, you are also welcome to initiate a pull request.
 
-If you want to contribute document content, please go to [crazywhalecc/static-php-cli-docs](https://github.com/crazywhalecc/static-php-cli-docs).
+If you want to contribute documentation, please go to [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs).
+
+Now there is a [static-php](https://github.com/static-php) organization, which is used to store the repo related to the project.
 
 Part of the English document is written by me, and part is translated by Google,
 and there may be inaccurate descriptions, strange or offensive expressions.
 If you are a native English speaker, some corrections to the documentation are welcome.
-
 
 ## Sponsor this project
 

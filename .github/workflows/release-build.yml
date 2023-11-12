@@ -24,7 +24,7 @@ jobs:
       - name: Reuse static-php-cli-hosted artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
-          repo: crazywhalecc/static-php-cli-hosted
+          repo: static-php/static-php-cli-hosted
           branch: master
           workflow: build-spc-release.yml
           name: "spc-${{ matrix.operating-system }}"

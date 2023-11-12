@@ -225,7 +225,7 @@
     },
     "libmemcached": {
         "type": "git",
-        "url": "https://github.com/crazywhalecc/libmemcached-macos.git",
+        "url": "https://github.com/static-php/libmemcached-macos.git",
         "rev": "master",
         "license": {
             "type": "file",
@@ -323,7 +323,7 @@
         "type": "git",
         "path": "php-src/sapi/micro",
         "rev": "master",
-        "url": "https://github.com/crazywhalecc/phpmicro",
+        "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
             "path": "LICENSE"

@@ -12,13 +12,12 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 <img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
 
-> 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/crazywhalecc/phpmicro)。
+> 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/static-php/phpmicro)。
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc7-pink.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
-[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
-[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
-[![](https://img.shields.io/badge/Extension%20Counter-55+-yellow.svg?style=flat-square)]()
+[![](https://img.shields.io/github/actions/workflow/status/static-php/static-php-cli-hosted/build-php-common.yml?branch=refactor&label=Build%20Common%20Extensions&style=flat-square)](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml)
+[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 > 项目名称是 static-php-cli，但其实支持 cli、fpm、micro 和 embed SAPI 😎
@@ -232,7 +231,7 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
 
-如果你想贡献文档内容，请到项目仓库 [crazywhalecc/static-php-cli-docs](https://github.com/crazywhalecc/static-php-cli-docs) 贡献。
+如果你想贡献文档内容，请到项目仓库 [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs) 贡献。
 
 ## 赞助本项目
 
