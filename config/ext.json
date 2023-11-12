@@ -137,7 +137,6 @@
             "imap"
         ],
         "lib-suggests": [
-            "kerberos",
             "openssl"
         ]
     },
