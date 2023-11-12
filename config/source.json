@@ -234,7 +234,7 @@
     },
     "libpng": {
         "type": "git",
-        "url": "https://git.code.sf.net/p/libpng/code",
+        "url": "https://github.com/glennrp/libpng.git",
         "rev": "libpng16",
         "license": {
             "type": "file",
