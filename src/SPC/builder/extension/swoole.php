@@ -16,7 +16,7 @@ class swoole extends Extension
         // pgsql hook is buggy for static php
         $arg .= ' --disable-swoole-pgsql';
         $arg .= $this->builder->getLib('openssl') ? ' --enable-openssl' : ' --disable-openssl --without-openssl';
-        $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : '';
+        $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : ' --disable-brotli';
         $arg .= $this->builder->getExt('curl') ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
         return $arg;
     }
