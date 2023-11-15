@@ -111,9 +111,8 @@
         }
     },
     "freetype": {
-        "type": "filelist",
-        "url": "https://download-mirror.savannah.gnu.org/releases/freetype/",
-        "regex": "/href=\"(?<file>freetype-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "type": "url",
+        "url": "https://github.com/freetype/freetype/archive/refs/tags/VER-2-13-2.tar.gz",
         "license": {
             "type": "file",
             "path": "LICENSE.TXT"
