@@ -401,15 +401,6 @@
             "path": "LICENSE"
         }
     },
-    "pthreads4w": {
-        "type": "git",
-        "rev": "master",
-        "url": "https://github.com/jwinarske/pthreads4w",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "readline": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/readline/",

@@ -311,8 +311,7 @@
         ],
         "lib-suggests-windows": [
             "icu",
-            "xz",
-            "pthreads4w"
+            "xz"
         ]
     },
     "libxslt": {
@@ -448,18 +447,6 @@
             "libxslt",
             "ldap",
             "zstd"
-        ]
-    },
-    "pthreads4w": {
-        "source": "pthreads4w",
-        "static-libs-windows": [
-            "libpthreadVC3.lib"
-        ],
-        "headers-windows": [
-            "_ptw32.h",
-            "pthread.h",
-            "sched.h",
-            "semaphore.h"
         ]
     },
     "readline": {
