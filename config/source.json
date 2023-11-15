@@ -404,7 +404,7 @@
     "pthreads4w": {
         "type": "git",
         "rev": "master",
-        "url": "https://git.code.sf.net/p/pthreads4w/code",
+        "url": "https://github.com/jwinarske/pthreads4w",
         "license": {
             "type": "file",
             "path": "LICENSE"
