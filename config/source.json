@@ -111,8 +111,9 @@
         }
     },
     "freetype": {
-        "type": "url",
-        "url": "https://github.com/freetype/freetype/archive/refs/tags/VER-2-13-2.tar.gz",
+        "type": "git",
+        "rev": "VER-2-13-2",
+        "url": "https://github.com/freetype/freetype",
         "license": {
             "type": "file",
             "path": "LICENSE.TXT"
@@ -216,7 +217,7 @@
     },
     "libmcrypt": {
         "type": "url",
-        "url": "https://nchc.dl.sourceforge.net/project/mcrypt/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz",
+        "url": "https://downloads.sourceforge.net/project/mcrypt/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -302,7 +303,7 @@
     },
     "mcrypt": {
         "type": "url",
-        "url": "https://jaist.dl.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
+        "url": "https://downloads.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
