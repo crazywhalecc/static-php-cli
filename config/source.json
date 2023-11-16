@@ -111,8 +111,9 @@
         }
     },
     "freetype": {
-        "type": "url",
-        "url": "https://github.com/freetype/freetype/archive/refs/tags/VER-2-13-2.tar.gz",
+        "type": "git",
+        "rev": "VER-2-13-2",
+        "url": "https://github.com/freetype/freetype",
         "license": {
             "type": "file",
             "path": "LICENSE.TXT"
