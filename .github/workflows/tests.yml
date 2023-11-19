@@ -133,7 +133,7 @@ jobs:
             ${{ runner.os }}-php-
 
       - name: "Install Dependencies"
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "Run Build Tests (doctor)"
         run: bin/spc doctor --auto-fix
