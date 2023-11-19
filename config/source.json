@@ -121,9 +121,9 @@
         }
     },
     "freetype": {
-        "type": "filelist",
-        "url": "https://download-mirror.savannah.gnu.org/releases/freetype/",
-        "regex": "/href=\"(?<file>freetype-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "type": "git",
+        "rev": "VER-2-13-2",
+        "url": "https://github.com/freetype/freetype",
         "license": {
             "type": "file",
             "path": "LICENSE.TXT"
@@ -149,6 +149,15 @@
     "imagemagick": {
         "type": "ghtar",
         "repo": "ImageMagick/ImageMagick",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "imap": {
+        "type": "git",
+        "url": "https://github.com/static-php/imap.git",
+        "rev": "master",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -218,7 +227,7 @@
     },
     "libmcrypt": {
         "type": "url",
-        "url": "https://nchc.dl.sourceforge.net/project/mcrypt/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz",
+        "url": "https://downloads.sourceforge.net/project/mcrypt/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -235,7 +244,7 @@
     },
     "libpng": {
         "type": "git",
-        "url": "https://git.code.sf.net/p/libpng/code",
+        "url": "https://github.com/glennrp/libpng.git",
         "rev": "libpng16",
         "license": {
             "type": "file",
@@ -304,7 +313,7 @@
     },
     "mcrypt": {
         "type": "url",
-        "url": "https://jaist.dl.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
+        "url": "https://downloads.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -398,15 +407,6 @@
         "url": "https://pecl.php.net/get/protobuf",
         "path": "php-src/ext/protobuf",
         "filename": "protobuf.tgz",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
-    "pthreads4w": {
-        "type": "git",
-        "rev": "master",
-        "url": "https://git.code.sf.net/p/pthreads4w/code",
         "license": {
             "type": "file",
             "path": "LICENSE"

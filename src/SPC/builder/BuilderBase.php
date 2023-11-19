@@ -69,7 +69,7 @@ abstract class BuilderBase
         foreach ($libraries as $library) {
             // if some libs are not supported (but in config "lib.json", throw exception)
             if (!isset($support_lib_list[$library])) {
-                throw new RuntimeException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
+                throw new WrongUsageException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
             }
             $lib = new ($support_lib_list[$library])($this);
             $this->addLib($lib);

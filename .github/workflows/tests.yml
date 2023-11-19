@@ -1,98 +1,145 @@
 name: Tests
 
 on:
-    push:
-        branches: [ "main" ]
-    pull_request:
-        branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    php-cs-fixer:
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  php-cs-fixer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.1'
-                  extensions: curl, openssl, mbstring
-                  ini-values: memory_limit=-1
-                  tools: pecl, composer, php-cs-fixer
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: pecl, composer, php-cs-fixer
 
-            - name: Run PHP-CS-Fixer fix
-              run: php-cs-fixer fix --dry-run --diff --ansi
+      - name: Run PHP-CS-Fixer fix
+        run: php-cs-fixer fix --dry-run --diff --ansi
 
-    phpstan:
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  phpstan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.1'
-                  extensions: curl, openssl, mbstring
-                  ini-values: memory_limit=-1
-                  tools: composer
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: composer
 
-            - name: Cache Composer packages
-              id: composer-cache
-              uses: actions/cache@v3
-              with:
-                  path: vendor
-                  key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-phpstan-
+      - name: "Cache Composer packages"
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-phpstan-
 
-            - name: Install Dependencies
-              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: "Install Dependencies"
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-            - name: Run phpstan
-              run: vendor/bin/phpstan analyse
+      - name: "Run phpstan"
+        run: vendor/bin/phpstan analyse
 
-    phpunit:
-        name: PHPUnit (PHP ${{ matrix.php }})
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        strategy:
-            matrix:
-                include:
-                    - php: '8.1'
-                    - php: '8.2'
-            fail-fast: false
+  phpunit:
+    name: "PHPUnit (PHP ${{ matrix.php }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        include:
+          - php: '8.1'
+          - php: '8.2'
+      fail-fast: false
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: "${{ matrix.php }}"
-                  tools: pecl, composer
-                  extensions: curl, openssl, mbstring
-                  ini-values: memory_limit=-1
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ matrix.php }}"
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
 
-            - name: Cache Composer packages
-              id: composer-cache
-              uses: actions/cache@v3
-              with:
-                  path: vendor
-                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-
+      - name: "Cache Composer packages"
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
 
-            - name: Install Dependencies
-              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: "Install Dependencies"
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-            - name: Run PHPUnit tests
-              run: |
-                  vendor/bin/phpunit tests/ --no-coverage
+      - name: "Run PHPUnit Tests"
+        run: |
+          vendor/bin/phpunit tests/ --no-coverage
+
+  build:
+    name: "Build PHP Test (PHP ${{ matrix.php }})"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        php:
+          - 8.0
+          - 8.1
+          - 8.2
+        os:
+          - ubuntu-latest
+          - macos-latest
+      fail-fast: false
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ matrix.php }}"
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+
+      - name: "Cache Composer packages"
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: "Install Dependencies"
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: "Run Build Tests (doctor)"
+        run: bin/spc doctor --auto-fix
+
+      - name: "Run Build Tests (download)"
+        run: bin/spc download --for-extensions="$(php src/globals/test-extensions.php)" --with-php=${{ matrix.php }} --debug
+
+      - name: "Run Build Tests (build)"
+        run: bin/spc build "$(php src/globals/test-extensions.php)" --build-cli --build-micro --build-fpm --debug
