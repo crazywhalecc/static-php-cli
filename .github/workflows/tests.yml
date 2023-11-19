@@ -103,9 +103,9 @@ jobs:
     strategy:
       matrix:
         php:
-          - 8.0
-          - 8.1
-          - 8.2
+          - "8.0"
+          - "8.1"
+          - "8.2"
         os:
           - ubuntu-latest
           - macos-latest
