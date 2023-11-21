@@ -51,16 +51,6 @@
             "path": "LICENSE"
         }
     },
-    "rar": {
-        "type": "git",
-        "url": "https://github.com/static-php/php-rar.git",
-        "path": "php-src/ext/rar",
-        "rev": "issue-php82",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "ext-glfw": {
         "type": "git",
         "url": "https://github.com/mario-deluna/php-glfw",
@@ -412,6 +402,16 @@
             "path": "LICENSE"
         }
     },
+    "rar": {
+        "type": "git",
+        "url": "https://github.com/static-php/php-rar.git",
+        "path": "php-src/ext/rar",
+        "rev": "issue-php82",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "readline": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/readline/",
@@ -467,6 +467,15 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "tidy": {
+        "type": "url",
+        "url": "https://github.com/htacg/tidy-html5/archive/refs/tags/5.8.0.tar.gz",
+        "filename": "tidy-html5.tgz",
+        "license": {
+            "type": "file",
+            "path": "README/LICENSE.md"
         }
     },
     "xlswriter": {

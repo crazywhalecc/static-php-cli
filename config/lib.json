@@ -483,6 +483,12 @@
             "sqlite3ext.h"
         ]
     },
+    "tidy": {
+        "source": "tidy",
+        "static-libs-unix": [
+            "libtidy.a"
+        ]
+    },
     "xz": {
         "source": "xz",
         "static-libs-unix": [
