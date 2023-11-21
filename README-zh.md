@@ -130,7 +130,7 @@ chmod +x bin/spc
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 ```
 
-你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.3 ~ 8.2：
+你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.3 ~ 8.3：
 
 ```bash
 # 优先考虑使用 >= 8.0 的 PHP 版本，因为 phpmicro 不支持在 PHP7 中构建
