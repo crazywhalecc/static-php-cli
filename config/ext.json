@@ -278,11 +278,6 @@
             "sqlite"
         ]
     },
-    "rar": {
-        "type": "external",
-        "source": "rar",
-        "cpp-extension": true
-    },
     "pgsql": {
         "type": "builtin",
         "arg-type": "with-prefix",
@@ -310,6 +305,11 @@
         "lib-depends": [
             "aspell"
         ]
+    },
+    "rar": {
+        "type": "external",
+        "source": "rar",
+        "cpp-extension": true
     },
     "readline": {
         "type": "builtin",
@@ -435,7 +435,7 @@
     },
     "tidy": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "tidy"
         ]
