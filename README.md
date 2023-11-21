@@ -272,11 +272,13 @@ You can sponsor my project on [this page](https://github.com/crazywhalecc/crazyw
 ## Open-Source License
 
 This project itself is based on MIT License,
-some newly added extensions and dependencies may originate from the following projects (including but not limited to),
-and the headers of these code files will also be given additional instructions LICENSE and AUTHOR:
+some newly added extensions and dependencies may originate from the the other projects,
+and the headers of these code files will also be given additional instructions LICENSE and AUTHOR.
 
-- [dixyes/lwmbs](https://github.com/dixyes/lwmbs) (Mulun Permissive License)
-- [swoole/swoole-cli](https://github.com/swoole/swoole-cli) (Apache 2.0 LICENSE+SWOOLE-CLI LICENSE)
+These are similar projects:
+
+- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)
+- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)
 
 Due to the special nature of this project,
 many other open source projects such as curl and protobuf will be used during the project compilation process,
