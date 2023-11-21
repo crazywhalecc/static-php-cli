@@ -67,6 +67,7 @@ jobs:
         include:
           - php: '8.1'
           - php: '8.2'
+          - php: '8.3'
 
     steps:
       - name: "Checkout"
@@ -106,6 +107,7 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
+          - "8.3"
         os:
           - ubuntu-latest
           - macos-latest
@@ -117,7 +119,7 @@ jobs:
       - name: "Setup PHP"
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
           tools: pecl, composer
           extensions: curl, openssl, mbstring
           ini-values: memory_limit=-1

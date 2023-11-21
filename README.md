@@ -144,7 +144,7 @@ Basic usage for building php and micro with some extensions:
 ./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-cli --build-micro
 ```
 
-You can also use the parameter `--with-php=x.y` to specify the downloaded PHP version, currently supports 7.4 ~ 8.2:
+You can also use the parameter `--with-php=x.y` to specify the downloaded PHP version, currently supports 7.4 ~ 8.3:
 
 ```bash
 # Using PHP >= 8.0 is recommended, because PHP7 cannot use phpmicro
