@@ -65,6 +65,8 @@ Please first select the extension you want to compile based on the extension lis
 
 > If an extension you need is missing, you can submit an issue.
 
+Here is the current planned roadmap for extension support: [#152](https://github.com/crazywhalecc/static-php-cli/issues/152) .
+
 ### GitHub Actions Build
 
 Use GitHub Action to easily build a statically compiled PHP,
