@@ -90,13 +90,12 @@ Currently, the platforms supported by `spc` binary are Linux and macOS.
 
 Here's how to download from GitHub Actions:
 
-1. Enter [GitHub Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml).
-2. Select the latest build task, select `Artifacts`, and download the binary file of the corresponding platform.
-3. Unzip the `.zip` file. After decompressing, add execution permissions to it: `chmod +x ./spc`.
+1. Enter [GitHub Actions](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml) or [self-hosted nightly builds](https://dl.static-php.dev/static-php-cli/spc-bin/nightly/).
+2. If you download from GHA, select the latest build task, select `Artifacts`, and download the binary file of the corresponding platform.
+3. If you download from GHA, unzip the `.zip` file. After decompressing, add execution permissions to it: `chmod +x ./spc`.
+4. If you download from self-hosted server, download `spc-$os-$arch` file and just use it (don't forget `chmod +x`).
 
-You can also download binaries from a self-hosted server: [enter](https://dl.static-php.dev/static-php-cli/spc-bin/nightly/).
-
-> SPC single-file binary is built by phpmicro and box.
+> SPC single-file binary is built by phpmicro and box, and it doesn't need to install PHP. Just treat `spc` as a standalone executable.
 
 ### Manual build (using source code)
 
