@@ -28,7 +28,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
-        'xz',
+        'xz', 'libtool',
     ];
 
     public const TOOLS_RHEL = [
