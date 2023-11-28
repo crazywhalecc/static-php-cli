@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -39,8 +40,12 @@ trait imagemagick
         }
 
         $ldflags = $this instanceof LinuxLibraryBase ? ('LDFLAGS="-static" ') : '';
+
+        // libxml iconv patch
+        $required_libs .= $this instanceof MacOSLibraryBase ? (' -liconv') : '';
         shell()->cd($this->source_dir)
             ->exec(
+                'PKG_CONFIG="$PKG_CONFIG --static" ' .
                 $ldflags .
                 "LIBS='{$required_libs}' " .
                 './configure ' .
