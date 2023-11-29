@@ -57,9 +57,7 @@ trait postgresql
 
         # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
         shell()->cd($this->source_dir . '/build')
-            ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
-            ->exec('sed -i.backup "293 s/^/#$/"  ../src/Makefile.shlib')
-            ->exec('sed -i.backup "441 s/^/#$/"  ../src/Makefile.shlib');
+            ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile');
 
         // configure
         shell()->cd($this->source_dir . '/build')
@@ -88,9 +86,7 @@ trait postgresql
             ->exec($envs . ' make -C src/bin/pg_config install')
             ->exec($envs . ' make -C src/include install')
             ->exec($envs . ' make -C src/common install')
-            ->exec($envs . ' make -C src/backend/port install')
             ->exec($envs . ' make -C src/port install')
-            ->exec($envs . ' make -C src/backend/libpq install')
             ->exec($envs . ' make -C src/interfaces/libpq install');
 
         // remove dynamic libs
