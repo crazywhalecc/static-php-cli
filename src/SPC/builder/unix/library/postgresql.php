@@ -31,9 +31,11 @@ trait postgresql
         foreach ($optional_packages as $lib => $pkg) {
             if ($this->getBuilder()->getLib($lib)) {
                 $packages .= ' ' . $pkg;
-                logger()->debug(shell()->execWithResult("pkg-config --cflags-only-I  --static {$pkg}")[1][0]);
-                logger()->debug(shell()->execWithResult("pkg-config --libs-only-L    --static {$pkg}")[1][0]);
-                logger()->debug(shell()->execWithResult("pkg-config --libs-only-l    --static {$pkg}")[1][0]);
+
+                $output = shell()->execWithResult("pkg-config --cflags --libs --static {$pkg}")[1][0];
+                if (!empty($output[1][0])) {
+                    logger()->info($output[1][0]);
+                }
             }
         }
 
@@ -100,9 +102,5 @@ trait postgresql
             ->exec("rm -rf {$builddir}/lib/*.so.*")
             ->exec("rm -rf {$builddir}/lib/*.so")
             ->exec("rm -rf {$builddir}/lib/*.dylib");
-
-        logger()->debug(shell()->execWithResult('pkg-config --cflags-only-I  --static libpq')[1][0]);
-        logger()->debug(shell()->execWithResult('pkg-config --libs-only-L    --static libpq')[1][0]);
-        logger()->debug(shell()->execWithResult('pkg-config --libs-only-l    --static libpq')[1][0]);
     }
 }
