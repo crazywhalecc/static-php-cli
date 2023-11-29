@@ -31,7 +31,6 @@ trait postgresql
         foreach ($optional_packages as $lib => $pkg) {
             if ($this->getBuilder()->getLib($lib)) {
                 $packages .= ' ' . $pkg;
-
                 $output = shell()->execWithResult("pkg-config --cflags --libs --static {$pkg}")[1][0];
                 if (!empty($output[1][0])) {
                     logger()->info($output[1][0]);
