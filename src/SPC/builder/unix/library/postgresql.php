@@ -57,7 +57,9 @@ trait postgresql
 
         # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
         shell()->cd($this->source_dir . '/build')
-            ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile');
+            ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
+            ->exec('sed -i.backup "278 s/^/# /"  ../src/Makefile.shlib')
+            ->exec('sed -i.backup "402 s/^/# /"  ../src/Makefile.shlib');
 
         // configure
         shell()->cd($this->source_dir . '/build')
