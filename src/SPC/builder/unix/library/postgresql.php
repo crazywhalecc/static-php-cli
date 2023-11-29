@@ -27,9 +27,13 @@ trait postgresql
             'libxslt' => 'libxslt',
             'icu' => 'icu-i18n',
         ];
+        logger()->info(shell()->execWithResult("pkg-config --cflags-only-I  --static {$packages}")[1][0]);
         foreach ($optional_packages as $lib => $pkg) {
             if ($this->getBuilder()->getLib($lib)) {
                 $packages .= ' ' . $pkg;
+                logger()->info(shell()->execWithResult("pkg-config --cflags-only-I  --static {$pkg}")[1][0]);
+                logger()->info(shell()->execWithResult("pkg-config --libs-only-L    --static {$pkg}")[1][0]);
+                logger()->info(shell()->execWithResult("pkg-config --libs-only-l    --static {$pkg}")[1][0]);
             }
         }
 
@@ -96,5 +100,7 @@ trait postgresql
             ->exec("rm -rf {$builddir}/lib/*.so.*")
             ->exec("rm -rf {$builddir}/lib/*.so")
             ->exec("rm -rf {$builddir}/lib/*.dylib");
+
+        logger()->info(shell()->execWithResult('pkg-config --cflags-only-I  --static libpq')[1][0]);
     }
 }
