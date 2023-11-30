@@ -157,9 +157,8 @@
             "libldap.a"
         ],
         "lib-depends": [
-            "openssl"
-        ],
-        "lib-suggests": [
+            "openssl",
+            "zlib",
             "gmp",
             "libsodium"
         ]
