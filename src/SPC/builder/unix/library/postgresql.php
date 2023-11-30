@@ -78,7 +78,7 @@ trait postgresql
                 '--with-readline ' .
                 '--with-libxml ' .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
-                (($this->builder->getLib('ldap') && 0) ? '--with-ldap ' : '--without-ldap ') .
+                '--without-ldap ' .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
                 ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
                 '--without-lz4 ' .
@@ -88,6 +88,7 @@ trait postgresql
                 '--without-bonjour ' .
                 '--without-tcl '
             );
+        // ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
 
         // build
         shell()->cd($this->source_dir . '/build')
