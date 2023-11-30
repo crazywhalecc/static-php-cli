@@ -28,13 +28,14 @@ trait postgresql
             'icu' => 'icu-i18n',
         ];
 
+        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
+
         foreach ($optional_packages as $lib => $pkg) {
             if ($this->getBuilder()->getLib($lib)) {
                 $packages .= ' ' . $pkg;
-                $output = shell()->execWithResult("pkg-config --cflags --libs --static {$pkg}")[1][0];
-                if (!empty($output[1][0])) {
-                    logger()->info($output[1][0]);
-                }
+                $output = shell()->execWithResult("pkg-config --static {$pkg}");
+                logger()->info($output[1][0]);
             }
         }
 
