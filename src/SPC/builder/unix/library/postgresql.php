@@ -35,7 +35,7 @@ trait postgresql
             if ($this->getBuilder()->getLib($lib)) {
                 $packages .= ' ' . $pkg;
                 $output = shell()->execWithResult("pkg-config --static {$pkg}");
-                logger()->info($output[1][0]);
+                logger()->info(var_export($output[1], true));
             }
         }
 
