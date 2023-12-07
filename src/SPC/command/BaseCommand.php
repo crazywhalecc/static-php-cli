@@ -78,28 +78,26 @@ abstract class BaseCommand extends Command
     {
         $this->input = $input;
         $this->output = $output;
-        if ($this->shouldExecute()) {
-            try {
-                return $this->handle();
-            } catch (WrongUsageException $e) {
-                $msg = explode("\n", $e->getMessage());
-                foreach ($msg as $v) {
+
+        try {
+            return $this->handle();
+        } catch (WrongUsageException $e) {
+            foreach (explode("\n", $e->getMessage()) as $v) {
+                logger()->error($v);
+            }
+
+            return static::FAILURE;
+        } catch (\Throwable $e) {
+            if ($this->getOption('debug')) {
+                ExceptionHandler::getInstance()->handle($e);
+            } else {
+                foreach (explode("\n", $e->getMessage()) as $v) {
                     logger()->error($v);
                 }
-                return static::FAILURE;
-            } catch (\Throwable $e) {
-                if ($this->getOption('debug')) {
-                    ExceptionHandler::getInstance()->handle($e);
-                } else {
-                    $msg = explode("\n", $e->getMessage());
-                    foreach ($msg as $v) {
-                        logger()->error($v);
-                    }
-                }
-                return static::FAILURE;
             }
+
+            return static::FAILURE;
         }
-        return static::SUCCESS;
     }
 
     protected function getOption(string $name): mixed
@@ -110,10 +108,5 @@ abstract class BaseCommand extends Command
     protected function getArgument(string $name): mixed
     {
         return $this->input->getArgument($name);
-    }
-
-    protected function shouldExecute(): bool
-    {
-        return true;
     }
 }

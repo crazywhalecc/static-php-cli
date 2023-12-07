@@ -11,8 +11,33 @@ if (PHP_OS_FAMILY === 'Windows' && Phar::running()) {
     exec('CHCP 65001');
 }
 
-try {
-    (new ConsoleApplication())->run();
-} catch (Exception $e) {
-    ExceptionHandler::getInstance()->handle($e);
+if (in_array('--docker', $_SERVER['argv'] ?? [], true)) {
+    // Remove first argument as it point this file
+    $arguments = $_SERVER['argv'];
+    unset($arguments[0]);
+
+    // Remove fake option used in pre-built binary
+    foreach ($arguments as $key => $argument) {
+        if ($argument === '--docker') {
+            unset($arguments[$key]);
+
+            break;
+        }
+    }
+
+    try {
+        $temporary = str_replace('spc.phar', 'bin/spc-docker', Phar::running(false));
+        file_put_contents($temporary, file_get_contents(__DIR__ . '/spc-alpine-docker'));
+        f_passthru('chmod +x ' . $temporary . ' && ' . $temporary . ' ' . implode(' ', $arguments) . ' && rm -f ' . $temporary);
+    } catch (Exception $e) {
+        pcntl_signal(SIGINT, SIG_IGN);
+
+        ExceptionHandler::getInstance()->handle($e);
+    }
+} else {
+    try {
+        (new ConsoleApplication())->run();
+    } catch (Exception $e) {
+        ExceptionHandler::getInstance()->handle($e);
+    }
 }
