@@ -21,6 +21,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
         'g++', 'patch', 'binutils-gold',
+        'libtoolize',
     ];
 
     public const TOOLS_DEBIAN = [
@@ -102,7 +103,8 @@ class LinuxToolCheckList
         try {
             $is_debian = in_array($distro['dist'], ['debian', 'ubuntu']);
             $to_install = $is_debian ? str_replace('xz', 'xz-utils', $missing) : $missing;
-            $to_install = $is_debian ? str_replace('libtoolize', 'libtool', $to_install) : $to_install;
+            // debian, alpine libtool -> libtoolize
+            $to_install = str_replace('libtoolize', 'libtool', $to_install);
             shell(true)->exec($prefix . $install_cmd . ' ' . implode(' ', $to_install));
         } catch (RuntimeException) {
             return false;

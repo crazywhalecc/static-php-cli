@@ -73,6 +73,7 @@ RUN apk update; \
         git \
         jq \
         libgcc \
+        libtool \
         libstdc++ \
         linux-headers \
         m4 \
