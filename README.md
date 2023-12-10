@@ -24,7 +24,7 @@ You can also use the micro binary file to combine php binary and php source code
 [![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
-## Docs
+## Documentation
 
 The current README contains basic usage. For all the features of static-php-cli,
 see <https://static-php.dev> .
@@ -135,7 +135,7 @@ Basic usage for building php and micro with some extensions:
 > If you are using the packaged `spc` binary, you need to replace `bin/spc` with `./spc` in the following commands.
 
 ```bash
-# Check system tool dependencies, fix them automatically
+# Check system tool dependencies, fix them if possible
 ./bin/spc doctor
 # fetch all libraries
 ./bin/spc download --all
@@ -167,7 +167,7 @@ If anything goes wrong, use `--debug` option to display full terminal output:
 ./bin/spc fetch --all --debug
 ```
 
-In addition, we build NTS by default. If you are going to build ZTS version, just add `--enable-zts` option.
+In addition, we build NTS (non-thread-safe) by default. If you are going to build ZTS version, just add `--enable-zts` option.
 
 ```bash
 ./bin/spc build openssl,pcntl --build-all --enable-zts
@@ -236,7 +236,7 @@ When using the parameter `--build-all` or `--build-fpm`,
 the final compilation result will output a file named `./php-fpm`,
 This file will be located in the path `buildroot/bin/`, simply copy it out for use.
 
-In normal Linux distributions and macOS systems, the package manager will automatically generate a default fpm configuration file after installing php-fpm.
+In common Linux distributions and macOS systems, the package manager will automatically generate a default fpm configuration file after installing php-fpm.
 Because php-fpm must specify a configuration file before running, the php-fpm compiled by this project will not have any configuration files, so you need to write `php-fpm.conf` and `pool.conf` configuration files yourself.
 
 Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./php-fpm -y php-fpm.conf`.
@@ -262,10 +262,6 @@ If you want to contribute documentation, please go to [static-php/static-php-cli
 
 Now there is a [static-php](https://github.com/static-php) organization, which is used to store the repo related to the project.
 
-Part of the English document is written by me, and part is translated by Google,
-and there may be inaccurate descriptions, strange or offensive expressions.
-If you are a native English speaker, some corrections to the documentation are welcome.
-
 ## Sponsor this project
 
 You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md).
@@ -288,8 +284,3 @@ and they all have their own open source licenses.
 Please use the `bin/spc dump-license` command to export the open source licenses used in the project after compilation,
 and comply with the corresponding project's LICENSE.
 
-## Advanced
-
-The refactoring branch of this project is written modularly.
-If you are interested in this project and want to join the development,
-you can refer to the [Contribution Guide](https://static-php.dev) of the documentation to contribute code or documentation.
