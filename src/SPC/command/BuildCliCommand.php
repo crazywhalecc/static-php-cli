@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use ZM\Logger\ConsoleColor;
 
-#[AsCommand('build', 'build CLI binary')]
+#[AsCommand('build', 'build PHP')]
 class BuildCliCommand extends BuildCommand
 {
     public function configure(): void
@@ -33,6 +33,8 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
         $this->addOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
         $this->addOption('with-micro-fake-cli', null, null, 'Enable phpmicro fake cli');
+        $this->addOption('with-suggested-libs', 'L', null, 'Build with suggested libs for selected exts and libs');
+        $this->addOption('with-suggested-exts', 'E', null, 'Build with suggested extensions for selected exts');
     }
 
     public function handle(): int
@@ -42,12 +44,9 @@ class BuildCliCommand extends BuildCommand
         // transform string to array
         $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions'))));
 
-        $rule = BUILD_TARGET_NONE;
-        $rule |= ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-embed') ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
+        // parse rule with options
+        $rule = $this->parseRules();
+
         if ($rule === BUILD_TARGET_NONE) {
             $this->output->writeln('<error>Please add at least one build target!</error>');
             $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
@@ -62,16 +61,27 @@ class BuildCliCommand extends BuildCommand
             $builder = BuilderProvider::makeBuilderByInput($this->input);
             // calculate dependencies
             [$extensions, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps($extensions, $libraries);
-            /* @phpstan-ignore-next-line */
-            logger()->info('Build target: ' . ConsoleColor::yellow($builder->getBuildTypeName($rule)));
-            /* @phpstan-ignore-next-line */
-            logger()->info('Enabled extensions: ' . ConsoleColor::yellow(implode(', ', $extensions)));
-            /* @phpstan-ignore-next-line */
-            logger()->info('Required libraries: ' . ConsoleColor::yellow(implode(', ', $libraries)));
-            if (!empty($not_included)) {
-                logger()->warning('some extensions will be enabled due to dependencies: ' . implode(',', $not_included));
+
+            // print info
+            $indent_texts = [
+                'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
+                'Build SAPI' => $builder->getBuildTypeName($rule),
+                'Extensions (' . count($extensions) . ')' => implode(', ', $extensions),
+                'Libraries (' . count($libraries) . ')' => implode(', ', $libraries),
+                'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
+                'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
+            ];
+            if (!empty($this->input->getOption('with-hardcoded-ini'))) {
+                $indent_texts['Hardcoded INI'] = $this->input->getOption('with-hardcoded-ini');
             }
+            $this->printFormatInfo($indent_texts);
+
+            if (!empty($not_included)) {
+                logger()->warning('Some extensions will be enabled due to dependencies: ' . implode(',', $not_included));
+            }
+            logger()->info('Build will start after 2s ...');
             sleep(2);
+
             if ($this->input->getOption('with-clean')) {
                 logger()->info('Cleaning source dir...');
                 FileSystem::removeDir(SOURCE_PATH);
@@ -138,6 +148,43 @@ class BuildCliCommand extends BuildCommand
                 logger()->critical('Please check with --debug option to see more details.');
             }
             return static::FAILURE;
+        }
+    }
+
+    /**
+     * Parse build options to rule int.
+     */
+    private function parseRules(): int
+    {
+        $rule = BUILD_TARGET_NONE;
+        $rule |= ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-embed') ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
+        return $rule;
+    }
+
+    private function printFormatInfo(array $indent_texts): void
+    {
+        // calculate space count for every line
+        $maxlen = 0;
+        foreach ($indent_texts as $k => $v) {
+            $maxlen = max(strlen($k), $maxlen);
+        }
+        foreach ($indent_texts as $k => $v) {
+            if (is_string($v)) {
+                /* @phpstan-ignore-next-line */
+                logger()->info($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($v));
+            } elseif (is_array($v) && !is_assoc_array($v)) {
+                $first = array_shift($v);
+                /* @phpstan-ignore-next-line */
+                logger()->info($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($first));
+                foreach ($v as $vs) {
+                    /* @phpstan-ignore-next-line */
+                    logger()->info(str_pad('', $maxlen + 2) . ConsoleColor::yellow($vs));
+                }
+            }
         }
     }
 }
