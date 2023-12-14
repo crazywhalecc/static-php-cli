@@ -259,6 +259,19 @@ abstract class BuilderBase
         throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
     }
 
+    public function getPHPVersion(): string
+    {
+        if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            throw new WrongUsageException('PHP source files are not available, you need to download them first');
+        }
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION "(.*)"/', $file, $match) !== 0) {
+            return $match[1];
+        }
+
+        throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
+    }
+
     /**
      * Get build type name string to display.
      *
