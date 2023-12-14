@@ -20,7 +20,7 @@ trait postgresql
     {
         $builddir = BUILD_ROOT_PATH;
         $envs = '';
-        $packages = 'openssl zlib readline libxml-2.0 zlib';
+        $packages = 'zlib openssl readline libxml-2.0';
         $optional_packages = [
             'zstd' => 'libzstd',
             // 'ldap' => 'ldap',
