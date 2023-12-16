@@ -20,16 +20,22 @@ trait postgresql
     {
         $builddir = BUILD_ROOT_PATH;
         $envs = '';
-        $packages = 'openssl zlib readline libxml-2.0 zlib';
+        $packages = 'zlib openssl readline libxml-2.0';
         $optional_packages = [
             'zstd' => 'libzstd',
-            'ldap' => 'ldap',
+            // 'ldap' => 'ldap',
             'libxslt' => 'libxslt',
             'icu' => 'icu-i18n',
         ];
+
+        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
+
         foreach ($optional_packages as $lib => $pkg) {
             if ($this->getBuilder()->getLib($lib)) {
                 $packages .= ' ' . $pkg;
+                $output = shell()->execWithResult("pkg-config --static {$pkg}");
+                logger()->info(var_export($output[1], true));
             }
         }
 
@@ -58,8 +64,8 @@ trait postgresql
         # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
         shell()->cd($this->source_dir . '/build')
             ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
-            ->exec('sed -i.backup "293 s/^/#$/"  ../src/Makefile.shlib')
-            ->exec('sed -i.backup "441 s/^/#$/"  ../src/Makefile.shlib');
+            ->exec('sed -i.backup "278 s/^/# /"  ../src/Makefile.shlib')
+            ->exec('sed -i.backup "402 s/^/# /"  ../src/Makefile.shlib');
 
         // configure
         shell()->cd($this->source_dir . '/build')
@@ -72,7 +78,7 @@ trait postgresql
                 '--with-readline ' .
                 '--with-libxml ' .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
-                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
+                '--without-ldap ' .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
                 ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
                 '--without-lz4 ' .
@@ -82,15 +88,14 @@ trait postgresql
                 '--without-bonjour ' .
                 '--without-tcl '
             );
+        // ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
 
         // build
         shell()->cd($this->source_dir . '/build')
             ->exec($envs . ' make -C src/bin/pg_config install')
             ->exec($envs . ' make -C src/include install')
             ->exec($envs . ' make -C src/common install')
-            ->exec($envs . ' make -C src/backend/port install')
             ->exec($envs . ' make -C src/port install')
-            ->exec($envs . ' make -C src/backend/libpq install')
             ->exec($envs . ' make -C src/interfaces/libpq install');
 
         // remove dynamic libs

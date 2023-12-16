@@ -386,7 +386,7 @@
     },
     "postgresql": {
         "type": "url",
-        "url": "https://ftp.postgresql.org/pub/source/v15.1/postgresql-15.1.tar.gz",
+        "url": "https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"

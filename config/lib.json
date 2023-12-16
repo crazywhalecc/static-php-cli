@@ -156,8 +156,9 @@
             "liblber.a",
             "libldap.a"
         ],
-        "lib-suggests": [
+        "lib-depends": [
             "openssl",
+            "zlib",
             "gmp",
             "libsodium"
         ]

@@ -17,7 +17,8 @@ class swoole extends Extension
         $arg .= ' --disable-swoole-pgsql';
         $arg .= $this->builder->getLib('openssl') ? ' --enable-openssl' : ' --disable-openssl --without-openssl';
         $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : ' --disable-brotli';
-        $arg .= $this->builder->getExt('curl') ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
+        // swoole curl hook is buggy for php 8.0
+        $arg .= $this->builder->getExt('curl') && $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
         return $arg;
     }
 }
