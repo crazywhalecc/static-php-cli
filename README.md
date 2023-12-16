@@ -233,7 +233,7 @@ cat buildroot/bin/micro.sfx my-app.phar > my-app && chmod +x my-app
 bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=system" --output my-app-2
 ```
 
-> In some cases, PHAR files may not run in a micro environment.
+> In some cases, PHAR files may not run in a micro environment. Overall, micro is not production ready.
 
 ### Use fpm
 
