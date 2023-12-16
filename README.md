@@ -31,9 +31,13 @@ see <https://static-php.dev> .
 
 ## Direct Download
 
-If you don't want to compile yourself, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml), or from [self-hosted server](https://dl.static-php.dev/static-php-cli/common/).
+If you don't want to compile yourself, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml), or from self-hosted server.
 
-> self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+Below are several precompiled static-php binaries with different extension combinations,
+which can be downloaded directly according to your needs.
+
+- [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): The common combination contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 22MB.
+- [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): The bulk package contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 70MB in size.
 
 ## Use static-php-cli to build PHP
 
