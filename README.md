@@ -38,6 +38,7 @@ which can be downloaded directly according to your needs.
 
 - [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): `common` combination contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 22MB.
 - [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` combination contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 70MB in size.
+- [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` combination contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 6MB in size.
 
 ## Use static-php-cli to build PHP
 
