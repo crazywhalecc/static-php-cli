@@ -6,9 +6,43 @@ use SPC\exception\ExceptionHandler;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// 防止 Micro 打包状态下不支持中文的显示（虽然这个项目目前好像没输出过中文？）
-if (PHP_OS_FAMILY === 'Windows' && Phar::running()) {
-    exec('CHCP 65001');
+// check if we need to run in docker
+if (in_array('--docker', $_SERVER['argv'] ?? [], true)) {
+    // Remove fake option used in pre-built binary
+    $key = array_search('--docker', $_SERVER['argv']);
+    array_splice($_SERVER['argv'], $key, 1);
+    putenv('SPC_USE_DOCKER=yes');
+}
+if (getenv('SPC_USE_DOCKER') === 'yes') {
+    echo "We are in docker mode !\n";
+    // Remove first argument as it point this file
+    array_shift($_SERVER['argv']);
+
+    // mark that we are running in docker
+    putenv('SPC_USE_DOCKER=in');
+
+    // only support linux
+    if (PHP_OS_FAMILY !== 'Linux') {
+        echo 'Docker mode is only supported on Linux!' . PHP_EOL;
+        exit(1);
+    }
+
+    if (Phar::running() !== '') {
+        $exec = Phar::running(false) . ' export-docker-sh | sh -s -- ' . implode(' ', $_SERVER['argv']);
+        $result = passthru($exec, $exit_code);
+        if ($exit_code !== 0) {
+            echo "Phar running docker with error\n";
+            exit($exit_code);
+        }
+    } else {
+        $exec = __DIR__ . '/spc-alpine-docker';
+        $result = pcntl_exec($exec, $_SERVER['argv']);
+    }
+    if ($result === false) {
+        echo 'Failed to run docker mode!' . PHP_EOL;
+        exit(1);
+    }
+    exit(0);
 }
 
 try {
