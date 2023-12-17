@@ -36,9 +36,9 @@ If you don't want to compile yourself, you can download example pre-compiled art
 Below are several precompiled static-php binaries with different extension combinations,
 which can be downloaded directly according to your needs.
 
-- [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): `common` combination contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 22MB.
-- [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` combination contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 70MB in size.
-- [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` combination contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 6MB in size.
+- [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): `common` contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 22MB.
+- [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 70MB in size.
+- [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 6MB in size.
 
 ## Use static-php-cli to build PHP
 
@@ -233,7 +233,7 @@ cat buildroot/bin/micro.sfx my-app.phar > my-app && chmod +x my-app
 bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=system" --output my-app-2
 ```
 
-> In some cases, PHAR files may not run in a micro environment.
+> In some cases, PHAR files may not run in a micro environment. Overall, micro is not production ready.
 
 ### Use fpm
 
