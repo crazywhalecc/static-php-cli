@@ -163,6 +163,12 @@
             "libsodium"
         ]
     },
+    "libargon2": {
+        "source": "libargon2",
+        "static-libs-unix": [
+            "libargon2.a"
+        ]
+    },
     "libavif": {
         "source": "libavif",
         "static-libs-unix": [
