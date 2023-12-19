@@ -69,7 +69,7 @@ abstract class BuilderBase
         foreach ($libraries as $library) {
             // if some libs are not supported (but in config "lib.json", throw exception)
             if (!isset($support_lib_list[$library])) {
-                throw new RuntimeException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
+                throw new WrongUsageException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
             }
             $lib = new ($support_lib_list[$library])($this);
             $this->addLib($lib);
@@ -254,6 +254,19 @@ abstract class BuilderBase
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
         if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
             return intval($match[1]);
+        }
+
+        throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
+    }
+
+    public function getPHPVersion(): string
+    {
+        if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            throw new WrongUsageException('PHP source files are not available, you need to download them first');
+        }
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION "(.*)"/', $file, $match) !== 0) {
+            return $match[1];
         }
 
         throw new RuntimeException('PHP version file format is malformed, please remove it and download again');

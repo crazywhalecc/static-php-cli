@@ -25,6 +25,7 @@ class MacOSToolCheckList
         'autoconf',
         'automake',
         'tar',
+        'libtool',
         'unzip',
         'xz',
         'gzip',

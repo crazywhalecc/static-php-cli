@@ -134,6 +134,12 @@ class SourcePatcher
         $patch_file = ROOT_DIR . "/src/globals/patch/{$patch_name}";
         $patch_str = str_replace('/', DIRECTORY_SEPARATOR, $patch_file);
 
+        // copy patch from phar
+        if (\Phar::running() !== '') {
+            file_put_contents(SOURCE_PATH . '/' . $patch_name, file_get_contents($patch_file));
+            $patch_str = str_replace('/', DIRECTORY_SEPARATOR, SOURCE_PATH . '/' . $patch_name);
+        }
+
         f_passthru(
             'cd ' . $cwd . ' && ' .
             (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patch_str . ' | patch -p1 ' . ($reverse ? '-R' : '')

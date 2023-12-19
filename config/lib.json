@@ -141,14 +141,24 @@
             "libxml2"
         ]
     },
+    "imap": {
+        "source": "imap",
+        "static-libs-unix": [
+            "libc-client.a"
+        ],
+        "lib-suggests": [
+            "openssl"
+        ]
+    },
     "ldap": {
         "source": "ldap",
         "static-libs-unix": [
             "liblber.a",
             "libldap.a"
         ],
-        "lib-suggests": [
+        "lib-depends": [
             "openssl",
+            "zlib",
             "gmp",
             "libsodium"
         ]
@@ -308,8 +318,7 @@
         ],
         "lib-suggests-windows": [
             "icu",
-            "xz",
-            "pthreads4w"
+            "xz"
         ]
     },
     "libxslt": {
@@ -447,18 +456,6 @@
             "zstd"
         ]
     },
-    "pthreads4w": {
-        "source": "pthreads4w",
-        "static-libs-windows": [
-            "libpthreadVC3.lib"
-        ],
-        "headers-windows": [
-            "_ptw32.h",
-            "pthread.h",
-            "sched.h",
-            "semaphore.h"
-        ]
-    },
     "readline": {
         "source": "readline",
         "static-libs-unix": [
@@ -491,6 +488,12 @@
         "headers-unix": [
             "sqlite3.h",
             "sqlite3ext.h"
+        ]
+    },
+    "tidy": {
+        "source": "tidy",
+        "static-libs-unix": [
+            "libtidy.a"
         ]
     },
     "xz": {

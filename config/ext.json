@@ -118,7 +118,7 @@
     "iconv": {
         "type": "builtin",
         "arg-type": "with-prefix",
-        "lib-depends-windows": [
+        "lib-depends": [
             "libiconv"
         ]
     },
@@ -132,12 +132,12 @@
     },
     "imap": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends": [
             "imap"
         ],
         "lib-suggests": [
-            "kerberos"
+            "openssl"
         ]
     },
     "inotify": {
@@ -228,13 +228,15 @@
         ]
     },
     "opcache": {
-        "type": "builtin"
+        "type": "builtin",
+        "arg-type": "custom"
     },
     "openssl": {
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
-            "openssl"
+            "openssl",
+            "zlib"
         ],
         "ext-depends": [
             "zlib"
@@ -311,6 +313,11 @@
         "lib-depends": [
             "aspell"
         ]
+    },
+    "rar": {
+        "type": "external",
+        "source": "rar",
+        "cpp-extension": true
     },
     "readline": {
         "type": "builtin",
@@ -436,7 +443,7 @@
     },
     "tidy": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "tidy"
         ]

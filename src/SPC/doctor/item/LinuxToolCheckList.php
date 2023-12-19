@@ -21,6 +21,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
         'g++', 'patch', 'binutils-gold',
+        'libtoolize',
     ];
 
     public const TOOLS_DEBIAN = [
@@ -28,7 +29,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
-        'xz',
+        'xz', 'libtoolize',
     ];
 
     public const TOOLS_RHEL = [
@@ -36,7 +37,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch',
-        'xz', 'wget', // to get musl
+        'xz',
     ];
 
     /** @noinspection PhpUnused */
@@ -47,8 +48,7 @@ class LinuxToolCheckList
 
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
-            'almalinux' => self::TOOLS_RHEL,
-            'rhel' => self::TOOLS_RHEL,
+            'redhat' => self::TOOLS_RHEL,
             default => self::TOOLS_DEBIAN,
         };
         $missing = [];
@@ -61,8 +61,7 @@ class LinuxToolCheckList
             return match ($distro['dist']) {
                 'ubuntu',
                 'alpine',
-                'rhel',
-                'almalinux',
+                'redhat',
                 'debian' => CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]),
                 default => CheckResult::fail(implode(', ', $missing) . ' not installed on your system'),
             };
@@ -74,11 +73,10 @@ class LinuxToolCheckList
     #[AsCheckItem('if necessary packages are installed', limit_os: 'Linux')]
     public function checkSystemOSPackages(): ?CheckResult
     {
-        $distro = SystemUtil::getOSRelease();
-        if ($distro['dist'] === 'alpine') {
+        if (SystemUtil::isMuslDist()) {
             // check linux-headers installation
             if (!file_exists('/usr/include/linux/mman.h')) {
-                return CheckResult::fail('linux-headers not installed on your system', 'install-linux-tools', [$distro, ['linux-headers']]);
+                return CheckResult::fail('linux-headers not installed on your system', 'install-linux-tools', [SystemUtil::getOSRelease(), ['linux-headers']]);
             }
         }
         return CheckResult::ok();
@@ -94,8 +92,7 @@ class LinuxToolCheckList
         $install_cmd = match ($distro['dist']) {
             'ubuntu', 'debian' => 'apt-get install -y',
             'alpine' => 'apk add',
-            'rhel' => 'dnf install -y',
-            'almalinux' => 'dnf install -y',
+            'redhat' => 'dnf install -y',
             default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';
@@ -104,8 +101,10 @@ class LinuxToolCheckList
             logger()->warning('Current user is not root, using sudo for running command');
         }
         try {
-            $is_rhel = in_array($distro['dist'], ['rhel', 'almalinux']);
-            $to_install = $is_rhel ? $missing : str_replace('xz', 'xz-utils', $missing);
+            $is_debian = in_array($distro['dist'], ['debian', 'ubuntu']);
+            $to_install = $is_debian ? str_replace('xz', 'xz-utils', $missing) : $missing;
+            // debian, alpine libtool -> libtoolize
+            $to_install = str_replace('libtoolize', 'libtool', $to_install);
             shell(true)->exec($prefix . $install_cmd . ' ' . implode(' ', $to_install));
         } catch (RuntimeException) {
             return false;
