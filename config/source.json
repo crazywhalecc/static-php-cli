@@ -463,8 +463,8 @@
         "path": "php-src/ext/sqlsrv",
         "filename": "sqlsrv.tgz",
         "license": {
-            "type": "text",
-            "text": "TODO"
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "swoole": {
@@ -500,8 +500,8 @@
         "type": "url",
         "url": "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz",
         "license": {
-            "type": "text",
-            "text": "TODO"
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "xlswriter": {

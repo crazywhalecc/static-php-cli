@@ -22,6 +22,7 @@ trait unixodbc
                 '--disable-debug ' .
                 '--disable-dependency-tracking ' .
                 '--with-libiconv-prefix=' . BUILD_ROOT_PATH . ' ' .
+                '--with-included-ltdl ' .
                 '--enable-gui=no ' .
                 '--prefix='
             )
