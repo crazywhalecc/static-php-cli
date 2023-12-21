@@ -391,6 +391,17 @@
             "sqlite"
         ]
     },
+    "sqlsrv": {
+        "type": "external",
+        "source": "sqlsrv",
+        "lib-depends": [
+            "unixodbc"
+        ],
+        "cpp-extension": true,
+        "ext-depends-linux": [
+            "pcntl"
+        ]
+    },
     "ssh2": {
         "type": "external",
         "source": "ext-ssh2",

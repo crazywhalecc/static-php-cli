@@ -496,6 +496,17 @@
             "libtidy.a"
         ]
     },
+    "unixodbc": {
+        "source": "unixodbc",
+        "static-libs-unix": [
+            "libodbc.a",
+            "libodbccr.a",
+            "libodbcinst.a"
+        ],
+        "lib-depends": [
+            "libiconv"
+        ]
+    },
     "xz": {
         "source": "xz",
         "static-libs-unix": [

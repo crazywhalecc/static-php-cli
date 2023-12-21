@@ -163,6 +163,7 @@ class MacOSBuilder extends BuilderBase
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
                 "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
+                "CPPFLAGS='-I" . BUILD_INCLUDE_PATH . "' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
