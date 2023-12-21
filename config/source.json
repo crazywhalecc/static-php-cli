@@ -457,6 +457,16 @@
             "text": "The author disclaims copyright to this source code.  In place of\na legal notice, here is a blessing:\n\n  *   May you do good and not evil.\n  *   May you find forgiveness for yourself and forgive others.\n  *   May you share freely, never taking more than you give."
         }
     },
+    "sqlsrv": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/sqlsrv",
+        "path": "php-src/ext/sqlsrv",
+        "filename": "sqlsrv.tgz",
+        "license": {
+            "type": "text",
+            "text": "TODO"
+        }
+    },
     "swoole": {
         "type": "ghtar",
         "path": "php-src/ext/swoole",
@@ -484,6 +494,14 @@
         "license": {
             "type": "file",
             "path": "README/LICENSE.md"
+        }
+    },
+    "unixodbc": {
+        "type": "url",
+        "url": "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz",
+        "license": {
+            "type": "text",
+            "text": "TODO"
         }
     },
     "xlswriter": {
