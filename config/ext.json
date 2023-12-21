@@ -16,6 +16,14 @@
     "calendar": {
         "type": "builtin"
     },
+    "crypto": {
+        "type": "external",
+        "arg-type": "with",
+        "source": "ext-crypto",
+        "lib-depends": [
+            "openssl"
+        ]
+    },
     "ctype": {
         "type": "builtin"
     },
@@ -122,6 +130,10 @@
             "libiconv"
         ]
     },
+    "igbinary": {
+        "type": "external",
+        "source": "igbinary"
+    },
     "imagick": {
         "type": "external",
         "source": "ext-imagick",
@@ -162,6 +174,14 @@
         ],
         "ext-suggests": [
             "openssl"
+        ]
+    },
+    "leveldb": {
+        "type": "external",
+        "arg-type": "with-prefix",
+        "source": "pmmp-leveldb",
+        "lib-depends": [
+            "leveldb"
         ]
     },
     "mbregex": {
@@ -212,6 +232,10 @@
             "zstd",
             "zlib"
         ]
+    },
+    "morton": {
+        "type": "external",
+        "source": "ext-morton"
     },
     "mysqli": {
         "type": "builtin",
@@ -298,6 +322,16 @@
         "ext-depends": [
             "zlib"
         ]
+    },
+    "pmmp-chunkutils2": {
+        "type": "external",
+        "source": "pmmp-chunkutils2",
+        "arg-type": "custom",
+        "cpp-extension": true
+    },
+    "pmmpthread": {
+        "type": "external",
+        "source": "pmmpthread"
     },
     "posix": {
         "type": "builtin",

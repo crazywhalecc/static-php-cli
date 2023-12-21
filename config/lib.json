@@ -163,6 +163,13 @@
             "libsodium"
         ]
     },
+    "leveldb": {
+        "source": "leveldb",
+        "static-libs-unix": [
+            "libleveldb.a"
+        ],
+        "cpp-library": true
+    },
     "libargon2": {
         "source": "libargon2",
         "static-libs-unix": [

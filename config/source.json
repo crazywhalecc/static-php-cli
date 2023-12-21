@@ -42,6 +42,16 @@
             "path": "COPYING"
         }
     },
+    "ext-crypto": {
+        "type": "git",
+        "path": "php-src/ext/crypto",
+        "rev": "master",
+        "url": "https://github.com/bukka/php-crypto.git",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-event": {
         "type": "url",
         "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
@@ -75,6 +85,16 @@
         "url": "https://pecl.php.net/get/memcache",
         "path": "php-src/ext/memcache",
         "filename": "memcache.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-morton": {
+        "type": "git",
+        "path": "php-src/ext/morton",
+        "rev": "master",
+        "url": "https://github.com/pmmp/ext-morton.git",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -136,6 +156,15 @@
             "path": "LICENSE"
         }
     },
+    "igbinary": {
+        "type": "ghtar",
+        "path": "php-src/ext/igbinary",
+        "repo": "igbinary/igbinary",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "imagemagick": {
         "type": "ghtar",
         "repo": "ImageMagick/ImageMagick",
@@ -167,6 +196,15 @@
         "type": "filelist",
         "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
         "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "leveldb": {
+        "type": "git",
+        "rev": "mojang-compatible",
+        "url": "https://github.com/pmmp/leveldb.git",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -390,6 +428,34 @@
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "pmmp-chunkutils2": {
+        "type": "ghtar",
+        "path": "php-src/ext/chunkutils2",
+        "repo": "pmmp/ext-chunkutils2",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "pmmp-leveldb": {
+        "type": "git",
+        "path": "php-src/ext/leveldb",
+        "rev": "pmmp-mojang-compatible",
+        "url": "https://github.com/pmmp/php-leveldb.git",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "pmmpthread": {
+        "type": "ghtar",
+        "path": "php-src/ext/pmmpthread",
+        "repo": "pmmp/ext-pmmpthread",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "postgresql": {
