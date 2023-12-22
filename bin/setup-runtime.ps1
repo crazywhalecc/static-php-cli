@@ -40,4 +40,9 @@ if (-not(Test-Path "runtime\composer.phar"))
 # create runtime\composer.ps1
 Set-Content -Path 'runtime\composer.ps1' -Value 'Start-Process "runtime\php.exe" ("runtime\composer.phar " + $args) -NoNewWindow -Wait' -Encoding UTF8
 
-Write-Host "Successfully downloaded PHP and Composer !"
+Write-Host "Successfully downloaded PHP and Composer !" -ForegroundColor Green
+Write-Host "Use static-php-cli: bin/spc" -ForegroundColor Green
+Write-Host "Use php:            runtime/php" -ForegroundColor Green
+Write-Host "Use composer:       runtime/composer" -ForegroundColor Green
+Write-Host ""
+Write-Host "Don't forget installing composer dependencies ('runtime/composer install') before using static-php-cli !" -ForegroundColor Cyan
