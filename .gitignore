@@ -22,8 +22,8 @@ docker/source/
 
 # exclude self-runtime
 /bin/*
-!/bin/spc
-!/bin/setup-runtime
+!/bin/spc*
+!/bin/setup-runtime*
 !/bin/spc-alpine-docker
 
 # default test directory
