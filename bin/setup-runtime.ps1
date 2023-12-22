@@ -1,3 +1,55 @@
+param (
+    [string] ${action}
+)
+
+function AddToPath {
+    param (
+        [string]$pathToAdd
+    )
+
+    $currentPath = [System.Environment]::GetEnvironmentVariable('Path', 'User')
+
+    if ($currentPath -notlike "*$pathToAdd*") {
+        $newPath = $currentPath + ";$pathToAdd"
+        [System.Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+        Write-Host "Added '$pathToAdd' to Path."
+        Write-Host "To remove path, use: " -NoNewline
+        Write-Host "bin/setup-runtime remove-path" -ForegroundColor Cyan
+    } else {
+        Write-Host "Path already exists."
+    }
+}
+
+function RemoveFromPath {
+    param (
+        [string]$pathToRemove
+    )
+
+    $currentPath = [System.Environment]::GetEnvironmentVariable('Path', 'User')
+
+    if ($currentPath -like "*$pathToRemove*") {
+        $newPath = $currentPath -replace [regex]::Escape($pathToRemove), ''
+        [System.Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+        Write-Host "Removed Path '$pathToRemove'"
+    } else {
+        Write-Host "Path '$pathToRemove' not in Path"
+    }
+}
+
+# working dir
+$WorkingDir = (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Definition))
+
+if ($action -eq 'add-path') {
+    AddToPath ($WorkingDir + '\runtime')
+    exit 0
+} elseif ($action -eq 'remove-path') {
+    RemoveFromPath ($WorkingDir + '\runtime')
+    exit 0
+} elseif (-not($action -eq '')) {
+    Write-Host ("Invalid action: " + $action) -ForegroundColor Red
+    exit 1
+}
+
 # get php 8.1 specific version
 $API = (Invoke-WebRequest -Uri "https://www.php.net/releases/index.php?json&version=8.1") | ConvertFrom-Json
 
@@ -41,8 +93,19 @@ if (-not(Test-Path "runtime\composer.phar"))
 Set-Content -Path 'runtime\composer.ps1' -Value 'Start-Process "runtime\php.exe" ("runtime\composer.phar " + $args) -NoNewWindow -Wait' -Encoding UTF8
 
 Write-Host "Successfully downloaded PHP and Composer !" -ForegroundColor Green
-Write-Host "Use static-php-cli: bin/spc" -ForegroundColor Green
-Write-Host "Use php:            runtime/php" -ForegroundColor Green
-Write-Host "Use composer:       runtime/composer" -ForegroundColor Green
+Write-Host "Use static-php-cli: " -NoNewline
+Write-Host "bin/spc" -ForegroundColor Cyan
+Write-Host "Use php:            " -NoNewline
+Write-Host "runtime/php" -ForegroundColor Cyan
+Write-Host "Use composer:       " -NoNewline
+Write-Host "runtime/composer" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Don't forget installing composer dependencies ('runtime/composer install') before using static-php-cli !" -ForegroundColor Cyan
+Write-Host "Don't forget installing composer dependencies '" -NoNewline
+Write-Host "runtime/composer install" -ForegroundColor Cyan -NoNewline
+Write-Host "' before using static-php-cli !"
+Write-Host ""
+Write-Host "If you want to use this PHP for quality tools (like phpstan, php-cs-fixer) or other project,"
+Write-Host "or use PHP, Composer as system executable,"
+Write-Host "use '" -NoNewline
+Write-Host "bin/setup-runtime add-path" -ForegroundColor Cyan -NoNewline
+Write-Host "' to add runtime dir in Path."
