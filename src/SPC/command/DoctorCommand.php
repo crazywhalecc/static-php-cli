@@ -75,8 +75,9 @@ class DoctorCommand extends BaseCommand
         } catch (\Throwable $e) {
             $this->output->writeln('<error>' . $e->getMessage() . '</error>');
 
-            pcntl_signal(SIGINT, SIG_IGN);
-
+            if (extension_loaded('pcntl')) {
+                pcntl_signal(SIGINT, SIG_IGN);
+            }
             return static::FAILURE;
         }
 
