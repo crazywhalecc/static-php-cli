@@ -26,5 +26,8 @@ docker/source/
 !/bin/setup-runtime*
 !/bin/spc-alpine-docker
 
+# exclude windows build tools
+/php-sdk-binary-tools/
+
 # default test directory
 /tests/var/
