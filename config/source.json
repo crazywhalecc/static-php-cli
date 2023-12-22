@@ -172,6 +172,15 @@
             "path": "LICENSE"
         }
     },
+    "libargon2": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/mpociot/phc-winner-argon2",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",
@@ -376,9 +385,8 @@
         }
     },
     "pkg-config": {
-        "type": "filelist",
-        "url": "https://pkgconfig.freedesktop.org/releases/",
-        "regex": "/href=\"(?<file>pkg-config-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -386,7 +394,7 @@
     },
     "postgresql": {
         "type": "url",
-        "url": "https://ftp.postgresql.org/pub/source/v15.1/postgresql-15.1.tar.gz",
+        "url": "https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"
@@ -449,6 +457,16 @@
             "text": "The author disclaims copyright to this source code.  In place of\na legal notice, here is a blessing:\n\n  *   May you do good and not evil.\n  *   May you find forgiveness for yourself and forgive others.\n  *   May you share freely, never taking more than you give."
         }
     },
+    "sqlsrv": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/sqlsrv",
+        "path": "php-src/ext/sqlsrv",
+        "filename": "sqlsrv.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "swoole": {
         "type": "ghtar",
         "path": "php-src/ext/swoole",
@@ -476,6 +494,14 @@
         "license": {
             "type": "file",
             "path": "README/LICENSE.md"
+        }
+    },
+    "unixodbc": {
+        "type": "url",
+        "url": "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "xlswriter": {

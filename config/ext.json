@@ -228,7 +228,8 @@
         ]
     },
     "opcache": {
-        "type": "builtin"
+        "type": "builtin",
+        "arg-type": "custom"
     },
     "openssl": {
         "type": "builtin",
@@ -239,6 +240,13 @@
         ],
         "ext-depends": [
             "zlib"
+        ]
+    },
+    "password-argon2": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libargon2"
         ]
     },
     "pcntl": {
@@ -381,6 +389,17 @@
         "arg-type": "with-prefix",
         "lib-depends": [
             "sqlite"
+        ]
+    },
+    "sqlsrv": {
+        "type": "external",
+        "source": "sqlsrv",
+        "lib-depends": [
+            "unixodbc"
+        ],
+        "cpp-extension": true,
+        "ext-depends-linux": [
+            "pcntl"
         ]
     },
     "ssh2": {

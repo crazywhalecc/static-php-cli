@@ -15,6 +15,8 @@ trait ldap
         $alt .= $this->builder->getLib('gmp') ? '--with-mp=gmp ' : '';
         // libsodium support
         $alt .= $this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '';
+        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
         shell()->cd($this->source_dir)
             ->exec(
                 $this->builder->makeAutoconfFlags(AUTOCONF_LDFLAGS | AUTOCONF_CPPFLAGS) .

@@ -156,10 +156,17 @@
             "liblber.a",
             "libldap.a"
         ],
-        "lib-suggests": [
+        "lib-depends": [
             "openssl",
+            "zlib",
             "gmp",
             "libsodium"
+        ]
+    },
+    "libargon2": {
+        "source": "libargon2",
+        "static-libs-unix": [
+            "libargon2.a"
         ]
     },
     "libavif": {
@@ -487,6 +494,17 @@
         "source": "tidy",
         "static-libs-unix": [
             "libtidy.a"
+        ]
+    },
+    "unixodbc": {
+        "source": "unixodbc",
+        "static-libs-unix": [
+            "libodbc.a",
+            "libodbccr.a",
+            "libodbcinst.a"
+        ],
+        "lib-depends": [
+            "libiconv"
         ]
     },
     "xz": {

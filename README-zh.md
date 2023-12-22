@@ -28,9 +28,11 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 ## 自托管直接下载
 
-如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.static-php.dev/static-php-cli/common/)
+如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载。
 
-> 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+- [扩展组合 - common](https://dl.static-php.dev/static-php-cli/common/)：common 组合包含了约 [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) 个常用扩展，体积为 22MB 左右。
+- [扩展组合 - bulk](https://dl.static-php.dev/static-php-cli/bulk/)：bulk 组合包含了 [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) 个扩展，体积为 70MB 左右。
+- [扩展组合 - minimal](https://dl.static-php.dev/static-php-cli/minimal/)：minimal 组合包含了 [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) 个扩展，体积为 6MB 左右。
 
 ## 使用 static-php-cli 构建 PHP
 

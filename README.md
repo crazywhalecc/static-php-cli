@@ -18,22 +18,26 @@ You can also use the micro binary file to combine php binary and php source code
 
 [![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
-[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-linux-x86_64.yml?branch=refactor&label=Linux%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
-[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/build-macos-x86_64.yml?branch=refactor&label=macOS%20Build&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/build.yml)
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 
-[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
+[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]([https://static-php.dev/](https://static-php.dev/en/guide/extensions.html))
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
-## Docs
+## Documentation
 
 The current README contains basic usage. For all the features of static-php-cli,
 see <https://static-php.dev> .
 
 ## Direct Download
 
-If you don't want to compile yourself, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml), or from [self-hosted server](https://dl.static-php.dev/static-php-cli/common/).
+If you don't want to compile yourself, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml), or from self-hosted server.
 
-> self-hosted server contains extensions: `bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+Below are several precompiled static-php binaries with different extension combinations,
+which can be downloaded directly according to your needs.
+
+- [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): `common` contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 22MB.
+- [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 70MB in size.
+- [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 6MB in size.
 
 ## Use static-php-cli to build PHP
 
@@ -135,7 +139,7 @@ Basic usage for building php and micro with some extensions:
 > If you are using the packaged `spc` binary, you need to replace `bin/spc` with `./spc` in the following commands.
 
 ```bash
-# Check system tool dependencies, fix them automatically
+# Check system tool dependencies, fix them if possible
 ./bin/spc doctor
 # fetch all libraries
 ./bin/spc download --all
@@ -167,7 +171,7 @@ If anything goes wrong, use `--debug` option to display full terminal output:
 ./bin/spc fetch --all --debug
 ```
 
-In addition, we build NTS by default. If you are going to build ZTS version, just add `--enable-zts` option.
+In addition, we build NTS (non-thread-safe) by default. If you are going to build ZTS version, just add `--enable-zts` option.
 
 ```bash
 ./bin/spc build openssl,pcntl --build-all --enable-zts
@@ -228,7 +232,7 @@ cat buildroot/bin/micro.sfx my-app.phar > my-app && chmod +x my-app
 bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=system" --output my-app-2
 ```
 
-> In some cases, PHAR files may not run in a micro environment.
+> In some cases, PHAR files may not run in a micro environment. Overall, micro is not production ready.
 
 ### Use fpm
 
@@ -236,7 +240,7 @@ When using the parameter `--build-all` or `--build-fpm`,
 the final compilation result will output a file named `./php-fpm`,
 This file will be located in the path `buildroot/bin/`, simply copy it out for use.
 
-In normal Linux distributions and macOS systems, the package manager will automatically generate a default fpm configuration file after installing php-fpm.
+In common Linux distributions and macOS systems, the package manager will automatically generate a default fpm configuration file after installing php-fpm.
 Because php-fpm must specify a configuration file before running, the php-fpm compiled by this project will not have any configuration files, so you need to write `php-fpm.conf` and `pool.conf` configuration files yourself.
 
 Specifying `php-fpm.conf` can use the command parameter `-y`, for example: `./php-fpm -y php-fpm.conf`.
@@ -262,10 +266,6 @@ If you want to contribute documentation, please go to [static-php/static-php-cli
 
 Now there is a [static-php](https://github.com/static-php) organization, which is used to store the repo related to the project.
 
-Part of the English document is written by me, and part is translated by Google,
-and there may be inaccurate descriptions, strange or offensive expressions.
-If you are a native English speaker, some corrections to the documentation are welcome.
-
 ## Sponsor this project
 
 You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md).
@@ -288,8 +288,3 @@ and they all have their own open source licenses.
 Please use the `bin/spc dump-license` command to export the open source licenses used in the project after compilation,
 and comply with the corresponding project's LICENSE.
 
-## Advanced
-
-The refactoring branch of this project is written modularly.
-If you are interested in this project and want to join the development,
-you can refer to the [Contribution Guide](https://static-php.dev) of the documentation to contribute code or documentation.
