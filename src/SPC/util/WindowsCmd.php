@@ -7,7 +7,7 @@ namespace SPC\util;
 use SPC\exception\RuntimeException;
 use ZM\Logger\ConsoleColor;
 
-class UnixShell
+class WindowsCmd
 {
     private ?string $cd = null;
 
@@ -17,13 +17,13 @@ class UnixShell
 
     public function __construct(?bool $debug = null)
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            throw new RuntimeException('Windows cannot use UnixShell');
+        if (PHP_OS_FAMILY !== 'Windows') {
+            throw new RuntimeException('Only windows can use WindowsCmd');
         }
         $this->debug = $debug ?? defined('DEBUG_MODE');
     }
 
-    public function cd(string $dir): UnixShell
+    public function cd(string $dir): WindowsCmd
     {
         logger()->info('Entering dir: ' . $dir);
         $c = clone $this;
@@ -34,16 +34,18 @@ class UnixShell
     /**
      * @throws RuntimeException
      */
-    public function exec(string $cmd): UnixShell
+    public function exec(string $cmd): WindowsCmd
     {
         /* @phpstan-ignore-next-line */
         logger()->info(ConsoleColor::yellow('[EXEC] ') . ConsoleColor::green($cmd));
         if ($this->cd !== null) {
-            $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
+            $cmd = 'cd /d ' . escapeshellarg($this->cd) . ' && ' . $cmd;
         }
         if (!$this->debug) {
-            $cmd .= ' 1>/dev/null 2>&1';
+            $cmd .= ' >nul 2>&1';
         }
+        echo $cmd . PHP_EOL;
+
         f_passthru($cmd);
         return $this;
     }
@@ -60,7 +62,7 @@ class UnixShell
         return [$code, $out];
     }
 
-    public function setEnv(array $env): UnixShell
+    public function setEnv(array $env): WindowsCmd
     {
         $this->env = array_merge($this->env, $env);
         return $this;
@@ -69,17 +71,20 @@ class UnixShell
     /**
      * @throws RuntimeException
      */
-    public function execWithEnv(string $cmd): UnixShell
+    public function execWithEnv(string $cmd): WindowsCmd
     {
-        return $this->exec($this->getEnvString() . ' ' . $cmd);
+        if ($this->getEnvString() !== '') {
+            return $this->exec($this->getEnvString() . "call $cmd");
+        }
+        return $this->exec($cmd);
     }
 
     private function getEnvString(): string
     {
         $str = '';
         foreach ($this->env as $k => $v) {
-            $str .= ' ' . $k . '="' . $v . '"';
+            $str .= 'set ' . $k . '=' . $v . ' && ';
         }
-        return trim($str);
+        return $str;
     }
 }

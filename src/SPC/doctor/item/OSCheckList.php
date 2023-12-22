@@ -16,7 +16,7 @@ class OSCheckList
     #[AsCheckItem('if current OS are supported', level: 999)]
     public function checkOS(): ?CheckResult
     {
-        if (!in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
+        if (!in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD', 'Windows'])) {
             return CheckResult::fail('Current OS is not supported: ' . PHP_OS_FAMILY);
         }
         $distro = PHP_OS_FAMILY === 'Linux' ? (' ' . SystemUtil::getOSRelease()['dist']) : '';

@@ -22,6 +22,10 @@ define('SEPARATED_PATH', [
     BUILD_ROOT_PATH,
 ]);
 
+if (PHP_OS_FAMILY === 'Windows') {
+    define('PHP_SDK_PATH', is_string($a = getenv('PHP_SDK_PATH')) ? $a : (WORKING_DIR . '/php-sdk-binary-tools'));
+}
+
 // dangerous command
 const DANGER_CMD = [
     'rm',
