@@ -90,7 +90,11 @@ if (-not(Test-Path "runtime\composer.phar"))
 }
 
 # create runtime\composer.ps1
-Set-Content -Path 'runtime\composer.ps1' -Value 'Start-Process "runtime\php.exe" ("runtime\composer.phar " + $args) -NoNewWindow -Wait' -Encoding UTF8
+$ComposerContent = '
+$WorkingDir = (Split-Path -Parent $MyInvocation.MyCommand.Definition)
+Start-Process ($WorkingDir + "\php.exe") ($WorkingDir + "\composer.phar " + $args) -NoNewWindow -Wait
+'
+$ComposerContent | Set-Content -Path 'runtime\composer.ps1' -Encoding UTF8
 
 Write-Host "Successfully downloaded PHP and Composer !" -ForegroundColor Green
 Write-Host "Use static-php-cli: " -NoNewline
