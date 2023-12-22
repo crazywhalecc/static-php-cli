@@ -30,7 +30,6 @@ class WindowsToolCheckList
         return CheckResult::ok(PHP_SDK_PATH);
     }
 
-
     #[AsFixItem('install-php-sdk')]
     public function installPhpSdk(): bool
     {

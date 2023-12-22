@@ -74,7 +74,7 @@ class WindowsCmd
     public function execWithEnv(string $cmd): WindowsCmd
     {
         if ($this->getEnvString() !== '') {
-            return $this->exec($this->getEnvString() . "call $cmd");
+            return $this->exec($this->getEnvString() . "call {$cmd}");
         }
         return $this->exec($cmd);
     }
