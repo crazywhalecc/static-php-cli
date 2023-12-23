@@ -224,6 +224,12 @@
             "libturbojpeg.a"
         ]
     },
+    "liblz4": {
+        "source": "liblz4",
+        "static-libs-unix": [
+            "liblz4.a"
+        ]
+    },
     "libmemcached": {
         "source": "libmemcached",
         "static-libs-unix": [
@@ -493,12 +499,6 @@
         ],
         "lib-depends": [
             "libiconv"
-        ]
-    },
-    "liblz4": {
-        "source": "liblz4",
-        "static-libs-unix": [
-            "liblz4.a"
         ]
     },
     "xz": {

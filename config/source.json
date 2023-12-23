@@ -136,6 +136,16 @@
             "path": "LICENSE"
         }
     },
+    "igbinary": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/igbinary",
+        "path": "php-src/ext/igbinary",
+        "filename": "igbinary.tgz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "imagemagick": {
         "type": "ghtar",
         "repo": "ImageMagick/ImageMagick",
@@ -355,16 +365,6 @@
         "type": "ghrel",
         "repo": "nghttp2/nghttp2",
         "match": "nghttp2.+\\.tar\\.xz",
-        "license": {
-            "type": "file",
-            "path": "COPYING"
-        }
-    },
-    "igbinary": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/igbinary",
-        "path": "php-src/ext/igbinary",
-        "filename": "igbinary.tgz",
         "license": {
             "type": "file",
             "path": "COPYING"
