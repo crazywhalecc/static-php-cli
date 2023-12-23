@@ -330,6 +330,14 @@
             "readline"
         ]
     },
+    "uv": {
+        "type": "external",
+        "source": "ext-uv",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libuv"
+        ]
+    },
     "redis": {
         "type": "external",
         "source": "redis",

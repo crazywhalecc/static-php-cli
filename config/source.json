@@ -226,6 +226,30 @@
             "path": "COPYING"
         }
     },
+    "libuv": {
+        "type": "ghtar",
+        "repo": "libuv/libuv",
+        "license": [
+            {
+                "type": "file",
+                "path": "LICENSE"
+            },
+            {
+                "type": "file",
+                "path": "LICENSE-extra"
+            }
+        ]
+    },
+    "ext-uv": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/uv",
+        "path": "php-src/ext/uv",
+        "filename": "uv.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "libjpeg": {
         "type": "ghtar",
         "repo": "libjpeg-turbo/libjpeg-turbo",

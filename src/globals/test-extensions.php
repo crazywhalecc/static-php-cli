@@ -9,10 +9,10 @@ $extensions = 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gm
 $additional_libs = 'libwebp,libavif,libjpeg,freetype';
 
 # If you want to test additional extensions, add them below. (comma start)
-$extensions .= ',igbinary';
+$extensions .= ',uv';
 
 # If you want to test additional features for extensions, add libs below. (comma start like extensions)
-$additional_libs .= ',liblz4';
+$additional_libs .= '';
 
 if (!isset($argv[1])) {
     exit("Please use 'extensions', 'cmd' or 'libs' as output type");

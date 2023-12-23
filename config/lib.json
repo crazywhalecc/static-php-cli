@@ -484,6 +484,12 @@
             "sqlite3ext.h"
         ]
     },
+    "libuv": {
+        "source": "libuv",
+        "static-libs-unix": [
+            "libuv.a"
+        ]
+    },
     "tidy": {
         "source": "tidy",
         "static-libs-unix": [
