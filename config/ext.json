@@ -330,14 +330,6 @@
             "readline"
         ]
     },
-    "uv": {
-        "type": "external",
-        "source": "ext-uv",
-        "arg-type": "with-prefix",
-        "lib-depends": [
-            "libuv"
-        ]
-    },
     "redis": {
         "type": "external",
         "source": "redis",
@@ -478,6 +470,14 @@
     },
     "tokenizer": {
         "type": "builtin"
+    },
+    "uv": {
+        "type": "external",
+        "source": "ext-uv",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libuv"
+        ]
     },
     "xlswriter": {
         "type": "external",
