@@ -122,6 +122,10 @@
             "libiconv"
         ]
     },
+    "igbinary": {
+        "type": "external",
+        "source": "igbinary"
+    },
     "imagick": {
         "type": "external",
         "source": "ext-imagick",
@@ -149,10 +153,6 @@
         "lib-depends": [
             "icu"
         ]
-    },
-    "igbinary": {
-        "type": "external",
-        "source": "igbinary"
     },
     "ldap": {
         "type": "builtin",
