@@ -471,6 +471,14 @@
     "tokenizer": {
         "type": "builtin"
     },
+    "uv": {
+        "type": "external",
+        "source": "ext-uv",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libuv"
+        ]
+    },
     "xlswriter": {
         "type": "external",
         "source": "xlswriter",

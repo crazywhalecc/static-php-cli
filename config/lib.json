@@ -284,6 +284,12 @@
             "zlib"
         ]
     },
+    "libuv": {
+        "source": "libuv",
+        "static-libs-unix": [
+            "libuv.a"
+        ]
+    },
     "libwebp": {
         "source": "libwebp",
         "static-libs-unix": [
