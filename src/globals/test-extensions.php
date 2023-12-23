@@ -2,14 +2,24 @@
 
 declare(strict_types=1);
 
-# If you want to test new extensions here, just modify it.
-$extensions = 'sqlsrv,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,ftp,gd,gmp,iconv,imagick,imap,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,protobuf,readline,redis,session,shmop,simplexml,soap,sockets,sqlite3,swoole,sysvmsg,sysvsem,sysvshm,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib';
+# Normal test, contains `common` extension.
+$extensions = 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip';
 
-if (PHP_OS_FAMILY === 'Darwin') {
-    $extensions .= ',sodium';
+# Normal test, contains gd extra libraries.
+$additional_libs = 'libwebp,libavif,libjpeg,freetype';
+
+# If you want to test additional extensions, add them below. (comma start)
+$extensions .= ',igbinary';
+
+# If you want to test additional features for extensions, add libs below. (comma start like extensions)
+$additional_libs .= ',liblz4';
+
+if (!isset($argv[1])) {
+    exit("Please use 'extensions', 'cmd' or 'libs' as output type");
 }
-
-// test redis lz4, igbinary
-$extensions .= ',igbinary,zstd --with-libs=liblz4';
-
-echo $extensions;
+echo match ($argv[1]) {
+    'extensions' => $extensions,
+    'libs' => $additional_libs,
+    'cmd' => $extensions . ' --with-libs=' . $additional_libs,
+    default => '',
+};
