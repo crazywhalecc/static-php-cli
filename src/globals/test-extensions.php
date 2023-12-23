@@ -9,4 +9,7 @@ if (PHP_OS_FAMILY === 'Darwin') {
     $extensions .= ',sodium';
 }
 
+// test redis lz4, igbinary
+$extensions .= ',igbinary,zstd --with-libs=liblz4';
+
 echo $extensions;
