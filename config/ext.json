@@ -339,7 +339,8 @@
             "igbinary"
         ],
         "lib-suggests": [
-            "zstd"
+            "zstd",
+            "liblz4"
         ]
     },
     "session": {
