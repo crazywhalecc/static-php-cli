@@ -150,6 +150,10 @@
             "icu"
         ]
     },
+    "igbinary": {
+        "type": "external",
+        "source": "igbinary"
+    },
     "ldap": {
         "type": "builtin",
         "arg-type": "with-prefix",
@@ -331,7 +335,11 @@
         "source": "redis",
         "arg-type": "custom",
         "ext-suggests": [
-            "session"
+            "session",
+            "igbinary"
+        ],
+        "lib-suggests": [
+            "zstd"
         ]
     },
     "session": {

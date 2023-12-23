@@ -224,12 +224,13 @@
             "path": "LICENSE.md"
         }
     },
-    "libmcrypt": {
-        "type": "url",
-        "url": "https://downloads.sourceforge.net/project/mcrypt/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz",
+    "liblz4": {
+        "type": "ghrel",
+        "repo": "lz4/lz4",
+        "match": "lz4-.+\\.tar\\.gz",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "LICENSE"
         }
     },
     "libmemcached": {
@@ -251,8 +252,9 @@
         }
     },
     "libsodium": {
-        "type": "url",
-        "url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz",
+        "type": "ghrel",
+        "repo": "jedisct1/libsodium",
+        "match": "libsodium-\\d+(\\.\\d+)*\\.tar\\.gz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -310,14 +312,6 @@
             "path": "LICENSE"
         }
     },
-    "mcrypt": {
-        "type": "url",
-        "url": "https://downloads.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
-        "license": {
-            "type": "file",
-            "path": "COPYING"
-        }
-    },
     "memcached": {
         "type": "url",
         "url": "https://pecl.php.net/get/memcached",
@@ -361,6 +355,16 @@
         "type": "ghrel",
         "repo": "nghttp2/nghttp2",
         "match": "nghttp2.+\\.tar\\.xz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "igbinary": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/igbinary",
+        "path": "php-src/ext/igbinary",
+        "filename": "igbinary.tgz",
         "license": {
             "type": "file",
             "path": "COPYING"

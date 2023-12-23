@@ -224,12 +224,6 @@
             "libturbojpeg.a"
         ]
     },
-    "libmcrypt": {
-        "source": "libmcrypt",
-        "static-libs-unix": [
-            "libmcrypt.a"
-        ]
-    },
     "libmemcached": {
         "source": "libmemcached",
         "static-libs-unix": [
@@ -368,12 +362,6 @@
             "openssl"
         ]
     },
-    "mcrypt": {
-        "source": "mcrypt",
-        "static-libs-unix": [
-            "libmcrypt.a"
-        ]
-    },
     "ncurses": {
         "source": "ncurses",
         "static-libs-unix": [
@@ -505,6 +493,12 @@
         ],
         "lib-depends": [
             "libiconv"
+        ]
+    },
+    "liblz4": {
+        "source": "liblz4",
+        "static-libs-unix": [
+            "liblz4.a"
         ]
     },
     "xz": {
