@@ -427,7 +427,7 @@
         "lib-depends": [
             "openssl",
             "curl",
-            "cares",
+            "libcares",
             "zlib",
             "brotli",
             "nghttp2"

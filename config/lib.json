@@ -563,7 +563,7 @@
             "zstd_errors.h"
         ]
     },
-    "cares": {
+    "libcares": {
         "source": "cares",
         "static-libs-unix": [
             "libcares.a"
