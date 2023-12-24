@@ -69,7 +69,7 @@ function osfamily2dir(): string
 /**
  * Execute the shell command, and the output will be directly printed in the terminal. If there is an error, an exception will be thrown
  *
- * @throws \SPC\exception\RuntimeException
+ * @throws SPC\exception\RuntimeException
  */
 function f_passthru(string $cmd): ?bool
 {
