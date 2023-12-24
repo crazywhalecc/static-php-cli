@@ -21,10 +21,6 @@ class LinuxBuilder extends BuilderBase
     /** @var array Tune cflags */
     public array $tune_c_flags;
 
-    private string $extra_libs = '';
-
-    private string $extra_cflags = '';
-
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -155,7 +151,6 @@ class LinuxBuilder extends BuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
-        $this->setOption('extra-libs', $extra_libs);
 
         $cflags = $this->arch_c_flags;
 
@@ -165,8 +160,8 @@ class LinuxBuilder extends BuilderBase
         $x_cppflags = '';
         $x_ldflags = '';
         $x_libs = '';
-        $extra_cflags = '';
-        $extra_libs = '';
+        $x_extra_cflags = '';
+        $x_extra_libs = '';
         if ($this->getExt('swoole')) {
             $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib libcurl ';
             if ($this->getLib('postgresql')) {
@@ -188,21 +183,25 @@ class LinuxBuilder extends BuilderBase
             $x_libs = $x_libs . ' -lm -lstdc++ ';
             $output = shell()->execWithResult("pkg-config --cflags --static {$packages}");
             if (!empty($output[1][0])) {
-                $extra_cflags = $output[1][0];
+                $x_extra_cflags = $output[1][0];
             }
             $output = shell()->execWithResult("pkg-config --libs --static {$packages}");
             if (!empty($output[1][0])) {
-                $extra_libs = $output[1][0];
+                $x_extra_libs = $output[1][0];
             }
-            $extra_libs = $extra_libs . ' ' . $x_libs;
-            $this->extra_libs = $extra_libs;
-            $this->extra_cflags = $extra_cflags . ' -I' . SOURCE_PATH . '/php-src/ext/ ';
+            $x_extra_libs .= ' ' . $x_libs;
+            $x_extra_cflags .= ' -I' . SOURCE_PATH . '/php-src/ext/ ';
+
             logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
             logger()->info('LDFLAGS INFO: ' . $x_ldflags);
             logger()->info('LIBS INFO: ' . $x_libs);
-            logger()->info('EXTRA_CFLAGS INFO: ' . $extra_cflags);
-            logger()->info('EXTRA_LIBS INFO: ' . $extra_libs);
+            logger()->info('EXTRA_CFLAGS INFO: ' . $x_extra_cflags);
+            logger()->info('EXTRA_LIBS INFO: ' . $x_extra_libs);
         }
+
+        $this->setOption('extra-cflags', $x_extra_cflags);
+        $this->setOption('extra-libs', $x_extra_libs);
+
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
@@ -300,7 +299,7 @@ class LinuxBuilder extends BuilderBase
      */
     public function buildCli(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars($this->options));
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(" make -j{$this->concurrency} {$vars}  cli");
@@ -396,8 +395,8 @@ class LinuxBuilder extends BuilderBase
             'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(
                 ' ',
                 array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
-            ) . $cflags . ' ' . $this->extra_cflags,
-            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' ' . $this->extra_libs,
+            ) . $cflags . ' ' . $this->getOption('extra-cflags', ''),
+            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs,
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
         ];
     }
