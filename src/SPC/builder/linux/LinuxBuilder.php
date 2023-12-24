@@ -151,7 +151,7 @@ class LinuxBuilder extends BuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
-
+        $this->setOption('extra-libs', $extra_libs);
         $cflags = $this->arch_c_flags;
 
         f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
@@ -198,9 +198,8 @@ class LinuxBuilder extends BuilderBase
             logger()->info('EXTRA_CFLAGS INFO: ' . $x_extra_cflags);
             logger()->info('EXTRA_LIBS INFO: ' . $x_extra_libs);
         }
-
-        $this->setOption('extra-cflags', $x_extra_cflags);
-        $this->setOption('extra-libs', $x_extra_libs);
+        $this->setOption('x-extra-cflags', $x_extra_cflags);
+        $this->setOption('x-extra-libs', $x_extra_libs);
 
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
@@ -395,8 +394,8 @@ class LinuxBuilder extends BuilderBase
             'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(
                 ' ',
                 array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
-            ) . $cflags . ' ' . $this->getOption('extra-cflags', ''),
-            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs,
+            ) . $cflags . ' ' . $this->getOption('x-extra-cflags'),
+            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . ' ' . $libs . ' ' . $this->getOption('x-extra-libs'),
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
         ];
     }
