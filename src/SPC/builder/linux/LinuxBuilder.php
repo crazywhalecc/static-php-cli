@@ -159,9 +159,9 @@ class LinuxBuilder extends BuilderBase
         if (!empty($output[1][0])) {
             $x_libs = $output[1][0];
         }
-        logger()->info($x_cppflags);
-        logger()->info($x_ldflags);
-        logger()->info($x_libs);
+        logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
+        logger()->info('LDFLAGS INFO: ' . $x_ldflags);
+        logger()->info('LIBS INFO: ' . $x_libs);
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
