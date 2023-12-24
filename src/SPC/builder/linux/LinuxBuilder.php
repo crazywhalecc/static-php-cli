@@ -141,6 +141,8 @@ class LinuxBuilder extends BuilderBase
 
         $cflags = $this->arch_c_flags;
 
+        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
         $x_cppflags = '';
         $x_ldflags = '';
         $x_libs = '';
