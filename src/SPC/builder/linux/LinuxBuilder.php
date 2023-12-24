@@ -159,6 +159,7 @@ class LinuxBuilder extends BuilderBase
         if (!empty($output[1][0])) {
             $x_libs = $output[1][0];
         }
+        $x_libs = $x_libs . ' -lm -lstdc++ ';
         logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
         logger()->info('LDFLAGS INFO: ' . $x_ldflags);
         logger()->info('LIBS INFO: ' . $x_libs);
@@ -167,9 +168,8 @@ class LinuxBuilder extends BuilderBase
             'CFLAGS' => $cflags,
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH . ' ' . $x_ldflags,
-            'LIBS' => $x_libs . ' -lm -lstdc++',
+            'LIBS' => $x_libs,
         ]);
-
         SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
