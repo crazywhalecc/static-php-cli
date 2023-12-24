@@ -438,7 +438,7 @@
             "sockets",
             "mysqlnd"
         ],
-        "ext-suggests": [
+        "lib-suggests": [
             "pgsql",
             "unixodbc"
         ],
