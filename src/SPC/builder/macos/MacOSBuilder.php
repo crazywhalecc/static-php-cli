@@ -214,6 +214,10 @@ class MacOSBuilder extends BuilderBase
             'LIBS' => $x_libs,
         ]);
 
+        shell()
+            ->cd(SOURCE_PATH . '/php-src')
+            ->exec('sed -i.backup "s/ac_cv_func_explicit_bzero\" = xyes/ac_cv_func_explicit_bzero\" = x_fake_yes/" ./configure');
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 './configure ' .
