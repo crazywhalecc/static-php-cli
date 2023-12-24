@@ -167,7 +167,7 @@ class LinuxBuilder extends BuilderBase
             'CFLAGS' => $cflags,
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH . ' ' . $x_ldflags,
-            'LIBS' => $x_libs,
+            'LIBS' => $x_libs . ' -lm ',
         ]);
 
         SourcePatcher::patchBeforeBuildconf($this);
