@@ -176,6 +176,7 @@ class LinuxBuilder extends BuilderBase
         if (!empty($output[1][0])) {
             $x_libs = $output[1][0];
         }
+        $x_libs = $x_libs . ' -lm -lstdc++ ';
         $output = shell()->execWithResult("pkg-config --cflags --static {$packages}");
         if (!empty($output[1][0])) {
             $extra_cflags = $output[1][0];
@@ -183,10 +184,9 @@ class LinuxBuilder extends BuilderBase
         $output = shell()->execWithResult("pkg-config --libs --static {$packages}");
         if (!empty($output[1][0])) {
             $extra_libs = $output[1][0];
-            $extra_libs = $extra_libs . ' -lm -lstdc++ ';
+            $extra_libs = $extra_libs . $x_libs;
         }
 
-        $x_libs = $x_libs . ' -lm -lstdc++ ';
         logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
         logger()->info('LDFLAGS INFO: ' . $x_ldflags);
         logger()->info('LIBS INFO: ' . $x_libs);
