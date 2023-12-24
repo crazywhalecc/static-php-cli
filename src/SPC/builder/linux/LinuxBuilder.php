@@ -192,30 +192,33 @@ class LinuxBuilder extends BuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
-
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec(
-                "{$this->getOption('ld_library_path')} " .
-                './configure ' .
-                '--prefix= ' .
-                '--with-valgrind=no ' .
-                '--enable-shared=no ' .
-                '--enable-static=yes ' .
-                '--disable-all ' .
-                '--disable-cgi ' .
-                '--disable-phpdbg ' .
-                ($enableCli ? '--enable-cli ' : '--disable-cli ') .
-                ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
-                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
-                $disable_jit .
-                $json_74 .
-                $zts .
-                $maxExecutionTimers .
-                $this->makeExtensionArgs() .
-                ' ' . $envs_build_php . ' '
-            );
-
+        try {
+            shell()->cd(SOURCE_PATH . '/php-src')
+                ->exec(
+                    // "{$this->getOption('ld_library_path')} " .
+                    './configure ' .
+                    '--prefix= ' .
+                    '--with-valgrind=no ' .
+                    '--enable-shared=no ' .
+                    '--enable-static=yes ' .
+                    '--disable-all ' .
+                    '--disable-cgi ' .
+                    '--disable-phpdbg ' .
+                    ($enableCli ? '--enable-cli ' : '--disable-cli ') .
+                    ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
+                    ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
+                    ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
+                    $disable_jit .
+                    $json_74 .
+                    $zts .
+                    $maxExecutionTimers .
+                    $this->makeExtensionArgs() .
+                    ' ' . $envs_build_php . ' '
+                );
+        } catch (\Exception $e) {
+            shell()->exec('cat ' . SOURCE_PATH . '/php-src/config.log');
+            throw new \Exception($e->getMessage());
+        }
         SourcePatcher::patchBeforeMake($this);
 
         $this->cleanMake();
