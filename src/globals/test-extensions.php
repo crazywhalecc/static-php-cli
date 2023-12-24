@@ -10,9 +10,12 @@ $additional_libs = 'libwebp,libavif,libjpeg,freetype';
 
 # If you want to test additional extensions, add them below. (comma start)
 $extensions .= ',uv';
-$extensions = 'swoole';
+
 # If you want to test additional features for extensions, add libs below. (comma start like extensions)
 $additional_libs .= '';
+
+$extensions = 'swoole';
+$additional_libs = '';
 
 if (!isset($argv[1])) {
     exit("Please use 'extensions', 'cmd' or 'libs' as output type");
