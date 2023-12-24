@@ -579,7 +579,7 @@
             "path": "LICENSE"
         }
     },
-    "cares": {
+    "libcares": {
         "type": "url",
         "url": "https://c-ares.org/download/c-ares-1.24.0.tar.gz",
         "license": {

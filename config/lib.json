@@ -564,7 +564,7 @@
         ]
     },
     "libcares": {
-        "source": "cares",
+        "source": "libcares",
         "static-libs-unix": [
             "libcares.a"
         ],
