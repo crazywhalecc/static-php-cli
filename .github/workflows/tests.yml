@@ -144,5 +144,5 @@ jobs:
 
       - name: "Run Build Tests (build)"
         run: |
-          bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --build-micro --build-fpm --debug --cc=clang --cxx=clang++
+          bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --build-micro --build-fpm --debug 
           # bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --debug --cc=clang --cxx=clang++
