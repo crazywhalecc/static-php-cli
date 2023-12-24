@@ -160,7 +160,7 @@ class MacOSBuilder extends BuilderBase
         $x_cppflags = '';
         $x_ldflags = '';
         $x_libs = '';
-        $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib';
+        $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib libcurl';
         $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
         if (!empty($output[1][0])) {
             $x_cppflags = $output[1][0];
