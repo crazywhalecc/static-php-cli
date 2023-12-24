@@ -233,7 +233,7 @@ class LinuxBuilder extends BuilderBase
         try {
             shell()->cd(SOURCE_PATH . '/php-src')
                 ->exec(
-                    // "{$this->getOption('ld_library_path')} " .
+                    "{$this->getOption('ld_library_path')} " .
                     './configure ' .
                     '--prefix= ' .
                     '--with-valgrind=no ' .
