@@ -352,7 +352,7 @@ class LinuxBuilder extends BuilderBase
         $ldflags = isset($input['EXTRA_LDFLAGS_PROGRAM']) && $input['EXTRA_LDFLAGS_PROGRAM'] ? " {$input['EXTRA_LDFLAGS_PROGRAM']}" : '';
         return [
             'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $cflags,
-            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' -lm -lstdc++ ',
+            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' -lm  ',
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
         ];
     }
