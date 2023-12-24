@@ -211,6 +211,7 @@ class MacOSBuilder extends BuilderBase
 
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
+            'CFLAGS' => " {$this->arch_c_flags} -Werror=unknown-warning-option ",
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH . ' ' . $x_ldflags,
             'LIBS' => $x_libs,
