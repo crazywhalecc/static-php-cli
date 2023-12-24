@@ -390,8 +390,8 @@ class LinuxBuilder extends BuilderBase
             'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(
                 ' ',
                 array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
-            ) . $cflags . $this->extra_cflags,
-            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' -lm  ' . $this->extra_libs,
+            ) . $cflags . ' ' . $this->extra_cflags,
+            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' ' . $this->extra_libs,
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
         ];
     }
