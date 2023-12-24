@@ -166,7 +166,7 @@ class LinuxBuilder extends BuilderBase
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
-            'LDFLAGS' => ' ' . $x_ldflags,
+            'LDFLAGS' => '-L' . BUILD_LIB_PATH . ' ' . $x_ldflags,
             'LIBS' => $x_libs,
         ]);
 

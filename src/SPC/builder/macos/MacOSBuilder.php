@@ -179,7 +179,7 @@ class MacOSBuilder extends BuilderBase
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
-            'LDFLAGS' => ' ' . $x_ldflags,
+            'LDFLAGS' => '-L' . BUILD_LIB_PATH . ' ' . $x_ldflags,
             'LIBS' => $x_libs,
         ]);
 
