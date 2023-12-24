@@ -190,6 +190,8 @@ class LinuxBuilder extends BuilderBase
         logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
         logger()->info('LDFLAGS INFO: ' . $x_ldflags);
         logger()->info('LIBS INFO: ' . $x_libs);
+        logger()->info('EXTRA_CFLAGS INFO: ' . $extra_cflags);
+        logger()->info('EXTRA_LIBS INFO: ' . $extra_libs);
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
