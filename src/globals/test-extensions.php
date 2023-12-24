@@ -14,9 +14,9 @@ $extensions .= ',uv';
 # If you want to test additional features for extensions, add libs below. (comma start like extensions)
 $additional_libs .= '';
 
-$extensions = 'swoole';
+$extensions .= 'swoole';
 
-$additional_libs = 'postgresql';
+$additional_libs .= 'postgresql';
 
 if (!isset($argv[1])) {
     exit("Please use 'extensions', 'cmd' or 'libs' as output type");
