@@ -490,6 +490,13 @@
             "libuv"
         ]
     },
+    "xhprof": {
+        "type": "external",
+        "source": "xhprof",
+        "ext-depends": [
+            "ctype"
+        ]
+    },
     "xlswriter": {
         "type": "external",
         "source": "xlswriter",

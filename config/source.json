@@ -532,6 +532,16 @@
             "path": "COPYING"
         }
     },
+    "xhprof": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/xhprof",
+        "path": "php-src/ext/xhprof-src",
+        "filename": "xhprof.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "xlswriter": {
         "type": "url",
         "url": "https://pecl.php.net/get/xlswriter",

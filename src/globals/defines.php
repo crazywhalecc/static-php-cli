@@ -5,7 +5,7 @@ declare(strict_types=1);
 use ZM\Logger\ConsoleLogger;
 
 define('WORKING_DIR', getcwd());
-const ROOT_DIR = __DIR__ . '/../..';
+define('ROOT_DIR', dirname(__DIR__, 2));
 
 // CLI start time
 define('START_TIME', microtime(true));
@@ -21,6 +21,10 @@ define('SEPARATED_PATH', [
     '/' . pathinfo(BUILD_INCLUDE_PATH)['basename'], // include
     BUILD_ROOT_PATH,
 ]);
+
+if (PHP_OS_FAMILY === 'Windows') {
+    define('PHP_SDK_PATH', is_string($a = getenv('PHP_SDK_PATH')) ? $a : (WORKING_DIR . DIRECTORY_SEPARATOR . 'php-sdk-binary-tools'));
+}
 
 // dangerous command
 const DANGER_CMD = [

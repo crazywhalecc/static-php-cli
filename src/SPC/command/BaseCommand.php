@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
+use Laravel\Prompts\ConfirmPrompt;
+use Laravel\Prompts\Prompt;
 use Psr\Log\LogLevel;
 use SPC\ConsoleApplication;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use ZM\Logger\ConsoleLogger;
 
 abstract class BaseCommand extends Command
@@ -78,6 +82,15 @@ abstract class BaseCommand extends Command
     {
         $this->input = $input;
         $this->output = $output;
+
+        // windows fallback
+        Prompt::fallbackWhen(PHP_OS_FAMILY === 'Windows');
+        ConfirmPrompt::fallbackUsing(function (ConfirmPrompt $prompt) use ($input, $output) {
+            $helper = new QuestionHelper();
+            $case = $prompt->default ? ' [Y/n] ' : ' [y/N] ';
+            $question = new ConfirmationQuestion($prompt->label . $case, $prompt->default);
+            return $helper->ask($input, $output, $question);
+        });
         if ($this->shouldExecute()) {
             try {
                 return $this->handle();
