@@ -143,4 +143,4 @@ jobs:
         run: bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --with-php=${{ matrix.php }} --debug
 
       - name: "Run Build Tests (build)"
-        run: bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --build-micro --build-fpm --debug
+        run: bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --build-micro --build-fpm --debug --cc=clang -cxx=clang++
