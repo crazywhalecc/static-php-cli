@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\macos;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
@@ -155,6 +156,32 @@ class MacOSBuilder extends BuilderBase
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
+        $x_cppflags = '';
+        $x_ldflags = '';
+        $x_libs = '';
+        $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib';
+        $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
+        if (!empty($output[1][0])) {
+            $x_cppflags = $output[1][0];
+        }
+        $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
+        if (!empty($output[1][0])) {
+            $x_ldflags = $output[1][0];
+        }
+        $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
+        if (!empty($output[1][0])) {
+            $x_libs = $output[1][0];
+        }
+        logger()->info($x_cppflags);
+        logger()->info($x_ldflags);
+        logger()->info($x_libs);
+        // prepare build php envs
+        $envs_build_php = SystemUtil::makeEnvVarString([
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
+            'LDFLAGS' => ' ' . $x_ldflags,
+            'LIBS' => $x_libs,
+        ]);
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 './configure ' .
@@ -162,8 +189,6 @@ class MacOSBuilder extends BuilderBase
                 '--with-valgrind=no ' .     // Not detect memory leak
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
-                "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
-                "CPPFLAGS='-I" . BUILD_INCLUDE_PATH . "' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -173,7 +198,8 @@ class MacOSBuilder extends BuilderBase
                 ($enableMicro ? '--enable-micro ' : '--disable-micro ') .
                 $json_74 .
                 $zts .
-                $this->makeExtensionArgs()
+                $this->makeExtensionArgs() .
+                $envs_build_php
             );
 
         SourcePatcher::patchBeforeMake($this);
