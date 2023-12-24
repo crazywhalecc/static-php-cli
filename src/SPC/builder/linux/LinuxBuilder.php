@@ -295,7 +295,7 @@ class LinuxBuilder extends BuilderBase
      */
     public function buildCli(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars($this->getBuildVars()));
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(" make -j{$this->concurrency} {$vars}  cli");
