@@ -225,7 +225,7 @@ class LinuxBuilder extends BuilderBase
 
         if ($enableCli) {
             logger()->info('building cli');
-            $this->buildCli();
+            $this->buildCli($envs_build_php);
         }
         if ($enableFpm) {
             logger()->info('building fpm');
@@ -251,15 +251,16 @@ class LinuxBuilder extends BuilderBase
     /**
      * Build cli sapi
      *
+     * @param  mixed               $envs_build_php
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(): void
+    public function buildCli($envs_build_php): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("make -j{$this->concurrency} {$vars} cli");
+            ->exec(" make -j{$this->concurrency} {$vars} {$envs_build_php} cli");
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
