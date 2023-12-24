@@ -141,11 +141,31 @@ class LinuxBuilder extends BuilderBase
 
         $cflags = $this->arch_c_flags;
 
+        $x_cppflags = '';
+        $x_ldflags = '';
+        $x_libs = '';
+        $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib';
+        $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
+        if (!empty($output[1][0])) {
+            $x_cppflags = $output[1][0];
+        }
+        $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
+        if (!empty($output[1][0])) {
+            $x_ldflags = $output[1][0];
+        }
+        $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
+        if (!empty($output[1][0])) {
+            $x_libs = $output[1][0];
+        }
+        logger()->info($x_cppflags);
+        logger()->info($x_ldflags);
+        logger()->info($x_libs);
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
-            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
-            'LIBS' => '-ldl -lpthread',
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
+            'LDFLAGS' => ' ' . $x_ldflags,
+            'LIBS' => $x_libs,
         ]);
 
         SourcePatcher::patchBeforeBuildconf($this);
