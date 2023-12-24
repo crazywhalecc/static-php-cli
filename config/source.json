@@ -584,7 +584,7 @@
         "url": "https://c-ares.org/download/c-ares-1.24.0.tar.gz",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "LICENSE.md"
         }
     }
 }
