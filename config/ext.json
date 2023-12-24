@@ -439,7 +439,7 @@
             "mysqlnd"
         ],
         "lib-suggests": [
-            "pgsql",
+            "postgresql",
             "unixodbc"
         ],
         "unix-only": true
