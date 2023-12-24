@@ -16,7 +16,7 @@ class swoole extends Extension
         $arg .= ' --with-brotli-dir=' . BUILD_ROOT_PATH;
         $arg .= ' --with-nghttp2-dir=' . BUILD_ROOT_PATH;
 
-        $arg .= $this->builder->getExt('pgsql') ? ' --enable-swoole-pgsql' : ' ';
+        $arg .= $this->builder->getLib('postgresql') ? ' --enable-swoole-pgsql' : ' ';
         // swoole curl hook is buggy for php 8.0
         $arg .= $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
 
