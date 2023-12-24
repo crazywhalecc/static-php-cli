@@ -21,9 +21,9 @@ class LinuxBuilder extends BuilderBase
     /** @var array Tune cflags */
     public array $tune_c_flags;
 
-    protected string $extra_libs = '';
+    private string $extra_libs = '';
 
-    protected string $extra_cflags = '';
+    private string $extra_cflags = '';
 
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
@@ -167,36 +167,42 @@ class LinuxBuilder extends BuilderBase
         $x_libs = '';
         $extra_cflags = '';
         $extra_libs = '';
-        $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib libcurl libpq';
-        $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
-        if (!empty($output[1][0])) {
-            $x_cppflags = $output[1][0];
+        if ($this->getExt('swoole')) {
+            $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib libcurl ';
+            if ($this->getLib('postgresql')) {
+                $packages .= ' libpq ';
+            }
+
+            $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
+            if (!empty($output[1][0])) {
+                $x_cppflags = $output[1][0];
+            }
+            $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
+            if (!empty($output[1][0])) {
+                $x_ldflags = $output[1][0];
+            }
+            $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
+            if (!empty($output[1][0])) {
+                $x_libs = $output[1][0];
+            }
+            $x_libs = $x_libs . ' -lm -lstdc++ ';
+            $output = shell()->execWithResult("pkg-config --cflags --static {$packages}");
+            if (!empty($output[1][0])) {
+                $extra_cflags = $output[1][0];
+            }
+            $output = shell()->execWithResult("pkg-config --libs --static {$packages}");
+            if (!empty($output[1][0])) {
+                $extra_libs = $output[1][0];
+            }
+            $extra_libs = $extra_libs . ' ' . $x_libs;
+            $this->extra_libs = $extra_libs;
+            $this->extra_cflags = $extra_cflags . ' -I' . SOURCE_PATH . '/php-src/ext/ ';
+            logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
+            logger()->info('LDFLAGS INFO: ' . $x_ldflags);
+            logger()->info('LIBS INFO: ' . $x_libs);
+            logger()->info('EXTRA_CFLAGS INFO: ' . $extra_cflags);
+            logger()->info('EXTRA_LIBS INFO: ' . $extra_libs);
         }
-        $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
-        if (!empty($output[1][0])) {
-            $x_ldflags = $output[1][0];
-        }
-        $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
-        if (!empty($output[1][0])) {
-            $x_libs = $output[1][0];
-        }
-        $x_libs = $x_libs . ' -lm -lstdc++ ';
-        $output = shell()->execWithResult("pkg-config --cflags --static {$packages}");
-        if (!empty($output[1][0])) {
-            $extra_cflags = $output[1][0];
-        }
-        $output = shell()->execWithResult("pkg-config --libs --static {$packages}");
-        if (!empty($output[1][0])) {
-            $extra_libs = $output[1][0];
-        }
-        $extra_libs = $extra_libs . ' ' . $x_libs;
-        $this->extra_libs = $extra_libs;
-        $this->extra_cflags = $extra_cflags . ' -I' . SOURCE_PATH . '/php-src/ext/ ';
-        logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
-        logger()->info('LDFLAGS INFO: ' . $x_ldflags);
-        logger()->info('LIBS INFO: ' . $x_libs);
-        logger()->info('EXTRA_CFLAGS INFO: ' . $extra_cflags);
-        logger()->info('EXTRA_LIBS INFO: ' . $extra_libs);
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
