@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [ "main" , "feature-swoole" ]
+#     branches: [ "main" , "feature-swoole" ]
   pull_request:
     branches: [ "main" ]
 
