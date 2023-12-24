@@ -143,7 +143,7 @@ class LinuxBuilder extends BuilderBase
 
         f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
         f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
-        f_putenv('PATH=' . BUILD_ROOT_PATH . '/bin/:$PATH');
+
         $x_cppflags = '';
         $x_ldflags = '';
         $x_libs = '';
