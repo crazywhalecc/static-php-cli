@@ -189,7 +189,7 @@ class LinuxBuilder extends BuilderBase
         if (!empty($output[1][0])) {
             $extra_libs = $output[1][0];
         }
-        $extra_libs = $extra_libs . $x_libs;
+        $extra_libs = $extra_libs . ' ' . $x_libs;
         $this->extra_libs = $extra_libs;
         $this->extra_cflags = $extra_cflags . ' -I' . SOURCE_PATH . '/php-src/ext/ ';
         logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
