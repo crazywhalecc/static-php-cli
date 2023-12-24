@@ -425,14 +425,22 @@
         "arg-type": "custom",
         "cpp-extension": true,
         "lib-depends": [
-            "openssl"
+            "openssl",
+            "curl",
+            "cares",
+            "zlib",
+            "brotli",
+            "nghttp2"
         ],
         "ext-depends": [
-            "openssl"
+            "openssl",
+            "curl",
+            "sockets",
+            "mysqlnd"
         ],
         "ext-suggests": [
-            "curl",
-            "pgsql"
+            "pgsql",
+            "unixodbc"
         ],
         "unix-only": true
     },
