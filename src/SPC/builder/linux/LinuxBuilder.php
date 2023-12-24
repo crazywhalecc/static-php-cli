@@ -191,7 +191,7 @@ class LinuxBuilder extends BuilderBase
         }
         $extra_libs = $extra_libs . $x_libs;
         $this->extra_libs = $extra_libs;
-        $this->extra_cflags = $extra_cflags;
+        $this->extra_cflags = $extra_cflags . ' -I' . SOURCE_PATH . '/php-src/ext/ ';
         logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
         logger()->info('LDFLAGS INFO: ' . $x_ldflags);
         logger()->info('LIBS INFO: ' . $x_libs);
