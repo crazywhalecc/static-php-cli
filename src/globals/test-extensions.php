@@ -6,7 +6,8 @@ declare(strict_types=1);
 $extensions = 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip';
 
 # Normal test, contains gd extra libraries.
-$additional_libs = 'libwebp,libavif,libjpeg,freetype';
+# $additional_libs = 'libwebp,libavif,libjpeg,freetype';
+$additional_libs = 'libwebp,libjpeg,freetype';
 
 # If you want to test additional extensions, add them below. (comma start)
 # $extensions .= ',uv';
