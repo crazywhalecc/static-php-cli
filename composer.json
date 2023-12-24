@@ -11,7 +11,6 @@
     "require": {
         "php": ">= 8.1",
         "ext-mbstring": "*",
-        "ext-pcntl": "*",
         "laravel/prompts": "^0.1.12",
         "symfony/console": "^5.4 || ^6 || ^7",
         "zhamao/logger": "^1.0"

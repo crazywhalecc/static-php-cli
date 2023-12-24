@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Psr\Log\LoggerInterface;
 use SPC\exception\WrongUsageException;
 use SPC\util\UnixShell;
+use SPC\util\WindowsCmd;
 use ZM\Logger\ConsoleLogger;
 
 /**
@@ -119,4 +120,9 @@ function f_putenv(string $env): bool
 function shell(?bool $debug = null): UnixShell
 {
     return new UnixShell($debug);
+}
+
+function cmd(?bool $debug = null): WindowsCmd
+{
+    return new WindowsCmd($debug);
 }
