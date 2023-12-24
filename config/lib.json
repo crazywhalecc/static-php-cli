@@ -562,5 +562,17 @@
             "zstd.h",
             "zstd_errors.h"
         ]
+    },
+    "cares": {
+        "source": "cares",
+        "static-libs-unix": [
+            "libcares.a"
+        ],
+        "headers-unix": [
+            "ares.h",
+            "ares_dns.h",
+            "ares_nameser.h",
+            "ares_rules.h"
+        ]
     }
 }
