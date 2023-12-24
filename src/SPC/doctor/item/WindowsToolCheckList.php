@@ -16,12 +16,13 @@ class WindowsToolCheckList
     public function checkGit(): ?CheckResult
     {
         if (SystemUtil::findCommand('git.exe') === null) {
-            return CheckResult::fail('Git not installed, see https://static-php.dev/en/guide/windows-setup.html');
+            return CheckResult::fail('Git not installed, please install git for windows manually, see: https://git-scm.com/download/win');
+            // return CheckResult::fail('Git not installed, see https://static-php.dev/en/guide/windows-setup.html');
         }
         return CheckResult::ok();
     }
 
-    #[AsCheckItem('if php-sdk-binary-tools2 are downloaded', limit_os: 'Windows', level: 998)]
+    #[AsCheckItem('if php-sdk-binary-tools are downloaded', limit_os: 'Windows', level: 998)]
     public function checkSDK(): ?CheckResult
     {
         if (!file_exists(PHP_SDK_PATH . DIRECTORY_SEPARATOR . 'phpsdk-starter.bat')) {
