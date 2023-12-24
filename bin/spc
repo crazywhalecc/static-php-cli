@@ -4,7 +4,13 @@
 use SPC\ConsoleApplication;
 use SPC\exception\ExceptionHandler;
 
-require_once __DIR__ . '/../vendor/autoload.php';
+if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
+    // Current: ./bin (git/project mode)
+    require_once dirname(__DIR__) . '/vendor/autoload.php';
+} else {
+    // Current: ./vendor/crazywhalecc/static-php-cli/bin (composer library mode)
+    require_once dirname(__DIR__, 3) . '/autoload.php';
+}
 
 // 防止 Micro 打包状态下不支持中文的显示（虽然这个项目目前好像没输出过中文？）
 if (PHP_OS_FAMILY === 'Windows' && Phar::running()) {
