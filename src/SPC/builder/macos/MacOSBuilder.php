@@ -200,7 +200,7 @@ class MacOSBuilder extends BuilderBase
                 $json_74 .
                 $zts .
                 $this->makeExtensionArgs() .
-                $envs_build_php
+                ' ' . $envs_build_php . ' '
             );
 
         SourcePatcher::patchBeforeMake($this);

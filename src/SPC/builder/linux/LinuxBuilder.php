@@ -212,8 +212,8 @@ class LinuxBuilder extends BuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                $this->makeExtensionArgs() . ' ' .
-                $envs_build_php
+                $this->makeExtensionArgs() .
+                ' ' . $envs_build_php . ' '
             );
 
         SourcePatcher::patchBeforeMake($this);
