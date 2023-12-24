@@ -436,7 +436,10 @@
             "openssl",
             "curl",
             "sockets",
-            "mysqlnd"
+            "mysqlnd",
+            "pdo",
+            "session",
+            "phar"
         ],
         "lib-suggests": [
             "postgresql",

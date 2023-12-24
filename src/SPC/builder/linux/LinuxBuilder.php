@@ -21,6 +21,10 @@ class LinuxBuilder extends BuilderBase
     /** @var array Tune cflags */
     public array $tune_c_flags;
 
+    protected string $extra_libs = '';
+
+    protected string $extra_cflags = '';
+
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -184,9 +188,10 @@ class LinuxBuilder extends BuilderBase
         $output = shell()->execWithResult("pkg-config --libs --static {$packages}");
         if (!empty($output[1][0])) {
             $extra_libs = $output[1][0];
-            $extra_libs = $extra_libs . $x_libs;
         }
-
+        $extra_libs = $extra_libs . $x_libs;
+        $this->extra_libs = $extra_libs;
+        $this->extra_cflags = $extra_cflags;
         logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
         logger()->info('LDFLAGS INFO: ' . $x_ldflags);
         logger()->info('LIBS INFO: ' . $x_libs);
@@ -254,7 +259,7 @@ class LinuxBuilder extends BuilderBase
 
         if ($enableCli) {
             logger()->info('building cli');
-            $this->buildCli(['EXTRA_LIBS' => $extra_libs]);
+            $this->buildCli();
         }
         if ($enableFpm) {
             logger()->info('building fpm');
@@ -287,9 +292,9 @@ class LinuxBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(array $input): void
+    public function buildCli(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars($input));
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(" make -j{$this->concurrency} {$vars}  cli");
@@ -385,8 +390,8 @@ class LinuxBuilder extends BuilderBase
             'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(
                 ' ',
                 array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
-            ) . $cflags,
-            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' -lm  ',
+            ) . $cflags . $this->extra_cflags,
+            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' -lm  ' . $this->extra_libs,
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
         ];
     }

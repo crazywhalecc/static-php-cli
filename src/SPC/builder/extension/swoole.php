@@ -12,8 +12,7 @@ class swoole extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        $arg = ' --enable-pdo --enable-sockets --enable-mysqlnd --enable-phar --enable-session ';
-        $arg .= ' --enable-swoole --enable-sockets --enable-mysqlnd  --enable-cares ';
+        $arg = ' --enable-swoole --enable-sockets --enable-mysqlnd  --enable-cares ';
         $arg .= ' --with-brotli-dir=' . BUILD_ROOT_PATH;
         $arg .= ' --with-nghttp2-dir=' . BUILD_ROOT_PATH;
 
