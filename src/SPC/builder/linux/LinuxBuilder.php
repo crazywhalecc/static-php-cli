@@ -254,7 +254,7 @@ class LinuxBuilder extends BuilderBase
 
         if ($enableCli) {
             logger()->info('building cli');
-            $this->buildCli(['EXTRA_CFLAGS' => $extra_cflags, 'EXTRA_LIBS' => $extra_libs]);
+            $this->buildCli(['EXTRA_LIBS' => $extra_libs]);
         }
         if ($enableFpm) {
             logger()->info('building fpm');
@@ -284,11 +284,10 @@ class LinuxBuilder extends BuilderBase
     /**
      * Build cli sapi
      *
-     * @param  mixed               $input
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli($input): void
+    public function buildCli(array $input): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getBuildVars($input));
         shell()->cd(SOURCE_PATH . '/php-src')
