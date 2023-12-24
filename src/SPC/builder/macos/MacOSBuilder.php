@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\macos;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\builder\traits\UnixBuilderTrait;
 use SPC\exception\FileSystemException;
