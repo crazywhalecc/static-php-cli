@@ -46,15 +46,23 @@ class LinuxBuilder extends BuilderBase
             f_putenv("CXX={$this->getOption('cxx', "{$arch}-linux-musl-g++")}");
             f_putenv("AR={$this->getOption('ar', "{$arch}-linux-musl-ar")}");
             f_putenv("LD={$this->getOption('ld', 'ld.gold')}");
-            f_putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
+            f_putenv(
+                "PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . BUILD_ROOT_PATH . '/bin:' . getenv(
+                    'PATH'
+                )
+            );
 
             // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
 
             // check musl-cross make installed if we use musl-cross-make
-            if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc")) {
-                throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
+            if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists(
+                "/usr/local/musl/bin/{$arch}-linux-musl-gcc"
+            )) {
+                throw new WrongUsageException(
+                    'musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)'
+                );
             }
         }
 
@@ -72,7 +80,10 @@ class LinuxBuilder extends BuilderBase
         // cflags
         $this->arch_c_flags = SystemUtil::getArchCFlags(getenv('CC'), $this->getOption('arch'));
         $this->arch_cxx_flags = SystemUtil::getArchCFlags(getenv('CXX'), $this->getOption('arch'));
-        $this->tune_c_flags = SystemUtil::checkCCFlags(SystemUtil::getTuneCFlags($this->getOption('arch')), getenv('CC'));
+        $this->tune_c_flags = SystemUtil::checkCCFlags(
+            SystemUtil::getTuneCFlags($this->getOption('arch')),
+            getenv('CC')
+        );
         // cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile(
             'Linux',
@@ -133,7 +144,10 @@ class LinuxBuilder extends BuilderBase
         if (!$this->getOption('bloat', false)) {
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
         } else {
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
+            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(
+                ' ',
+                array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles()))
+            );
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
@@ -147,6 +161,8 @@ class LinuxBuilder extends BuilderBase
         $x_cppflags = '';
         $x_ldflags = '';
         $x_libs = '';
+        $extra_cflags = '';
+        $extra_libs = '';
         $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib libcurl libpq';
         $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
         if (!empty($output[1][0])) {
@@ -160,6 +176,16 @@ class LinuxBuilder extends BuilderBase
         if (!empty($output[1][0])) {
             $x_libs = $output[1][0];
         }
+        $output = shell()->execWithResult("pkg-config --cflags --static {$packages}");
+        if (!empty($output[1][0])) {
+            $extra_cflags = $output[1][0];
+        }
+        $output = shell()->execWithResult("pkg-config --libs --static {$packages}");
+        if (!empty($output[1][0])) {
+            $extra_libs = $output[1][0];
+            $extra_libs = $extra_libs . ' -lm -lstdc++ ';
+        }
+
         $x_libs = $x_libs . ' -lm -lstdc++ ';
         logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
         logger()->info('LDFLAGS INFO: ' . $x_ldflags);
@@ -226,7 +252,7 @@ class LinuxBuilder extends BuilderBase
 
         if ($enableCli) {
             logger()->info('building cli');
-            $this->buildCli($envs_build_php);
+            $this->buildCli(['EXTRA_CFLAGS' => $extra_cflags, 'EXTRA_LIBS' => $extra_libs]);
         }
         if ($enableFpm) {
             logger()->info('building fpm');
@@ -239,7 +265,11 @@ class LinuxBuilder extends BuilderBase
         if ($enableEmbed) {
             logger()->info('building embed');
             if ($enableMicro) {
-                FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
+                FileSystem::replaceFileStr(
+                    SOURCE_PATH . '/php-src/Makefile',
+                    'OVERALL_TARGET =',
+                    'OVERALL_TARGET = libphp.la'
+                );
             }
             $this->buildEmbed();
         }
@@ -252,16 +282,16 @@ class LinuxBuilder extends BuilderBase
     /**
      * Build cli sapi
      *
-     * @param  mixed               $envs_build_php
+     * @param  mixed               $input
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli($envs_build_php): void
+    public function buildCli($input): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars($input));
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec(" make -j{$this->concurrency} {$vars} {$envs_build_php} cli");
+            ->exec(" make -j{$this->concurrency} {$vars}  cli");
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
@@ -351,7 +381,10 @@ class LinuxBuilder extends BuilderBase
         $libs = isset($input['EXTRA_LIBS']) && $input['EXTRA_LIBS'] ? " {$input['EXTRA_LIBS']}" : '';
         $ldflags = isset($input['EXTRA_LDFLAGS_PROGRAM']) && $input['EXTRA_LDFLAGS_PROGRAM'] ? " {$input['EXTRA_LDFLAGS_PROGRAM']}" : '';
         return [
-            'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $cflags,
+            'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(
+                ' ',
+                array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)
+            ) . $cflags,
             'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs . ' -lm  ',
             'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
         ];
