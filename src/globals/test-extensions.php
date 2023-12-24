@@ -15,8 +15,8 @@ $extensions .= ',uv';
 $additional_libs .= '';
 
 $extensions = 'swoole';
+
 $additional_libs = 'postgresql';
-$additional_libs = '';
 
 if (!isset($argv[1])) {
     exit("Please use 'extensions', 'cmd' or 'libs' as output type");
