@@ -11,3 +11,6 @@ parameters:
     - '#Function Swoole\\Coroutine\\run not found.#'
   dynamicConstantNames:
     - PHP_OS_FAMILY
+  excludePaths:
+      analyseAndScan:
+            - ./src/globals/tests/swoole.php
