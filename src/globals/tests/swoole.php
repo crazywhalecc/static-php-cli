@@ -7,8 +7,6 @@ use Swoole\Coroutine\Http2\Client;
 use Swoole\Coroutine\WaitGroup;
 use Swoole\Http2\Request;
 
-use function Swoole\Coroutine\run;
-
 assert(function_exists('swoole_cpu_num'));
 assert(class_exists('Swoole\Coroutine\Redis'));
 
@@ -17,7 +15,7 @@ co::set([
     'log_level' => 0,
 ]);
 
-run(function () {
+Swoole\Coroutine\run(function () {
     $domain = 'api.github.com';
     $cli = new Client($domain, 443, true);
     $cli->set([
