@@ -203,7 +203,7 @@ class LinuxBuilder extends BuilderBase
             'CFLAGS' => $cflags,
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH . ' ' . $x_ldflags,
-            'LIBS' => $x_libs,
+            'LIBS' => ' -ldl -lpthread ' . $x_libs,
         ]);
         SourcePatcher::patchBeforeBuildconf($this);
 
