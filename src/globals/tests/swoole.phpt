@@ -10,6 +10,14 @@ use Swoole\Http2\Request;
 assert(function_exists('swoole_cpu_num'));
 assert(class_exists('Swoole\Coroutine\Redis'));
 
+$command = 'ls -1 ' . dirname(realpath(__FILE__));
+
+$list = swoole_string(shell_exec($command))->trim()->lower()->split(PHP_EOL)
+    ->remove('calendar.php')
+    ->remove('zlib.php')->toArray();
+
+assert(in_array('swoole.phpt.php', $list));
+
 co::set([
     'trace_flags' => SWOOLE_TRACE_HTTP2,
     'log_level' => 0,
