@@ -4,7 +4,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 🌐 **[中文](README-zh.md)** | **[English](README.md)**
 
-> 2.0 Release is coming soon, windows support will be published in v2.1.
+> 2.0 Release is coming soon, windows support will be added in v2.1.
 
 The project name is static-php-cli, but it actually supports cli, fpm, micro and embed SAPI 😎
 
