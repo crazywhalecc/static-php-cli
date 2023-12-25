@@ -14,3 +14,4 @@ parameters:
   excludePaths:
       analyseAndScan:
             - ./src/globals/tests/swoole.php
+            - ./src/globals/tests/swoole.phpt
