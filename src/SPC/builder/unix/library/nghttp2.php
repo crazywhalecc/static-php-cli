@@ -6,12 +6,14 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 
 trait nghttp2
 {
     /**
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     protected function build(): void
     {
