@@ -209,6 +209,15 @@
             "path": "LICENSE"
         }
     },
+    "libcares": {
+        "type": "filelist",
+        "url": "https://c-ares.org/download/",
+        "regex": "/href=\"\\/download\\/(?<file>c-ares-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
+        }
+    },
     "libevent": {
         "type": "ghrel",
         "repo": "libevent/libevent",
@@ -587,14 +596,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "libcares": {
-        "type": "url",
-        "url": "https://c-ares.org/download/c-ares-1.24.0.tar.gz",
-        "license": {
-            "type": "file",
-            "path": "LICENSE.md"
         }
     }
 }
