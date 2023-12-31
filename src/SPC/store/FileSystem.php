@@ -233,6 +233,7 @@ class FileSystem
                         throw new FileSystemException("unknown archive format: {$filename}");
                 }
             }
+            self::emitSourceExtractHook($name);
         } catch (RuntimeException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('rmdir /s /q ' . SOURCE_PATH . "/{$name}");
