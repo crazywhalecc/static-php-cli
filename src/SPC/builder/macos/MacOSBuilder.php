@@ -53,11 +53,7 @@ class MacOSBuilder extends BuilderBase
         $this->arch_c_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
         $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
         // cmake toolchain
-        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile(
-            'Darwin',
-            $this->getOption('arch'),
-            $this->arch_c_flags
-        );
+        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->getOption('arch'), $this->arch_c_flags);
 
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
@@ -141,10 +137,7 @@ class MacOSBuilder extends BuilderBase
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
         } else {
             logger()->info('bloat linking');
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(
-                ' ',
-                array_map(fn ($x) => "-Wl,-force_load,{$x}", array_filter($this->getAllStaticLibFiles()))
-            );
+            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Wl,-force_load,{$x}", array_filter($this->getAllStaticLibFiles())));
         }
         $this->setOption('extra-libs', $extra_libs);
 
@@ -162,56 +155,11 @@ class MacOSBuilder extends BuilderBase
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
-        $x_cppflags = '';
-        $x_ldflags = '';
-        $x_libs = '';
-        $x_extra_cflags = '';
-        $x_extra_libs = '';
-        if ($this->getExt('swoole')) {
-            $packages = 'openssl libssl libnghttp2 libcares libbrotlicommon libbrotlidec libbrotlienc zlib libcurl ';
-            if ($this->getLib('postgresql')) {
-                $packages .= ' libpq ';
-            }
-
-            $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
-            if (!empty($output[1][0])) {
-                $x_cppflags = $output[1][0];
-            }
-            $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
-            if (!empty($output[1][0])) {
-                $x_ldflags = $output[1][0];
-            }
-            $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
-            if (!empty($output[1][0])) {
-                $x_libs = $output[1][0];
-            }
-            $x_libs = $x_libs . ' -lm -lc++ ';
-            $output = shell()->execWithResult("pkg-config --cflags --static {$packages}");
-            if (!empty($output[1][0])) {
-                $x_extra_cflags = $output[1][0];
-            }
-            $output = shell()->execWithResult("pkg-config --libs --static {$packages}");
-            if (!empty($output[1][0])) {
-                $x_extra_libs = $output[1][0];
-            }
-            $x_extra_libs .= ' ' . $x_libs;
-            $x_extra_cflags .= ' -I' . SOURCE_PATH . '/php-src/ext/ ';
-
-            logger()->info('CPPFLAGS INFO: ' . $x_cppflags);
-            logger()->info('LDFLAGS INFO: ' . $x_ldflags);
-            logger()->info('LIBS INFO: ' . $x_libs);
-            logger()->info('EXTRA_CFLAGS INFO: ' . $x_extra_cflags);
-            logger()->info('EXTRA_LIBS INFO: ' . $x_extra_libs);
-        }
-        $this->setOption('x-extra-cflags', $x_extra_cflags);
-        $this->setOption('x-extra-libs', $x_extra_libs);
-
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => " {$this->arch_c_flags} -Werror=unknown-warning-option ",
-            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' ' . $x_cppflags,
-            'LDFLAGS' => '-L' . BUILD_LIB_PATH . ' ' . $x_ldflags,
-            'LIBS' => $x_libs,
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
+            'LDFLAGS' => '-L' . BUILD_LIB_PATH,
         ]);
 
         if ($this->getLib('postgresql')) {
@@ -238,8 +186,8 @@ class MacOSBuilder extends BuilderBase
                 ($enableMicro ? '--enable-micro ' : '--disable-micro ') .
                 $json_74 .
                 $zts .
-                $this->makeExtensionArgs() .
-                ' ' . $envs_build_php . ' '
+                $this->makeExtensionArgs() . ' ' .
+                $envs_build_php
             );
 
         SourcePatcher::patchBeforeMake($this);
@@ -261,11 +209,7 @@ class MacOSBuilder extends BuilderBase
         if ($enableEmbed) {
             logger()->info('building embed');
             if ($enableMicro) {
-                FileSystem::replaceFileStr(
-                    SOURCE_PATH . '/php-src/Makefile',
-                    'OVERALL_TARGET =',
-                    'OVERALL_TARGET = libphp.la'
-                );
+                FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
         }
