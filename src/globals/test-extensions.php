@@ -13,7 +13,7 @@ declare(strict_types=1);
 $extensions = 'swoole,swoole-hook-pgsql,swoole-hook-mysql,swoole-hook-sqlite';
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
-$with_libs = 'libwebp';
+$with_libs = '';
 
 // Please change your test base combination. We recommend testing with `common`.
 // You can use `common`, `bulk`, `minimal` or `none`.
