@@ -424,6 +424,7 @@
         "source": "swoole",
         "arg-type": "custom",
         "cpp-extension": true,
+        "unix-only": true,
         "lib-depends": [
             "libcares",
             "brotli",
@@ -435,12 +436,38 @@
             "curl"
         ],
         "ext-suggests": [
+            "swoole-hook-pgsql",
+            "swoole-hook-mysql",
+            "swoole-hook-sqlite"
+        ]
+    },
+    "swoole-hook-pgsql": {
+        "type": "addon",
+        "arg-type": "custom",
+        "ext-depends": [
             "pgsql",
-            "sqlsrv",
+            "pdo"
+        ]
+    },
+    "swoole-hook-mysql": {
+        "type": "addon",
+        "arg-type": "custom",
+        "ext-depends": [
             "mysqlnd",
-            "session"
+            "pdo",
+            "pdo_mysql"
         ],
-        "unix-only": true
+        "ext-suggests": [
+            "mysqli"
+        ]
+    },
+    "swoole-hook-sqlite": {
+        "type": "addon",
+        "arg-type": "custom",
+        "ext-depends": [
+            "sqlite3",
+            "pdo"
+        ]
     },
     "swow": {
         "type": "external",
