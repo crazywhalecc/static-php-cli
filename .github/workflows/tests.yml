@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-#     branches: [ "main" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -143,6 +143,4 @@ jobs:
         run: bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --with-php=${{ matrix.php }} --debug
 
       - name: "Run Build Tests (build)"
-        run: |
-          bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --build-micro --build-fpm --debug 
-          # bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --debug --cc=clang --cxx=clang++
+        run: bin/spc build $(php src/globals/test-extensions.php cmd) --build-cli --build-micro --build-fpm --debug
