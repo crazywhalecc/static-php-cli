@@ -227,7 +227,7 @@ abstract class BuilderBase
         foreach ($this->exts as $ext) {
             $ret[] = trim($ext->getConfigureArg());
         }
-        logger()->info('Using configure: ' . implode(' ', $ret));
+        logger()->debug('Using configure: ' . implode(' ', $ret));
         return implode(' ', $ret);
     }
 
