@@ -26,7 +26,9 @@ class libxml2 extends LinuxLibraryBase
         shell()->cd($this->source_dir . '/build')
             ->exec(
                 'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DIconv_IS_BUILT_IN=OFF ' .
                 '-DLIBXML2_WITH_ICONV=ON ' .
@@ -39,7 +41,7 @@ class libxml2 extends LinuxLibraryBase
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
 
         FileSystem::replaceFileStr(
             BUILD_LIB_PATH . '/pkgconfig/libxml-2.0.pc',

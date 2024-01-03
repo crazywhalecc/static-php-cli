@@ -333,10 +333,6 @@
         "lib-suggests": [
             "xz",
             "icu"
-        ],
-        "lib-suggests-windows": [
-            "icu",
-            "xz"
         ]
     },
     "libxslt": {
