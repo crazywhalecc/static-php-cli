@@ -140,7 +140,9 @@ abstract class LibraryBase
             if (!$this->patched && $this->patchBeforeBuild()) {
                 file_put_contents($this->source_dir . '/.spc.patched', 'PATCHED!!!');
             }
+            $this->getBuilder()->emitPatchPoint('before-library[ ' . static::NAME . ']-build');
             $this->build();
+            $this->getBuilder()->emitPatchPoint('after-library[ ' . static::NAME . ']-build');
             return BUILD_STATUS_OK;
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -29,6 +30,9 @@ abstract class BuilderBase
 
     /** @var array<string, mixed> compile options */
     protected array $options = [];
+
+    /** @var string patch point name */
+    protected string $patch_point = '';
 
     /**
      * Build libraries
@@ -78,8 +82,13 @@ abstract class BuilderBase
             $lib->calcDependency();
         }
 
+        // patch point
+        $this->emitPatchPoint('before-libs-extract');
+
         // extract sources
         SourceExtractor::initSource(libs: $sorted_libraries);
+
+        $this->emitPatchPoint('after-libs-extract');
 
         // build all libs
         foreach ($this->libs as $lib) {
@@ -189,11 +198,17 @@ abstract class BuilderBase
     public function proveExts(array $extensions): void
     {
         CustomExt::loadCustomExt();
+        $this->emitPatchPoint('before-php-extract');
         SourceExtractor::initSource(sources: ['php-src']);
+        $this->emitPatchPoint('after-php-extract');
         if ($this->getPHPVersionID() >= 80000) {
+            $this->emitPatchPoint('before-micro-extract');
             SourceExtractor::initSource(sources: ['micro']);
+            $this->emitPatchPoint('after-micro-extract');
         }
+        $this->emitPatchPoint('before-exts-extract');
         SourceExtractor::initSource(exts: $extensions);
+        $this->emitPatchPoint('after-exts-extract');
         foreach ($extensions as $extension) {
             $class = CustomExt::getExtClass($extension);
             $ext = new $class($extension, $this);
@@ -340,6 +355,39 @@ abstract class BuilderBase
             }
         }
         return implode(' ', $env);
+    }
+
+    /**
+     * Get builder patch point name.
+     */
+    public function getPatchPoint(): string
+    {
+        return $this->patch_point;
+    }
+
+    public function emitPatchPoint(string $point_name): void
+    {
+        $this->patch_point = $point_name;
+        if (($patches = $this->getOption('with-added-patch', [])) === []) {
+            return;
+        }
+
+        foreach ($patches as $patch) {
+            try {
+                if (!file_exists($patch)) {
+                    throw new RuntimeException("Additional patch script file {$patch} not found!");
+                }
+                logger()->debug('Running additional patch script: ' . $patch);
+                require $patch;
+            } catch (\Throwable $e) {
+                logger()->critical('Patch script ' . $patch . ' failed to run.');
+                if ($this->getOption('debug')) {
+                    ExceptionHandler::getInstance()->handle($e);
+                } else {
+                    logger()->critical('Please check with --debug option to see more details.');
+                }
+            }
+        }
     }
 
     /**

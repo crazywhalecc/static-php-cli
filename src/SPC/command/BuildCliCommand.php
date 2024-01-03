@@ -35,6 +35,8 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('with-micro-fake-cli', null, null, 'Enable phpmicro fake cli');
         $this->addOption('with-suggested-libs', 'L', null, 'Build with suggested libs for selected exts and libs');
         $this->addOption('with-suggested-exts', 'E', null, 'Build with suggested extensions for selected exts');
+        $this->addOption('with-added-patch', 'P', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Inject patch script outside');
+
     }
 
     public function handle(): int
