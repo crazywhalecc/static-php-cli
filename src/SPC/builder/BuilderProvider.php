@@ -17,6 +17,8 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 class BuilderProvider
 {
+    private static ?BuilderBase $builder = null;
+
     /**
      * @throws FileSystemException
      * @throws RuntimeException
@@ -24,7 +26,7 @@ class BuilderProvider
      */
     public static function makeBuilderByInput(InputInterface $input): BuilderBase
     {
-        return match (PHP_OS_FAMILY) {
+        self::$builder = match (PHP_OS_FAMILY) {
             // 'Windows' => new WindowsBuilder(
             //   binary_sdk_dir: $input->getOption('with-sdk-binary-dir'),
             //    vs_ver: $input->getOption('vs-ver'),
@@ -35,5 +37,17 @@ class BuilderProvider
             'BSD' => new BSDBuilder($input->getOptions()),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
+        return self::$builder;
+    }
+
+    /**
+     * @throws WrongUsageException
+     */
+    public function getBuilder(): BuilderBase
+    {
+        if (self::$builder === null) {
+            throw new WrongUsageException('Builder has not been initialized');
+        }
+        return self::$builder;
     }
 }
