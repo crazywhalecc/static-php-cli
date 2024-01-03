@@ -16,6 +16,7 @@ class SourcePatcher
         // FileSystem::addSourceExtractHook('swow', [SourcePatcher::class, 'patchSwow']);
         FileSystem::addSourceExtractHook('micro', [SourcePatcher::class, 'patchMicro']);
         FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl11Darwin']);
+        FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
     }
 
     /**
@@ -157,6 +158,17 @@ class SourcePatcher
             return true;
         }
         return false;
+    }
+
+    public static function patchSwoole(): bool
+    {
+        // swoole hook needs pdo/pdo.h
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/swoole/config.m4',
+            'PHP_ADD_INCLUDE([$ext_srcdir])',
+            "PHP_ADD_INCLUDE( [\$ext_srcdir] )\n    PHP_ADD_INCLUDE([\$abs_srcdir/ext])"
+        );
+        return true;
     }
 
     /**

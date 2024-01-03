@@ -8,5 +8,10 @@ parameters:
     - '#Unsafe usage of new static#'
     - '#class Fiber#'
     - '#Attribute class JetBrains\\PhpStorm\\ArrayShape does not exist#'
+    - '#Function Swoole\\Coroutine\\run not found.#'
   dynamicConstantNames:
     - PHP_OS_FAMILY
+  excludePaths:
+      analyseAndScan:
+            - ./src/globals/tests/swoole.php
+            - ./src/globals/tests/swoole.phpt

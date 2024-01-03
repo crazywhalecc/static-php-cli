@@ -138,16 +138,15 @@ class LinuxBuilder extends BuilderBase
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
         $this->setOption('extra-libs', $extra_libs);
-
         $cflags = $this->arch_c_flags;
 
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => $cflags,
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
+            'LDFLAGS' => '-L' . BUILD_LIB_PATH,
             'LIBS' => '-ldl -lpthread',
         ]);
-
         SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
@@ -190,8 +189,8 @@ class LinuxBuilder extends BuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                $this->makeExtensionArgs() . ' ' .
-                $envs_build_php
+                $this->makeExtensionArgs() .
+                ' ' . $envs_build_php . ' '
             );
 
         SourcePatcher::patchBeforeMake($this);
@@ -323,10 +322,11 @@ class LinuxBuilder extends BuilderBase
         $cflags = isset($input['EXTRA_CFLAGS']) && $input['EXTRA_CFLAGS'] ? " {$input['EXTRA_CFLAGS']}" : '';
         $libs = isset($input['EXTRA_LIBS']) && $input['EXTRA_LIBS'] ? " {$input['EXTRA_LIBS']}" : '';
         $ldflags = isset($input['EXTRA_LDFLAGS_PROGRAM']) && $input['EXTRA_LDFLAGS_PROGRAM'] ? " {$input['EXTRA_LDFLAGS_PROGRAM']}" : '';
+        $tune_c_flags = implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags));
         return [
-            'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE " . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags)) . $cflags,
-            'EXTRA_LIBS' => $this->getOption('extra-libs', '') . $libs,
-            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static" . $ldflags,
+            'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE {$tune_c_flags}{$cflags}",
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs', '')} {$libs}",
+            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static{$ldflags}",
         ];
     }
 }

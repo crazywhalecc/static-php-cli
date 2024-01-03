@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Psr\Log\LoggerInterface;
+use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\util\UnixShell;
 use SPC\util\WindowsCmd;
@@ -69,7 +70,7 @@ function osfamily2dir(): string
 /**
  * Execute the shell command, and the output will be directly printed in the terminal. If there is an error, an exception will be thrown
  *
- * @throws \SPC\exception\RuntimeException
+ * @throws RuntimeException
  */
 function f_passthru(string $cmd): ?bool
 {
@@ -87,7 +88,7 @@ function f_passthru(string $cmd): ?bool
     }
     $ret = passthru($cmd, $code);
     if ($code !== 0) {
-        throw new \SPC\exception\RuntimeException('Command run failed with code[' . $code . ']: ' . $cmd, $code);
+        throw new RuntimeException('Command run failed with code[' . $code . ']: ' . $cmd, $code);
     }
     return $ret;
 }

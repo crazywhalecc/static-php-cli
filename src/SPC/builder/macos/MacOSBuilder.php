@@ -155,6 +155,21 @@ class MacOSBuilder extends BuilderBase
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
+        // prepare build php envs
+        $envs_build_php = SystemUtil::makeEnvVarString([
+            'CFLAGS' => " {$this->arch_c_flags} -Werror=unknown-warning-option ",
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
+            'LDFLAGS' => '-L' . BUILD_LIB_PATH,
+        ]);
+
+        if ($this->getLib('postgresql')) {
+            shell()
+                ->cd(SOURCE_PATH . '/php-src')
+                ->exec(
+                    'sed -i.backup "s/ac_cv_func_explicit_bzero\" = xyes/ac_cv_func_explicit_bzero\" = x_fake_yes/" ./configure'
+                );
+        }
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 './configure ' .
@@ -162,8 +177,6 @@ class MacOSBuilder extends BuilderBase
                 '--with-valgrind=no ' .     // Not detect memory leak
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
-                "CFLAGS='{$this->arch_c_flags} -Werror=unknown-warning-option' " .
-                "CPPFLAGS='-I" . BUILD_INCLUDE_PATH . "' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -173,7 +186,8 @@ class MacOSBuilder extends BuilderBase
                 ($enableMicro ? '--enable-micro ' : '--disable-micro ') .
                 $json_74 .
                 $zts .
-                $this->makeExtensionArgs()
+                $this->makeExtensionArgs() . ' ' .
+                $envs_build_php
             );
 
         SourcePatcher::patchBeforeMake($this);
@@ -213,10 +227,7 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildCli(): void
     {
-        $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS needs it)
-        ]);
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $shell->exec("make -j{$this->concurrency} {$vars} cli");
@@ -247,9 +258,8 @@ class MacOSBuilder extends BuilderBase
         $vars = [
             // with debug information, optimize for size, remove identifiers, patch fake cli for micro
             'EXTRA_CFLAGS' => '-g -Os -fno-ident' . $enable_fake_cli,
-            // link resolv library (macOS needs it)
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv",
         ];
+        $vars = $this->getBuildVars($vars);
         if (!$this->getOption('no-strip', false)) {
             $vars['STRIP'] = 'dsymutil -f ';
         }
@@ -272,10 +282,7 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildFpm(): void
     {
-        $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS needs it)
-        ]);
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $shell->exec("make -j{$this->concurrency} {$vars} fpm");
@@ -292,10 +299,7 @@ class MacOSBuilder extends BuilderBase
      */
     public function buildEmbed(): void
     {
-        $vars = SystemUtil::makeEnvVarString([
-            'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv", // link resolv library (macOS needs it)
-        ]);
+        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
 
         shell()
             ->cd(SOURCE_PATH . '/php-src')
@@ -308,5 +312,16 @@ class MacOSBuilder extends BuilderBase
             ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
             ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
             ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
+    }
+
+    private function getBuildVars($input = []): array
+    {
+        $optimization = $this->getOption('no-strip', false) ? '-g -O0' : '-g0 -Os';
+        $cflags = isset($input['EXTRA_CFLAGS']) && $input['EXTRA_CFLAGS'] ? " {$input['EXTRA_CFLAGS']}" : '';
+        $libs = isset($input['EXTRA_LIBS']) && $input['EXTRA_LIBS'] ? " {$input['EXTRA_LIBS']}" : '';
+        return [
+            'EXTRA_CFLAGS' => "{$optimization} {$cflags} " . $this->getOption('x-extra-cflags'),
+            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv {$libs} " . $this->getOption('x-extra-libs'),
+        ];
     }
 }

@@ -175,6 +175,18 @@
             "libavif.a"
         ]
     },
+    "libcares": {
+        "source": "libcares",
+        "static-libs-unix": [
+            "libcares.a"
+        ],
+        "headers-unix": [
+            "ares.h",
+            "ares_dns.h",
+            "ares_nameser.h",
+            "ares_rules.h"
+        ]
+    },
     "libevent": {
         "source": "libevent",
         "static-libs-unix": [

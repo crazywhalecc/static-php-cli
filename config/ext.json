@@ -424,17 +424,50 @@
         "source": "swoole",
         "arg-type": "custom",
         "cpp-extension": true,
+        "unix-only": true,
         "lib-depends": [
-            "openssl"
+            "libcares",
+            "brotli",
+            "nghttp2",
+            "zlib"
         ],
         "ext-depends": [
-            "openssl"
+            "openssl",
+            "curl"
         ],
         "ext-suggests": [
-            "curl",
-            "pgsql"
+            "swoole-hook-pgsql",
+            "swoole-hook-mysql",
+            "swoole-hook-sqlite"
+        ]
+    },
+    "swoole-hook-mysql": {
+        "type": "addon",
+        "arg-type": "custom",
+        "ext-depends": [
+            "mysqlnd",
+            "pdo",
+            "pdo_mysql"
         ],
-        "unix-only": true
+        "ext-suggests": [
+            "mysqli"
+        ]
+    },
+    "swoole-hook-pgsql": {
+        "type": "addon",
+        "arg-type": "custom",
+        "ext-depends": [
+            "pgsql",
+            "pdo"
+        ]
+    },
+    "swoole-hook-sqlite": {
+        "type": "addon",
+        "arg-type": "custom",
+        "ext-depends": [
+            "sqlite3",
+            "pdo"
+        ]
     },
     "swow": {
         "type": "external",
