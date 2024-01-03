@@ -441,14 +441,6 @@
             "swoole-hook-sqlite"
         ]
     },
-    "swoole-hook-pgsql": {
-        "type": "addon",
-        "arg-type": "custom",
-        "ext-depends": [
-            "pgsql",
-            "pdo"
-        ]
-    },
     "swoole-hook-mysql": {
         "type": "addon",
         "arg-type": "custom",
@@ -459,6 +451,14 @@
         ],
         "ext-suggests": [
             "mysqli"
+        ]
+    },
+    "swoole-hook-pgsql": {
+        "type": "addon",
+        "arg-type": "custom",
+        "ext-depends": [
+            "pgsql",
+            "pdo"
         ]
     },
     "swoole-hook-sqlite": {
