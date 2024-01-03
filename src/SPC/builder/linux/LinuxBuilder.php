@@ -147,10 +147,13 @@ class LinuxBuilder extends BuilderBase
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
             'LIBS' => '-ldl -lpthread',
         ]);
+
+        $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
+        $this->emitPatchPoint('before-php-configure');
         SourcePatcher::patchBeforeConfigure($this);
 
         $phpVersionID = $this->getPHPVersionID();
@@ -193,6 +196,7 @@ class LinuxBuilder extends BuilderBase
                 ' ' . $envs_build_php . ' '
             );
 
+        $this->emitPatchPoint('before-php-make');
         SourcePatcher::patchBeforeMake($this);
 
         $this->cleanMake();
@@ -218,6 +222,7 @@ class LinuxBuilder extends BuilderBase
         }
 
         if (php_uname('m') === $this->getOption('arch')) {
+            $this->emitPatchPoint('before-sanity-check');
             $this->sanityCheck($build_target);
         }
     }

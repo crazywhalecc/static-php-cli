@@ -141,10 +141,12 @@ class MacOSBuilder extends BuilderBase
         }
         $this->setOption('extra-libs', $extra_libs);
 
+        $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
+        $this->emitPatchPoint('before-php-configure');
         SourcePatcher::patchBeforeConfigure($this);
 
         $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
@@ -190,6 +192,7 @@ class MacOSBuilder extends BuilderBase
                 $envs_build_php
             );
 
+        $this->emitPatchPoint('before-php-make');
         SourcePatcher::patchBeforeMake($this);
 
         $this->cleanMake();
@@ -215,6 +218,7 @@ class MacOSBuilder extends BuilderBase
         }
 
         if (php_uname('m') === $this->getOption('arch')) {
+            $this->emitPatchPoint('before-sanity-check');
             $this->sanityCheck($build_target);
         }
     }
