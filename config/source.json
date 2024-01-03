@@ -562,9 +562,9 @@
         }
     },
     "xz": {
-        "type": "filelist",
-        "url": "https://tukaani.org/xz/",
-        "regex": "/href=\"(?<file>xz-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "type": "ghrel",
+        "repo": "tukaani-project/xz",
+        "match": "xz-.+\\.tar\\.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
