@@ -510,6 +510,9 @@
         "arg-type": "with-prefix",
         "lib-depends": [
             "libuv"
+        ],
+        "ext-depends": [
+            "sockets"
         ]
     },
     "xhprof": {

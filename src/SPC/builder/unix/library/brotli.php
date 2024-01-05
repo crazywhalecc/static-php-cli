@@ -29,6 +29,7 @@ trait brotli
         $this->patchPkgconfPrefix(['libbrotlicommon.pc', 'libbrotlidec.pc', 'libbrotlienc.pc']);
         shell()->cd(BUILD_ROOT_PATH . '/lib')
             ->exec('ln -sf libbrotlicommon.a libbrotlicommon-static.a')
+            ->exec('ln -sf libbrotlicommon.a libbrotli.a')
             ->exec('ln -sf libbrotlidec.a libbrotlidec-static.a')
             ->exec('ln -sf libbrotlienc.a libbrotlienc-static.a');
         foreach (FileSystem::scanDirFiles(BUILD_ROOT_PATH . '/lib/', false, true) as $filename) {
