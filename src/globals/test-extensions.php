@@ -10,14 +10,14 @@ declare(strict_types=1);
 // --------------------------------- edit area ---------------------------------
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
-$extensions = 'swoole,uv';
+$extensions = 'ldap';
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = '';
 
 // Please change your test base combination. We recommend testing with `common`.
 // You can use `common`, `bulk`, `minimal` or `none`.
-$base_combination = 'minimal';
+$base_combination = 'common';
 
 // -------------------------- code area, do not modify --------------------------
 
