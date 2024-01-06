@@ -17,7 +17,7 @@ $with_libs = '';
 
 // Please change your test base combination. We recommend testing with `common`.
 // You can use `common`, `bulk`, `minimal` or `none`.
-$base_combination = 'common';
+$base_combination = 'minimal';
 
 // -------------------------- code area, do not modify --------------------------
 
