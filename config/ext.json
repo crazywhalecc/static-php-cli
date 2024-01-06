@@ -403,13 +403,13 @@
     "sqlsrv": {
         "type": "external",
         "source": "sqlsrv",
-        "cpp-extension": true,
         "lib-depends": [
             "unixodbc"
         ],
         "ext-depends-linux": [
             "pcntl"
-        ]
+        ],
+        "cpp-extension": true
     },
     "ssh2": {
         "type": "external",
