@@ -28,10 +28,10 @@ trait brotli
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libbrotlicommon.pc', 'libbrotlidec.pc', 'libbrotlienc.pc']);
         shell()->cd(BUILD_ROOT_PATH . '/lib')
-            ->exec('ln -sf libbrotlicommon.a libbrotlicommon-static.a')
+            ->exec('cp libbrotlicommon.a libbrotlicommon-static.a')
             ->exec('ln -sf libbrotlicommon.a libbrotli.a')
-            ->exec('ln -sf libbrotlidec.a libbrotlidec-static.a')
-            ->exec('ln -sf libbrotlienc.a libbrotlienc-static.a');
+            ->exec('cp libbrotlidec.a libbrotlidec-static.a')
+            ->exec('cp libbrotlienc.a libbrotlienc-static.a');
         foreach (FileSystem::scanDirFiles(BUILD_ROOT_PATH . '/lib/', false, true) as $filename) {
             if (str_starts_with($filename, 'libbrotli') && (str_contains($filename, '.so') || str_ends_with($filename, '.dylib'))) {
                 unlink(BUILD_ROOT_PATH . '/lib/' . $filename);
