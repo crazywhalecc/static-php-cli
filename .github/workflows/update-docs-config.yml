@@ -24,6 +24,7 @@ jobs:
         with:
           repository: static-php/static-php-cli-docs
           ref: master
+          token: ${{ secrets.DOCS_REPO_TOKEN }}
           path: static-php-cli-docs
 
       - name: "Set up Git"
