@@ -327,12 +327,12 @@
             "libxml2"
         ],
         "lib-depends": [
-            "libiconv",
-            "zlib"
+            "libiconv"
         ],
         "lib-suggests": [
             "xz",
-            "icu"
+            "icu",
+            "zlib"
         ]
     },
     "libxslt": {
