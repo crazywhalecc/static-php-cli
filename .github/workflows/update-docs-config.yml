@@ -33,7 +33,7 @@ jobs:
           git config --global user.name "GitHub Actions"
 
       - name: "Copy Config Files"
-        run: cp -r static-php-cli/config/ static-php-cli-docs/docs/.vitepress/config/
+        run: cp -r static-php-cli/config/* static-php-cli-docs/docs/.vitepress/config/
 
       - name: "Commit and Push Changes"
         run: |
