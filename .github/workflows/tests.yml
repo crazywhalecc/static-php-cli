@@ -1,6 +1,11 @@
 name: Tests
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/globals/test-extensions.php'
   pull_request:
     branches: [ "main" ]
 
