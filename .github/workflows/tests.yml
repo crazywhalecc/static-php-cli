@@ -133,6 +133,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-
 
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v3
+        with:
+          path: downloads
+          key: php-${{ matrix.php }}-dependencies
+
       - name: "Install Dependencies"
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
