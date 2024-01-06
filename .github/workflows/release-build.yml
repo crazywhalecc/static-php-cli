@@ -1,6 +1,8 @@
-name: Upload SPC Binary (Release)
+name: Build SPC Binary
 
 on:
+  push:
+    branches: [ "main" ]
   release:
     types:
       - published
@@ -8,10 +10,14 @@ on:
 
 jobs:
   build-release-artifacts:
-    name: "Upload SPC Binary (Release)"
+    name: "Build SPC Binary"
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        php-version:
+          - "8.1"
+        micro-version:
+          - "8.1.26"
         operating-system:
           - "linux-x86_64"
           - "macos-x86_64"
@@ -21,24 +27,75 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v4"
 
-      - name: Reuse static-php-cli-hosted artifacts
-        uses: dawidd6/action-download-artifact@v2
+      - if: inputs.debug == true
+        run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
+
+      - name: "Install PHP for official runners"
+        uses: "shivammathur/setup-php@v2"
         with:
-          repo: static-php/static-php-cli-hosted
-          branch: master
-          workflow: build-spc-release.yml
-          name: "spc-${{ matrix.operating-system }}"
+          coverage: none
+          tools: composer:v2
+          php-version: "${{ matrix.php-version }}"
+          ini-values: memory_limit=-1
+
+      - name: "Get Composer Cache Directory"
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: "Cache Composer dependencies"
+        uses: "actions/cache@v3"
+        with:
+          path: "${{ steps.composer-cache.outputs.dir }}"
+          key: "php-${{ matrix.php-version }}-locked-composer-${{ hashFiles('**/composer.lock') }}"
+          restore-keys: |
+            php-${{ matrix.php-version }}-locked-composer
+
+      - name: "Install Locked Dependencies"
+        run: "composer install --no-interaction --no-progress"
+
+      - name: "Build PHAR File"
+        run: "composer build:phar"
+
+      - name: "Download minimal combination"
+        run: |
+          curl https://dl.static-php.dev/static-php-cli/minimal/php-${{ matrix.micro-version }}-micro-${{ matrix.operating-system }}.tar.gz -o tmp.tgz
+          tar -zxvf tmp.tgz
+
+      - name: "Generate Executable"
+        run: |
+          cat micro.sfx spc.phar > spc
+          chmod +x spc
 
       - name: "Archive Executable"
         run: |
           tar -czf spc-${{ matrix.operating-system }}.tar.gz spc
           echo "filename=spc-${{ matrix.operating-system }}.tar.gz" >> $GITHUB_ENV
+          echo "OS=${{ matrix.operating-system }}" >> $GITHUB_ENV
+          if [ "${{ matrix.operating-system }}" == "linux-x86_64" ]; then
+            ./spc dev:extensions
+          fi
+
+      - name: "Copy file"
+        run: "mkdir dist/ && cp ${{ env.filename }} dist/ && cp spc dist/spc-$OS"
 
       - name: upload binaries to release
         uses: softprops/action-gh-release@v1
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
           files: ${{ env.filename }}
+
+      - name: "Deploy to Self-Hosted Server"
+        if: secrets.DEPLOY_SERVER_HOST != ''
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET_SPC_NIGHTLY }}
 
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v3
