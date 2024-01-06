@@ -86,7 +86,7 @@ jobs:
           files: ${{ env.filename }}
 
       - name: "Deploy to Self-Hosted Server"
-        if: ${{ secrets.DEPLOY_SERVER_HOST != '' }}
+        if: github.repository == 'crazywhalecc/static-php-cli'
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}

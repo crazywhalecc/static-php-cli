@@ -11,7 +11,7 @@ jobs:
   update-docs-config:
     name: "Update Docs Config"
     runs-on: ubuntu-latest
-    if: ${{ secrets.DOCS_REPO_TOKEN != '' }}
+    if: github.repository == 'crazywhalecc/static-php-cli'
     steps:
       - name: "Checkout static-php-cli"
         uses: actions/checkout@v4
