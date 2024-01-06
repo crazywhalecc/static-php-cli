@@ -1,0 +1,42 @@
+name: Update Docs Config
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'config/**.json'
+
+jobs:
+  update-docs-config:
+    name: "Update Docs Config"
+    runs-on: ubuntu-latest
+    if: secrets.DOCS_REPO_TOKEN != ''
+    steps:
+      - name: "Checkout static-php-cli"
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: static-php-cli
+
+      - name: "Checkout static-php-cli-docs"
+        uses: actions/checkout@v4
+        with:
+          repository: static-php/static-php-cli-docs
+          ref: master
+          path: static-php-cli-docs
+
+      - name: "Set up Git"
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: "Copy Config Files"
+        run: cp -r static-php-cli/config/ static-php-cli-docs/docs/.vitepress/config/
+
+      - name: "Commit and Push Changes"
+        run: |
+          cd static-php-cli-docs
+          git add -A
+          git commit -m "Sync config files from main"
+          git push origin master

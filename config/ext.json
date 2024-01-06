@@ -403,10 +403,10 @@
     "sqlsrv": {
         "type": "external",
         "source": "sqlsrv",
+        "cpp-extension": true,
         "lib-depends": [
             "unixodbc"
         ],
-        "cpp-extension": true,
         "ext-depends-linux": [
             "pcntl"
         ]
