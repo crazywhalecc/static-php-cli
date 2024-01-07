@@ -102,8 +102,6 @@ class BuildCliCommand extends BuildCommand
                 SourcePatcher::patchHardcodedINI($custom_ini);
             }
 
-            shell(true)->cd(BUILD_LIB_PATH)->exec('cat pkgconfig/ldap.pc');
-            logger()->info('TEST BREAKPOINT');
             // start to build
             $builder->buildPHP($rule);
 
