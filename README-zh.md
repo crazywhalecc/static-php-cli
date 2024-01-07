@@ -14,10 +14,10 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 > 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/static-php/phpmicro)。
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0.0-green.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
-[![](https://img.shields.io/github/actions/workflow/status/static-php/static-php-cli-hosted/build-php-common.yml?branch=refactor&label=Build%20Common%20Extensions&style=flat-square)](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml)
-[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
+[![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
+[![](https://img.shields.io/badge/Extension%20Counter-75+-yellow.svg?style=flat-square)]()
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 > 项目名称是 static-php-cli，但其实支持 cli、fpm、micro 和 embed SAPI 😎
