@@ -188,7 +188,8 @@ class DownloadCommand extends BaseCommand
         // create downloads
         try {
             if (PHP_OS_FAMILY !== 'Windows') {
-                f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($path));
+                $abs_path = realpath($path);
+                f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($abs_path));
             }
             // Windows TODO
 
