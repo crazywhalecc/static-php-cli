@@ -62,6 +62,7 @@ class LinuxToolCheckList
                 'ubuntu',
                 'alpine',
                 'redhat',
+                'Deepin',
                 'debian' => CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]),
                 default => CheckResult::fail(implode(', ', $missing) . ' not installed on your system'),
             };
@@ -70,7 +71,7 @@ class LinuxToolCheckList
     }
 
     /** @noinspection PhpUnused */
-    #[AsCheckItem('if necessary packages are installed', limit_os: 'Linux')]
+    #[AsCheckItem('if necessary linux headers are installed', limit_os: 'Linux')]
     public function checkSystemOSPackages(): ?CheckResult
     {
         if (SystemUtil::isMuslDist()) {
@@ -90,7 +91,7 @@ class LinuxToolCheckList
     public function fixBuildTools(array $distro, array $missing): bool
     {
         $install_cmd = match ($distro['dist']) {
-            'ubuntu', 'debian' => 'apt-get install -y',
+            'ubuntu', 'debian', 'Deepin' => 'apt-get install -y',
             'alpine' => 'apk add',
             'redhat' => 'dnf install -y',
             default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
@@ -101,7 +102,7 @@ class LinuxToolCheckList
             logger()->warning('Current user is not root, using sudo for running command');
         }
         try {
-            $is_debian = in_array($distro['dist'], ['debian', 'ubuntu']);
+            $is_debian = in_array($distro['dist'], ['debian', 'ubuntu', 'Deepin']);
             $to_install = $is_debian ? str_replace('xz', 'xz-utils', $missing) : $missing;
             // debian, alpine libtool -> libtoolize
             $to_install = str_replace('libtoolize', 'libtool', $to_install);
