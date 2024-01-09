@@ -43,7 +43,7 @@ class BuilderProvider
     /**
      * @throws WrongUsageException
      */
-    public function getBuilder(): BuilderBase
+    public static function getBuilder(): BuilderBase
     {
         if (self::$builder === null) {
             throw new WrongUsageException('Builder has not been initialized');
