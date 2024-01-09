@@ -50,6 +50,43 @@ trait UnixBuilderTrait
     }
 
     /**
+     * Return generic cmake options when configuring cmake projects
+     */
+    public function makeCmakeArgs(): string
+    {
+        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
+        return $extra .
+            '-DCMAKE_BUILD_TYPE=Release ' .
+            '-DCMAKE_INSTALL_PREFIX=/ ' .
+            '-DCMAKE_INSTALL_BINDIR=/bin ' .
+            '-DCMAKE_INSTALL_LIBDIR=/lib ' .
+            '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+            "-DCMAKE_TOOLCHAIN_FILE={$this->cmake_toolchain_file}";
+    }
+
+    /**
+     * Generate configure flags
+     */
+    public function makeAutoconfFlags(int $flag = AUTOCONF_ALL): string
+    {
+        $extra = '';
+        // TODO: add auto pkg-config support
+        if (($flag & AUTOCONF_LIBS) === AUTOCONF_LIBS) {
+            $extra .= 'LIBS="' . BUILD_LIB_PATH . '" ';
+        }
+        if (($flag & AUTOCONF_CFLAGS) === AUTOCONF_CFLAGS) {
+            $extra .= 'CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
+        }
+        if (($flag & AUTOCONF_CPPFLAGS) === AUTOCONF_CPPFLAGS) {
+            $extra .= 'CPPFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
+        }
+        if (($flag & AUTOCONF_LDFLAGS) === AUTOCONF_LDFLAGS) {
+            $extra .= 'LDFLAGS="-L' . BUILD_LIB_PATH . '" ';
+        }
+        return $extra;
+    }
+
+    /**
      * Sanity check after build complete
      *
      * @throws RuntimeException
@@ -118,42 +155,5 @@ trait UnixBuilderTrait
     {
         logger()->info('cleaning up');
         shell()->cd(SOURCE_PATH . '/php-src')->exec('make clean');
-    }
-
-    /**
-     * Return generic cmake options when configuring cmake projects
-     */
-    public function makeCmakeArgs(): string
-    {
-        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
-        return $extra .
-            '-DCMAKE_BUILD_TYPE=Release ' .
-            '-DCMAKE_INSTALL_PREFIX=/ ' .
-            '-DCMAKE_INSTALL_BINDIR=/bin ' .
-            '-DCMAKE_INSTALL_LIBDIR=/lib ' .
-            '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
-            "-DCMAKE_TOOLCHAIN_FILE={$this->cmake_toolchain_file}";
-    }
-
-    /**
-     * Generate configure flags
-     */
-    public function makeAutoconfFlags(int $flag = AUTOCONF_ALL): string
-    {
-        $extra = '';
-        // TODO: add auto pkg-config support
-        if (($flag & AUTOCONF_LIBS) === AUTOCONF_LIBS) {
-            $extra .= 'LIBS="' . BUILD_LIB_PATH . '" ';
-        }
-        if (($flag & AUTOCONF_CFLAGS) === AUTOCONF_CFLAGS) {
-            $extra .= 'CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
-        }
-        if (($flag & AUTOCONF_CPPFLAGS) === AUTOCONF_CPPFLAGS) {
-            $extra .= 'CPPFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
-        }
-        if (($flag & AUTOCONF_LDFLAGS) === AUTOCONF_LDFLAGS) {
-            $extra .= 'LDFLAGS="-L' . BUILD_LIB_PATH . '" ';
-        }
-        return $extra;
     }
 }
