@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Psr\Log\LoggerInterface;
+use SPC\builder\BuilderBase;
+use SPC\builder\BuilderProvider;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\util\UnixShell;
@@ -126,4 +128,24 @@ function shell(?bool $debug = null): UnixShell
 function cmd(?bool $debug = null): WindowsCmd
 {
     return new WindowsCmd($debug);
+}
+
+/**
+ * Get current builder.
+ *
+ * @throws WrongUsageException
+ */
+function builder(): BuilderBase
+{
+    return BuilderProvider::getBuilder();
+}
+
+/**
+ * Get current patch point.
+ *
+ * @throws WrongUsageException
+ */
+function patch_point(): string
+{
+    return BuilderProvider::getBuilder()->getPatchPoint();
 }
