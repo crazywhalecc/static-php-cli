@@ -47,6 +47,10 @@ class imap extends LinuxLibraryBase
         shell()->cd($this->source_dir)
             ->exec('make clean')
             ->exec('touch ip6')
+            ->exec('chmod +x tools/an')
+            ->exec('chmod +x tools/ua')
+            ->exec('chmod +x src/osdep/unix/drivers')
+            ->exec('chmod +x src/osdep/unix/mkauths')
             ->exec(
                 "yes | make slx {$ssl_options}"
             );

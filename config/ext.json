@@ -406,10 +406,10 @@
         "lib-depends": [
             "unixodbc"
         ],
-        "cpp-extension": true,
         "ext-depends-linux": [
             "pcntl"
-        ]
+        ],
+        "cpp-extension": true
     },
     "ssh2": {
         "type": "external",
@@ -510,6 +510,9 @@
         "arg-type": "with-prefix",
         "lib-depends": [
             "libuv"
+        ],
+        "ext-depends": [
+            "sockets"
         ]
     },
     "xhprof": {

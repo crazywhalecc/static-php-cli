@@ -4,7 +4,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 🌐 **[中文](README-zh.md)** | **[English](README.md)**
 
-> 2.0 Release is coming soon, windows support will be added in v2.1.
+> Windows support will be added in v2.1.
 
 The project name is static-php-cli, but it actually supports cli, fpm, micro and embed SAPI 😎
 
@@ -18,11 +18,10 @@ You can also use the micro binary file to combine php binary and php source code
 
 > This SAPI feature is from the [Fork](https://github.com/static-php/phpmicro) of [dixyes/phpmicro](https://github.com/dixyes/phpmicro).
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
+[![Version](https://img.shields.io/badge/Version-2.0.0-green.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 [![](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
-
-[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]([https://static-php.dev/](https://static-php.dev/en/guide/extensions.html))
+[![](https://img.shields.io/badge/Extension%20Counter-75+-yellow.svg?style=flat-square)]([https://static-php.dev/](https://static-php.dev/en/guide/extensions.html))
 [![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
 
 ## Documentation

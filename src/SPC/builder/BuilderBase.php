@@ -37,12 +37,12 @@ abstract class BuilderBase
     /**
      * Build libraries
      *
-     * @param  array<string>       $libraries Libraries to build
+     * @param  array<string>       $sorted_libraries Libraries to build (if not empty, must sort first)
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function buildLibs(array $libraries): void
+    public function buildLibs(array $sorted_libraries): void
     {
         // search all supported libs
         $support_lib_list = [];
@@ -57,20 +57,18 @@ abstract class BuilderBase
         }
 
         // if no libs specified, compile all supported libs
-        if ($libraries === [] && $this->isLibsOnly()) {
+        if ($sorted_libraries === [] && $this->isLibsOnly()) {
             $libraries = array_keys($support_lib_list);
+            $sorted_libraries = DependencyUtil::getLibsByDeps($libraries);
         }
 
         // pkg-config must be compiled first, whether it is specified or not
-        if (!in_array('pkg-config', $libraries)) {
-            array_unshift($libraries, 'pkg-config');
+        if (!in_array('pkg-config', $sorted_libraries)) {
+            array_unshift($sorted_libraries, 'pkg-config');
         }
 
-        // append dependencies
-        $libraries = DependencyUtil::getLibsByDeps($libraries);
-
         // add lib object for builder
-        foreach ($libraries as $library) {
+        foreach ($sorted_libraries as $library) {
             // if some libs are not supported (but in config "lib.json", throw exception)
             if (!isset($support_lib_list[$library])) {
                 throw new WrongUsageException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
@@ -88,7 +86,7 @@ abstract class BuilderBase
         $this->emitPatchPoint('before-libs-extract');
 
         // extract sources
-        SourceExtractor::initSource(libs: $libraries);
+        SourceExtractor::initSource(libs: $sorted_libraries);
 
         $this->emitPatchPoint('after-libs-extract');
 

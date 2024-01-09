@@ -50,6 +50,10 @@ class imap extends MacOSLibraryBase
         shell()->cd($this->source_dir)
             ->exec('make clean')
             ->exec('touch ip6')
+            ->exec('chmod +x tools/an')
+            ->exec('chmod +x tools/ua')
+            ->exec('chmod +x src/osdep/unix/drivers')
+            ->exec('chmod +x src/osdep/unix/mkauths')
             ->exec(
                 "yes | EXTRACFLAGS='-Wimplicit-function-declaration -include $(xcrun --show-sdk-path)/usr/include/poll.h -include $(xcrun --show-sdk-path)/usr/include/time.h -include $(xcrun --show-sdk-path)/usr/include/utime.h' make osx {$ssl_options}"
             );

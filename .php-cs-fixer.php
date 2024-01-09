@@ -63,6 +63,7 @@ return (new PhpCsFixer\Config())
         'phpdoc_summary' => false,
         'php_unit_test_class_requires_covers' => false,
         'phpdoc_var_without_name' => false,
+        'fully_qualified_strict_types' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()->in([__DIR__ . '/src', __DIR__ . '/tests/SPC'])

@@ -209,4 +209,21 @@ class SystemUtil
         }
         return $ret;
     }
+
+    /**
+     * Get fully-supported linux distros.
+     *
+     * @return string[] List of supported Linux distro name for doctor
+     */
+    public static function getSupportedDistros(): array
+    {
+        return [
+            // debian-like
+            'debian', 'ubuntu', 'Deepin',
+            // rhel-like
+            'redhat',
+            // alpine
+            'alpine',
+        ];
+    }
 }

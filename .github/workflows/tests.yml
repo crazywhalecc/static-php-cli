@@ -2,7 +2,10 @@ name: Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      - 'src/globals/test-extensions.php'
   pull_request:
     branches: [ "main" ]
 
@@ -132,6 +135,13 @@ jobs:
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-php-
+
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v3
+        with:
+          path: downloads
+          key: php-${{ matrix.php }}-dependencies
 
       - name: "Install Dependencies"
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist

@@ -10,7 +10,7 @@ declare(strict_types=1);
 // --------------------------------- edit area ---------------------------------
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
-$extensions = 'xml,intl';
+$extensions = 'ldap';
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = '';
