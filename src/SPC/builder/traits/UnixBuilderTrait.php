@@ -54,7 +54,7 @@ trait UnixBuilderTrait
      *
      * @throws RuntimeException
      */
-    public function sanityCheck(int $build_target): void
+    protected function sanityCheck(int $build_target): void
     {
         // sanity check for php-cli
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
@@ -95,7 +95,7 @@ trait UnixBuilderTrait
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function deployBinary(int $type): bool
+    protected function deployBinary(int $type): bool
     {
         $src = match ($type) {
             BUILD_TARGET_CLI => SOURCE_PATH . '/php-src/sapi/cli/php',
@@ -114,7 +114,7 @@ trait UnixBuilderTrait
      *
      * @throws RuntimeException
      */
-    public function cleanMake(): void
+    protected function cleanMake(): void
     {
         logger()->info('cleaning up');
         shell()->cd(SOURCE_PATH . '/php-src')->exec('make clean');

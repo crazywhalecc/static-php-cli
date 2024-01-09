@@ -154,7 +154,7 @@ class BSDBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(): void
+    protected function buildCli(): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
@@ -177,7 +177,7 @@ class BSDBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function buildMicro(): void
+    protected function buildMicro(): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new WrongUsageException('phpmicro only support PHP >= 8.0!');
@@ -215,7 +215,7 @@ class BSDBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildFpm(): void
+    protected function buildFpm(): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
@@ -235,7 +235,7 @@ class BSDBuilder extends BuilderBase
      *
      * @throws RuntimeException
      */
-    public function buildEmbed(): void
+    protected function buildEmbed(): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
