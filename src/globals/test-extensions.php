@@ -60,9 +60,15 @@ $trim_value = "\r\n \t,";
 $final_extensions = trim(trim($extensions, $trim_value) . ',' . _getCombination($base_combination), $trim_value);
 $final_libs = trim($with_libs, $trim_value);
 
+if (PHP_OS_FAMILY === 'Windows') {
+    $final_extensions_cmd = '"' . $final_extensions . '"';
+} else {
+    $final_extensions_cmd = $final_extensions;
+}
+
 echo match ($argv[1]) {
     'extensions' => $final_extensions,
     'libs' => $final_libs,
-    'cmd' => '"' . $final_extensions . '"' . ($final_libs === '' ? '' : (' --with-libs="' . $final_libs . '"')),
+    'cmd' => $final_extensions_cmd . ($final_libs === '' ? '' : (' --with-libs="' . $final_libs . '"')),
     default => '',
 };
