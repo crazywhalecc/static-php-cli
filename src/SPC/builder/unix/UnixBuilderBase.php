@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
-namespace SPC\builder\traits;
+namespace SPC\builder\unix;
 
+use SPC\builder\BuilderBase;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\store\SourceExtractor;
+use SPC\util\DependencyUtil;
 
-trait UnixBuilderTrait
+abstract class UnixBuilderBase extends BuilderBase
 {
     /** @var string cflags */
     public string $arch_c_flags;
@@ -86,6 +90,65 @@ trait UnixBuilderTrait
         return $extra;
     }
 
+    public function buildLibs(array $sorted_libraries): void
+    {
+        // search all supported libs
+        $support_lib_list = [];
+        $classes = FileSystem::getClassesPsr4(
+            ROOT_DIR . '/src/SPC/builder/' . osfamily2dir() . '/library',
+            'SPC\\builder\\' . osfamily2dir() . '\\library'
+        );
+        foreach ($classes as $class) {
+            if (defined($class . '::NAME') && $class::NAME !== 'unknown' && Config::getLib($class::NAME) !== null) {
+                $support_lib_list[$class::NAME] = $class;
+            }
+        }
+
+        // if no libs specified, compile all supported libs
+        if ($sorted_libraries === [] && $this->isLibsOnly()) {
+            $libraries = array_keys($support_lib_list);
+            $sorted_libraries = DependencyUtil::getLibsByDeps($libraries);
+        }
+
+        // pkg-config must be compiled first, whether it is specified or not
+        if (!in_array('pkg-config', $sorted_libraries)) {
+            array_unshift($sorted_libraries, 'pkg-config');
+        }
+
+        // add lib object for builder
+        foreach ($sorted_libraries as $library) {
+            // if some libs are not supported (but in config "lib.json", throw exception)
+            if (!isset($support_lib_list[$library])) {
+                throw new WrongUsageException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
+            }
+            $lib = new ($support_lib_list[$library])($this);
+            $this->addLib($lib);
+        }
+
+        // calculate and check dependencies
+        foreach ($this->libs as $lib) {
+            $lib->calcDependency();
+        }
+
+        // patch point
+        $this->emitPatchPoint('before-libs-extract');
+
+        // extract sources
+        SourceExtractor::initSource(libs: $sorted_libraries);
+
+        $this->emitPatchPoint('after-libs-extract');
+
+        // build all libs
+        foreach ($this->libs as $lib) {
+            match ($lib->tryBuild($this->getOption('rebuild', false))) {
+                BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
+                BUILD_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
+                BUILD_STATUS_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
+                default => logger()->warning('lib [' . $lib::NAME . '] build status unknown'),
+            };
+        }
+    }
+
     /**
      * Sanity check after build complete
      *
@@ -103,7 +166,7 @@ trait UnixBuilderTrait
 
             foreach ($this->exts as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
-                $ext->runCliCheck();
+                $ext->runCliCheckUnix();
             }
         }
 

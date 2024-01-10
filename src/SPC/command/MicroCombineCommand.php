@@ -87,6 +87,10 @@ class MicroCombineCommand extends BaseCommand
         // 8. Combine !
         $output = FileSystem::isRelativePath($output) ? (WORKING_DIR . '/' . $output) : $output;
         $file_target = file_get_contents($micro_file) . $ini_part . file_get_contents($file);
+        if (PHP_OS_FAMILY === 'Windows' && !str_ends_with(strtolower($output), '.exe')) {
+            $output .= '.exe';
+        }
+        $output = FileSystem::convertPath($output);
         $result = file_put_contents($output, $file_target);
         if ($result === false) {
             $this->output->writeln('<error>Combine failed.</error>');

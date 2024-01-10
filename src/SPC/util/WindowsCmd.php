@@ -50,6 +50,11 @@ class WindowsCmd
         return $this;
     }
 
+    public function execWithWrapper(string $wrapper, string $args): WindowsCmd
+    {
+        return $this->exec($wrapper . ' "' . str_replace('"', '^"', $args) . '"');
+    }
+
     public function execWithResult(string $cmd, bool $with_log = true): array
     {
         if ($with_log) {

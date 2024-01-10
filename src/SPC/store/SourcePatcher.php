@@ -6,6 +6,7 @@ namespace SPC\store;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 
@@ -30,6 +31,20 @@ class SourcePatcher
             if ($ext->patchBeforeBuildconf() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
             }
+        }
+        // patch windows php 8.1 bug
+        if (PHP_OS_FAMILY === 'Windows' && $builder->getPHPVersionID() >= 80100 && $builder->getPHPVersionID() < 80200) {
+            logger()->info('Patching PHP 8.1 windows Fiber bug');
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '\php-src\win32\build\config.w32',
+                "ADD_FLAG('LDFLAGS', '$(BUILD_DIR)\\\\Zend\\\\jump_' + FIBER_ASM_ARCH + '_ms_pe_masm.obj');",
+                "ADD_FLAG('ASM_OBJS', '$(BUILD_DIR)\\\\Zend\\\\jump_' + FIBER_ASM_ARCH + '_ms_pe_masm.obj $(BUILD_DIR)\\\\Zend\\\\make_' + FIBER_ASM_ARCH + '_ms_pe_masm.obj');"
+            );
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '\php-src\win32\build\config.w32',
+                "ADD_FLAG('LDFLAGS', '$(BUILD_DIR)\\\\Zend\\\\make_' + FIBER_ASM_ARCH + '_ms_pe_masm.obj');",
+                ''
+            );
         }
     }
 
@@ -181,9 +196,10 @@ class SourcePatcher
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCPY 1$/m', '');
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCAT 1$/m', '');
         }
-        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
-
-        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
+        if ($builder instanceof UnixBuilderBase) {
+            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
+        }
 
         // call extension patch before make
         foreach ($builder->getExts() as $ext) {
@@ -251,5 +267,33 @@ class SourcePatcher
         @unlink($micro_c_bak);
         @unlink($embed_c_bak);
         return $result;
+    }
+
+    /**
+     * Patch cli SAPI Makefile for Windows.
+     *
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    public static function patchWindowsCLITarget(): void
+    {
+        // search Makefile code line contains "$(BUILD_DIR)\php.exe:"
+        $content = FileSystem::readFile(SOURCE_PATH . '/php-src/Makefile');
+        $lines = explode("\r\n", $content);
+        $line_num = 0;
+        $found = false;
+        foreach ($lines as $v) {
+            if (strpos($v, '$(BUILD_DIR)\php.exe:') !== false) {
+                $found = $line_num;
+                break;
+            }
+            ++$line_num;
+        }
+        if ($found === false) {
+            throw new RuntimeException('Cannot patch windows CLI Makefile!');
+        }
+        $lines[$line_num] = '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest';
+        $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
     }
 }

@@ -57,9 +57,7 @@
             "brotli",
             "nghttp2",
             "zstd",
-            "openssl",
-            "idn2",
-            "psl"
+            "openssl"
         ],
         "frameworks": [
             "CoreFoundation",

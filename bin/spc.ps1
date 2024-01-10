@@ -1,4 +1,4 @@
-$PHP_Exec = "runtime\php.exe"
+$PHP_Exec = ".\runtime\php.exe"
 
 if (-not(Test-Path $PHP_Exec)) {
     $PHP_Exec = Get-Command php.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Definition
@@ -8,5 +8,4 @@ if (-not(Test-Path $PHP_Exec)) {
     }
 }
 
-$phpArgs = "bin\spc " + $args
-Start-Process $PHP_Exec -ArgumentList $phpArgs -NoNewWindow -Wait
+& "$PHP_Exec" ("bin/spc") @args

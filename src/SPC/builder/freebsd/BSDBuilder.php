@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace SPC\builder\freebsd;
 
-use SPC\builder\BuilderBase;
-use SPC\builder\traits\UnixBuilderTrait;
+use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 
-class BSDBuilder extends BuilderBase
+class BSDBuilder extends UnixBuilderBase
 {
-    /** Unix compatible builder methods */
-    use UnixBuilderTrait;
-
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 

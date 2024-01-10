@@ -287,6 +287,9 @@ These are similar projects:
 - [dixyes/lwmbs](https://github.com/dixyes/lwmbs)
 - [swoole/swoole-cli](https://github.com/swoole/swoole-cli)
 
+The project uses some code from [dixyes/lwmbs](https://github.com/dixyes/lwmbs), such as windows static build target and libiconv support.
+lwmbs is licensed under the [Mulan PSL 2](http://license.coscl.org.cn/MulanPSL2).
+
 Due to the special nature of this project,
 many other open source projects such as curl and protobuf will be used during the project compilation process,
 and they all have their own open source licenses.

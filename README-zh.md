@@ -254,14 +254,13 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 ## 开源协议
 
-本项目依据旧版本惯例采用 MIT License 开源，部分扩展的集成编译命令参考或修改自以下项目：
+本项目采用 MIT License 许可开源，下面是类似的项目：
 
-- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)（木兰宽松许可证）
-- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE、SWOOLE-CLI LICENSE）
+- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)
+- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)
+
+该项目使用了 [dixyes/lwmbs](https://github.com/dixyes/lwmbs) 中的一些代码，例如 Windows 静态构建目标和 libiconv 库支持。
+lwmbs 使用 [Mulan PSL 2](http://license.coscl.org.cn/MulanPSL2) 许可进行分发。对应文件有关于作者和许可的特殊说明，除此之外，均使用 MIT 授权许可。
 
 因本项目的特殊性，使用项目编译过程中会使用很多其他开源项目，例如 curl、protobuf 等，它们都有各自的开源协议。
 请在编译完成后，使用命令 `bin/spc dump-license` 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。
-
-## 进阶
-
-本项目重构分支为模块化编写。如果你对本项目感兴趣，想加入开发，可以参照文档的 [贡献指南](https://static-php.dev) 贡献代码或文档。

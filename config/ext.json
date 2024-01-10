@@ -106,7 +106,8 @@
         "source": "ext-glfw",
         "lib-depends": [
             "glfw"
-        ]
+        ],
+        "lib-depends-windows": []
     },
     "gmp": {
         "type": "builtin",
@@ -238,6 +239,7 @@
     "openssl": {
         "type": "builtin",
         "arg-type": "custom",
+        "arg-type-windows": "with",
         "lib-depends": [
             "openssl",
             "zlib"
