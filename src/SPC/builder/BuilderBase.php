@@ -41,6 +41,7 @@ abstract class BuilderBase
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws WrongUsageException
+     * @internal
      */
     public function buildLibs(array $sorted_libraries): void
     {
@@ -181,6 +182,8 @@ abstract class BuilderBase
 
     /**
      * Set libs only mode.
+     *
+     * @internal
      */
     public function setLibsOnly(bool $status = true): void
     {
@@ -194,6 +197,7 @@ abstract class BuilderBase
      * @throws RuntimeException
      * @throws \ReflectionException
      * @throws WrongUsageException
+     * @internal
      */
     public function proveExts(array $extensions): void
     {
