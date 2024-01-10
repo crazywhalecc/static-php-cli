@@ -21,4 +21,5 @@ try {
     (new ConsoleApplication())->run();
 } catch (Exception $e) {
     ExceptionHandler::getInstance()->handle($e);
+    exit(1);
 }

@@ -7,6 +7,7 @@ namespace SPC\builder;
 use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
+use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -27,11 +28,7 @@ class BuilderProvider
     public static function makeBuilderByInput(InputInterface $input): BuilderBase
     {
         self::$builder = match (PHP_OS_FAMILY) {
-            // 'Windows' => new WindowsBuilder(
-            //   binary_sdk_dir: $input->getOption('with-sdk-binary-dir'),
-            //    vs_ver: $input->getOption('vs-ver'),
-            //    arch: $input->getOption('arch'),
-            // ),
+            'Windows' => new WindowsBuilder($input->getOptions()),
             'Darwin' => new MacOSBuilder($input->getOptions()),
             'Linux' => new LinuxBuilder($input->getOptions()),
             'BSD' => new BSDBuilder($input->getOptions()),

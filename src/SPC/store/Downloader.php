@@ -168,14 +168,15 @@ class Downloader
     public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null): void
     {
         logger()->debug("Downloading {$url}");
-        pcntl_signal(SIGINT, function () use ($filename) {
-            if (file_exists(DOWNLOAD_PATH . '/' . $filename)) {
+        $cancel_func = function () use ($filename) {
+            if (file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/' . $filename))) {
                 logger()->warning('Deleting download file: ' . $filename);
-                unlink(DOWNLOAD_PATH . '/' . $filename);
+                unlink(FileSystem::convertPath(DOWNLOAD_PATH . '/' . $filename));
             }
-        });
-        self::curlDown(url: $url, path: DOWNLOAD_PATH . "/{$filename}");
-        pcntl_signal(SIGINT, SIG_IGN);
+        };
+        self::registerCancelEvent($cancel_func);
+        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"));
+        self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
         self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path]);
     }
@@ -187,7 +188,7 @@ class Downloader
      */
     public static function lockSource(string $name, array $data): void
     {
-        if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+        if (!file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/.lock.json'))) {
             $lock = [];
         } else {
             $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
@@ -204,24 +205,25 @@ class Downloader
      */
     public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null): void
     {
-        $download_path = DOWNLOAD_PATH . "/{$name}";
+        $download_path = FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}");
         if (file_exists($download_path)) {
             FileSystem::removeDir($download_path);
         }
         logger()->debug("cloning {$name} source");
         $check = !defined('DEBUG_MODE') ? ' -q' : '';
-        pcntl_signal(SIGINT, function () use ($download_path) {
+        $cancel_func = function () use ($download_path) {
             if (is_dir($download_path)) {
                 logger()->warning('Removing path ' . $download_path);
                 FileSystem::removeDir($download_path);
             }
-        });
+        };
+        self::registerCancelEvent($cancel_func);
         f_passthru(
-            'git clone' . $check .
+            SPC_GIT_EXEC . ' clone' . $check .
             ' --config core.autocrlf=false ' .
             "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
         );
-        pcntl_signal(SIGINT, SIG_IGN);
+        self::unregisterCancelEvent();
 
         // Lock
         logger()->debug("Locking git source {$name}");
@@ -251,7 +253,6 @@ class Downloader
      * @param  null|array          $source source meta info: [type, path, rev, url, filename, regex, license]
      * @throws DownloaderException
      * @throws FileSystemException
-     * @throws RuntimeException
      */
     public static function downloadSource(string $name, ?array $source = null, bool $force = false): void
     {
@@ -359,12 +360,12 @@ class Downloader
         };
         $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
 
-        $cmd = "curl -sfSL {$methodArg} {$headerArg} \"{$url}\"";
+        $cmd = SPC_CURL_EXEC . " -sfSL {$methodArg} {$headerArg} \"{$url}\"";
         if (getenv('CACHE_API_EXEC') === 'yes') {
-            if (!file_exists(DOWNLOAD_PATH . '/.curl_exec_cache')) {
+            if (!file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'))) {
                 $cache = [];
             } else {
-                $cache = json_decode(file_get_contents(DOWNLOAD_PATH . '/.curl_exec_cache'), true);
+                $cache = json_decode(file_get_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache')), true);
             }
             if (isset($cache[$cmd]) && $cache[$cmd]['expire'] >= time()) {
                 return $cache[$cmd]['cache'];
@@ -375,7 +376,7 @@ class Downloader
             }
             $cache[$cmd]['cache'] = implode("\n", $output);
             $cache[$cmd]['expire'] = time() + 3600;
-            file_put_contents(DOWNLOAD_PATH . '/.curl_exec_cache', json_encode($cache));
+            file_put_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'), json_encode($cache));
             return $cache[$cmd]['cache'];
         }
         f_exec($cmd, $output, $ret);
@@ -404,7 +405,35 @@ class Downloader
         };
         $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
         $check = !defined('DEBUG_MODE') ? 's' : '#';
-        $cmd = "curl -{$check}fSL -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
+        $cmd = SPC_CURL_EXEC . " -{$check}fSL -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
         f_passthru($cmd);
+    }
+
+    /**
+     * Register CTRL+C event for different OS.
+     *
+     * @param callable $callback callback function
+     */
+    private static function registerCancelEvent(callable $callback): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            sapi_windows_set_ctrl_handler($callback);
+        } elseif (extension_loaded('pcntl')) {
+            pcntl_signal(SIGINT, $callback);
+        } else {
+            logger()->debug('You have not enabled `pcntl` extension, cannot prevent download file corruption when Ctrl+C');
+        }
+    }
+
+    /**
+     * Unegister CTRL+C event for different OS.
+     */
+    private static function unregisterCancelEvent(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            sapi_windows_set_ctrl_handler(null);
+        } elseif (extension_loaded('pcntl')) {
+            pcntl_signal(SIGINT, SIG_IGN);
+        }
     }
 }

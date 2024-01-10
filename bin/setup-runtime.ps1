@@ -28,7 +28,7 @@ function RemoveFromPath {
     $currentPath = [System.Environment]::GetEnvironmentVariable('Path', 'User')
 
     if ($currentPath -like "*$pathToRemove*") {
-        $newPath = $currentPath -replace [regex]::Escape($pathToRemove), ''
+        $newPath = $currentPath -replace [regex]::Escape(';' + $pathToRemove), ''
         [System.Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
         Write-Host "Removed Path '$pathToRemove'"
     } else {
@@ -92,7 +92,7 @@ if (-not(Test-Path "runtime\composer.phar"))
 # create runtime\composer.ps1
 $ComposerContent = '
 $WorkingDir = (Split-Path -Parent $MyInvocation.MyCommand.Definition)
-Start-Process ($WorkingDir + "\php.exe") ($WorkingDir + "\composer.phar " + $args) -NoNewWindow -Wait
+& ($WorkingDir + "\php.exe") (Join-Path $WorkingDir "\composer.phar") @args
 '
 $ComposerContent | Set-Content -Path 'runtime\composer.ps1' -Encoding UTF8
 

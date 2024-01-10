@@ -36,6 +36,7 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('with-suggested-libs', 'L', null, 'Build with suggested libs for selected exts and libs');
         $this->addOption('with-suggested-exts', 'E', null, 'Build with suggested extensions for selected exts');
         $this->addOption('with-added-patch', 'P', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Inject patch script outside');
+        $this->addOption('with-micro-ext-test', null, null, 'Enable phpmicro with extension test code');
     }
 
     public function handle(): int
@@ -120,13 +121,17 @@ class BuildCliCommand extends BuildCommand
                 $fixed = ' (host system)';
             }
             if (($rule & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
-                logger()->info('Static php binary path' . $fixed . ': ' . $build_root_path . '/bin/php');
+                $win_suffix = PHP_OS_FAMILY === 'Windows' ? '.exe' : '';
+                $path = FileSystem::convertPath("{$build_root_path}/bin/php{$win_suffix}");
+                logger()->info("Static php binary path{$fixed}: {$path}");
             }
             if (($rule & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
-                logger()->info('phpmicro binary path' . $fixed . ': ' . $build_root_path . '/bin/micro.sfx');
+                $path = FileSystem::convertPath("{$build_root_path}/bin/micro.sfx");
+                logger()->info("phpmicro binary path{$fixed}: {$path}");
             }
-            if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM) {
-                logger()->info('Static php-fpm binary path' . $fixed . ': ' . $build_root_path . '/bin/php-fpm');
+            if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM && PHP_OS_FAMILY !== 'Windows') {
+                $path = FileSystem::convertPath("{$build_root_path}/bin/php-fpm");
+                logger()->info("Static php-fpm binary path{$fixed}: {$path}");
             }
 
             // export metadata
@@ -135,7 +140,8 @@ class BuildCliCommand extends BuildCommand
             // export licenses
             $dumper = new LicenseDumper();
             $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
-            logger()->info('License path' . $fixed . ': ' . $build_root_path . '/license/');
+            $path = FileSystem::convertPath("{$build_root_path}/license/");
+            logger()->info("License path{$fixed}: {$path}");
             return static::SUCCESS;
         } catch (WrongUsageException $e) {
             // WrongUsageException is not an exception, it's a user error, so we just print the error message

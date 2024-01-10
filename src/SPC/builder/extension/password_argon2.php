@@ -11,7 +11,7 @@ use SPC\util\CustomExt;
 #[CustomExt('password-argon2')]
 class password_argon2 extends Extension
 {
-    public function runCliCheck(): void
+    public function runCliCheckUnix(): void
     {
         [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "assert(defined(\'PASSWORD_ARGON2I\'));"');
         if ($ret !== 0) {

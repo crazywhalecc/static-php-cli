@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux;
 
-use SPC\builder\BuilderBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\traits\UnixBuilderTrait;
+use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 
-class LinuxBuilder extends BuilderBase
+class LinuxBuilder extends UnixBuilderBase
 {
-    /** Unix compatible builder methods */
-    use UnixBuilderTrait;
-
     /** @var array Tune cflags */
     public array $tune_c_flags;
 

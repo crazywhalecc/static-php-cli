@@ -12,8 +12,6 @@ use SPC\store\FileSystem;
 
 trait UnixLibraryTrait
 {
-    use LibraryTrait;
-
     /**
      * @throws RuntimeException
      * @throws FileSystemException

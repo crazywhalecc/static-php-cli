@@ -19,7 +19,7 @@ class mbregex extends Extension
     /**
      * mbregex is not an extension, we need to overwrite the default check.
      */
-    public function runCliCheck(): void
+    public function runCliCheckUnix(): void
     {
         [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "mbstring" | grep regex', false);
         if ($ret !== 0) {
