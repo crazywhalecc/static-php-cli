@@ -188,8 +188,9 @@ class FileSystemTest extends TestCase
         $this->assertTrue(FileSystem::isRelativePath('.\\sdf'));
         if (DIRECTORY_SEPARATOR === '\\') {
             $this->assertFalse(FileSystem::isRelativePath('C:\\asdasd/fwe\asd'));
+        } else {
+            $this->assertFalse(FileSystem::isRelativePath('/fwefwefewf'));
         }
-        $this->assertTrue(FileSystem::isRelativePath('/fwefwefewf'));
     }
 
     public function testScanDirFiles()
