@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('mbstring')]
 class mbstring extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getConfigureArg(): string
     {
         $arg = '--enable-mbstring';
         if ($this->builder->getExt('mbregex') === null) {
