@@ -15,3 +15,4 @@ parameters:
       analyseAndScan:
             - ./src/globals/tests/swoole.php
             - ./src/globals/tests/swoole.phpt
+            - ./src/globals/test-extensions.php
