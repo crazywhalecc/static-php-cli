@@ -29,9 +29,11 @@ static-php-cli（简称 `spc`）有许多特性：
 - :fire: 支持大量 [扩展](https://static-php.dev/zh/guide/extensions.html)
 
 **静态 php-cli:**
+
 <img width="700" alt="out1" src="https://github.com/crazywhalecc/static-php-cli/assets/20330940/01a2e60f-13b0-4242-a645-f7afa4936396">
 
 **使用 phpmicro 打包 PHP 代码:**
+
 <img width="700" alt="out2" src="https://github.com/crazywhalecc/static-php-cli/assets/20330940/46b7128d-fb72-4169-957e-48564c3ff3e2">
 
 ## 文档

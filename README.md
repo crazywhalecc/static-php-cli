@@ -31,9 +31,11 @@ static-php-cli (you can call it `spc`) has a lot of features:
 - :fire: Support many popular [extensions](https://static-php.dev/en/guide/extensions.html)
 
 **Single-file standalone php-cli:**
+
 <img width="700" alt="out1" src="https://github.com/crazywhalecc/static-php-cli/assets/20330940/01a2e60f-13b0-4242-a645-f7afa4936396">
 
 **Combine PHP code with PHP interpreter using phpmicro:**
+
 <img width="700" alt="out2" src="https://github.com/crazywhalecc/static-php-cli/assets/20330940/46b7128d-fb72-4169-957e-48564c3ff3e2">
 
 ## Documentation
