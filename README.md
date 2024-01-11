@@ -24,7 +24,7 @@ static-php-cli (you can call it `spc`) has a lot of features:
 - :handbag: Build single-file php executable, without any dependencies
 - :hamburger: Build **[phpmicro](https://github.com/dixyes/phpmicro)** self-extracted executable (glue php binary and php source code into one file)
 - :pill: Automatic build environment checker (Doctor module)
-- :zap: `Linux`, `macOS`, `FreeBSD`, [`Windows (WIP)`](https://github.com/crazywhalecc/static-php-cli/pull/301) support
+- :zap: `Linux`, `macOS`, `FreeBSD`, `Windows` support
 - :wrench: Configurable source code patches
 - :books: Build dependency management
 - 📦 Provide `spc` own standalone executable (built by spc and [box](https://github.com/box-project/box))
@@ -72,7 +72,7 @@ Here is the supported OS and arch, where :octocat: represents support for GitHub
 |---------|----------------------|----------------------|
 | macOS   | :octocat: :computer: | :computer:           |
 | Linux   | :octocat: :computer: | :octocat: :computer: |
-| Windows |                      |                      |
+| Windows | :computer:           |                      |
 | FreeBSD | :computer:           | :computer:           |
 
 Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`, `8.2`, `8.3`.
