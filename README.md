@@ -58,7 +58,7 @@ which can be downloaded directly according to your needs.
 
 ### Compilation Requirements
 
-- PHP >= 8.1 (static-php-cli is written in PHP)
+- PHP >= 8.1 (This is the version required by spc itself, not the build version)
 - Extension: `mbstring,pcntl,posix,tokenizer,phar`
 - Supported OS with `curl` and `git` installed
 
