@@ -52,7 +52,7 @@ static-php-cli（简称 `spc`）有许多特性：
 
 ### 编译环境需求
 
-- PHP >= 8.1（spc 自身是用 PHP 写的）
+- PHP >= 8.1（这是 spc 自身需要的版本，不是支持的构建版本）
 - 扩展：`mbstring,pcntl,posix,tokenizer,phar`
 - 系统安装了 `curl` 和 `git`
 
