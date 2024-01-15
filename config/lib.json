@@ -294,6 +294,17 @@
             "zlib"
         ]
     },
+    "libui-ng": {
+        "source": "ardillo",
+        "static-libs-unix": [
+            "libui.a",
+            "libcmocka.a"
+        ],
+        "frameworks": [
+            "CoreFoundation",
+            "AppKit"
+        ]
+    },
     "libuv": {
         "source": "libuv",
         "static-libs-unix": [

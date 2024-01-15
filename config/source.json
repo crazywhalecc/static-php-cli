@@ -16,6 +16,15 @@
             "path": "LICENSE"
         }
     },
+    "ardillo": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/ardillo-php/ext.git",
+        "license": {
+            "type": "text",
+            "text": "NO LICENSE FILE"
+        }
+    },
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",

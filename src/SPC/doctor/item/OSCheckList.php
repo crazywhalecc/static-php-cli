@@ -21,6 +21,6 @@ class OSCheckList
         }
         $distro = PHP_OS_FAMILY === 'Linux' ? (' ' . SystemUtil::getOSRelease()['dist']) : '';
         $known_distro = PHP_OS_FAMILY === 'Linux' && in_array(SystemUtil::getOSRelease()['dist'], SystemUtil::getSupportedDistros());
-        return CheckResult::ok(PHP_OS_FAMILY . ' ' . php_uname('m') . $distro . ', supported' . ($known_distro ? '' : ' (but not tested on this distro)'));
+        return CheckResult::ok(PHP_OS_FAMILY . ' ' . php_uname('m') . $distro . ', supported' . ($known_distro && PHP_OS_FAMILY === 'Linux' ? '' : ' (but not tested on this distro)'));
     }
 }

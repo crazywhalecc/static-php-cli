@@ -31,6 +31,7 @@ class MacOSToolCheckList
         'gzip',
         'bzip2',
         'cmake',
+        'meson',
     ];
 
     #[AsCheckItem('if homebrew has installed', limit_os: 'Darwin', level: 998)]

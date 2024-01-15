@@ -3,6 +3,14 @@
         "type": "external",
         "source": "apcu"
     },
+    "ardillo": {
+        "type": "external",
+        "source": "ardillo",
+        "arg-type": "enable",
+        "lib-depends": [
+            "libui-ng"
+        ]
+    },
     "bcmath": {
         "type": "builtin"
     },
