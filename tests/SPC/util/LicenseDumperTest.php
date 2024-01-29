@@ -13,7 +13,13 @@ use SPC\util\LicenseDumper;
  */
 final class LicenseDumperTest extends TestCase
 {
-    private const DIRECTORY = '../../var/license-dump';
+    private const DIRECTORY = __DIR__ . '/../../var/license-dump';
+
+    public static function tearDownAfterClass(): void
+    {
+        @rmdir(self::DIRECTORY);
+        @rmdir(dirname(self::DIRECTORY));
+    }
 
     protected function setUp(): void
     {
