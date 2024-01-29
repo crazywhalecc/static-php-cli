@@ -261,7 +261,7 @@ class WindowsBuilder extends BuilderBase
             file_put_contents(
                 SOURCE_PATH . '\hello.exe',
                 file_get_contents(BUILD_ROOT_PATH . '\bin\micro.sfx') .
-                ($this->getOption('with-micro-ext-test') ? $this->generateMicroExtTests() : '<?php echo "[micro-test-start][micro-test-end]";')
+                ($this->getOption('without-micro-ext-test') ? '<?php echo "[micro-test-start][micro-test-end]";' : $this->generateMicroExtTests())
             );
             chmod(SOURCE_PATH . '\hello.exe', 0755);
             [$ret, $output2] = cmd()->execWithResult(SOURCE_PATH . '\hello.exe');
