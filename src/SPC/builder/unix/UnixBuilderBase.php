@@ -178,12 +178,17 @@ abstract class UnixBuilderBase extends BuilderBase
             file_put_contents(
                 SOURCE_PATH . '/hello.exe',
                 file_get_contents(SOURCE_PATH . '/php-src/sapi/micro/micro.sfx') .
-                '<?php echo "hello";'
+                ($this->getOption('without-micro-ext-test') ? '<?php echo "[micro-test-start][micro-test-end]";' : $this->generateMicroExtTests())
             );
             chmod(SOURCE_PATH . '/hello.exe', 0755);
             [$ret, $output2] = shell()->execWithResult(SOURCE_PATH . '/hello.exe');
-            if ($ret !== 0 || trim($out = implode('', $output2)) !== 'hello') {
-                throw new RuntimeException('micro failed sanity check, ret[' . $ret . '], out[' . ($out ?? 'NULL') . ']');
+            $raw_out = trim(implode('', $output2));
+            $condition[0] = $ret === 0;
+            $condition[1] = str_starts_with($raw_out, '[micro-test-start]') && str_ends_with($raw_out, '[micro-test-end]');
+            foreach ($condition as $k => $v) {
+                if (!$v) {
+                    throw new RuntimeException("micro failed sanity check with condition[{$k}], ret[{$ret}], out[{$raw_out}]");
+                }
             }
         }
     }

@@ -369,8 +369,10 @@ abstract class BuilderBase
 
         foreach ($this->getExts() as $ext) {
             $ext_name = $ext->getDistName();
-            $php .= "echo 'Running micro with {$ext_name} test' . PHP_EOL;\n";
-            $php .= "assert(extension_loaded('{$ext_name}'));\n\n";
+            if (!empty($ext_name)) {
+                $php .= "echo 'Running micro with {$ext_name} test' . PHP_EOL;\n";
+                $php .= "assert(extension_loaded('{$ext_name}'));\n\n";
+            }
         }
         $php .= "echo '[micro-test-end]';\n";
         return $php;
