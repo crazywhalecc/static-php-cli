@@ -14,13 +14,13 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function loadConfigArray(string $config): array
+    public static function loadConfigArray(string $config, ?string $config_dir = null): array
     {
         $whitelist = ['ext', 'lib', 'source'];
         if (!in_array($config, $whitelist)) {
             throw new FileSystemException('Reading ' . $config . '.json is not allowed');
         }
-        $tries = [
+        $tries = $config_dir !== null ? [FileSystem::convertPath($config_dir . '/' . $config . '.json')] : [
             WORKING_DIR . '/config/' . $config . '.json',
             ROOT_DIR . '/config/' . $config . '.json',
         ];
