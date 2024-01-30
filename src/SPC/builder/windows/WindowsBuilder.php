@@ -150,6 +150,8 @@ class WindowsBuilder extends BuilderBase
         $makefile = FileSystem::readFile(SOURCE_PATH . '\php-src\Makefile');
         if ($this->getPHPVersionID() >= 80200 && str_contains($makefile, 'FIBER_ASM_ARCH')) {
             $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
+        } elseif ($this->getPHPVersionID() >= 84000 && str_contains($makefile, 'FIBER_ASM_ABI')) {
+            $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ABI).obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ABI).obj' . "\r\n\r\n";
         }
         FileSystem::writeFile(SOURCE_PATH . '\php-src\Makefile', $makefile);
 
