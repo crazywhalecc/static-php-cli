@@ -12,6 +12,11 @@ use SPC\util\CustomExt;
 #[CustomExt('swoole-hook-sqlite')]
 class swoole_hook_sqlite extends Extension
 {
+    public function getDistName(): string
+    {
+        return 'swoole';
+    }
+
     public function getUnixConfigureArg(): string
     {
         // pdo_pgsql need to be disabled
