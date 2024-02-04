@@ -104,6 +104,9 @@ class BuildCliCommand extends BuildCommand
                 SourcePatcher::patchHardcodedINI($custom_ini);
             }
 
+            // add static-php-cli.version to main.c, in order to debug php failure more easily
+            SourcePatcher::patchSPCVersionToPHP($this->getApplication()->getVersion());
+
             // start to build
             $builder->buildPHP($rule);
 
