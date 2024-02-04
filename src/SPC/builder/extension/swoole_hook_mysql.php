@@ -18,7 +18,7 @@ class swoole_hook_mysql extends Extension
         return '';
     }
 
-    public function runCliCheck(): void
+    public function runCliCheckUnix(): void
     {
         // skip if not enable swoole
         if ($this->builder->getExt('swoole') === null) {
