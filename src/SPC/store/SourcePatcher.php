@@ -296,4 +296,20 @@ class SourcePatcher
         $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
     }
+
+    /**
+     * Add additional `static-php-cli.version` ini value for PHP source.
+     *
+     * @throws FileSystemException
+     */
+    public static function patchSPCVersionToPHP(string $version = 'unknown'): void
+    {
+        // detect patch
+        $file = FileSystem::readFile(SOURCE_PATH . '/php-src/main/main.c');
+        if (!str_contains($file, 'static-php-cli.version')) {
+            logger()->debug('Inserting static-php-cli.version to php-src');
+            $file = str_replace('PHP_INI_BEGIN()', "PHP_INI_BEGIN()\n\tPHP_INI_ENTRY(\"static-php-cli.version\",\t\"{$version}\",\tPHP_INI_ALL,\tNULL)", $file);
+            FileSystem::writeFile(SOURCE_PATH . '/php-src/main/main.c', $file);
+        }
+    }
 }
