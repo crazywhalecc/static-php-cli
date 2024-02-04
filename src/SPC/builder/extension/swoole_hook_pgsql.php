@@ -22,7 +22,7 @@ class swoole_hook_pgsql extends Extension
         return '--enable-swoole-pgsql';
     }
 
-    public function runCliCheck(): void
+    public function runCliCheckUnix(): void
     {
         // skip if not enable swoole
         if ($this->builder->getExt('swoole') === null) {

@@ -116,7 +116,7 @@ class DownloadCommand extends BaseCommand
                 // get source list that will be downloaded
                 $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
                 if (empty($sources)) {
-                    logger()->warning('Downloading with --all option will take more times to download, we recommend you to download with --for-extensions option !');
+                    logger()->notice('Downloading with --all option will take more times to download, we recommend you to download with --for-extensions option !');
                     $sources = array_keys(Config::getSources());
                 }
             }

@@ -22,7 +22,7 @@ class swoole_hook_sqlite extends Extension
         return '--enable-swoole-sqlite';
     }
 
-    public function runCliCheck(): void
+    public function runCliCheckUnix(): void
     {
         // skip if not enable swoole
         if ($this->builder->getExt('swoole') === null) {
