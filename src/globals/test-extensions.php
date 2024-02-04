@@ -69,6 +69,7 @@ if (PHP_OS_FAMILY === 'Windows') {
 echo match ($argv[1]) {
     'extensions' => $final_extensions,
     'libs' => $final_libs,
+    'libs_cmd' => ($final_libs === '' ? '' : (' --with-libs="' . $final_libs . '"')),
     'cmd' => $final_extensions_cmd . ($final_libs === '' ? '' : (' --with-libs="' . $final_libs . '"')),
     default => '',
 };
