@@ -115,6 +115,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+          - macos-14
       fail-fast: false
     steps:
       - name: "Checkout"
