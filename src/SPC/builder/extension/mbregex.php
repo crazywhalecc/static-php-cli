@@ -11,6 +11,11 @@ use SPC\util\CustomExt;
 #[CustomExt('mbregex')]
 class mbregex extends Extension
 {
+    public function getDistName(): string
+    {
+        return 'mbstring';
+    }
+
     public function getConfigureArg(): string
     {
         return '';
