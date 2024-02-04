@@ -11,6 +11,11 @@ use SPC\util\CustomExt;
 #[CustomExt('swoole-hook-mysql')]
 class swoole_hook_mysql extends Extension
 {
+    public function getDistName(): string
+    {
+        return 'swoole';
+    }
+
     public function getUnixConfigureArg(): string
     {
         // pdo_mysql doesn't need to be disabled
