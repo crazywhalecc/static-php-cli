@@ -63,7 +63,7 @@ static-php-cli（简称 `spc`）有许多特性：
 
 |         | x86_64               | aarch64              |
 |---------|----------------------|----------------------|
-| macOS   | :octocat: :computer: | :computer:           |
+| macOS   | :octocat: :computer: | :octocat: :computer: |
 | Linux   | :octocat: :computer: | :octocat: :computer: |
 | Windows |                      |                      |
 | FreeBSD | :computer:           | :computer:           |

@@ -70,7 +70,7 @@ Here is the supported OS and arch, where :octocat: represents support for GitHub
 
 |         | x86_64               | aarch64              |
 |---------|----------------------|----------------------|
-| macOS   | :octocat: :computer: | :computer:           |
+| macOS   | :octocat: :computer: | :octocat: :computer: |
 | Linux   | :octocat: :computer: | :octocat: :computer: |
 | Windows | :computer:           |                      |
 | FreeBSD | :computer:           | :computer:           |
