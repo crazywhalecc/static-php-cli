@@ -14,6 +14,20 @@ use SPC\store\Config;
  */
 class DependencyUtil
 {
+    public static function getExtsAndLibs(array $exts, array $additional_libs = [], bool $include_suggested_exts = false, bool $include_suggested_libs = false): array
+    {
+        if (!$include_suggested_exts && !$include_suggested_libs) {
+            return self::getExtLibsByDeps($exts, $additional_libs);
+        }
+        if ($include_suggested_exts && $include_suggested_libs) {
+            return self::getAllExtLibsByDeps($exts, $additional_libs);
+        }
+        if (!$include_suggested_exts) {
+            return self::getExtLibsByDeps($exts, $additional_libs);
+        }
+        return self::getAllExtLibsByDeps($exts, $additional_libs, false);
+    }
+
     /**
      * Obtain the dependent lib list according to the required ext list, and sort according to the dependency
      *
@@ -24,7 +38,7 @@ class DependencyUtil
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public static function getExtLibsByDeps(array $exts, array $additional_libs = []): array
+    public static function getExtLibsByDeps(array $exts, array $additional_libs = [], bool $include_suggested_exts = false): array
     {
         $sorted = [];
         $visited = [];
@@ -99,7 +113,7 @@ class DependencyUtil
         return $final;
     }
 
-    public static function getAllExtLibsByDeps(array $exts): array
+    public static function getAllExtLibsByDeps(array $exts, array $additional_libs = [], bool $include_suggested_libs = true): array
     {
         $sorted = [];
         $visited = [];
@@ -109,12 +123,13 @@ class DependencyUtil
                 self::visitExtAllDeps($ext, $visited, $sorted);
             }
         }
-        $libs = [];
+        $libs = $additional_libs;
         foreach ($sorted as $ext) {
             if (!in_array($ext, $exts)) {
                 $not_included_exts[] = $ext;
             }
-            foreach (array_merge(Config::getExt($ext, 'lib-depends', []), Config::getExt($ext, 'lib-suggests', [])) as $dep) {
+            $total = $include_suggested_libs ? array_merge(Config::getExt($ext, 'lib-depends', []), Config::getExt($ext, 'lib-suggests', [])) : Config::getExt($ext, 'lib-depends', []);
+            foreach ($total as $dep) {
                 if (!in_array($dep, $libs)) {
                     $libs[] = $dep;
                 }

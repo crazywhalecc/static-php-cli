@@ -23,11 +23,11 @@ class BuildCliCommand extends BuildCommand
     {
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
-        $this->addOption('build-micro', null, null, 'build micro');
-        $this->addOption('build-cli', null, null, 'build cli');
-        $this->addOption('build-fpm', null, null, 'build fpm');
-        $this->addOption('build-embed', null, null, 'build embed');
-        $this->addOption('build-all', null, null, 'build cli, micro, fpm, embed');
+        $this->addOption('build-micro', null, null, 'Build micro SAPI');
+        $this->addOption('build-cli', null, null, 'Build cli SAPI');
+        $this->addOption('build-fpm', null, null, 'Build fpm SAPI');
+        $this->addOption('build-embed', null, null, 'Build embed SAPI');
+        $this->addOption('build-all', null, null, 'Build all SAPI');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('enable-zts', null, null, 'enable ZTS support');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
@@ -61,8 +61,9 @@ class BuildCliCommand extends BuildCommand
         try {
             // create builder
             $builder = BuilderProvider::makeBuilderByInput($this->input);
-            // calculate dependencies
-            [$extensions, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps($extensions, $libraries);
+            $include_suggest_ext = $this->getOption('with-suggested-exts');
+            $include_suggest_lib = $this->getOption('with-suggested-libs');
+            [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
             // print info
             $indent_texts = [
