@@ -106,7 +106,7 @@ class SourcePatcher
         }
         $patch_list = $list ?? $default;
         $patches = [];
-        $serial = ['80', '81', '82', '83'];
+        $serial = ['80', '81', '82', '83', '84'];
         foreach ($patch_list as $patchName) {
             if (file_exists(SOURCE_PATH . "/php-src/sapi/micro/patches/{$patchName}.patch")) {
                 $patches[] = "sapi/micro/patches/{$patchName}.patch";
