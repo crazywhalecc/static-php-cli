@@ -31,6 +31,7 @@ class MacOSToolCheckList
         'gzip',
         'bzip2',
         'cmake',
+        'glibtoolize',
     ];
 
     #[AsCheckItem('if homebrew has installed', limit_os: 'Darwin', level: 998)]
@@ -72,8 +73,14 @@ class MacOSToolCheckList
     #[AsFixItem('build-tools')]
     public function fixBuildTools(array $missing): bool
     {
+        $replacement = [
+            'glibtoolize' => 'libtool',
+        ];
         foreach ($missing as $cmd) {
             try {
+                if (isset($replacement[$cmd])) {
+                    $cmd = $replacement[$cmd];
+                }
                 shell(true)->exec('brew install --formula ' . escapeshellarg($cmd));
             } catch (RuntimeException) {
                 return false;
