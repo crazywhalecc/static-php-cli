@@ -4,7 +4,6 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
 [![Extensions](https://img.shields.io/badge/Extension%20Counter-75+-yellow.svg?style=flat-square)](https://static-php.dev/en/guide/extensions.html)
-[![Discord](https://dcbadge.vercel.app/api/server/RNpegEYW?style=flat-square&compact=true&theme=default-inverted)](https://discord.gg/RNpegEYW)
 
 **static-php-cli** is a powerful tool designed for building static, standalone PHP runtime
 with popular extensions.
