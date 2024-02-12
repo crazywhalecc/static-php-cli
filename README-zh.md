@@ -1,5 +1,7 @@
 # static-php-cli
 
+[![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
+[![Chinese readme](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%20%F0%9F%87%A8%F0%9F%87%B3-moccasin?style=flat-square)](README-zh.md)
 [![Releases](https://img.shields.io/packagist/v/crazywhalecc/static-php-cli?include_prereleases&label=Release&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
@@ -10,9 +12,6 @@
 目前 static-php-cli 支持 `cli`、`fpm`、`embed` 和 `micro` SAPI。
 
 **static-php-cli**也支持将 PHP 代码和 PHP 运行时打包为一个文件并运行。
-
-- [README - English](./README.md)
-- [README - 中文](./README-zh.md)
 
 ## 特性
 
