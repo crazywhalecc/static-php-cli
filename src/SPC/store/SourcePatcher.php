@@ -6,7 +6,6 @@ namespace SPC\store;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\LinuxBuilder;
-use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -199,11 +198,6 @@ class SourcePatcher
         }
         if ($builder instanceof UnixBuilderBase) {
             FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
-        }
-
-        // Prevent event extension compile error on macOS
-        if ($builder instanceof MacOSBuilder) {
-            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
         }
 
         // call extension patch before make
