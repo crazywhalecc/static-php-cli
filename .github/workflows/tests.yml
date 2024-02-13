@@ -130,6 +130,7 @@ jobs:
           ini-values: memory_limit=-1
 
       - name: "Use test token if exists"
+        if: matrix.os != 'windows-latest'
         run: |
           if [ "${{ secrets.TEST_GH_TOKEN }}" != "" ]; then
             echo "GITHUB_TOKEN=${{ secrets.TEST_GH_TOKEN }}" >> $GITHUB_ENV
