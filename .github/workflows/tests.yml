@@ -130,8 +130,10 @@ jobs:
           ini-values: memory_limit=-1
 
       - name: "Use test token if exists"
-        if: ${{ secrets.TEST_GH_TOKENS }}
-        run: echo "GITHUB_TOKEN=${{ secrets.TEST_GH_TOKEN }}" >> $GITHUB_ENV
+        run: |
+          if [ "${{ secrets.TEST_GH_TOKEN }}" != "" ]; then
+            echo "GITHUB_TOKEN=${{ secrets.TEST_GH_TOKEN }}" >> $GITHUB_ENV
+          fi
 
       - name: "Cache Composer packages"
         id: composer-cache
