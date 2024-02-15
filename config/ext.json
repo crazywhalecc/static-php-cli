@@ -95,7 +95,7 @@
     },
     "gettext": {
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "with-prefix",
         "lib-depends": [
             "gettext"
         ]
