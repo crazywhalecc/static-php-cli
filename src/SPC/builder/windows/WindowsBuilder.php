@@ -192,7 +192,7 @@ class WindowsBuilder extends BuilderBase
         // if no libs specified, compile all supported libs
         if ($sorted_libraries === [] && $this->isLibsOnly()) {
             $libraries = array_keys($support_lib_list);
-            $sorted_libraries = DependencyUtil::getLibsByDeps($libraries);
+            $sorted_libraries = DependencyUtil::getLibs($libraries);
         }
 
         // add lib object for builder

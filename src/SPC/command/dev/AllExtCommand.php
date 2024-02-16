@@ -15,8 +15,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-use function Laravel\Prompts\table;
-
 #[AsCommand('dev:extensions', 'Helper command that lists available extension details', ['list-ext'])]
 class AllExtCommand extends BaseCommand
 {
@@ -61,7 +59,7 @@ class AllExtCommand extends BaseCommand
             }
 
             try {
-                [, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps([$extension]);
+                [, $libraries, $not_included] = DependencyUtil::getExtsAndLibs([$extension]);
             } catch (WrongUsageException) {
                 $libraries = $not_included = [];
             }
@@ -88,7 +86,8 @@ class AllExtCommand extends BaseCommand
         if ($data === []) {
             $style->warning('Unknown extension selected: ' . implode(',', $extensions));
         } else {
-            table($columns, $data);
+            $func = PHP_OS_FAMILY === 'Windows' ? [$style, 'table'] : '\Laravel\Prompts\table';
+            call_user_func($func, $columns, $data);
         }
 
         return static::SUCCESS;

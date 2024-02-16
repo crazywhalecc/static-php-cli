@@ -227,8 +227,12 @@ class FileSystem
     {
         $dir = self::convertPath($dir);
         // 不是目录不扫，直接 false 处理
+        if (!file_exists($dir)) {
+            logger()->debug('Scan dir failed, no such file or directory.');
+            return false;
+        }
         if (!is_dir($dir)) {
-            logger()->warning('Scan dir failed, no such directory.');
+            logger()->warning('Scan dir failed, not directory.');
             return false;
         }
         logger()->debug('scanning directory ' . $dir);
@@ -317,8 +321,12 @@ class FileSystem
         $dir = FileSystem::convertPath($dir);
         logger()->debug('Removing path recursively: "' . $dir . '"');
         // 不是目录不扫，直接 false 处理
+        if (!file_exists($dir)) {
+            logger()->debug('Scan dir failed, no such file or directory.');
+            return false;
+        }
         if (!is_dir($dir)) {
-            logger()->warning('Scan dir failed, no such directory.');
+            logger()->warning('Scan dir failed, not directory.');
             return false;
         }
         logger()->debug('scanning directory ' . $dir);

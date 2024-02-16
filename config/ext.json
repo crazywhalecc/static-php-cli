@@ -93,13 +93,6 @@
             "freetype"
         ]
     },
-    "gettext": {
-        "type": "builtin",
-        "arg-type": "with",
-        "lib-depends": [
-            "gettext"
-        ]
-    },
     "glfw": {
         "type": "external",
         "arg-type": "custom",
@@ -313,13 +306,6 @@
         "type": "external",
         "source": "protobuf"
     },
-    "pspell": {
-        "type": "builtin",
-        "arg-type": "with",
-        "lib-depends": [
-            "aspell"
-        ]
-    },
     "rar": {
         "type": "external",
         "source": "rar",
@@ -369,13 +355,6 @@
         ],
         "ext-suggest": [
             "apcu"
-        ]
-    },
-    "snmp": {
-        "type": "builtin",
-        "arg-type": "with",
-        "lib-depends": [
-            "net-snmp"
         ]
     },
     "soap": {
