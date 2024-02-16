@@ -77,12 +77,23 @@ class BuildCliCommand extends BuildCommand
             if (!empty($this->input->getOption('with-hardcoded-ini'))) {
                 $indent_texts['Hardcoded INI'] = $this->input->getOption('with-hardcoded-ini');
             }
-            $this->printFormatInfo($indent_texts);
+            if ($this->input->getOption('disable-opcache-jit')) {
+                $indent_texts['Opcache JIT'] = 'disabled';
+            }
+            try {
+                $ver = $builder->getPHPVersion();
+                $indent_texts['PHP Version'] = $ver;
+            } catch (\Throwable) {
+                if (($ver = $builder->getPHPVersionFromArchive()) !== false) {
+                    $indent_texts['PHP Version'] = $ver;
+                }
+            }
 
             if (!empty($not_included)) {
-                logger()->warning('Some extensions will be enabled due to dependencies: ' . implode(',', $not_included));
+                $indent_texts['Extra Exts (' . count($not_included) . ')'] = implode(', ', $not_included);
             }
-            logger()->info('Build will start after 2s ...');
+            $this->printFormatInfo($indent_texts);
+            logger()->notice('Build will start after 2s ...');
             sleep(2);
 
             if ($this->input->getOption('with-clean')) {
