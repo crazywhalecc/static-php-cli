@@ -16,6 +16,7 @@ trait gettext
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--disable-java ' .
+                '--disable-c+ ' .
                 $extra .
                 '--with-libiconv-prefix=' . BUILD_ROOT_PATH . ' ' .
                 '--prefix=' . BUILD_ROOT_PATH

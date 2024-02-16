@@ -16,12 +16,21 @@ class gettext extends Extension
 {
     /**
      * @throws FileSystemException
+     */
+    public function patchBeforeBuildconf(): bool
+    {
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gettext/config.m4', 'AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB(intl');
+        return true;
+    }
+
+    /**
      * @throws WrongUsageException
+     * @throws FileSystemException
      */
     public function patchBeforeConfigure(): bool
     {
         $frameworks = $this->builder instanceof MacOSBuilder ? ' ' . $this->builder->getFrameworks(true) . ' ' : '';
-        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/-lintl/', $this->getLibFilesString() . $frameworks);
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/configure', '-lintl', $this->getLibFilesString() . $frameworks);
         return true;
     }
 }
