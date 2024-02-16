@@ -17,7 +17,7 @@ jobs:
         php-version:
           - "8.1"
         micro-version:
-          - "8.1.27"
+          - "8.2.16"
         operating-system:
           - "linux-x86_64"
           - "macos-x86_64"
