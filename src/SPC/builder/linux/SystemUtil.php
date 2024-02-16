@@ -110,11 +110,7 @@ class SystemUtil
     public static function getTuneCFlags(string $arch): array
     {
         return match ($arch) {
-            'x86_64' => [
-                '-march=corei7',
-                '-mtune=core-avx2',
-            ],
-            'arm64', 'aarch64' => [],
+            'x86_64', 'arm64', 'aarch64' => [],
             default => throw new RuntimeException('unsupported arch: ' . $arch),
         };
     }
