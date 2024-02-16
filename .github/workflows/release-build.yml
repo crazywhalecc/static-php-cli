@@ -96,7 +96,7 @@ jobs:
           if [ "${{ matrix.operating-system }}" != "windows-x64" ]; then
             mkdir dist/ && cp ${{ env.filename }} dist/ && cp spc dist/spc-$OS
           else
-            mkdir dist/ && cp ${{ env.filename }} dist/
+            mkdir dist/ && cp spc.exe dist/${{ env.filename }}
             echo "SUFFIX=.exe" >> $GITHUB_ENV
           fi
 
@@ -122,4 +122,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: spc${{ env.SUFFIX }}
-          name: spc-${{ matrix.operating-system }}
+          name: spc-${{ matrix.operating-system }}${{ env.SUFFIX }}
