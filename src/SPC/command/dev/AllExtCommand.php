@@ -59,7 +59,7 @@ class AllExtCommand extends BaseCommand
             }
 
             try {
-                [, $libraries, $not_included] = DependencyUtil::getExtLibsByDeps([$extension]);
+                [, $libraries, $not_included] = DependencyUtil::getExtsAndLibs([$extension]);
             } catch (WrongUsageException) {
                 $libraries = $not_included = [];
             }

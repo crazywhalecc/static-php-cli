@@ -107,7 +107,7 @@ abstract class UnixBuilderBase extends BuilderBase
         // if no libs specified, compile all supported libs
         if ($sorted_libraries === [] && $this->isLibsOnly()) {
             $libraries = array_keys($support_lib_list);
-            $sorted_libraries = DependencyUtil::getLibsByDeps($libraries);
+            $sorted_libraries = DependencyUtil::getLibs($libraries);
         }
 
         // pkg-config must be compiled first, whether it is specified or not
