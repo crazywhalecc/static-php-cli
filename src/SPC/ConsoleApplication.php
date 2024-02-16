@@ -23,7 +23,7 @@ use Symfony\Component\Console\Command\ListCommand;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.1.0-beta.2';
+    public const VERSION = '2.1.0-beta.3';
 
     public function __construct()
     {

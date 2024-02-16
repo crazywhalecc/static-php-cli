@@ -15,14 +15,15 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "8.1"
+          - "8.2"
         micro-version:
-          - "8.1.26"
+          - "8.2.16"
         operating-system:
           - "linux-x86_64"
           - "macos-x86_64"
           - "linux-aarch64"
           - "macos-aarch64"
+          - "windows-x64"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v4"
@@ -59,31 +60,51 @@ jobs:
 
       - name: "Download minimal combination"
         run: |
-          curl https://dl.static-php.dev/static-php-cli/minimal/php-${{ matrix.micro-version }}-micro-${{ matrix.operating-system }}.tar.gz -o tmp.tgz
-          tar -zxvf tmp.tgz
-
+          if [ "${{ matrix.operating-system }}" = "windows-x64" ]; then
+            curl https://dl.static-php.dev/static-php-cli/windows/spc-min/php-${{ matrix.micro-version }}-micro-win.zip -o tmp.zip
+            unzip tmp.zip
+          else
+            curl https://dl.static-php.dev/static-php-cli/minimal/php-${{ matrix.micro-version }}-micro-${{ matrix.operating-system }}.tar.gz -o tmp.tgz
+            tar -zxvf tmp.tgz
+          fi
+          
       - name: "Generate Executable"
         run: |
-          cat micro.sfx spc.phar > spc
-          chmod +x spc
+          if [ "${{ matrix.operating-system }}" = "windows-x64" ]; then
+            cat micro.sfx spc.phar > spc.exe
+          else
+            cat micro.sfx spc.phar > spc
+            chmod +x spc
+          fi
 
       - name: "Archive Executable"
         run: |
-          tar -czf spc-${{ matrix.operating-system }}.tar.gz spc
-          echo "filename=spc-${{ matrix.operating-system }}.tar.gz" >> $GITHUB_ENV
-          echo "OS=${{ matrix.operating-system }}" >> $GITHUB_ENV
-          if [ "${{ matrix.operating-system }}" == "linux-x86_64" ]; then
-            ./spc dev:extensions
+          if [ "${{ matrix.operating-system }}" != "windows-x64" ]; then
+            tar -czf spc-${{ matrix.operating-system }}.tar.gz spc
+            echo "filename=spc-${{ matrix.operating-system }}.tar.gz" >> $GITHUB_ENV
+            echo "OS=${{ matrix.operating-system }}" >> $GITHUB_ENV
+            if [ "${{ matrix.operating-system }}" == "linux-x86_64" ]; then
+              ./spc dev:extensions
+            fi
+          else
+            echo "filename=spc-${{ matrix.operating-system }}.exe" >> $GITHUB_ENV
+            echo "OS=${{ matrix.operating-system }}" >> $GITHUB_ENV
           fi
 
       - name: "Copy file"
-        run: "mkdir dist/ && cp ${{ env.filename }} dist/ && cp spc dist/spc-$OS"
+        run: |
+          if [ "${{ matrix.operating-system }}" != "windows-x64" ]; then
+            mkdir dist/ && cp ${{ env.filename }} dist/ && cp spc dist/spc-$OS
+          else
+            mkdir dist/ && cp spc.exe dist/${{ env.filename }}
+            echo "SUFFIX=.exe" >> $GITHUB_ENV
+          fi
 
       - name: upload binaries to release
         uses: softprops/action-gh-release@v1
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
-          files: ${{ env.filename }}
+          files: dist/${{ env.filename }}
 
       - name: "Deploy to Self-Hosted Server"
         if: github.repository == 'crazywhalecc/static-php-cli'
@@ -100,5 +121,5 @@ jobs:
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v3
         with:
-          path: spc
-          name: spc-${{ matrix.operating-system }}
+          path: spc${{ env.SUFFIX }}
+          name: spc-${{ matrix.operating-system }}${{ env.SUFFIX }}
