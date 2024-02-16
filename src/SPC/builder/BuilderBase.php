@@ -232,6 +232,30 @@ abstract class BuilderBase
     }
 
     /**
+     * Get PHP version from archive file name.
+     *
+     * @param null|string $file php-*.*.*.tar.gz filename, read from lockfile if empty
+     */
+    public function getPHPVersionFromArchive(?string $file = null): false|string
+    {
+        if ($file === null) {
+            $lock = file_exists(DOWNLOAD_PATH . '/.lock.json') ? file_get_contents(DOWNLOAD_PATH . '/.lock.json') : false;
+            if ($lock === false) {
+                return false;
+            }
+            $lock = json_decode($lock, true);
+            $file = $lock['php-src']['filename'] ?? null;
+            if ($file === null) {
+                return false;
+            }
+        }
+        if (preg_match('/php-(\d+\.\d+\.\d+)/', $file, $match)) {
+            return $match[1];
+        }
+        return false;
+    }
+
+    /**
      * Get build type name string to display.
      *
      * @param int $type Build target type
