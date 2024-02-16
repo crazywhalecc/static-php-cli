@@ -185,8 +185,11 @@ class Extension
                 file_get_contents(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php')
             );
 
-            [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
+            [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
             if ($ret !== 0) {
+                if ($this->builder->getOption('debug')) {
+                    var_dump($out);
+                }
                 throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
             }
         }

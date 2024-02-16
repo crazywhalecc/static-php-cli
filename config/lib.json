@@ -83,6 +83,22 @@
             "brotli"
         ]
     },
+    "gettext": {
+        "source": "gettext",
+        "static-libs-unix": [
+            "libintl.a"
+        ],
+        "lib-depends": [
+            "libiconv"
+        ],
+        "lib-suggests": [
+            "ncurses",
+            "libxml2"
+        ],
+        "frameworks": [
+            "CoreFoundation"
+        ]
+    },
     "glfw": {
         "source": "ext-glfw",
         "static-libs-unix": [

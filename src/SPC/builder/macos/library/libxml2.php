@@ -18,7 +18,7 @@ class libxml2 extends MacOSLibraryBase
      */
     protected function build(): void
     {
-        $enable_zlib = $this->builder->getLib('zlib') ? 'ON' : 'OFF';
+        $enable_zlib = $this->builder->getLib('zlib') ? ('ON -DZLIB_LIBRARY=' . BUILD_LIB_PATH . '/libz.a -DZLIB_INCLUDE_DIR=' . BUILD_INCLUDE_PATH) : 'OFF';
         $enable_icu = $this->builder->getLib('icu') ? 'ON' : 'OFF';
         $enable_xz = $this->builder->getLib('xz') ? 'ON' : 'OFF';
 

@@ -93,6 +93,13 @@
             "freetype"
         ]
     },
+    "gettext": {
+        "type": "builtin",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "gettext"
+        ]
+    },
     "glfw": {
         "type": "external",
         "arg-type": "custom",
