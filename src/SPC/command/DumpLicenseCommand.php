@@ -22,8 +22,8 @@ class DumpLicenseCommand extends BaseCommand
     {
         $this->addOption('for-extensions', null, InputOption::VALUE_REQUIRED, 'Dump by extensions and related libraries', null);
         $this->addOption('without-php', null, InputOption::VALUE_NONE, 'Dump without php-src');
-        $this->addOption('by-libs', null, InputOption::VALUE_REQUIRED, 'Dump by libraries', null);
-        $this->addOption('by-sources', null, InputOption::VALUE_REQUIRED, 'Dump by original sources (source.json)', null);
+        $this->addOption('for-libs', null, InputOption::VALUE_REQUIRED, 'Dump by libraries', null);
+        $this->addOption('for-sources', null, InputOption::VALUE_REQUIRED, 'Dump by original sources (source.json)', null);
         $this->addOption('dump-dir', null, InputOption::VALUE_REQUIRED, 'Change dump directory', BUILD_ROOT_PATH . '/license');
     }
 
@@ -39,7 +39,7 @@ class DumpLicenseCommand extends BaseCommand
             // 从参数中获取要编译的 extensions，并转换为数组
             $extensions = array_map('trim', array_filter(explode(',', $this->getOption('for-extensions'))));
             // 根据提供的扩展列表获取依赖库列表并编译
-            [$extensions, $libraries] = DependencyUtil::getExtLibsByDeps($extensions);
+            [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions);
             $dumper->addExts($extensions);
             $dumper->addLibs($libraries);
             if (!$this->getOption('without-php')) {
@@ -52,22 +52,22 @@ class DumpLicenseCommand extends BaseCommand
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
             return static::SUCCESS;
         }
-        if ($this->getOption('by-libs') !== null) {
-            $libraries = array_map('trim', array_filter(explode(',', $this->getOption('by-libs'))));
-            $libraries = DependencyUtil::getLibsByDeps($libraries);
+        if ($this->getOption('for-libs') !== null) {
+            $libraries = array_map('trim', array_filter(explode(',', $this->getOption('for-libs'))));
+            $libraries = DependencyUtil::getLibs($libraries);
             $dumper->addLibs($libraries);
             $dumper->dump($this->getOption('dump-dir'));
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
             return static::SUCCESS;
         }
-        if ($this->getOption('by-sources') !== null) {
-            $sources = array_map('trim', array_filter(explode(',', $this->getOption('by-sources'))));
+        if ($this->getOption('for-sources') !== null) {
+            $sources = array_map('trim', array_filter(explode(',', $this->getOption('for-sources'))));
             $dumper->addSources($sources);
             $dumper->dump($this->getOption('dump-dir'));
             $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
             return static::SUCCESS;
         }
-        $this->output->writeln('You must use one of "--for-extensions=", "--by-libs=", "--by-sources=" to dump');
+        $this->output->writeln('You must use one of "--for-extensions=", "--for-libs=", "--for-sources=" to dump');
         return static::FAILURE;
     }
 }
