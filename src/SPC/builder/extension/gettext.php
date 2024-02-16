@@ -19,7 +19,9 @@ class gettext extends Extension
      */
     public function patchBeforeBuildconf(): bool
     {
-        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gettext/config.m4', 'AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB(intl');
+        if ($this->builder instanceof MacOSBuilder) {
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gettext/config.m4', 'AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB(intl');
+        }
         return true;
     }
 
@@ -29,8 +31,10 @@ class gettext extends Extension
      */
     public function patchBeforeConfigure(): bool
     {
-        $frameworks = $this->builder instanceof MacOSBuilder ? ' ' . $this->builder->getFrameworks(true) . ' ' : '';
-        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/configure', '-lintl', $this->getLibFilesString() . $frameworks);
+        if ($this->builder instanceof MacOSBuilder) {
+            $frameworks = ' ' . $this->builder->getFrameworks(true) . ' ';
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/configure', '-lintl', $this->getLibFilesString() . $frameworks);
+        }
         return true;
     }
 }
