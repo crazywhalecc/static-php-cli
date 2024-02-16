@@ -104,7 +104,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
-          files: ${{ env.filename }}
+          files: dist/${{ env.filename }}
 
       - name: "Deploy to Self-Hosted Server"
         if: github.repository == 'crazywhalecc/static-php-cli'
