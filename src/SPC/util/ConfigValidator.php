@@ -70,4 +70,9 @@ class ConfigValidator
     {
         is_array($data) || throw new ValidationException('ext.json is broken');
     }
+
+    public static function validatePkgs(mixed $data): void
+    {
+        is_array($data) || throw new \_PHPStan_c997ea9ee\Nette\Schema\ValidationException('pkg.json is broken');
+    }
 }
