@@ -1,4 +1,8 @@
 {
+    "musl-toolchain-aarch64-linux": {
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz"
+    },
     "musl-toolchain-x86_64-linux": {
         "type": "url",
         "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz"
