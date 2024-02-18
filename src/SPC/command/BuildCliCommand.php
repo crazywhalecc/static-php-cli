@@ -58,6 +58,9 @@ class BuildCliCommand extends BuildCommand
             $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm, embed</comment>");
             return static::FAILURE;
         }
+        if ($rule === BUILD_TARGET_ALL) {
+            logger()->warning('--build-all option makes `--no-strip` always true, be aware!');
+        }
         try {
             // create builder
             $builder = BuilderProvider::makeBuilderByInput($this->input);
