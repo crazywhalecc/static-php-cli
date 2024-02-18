@@ -14,7 +14,8 @@ class openssl extends WindowsLibraryBase
 
     protected function build(): void
     {
-        $perl = file_exists(BUILD_ROOT_PATH . '\perl\perl\bin\perl.exe') ? (BUILD_ROOT_PATH . '\perl\perl\bin\perl.exe') : SystemUtil::findCommand('perl.exe');
+        $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl-' . arch2gnu(php_uname('m')) . '-win\perl\bin\perl.exe';
+        $perl = file_exists($perl_path_native) ? ($perl_path_native) : SystemUtil::findCommand('perl.exe');
         if ($perl === null) {
             throw new RuntimeException('You need to install perl first! (easiest way is using static-php-cli command "doctor")');
         }

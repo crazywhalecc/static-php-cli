@@ -246,6 +246,92 @@ class Downloader
         }*/
     }
 
+    public static function downloadPackage(string $name, ?array $pkg = null, bool $force = false): void
+    {
+        if ($pkg === null) {
+            $pkg = Config::getPkg($name);
+        }
+
+        if ($pkg === null) {
+            logger()->warning('Package {name} unknown. Skipping.', ['name' => $name]);
+            return;
+        }
+
+        if (!is_dir(DOWNLOAD_PATH)) {
+            FileSystem::createDir(DOWNLOAD_PATH);
+        }
+
+        // load lock file
+        if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+            $lock = [];
+        } else {
+            $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
+        }
+        // If lock file exists, skip downloading
+        if (isset($lock[$name]) && !$force) {
+            if ($lock[$name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename'])) {
+                logger()->notice("Package [{$name}] already downloaded: " . $lock[$name]['filename']);
+                return;
+            }
+            if ($lock[$name]['source_type'] === 'dir' && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])) {
+                logger()->notice("Package [{$name}] already downloaded: " . $lock[$name]['dirname']);
+                return;
+            }
+        }
+
+        try {
+            switch ($pkg['type']) {
+                case 'bitbuckettag':    // BitBucket Tag
+                    [$url, $filename] = self::getLatestBitbucketTag($name, $pkg);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    break;
+                case 'ghtar':           // GitHub Release (tar)
+                    [$url, $filename] = self::getLatestGithubTarball($name, $pkg);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    break;
+                case 'ghtagtar':        // GitHub Tag (tar)
+                    [$url, $filename] = self::getLatestGithubTarball($name, $pkg, 'tags');
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    break;
+                case 'ghrel':           // GitHub Release (uploaded)
+                    [$url, $filename] = self::getLatestGithubRelease($name, $pkg);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    break;
+                case 'filelist':        // Basic File List (regex based crawler)
+                    [$url, $filename] = self::getFromFileList($name, $pkg);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    break;
+                case 'url':             // Direct download URL
+                    $url = $pkg['url'];
+                    $filename = $pkg['filename'] ?? basename($pkg['url']);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    break;
+                case 'git':             // Git repo
+                    self::downloadGit($name, $pkg['url'], $pkg['rev'], $pkg['extract'] ?? null);
+                    break;
+                case 'custom':          // Custom download method, like API-based download or other
+                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
+                    foreach ($classes as $class) {
+                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
+                            (new $class())->fetch();
+                            break;
+                        }
+                    }
+                    break;
+                default:
+                    throw new DownloaderException('unknown source type: ' . $pkg['type']);
+            }
+        } catch (RuntimeException $e) {
+            // Because sometimes files downloaded through the command line are not automatically deleted after a failure.
+            // Here we need to manually delete the file if it is detected to exist.
+            if (isset($filename) && file_exists(DOWNLOAD_PATH . '/' . $filename)) {
+                logger()->warning('Deleting download file: ' . $filename);
+                unlink(DOWNLOAD_PATH . '/' . $filename);
+            }
+            throw new DownloaderException('Download failed! ' . $e->getMessage());
+        }
+    }
+
     /**
      * Download source by name and meta.
      *

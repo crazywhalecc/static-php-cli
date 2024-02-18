@@ -11,7 +11,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
-use SPC\store\SourceExtractor;
+use SPC\store\SourceManager;
 use SPC\util\DependencyUtil;
 
 abstract class UnixBuilderBase extends BuilderBase
@@ -134,7 +134,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $this->emitPatchPoint('before-libs-extract');
 
         // extract sources
-        SourceExtractor::initSource(libs: $sorted_libraries);
+        SourceManager::initSource(libs: $sorted_libraries);
 
         $this->emitPatchPoint('after-libs-extract');
 
