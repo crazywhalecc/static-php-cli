@@ -1,17 +1,7 @@
 {
-    "upx-x86_64-linux": {
+    "musl-toolchain-x86_64-linux": {
         "type": "url",
-        "url": "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-amd64_linux.tar.xz",
-        "extract-files": {
-            "upx": "{pkg_root_path}/bin/upx"
-        }
-    },
-    "upx-aarch64-linux": {
-        "type": "url",
-        "url": "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-arm64_linux.tar.xz",
-        "extract-files": {
-            "upx": "{pkg_root_path}/bin/upx"
-        }
+        "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz"
     },
     "nasm-x86_64-win": {
         "type": "url",
@@ -25,8 +15,18 @@
         "type": "url",
         "url": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip"
     },
-    "musl-toolchain-x86_64-linux": {
+    "upx-aarch64-linux": {
         "type": "url",
-        "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz"
+        "url": "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-arm64_linux.tar.xz",
+        "extract-files": {
+            "upx": "{pkg_root_path}/bin/upx"
+        }
+    },
+    "upx-x86_64-linux": {
+        "type": "url",
+        "url": "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-amd64_linux.tar.xz",
+        "extract-files": {
+            "upx": "{pkg_root_path}/bin/upx"
+        }
     }
 }
