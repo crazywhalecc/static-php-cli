@@ -16,15 +16,17 @@
         "url": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip"
     },
     "upx-aarch64-linux": {
-        "type": "url",
-        "url": "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-arm64_linux.tar.xz",
+        "type": "ghrel",
+        "repo": "upx/upx",
+        "match": "upx.+-arm64_linux\\.tar\\.xz",
         "extract-files": {
             "upx": "{pkg_root_path}/bin/upx"
         }
     },
     "upx-x86_64-linux": {
-        "type": "url",
-        "url": "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-amd64_linux.tar.xz",
+        "type": "ghrel",
+        "repo": "upx/upx",
+        "match": "upx.+-amd64_linux\\.tar\\.xz",
         "extract-files": {
             "upx": "{pkg_root_path}/bin/upx"
         }
