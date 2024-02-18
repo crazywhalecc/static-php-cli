@@ -56,11 +56,6 @@ abstract class BaseCommand extends Command
             // 如果 return false 则错误会继续递交给 PHP 标准错误处理
             return true;
         }, E_ALL | E_STRICT);
-        if ($input->getOption('debug')) {
-            global $ob_logger;
-            $ob_logger = new ConsoleLogger(LogLevel::DEBUG);
-            define('DEBUG_MODE', true);
-        }
         $version = ConsoleApplication::VERSION;
         if (!$this->no_motd) {
             echo "     _        _   _                 _           
@@ -82,6 +77,14 @@ abstract class BaseCommand extends Command
     {
         $this->input = $input;
         $this->output = $output;
+
+        global $ob_logger;
+        if ($input->getOption('debug')) {
+            $ob_logger = new ConsoleLogger(LogLevel::DEBUG, decorated: !$input->getOption('no-ansi'));
+            define('DEBUG_MODE', true);
+        } else {
+            $ob_logger = new ConsoleLogger(decorated: !$input->getOption('no-ansi'));
+        }
 
         // windows fallback
         Prompt::fallbackWhen(PHP_OS_FAMILY === 'Windows');
