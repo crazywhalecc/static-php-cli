@@ -8,7 +8,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
-class SourceExtractor
+class SourceManager
 {
     /**
      * @throws WrongUsageException
@@ -59,7 +59,7 @@ class SourceExtractor
             }
 
             // check source dir exist
-            $check = $lock[$source]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (SOURCE_PATH . '/' . $lock[$source]['move_path']);
+            $check = $lock[$source]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (WORKING_DIR . '/' . $lock[$source]['move_path']);
             if (!is_dir($check)) {
                 logger()->debug('Extracting source [' . $source . '] to ' . $check . ' ...');
                 FileSystem::extractSource($source, DOWNLOAD_PATH . '/' . ($lock[$source]['filename'] ?? $lock[$source]['dirname']), $lock[$source]['move_path']);

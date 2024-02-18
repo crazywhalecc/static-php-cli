@@ -10,7 +10,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
-use SPC\store\SourceExtractor;
+use SPC\store\SourceManager;
 use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
 
@@ -211,7 +211,7 @@ class WindowsBuilder extends BuilderBase
         }
 
         // extract sources
-        SourceExtractor::initSource(libs: $sorted_libraries);
+        SourceManager::initSource(libs: $sorted_libraries);
 
         // build all libs
         foreach ($this->libs as $lib) {

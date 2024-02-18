@@ -8,11 +8,11 @@ use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\store\SourceExtractor;
+use SPC\store\SourceManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
-#[AsCommand('extract', 'Extract required sources')]
+#[AsCommand('extract', 'Extract required sources', ['extract-source'])]
 class ExtractCommand extends BaseCommand
 {
     use UnixSystemUtilTrait;
@@ -34,7 +34,7 @@ class ExtractCommand extends BaseCommand
             $this->output->writeln('<error>sources cannot be empty, at least contain one !</error>');
             return static::FAILURE;
         }
-        SourceExtractor::initSource(sources: $sources);
+        SourceManager::initSource(sources: $sources);
         logger()->info('Extract done !');
         return static::SUCCESS;
     }

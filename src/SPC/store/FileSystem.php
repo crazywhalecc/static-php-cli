@@ -16,7 +16,7 @@ class FileSystem
      */
     public static function loadConfigArray(string $config, ?string $config_dir = null): array
     {
-        $whitelist = ['ext', 'lib', 'source'];
+        $whitelist = ['ext', 'lib', 'source', 'pkg'];
         if (!in_array($config, $whitelist)) {
             throw new FileSystemException('Reading ' . $config . '.json is not allowed');
         }
@@ -139,6 +139,37 @@ class FileSystem
     }
 
     /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public static function extractPackage(string $name, string $filename, ?string $extract_path = null): void
+    {
+        if ($extract_path !== null) {
+            // replace
+            $extract_path = self::replacePathVariable($extract_path);
+            $extract_path = self::isRelativePath($extract_path) ? (WORKING_DIR . '/' . $extract_path) : $extract_path;
+        } else {
+            $extract_path = PKG_ROOT_PATH . '/' . $name;
+        }
+        logger()->info("extracting {$name} package to {$extract_path} ...");
+        $target = self::convertPath($extract_path);
+
+        if (!is_dir($dir = dirname($target))) {
+            self::createDir($dir);
+        }
+        try {
+            self::extractArchive($filename, $target);
+        } catch (RuntimeException $e) {
+            if (PHP_OS_FAMILY === 'Windows') {
+                f_passthru('rmdir /s /q ' . $target);
+            } else {
+                f_passthru('rm -r ' . $target);
+            }
+            throw new FileSystemException('Cannot extract package ' . $name, $e->getCode(), $e);
+        }
+    }
+
+    /**
      * 解压缩下载的资源包到 source 目录
      *
      * @param  string              $name     资源名
@@ -152,52 +183,24 @@ class FileSystem
         if (self::$_extract_hook === []) {
             SourcePatcher::init();
         }
-        if (!is_dir(SOURCE_PATH)) {
-            self::createDir(SOURCE_PATH);
-        }
         if ($move_path !== null) {
             $move_path = SOURCE_PATH . '/' . $move_path;
         }
         logger()->info("extracting {$name} source to " . ($move_path ?? SOURCE_PATH . "/{$name}") . ' ...');
+        $target = self::convertPath($move_path ?? (SOURCE_PATH . "/{$name}"));
+        if (!is_dir($dir = dirname($target))) {
+            self::createDir($dir);
+        }
         try {
-            $target = self::convertPath($move_path ?? (SOURCE_PATH . "/{$name}"));
-            // Git source, just move
-            if (is_dir(self::convertPath($filename))) {
-                self::copyDir(self::convertPath($filename), $target);
-                self::emitSourceExtractHook($name);
-                return;
-            }
-            if (f_mkdir(directory: $target, recursive: true) !== true) {
-                throw new FileSystemException('create ' . $name . 'source dir failed');
-            }
-
-            if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
-                match (self::extname($filename)) {
-                    'tar', 'xz', 'txz' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
-                    'tgz', 'gz' => f_passthru("tar -xzf {$filename} -C {$target} --strip-components 1"),
-                    'bz2' => f_passthru("tar -xjf {$filename} -C {$target} --strip-components 1"),
-                    'zip' => f_passthru("unzip {$filename} -d {$target}"),
-                    default => throw new FileSystemException('unknown archive format: ' . $filename),
-                };
-            } elseif (PHP_OS_FAMILY === 'Windows') {
-                // use php-sdk-binary-tools/bin/7za.exe
-                $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
-                f_mkdir(SOURCE_PATH . "/{$name}", recursive: true);
-                match (self::extname($filename)) {
-                    'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
-                    'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | tar -f - -x -C {$target} --strip-components 1"),
-                    'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
-                    default => throw new FileSystemException("unknown archive format: {$filename}"),
-                };
-            }
+            self::extractArchive($filename, $target);
             self::emitSourceExtractHook($name);
         } catch (RuntimeException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
-                f_passthru('rmdir /s /q ' . SOURCE_PATH . "/{$name}");
+                f_passthru('rmdir /s /q ' . $target);
             } else {
-                f_passthru('rm -r ' . SOURCE_PATH . "/{$name}");
+                f_passthru('rm -r ' . $target);
             }
-            throw new FileSystemException('Cannot extract source ' . $name, $e->getCode(), $e);
+            throw new FileSystemException('Cannot extract source ' . $name . ': ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -409,6 +412,54 @@ class FileSystem
             return !(strlen($path) > 2 && ctype_alpha($path[0]) && $path[1] === ':');
         }
         return strlen($path) > 0 && $path[0] !== '/';
+    }
+
+    public static function replacePathVariable(string $path): string
+    {
+        $replacement = [
+            '{pkg_root_path}' => PKG_ROOT_PATH,
+            '{php_sdk_path}' => defined('PHP_SDK_PATH') ? PHP_SDK_PATH : WORKING_DIR . '/php-sdk-binary-tools',
+            '{working_dir}' => WORKING_DIR,
+            '{download_path}' => DOWNLOAD_PATH,
+            '{source_path}' => SOURCE_PATH,
+        ];
+        return str_replace(array_keys($replacement), array_values($replacement), $path);
+    }
+
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    private static function extractArchive(string $filename, string $target): void
+    {
+        // Git source, just move
+        if (is_dir(self::convertPath($filename))) {
+            self::copyDir(self::convertPath($filename), $target);
+            return;
+        }
+        // Create base dir
+        if (f_mkdir(directory: $target, recursive: true) !== true) {
+            throw new FileSystemException('create ' . $target . ' dir failed');
+        }
+
+        if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
+            match (self::extname($filename)) {
+                'tar', 'xz', 'txz' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
+                'tgz', 'gz' => f_passthru("tar -xzf {$filename} -C {$target} --strip-components 1"),
+                'bz2' => f_passthru("tar -xjf {$filename} -C {$target} --strip-components 1"),
+                'zip' => f_passthru("unzip {$filename} -d {$target}"),
+                default => throw new FileSystemException('unknown archive format: ' . $filename),
+            };
+        } elseif (PHP_OS_FAMILY === 'Windows') {
+            // use php-sdk-binary-tools/bin/7za.exe
+            $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
+            match (self::extname($filename)) {
+                'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | tar -f - -x -C {$target} --strip-components 1"),
+                'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
+                default => throw new FileSystemException("unknown archive format: {$filename}"),
+            };
+        }
     }
 
     /**

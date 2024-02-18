@@ -16,6 +16,9 @@ docker/source/
 # default source build root directory
 /buildroot/
 
+# default package root directory
+/pkgroot/
+
 # tools cache files
 .php-cs-fixer.cache
 .phpunit.result.cache

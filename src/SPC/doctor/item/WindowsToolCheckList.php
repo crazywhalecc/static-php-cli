@@ -9,8 +9,8 @@ use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
 use SPC\exception\RuntimeException;
-use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\PackageManager;
 
 class WindowsToolCheckList
 {
@@ -64,8 +64,9 @@ class WindowsToolCheckList
     #[AsCheckItem('if perl(strawberry) installed', limit_os: 'Windows', level: 994)]
     public function checkPerl(): ?CheckResult
     {
-        if (file_exists(BUILD_ROOT_PATH . '\perl\perl\bin\perl.exe')) {
-            return CheckResult::ok(BUILD_ROOT_PATH . '\perl\perl\bin\perl.exe');
+        $arch = arch2gnu(php_uname('m'));
+        if (file_exists(PKG_ROOT_PATH . '\strawberry-perl-' . $arch . '-win\perl\bin\perl.exe')) {
+            return CheckResult::ok(PKG_ROOT_PATH . '\strawberry-perl-' . $arch . '-win\perl\bin\perl.exe');
         }
         if (($path = SystemUtil::findCommand('perl.exe')) === null) {
             return CheckResult::fail('perl not found in path.', 'install-perl');
@@ -91,32 +92,15 @@ class WindowsToolCheckList
     #[AsFixItem('install-nasm')]
     public function installNasm(): bool
     {
-        // The hardcoded version here is to be consistent with the version compiled by `musl-cross-toolchain`.
-        $nasm_ver = '2.16.01';
-        $nasm_dist = "nasm-{$nasm_ver}";
-        $source = [
-            'type' => 'url',
-            'url' => "https://www.nasm.us/pub/nasm/releasebuilds/{$nasm_ver}/win64/{$nasm_dist}-win64.zip",
-        ];
-        logger()->info('Downloading ' . $source['url']);
-        Downloader::downloadSource('nasm', $source);
-        FileSystem::extractSource('nasm', DOWNLOAD_PATH . "\\{$nasm_dist}-win64.zip");
-        copy(SOURCE_PATH . "\\nasm\\{$nasm_dist}\\nasm.exe", PHP_SDK_PATH . '\bin\nasm.exe');
-        copy(SOURCE_PATH . "\\nasm\\{$nasm_dist}\\ndisasm.exe", PHP_SDK_PATH . '\bin\ndisasm.exe');
+        PackageManager::installPackage('nasm-x86_64-win');
         return true;
     }
 
     #[AsFixItem('install-perl')]
     public function installPerl(): bool
     {
-        $url = 'https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip';
-        $source = [
-            'type' => 'url',
-            'url' => $url,
-        ];
-        logger()->info("Downloading {$url}");
-        Downloader::downloadSource('strawberry-perl', $source);
-        FileSystem::extractSource('strawberry-perl', DOWNLOAD_PATH . '\strawberry-perl-5.38.0.1-64bit-portable.zip', '../buildroot/perl');
+        $arch = arch2gnu(php_uname('m'));
+        PackageManager::installPackage("strawberry-perl-{$arch}-win");
         return true;
     }
 }

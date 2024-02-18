@@ -9,7 +9,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
-use SPC\store\SourceExtractor;
+use SPC\store\SourceManager;
 use SPC\util\CustomExt;
 
 abstract class BuilderBase
@@ -144,15 +144,15 @@ abstract class BuilderBase
     {
         CustomExt::loadCustomExt();
         $this->emitPatchPoint('before-php-extract');
-        SourceExtractor::initSource(sources: ['php-src']);
+        SourceManager::initSource(sources: ['php-src']);
         $this->emitPatchPoint('after-php-extract');
         if ($this->getPHPVersionID() >= 80000) {
             $this->emitPatchPoint('before-micro-extract');
-            SourceExtractor::initSource(sources: ['micro']);
+            SourceManager::initSource(sources: ['micro']);
             $this->emitPatchPoint('after-micro-extract');
         }
         $this->emitPatchPoint('before-exts-extract');
-        SourceExtractor::initSource(exts: $extensions);
+        SourceManager::initSource(exts: $extensions);
         $this->emitPatchPoint('after-exts-extract');
         foreach ($extensions as $extension) {
             $class = CustomExt::getExtClass($extension);

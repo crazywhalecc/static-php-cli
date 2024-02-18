@@ -12,6 +12,8 @@ use SPC\exception\WrongUsageException;
  */
 class Config
 {
+    public static ?array $pkg = null;
+
     public static ?array $source = null;
 
     public static ?array $lib = null;
@@ -29,6 +31,19 @@ class Config
             self::$source = FileSystem::loadConfigArray('source');
         }
         return self::$source[$name] ?? null;
+    }
+
+    /**
+     * Read pkg from pkg.json
+     *
+     * @throws FileSystemException
+     */
+    public static function getPkg(string $name): ?array
+    {
+        if (self::$pkg === null) {
+            self::$pkg = FileSystem::loadConfigArray('pkg');
+        }
+        return self::$pkg[$name] ?? null;
     }
 
     /**
