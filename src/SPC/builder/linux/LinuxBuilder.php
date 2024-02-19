@@ -257,12 +257,12 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make -j{$this->concurrency} {$vars} cli");
 
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
-        } elseif ($this->getOption('with-upx-pack')) {
+        if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
                 ->exec('strip --strip-all php')
                 ->exec($this->getOption('upx-exec') . ' --best php');
+        } elseif (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
         }
 
         $this->deployBinary(BUILD_TARGET_CLI);
@@ -312,14 +312,13 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make -j{$this->concurrency} {$vars} fpm");
 
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
-        } elseif ($this->getOption('with-upx-pack')) {
+        if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
                 ->exec('strip --strip-all php-fpm')
                 ->exec($this->getOption('upx-exec') . ' --best php-fpm');
+        } elseif (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
         }
-
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 
