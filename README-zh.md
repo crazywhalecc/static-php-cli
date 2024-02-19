@@ -25,6 +25,7 @@ static-php-cli（简称 `spc`）有许多特性：
 - :books: 自带编译依赖管理
 - 📦 提供由自身编译的独立 `spc` 二进制（使用 spc 和 [box](https://github.com/box-project/box) 构建）
 - :fire: 支持大量 [扩展](https://static-php.dev/zh/guide/extensions.html)
+- :floppy_disk: 整合 UPX 工具（减小二进制文件体积）
 
 **静态 php-cli:**
 
