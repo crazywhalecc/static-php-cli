@@ -37,6 +37,8 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('with-suggested-exts', 'E', null, 'Build with suggested extensions for selected exts');
         $this->addOption('with-added-patch', 'P', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Inject patch script outside');
         $this->addOption('without-micro-ext-test', null, null, 'Disable phpmicro with extension test code');
+
+        $this->addOption('with-upx-pack', null, null, 'Compress / pack binary using UPX tool (linux/windows only)');
     }
 
     public function handle(): int
@@ -61,6 +63,28 @@ class BuildCliCommand extends BuildCommand
         if ($rule === BUILD_TARGET_ALL) {
             logger()->warning('--build-all option makes `--no-strip` always true, be aware!');
         }
+        // Check upx
+        $suffix = PHP_OS_FAMILY === 'Windows' ? '.exe' : '';
+        if ($this->getOption('with-upx-pack')) {
+            // only available for linux for now
+            if (!in_array(PHP_OS_FAMILY, ['Linux', 'Windows'])) {
+                logger()->error('UPX is only available on Linux and Windows!');
+                return static::FAILURE;
+            }
+            // need to install this manually
+            if (!file_exists(PKG_ROOT_PATH . '/bin/upx' . $suffix)) {
+                global $argv;
+                logger()->error('upx does not exist, please install it first:');
+                logger()->error('');
+                logger()->error("\t" . $argv[0] . ' install-pkg upx');
+                logger()->error('');
+                return static::FAILURE;
+            }
+            // exclusive with no-strip
+            if ($this->getOption('no-strip')) {
+                logger()->warning('--with-upx-pack conflicts with --no-strip, --no-strip won\'t work!');
+            }
+        }
         try {
             // create builder
             $builder = BuilderProvider::makeBuilderByInput($this->input);
@@ -82,6 +106,10 @@ class BuildCliCommand extends BuildCommand
             }
             if ($this->input->getOption('disable-opcache-jit')) {
                 $indent_texts['Opcache JIT'] = 'disabled';
+            }
+            if ($this->input->getOption('with-upx-pack') && in_array(PHP_OS_FAMILY, ['Linux', 'Windows'])) {
+                $indent_texts['UPX Pack'] = 'enabled';
+                $builder->setOption('upx-exec', FileSystem::convertPath(PKG_ROOT_PATH . '/bin/upx' . $suffix));
             }
             try {
                 $ver = $builder->getPHPVersion();

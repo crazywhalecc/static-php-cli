@@ -34,5 +34,13 @@
         "extract-files": {
             "upx": "{pkg_root_path}/bin/upx"
         }
+    },
+    "upx-x86_64-win": {
+        "type": "ghrel",
+        "repo": "upx/upx",
+        "match": "upx.+-win64\\.zip",
+        "extract-files": {
+            "upx-*-win64/upx.exe": "{pkg_root_path}/bin/upx.exe"
+        }
     }
 }
