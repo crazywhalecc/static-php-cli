@@ -182,6 +182,12 @@ class LinuxBuilder extends UnixBuilderBase
                 '/POST_MICRO_BUILD_COMMANDS=.*/',
                 'POST_MICRO_BUILD_COMMANDS=true',
             );
+        } else {
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
+                '/POST_MICRO_BUILD_COMMANDS=.*/',
+                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
+            );
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')
