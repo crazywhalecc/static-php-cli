@@ -163,7 +163,7 @@ class FileSystem
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('rmdir /s /q ' . $target);
             } else {
-                f_passthru('rm -r ' . $target);
+                f_passthru('rm -rf ' . $target);
             }
             throw new FileSystemException('Cannot extract package ' . $name, $e->getCode(), $e);
         }
@@ -186,7 +186,7 @@ class FileSystem
         if ($move_path !== null) {
             $move_path = SOURCE_PATH . '/' . $move_path;
         }
-        logger()->info("extracting {$name} source to " . ($move_path ?? SOURCE_PATH . "/{$name}") . ' ...');
+        logger()->info("extracting {$name} source to " . ($move_path ?? (SOURCE_PATH . "/{$name}")) . ' ...');
         $target = self::convertPath($move_path ?? (SOURCE_PATH . "/{$name}"));
         if (!is_dir($dir = dirname($target))) {
             self::createDir($dir);
@@ -198,7 +198,7 @@ class FileSystem
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('rmdir /s /q ' . $target);
             } else {
-                f_passthru('rm -r ' . $target);
+                f_passthru('rm -rf ' . $target);
             }
             throw new FileSystemException('Cannot extract source ' . $name . ': ' . $e->getMessage(), $e->getCode(), $e);
         }
