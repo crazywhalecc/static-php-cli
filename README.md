@@ -27,6 +27,7 @@ static-php-cli (you can call it `spc`) has a lot of features:
 - :books: Build dependency management
 - 📦 Provide `spc` own standalone executable (built by spc and [box](https://github.com/box-project/box))
 - :fire: Support many popular [extensions](https://static-php.dev/en/guide/extensions.html)
+- :floppy_disk: UPX integration (significantly reduces binary size)
 
 **Single-file standalone php-cli:**
 
