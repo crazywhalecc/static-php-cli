@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
+use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
 
 class PackageManager
@@ -38,12 +39,26 @@ class PackageManager
 
         // if contains extract-files, we just move this file to destination, and remove extract dir
         if (is_array($config['extract-files'] ?? null) && is_assoc_array($config['extract-files'])) {
+            $scandir = FileSystem::scanDirFiles($extract, true, true);
             foreach ($config['extract-files'] as $file => $target) {
                 $target = FileSystem::convertPath(FileSystem::replacePathVariable($target));
                 if (!is_dir($dir = dirname($target))) {
                     f_mkdir($dir, 0755, true);
                 }
                 logger()->debug("Moving package [{$pkg_name}] file {$file} to {$target}");
+                // match pattern, needs to scan dir
+                $file = FileSystem::convertPath($file);
+                $found = false;
+                foreach ($scandir as $item) {
+                    if (match_pattern($file, $item)) {
+                        $file = $item;
+                        $found = true;
+                        break;
+                    }
+                }
+                if ($found === false) {
+                    throw new FileSystemException('Unable to find extract-files item: ' . $file);
+                }
                 rename(FileSystem::convertPath($extract . '/' . $file), $target);
             }
             FileSystem::removeDir($extract);

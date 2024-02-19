@@ -169,6 +169,21 @@ class LinuxBuilder extends UnixBuilderBase
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
+        // upx pack and strip for micro
+        if ($this->getOption('with-upx-pack', false)) {
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
+                '/POST_MICRO_BUILD_COMMANDS=.*/',
+                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH) && ' . $this->getOption('upx-exec') . ' --best \$(SAPI_MICRO_PATH)',
+            );
+        } elseif (!$this->getOption('no-strip', false)) {
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
+                '/POST_MICRO_BUILD_COMMANDS=.*/',
+                'POST_MICRO_BUILD_COMMANDS=true',
+            );
+        }
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 "{$this->getOption('ld_library_path')} " .
@@ -238,6 +253,10 @@ class LinuxBuilder extends UnixBuilderBase
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
+        } elseif ($this->getOption('with-upx-pack')) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
+                ->exec('strip --strip-all php')
+                ->exec($this->getOption('upx-exec') . ' --best php');
         }
 
         $this->deployBinary(BUILD_TARGET_CLI);
@@ -267,10 +286,6 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make -j{$this->concurrency} {$vars} micro");
 
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec('strip --strip-all micro.sfx');
-        }
-
         $this->deployBinary(BUILD_TARGET_MICRO);
 
         if ($this->phar_patched) {
@@ -293,6 +308,10 @@ class LinuxBuilder extends UnixBuilderBase
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
+        } elseif ($this->getOption('with-upx-pack')) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
+                ->exec('strip --strip-all php-fpm')
+                ->exec($this->getOption('upx-exec') . ' --best php-fpm');
         }
 
         $this->deployBinary(BUILD_TARGET_FPM);

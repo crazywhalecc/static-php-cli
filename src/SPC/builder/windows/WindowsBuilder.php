@@ -72,6 +72,19 @@ class WindowsBuilder extends BuilderBase
 
         $zts = $this->zts ? '--enable-zts=yes ' : '--enable-zts=no ';
 
+        // with-upx-pack for phpmicro
+        $makefile = FileSystem::convertPath(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.w32');
+        if ($this->getOption('with-upx-pack', false)) {
+            if (!file_exists($makefile . '.originfile')) {
+                copy($makefile, $makefile . '.originfile');
+                FileSystem::replaceFileStr($makefile, '$(MICRO_SFX):', "_MICRO_UPX = {$this->getOption('upx-exec')} --best $(MICRO_SFX)\n$(MICRO_SFX):");
+                FileSystem::replaceFileStr($makefile, '@$(_MICRO_MT)', "@$(_MICRO_MT)\n\t@$(_MICRO_UPX)");
+            }
+        } elseif (file_exists($makefile . '.originfile')) {
+            copy($makefile . '.originfile', $makefile);
+            unlink($makefile . '.originfile');
+        }
+
         cmd()->cd(SOURCE_PATH . '\php-src')
             ->exec(
                 "{$this->sdk_prefix} configure.bat --task-args \"" .
@@ -293,6 +306,12 @@ class WindowsBuilder extends BuilderBase
             BUILD_TARGET_MICRO => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\micro.sfx",
             default => throw new RuntimeException('Deployment does not accept type ' . $type),
         };
+
+        // with-upx-pack for cli
+        if ($this->getOption('with-upx-pack', false) && $type === BUILD_TARGET_CLI) {
+            cmd()->exec($this->getOption('upx-exec') . ' --best ' . escapeshellarg($src));
+        }
+
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
         FileSystem::createDir(BUILD_ROOT_PATH . '\bin');
 
