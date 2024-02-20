@@ -180,13 +180,13 @@ class LinuxBuilder extends UnixBuilderBase
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
                 '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=true',
+                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
             );
         } else {
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
                 '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
+                'POST_MICRO_BUILD_COMMANDS=true',
             );
         }
 
