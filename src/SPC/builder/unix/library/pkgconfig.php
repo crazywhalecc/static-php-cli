@@ -21,6 +21,8 @@ trait pkgconfig
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--with-internal-glib ' .
+                '--disable-host-tool ' .
+                '--with-pic ' .
                 '--prefix=' . BUILD_ROOT_PATH . ' ' .
                 '--without-sysroot ' .
                 '--without-system-include-path ' .
@@ -29,6 +31,7 @@ trait pkgconfig
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install');
+            ->exec('make install-exec');
+        shell()->exec('strip ' . BUILD_ROOT_PATH . '/bin/pkg-config');
     }
 }
