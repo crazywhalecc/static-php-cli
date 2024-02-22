@@ -157,6 +157,8 @@ bin/spc --version
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 # 编译线程安全版本 (--enable-zts)
 ./bin/spc build curl,phar --enable-zts --build-cli
+# 编译后使用 UPX 减小可执行文件体积 (--with-upx-pack) (至少压缩至原来的 30~50%)
+./bin/spc build curl,phar --enable-zts --build-cli --with-upx-pack
 ```
 
 其中，目前支持构建 cli，micro，fpm 和 embed，使用以下参数的一个或多个来指定编译的 SAPI：

@@ -167,6 +167,8 @@ Basic usage for building php with some extensions:
 ./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-cli --build-micro
 # build thread-safe (ZTS) version (--enable-zts)
 ./bin/spc build curl,phar --enable-zts --build-cli
+# build, pack executable with UPX (--with-upx-pack) (reduce binary size for 30~50%)
+./bin/spc build curl,phar --enable-zts --build-cli --with-upx-pack
 ```
 
 Now we support `cli`, `micro`, `fpm` and `embed` SAPI. You can use one or more of the following parameters to specify the compiled SAPI:
