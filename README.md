@@ -79,20 +79,21 @@ Here is the supported OS and arch, where :octocat: represents support for GitHub
 
 Currently supported PHP versions for compilation: 
 
-> - :warning: supported but not maintained
-> - :heavy_check_mark: supported
-> - :x: not supported
+> :warning: supported but not maintained
+> 
+> :heavy_check_mark: supported
+> 
+> :x: not supported
 
-| PHP Version | Status             |
-|-------------|--------------------|
-| 7.2         | :x:                |
-| 7.3         | :warning:          |
-| 7.4         | :warning:          |
-| 8.0         | :heavy_check_mark: |
-| 8.1         | :heavy_check_mark: |
-| 8.2         | :heavy_check_mark: |
-| 8.3         | :heavy_check_mark: |
-
+| PHP Version | Status             | Comment                                           |
+|-------------|--------------------|---------------------------------------------------|
+| 7.2         | :x:                |                                                   |
+| 7.3         | :warning:          | phpmicro and some extensions not supported on 7.x |
+| 7.4         | :warning:          | phpmicro and some extensions not supported on 7.x |
+| 8.0         | :heavy_check_mark: | PHP official has stopped maintenance of 8.0       |
+| 8.1         | :heavy_check_mark: |                                                   |
+| 8.2         | :heavy_check_mark: |                                                   |
+| 8.3         | :heavy_check_mark: |                                                   |
 
 ### Supported Extensions
 

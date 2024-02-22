@@ -77,15 +77,15 @@ static-php-cli（简称 `spc`）有许多特性：
 > 
 > :x: 不支持
 
-| PHP Version | Status             |
-|-------------|--------------------|
-| 7.2         | :x:                |
-| 7.3         | :warning:          |
-| 7.4         | :warning:          |
-| 8.0         | :heavy_check_mark: |
-| 8.1         | :heavy_check_mark: |
-| 8.2         | :heavy_check_mark: |
-| 8.3         | :heavy_check_mark: |
+| PHP Version | Status             | Comment                      |
+|-------------|--------------------|------------------------------|
+| 7.2         | :x:                |                              |
+| 7.3         | :warning:          | phpmicro 和许多扩展不支持 7.3、7.4 版本 |
+| 7.4         | :warning:          | phpmicro 和许多扩展不支持 7.3、7.4 版本 |
+| 8.0         | :heavy_check_mark: | PHP 官方已停止 8.0 的维护            |
+| 8.1         | :heavy_check_mark: |                              |
+| 8.2         | :heavy_check_mark: |                              |
+| 8.3         | :heavy_check_mark: |                              |
 
 ### 支持的扩展
 
