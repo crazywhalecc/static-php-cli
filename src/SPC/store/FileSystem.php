@@ -222,7 +222,7 @@ class FileSystem
     public static function convertWinPathToMinGW(string $path): string
     {
         if (preg_match('/^[A-Za-z]:/', $path)) {
-            $path = '/' . substr($path, 0, 1) . '/' . str_replace('\\', '/', substr($path, 2));
+            $path = '/' . strtolower(substr($path, 0, 1)) . '/' . str_replace('\\', '/', substr($path, 2));
         }
         return $path;
     }
@@ -463,13 +463,13 @@ class FileSystem
         } elseif (PHP_OS_FAMILY === 'Windows') {
             // use php-sdk-binary-tools/bin/7za.exe
             $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
-            $tar = self::convertPath(PHP_SDK_PATH . '/msys2/usr/bin/tar.exe');
+            // $tar = self::convertPath(PHP_SDK_PATH . '/msys2/usr/bin/tar.exe');
+            $tar = self::convertPath('C:\Program Files\Git\usr\bin\tar.exe');
             cmd()->exec('dir "' . dirname($target) . '"');
             putenv('MSYS=winsymlinks:lnk');
-            $mingw_target = self::convertWinPathToMinGW($target);
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
-                'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | \"{$tar}\" -f - -x -C \"{$mingw_target}\" --strip-components 1"),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | \"{$tar}\" -f - -x -C \"{$target}\" --strip-components 1"),
                 'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
                 default => throw new FileSystemException("unknown archive format: {$filename}"),
             };
