@@ -20,7 +20,7 @@ static-php-cli（简称 `spc`）有许多特性：
 - :handbag: 构建独立的单文件 PHP 解释器，无需任何依赖
 - :hamburger: 构建 **[phpmicro](https://github.com/dixyes/phpmicro)** 自执行二进制（将 PHP 代码和 PHP 解释器打包为一个文件）
 - :pill: 提供一键检查和修复编译环境的 Doctor 模块
-- :zap: 支持多个系统：`Linux`、`macOS`、`FreeBSD`、[`Windows (WIP)`](https://github.com/crazywhalecc/static-php-cli/pull/301)
+- :zap: 支持多个系统：`Linux`、`macOS`、`FreeBSD`、`Windows`
 - :wrench: 高度自定义的代码 patch 功能
 - :books: 自带编译依赖管理
 - 📦 提供由自身编译的独立 `spc` 二进制（使用 spc 和 [box](https://github.com/box-project/box) 构建）
@@ -47,6 +47,8 @@ static-php-cli（简称 `spc`）有许多特性：
 - [扩展组合 - bulk](https://dl.static-php.dev/static-php-cli/bulk/)：bulk 组合包含了 [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) 个扩展，体积为 70MB 左右。
 - [扩展组合 - minimal](https://dl.static-php.dev/static-php-cli/minimal/)：minimal 组合包含了 [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) 个扩展，体积为 6MB 左右。
 
+对于 Windows 系统，目前支持的扩展较少，故仅提供 SPC 自身运行的最小扩展组合的 `cli` 和 `micro`：[扩展组合 - spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/)。
+
 ## 使用 static-php-cli 构建 PHP
 
 ### 编译环境需求
@@ -64,10 +66,24 @@ static-php-cli（简称 `spc`）有许多特性：
 |---------|----------------------|----------------------|
 | macOS   | :octocat: :computer: | :octocat: :computer: |
 | Linux   | :octocat: :computer: | :octocat: :computer: |
-| Windows |                      |                      |
+| Windows | :computer:           |                      |
 | FreeBSD | :computer:           | :computer:           |
 
-目前支持编译的 PHP 版本为：`7.3`，`7.4`，`8.0`，`8.1`，`8.2`，`8.3`。
+当前支持编译的 PHP 版本：
+
+> :warning: 支持，但可能不再提供修复
+> :heavy_check_mark: 支持
+> :x: 不支持
+
+| PHP Version | Status             |
+|-------------|--------------------|
+| 7.2         | :x:                |
+| 7.3         | :warning:          |
+| 7.4         | :warning:          |
+| 8.0         | :heavy_check_mark: |
+| 8.1         | :heavy_check_mark: |
+| 8.2         | :heavy_check_mark: |
+| 8.3         | :heavy_check_mark: |
 
 ### 支持的扩展
 
@@ -107,10 +123,16 @@ curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-a
 curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
 # macOS aarch64 (Apple)
 curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+# Windows (x86_64, win10 build 17063 or later)
+curl.exe -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
 
-# add x perm
+# Add execute perm (Linux and macOS only)
 chmod +x ./spc
+
+# Run (Linux and macOS)
 ./spc --version
+# Run (Windows powershell)
+.\spc.exe --version
 ```
 
 自托管 `spc` 由 GitHub Actions 构建，你也可以从 Actions 直接下载：[此处](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml)。
@@ -149,16 +171,16 @@ bin/spc --version
 # 拉取所有依赖库
 ./bin/spc download --all
 # 只拉取编译指定扩展需要的所有依赖（推荐）
-./bin/spc download --for-extensions=openssl,pcntl,mbstring,pdo_sqlite
+./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # 下载编译不同版本的 PHP (--with-php=x.y，推荐 7.3 ~ 8.3)
-./bin/spc download --for-extensions=openssl,curl,mbstring --with-php=8.1
+./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 # 编译线程安全版本 (--enable-zts)
-./bin/spc build curl,phar --enable-zts --build-cli
+./bin/spc build "curl,phar" --enable-zts --build-cli
 # 编译后使用 UPX 减小可执行文件体积 (--with-upx-pack) (至少压缩至原来的 30~50%)
-./bin/spc build curl,phar --enable-zts --build-cli --with-upx-pack
+./bin/spc build "curl,phar" --enable-zts --build-cli --with-upx-pack
 ```
 
 其中，目前支持构建 cli，micro，fpm 和 embed，使用以下参数的一个或多个来指定编译的 SAPI：
@@ -172,7 +194,7 @@ bin/spc --version
 如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：
 
 ```bash
-./bin/spc build openssl,pcntl,mbstring --debug --build-all
+./bin/spc build "openssl,pcntl,mbstring" --debug --build-all
 ./bin/spc download --all --debug
 ```
 
