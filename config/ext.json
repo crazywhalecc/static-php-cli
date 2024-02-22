@@ -497,8 +497,7 @@
         "unix-only": true
     },
     "sysvshm": {
-        "type": "builtin",
-        "unix-only": true
+        "type": "builtin"
     },
     "tidy": {
         "type": "builtin",
