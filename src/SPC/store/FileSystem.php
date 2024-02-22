@@ -219,6 +219,14 @@ class FileSystem
         return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
 
+    public static function convertWinPathToMinGW(string $path): string
+    {
+        if (preg_match('/^[A-Za-z]:/', $path)) {
+            $path = '/' . strtolower(substr($path, 0, 1)) . '/' . str_replace('\\', '/', substr($path, 2));
+        }
+        return $path;
+    }
+
     /**
      * 递归或非递归扫描目录，可返回相对目录的文件列表或绝对目录的文件列表
      *
@@ -443,6 +451,9 @@ class FileSystem
         if (f_mkdir(directory: $target, recursive: true) !== true) {
             throw new FileSystemException('create ' . $target . ' dir failed');
         }
+        if (!file_exists($filename)) {
+            throw new FileSystemException('File not exists');
+        }
 
         if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
             match (self::extname($filename)) {
@@ -455,9 +466,15 @@ class FileSystem
         } elseif (PHP_OS_FAMILY === 'Windows') {
             // use php-sdk-binary-tools/bin/7za.exe
             $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
+
+            // Windows notes: I hate windows tar.......
+            // When extracting .tar.gz like libxml2, it shows a symlink error and returns code[1].
+            // Related posts: https://answers.microsoft.com/en-us/windows/forum/all/tar-on-windows-fails-to-extract-archive-containing/0ee9a7ea-9b1f-4fef-86a9-5d9dc35cea2f
+            // And MinGW tar.exe cannot work on temporarily storage ??? (GitHub Actions hosted runner)
+            // Yeah, I will be an MS HATER !
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
-                'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | tar -f - -x -C {$target} --strip-components 1"),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => cmd()->execWithResult("\"{$_7z}\" x -so {$filename} | tar -f - -x -C \"{$target}\" --strip-components 1"),
                 'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
                 default => throw new FileSystemException("unknown archive format: {$filename}"),
             };

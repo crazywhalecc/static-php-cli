@@ -245,6 +245,13 @@
             "localcharset.h"
         ]
     },
+    "libiconv-win": {
+        "source": "libiconv-win",
+        "static-libs-windows": [
+            "libiconv.lib",
+            "libiconv_a.lib"
+        ]
+    },
     "libjpeg": {
         "source": "libjpeg",
         "static-libs-unix": [
@@ -334,20 +341,24 @@
             "libxml2.a"
         ],
         "static-libs-windows": [
-            [
-                "libxml2s.lib",
-                "libxml2_a.lib"
-            ]
+            "libxml2s.lib",
+            "libxml2_a.lib"
         ],
         "headers": [
             "libxml2"
         ],
-        "lib-depends": [
+        "lib-depends-unix": [
             "libiconv"
         ],
-        "lib-suggests": [
+        "lib-suggests-unix": [
             "xz",
             "icu",
+            "zlib"
+        ],
+        "lib-depends-windows": [
+            "libiconv-win"
+        ],
+        "lib-suggests-windows": [
             "zlib"
         ]
     },
