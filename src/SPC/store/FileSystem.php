@@ -465,7 +465,7 @@ class FileSystem
             $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
             // $tar = self::convertPath(PHP_SDK_PATH . '/msys2/usr/bin/tar.exe');
             $tar = self::convertPath('C:\Program Files\Git\usr\bin\tar.exe');
-            cmd()->exec('dir "' . dirname($target) . '"');
+            cmd()->exec('dir "' . $target . '"');
             putenv('MSYS=winsymlinks:lnk');
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
