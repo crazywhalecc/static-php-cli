@@ -451,6 +451,9 @@ class FileSystem
         if (f_mkdir(directory: $target, recursive: true) !== true) {
             throw new FileSystemException('create ' . $target . ' dir failed');
         }
+        if (!file_exists($filename)) {
+            throw new FileSystemException('File not exists');
+        }
 
         if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
             match (self::extname($filename)) {
@@ -464,12 +467,9 @@ class FileSystem
             // use php-sdk-binary-tools/bin/7za.exe
             $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
             // $tar = self::convertPath(PHP_SDK_PATH . '/msys2/usr/bin/tar.exe');
-            $tar = self::convertPath('C:\Program Files\Git\usr\bin\tar.exe');
-            cmd()->exec('dir "' . $target . '"');
-            putenv('MSYS=winsymlinks:lnk');
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
-                'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | tar -f - -x -C \"{$target}\" --strip-components 1"),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => cmd()->execWithResult("\"{$_7z}\" x -so {$filename} | tar -f - -x -C \"{$target}\" --strip-components 1"),
                 'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
                 default => throw new FileSystemException("unknown archive format: {$filename}"),
             };
