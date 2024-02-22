@@ -185,9 +185,11 @@ class FileSystem
         }
         if ($move_path !== null) {
             $move_path = SOURCE_PATH . '/' . $move_path;
+        } else {
+            $move_path = SOURCE_PATH . "/{$name}";
         }
-        logger()->info("extracting {$name} source to " . ($move_path ?? (SOURCE_PATH . "/{$name}")) . ' ...');
-        $target = self::convertPath($move_path ?? (SOURCE_PATH . "/{$name}"));
+        $target = self::convertPath($move_path);
+        logger()->info("extracting {$name} source to {$target}" . ' ...');
         if (!is_dir($dir = dirname($target))) {
             self::createDir($dir);
         }

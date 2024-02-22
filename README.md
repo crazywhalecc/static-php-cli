@@ -53,16 +53,19 @@ which can be downloaded directly according to your needs.
 - [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 70MB in size.
 - [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 6MB in size.
 
+For Windows systems, there are currently fewer extensions supported, 
+so only `cli` and `micro` that run the minimum extension combination of SPC itself are provided: [Extension-Combination - spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/).
+
 ## Build
 
 ### Compilation Requirements
 
-- PHP >= 8.1 (This is the version required by spc itself, not the build version)
-- Extension: `mbstring,pcntl,posix,tokenizer,phar`
-- Supported OS with `curl` and `git` installed
-
 You can say I made a PHP builder written in PHP, pretty funny.
-But static-php-cli runtime only requires an environment above PHP 8.1 and `mbstring`, `pcntl` extension.
+But static-php-cli runtime only requires an environment above PHP 8.1 and extensions mentioned below.
+
+- PHP >= 8.1 (This is the version required by spc itself, not the build version)
+- Extension: `mbstring,tokenizer,phar`
+- Supported OS with `curl` and `git` installed
 
 Here is the supported OS and arch, where :octocat: represents support for GitHub Action builds,
 :computer: represents support for local manual builds, and blank represents not currently supported.
@@ -74,7 +77,23 @@ Here is the supported OS and arch, where :octocat: represents support for GitHub
 | Windows | :computer:           |                      |
 | FreeBSD | :computer:           | :computer:           |
 
-Currently supported PHP versions for compilation are: `7.3`, `7.4`, `8.0`, `8.1`, `8.2`, `8.3`.
+Currently supported PHP versions for compilation: 
+
+> :warning: supported but not maintained
+> 
+> :heavy_check_mark: supported
+> 
+> :x: not supported
+
+| PHP Version | Status             | Comment                                           |
+|-------------|--------------------|---------------------------------------------------|
+| 7.2         | :x:                |                                                   |
+| 7.3         | :warning:          | phpmicro and some extensions not supported on 7.x |
+| 7.4         | :warning:          | phpmicro and some extensions not supported on 7.x |
+| 8.0         | :heavy_check_mark: | PHP official has stopped maintenance of 8.0       |
+| 8.1         | :heavy_check_mark: |                                                   |
+| 8.2         | :heavy_check_mark: |                                                   |
+| 8.3         | :heavy_check_mark: |                                                   |
 
 ### Supported Extensions
 
@@ -117,10 +136,16 @@ curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-a
 curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
 # macOS aarch64 (Apple)
 curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+# Windows (x86_64, win10 build 17063 or later)
+curl.exe -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
 
-# add x perm
+# Add execute perm (Linux and macOS only)
 chmod +x ./spc
+
+# Run (Linux and macOS)
 ./spc --version
+# Run (Windows powershell)
+.\spc.exe --version
 ```
 
 Self-hosted `spc` is built by GitHub Actions, you can also download from Actions artifacts [here](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml).
@@ -150,7 +175,7 @@ bin/spc --version
 
 Basic usage for building php with some extensions:
 
-> If you are using the packaged `spc` binary, you need to replace `bin/spc` with `./spc` in the following commands.
+> If you are using the packaged standalone `spc` binary, you need to replace `bin/spc` with `./spc` or `.\spc.exe` in the following commands.
 
 ```bash
 # Check system tool dependencies, auto-fix them if possible
@@ -159,14 +184,16 @@ Basic usage for building php with some extensions:
 # fetch all libraries
 ./bin/spc download --all
 # only fetch necessary sources by needed extensions (recommended)
-./bin/spc download --for-extensions=openssl,pcntl,mbstring,pdo_sqlite
+./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # download different PHP version (--with-php=x.y, recommend 7.3 ~ 8.3)
-./bin/spc download --for-extensions=openssl,curl,mbstring --with-php=8.1
+./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI
-./bin/spc build bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl --build-cli --build-micro
+./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 # build thread-safe (ZTS) version (--enable-zts)
-./bin/spc build curl,phar --enable-zts --build-cli
+./bin/spc build "curl,phar" --enable-zts --build-cli
+# build, pack executable with UPX (--with-upx-pack) (reduce binary size for 30~50%)
+./bin/spc build "curl,phar" --enable-zts --build-cli --with-upx-pack
 ```
 
 Now we support `cli`, `micro`, `fpm` and `embed` SAPI. You can use one or more of the following parameters to specify the compiled SAPI:
@@ -180,7 +207,7 @@ Now we support `cli`, `micro`, `fpm` and `embed` SAPI. You can use one or more o
 If anything goes wrong, use `--debug` option to display full terminal output:
 
 ```bash
-./bin/spc build openssl,pcntl,mbstring --debug --build-all
+./bin/spc build "openssl,pcntl,mbstring" --debug --build-all
 ./bin/spc download --all --debug
 ```
 

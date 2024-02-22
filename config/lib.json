@@ -45,19 +45,21 @@
             "openssl",
             "zlib"
         ],
-        "lib-suggests": [
+        "lib-depends-windows": [
+            "openssl",
+            "zlib",
+            "libssh2",
+            "nghttp2"
+        ],
+        "lib-suggests-unix": [
             "libssh2",
             "brotli",
             "nghttp2",
             "zstd"
         ],
         "lib-suggests-windows": [
-            "zlib",
-            "libssh2",
             "brotli",
-            "nghttp2",
-            "zstd",
-            "openssl"
+            "zstd"
         ],
         "frameworks": [
             "CoreFoundation",
