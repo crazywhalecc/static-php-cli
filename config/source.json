@@ -254,6 +254,15 @@
             "path": "COPYING"
         }
     },
+    "libiconv-win": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/static-php/libiconv-win.git",
+        "license": {
+            "type": "file",
+            "path": "source/COPYING"
+        }
+    },
     "libjpeg": {
         "type": "ghtar",
         "repo": "libjpeg-turbo/libjpeg-turbo",

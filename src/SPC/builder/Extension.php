@@ -212,7 +212,7 @@ class Extension
             // Trim additional content & escape special characters to allow inline usage
             $test = str_replace(
                 ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
-                ['', '', '', '\"', '\$'],
+                ['', '', '', '\"', '$'],
                 file_get_contents(FileSystem::convertPath(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php'))
             );
 
