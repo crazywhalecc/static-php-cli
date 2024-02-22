@@ -466,7 +466,12 @@ class FileSystem
         } elseif (PHP_OS_FAMILY === 'Windows') {
             // use php-sdk-binary-tools/bin/7za.exe
             $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
-            // $tar = self::convertPath(PHP_SDK_PATH . '/msys2/usr/bin/tar.exe');
+
+            // Windows notes: I hate windows tar.......
+            // When extracting .tar.gz like libxml2, it shows a symlink error and returns code[1].
+            // Related posts: https://answers.microsoft.com/en-us/windows/forum/all/tar-on-windows-fails-to-extract-archive-containing/0ee9a7ea-9b1f-4fef-86a9-5d9dc35cea2f
+            // And MinGW tar.exe cannot work on temporarily storage ??? (GitHub Actions hosted runner)
+            // Yeah, I will be an MS HATER !
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
                 'xz', 'txz', 'gz', 'tgz', 'bz2' => cmd()->execWithResult("\"{$_7z}\" x -so {$filename} | tar -f - -x -C \"{$target}\" --strip-components 1"),
