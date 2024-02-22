@@ -331,7 +331,7 @@
     },
     "libxml2": {
         "type": "url",
-        "url": "https://github.com/GNOME/libxml2/archive/refs/tags/v2.9.14.tar.gz",
+        "url": "https://github.com/GNOME/libxml2/archive/refs/tags/v2.12.5.tar.gz",
         "license": {
             "type": "file",
             "path": "Copyright"
