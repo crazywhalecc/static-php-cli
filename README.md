@@ -79,9 +79,9 @@ Here is the supported OS and arch, where :octocat: represents support for GitHub
 
 Currently supported PHP versions for compilation: 
 
-> :warning: supported but not maintained
-> :heavy_check_mark: supported
-> :x: not supported
+> - :warning: supported but not maintained
+> - :heavy_check_mark: supported
+> - :x: not supported
 
 | PHP Version | Status             |
 |-------------|--------------------|

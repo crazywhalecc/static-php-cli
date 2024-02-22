@@ -71,9 +71,9 @@ static-php-cli（简称 `spc`）有许多特性：
 
 当前支持编译的 PHP 版本：
 
-> :warning: 支持，但可能不再提供修复
-> :heavy_check_mark: 支持
-> :x: 不支持
+> - :warning: 支持，但可能不再提供修复
+> - :heavy_check_mark: 支持
+> - :x: 不支持
 
 | PHP Version | Status             |
 |-------------|--------------------|
