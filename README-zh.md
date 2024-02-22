@@ -54,11 +54,11 @@ static-php-cli（简称 `spc`）有许多特性：
 ### 编译环境需求
 
 - PHP >= 8.1（这是 spc 自身需要的版本，不是支持的构建版本）
-- 扩展：`mbstring,pcntl,posix,tokenizer,phar`
+- 扩展：`mbstring,tokenizer,phar`
 - 系统安装了 `curl` 和 `git`
 
 是的，本项目采用 PHP 编写，编译前需要一个 PHP 环境，比较滑稽。
-但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含 mbstring、pcntl 扩展和 PHP 版本大于等于 8.1 即可。
+但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含上面提到的扩展和 PHP 版本大于等于 8.1 即可。
 
 下面是架构支持情况，:octocat: 代表支持 GitHub Action 构建，:computer: 代表支持本地构建，空 代表暂不支持。
 
@@ -71,9 +71,11 @@ static-php-cli（简称 `spc`）有许多特性：
 
 当前支持编译的 PHP 版本：
 
-> - :warning: 支持，但可能不再提供修复
-> - :heavy_check_mark: 支持
-> - :x: 不支持
+> :warning: 支持，但可能不再提供修复
+> 
+> :heavy_check_mark: 支持
+> 
+> :x: 不支持
 
 | PHP Version | Status             |
 |-------------|--------------------|
