@@ -24,6 +24,10 @@
         "arg-type": "with",
         "lib-depends": [
             "curl"
+        ],
+        "ext-depends-windows": [
+            "zlib",
+            "openssl"
         ]
     },
     "dba": {
@@ -403,8 +407,13 @@
         "type": "external",
         "source": "ext-ssh2",
         "arg-type": "with-prefix",
+        "arg-type-windows": "with",
         "lib-depends": [
             "libssh2"
+        ],
+        "ext-depends-windows": [
+            "openssl",
+            "zlib"
         ]
     },
     "swoole": {

@@ -8,6 +8,8 @@ use SPC\builder\BuilderBase;
 use SPC\builder\LibraryBase;
 use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 
 abstract class WindowsLibraryBase extends LibraryBase
@@ -20,6 +22,36 @@ abstract class WindowsLibraryBase extends LibraryBase
     public function getBuilder(): BuilderBase
     {
         return $this->builder;
+    }
+
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
+    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
+    {
+        $libs = [$this];
+        if ($recursive) {
+            array_unshift($libs, ...array_values($this->getDependencies(recursive: true)));
+        }
+
+        $sep = match ($style) {
+            'autoconf' => ' ',
+            'cmake' => ';',
+            default => throw new RuntimeException('style only support autoconf and cmake'),
+        };
+        $ret = [];
+        foreach ($libs as $lib) {
+            $libFiles = [];
+            foreach ($lib->getStaticLibs() as $name) {
+                $name = str_replace(' ', '\ ', FileSystem::convertPath(BUILD_LIB_PATH . "/{$name}"));
+                $name = str_replace('"', '\"', $name);
+                $libFiles[] = $name;
+            }
+            array_unshift($ret, implode($sep, $libFiles));
+        }
+        return implode($sep, $ret);
     }
 
     /**
