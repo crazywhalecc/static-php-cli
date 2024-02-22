@@ -459,7 +459,7 @@ class FileSystem
             putenv('MSYS=winsymlinks:lnk');
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
-                'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | \"{$tar}\" -f - -x -C {$target} --strip-components 1"),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => f_passthru("\"{$_7z}\" x -so {$filename} | \"{$tar}\" -f - -x -C \"{$target}\" --strip-components 1"),
                 'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
                 default => throw new FileSystemException("unknown archive format: {$filename}"),
             };
