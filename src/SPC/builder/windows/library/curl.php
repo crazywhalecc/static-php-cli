@@ -29,6 +29,7 @@ class curl extends WindowsLibraryBase
                 '-DUSE_ZLIB=ON ' .
                 '-DCURL_USE_OPENSSL=ON ' .
                 '-DCURL_USE_LIBLSSH2=ON ' .
+                '-DUSE_NGHTTP2=ON ' . // php-src with curl needs nghttp2
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '
             )
             ->execWithWrapper(
