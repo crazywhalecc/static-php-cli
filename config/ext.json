@@ -397,6 +397,7 @@
     "sqlite3": {
         "type": "builtin",
         "arg-type": "with-prefix",
+        "arg-type-windows": "with",
         "lib-depends": [
             "sqlite"
         ]

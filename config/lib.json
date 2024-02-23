@@ -520,7 +520,10 @@
         "static-libs-unix": [
             "libsqlite3.a"
         ],
-        "headers-unix": [
+        "static-libs-windows": [
+            "libsqlite3_a.lib"
+        ],
+        "headers": [
             "sqlite3.h",
             "sqlite3ext.h"
         ]
