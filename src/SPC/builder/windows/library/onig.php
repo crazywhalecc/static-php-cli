@@ -10,7 +10,6 @@ class onig extends WindowsLibraryBase
 {
     public const NAME = 'onig';
 
-
     protected function build(): void
     {
         // reset cmake
