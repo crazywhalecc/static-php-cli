@@ -440,10 +440,8 @@
             "libonig.a"
         ],
         "static-libs-windows": [
-            [
-                "onig.lib",
-                "onig_a.lib"
-            ]
+            "onig.lib",
+            "onig_a.lib"
         ],
         "headers": [
             "oniggnu.h",

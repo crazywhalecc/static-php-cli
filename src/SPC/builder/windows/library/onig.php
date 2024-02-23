@@ -6,9 +6,9 @@ namespace SPC\builder\windows\library;
 
 use SPC\store\FileSystem;
 
-class curl extends WindowsLibraryBase
+class onig extends WindowsLibraryBase
 {
-    public const NAME = 'curl';
+    public const NAME = 'onig';
 
     protected function build(): void
     {
@@ -25,16 +25,13 @@ class curl extends WindowsLibraryBase
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DBUILD_STATIC_LIBS=ON ' .
-                '-DBUILD_CURL_EXE=OFF ' .
-                '-DUSE_ZLIB=ON ' .
-                '-DCURL_USE_OPENSSL=ON ' .
-                '-DCURL_USE_LIBLSSH2=ON ' .
-                '-DUSE_NGHTTP2=ON ' . // php-src with curl needs nghttp2
+                '-DMSVC_STATIC_RUNTIME=ON ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '
             )
             ->execWithWrapper(
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
+        copy(BUILD_LIB_PATH . '/onig.lib', BUILD_LIB_PATH . '/onig_a.lib');
     }
 }

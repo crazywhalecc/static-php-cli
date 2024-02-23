@@ -15,6 +15,8 @@ class mbstring extends Extension
         $arg = '--enable-mbstring';
         if ($this->builder->getExt('mbregex') === null) {
             $arg .= ' --disable-mbregex';
+        } else {
+            $arg .= ' --enable-mbregex';
         }
         return $arg;
     }
