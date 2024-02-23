@@ -31,4 +31,16 @@ class mbregex extends Extension
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: compiled php-cli mbstring extension does not contain regex !');
         }
     }
+
+    public function runCliCheckWindows(): void
+    {
+        [$ret, $out] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "mbstring"', false);
+        if ($ret !== 0) {
+            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: compiled php-cli does not contain mbstring !');
+        }
+        $out = implode("\n", $out);
+        if (!str_contains($out, 'regex')) {
+            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: compiled php-cli mbstring extension does not contain regex !');
+        }
+    }
 }
