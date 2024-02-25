@@ -70,10 +70,10 @@ jobs:
           
       - name: "Generate Executable"
         run: |
+          bin/spc micro:combine spc.phar -M micro.sfx -O spc -I "memory_limit=2G"
           if [ "${{ matrix.operating-system }}" = "windows-x64" ]; then
-            cat micro.sfx spc.phar > spc.exe
+            mv spc spc.exe
           else
-            cat micro.sfx spc.phar > spc
             chmod +x spc
           fi
 
