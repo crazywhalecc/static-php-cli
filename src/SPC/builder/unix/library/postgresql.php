@@ -58,11 +58,17 @@ trait postgresql
 
         FileSystem::resetDir($this->source_dir . '/build');
 
-        # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
-        shell()->cd($this->source_dir . '/build')
-            ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
-            ->exec('sed -i.backup "278 s/^/# /"  ../src/Makefile.shlib')
-            ->exec('sed -i.backup "402 s/^/# /"  ../src/Makefile.shlib');
+        $version = $this->getVersion();
+        // 16.1 workaround
+        if (version_compare($version, '16.1') >= 0) {
+            # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
+            shell()->cd($this->source_dir . '/build')
+                ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
+                ->exec('sed -i.backup "278 s/^/# /"  ../src/Makefile.shlib')
+                ->exec('sed -i.backup "402 s/^/# /"  ../src/Makefile.shlib');
+        } else {
+            throw new RuntimeException('Unsupported version for postgresql: ' . $version . ' !');
+        }
 
         // configure
         shell()->cd($this->source_dir . '/build')
@@ -100,5 +106,18 @@ trait postgresql
             ->exec("rm -rf {$builddir}/lib/*.so.*")
             ->exec("rm -rf {$builddir}/lib/*.so")
             ->exec("rm -rf {$builddir}/lib/*.dylib");
+    }
+
+    private function getVersion(): string
+    {
+        try {
+            $file = FileSystem::readFile($this->source_dir . '/meson.build');
+            if (preg_match("/^\\s+version:\\s?'(.*)'/m", $file, $match)) {
+                return $match[1];
+            }
+            return 'unknown';
+        } catch (FileSystemException) {
+            return 'unknown';
+        }
     }
 }
