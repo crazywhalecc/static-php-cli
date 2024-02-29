@@ -85,6 +85,14 @@ class WindowsBuilder extends BuilderBase
             unlink($makefile . '.originfile');
         }
 
+        if (($logo = $this->getOption('with-micro-logo')) !== null) {
+            // realpath
+            $logo = realpath($logo);
+            $micro_logo = '--enable-micro-logo=' . escapeshellarg($logo) . ' ';
+        } else {
+            $micro_logo = '';
+        }
+
         cmd()->cd(SOURCE_PATH . '\php-src')
             ->exec(
                 "{$this->sdk_prefix} configure.bat --task-args \"" .
@@ -94,7 +102,7 @@ class WindowsBuilder extends BuilderBase
                 '--with-extra-includes=' . BUILD_INCLUDE_PATH . ' ' .
                 '--with-extra-libs=' . BUILD_LIB_PATH . ' ' .
                 ($enableCli ? '--enable-cli=yes ' : '--enable-cli=no ') .
-                ($enableMicro ? '--enable-micro=yes ' : '--enable-micro=no ') .
+                ($enableMicro ? ('--enable-micro=yes ' . $micro_logo) : '--enable-micro=no ') .
                 ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
                 "{$this->makeExtensionArgs()} " .
                 $zts .
