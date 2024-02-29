@@ -63,8 +63,11 @@
     "ffi": {
         "arg-type": "custom",
         "type": "builtin",
-        "lib-depends": [
+        "lib-depends-unix": [
             "libffi"
+        ],
+        "lib-depends-windows": [
+            "libffi-win"
         ]
     },
     "fileinfo": {

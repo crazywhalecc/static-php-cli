@@ -245,6 +245,15 @@
             "path": "LICENSE"
         }
     },
+    "libffi-win": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/static-php/libffi-win.git",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "libiconv": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/gnu/libiconv/",
