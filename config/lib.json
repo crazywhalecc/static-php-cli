@@ -233,6 +233,17 @@
             "ffitarget.h"
         ]
     },
+    "libffi-win": {
+        "source": "libffi-win",
+        "static-libs-windows": [
+            "libffi.lib"
+        ],
+        "headers-windows": [
+            "ffi.h",
+            "ffitarget.h",
+            "fficonfig.h"
+        ]
+    },
     "libiconv": {
         "source": "libiconv",
         "static-libs-unix": [

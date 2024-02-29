@@ -14,4 +14,9 @@ class ffi extends Extension
     {
         return '--with-ffi --enable-zend-signals';
     }
+
+    public function getWindowsConfigureArg(): string
+    {
+        return '--with-ffi';
+    }
 }
