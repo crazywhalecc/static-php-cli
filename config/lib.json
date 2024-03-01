@@ -147,7 +147,8 @@
             "libpng",
             "libjpeg",
             "libwebp",
-            "freetype"
+            "freetype",
+            "libtiff"
         ],
         "lib-suggests": [
             "zstd",
@@ -328,6 +329,12 @@
         ],
         "lib-suggests": [
             "zlib"
+        ]
+    },
+    "libtiff": {
+        "source": "libtiff",
+        "static-libs-unix": [
+            "libtiff.a"
         ]
     },
     "libuv": {
