@@ -30,7 +30,6 @@ trait libuuid
                 '--enable-static --disable-shared ' .
                 '--prefix='
             )
-            ->exec('cat Makefile')
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
