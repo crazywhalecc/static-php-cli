@@ -100,6 +100,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-uuid": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/uuid",
+        "path": "php-src/ext/uuid",
+        "filename": "uuid.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-uv": {
         "type": "url",
         "url": "https://pecl.php.net/get/uv",
@@ -332,6 +342,15 @@
         "license": {
             "type": "file",
             "path": "LICENSE.md"
+        }
+    },
+    "libuuid": {
+        "type": "git",
+        "url": "https://github.com/cloudbase/libuuid.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "libuv": {
