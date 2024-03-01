@@ -6,9 +6,16 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\FileSystem;
 
 trait libuuid
 {
+    public function patchBeforeBuild(): bool
+    {
+        FileSystem::replaceFileStr($this->source_dir . '/configure', '-${am__api_version}', '');
+        return true;
+    }
+
     /**
      * @throws FileSystemException
      * @throws RuntimeException
