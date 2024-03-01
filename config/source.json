@@ -325,6 +325,15 @@
             "path": "COPYING"
         }
     },
+    "libtiff": {
+        "type": "filelist",
+        "url": "https://download.osgeo.org/libtiff/",
+        "regex": "/href=\"(?<file>tiff-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
+        }
+    },
     "libuv": {
         "type": "ghtar",
         "repo": "libuv/libuv",
