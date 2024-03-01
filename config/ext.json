@@ -513,6 +513,14 @@
     "tokenizer": {
         "type": "builtin"
     },
+    "uuid": {
+        "type": "external",
+        "source": "ext-uuid",
+        "arg-type": "with-prefix",
+        "lib-depends": [
+            "libuuid"
+        ]
+    },
     "uv": {
         "type": "external",
         "source": "ext-uv",

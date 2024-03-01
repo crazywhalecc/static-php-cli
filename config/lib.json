@@ -337,6 +337,12 @@
             "libtiff.a"
         ]
     },
+    "libuuid": {
+        "source": "libuuid",
+        "static-libs-unix": [
+            "libuuid.a"
+        ]
+    },
     "libuv": {
         "source": "libuv",
         "static-libs-unix": [
