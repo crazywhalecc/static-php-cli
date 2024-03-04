@@ -15,8 +15,8 @@ class swoole extends Extension
         // enable swoole
         $arg = '--enable-swoole';
 
-        // commonly-used feature: coroutine-time, thread-context
-        $arg .= ' --enable-swoole-coro-time --enable-thread-context';
+        // commonly-used feature: coroutine-time, disable-thread-context
+        $arg .= ' --enable-swoole-coro-time --disable-thread-context';
 
         // required feature: curl, openssl (but curl hook is buggy for php 8.0)
         $arg .= $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
