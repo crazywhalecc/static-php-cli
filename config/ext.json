@@ -1,4 +1,15 @@
 {
+    "amqp": {
+        "type": "external",
+        "arg-type": "custom",
+        "source": "amqp",
+        "lib-depends": [
+            "librabbitmq"
+        ],
+        "ext-depends-windows": [
+            "openssl"
+        ]
+    },
     "apcu": {
         "type": "external",
         "source": "apcu"
