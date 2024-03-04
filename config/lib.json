@@ -305,6 +305,18 @@
             "zlib"
         ]
     },
+    "librabbitmq": {
+        "source": "librabbitmq",
+        "static-libs-unix": [
+            "librabbitmq.a"
+        ],
+        "static-libs-windows": [
+            "rabbitmq.4.lib"
+        ],
+        "lib-depends": [
+            "openssl"
+        ]
+    },
     "libsodium": {
         "source": "libsodium",
         "static-libs-unix": [

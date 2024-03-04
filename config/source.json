@@ -6,6 +6,16 @@
             "path": "LICENSE"
         }
     },
+    "amqp": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/amqp",
+        "path": "php-src/ext/amqp",
+        "filename": "amqp.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "apcu": {
         "type": "url",
         "url": "https://pecl.php.net/get/APCu",
@@ -312,6 +322,15 @@
         "type": "git",
         "url": "https://github.com/glennrp/libpng.git",
         "rev": "libpng16",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "librabbitmq": {
+        "type": "git",
+        "url": "https://github.com/alanxz/rabbitmq-c.git",
+        "rev": "master",
         "license": {
             "type": "file",
             "path": "LICENSE"
