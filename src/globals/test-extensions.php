@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'uuid',
-    'Windows' => 'mbstring,pdo_sqlite,mbregex,ffi',
+    'Linux', 'Darwin' => 'amqp',
+    'Windows' => 'mbstring,pdo_sqlite,mbregex,ffi,amqp',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
@@ -27,7 +27,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'common',
     'Windows' => 'none',
 };
 
