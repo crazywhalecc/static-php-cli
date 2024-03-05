@@ -166,7 +166,6 @@ jobs:
           retry_on: error
           command: |
             bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --with-php=${{ matrix.php }} --debug
-            bin/spc download --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --debug
 
       - name: "Run Build Tests (build)"
         run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php libs_cmd) --build-cli --build-micro --build-fpm --debug
