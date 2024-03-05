@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'zlib,openssl,curl,swoole,pcntl,posix,mbstring,tokenizer,phar',
+    'Linux', 'Darwin' => 'zlib,openssl,curl,pcntl,posix,mbstring,tokenizer,phar',
     'Windows' => 'mbstring,pdo_sqlite,mbregex,ffi,curl',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => '',
+    'Linux', 'Darwin' => 'zlib,openssl,brotli,nghttp2,curl,libcares',
     'Windows' => '',
 };
 
