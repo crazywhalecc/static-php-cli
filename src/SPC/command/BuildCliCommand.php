@@ -104,8 +104,8 @@ class BuildCliCommand extends BuildCommand
             $indent_texts = [
                 'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
                 'Build SAPI' => $builder->getBuildTypeName($rule),
-                'Extensions (' . count($extensions) . ')' => implode(', ', $extensions),
-                'Libraries (' . count($libraries) . ')' => implode(', ', $libraries),
+                'Extensions (' . count($extensions) . ')' => implode(',', $extensions),
+                'Libraries (' . count($libraries) . ')' => implode(',', $libraries),
                 'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
                 'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
             ];
