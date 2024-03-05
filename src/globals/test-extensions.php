@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'swoole',
+    'Linux', 'Darwin' => 'zlib,openssl,curl,swoole,pcntl,posix,mbstring,tokenizer,phar',
     'Windows' => 'mbstring,pdo_sqlite,mbregex,ffi,curl',
 };
 
@@ -27,7 +27,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'none',
     'Windows' => 'none',
 };
 
