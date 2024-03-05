@@ -88,7 +88,7 @@ class WindowsBuilder extends BuilderBase
         if (($logo = $this->getOption('with-micro-logo')) !== null) {
             // realpath
             $logo = realpath($logo);
-            $micro_logo = '--enable-micro-logo=' . escapeshellarg($logo) . ' ';
+            $micro_logo = '--enable-micro-logo=' . $logo . ' ';
         } else {
             $micro_logo = '';
         }
@@ -187,10 +187,12 @@ class WindowsBuilder extends BuilderBase
             SourcePatcher::patchMicro(['phar']);
         }
 
-        cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_micro_wrapper.bat --task-args micro");
-
-        if ($this->phar_patched) {
-            SourcePatcher::patchMicro(['phar'], true);
+        try {
+            cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_micro_wrapper.bat --task-args micro");
+        } finally {
+            if ($this->phar_patched) {
+                SourcePatcher::patchMicro(['phar'], true);
+            }
         }
 
         $this->deployBinary(BUILD_TARGET_MICRO);

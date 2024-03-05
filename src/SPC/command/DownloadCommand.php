@@ -36,6 +36,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
         $this->addOption('for-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
+        $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
         $this->addOption('without-suggestions', null, null, 'Do not fetch suggested sources when using --for-extensions');
     }
 
@@ -46,6 +47,7 @@ class DownloadCommand extends BaseCommand
             || $input->getOption('clean')
             || $input->getOption('from-zip')
             || $input->getOption('for-extensions')
+            || $input->getOption('for-libs')
         ) {
             $input->setArgument('sources', '');
         }
@@ -112,6 +114,9 @@ class DownloadCommand extends BaseCommand
                 $ext = array_map('trim', array_filter(explode(',', $for_ext)));
                 $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggestions'));
                 array_unshift($sources, 'php-src', 'micro', 'pkg-config');
+            } elseif ($for_lib = $this->getOption('for-libs')) {
+                $lib = array_map('trim', array_filter(explode(',', $for_lib)));
+                $sources = $this->calculateSourcesByLib($lib, !$this->getOption('without-suggestions'));
             } else {
                 // get source list that will be downloaded
                 $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
@@ -208,7 +213,8 @@ class DownloadCommand extends BaseCommand
     /**
      * Calculate the sources by extensions
      *
-     * @param  array               $extensions extension list
+     * @param  array               $extensions       extension list
+     * @param  bool                $include_suggests include suggested libs and extensions (default: true)
      * @throws FileSystemException
      * @throws WrongUsageException
      */
@@ -222,6 +228,24 @@ class DownloadCommand extends BaseCommand
             }
         }
         foreach ($libraries as $library) {
+            $sources[] = Config::getLib($library, 'source');
+        }
+        return array_values(array_unique($sources));
+    }
+
+    /**
+     * Calculate the sources by libraries
+     *
+     * @param  array               $libs             library list
+     * @param  bool                $include_suggests include suggested libs (default: true)
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
+    private function calculateSourcesByLib(array $libs, bool $include_suggests = true): array
+    {
+        $libs = DependencyUtil::getLibs($libs, $include_suggests);
+        $sources = [];
+        foreach ($libs as $library) {
             $sources[] = Config::getLib($library, 'source');
         }
         return array_values(array_unique($sources));

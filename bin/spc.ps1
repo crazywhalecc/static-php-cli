@@ -9,3 +9,4 @@ if (-not(Test-Path $PHP_Exec)) {
 }
 
 & "$PHP_Exec" ("bin/spc") @args
+exit $LASTEXITCODE
