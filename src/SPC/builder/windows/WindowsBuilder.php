@@ -195,7 +195,6 @@ class WindowsBuilder extends BuilderBase
             }
         }
 
-
         $this->deployBinary(BUILD_TARGET_MICRO);
     }
 
