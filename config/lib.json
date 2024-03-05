@@ -36,7 +36,7 @@
             "libcurl.a"
         ],
         "static-libs-windows": [
-            "libcurl.lib"
+            "libcurl_a.lib"
         ],
         "headers": [
             "curl"

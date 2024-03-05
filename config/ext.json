@@ -52,6 +52,9 @@
         "lib-depends": [
             "libxml2",
             "zlib"
+        ],
+        "ext-depends-windows": [
+            "xml"
         ]
     },
     "event": {
