@@ -36,7 +36,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
         $this->addOption('for-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
-        $this->addOption('for-libs', null, InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"', null);
+        $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
         $this->addOption('without-suggestions', null, null, 'Do not fetch suggested sources when using --for-extensions');
     }
 
