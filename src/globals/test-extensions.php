@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,openssl,curl,pdo_mysql',
-    'Windows' => 'mbstring,pdo_sqlite,mbregex,ffi',
+    'Linux', 'Darwin' => 'swoole',
+    'Windows' => 'mbstring,pdo_sqlite,mbregex,ffi,curl',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
