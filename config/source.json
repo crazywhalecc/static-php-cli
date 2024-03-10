@@ -495,6 +495,16 @@
             "path": "LICENSE.txt"
         }
     },
+    "pdo_sqlsrv": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/pdo_sqlsrv",
+        "path": "php-src/ext/pdo_sqlsrv",
+        "filename": "pdo_sqlsrv.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "pkg-config": {
         "type": "url",
         "url": "https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz",

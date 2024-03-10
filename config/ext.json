@@ -317,6 +317,15 @@
             "sqlite"
         ]
     },
+    "pdo_sqlsrv": {
+        "type": "external",
+        "source": "pdo_sqlsrv",
+        "arg-type": "with",
+        "ext-depends": [
+            "pdo",
+            "sqlsrv"
+        ]
+    },
     "pgsql": {
         "type": "builtin",
         "arg-type": "with-prefix",
