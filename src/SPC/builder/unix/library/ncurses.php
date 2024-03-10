@@ -23,7 +23,7 @@ trait ncurses
                 '--without-tests ' .
                 '--without-dlsym ' .
                 '--without-debug ' .
-                '-enable-symlinks' .
+                '-enable-symlinks ' .
                 '--bindir=' . BUILD_ROOT_PATH . '/bin ' .
                 '--includedir=' . BUILD_ROOT_PATH . '/include ' .
                 '--libdir=' . BUILD_ROOT_PATH . '/lib ' .
