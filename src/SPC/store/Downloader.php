@@ -231,7 +231,7 @@ class Downloader
                 "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
             );
         } catch (RuntimeException $e) {
-            if ($e->getCode() === SIGINT) {
+            if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
                 throw new WrongUsageException('Keyboard interrupted, download failed !');
             }
             if ($retry > 0) {
@@ -491,7 +491,7 @@ class Downloader
                     return $cache[$cmd]['cache'];
                 }
                 f_exec($cmd, $output, $ret);
-                if ($ret === SIGINT) {
+                if ($ret === 2 || $ret === -1073741510) {
                     throw new RuntimeException('failed http fetch');
                 }
                 if ($ret !== 0) {
@@ -503,7 +503,7 @@ class Downloader
                 return $cache[$cmd]['cache'];
             }
             f_exec($cmd, $output, $ret);
-            if ($ret === SIGINT) {
+            if ($ret === 2 || $ret === -1073741510) {
                 throw new RuntimeException('failed http fetch');
             }
             if ($ret !== 0) {
@@ -542,7 +542,8 @@ class Downloader
         try {
             f_passthru($cmd);
         } catch (RuntimeException $e) {
-            if ($e->getCode() === SIGINT) {
+            var_dump($e->getCode());
+            if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
                 throw new WrongUsageException('Keyboard interrupted, download failed !');
             }
             if ($retry > 0) {
@@ -564,7 +565,7 @@ class Downloader
         if (PHP_OS_FAMILY === 'Windows') {
             sapi_windows_set_ctrl_handler($callback);
         } elseif (extension_loaded('pcntl')) {
-            pcntl_signal(SIGINT, $callback);
+            pcntl_signal(2, $callback);
         } else {
             logger()->debug('You have not enabled `pcntl` extension, cannot prevent download file corruption when Ctrl+C');
         }
@@ -578,7 +579,7 @@ class Downloader
         if (PHP_OS_FAMILY === 'Windows') {
             sapi_windows_set_ctrl_handler(null);
         } elseif (extension_loaded('pcntl')) {
-            pcntl_signal(SIGINT, SIG_IGN);
+            pcntl_signal(2, SIG_IGN);
         }
     }
 }
