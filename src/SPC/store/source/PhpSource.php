@@ -32,7 +32,10 @@ class PhpSource extends CustomSourceBase
     public function getLatestPHPInfo(string $major_version): array
     {
         // 查找最新的小版本号
-        $info = json_decode(Downloader::curlExec(url: "https://www.php.net/releases/index.php?json&version={$major_version}"), true);
+        $info = json_decode(Downloader::curlExec(
+            url: "https://www.php.net/releases/index.php?json&version={$major_version}",
+            retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
+        ), true);
         if (!isset($info['version'])) {
             throw new DownloaderException("Version {$major_version} not found.");
         }
