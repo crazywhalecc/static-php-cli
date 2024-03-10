@@ -38,26 +38,58 @@ class DownloadCommand extends BaseCommand
         $this->addOption('for-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
         $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
         $this->addOption('without-suggestions', null, null, 'Do not fetch suggested sources when using --for-extensions');
+        $this->addOption('ignore-cache-sources', null, InputOption::VALUE_REQUIRED, 'Ignore some source caches, comma separated, e.g "php-src,curl,openssl"', '');
     }
 
+    /**
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
     public function initialize(InputInterface $input, OutputInterface $output): void
     {
-        if (
-            $input->getOption('all')
-            || $input->getOption('clean')
-            || $input->getOption('from-zip')
-            || $input->getOption('for-extensions')
-            || $input->getOption('for-libs')
-        ) {
+        // mode: --all
+        if ($input->getOption('all')) {
+            $input->setArgument('sources', implode(',', array_keys(Config::getSources())));
+            parent::initialize($input, $output);
+            return;
+        }
+        // mode: --clean and --from-zip
+        if ($input->getOption('clean') || $input->getOption('from-zip')) {
             $input->setArgument('sources', '');
+            parent::initialize($input, $output);
+            return;
+        }
+        // mode: normal
+        if (!empty($input->getArgument('sources'))) {
+            $final_sources = array_map('trim', array_filter(explode(',', $input->getArgument('sources'))));
+        } else {
+            $final_sources = [];
+        }
+        // mode: --for-extensions
+        if ($for_ext = $input->getOption('for-extensions')) {
+            $ext = array_map('trim', array_filter(explode(',', $for_ext)));
+            $sources = $this->calculateSourcesByExt($ext, !$input->getOption('without-suggestions'));
+            if (PHP_OS_FAMILY !== 'Windows') {
+                array_unshift($sources, 'pkg-config');
+            }
+            array_unshift($sources, 'php-src', 'micro');
+            $final_sources = array_merge($final_sources, array_diff($sources, $final_sources));
+        }
+        // mode: --for-libs
+        if ($for_lib = $input->getOption('for-libs')) {
+            $lib = array_map('trim', array_filter(explode(',', $for_lib)));
+            $sources = $this->calculateSourcesByLib($lib, !$input->getOption('without-suggestions'));
+            $final_sources = array_merge($final_sources, array_diff($sources, $final_sources));
+        }
+        if (!empty($final_sources)) {
+            $input->setArgument('sources', implode(',', $final_sources));
         }
         parent::initialize($input, $output);
     }
 
     /**
-     * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
      */
     public function handle(): int
     {
@@ -109,23 +141,12 @@ class DownloadCommand extends BaseCommand
                 Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
             }
 
-            // --for-extensions
-            if ($for_ext = $this->getOption('for-extensions')) {
-                $ext = array_map('trim', array_filter(explode(',', $for_ext)));
-                $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggestions'));
-                array_unshift($sources, 'php-src', 'micro', 'pkg-config');
-            } elseif ($for_lib = $this->getOption('for-libs')) {
-                $lib = array_map('trim', array_filter(explode(',', $for_lib)));
-                $sources = $this->calculateSourcesByLib($lib, !$this->getOption('without-suggestions'));
-            } else {
-                // get source list that will be downloaded
-                $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
-                if (empty($sources)) {
-                    logger()->notice('Downloading with --all option will take more times to download, we recommend you to download with --for-extensions option !');
-                    $sources = array_keys(Config::getSources());
-                }
+            $chosen_sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
+            $force_list = array_map('trim', array_filter(explode(',', $this->getOption('ignore-cache-sources'))));
+
+            if ($this->getOption('all')) {
+                logger()->notice('Downloading with --all option will take more times to download, we recommend you to download with --for-extensions option !');
             }
-            $chosen_sources = $sources;
 
             // Process -U options
             $custom_urls = [];
@@ -156,7 +177,7 @@ class DownloadCommand extends BaseCommand
                     Downloader::downloadSource($source, $new_config, true);
                 } else {
                     logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
-                    Downloader::downloadSource($source, Config::getSource($source));
+                    Downloader::downloadSource($source, Config::getSource($source), in_array($source, $force_list));
                 }
             }
             $time = round(microtime(true) - START_TIME, 3);
@@ -171,6 +192,10 @@ class DownloadCommand extends BaseCommand
         }
     }
 
+    /**
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
     private function downloadFromZip(string $path): int
     {
         if (!file_exists($path)) {
@@ -196,8 +221,10 @@ class DownloadCommand extends BaseCommand
             if (PHP_OS_FAMILY !== 'Windows') {
                 $abs_path = realpath($path);
                 f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($abs_path));
+            } else {
+                // Windows TODO
+                throw new WrongUsageException('Windows currently does not support --from-zip !');
             }
-            // Windows TODO
 
             if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
                 throw new RuntimeException('.lock.json not exist in "downloads/"');

@@ -246,6 +246,10 @@ class Downloader
         }*/
     }
 
+    /**
+     * @throws DownloaderException
+     * @throws FileSystemException
+     */
     public static function downloadPackage(string $name, ?array $pkg = null, bool $force = false): void
     {
         if ($pkg === null) {
@@ -313,7 +317,7 @@ class Downloader
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
                     foreach ($classes as $class) {
                         if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
-                            (new $class())->fetch();
+                            (new $class())->fetch($force);
                             break;
                         }
                     }
@@ -407,7 +411,7 @@ class Downloader
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
                     foreach ($classes as $class) {
                         if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
-                            (new $class())->fetch();
+                            (new $class())->fetch($force);
                             break;
                         }
                     }

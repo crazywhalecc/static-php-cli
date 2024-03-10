@@ -8,5 +8,5 @@ abstract class CustomSourceBase
 {
     public const NAME = 'unknown';
 
-    abstract public function fetch();
+    abstract public function fetch(bool $force = false);
 }
