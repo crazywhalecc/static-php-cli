@@ -7,7 +7,6 @@ namespace SPC\store\source;
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\Downloader;
 
 class PhpSource extends CustomSourceBase
@@ -16,13 +15,12 @@ class PhpSource extends CustomSourceBase
 
     /**
      * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function fetch(): void
+    public function fetch(bool $force = false): void
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.1';
-        Downloader::downloadSource('php-src', self::getLatestPHPInfo($major));
+        Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
     }
 
     /**

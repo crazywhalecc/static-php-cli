@@ -6,7 +6,6 @@ namespace SPC\store\source;
 
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\Downloader;
 
 class PostgreSQLSource extends CustomSourceBase
@@ -15,12 +14,11 @@ class PostgreSQLSource extends CustomSourceBase
 
     /**
      * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function fetch(): void
+    public function fetch(bool $force = false): void
     {
-        Downloader::downloadSource('postgresql', self::getLatestInfo());
+        Downloader::downloadSource('postgresql', self::getLatestInfo(), $force);
     }
 
     /**
