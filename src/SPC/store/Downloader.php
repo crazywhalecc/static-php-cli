@@ -7,6 +7,7 @@ namespace SPC\store;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\source\CustomSourceBase;
 
 /**
@@ -26,7 +27,8 @@ class Downloader
     {
         logger()->debug("finding {$name} source from bitbucket tag");
         $data = json_decode(self::curlExec(
-            url: "https://api.bitbucket.org/2.0/repositories/{$source['repo']}/refs/tags"
+            url: "https://api.bitbucket.org/2.0/repositories/{$source['repo']}/refs/tags",
+            retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
         ), true);
         $ver = $data['values'][0]['name'];
         if (!$ver) {
@@ -35,7 +37,8 @@ class Downloader
         $url = "https://bitbucket.org/{$source['repo']}/get/{$ver}.tar.gz";
         $headers = self::curlExec(
             url: $url,
-            method: 'HEAD'
+            method: 'HEAD',
+            retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
         );
         preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+\.tar\.gz)\1/im', $headers, $matches);
         if ($matches) {
@@ -62,7 +65,8 @@ class Downloader
         logger()->debug("finding {$name} source from github {$type} tarball");
         $data = json_decode(self::curlExec(
             url: "https://api.github.com/repos/{$source['repo']}/{$type}",
-            hooks: [[CurlHook::class, 'setupGithubToken']]
+            hooks: [[CurlHook::class, 'setupGithubToken']],
+            retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
         ), true);
         $url = $data[0]['tarball_url'];
         if (!$url) {
@@ -72,6 +76,7 @@ class Downloader
             url: $url,
             method: 'HEAD',
             hooks: [[CurlHook::class, 'setupGithubToken']],
+            retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
         );
         preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+\.tar\.gz)\1/im', $headers, $matches);
         if ($matches) {
@@ -97,6 +102,7 @@ class Downloader
         $data = json_decode(self::curlExec(
             url: "https://api.github.com/repos/{$source['repo']}/releases",
             hooks: [[CurlHook::class, 'setupGithubToken']],
+            retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
         ), true);
         $url = null;
         foreach ($data as $release) {
@@ -130,7 +136,7 @@ class Downloader
     public static function getFromFileList(string $name, array $source): array
     {
         logger()->debug("finding {$name} source from file list");
-        $page = self::curlExec($source['url']);
+        $page = self::curlExec($source['url'], retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0));
         preg_match_all($source['regex'], $page, $matches);
         if (!$matches) {
             throw new DownloaderException("Failed to get {$name} version");
@@ -175,7 +181,7 @@ class Downloader
             }
         };
         self::registerCancelEvent($cancel_func);
-        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"));
+        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0));
         self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
         self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path]);
@@ -203,7 +209,7 @@ class Downloader
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null): void
+    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retry = 0): void
     {
         $download_path = FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}");
         if (file_exists($download_path)) {
@@ -217,14 +223,25 @@ class Downloader
                 FileSystem::removeDir($download_path);
             }
         };
-        self::registerCancelEvent($cancel_func);
-        f_passthru(
-            SPC_GIT_EXEC . ' clone' . $check .
-            ' --config core.autocrlf=false ' .
-            "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
-        );
-        self::unregisterCancelEvent();
-
+        try {
+            self::registerCancelEvent($cancel_func);
+            f_passthru(
+                SPC_GIT_EXEC . ' clone' . $check .
+                ' --config core.autocrlf=false ' .
+                "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
+            );
+        } catch (RuntimeException $e) {
+            if ($e->getCode() === SIGINT) {
+                throw new WrongUsageException('Keyboard interrupted, download failed !');
+            }
+            if ($retry > 0) {
+                self::downloadGit($name, $url, $branch, $move_path, $retry - 1);
+                return;
+            }
+            throw $e;
+        } finally {
+            self::unregisterCancelEvent();
+        }
         // Lock
         logger()->debug("Locking git source {$name}");
         self::lockSource($name, ['source_type' => 'dir', 'dirname' => $name, 'move_path' => $move_path]);
@@ -311,7 +328,13 @@ class Downloader
                     self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
                     break;
                 case 'git':             // Git repo
-                    self::downloadGit($name, $pkg['url'], $pkg['rev'], $pkg['extract'] ?? null);
+                    self::downloadGit(
+                        $name,
+                        $pkg['url'],
+                        $pkg['rev'],
+                        $pkg['extract'] ?? null,
+                        intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
+                    );
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
@@ -405,7 +428,13 @@ class Downloader
                     self::downloadFile($name, $url, $filename, $source['path'] ?? null);
                     break;
                 case 'git':             // Git repo
-                    self::downloadGit($name, $source['url'], $source['rev'], $source['path'] ?? null);
+                    self::downloadGit(
+                        $name,
+                        $source['url'],
+                        $source['rev'],
+                        $source['path'] ?? null,
+                        intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
+                    );
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\\store\\source');
@@ -435,57 +464,71 @@ class Downloader
      *
      * @throws DownloaderException
      */
-    public static function curlExec(string $url, string $method = 'GET', array $headers = [], array $hooks = []): string
+    public static function curlExec(string $url, string $method = 'GET', array $headers = [], array $hooks = [], int $retry = 0): string
     {
         foreach ($hooks as $hook) {
             $hook($method, $url, $headers);
         }
 
-        FileSystem::findCommandPath('curl');
+        try {
+            FileSystem::findCommandPath('curl');
 
-        $methodArg = match ($method) {
-            'GET' => '',
-            'HEAD' => '-I',
-            default => "-X \"{$method}\"",
-        };
-        $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
+            $methodArg = match ($method) {
+                'GET' => '',
+                'HEAD' => '-I',
+                default => "-X \"{$method}\"",
+            };
+            $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
 
-        $cmd = SPC_CURL_EXEC . " -sfSL {$methodArg} {$headerArg} \"{$url}\"";
-        if (getenv('CACHE_API_EXEC') === 'yes') {
-            if (!file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'))) {
-                $cache = [];
-            } else {
-                $cache = json_decode(file_get_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache')), true);
-            }
-            if (isset($cache[$cmd]) && $cache[$cmd]['expire'] >= time()) {
+            $cmd = SPC_CURL_EXEC . " -sfSL {$methodArg} {$headerArg} \"{$url}\"";
+            if (getenv('CACHE_API_EXEC') === 'yes') {
+                if (!file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'))) {
+                    $cache = [];
+                } else {
+                    $cache = json_decode(file_get_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache')), true);
+                }
+                if (isset($cache[$cmd]) && $cache[$cmd]['expire'] >= time()) {
+                    return $cache[$cmd]['cache'];
+                }
+                f_exec($cmd, $output, $ret);
+                if ($ret === SIGINT) {
+                    throw new RuntimeException('failed http fetch');
+                }
+                if ($ret !== 0) {
+                    throw new DownloaderException('failed http fetch');
+                }
+                $cache[$cmd]['cache'] = implode("\n", $output);
+                $cache[$cmd]['expire'] = time() + 3600;
+                file_put_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'), json_encode($cache));
                 return $cache[$cmd]['cache'];
             }
             f_exec($cmd, $output, $ret);
+            if ($ret === SIGINT) {
+                throw new RuntimeException('failed http fetch');
+            }
             if ($ret !== 0) {
                 throw new DownloaderException('failed http fetch');
             }
-            $cache[$cmd]['cache'] = implode("\n", $output);
-            $cache[$cmd]['expire'] = time() + 3600;
-            file_put_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'), json_encode($cache));
-            return $cache[$cmd]['cache'];
+            return implode("\n", $output);
+        } catch (DownloaderException $e) {
+            if ($retry > 0) {
+                logger()->notice('Retrying curl exec ...');
+                return self::curlExec($url, $method, $headers, $hooks, $retry - 1);
+            }
+            throw $e;
         }
-        f_exec($cmd, $output, $ret);
-        if ($ret !== 0) {
-            throw new DownloaderException('failed http fetch');
-        }
-        return implode("\n", $output);
     }
 
     /**
      * Use curl to download sources from url
      *
-     * @throws DownloaderException
      * @throws RuntimeException
      */
-    public static function curlDown(string $url, string $path, string $method = 'GET', array $headers = [], array $hooks = []): void
+    public static function curlDown(string $url, string $path, string $method = 'GET', array $headers = [], array $hooks = [], int $retry = 0): void
     {
+        $used_headers = $headers;
         foreach ($hooks as $hook) {
-            $hook($method, $url, $headers);
+            $hook($method, $url, $used_headers);
         }
 
         $methodArg = match ($method) {
@@ -493,10 +536,22 @@ class Downloader
             'HEAD' => '-I',
             default => "-X \"{$method}\"",
         };
-        $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
+        $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $used_headers));
         $check = !defined('DEBUG_MODE') ? 's' : '#';
         $cmd = SPC_CURL_EXEC . " -{$check}fSL -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
-        f_passthru($cmd);
+        try {
+            f_passthru($cmd);
+        } catch (RuntimeException $e) {
+            if ($e->getCode() === SIGINT) {
+                throw new WrongUsageException('Keyboard interrupted, download failed !');
+            }
+            if ($retry > 0) {
+                logger()->notice('Retrying curl download ...');
+                self::curlDown($url, $path, $method, $used_headers, retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0));
+                return;
+            }
+            throw $e;
+        }
     }
 
     /**

@@ -39,6 +39,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
         $this->addOption('without-suggestions', null, null, 'Do not fetch suggested sources when using --for-extensions');
         $this->addOption('ignore-cache-sources', null, InputOption::VALUE_REQUIRED, 'Ignore some source caches, comma separated, e.g "php-src,curl,openssl"', '');
+        $this->addOption('retry', 'R', InputOption::VALUE_REQUIRED, 'Set retry time when downloading failed (default: 0)', '0');
     }
 
     /**
@@ -126,6 +127,10 @@ class DownloadCommand extends BaseCommand
                 logger()->error("bad version arg: {$ver}, x.y required!");
                 return static::FAILURE;
             }
+
+            // retry
+            $retry = intval($this->getOption('retry'));
+            f_putenv('SPC_RETRY_TIME=' . $retry);
 
             // Use shallow-clone can reduce git resource download
             if ($this->getOption('shallow-clone')) {
