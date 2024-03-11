@@ -58,6 +58,12 @@ class openssl extends LinuxLibraryBase
             $zlib_extra = '';
         }
 
+        if ($this->builder->getOption('no-strip')) {
+            $debug_extra = '-d ';
+        } else {
+            $debug_extra = '';
+        }
+
         $ex_lib = trim($ex_lib);
 
         $clang_postfix = SystemUtil::getCCType(getenv('CC')) === 'clang' ? '-clang' : '';
@@ -68,6 +74,7 @@ class openssl extends LinuxLibraryBase
                 '--prefix=/ ' .
                 '--libdir=lib ' .
                 '-static ' .
+                "{$debug_extra}" .
                 "{$zlib_extra}" .
                 'no-legacy ' .
                 "linux-{$this->builder->getOption('arch')}{$clang_postfix}"
