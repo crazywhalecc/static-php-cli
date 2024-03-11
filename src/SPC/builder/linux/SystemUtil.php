@@ -91,15 +91,15 @@ class SystemUtil
     public static function getArchCFlags(string $cc, string $arch): string
     {
         if (php_uname('m') === $arch) {
-            return '';
+            return getenv('CFLAGS') ?: '';
         }
         return match (static::getCCType($cc)) {
             'clang' => match ($arch) {
-                'x86_64' => '--target=x86_64-unknown-linux',
-                'arm64', 'aarch64' => '--target=arm64-unknown-linux',
+                'x86_64' => '--target=x86_64-unknown-linux ' . (getenv('CFLAGS') ?: ''),
+                'arm64', 'aarch64' => '--target=arm64-unknown-linux '  . (getenv('CFLAGS') ?: ''),
                 default => throw new WrongUsageException('unsupported arch: ' . $arch),
             },
-            'gcc' => '',
+            'gcc' => (getenv('CFLAGS') ?: ''),
             default => throw new WrongUsageException('cc compiler ' . $cc . ' is not supported'),
         };
     }
