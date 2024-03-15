@@ -24,6 +24,7 @@ class PackageManager
                 default => throw new WrongUsageException('Unsupported OS!'),
             };
             $config = Config::getPkg("{$pkg_name}-{$arch}-{$os}");
+            $pkg_name = "{$pkg_name}-{$arch}-{$os}";
         }
         if ($config === null) {
             throw new WrongUsageException("Package [{$pkg_name}] does not exist, please check the name and correct it !");
