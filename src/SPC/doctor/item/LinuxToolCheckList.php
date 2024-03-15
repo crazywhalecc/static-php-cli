@@ -40,6 +40,10 @@ class LinuxToolCheckList
         'xz',
     ];
 
+    private const PROVIDED_COMMAND = [
+        'binutils-gold' => 'ld.gold',
+    ];
+
     /** @noinspection PhpUnused */
     #[AsCheckItem('if necessary tools are installed', limit_os: 'Linux', level: 999)]
     public function checkCliTools(): ?CheckResult
@@ -52,9 +56,9 @@ class LinuxToolCheckList
             default => self::TOOLS_DEBIAN,
         };
         $missing = [];
-        foreach ($required as $cmd) {
-            if ($this->findCommand($cmd) === null) {
-                $missing[] = $cmd;
+        foreach ($required as $package) {
+            if ($this->findCommand(self::PROVIDED_COMMAND[$package] ?? $package) === null) {
+                $missing[] = $package;
             }
         }
         if (!empty($missing)) {
