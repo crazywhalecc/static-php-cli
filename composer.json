@@ -54,5 +54,11 @@
         },
         "optimize-autoloader": true,
         "sort-packages": true
-    }
+    },
+    "funding": [
+        {
+            "type": "other",
+            "url": "https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md"
+        }
+    ]
 }
