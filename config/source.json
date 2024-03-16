@@ -224,7 +224,7 @@
     "libargon2": {
         "type": "git",
         "rev": "master",
-        "url": "https://github.com/mpociot/phc-winner-argon2",
+        "url": "https://github.com/static-php/phc-winner-argon2",
         "license": {
             "type": "file",
             "path": "LICENSE"
