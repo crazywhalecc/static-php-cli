@@ -8,7 +8,7 @@ trait pkgconfig
 {
     protected function build(): void
     {
-        $macos_env = "CFLAGS='{$this->builder->arch_c_flags} -Wimplicit-function-declaration' ";
+        $macos_env = "CFLAGS='{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion' ";
         $linux_env = 'LDFLAGS=--static ';
 
         shell()->cd($this->source_dir)
