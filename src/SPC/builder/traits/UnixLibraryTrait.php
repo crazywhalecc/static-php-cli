@@ -48,7 +48,7 @@ trait UnixLibraryTrait
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function makeAutoconfEnv(string $prefix = null): string
+    public function makeAutoconfEnv(?string $prefix = null): string
     {
         if ($prefix === null) {
             $prefix = str_replace('-', '_', strtoupper(static::NAME));
