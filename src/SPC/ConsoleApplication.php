@@ -33,6 +33,7 @@ final class ConsoleApplication extends Application
 
         $this->addCommands(
             [
+                // Common commands
                 new BuildCliCommand(),
                 new BuildLibsCommand(),
                 new DoctorCommand(),
