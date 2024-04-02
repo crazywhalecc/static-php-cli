@@ -52,6 +52,16 @@
             "path": "COPYING"
         }
     },
+    "ext-ds": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/ds",
+        "path": "php-src/ext/ds",
+        "filename": "ds.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-event": {
         "type": "url",
         "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
