@@ -646,9 +646,8 @@
         }
     },
     "xz": {
-        "type": "ghrel",
-        "repo": "tukaani-project/xz",
-        "match": "xz-.+\\.tar\\.gz",
+        "type": "url",
+        "url": "https://fossies.org/linux/misc/xz-5.4.6.tar.xz",
         "license": {
             "type": "file",
             "path": "COPYING"
