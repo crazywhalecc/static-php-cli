@@ -382,6 +382,11 @@
     "shmop": {
         "type": "builtin"
     },
+    "simdjson": {
+        "type": "external",
+        "source": "ext-simdjson",
+        "cpp-extension": true
+    },
     "simplexml": {
         "type": "builtin",
         "arg-type": "custom",
