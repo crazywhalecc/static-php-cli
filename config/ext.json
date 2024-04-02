@@ -57,6 +57,10 @@
             "xml"
         ]
     },
+    "ds": {
+        "type": "external",
+        "source": "ext-ds"
+    },
     "event": {
         "type": "external",
         "source": "ext-event",
