@@ -20,7 +20,7 @@ class OSCheckList
             return CheckResult::fail('Current OS is not supported: ' . PHP_OS_FAMILY);
         }
         $distro = PHP_OS_FAMILY === 'Linux' ? (' ' . SystemUtil::getOSRelease()['dist']) : '';
-        $known_distro = PHP_OS_FAMILY === 'Linux' && in_array(SystemUtil::getOSRelease()['dist'], SystemUtil::getSupportedDistros());
+        $known_distro = PHP_OS_FAMILY !== 'Linux' || in_array(SystemUtil::getOSRelease()['dist'], SystemUtil::getSupportedDistros());
         return CheckResult::ok(PHP_OS_FAMILY . ' ' . php_uname('m') . $distro . ', supported' . ($known_distro ? '' : ' (but not tested on this distro)'));
     }
 }
