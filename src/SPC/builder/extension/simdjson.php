@@ -24,6 +24,11 @@ class simdjson extends Extension
             'if test -z "$PHP_CONFIG"; then',
             'if false; then'
         );
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/simdjson/config.w32',
+            "'yes',",
+            'PHP_SIMDJSON_SHARED,'
+        );
         return true;
     }
 }
