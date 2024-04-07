@@ -28,15 +28,16 @@ class LinuxBuilder extends UnixBuilderBase
 
         // check musl-cross make installed if we use musl-cross-make
         $arch = arch2gnu(php_uname('m'));
-        if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc")) {
-            throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
-        }
 
         // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
         $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
         $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
 
         GlobalEnvManager::init($this);
+
+        if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc")) {
+            throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
+        }
 
         // concurrency
         $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
@@ -169,7 +170,6 @@ class LinuxBuilder extends UnixBuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                "{$this->getOption('ld_library_path')} " .
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
@@ -314,7 +314,7 @@ class LinuxBuilder extends UnixBuilderBase
     {
         return [
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
-            'EXTRA_LIBS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
+            'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'),
         ];
     }
