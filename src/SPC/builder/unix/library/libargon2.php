@@ -11,9 +11,10 @@ trait libargon2
     protected function build()
     {
         shell()->cd($this->source_dir)
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->exec("make PREFIX='' clean")
-            ->exec("make -j{$this->builder->concurrency} PREFIX=''")
-            ->exec("make install PREFIX='' DESTDIR=" . BUILD_ROOT_PATH);
+            ->execWithEnv("make -j{$this->builder->concurrency} PREFIX=''")
+            ->execWithEnv("make install PREFIX='' DESTDIR=" . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['libargon2.pc']);
 

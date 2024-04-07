@@ -206,4 +206,9 @@ abstract class LibraryBase
         }
         logger()->debug('enabling ' . static::NAME . " without {$name}");
     }
+
+    protected function getSnakeCaseName(): string
+    {
+        return str_replace('-', '_', static::NAME);
+    }
 }

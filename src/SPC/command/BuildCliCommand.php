@@ -10,6 +10,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
+use SPC\util\GlobalEnvManager;
 use SPC\util\LicenseDumper;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -117,7 +118,6 @@ class BuildCliCommand extends BuildCommand
             }
             if ($this->input->getOption('with-upx-pack') && in_array(PHP_OS_FAMILY, ['Linux', 'Windows'])) {
                 $indent_texts['UPX Pack'] = 'enabled';
-                $builder->setOption('upx-exec', FileSystem::convertPath(PKG_ROOT_PATH . '/bin/upx' . $suffix));
             }
             try {
                 $ver = $builder->getPHPVersion();
@@ -132,6 +132,7 @@ class BuildCliCommand extends BuildCommand
                 $indent_texts['Extra Exts (' . count($not_included) . ')'] = implode(', ', $not_included);
             }
             $this->printFormatInfo($indent_texts);
+            $this->printFormatInfo($this->getDefinedEnvs(), true);
             logger()->notice('Build will start after 2s ...');
             sleep(2);
 
@@ -226,7 +227,18 @@ class BuildCliCommand extends BuildCommand
         return $rule;
     }
 
-    private function printFormatInfo(array $indent_texts): void
+    private function getDefinedEnvs(): array
+    {
+        $envs = GlobalEnvManager::getInitializedEnv();
+        $final = [];
+        foreach ($envs as $env) {
+            $exp = explode('=', $env, 2);
+            $final['Init var [' . $exp[0] . ']'] = $exp[1];
+        }
+        return $final;
+    }
+
+    private function printFormatInfo(array $indent_texts, bool $debug = false): void
     {
         // calculate space count for every line
         $maxlen = 0;
@@ -236,14 +248,14 @@ class BuildCliCommand extends BuildCommand
         foreach ($indent_texts as $k => $v) {
             if (is_string($v)) {
                 /* @phpstan-ignore-next-line */
-                logger()->info($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($v));
+                logger()->{$debug ? 'debug' : 'info'}($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($v));
             } elseif (is_array($v) && !is_assoc_array($v)) {
                 $first = array_shift($v);
                 /* @phpstan-ignore-next-line */
-                logger()->info($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($first));
+                logger()->{$debug ? 'debug' : 'info'}($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($first));
                 foreach ($v as $vs) {
                     /* @phpstan-ignore-next-line */
-                    logger()->info(str_pad('', $maxlen + 2) . ConsoleColor::yellow($vs));
+                    logger()->{$debug ? 'debug' : 'info'}(str_pad('', $maxlen + 2) . ConsoleColor::yellow($vs));
                 }
             }
         }

@@ -20,7 +20,8 @@ trait libevent
         FileSystem::resetDir($this->source_dir . '/build');
         // Start build
         shell()->cd($this->source_dir . '/build')
-            ->exec(
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->execWithEnv(
                 'cmake ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
@@ -33,7 +34,7 @@ trait libevent
                 '-DEVENT__DISABLE_SAMPLES=ON ' .
                 '..'
             )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
+            ->execWithEnv("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install');
     }
 }

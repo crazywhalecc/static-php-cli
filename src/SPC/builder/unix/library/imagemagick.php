@@ -39,15 +39,18 @@ trait imagemagick
             }
         }
 
-        $ldflags = $this instanceof LinuxLibraryBase ? ('LDFLAGS="-static" ') : '';
+        $ldflags = $this instanceof LinuxLibraryBase ? ('-static') : '';
 
         // libxml iconv patch
-        $required_libs .= $this instanceof MacOSLibraryBase ? (' -liconv') : '';
+        $required_libs .= $this instanceof MacOSLibraryBase ? ('-liconv') : '';
         shell()->cd($this->source_dir)
-            ->exec(
-                'PKG_CONFIG="$PKG_CONFIG --static" ' .
-                $ldflags .
-                "LIBS='{$required_libs}' " .
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags,
+                'LIBS' => $this->getLibExtraLibs() ?: $required_libs,
+                'PKG_CONFIG' => '$PKG_CONFIG --static',
+            ])
+            ->execWithEnv(
                 './configure ' .
                 '--enable-static --disable-shared ' .
                 $extra .

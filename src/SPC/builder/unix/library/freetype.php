@@ -26,15 +26,16 @@ trait freetype
         $suggested .= ' ';
 
         shell()->cd($this->source_dir)
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->exec('sh autogen.sh')
-            ->exec(
+            ->execWithEnv(
                 './configure ' .
                 '--enable-static --disable-shared --without-harfbuzz --prefix= ' .
                 $suggested
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->execWithEnv('make clean')
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['freetype2.pc']);
         FileSystem::replaceFileStr(
             BUILD_ROOT_PATH . '/lib/pkgconfig/freetype2.pc',

@@ -62,7 +62,12 @@ class UnixShell
 
     public function setEnv(array $env): UnixShell
     {
-        $this->env = array_merge($this->env, $env);
+        foreach ($env as $k => $v) {
+            if ($v === '') {
+                continue;
+            }
+            $this->env[$k] = $v;
+        }
         return $this;
     }
 
