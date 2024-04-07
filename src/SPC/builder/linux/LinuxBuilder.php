@@ -11,68 +11,42 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
+use SPC\util\GlobalEnvManager;
 
 class LinuxBuilder extends UnixBuilderBase
 {
-    /** @var array Tune cflags */
-    public array $tune_c_flags;
-
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
     /**
      * @throws FileSystemException
-     * @throws RuntimeException
      * @throws WrongUsageException
      */
     public function __construct(array $options = [])
     {
         $this->options = $options;
 
-        // ---------- set necessary options ----------
-        // set C/C++ compilers (default: alpine: gcc, others: musl-cross-make)
-        if (SystemUtil::isMuslDist()) {
-            f_putenv("CC={$this->getOption('cc', 'gcc')}");
-            f_putenv("CXX={$this->getOption('cxx', 'g++')}");
-            f_putenv("AR={$this->getOption('ar', 'ar')}");
-            f_putenv("LD={$this->getOption('ld', 'ld.gold')}");
-        } else {
-            $arch = arch2gnu(php_uname('m'));
-            f_putenv("CC={$this->getOption('cc', "{$arch}-linux-musl-gcc")}");
-            f_putenv("CXX={$this->getOption('cxx', "{$arch}-linux-musl-g++")}");
-            f_putenv("AR={$this->getOption('ar', "{$arch}-linux-musl-ar")}");
-            f_putenv("LD={$this->getOption('ld', 'ld.gold')}");
-            f_putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
-
-            // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
-            $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
-            $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
-
-            // check musl-cross make installed if we use musl-cross-make
-            if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc")) {
-                throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
-            }
+        // check musl-cross make installed if we use musl-cross-make
+        $arch = arch2gnu(php_uname('m'));
+        if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc")) {
+            throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
         }
 
-        // set PKG_CONFIG
-        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
-        // set PKG_CONFIG_PATH
-        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
+        // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
+        $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
+        $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
 
-        // set arch (default: current)
-        $this->setOptionIfNotExist('arch', php_uname('m'));
-        $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
+        GlobalEnvManager::init($this);
 
         // concurrency
-        $this->concurrency = SystemUtil::getCpuCount();
+        $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
         // cflags
-        $this->arch_c_flags = SystemUtil::getArchCFlags(getenv('CC'), $this->getOption('arch'));
-        $this->arch_cxx_flags = SystemUtil::getArchCFlags(getenv('CXX'), $this->getOption('arch'));
-        $this->tune_c_flags = SystemUtil::checkCCFlags(SystemUtil::getTuneCFlags($this->getOption('arch')), getenv('CC'));
+        $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
+        $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
         // cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile(
             'Linux',
-            $this->getOption('arch'),
+            $arch,
             $this->arch_c_flags,
             getenv('CC'),
             getenv('CXX'),
@@ -124,8 +98,8 @@ class LinuxBuilder extends UnixBuilderBase
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
         // ---------- Update extra-libs ----------
-        $extra_libs = $this->getOption('extra-libs', '');
-        // non-bloat linking
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+        // bloat means force-load all static libraries, even if they are not used
         if (!$this->getOption('bloat', false)) {
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
         } else {
@@ -133,21 +107,13 @@ class LinuxBuilder extends UnixBuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
-        $this->setOption('extra-libs', $extra_libs);
+        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
-
-        // prepare build php envs
-        $envs_build_php = SystemUtil::makeEnvVarString([
-            'CFLAGS' => $cflags,
-            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
-            'LDFLAGS' => '-L' . BUILD_LIB_PATH,
-            'LIBS' => '-ldl -lpthread',
-        ]);
 
         $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
 
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
+        shell()->cd(SOURCE_PATH . '/php-src')->exec(getenv('SPC_CMD_PREFIX_PHP_BUILDCONF'));
 
         $this->emitPatchPoint('before-php-configure');
         SourcePatcher::patchBeforeConfigure($this);
@@ -169,20 +135,31 @@ class LinuxBuilder extends UnixBuilderBase
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
+        // prepare build php envs
+        $envs_build_php = SystemUtil::makeEnvVarString([
+            'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
+            'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
+            'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
+            'LIBS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
+        ]);
+
         // upx pack and strip for micro
         if ($this->getOption('with-upx-pack', false)) {
+            // with upx pack always need strip
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
                 '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH) && ' . $this->getOption('upx-exec') . ' --best \$(SAPI_MICRO_PATH)',
+                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH) && ' . getenv('UPX_EXEC') . ' --best \$(SAPI_MICRO_PATH)',
             );
         } elseif (!$this->getOption('no-strip', false)) {
+            // not-no-strip means strip (default behavior)
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
                 '/POST_MICRO_BUILD_COMMANDS=.*/',
                 'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
             );
         } else {
+            // just no strip
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
                 '/POST_MICRO_BUILD_COMMANDS=.*/',
@@ -193,14 +170,7 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 "{$this->getOption('ld_library_path')} " .
-                './configure ' .
-                '--prefix= ' .
-                '--with-valgrind=no ' .
-                '--enable-shared=no ' .
-                '--enable-static=yes ' .
-                '--disable-all ' .
-                '--disable-cgi ' .
-                '--disable-phpdbg ' .
+                getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
                 ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
@@ -252,15 +222,15 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildCli(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("make -j{$this->concurrency} {$vars} cli");
+            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
                 ->exec('strip --strip-all php')
-                ->exec($this->getOption('upx-exec') . ' --best php');
+                ->exec(getenv('UPX_EXEC') . ' --best php');
         } elseif (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
         }
@@ -285,12 +255,16 @@ class LinuxBuilder extends UnixBuilderBase
             SourcePatcher::patchMicro(['phar']);
         }
 
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars([
-            'EXTRA_CFLAGS' => $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '',
-        ]));
+        $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+        $vars = $this->getMakeExtraVars();
+
+        // patch fake cli for micro
+        $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
+        $vars = SystemUtil::makeEnvVarString($vars);
+
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("make -j{$this->concurrency} {$vars} micro");
+            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} micro");
 
         $this->deployBinary(BUILD_TARGET_MICRO);
 
@@ -307,15 +281,15 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildFpm(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("make -j{$this->concurrency} {$vars} fpm");
+            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
                 ->exec('strip --strip-all php-fpm')
-                ->exec($this->getOption('upx-exec') . ' --best php-fpm');
+                ->exec(getenv('UPX_EXEC') . ' --best php-fpm');
         } elseif (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
         }
@@ -329,29 +303,19 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildEmbed(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
-        shell()
-            ->cd(SOURCE_PATH . '/php-src')
+        shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec('make INSTALL_ROOT=' . BUILD_ROOT_PATH . " -j{$this->concurrency} {$vars} install");
+            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
     }
 
-    private function getBuildVars($input = []): array
+    private function getMakeExtraVars(): array
     {
-        $use_lld = '';
-        if (str_ends_with(getenv('CC'), 'clang') && SystemUtil::findCommand('lld')) {
-            $use_lld = '-Xcompiler -fuse-ld=lld';
-        }
-        $optimization = $this->getOption('no-strip', false) ? '-g -O0' : '-g0 -Os';
-        $cflags = isset($input['EXTRA_CFLAGS']) && $input['EXTRA_CFLAGS'] ? " {$input['EXTRA_CFLAGS']}" : '';
-        $libs = isset($input['EXTRA_LIBS']) && $input['EXTRA_LIBS'] ? " {$input['EXTRA_LIBS']}" : '';
-        $ldflags = isset($input['EXTRA_LDFLAGS_PROGRAM']) && $input['EXTRA_LDFLAGS_PROGRAM'] ? " {$input['EXTRA_LDFLAGS_PROGRAM']}" : '';
-        $tune_c_flags = implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", $this->tune_c_flags));
         return [
-            'EXTRA_CFLAGS' => "{$optimization} -fno-ident -fPIE {$tune_c_flags}{$cflags}",
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs', '')} {$libs}",
-            'EXTRA_LDFLAGS_PROGRAM' => "{$use_lld} -all-static{$ldflags}",
+            'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
+            'EXTRA_LIBS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
+            'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'),
         ];
     }
 }

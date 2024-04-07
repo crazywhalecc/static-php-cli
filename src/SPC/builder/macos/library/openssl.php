@@ -48,6 +48,7 @@ class openssl extends MacOSLibraryBase
         }
 
         shell()->cd($this->source_dir)
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->exec(
                 "./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/
@@ -56,7 +57,7 @@ class openssl extends MacOSLibraryBase
                 "darwin64-{$this->builder->getOption('arch')}-cc"
             )
             ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
+            ->execWithEnv("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
             ->exec("make install_sw DESTDIR={$destdir}");
         $this->patchPkgconfPrefix(['libssl.pc', 'openssl.pc', 'libcrypto.pc']);
         // patch for openssl 3.3.0+

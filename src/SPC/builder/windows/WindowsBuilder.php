@@ -13,6 +13,7 @@ use SPC\store\FileSystem;
 use SPC\store\SourceManager;
 use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
+use SPC\util\GlobalEnvManager;
 
 class WindowsBuilder extends BuilderBase
 {
@@ -33,6 +34,8 @@ class WindowsBuilder extends BuilderBase
     {
         $this->options = $options;
 
+        GlobalEnvManager::init($this);
+
         // ---------- set necessary options ----------
         // set sdk (require visual studio 16 or 17)
         $vs = SystemUtil::findVisualStudio()['version'];
@@ -42,7 +45,7 @@ class WindowsBuilder extends BuilderBase
         $this->zts = $this->getOption('enable-zts', false);
 
         // set concurrency
-        $this->concurrency = SystemUtil::getCpuCount();
+        $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
 
         // make cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile();
@@ -59,9 +62,10 @@ class WindowsBuilder extends BuilderBase
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
         // ---------- Update extra-libs ----------
-        $extra_libs = $this->getOption('extra-libs', '');
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
-        $this->setOption('extra-libs', $extra_libs);
+        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
+
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
@@ -80,7 +84,7 @@ class WindowsBuilder extends BuilderBase
         if ($this->getOption('with-upx-pack', false)) {
             if (!file_exists($makefile . '.originfile')) {
                 copy($makefile, $makefile . '.originfile');
-                FileSystem::replaceFileStr($makefile, '$(MICRO_SFX):', "_MICRO_UPX = {$this->getOption('upx-exec')} --best $(MICRO_SFX)\n$(MICRO_SFX):");
+                FileSystem::replaceFileStr($makefile, '$(MICRO_SFX):', '_MICRO_UPX = ' . getenv('UPX_EXEC') . " --best $(MICRO_SFX)\n$(MICRO_SFX):");
                 FileSystem::replaceFileStr($makefile, '@$(_MICRO_MT)', "@$(_MICRO_MT)\n\t@$(_MICRO_UPX)");
             }
         } elseif (file_exists($makefile . '.originfile')) {
@@ -322,7 +326,7 @@ class WindowsBuilder extends BuilderBase
 
         // with-upx-pack for cli
         if ($this->getOption('with-upx-pack', false) && $type === BUILD_TARGET_CLI) {
-            cmd()->exec($this->getOption('upx-exec') . ' --best ' . escapeshellarg($src));
+            cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($src));
         }
 
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');

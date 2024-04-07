@@ -99,4 +99,19 @@ trait UnixLibraryTrait
             }
         }
     }
+
+    public function getLibExtraCFlags(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
+    }
+
+    public function getLibExtraLdFlags(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
+    }
+
+    public function getLibExtraLibs(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
+    }
 }

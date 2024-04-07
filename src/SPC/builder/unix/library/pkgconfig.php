@@ -8,15 +8,12 @@ trait pkgconfig
 {
     protected function build(): void
     {
-        $macos_env = "CFLAGS='{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion' ";
-        $linux_env = 'LDFLAGS=--static ';
+        $cflags = PHP_OS_FAMILY === 'Darwin' ? "{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion" : '';
+        $ldflags = PHP_OS_FAMILY === 'Darwin' ? '' : '--static';
 
         shell()->cd($this->source_dir)
-            ->exec(
-                match (PHP_OS_FAMILY) {
-                    'Darwin' => $macos_env,
-                    default => $linux_env,
-                } .
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags() ?: $cflags, 'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags, 'LIBS' => $this->getLibExtraLibs()])
+            ->execWithEnv(
                 './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .
@@ -30,8 +27,8 @@ trait pkgconfig
                 '--without-pc-path'
             )
             ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install-exec');
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv('make install-exec');
         shell()->exec('strip ' . BUILD_ROOT_PATH . '/bin/pkg-config');
     }
 }

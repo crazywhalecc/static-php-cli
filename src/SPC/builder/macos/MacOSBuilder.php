@@ -11,6 +11,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
+use SPC\util\GlobalEnvManager;
 
 class MacOSBuilder extends UnixBuilderBase
 {
@@ -26,28 +27,15 @@ class MacOSBuilder extends UnixBuilderBase
     {
         $this->options = $options;
 
-        // ---------- set necessary options ----------
-        // set C Compiler (default: clang)
-        f_putenv('CC=' . $this->getOption('cc', 'clang'));
-        // set C++ Composer (default: clang++)
-        f_putenv('CXX=' . $this->getOption('cxx', 'clang++'));
-        // set PATH
-        f_putenv('PATH=' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
-        // set PKG_CONFIG
-        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
-        // set PKG_CONFIG_PATH
-        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig/');
+        // apply global environment variables
+        GlobalEnvManager::init($this);
 
-        // set arch (default: current)
-        $this->setOptionIfNotExist('arch', php_uname('m'));
-        $this->setOptionIfNotExist('gnu-arch', arch2gnu($this->getOption('arch')));
-
-        // ---------- set necessary compile environments ----------
+        // ---------- set necessary compile vars ----------
         // concurrency
-        $this->concurrency = SystemUtil::getCpuCount();
+        $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
         // cflags
-        $this->arch_c_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
-        $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
+        $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
+        $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
         // cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->getOption('arch'), $this->arch_c_flags);
 
@@ -123,24 +111,25 @@ class MacOSBuilder extends UnixBuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         // ---------- Update extra-libs ----------
-        $extra_libs = $this->getOption('extra-libs', '');
         // add macOS frameworks
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . $this->getFrameworks(true);
         // add libc++, some extensions or libraries need it (C++ cannot be linked statically)
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lc++ ' : '');
+        // bloat means force-load all static libraries, even if they are not used
         if (!$this->getOption('bloat', false)) {
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
         } else {
             logger()->info('bloat linking');
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Wl,-force_load,{$x}", array_filter($this->getAllStaticLibFiles())));
         }
-        $this->setOption('extra-libs', $extra_libs);
+        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
 
         $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
 
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
+        shell()->cd(SOURCE_PATH . '/php-src')->exec(getenv('SPC_CMD_PREFIX_PHP_BUILDCONF'));
 
         $this->emitPatchPoint('before-php-configure');
         SourcePatcher::patchBeforeConfigure($this);
@@ -155,9 +144,9 @@ class MacOSBuilder extends UnixBuilderBase
 
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
-            'CFLAGS' => " {$this->arch_c_flags} -Werror=unknown-warning-option ",
-            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
-            'LDFLAGS' => '-L' . BUILD_LIB_PATH,
+            'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
+            'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
+            'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
         ]);
 
         if ($this->getLib('postgresql')) {
@@ -170,14 +159,7 @@ class MacOSBuilder extends UnixBuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
-                './configure ' .
-                '--prefix= ' .
-                '--with-valgrind=no ' .     // Not detect memory leak
-                '--enable-shared=no ' .
-                '--enable-static=yes ' .
-                '--disable-all ' .
-                '--disable-cgi ' .
-                '--disable-phpdbg ' .
+                getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
                 ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
@@ -227,10 +209,10 @@ class MacOSBuilder extends UnixBuilderBase
      */
     protected function buildCli(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("make -j{$this->concurrency} {$vars} cli");
+        $shell->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
         if (!$this->getOption('no-strip', false)) {
             $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
         }
@@ -255,18 +237,17 @@ class MacOSBuilder extends UnixBuilderBase
         }
 
         $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-        $vars = [
-            // with debug information, optimize for size, remove identifiers, patch fake cli for micro
-            'EXTRA_CFLAGS' => '-g -Os -fno-ident' . $enable_fake_cli,
-        ];
-        $vars = $this->getBuildVars($vars);
+        $vars = $this->getMakeExtraVars();
+
+        // patch fake cli for micro
+        $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
         if (!$this->getOption('no-strip', false)) {
             $vars['STRIP'] = 'dsymutil -f ';
         }
         $vars = SystemUtil::makeEnvVarString($vars);
 
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec("make -j{$this->concurrency} {$vars} micro");
+        shell()->cd(SOURCE_PATH . '/php-src')->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} micro");
+
         $this->deployBinary(BUILD_TARGET_MICRO);
 
         if ($this->phar_patched) {
@@ -282,10 +263,10 @@ class MacOSBuilder extends UnixBuilderBase
      */
     protected function buildFpm(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("make -j{$this->concurrency} {$vars} fpm");
+        $shell->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} fpm");
         if (!$this->getOption('no-strip', false)) {
             $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
         }
@@ -299,11 +280,10 @@ class MacOSBuilder extends UnixBuilderBase
      */
     protected function buildEmbed(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getBuildVars());
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
-        shell()
-            ->cd(SOURCE_PATH . '/php-src')
-            ->exec('make INSTALL_ROOT=' . BUILD_ROOT_PATH . " -j{$this->concurrency} {$vars} install")
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install")
             // Workaround for https://github.com/php/php-src/issues/12082
             ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o')
             ->exec('mkdir ' . BUILD_ROOT_PATH . '/lib/php-o')
@@ -314,14 +294,11 @@ class MacOSBuilder extends UnixBuilderBase
             ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
     }
 
-    private function getBuildVars($input = []): array
+    private function getMakeExtraVars(): array
     {
-        $optimization = $this->getOption('no-strip', false) ? '-g -O0' : '-g0 -Os';
-        $cflags = isset($input['EXTRA_CFLAGS']) && $input['EXTRA_CFLAGS'] ? " {$input['EXTRA_CFLAGS']}" : '';
-        $libs = isset($input['EXTRA_LIBS']) && $input['EXTRA_LIBS'] ? " {$input['EXTRA_LIBS']}" : '';
         return [
-            'EXTRA_CFLAGS' => "{$optimization} {$cflags} " . $this->getOption('x-extra-cflags'),
-            'EXTRA_LIBS' => "{$this->getOption('extra-libs')} -lresolv {$libs} " . $this->getOption('x-extra-libs'),
+            'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
+            'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
         ];
     }
 }
