@@ -35,7 +35,7 @@ class libpng extends MacOSLibraryBase
      */
     protected function build(): void
     {
-        $optimizations = match ($this->builder->getOption('arch')) {
+        $optimizations = match (php_uname('m')) {
             'x86_64' => '--enable-intel-sse ',
             'arm64' => '--enable-arm-neon ',
             default => '',
@@ -45,7 +45,7 @@ class libpng extends MacOSLibraryBase
             ->exec('chmod +x ./install-sh')
             ->exec(
                 './configure ' .
-                "--host={$this->builder->getOption('gnu-arch')}-apple-darwin " .
+                '--host=' . arch2gnu(php_uname('m')) . '-apple-darwin ' .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .
