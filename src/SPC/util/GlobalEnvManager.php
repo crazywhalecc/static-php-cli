@@ -40,15 +40,6 @@ class GlobalEnvManager
         self::putenv('SOURCE_PATH=' . SOURCE_PATH);
         self::putenv('DOWNLOAD_PATH=' . DOWNLOAD_PATH);
 
-        // Init system-specific env
-        match (PHP_OS_FAMILY) {
-            'Windows' => self::initWindowsEnv($builder),
-            'Darwin' => self::initDarwinEnv($builder),
-            'Linux' => self::initLinuxEnv($builder),
-            'BSD' => 'TODO',
-            default => logger()->warning('Unknown OS: ' . PHP_OS_FAMILY),
-        };
-
         // Init SPC env
         self::initIfNotExists('SPC_CONCURRENCY', match (PHP_OS_FAMILY) {
             'Windows' => (string) WindowsSystemUtil::getCpuCount(),
@@ -57,6 +48,15 @@ class GlobalEnvManager
             'BSD' => (string) BSDSystemUtil::getCpuCount(),
             default => '1',
         });
+
+        // Init system-specific env
+        match (PHP_OS_FAMILY) {
+            'Windows' => self::initWindowsEnv($builder),
+            'Darwin' => self::initDarwinEnv($builder),
+            'Linux' => self::initLinuxEnv($builder),
+            'BSD' => 'TODO',
+            default => logger()->warning('Unknown OS: ' . PHP_OS_FAMILY),
+        };
     }
 
     private static function initWindowsEnv(BuilderBase $builder): void
