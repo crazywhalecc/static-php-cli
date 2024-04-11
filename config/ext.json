@@ -623,6 +623,14 @@
             "dom"
         ]
     },
+    "yac": {
+        "type": "external",
+        "source": "yac",
+        "arg-type": "custom",
+        "ext-depends": [
+            "igbinary"
+        ]
+    },
     "yaml": {
         "type": "external",
         "source": "yaml",
