@@ -14,7 +14,7 @@ declare(strict_types=1);
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'yac',
-    'Windows' => 'mbstring,pdo_sqlite,mbregex,ffi,ds,simdjson',
+    'Windows' => 'mbstring,pdo_sqlite,mbregex,yac',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
