@@ -627,7 +627,7 @@
         "type": "external",
         "source": "yac",
         "arg-type-unix": "custom",
-        "ext-depends-windows": [
+        "ext-depends-unix": [
             "igbinary"
         ]
     },
