@@ -27,26 +27,31 @@ trait postgresql
             'libxslt' => 'libxslt',
             'icu' => 'icu-i18n',
         ];
+        $error_exec_cnt = 0;
 
         foreach ($optional_packages as $lib => $pkg) {
             if ($this->getBuilder()->getLib($lib)) {
                 $packages .= ' ' . $pkg;
                 $output = shell()->execWithResult("pkg-config --static {$pkg}");
+                $error_exec_cnt += $output[0] === 0 ? 0 : 1;
                 logger()->info(var_export($output[1], true));
             }
         }
 
         $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
+        $error_exec_cnt += $output[0] === 0 ? 0 : 1;
         if (!empty($output[1][0])) {
             $cppflags = $output[1][0];
             $envs .= " CPPFLAGS=\"{$cppflags}\"";
         }
         $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
+        $error_exec_cnt += $output[0] === 0 ? 0 : 1;
         if (!empty($output[1][0])) {
             $ldflags = $output[1][0];
             $envs .= $this instanceof MacOSLibraryBase ? " LDFLAGS=\"{$ldflags}\" " : " LDFLAGS=\"{$ldflags} -static\" ";
         }
         $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
+        $error_exec_cnt += $output[0] === 0 ? 0 : 1;
         if (!empty($output[1][0])) {
             $libs = $output[1][0];
             $libcpp = '';
@@ -54,6 +59,9 @@ trait postgresql
                 $libcpp = $this instanceof LinuxLibraryBase ? ' -lstdc++' : ' -lc++';
             }
             $envs .= " LIBS=\"{$libs}{$libcpp}\" ";
+        }
+        if ($error_exec_cnt > 0) {
+            throw new RuntimeException('Failed to get pkg-config information!');
         }
 
         FileSystem::resetDir($this->source_dir . '/build');
