@@ -673,6 +673,16 @@
             "path": "COPYING"
         }
     },
+    "yac": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/yac",
+        "path": "php-src/ext/yac",
+        "filename": "yac.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "yaml": {
         "type": "git",
         "path": "php-src/ext/yaml",
