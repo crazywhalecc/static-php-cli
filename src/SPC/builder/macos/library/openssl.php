@@ -23,6 +23,7 @@ namespace SPC\builder\macos\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 
 class openssl extends MacOSLibraryBase
 {
@@ -58,5 +59,15 @@ class openssl extends MacOSLibraryBase
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
             ->exec("make install_sw DESTDIR={$destdir}");
         $this->patchPkgconfPrefix(['libssl.pc', 'openssl.pc', 'libcrypto.pc']);
+        // patch for openssl 3.3.0+
+        if (!str_contains($file = FileSystem::readFile(BUILD_LIB_PATH . '/pkgconfig/libssl.pc'), 'prefix=')) {
+            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/libssl.pc', 'prefix=' . BUILD_ROOT_PATH . "\n" . $file);
+        }
+        if (!str_contains($file = FileSystem::readFile(BUILD_LIB_PATH . '/pkgconfig/openssl.pc'), 'prefix=')) {
+            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/openssl.pc', 'prefix=' . BUILD_ROOT_PATH . "\n" . $file);
+        }
+        if (!str_contains($file = FileSystem::readFile(BUILD_LIB_PATH . '/pkgconfig/libcrypto.pc'), 'prefix=')) {
+            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/libcrypto.pc', 'prefix=' . BUILD_ROOT_PATH . "\n" . $file);
+        }
     }
 }
