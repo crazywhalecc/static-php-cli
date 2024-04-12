@@ -385,7 +385,7 @@
     },
     "libuuid": {
         "type": "git",
-        "url": "https://github.com/cloudbase/libuuid.git",
+        "url": "https://github.com/static-php/libuuid.git",
         "rev": "master",
         "license": {
             "type": "file",
