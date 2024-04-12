@@ -353,6 +353,9 @@
         "source": "libuuid",
         "static-libs-unix": [
             "libuuid.a"
+        ],
+        "headers": [
+            "uuid/uuid.h"
         ]
     },
     "libuv": {

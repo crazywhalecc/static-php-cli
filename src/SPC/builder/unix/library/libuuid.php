@@ -10,29 +10,37 @@ use SPC\store\FileSystem;
 
 trait libuuid
 {
-    public function patchBeforeBuild(): bool
-    {
-        FileSystem::replaceFileStr($this->source_dir . '/configure', '-${am__api_version}', '');
-        return true;
-    }
-
     /**
      * @throws FileSystemException
      * @throws RuntimeException
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->exec('chmod +x configure')
-            ->exec('chmod +x install-sh')
+        FileSystem::resetDir($this->source_dir . '/build');
+        shell()->cd($this->source_dir . '/build')
             ->exec(
-                './configure ' .
-                '--enable-static --disable-shared ' .
-                '--prefix='
+                'cmake ' .
+                "{$this->builder->makeCmakeArgs()} " .
+                '..'
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
-        $this->patchPkgconfPrefix(['uuid.pc']);
+            ->exec("cmake --build . -j {$this->builder->concurrency}");
+        copy($this->source_dir . '/build/libuuid.a', BUILD_LIB_PATH . '/libuuid.a');
+        FileSystem::createDir(BUILD_INCLUDE_PATH . '/uuid');
+        copy($this->source_dir . '/uuid.h', BUILD_INCLUDE_PATH . '/uuid/uuid.h');
+        $pc = FileSystem::readFile($this->source_dir . '/uuid.pc.in');
+        $pc = str_replace([
+            '@prefix@',
+            '@exec_prefix@',
+            '@libdir@',
+            '@includedir@',
+            '@LIBUUID_VERSION@',
+        ], [
+            BUILD_ROOT_PATH,
+            '${prefix}',
+            '${prefix}/lib',
+            '${prefix}/include',
+            '1.0.3',
+        ], $pc);
+        FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/uuid.pc', $pc);
     }
 }
