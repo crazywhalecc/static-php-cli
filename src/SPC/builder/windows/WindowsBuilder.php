@@ -46,6 +46,9 @@ class WindowsBuilder extends BuilderBase
 
         // make cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile();
+
+        f_mkdir(BUILD_INCLUDE_PATH, recursive: true);
+        f_mkdir(BUILD_LIB_PATH, recursive: true);
     }
 
     /**

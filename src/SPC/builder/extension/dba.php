@@ -15,4 +15,10 @@ class dba extends Extension
         $qdbm = $this->builder->getLib('qdbm') ? (' --with-qdbm=' . BUILD_ROOT_PATH) : '';
         return '--enable-dba' . $qdbm;
     }
+
+    public function getWindowsConfigureArg(): string
+    {
+        $qdbm = $this->builder->getLib('qdbm') ? ' --with-qdbm' : '';
+        return '--with-dba' . $qdbm;
+    }
 }

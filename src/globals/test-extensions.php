@@ -14,13 +14,13 @@ declare(strict_types=1);
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'dba',
-    'Windows' => 'mbstring,pdo_sqlite,mbregex',
+    'Windows' => 'mbstring,pdo_sqlite,mbregex,dba',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'qdbm',
-    'Windows' => '',
+    'Windows' => 'qdbm',
 };
 
 // Please change your test base combination. We recommend testing with `common`.

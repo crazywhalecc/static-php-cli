@@ -552,8 +552,9 @@
         }
     },
     "qdbm": {
-        "type": "url",
-        "url": "https://master.dl.sourceforge.net/project/qdbm/qdbm/1.8.77/qdbm-1.8.77.tar.gz",
+        "type": "git",
+        "url": "https://github.com/static-php/qdbm.git",
+        "rev": "main",
         "license": {
             "type": "file",
             "path": "COPYING"
