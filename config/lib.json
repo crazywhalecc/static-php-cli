@@ -525,6 +525,12 @@
             "zstd"
         ]
     },
+    "qdbm": {
+        "source": "qdbm",
+        "static-libs-unix": [
+            "libqdbm.a"
+        ]
+    },
     "readline": {
         "source": "readline",
         "static-libs-unix": [

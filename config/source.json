@@ -551,6 +551,14 @@
             "path": "LICENSE"
         }
     },
+    "qdbm": {
+        "type": "url",
+        "url": "https://master.dl.sourceforge.net/project/qdbm/qdbm/1.8.77/qdbm-1.8.77.tar.gz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "rar": {
         "type": "git",
         "url": "https://github.com/static-php/php-rar.git",
