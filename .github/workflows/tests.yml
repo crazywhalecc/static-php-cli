@@ -168,4 +168,4 @@ jobs:
             bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug
 
       - name: "Run Build Tests (build)"
-        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" --with-libs="$(php src/globals/test-extensions.php libs_cmd)" --build-cli --build-micro --build-fpm --debug
+        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
