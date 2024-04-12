@@ -43,7 +43,10 @@
     },
     "dba": {
         "type": "builtin",
-        "arg-type-windows": "with"
+        "arg-type": "custom",
+        "lib-suggests": [
+            "qdbm"
+        ]
     },
     "dom": {
         "type": "builtin",

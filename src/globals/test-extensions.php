@@ -13,14 +13,14 @@ declare(strict_types=1);
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'yac',
-    'Windows' => 'mbstring,pdo_sqlite,mbregex,yac',
+    'Linux', 'Darwin' => 'dba',
+    'Windows' => 'mbstring,pdo_sqlite,mbregex,dba',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => '',
-    'Windows' => '',
+    'Linux', 'Darwin' => 'qdbm',
+    'Windows' => 'qdbm',
 };
 
 // Please change your test base combination. We recommend testing with `common`.
@@ -62,7 +62,6 @@ $final_libs = trim($with_libs, $trim_value);
 
 if (PHP_OS_FAMILY === 'Windows') {
     $final_extensions_cmd = '"' . $final_extensions . '"';
-    $final_libs = $final_libs === '' ? '' : ('"' . $final_libs . '"');
 } else {
     $final_extensions_cmd = $final_extensions;
 }

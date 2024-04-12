@@ -551,6 +551,15 @@
             "path": "LICENSE"
         }
     },
+    "qdbm": {
+        "type": "git",
+        "url": "https://github.com/static-php/qdbm.git",
+        "rev": "main",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "rar": {
         "type": "git",
         "url": "https://github.com/static-php/php-rar.git",

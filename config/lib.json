@@ -525,6 +525,18 @@
             "zstd"
         ]
     },
+    "qdbm": {
+        "source": "qdbm",
+        "static-libs-unix": [
+            "libqdbm.a"
+        ],
+        "static-libs-windows": [
+            "qdbm_a.lib"
+        ],
+        "headers-windows": [
+            "depot.h"
+        ]
+    },
     "readline": {
         "source": "readline",
         "static-libs-unix": [
