@@ -37,9 +37,11 @@ class MacOSToolCheckList
     #[AsCheckItem('if homebrew has installed', limit_os: 'Darwin', level: 998)]
     public function checkBrew(): ?CheckResult
     {
-        // 检查 homebrew 是否已经安装
-        if ($this->findCommand('brew') === null) {
+        if (($path = $this->findCommand('brew')) === null) {
             return CheckResult::fail('Homebrew is not installed', 'brew');
+        }
+        if ($path !== '/opt/homebrew/bin/brew' && php_uname('m') === 'arm64') {
+            return CheckResult::fail('Current homebrew (/usr/local/bin/homebrew) is not installed for M1 Mac, please re-install homebrew in /opt/homebrew/ !');
         }
         return CheckResult::ok();
     }
