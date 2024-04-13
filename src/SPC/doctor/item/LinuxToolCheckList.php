@@ -40,8 +40,13 @@ class LinuxToolCheckList
         'xz',
     ];
 
+    public const TOOLS_ARCH = [
+        'base-devel', 'cmake',
+    ];
+
     private const PROVIDED_COMMAND = [
         'binutils-gold' => 'ld.gold',
+        'base-devel' => 'automake',
     ];
 
     /** @noinspection PhpUnused */
@@ -53,6 +58,7 @@ class LinuxToolCheckList
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
             'redhat' => self::TOOLS_RHEL,
+            'arch' => self::TOOLS_ARCH,
             default => self::TOOLS_DEBIAN,
         };
         $missing = [];
@@ -67,6 +73,7 @@ class LinuxToolCheckList
                 'alpine',
                 'redhat',
                 'Deepin',
+                'arch',
                 'debian' => CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]),
                 default => CheckResult::fail(implode(', ', $missing) . ' not installed on your system'),
             };
@@ -114,6 +121,7 @@ class LinuxToolCheckList
             'ubuntu', 'debian', 'Deepin' => 'apt-get install -y',
             'alpine' => 'apk add',
             'redhat' => 'dnf install -y',
+            'arch' => 'pacman -S --noconfirm',
             default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';
