@@ -220,6 +220,8 @@ class SystemUtil
             'redhat',
             // alpine
             'alpine',
+            // arch
+            'arch', 'manjaro',
         ];
     }
 }
