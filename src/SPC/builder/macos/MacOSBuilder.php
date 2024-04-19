@@ -116,7 +116,7 @@ class MacOSBuilder extends UnixBuilderBase
         // add macOS frameworks
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . $this->getFrameworks(true);
         // add libc++, some extensions or libraries need it (C++ cannot be linked statically)
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lc++' : '');
+        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lc++ ' : '');
         // bloat means force-load all static libraries, even if they are not used
         if (!$this->getOption('bloat', false)) {
             $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
@@ -146,9 +146,9 @@ class MacOSBuilder extends UnixBuilderBase
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
-            // -std=c++17 will be able to be removed when https://github.com/php/php-src/pull/14002 will be released
-            'CXXFLAGS' => '-std=c++17 ' . getenv('SPC_CMD_VAR_PHP_CONFIGURE_CXXFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
+            // TODO: remove the following line when https://github.com/php/php-src/pull/14002 will be released
+            'CXX' => 'g++ -std=c++17',
         ]);
 
         if ($this->getLib('postgresql')) {
