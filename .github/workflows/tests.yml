@@ -165,7 +165,7 @@ jobs:
           max_attempts: 3
           retry_on: error
           command: |
-            bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug
+            bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=3
 
       - name: "Run Build Tests (build)"
         run: bin/spc build "$(php src/globals/test-extensions.php extensions)" --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
