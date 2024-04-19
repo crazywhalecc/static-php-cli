@@ -187,9 +187,8 @@
         }
     },
     "icu": {
-        "type": "ghrel",
-        "repo": "unicode-org/icu",
-        "match": "icu4c.+-src\\.tgz",
+        "type": "url",
+        "url": "https://github.com/unicode-org/icu/releases/download/release-74-2/icu4c-74_2-src.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
