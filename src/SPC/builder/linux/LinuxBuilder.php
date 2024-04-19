@@ -140,6 +140,8 @@ class LinuxBuilder extends UnixBuilderBase
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
+            // -std=c++17 will be able to be removed when https://github.com/php/php-src/pull/14002 will be released
+            'CXXFLAGS' => '-std=c++17 ' . getenv('SPC_CMD_VAR_PHP_CONFIGURE_CXXFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
             'LIBS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
         ]);
