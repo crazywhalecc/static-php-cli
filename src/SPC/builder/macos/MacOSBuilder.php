@@ -147,8 +147,6 @@ class MacOSBuilder extends UnixBuilderBase
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
-            // TODO: remove the following line when https://github.com/php/php-src/pull/14002 will be released
-            'CXX' => 'g++ -std=c++17',
         ]);
 
         if ($this->getLib('postgresql')) {
@@ -174,6 +172,9 @@ class MacOSBuilder extends UnixBuilderBase
 
         $this->emitPatchPoint('before-php-make');
         SourcePatcher::patchBeforeMake($this);
+
+        // TODO: remove the following line when https://github.com/php/php-src/pull/14002 will be released
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/intl/config.m4', 'PHP_CXX_COMPILE_STDCXX(11', 'PHP_CXX_COMPILE_STDCXX(17');
 
         $this->cleanMake();
 

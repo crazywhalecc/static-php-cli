@@ -142,8 +142,6 @@ class LinuxBuilder extends UnixBuilderBase
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
             'LIBS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
-            // TODO: remove the following line when https://github.com/php/php-src/pull/14002 will be released
-            'CXX' => 'g++ -std=c++17',
         ]);
 
         // upx pack and strip for micro
@@ -169,6 +167,9 @@ class LinuxBuilder extends UnixBuilderBase
                 'POST_MICRO_BUILD_COMMANDS=true',
             );
         }
+
+        // TODO: remove the following line when https://github.com/php/php-src/pull/14002 will be released
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/intl/config.m4', 'PHP_CXX_COMPILE_STDCXX(11', 'PHP_CXX_COMPILE_STDCXX(17');
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
