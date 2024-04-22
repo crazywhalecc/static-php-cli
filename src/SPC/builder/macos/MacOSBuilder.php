@@ -173,9 +173,6 @@ class MacOSBuilder extends UnixBuilderBase
         $this->emitPatchPoint('before-php-make');
         SourcePatcher::patchBeforeMake($this);
 
-        // TODO: remove the following line when https://github.com/php/php-src/pull/14002 will be released
-        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/intl/config.m4', 'PHP_CXX_COMPILE_STDCXX(11', 'PHP_CXX_COMPILE_STDCXX(17');
-
         $this->cleanMake();
 
         if ($enableCli) {
