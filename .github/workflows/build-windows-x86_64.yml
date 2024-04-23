@@ -54,6 +54,7 @@ jobs:
 
       - name: Generate hashed key for cache
         id: cache-key
+        shell: bash
         run: |
           INPUT_HASH=$(echo "${{ inputs.version }}-dependencies-${{ inputs.extensions }}" | sha256sum | awk '{print $1}')
           echo "::set-output name=hash::$INPUT_HASH"
