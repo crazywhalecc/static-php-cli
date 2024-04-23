@@ -46,7 +46,7 @@ class WindowsCmd
         }
         echo $cmd . PHP_EOL;
 
-        f_passthru($cmd);
+        fpassthru($cmd);
         return $this;
     }
 

@@ -44,7 +44,7 @@ class UnixShell
         if (!$this->debug) {
             $cmd .= ' 1>/dev/null 2>&1';
         }
-        f_passthru($cmd);
+        fpassthru($cmd);
         return $this;
     }
 
