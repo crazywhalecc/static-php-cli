@@ -52,19 +52,18 @@ jobs:
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
         run: composer update --no-dev --classmap-authoritative
 
-      - name: Generate hashed key for cache
-        id: cache-key
+      - name: Generate hashed key for download cache
         shell: bash
         run: |
-          INPUT_HASH=$(echo "${{ inputs.version }}-dependencies-${{ inputs.extensions }}" | sha256sum | awk '{print $1}')
-          echo "::set-output name=hash::$INPUT_HASH"
+          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ inputs.extensions }}" | sha256sum | awk '{print $1}')
+          echo "INPUT_HASH=${INPUT_HASH}" >> $env:GITHUB_ENV
 
       # Cache downloaded source
       - id: cache-download
         uses: actions/cache@v3
         with:
           path: downloads
-          key: php-${{ steps.cache-key.outputs.hash }}
+          key: php-${{ env.INPUT_HASH }}
 
       # With or without debug
       - if: inputs.debug == true
