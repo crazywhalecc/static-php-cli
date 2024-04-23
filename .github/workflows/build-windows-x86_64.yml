@@ -88,31 +88,31 @@ jobs:
 
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: php-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          name: php-${{ inputs.version }}
           path: buildroot/bin/php.exe
 
       # Upload micro self-extracted executable
       - if: ${{ inputs.build-micro == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          name: micro-${{ inputs.version }}
           path: buildroot/bin/micro.sfx
 
       # Upload fpm executable
       - if: ${{ inputs.build-fpm == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          name: php-fpm-${{ inputs.version }}
           path: buildroot/bin/php-fpm.exe
 
       # Upload extensions metadata
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: license-files
           path: buildroot/license/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build-meta
           path: |
