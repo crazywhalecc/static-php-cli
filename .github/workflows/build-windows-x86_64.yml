@@ -71,6 +71,8 @@ jobs:
       - if: ${{ inputs.build-fpm == true }}
         run: echo "SPC_BUILD_FPM=--build-fpm" >> $env:GITHUB_ENV
 
+      - run: ./bin/spc doctor
+
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
         run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ inputs.extensions }}" ${{ env.SPC_BUILD_DEBUG }}
