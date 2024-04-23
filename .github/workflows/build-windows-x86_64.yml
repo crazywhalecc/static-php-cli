@@ -39,11 +39,11 @@ jobs:
     name: build ${{ inputs.version }} on Windows x86_64
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Cache composer dependencies
       - id: cache-composer-deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: composer-dependencies
@@ -60,7 +60,7 @@ jobs:
 
       # Cache downloaded source
       - id: cache-download
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: downloads
           key: php-${{ env.INPUT_HASH }}
