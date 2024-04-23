@@ -85,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: php-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
-          path: buildroot/bin/php
+          path: buildroot/bin/php.exe
 
       # Upload micro self-extracted executable
       - if: ${{ inputs.build-micro == true }}
@@ -99,7 +99,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
-          path: buildroot/bin/php-fpm
+          path: buildroot/bin/php-fpm.exe
 
       # Upload extensions metadata
       - uses: actions/upload-artifact@v3
