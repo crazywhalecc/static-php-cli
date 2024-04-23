@@ -61,15 +61,15 @@ jobs:
 
       # With or without debug
       - if: inputs.debug == true
-        run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
+        run: echo "SPC_BUILD_DEBUG=--debug" >> $env:GITHUB_ENV
 
       # With target select: cli, micro or both
       - if: ${{ inputs.build-cli == true }}
-        run: echo "SPC_BUILD_CLI=--build-cli" >> $GITHUB_ENV
+        run: echo "SPC_BUILD_CLI=--build-cli" >> $env:GITHUB_ENV
       - if: ${{ inputs.build-micro == true }}
-        run: echo "SPC_BUILD_MICRO=--build-micro" >> $GITHUB_ENV
+        run: echo "SPC_BUILD_MICRO=--build-micro" >> $env:GITHUB_ENV
       - if: ${{ inputs.build-fpm == true }}
-        run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
+        run: echo "SPC_BUILD_FPM=--build-fpm" >> $env:GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
