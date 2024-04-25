@@ -63,6 +63,7 @@ class GlobalEnvManager
     {
         // Windows need php-sdk binary tools
         self::initIfNotExists('PHP_SDK_PATH', WORKING_DIR . DIRECTORY_SEPARATOR . 'php-sdk-binary-tools');
+        self::initIfNotExists('UPX_EXEC', PKG_ROOT_PATH . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'upx.exe');
     }
 
     private static function initLinuxEnv(BuilderBase $builder): void
