@@ -25,6 +25,8 @@ class nghttp2 extends WindowsLibraryBase
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DENABLE_SHARED_LIB=OFF ' .
                 '-DENABLE_STATIC_LIB=ON ' .
+                '-DBUILD_STATIC_LIBS=ON ' .
+                '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DENABLE_STATIC_CRT=ON ' .
                 '-DENABLE_LIB_ONLY=ON ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '
