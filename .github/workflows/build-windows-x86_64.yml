@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ inputs.extensions }}" | sha256sum | awk '{print $1}')
-          echo "INPUT_HASH=${INPUT_HASH}" >> $env:GITHUB_ENV
+          echo "INPUT_HASH=${INPUT_HASH}" >> "$GITHUB_ENV"
 
       # Cache downloaded source
       - id: cache-download
