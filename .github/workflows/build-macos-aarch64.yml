@@ -39,7 +39,7 @@ jobs:
     name: build ${{ inputs.version }} on macOS arm64
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Install macOS missing packages and mark os suffix
       - run: |
@@ -58,7 +58,7 @@ jobs:
 
       # Cache composer dependencies
       - id: cache-composer-deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: composer-dependencies
@@ -69,7 +69,7 @@ jobs:
 
       # Cache downloaded source
       - id: cache-download
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: downloads
           key: php-${{ inputs.version }}-dependencies-${{ inputs.extensions }}
@@ -95,31 +95,31 @@ jobs:
 
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: php-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/php
 
       # Upload micro self-extracted executable
       - if: ${{ inputs.build-micro == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/micro.sfx
 
       # Upload fpm executable
       - if: ${{ inputs.build-fpm == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/php-fpm
 
       # Upload extensions metadata
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: license-files
           path: buildroot/license/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build-meta
           path: |
