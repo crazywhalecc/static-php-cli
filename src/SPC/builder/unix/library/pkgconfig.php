@@ -8,8 +8,8 @@ trait pkgconfig
 {
     protected function build(): void
     {
-        $cflags = PHP_OS_FAMILY === 'Darwin' ? "{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion" : '';
-        $ldflags = PHP_OS_FAMILY === 'Darwin' ? '' : '--static';
+        $cflags = PHP_OS_FAMILY !== 'Linux' ? "{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion" : '';
+        $ldflags = PHP_OS_FAMILY !== 'Linux' ? '' : '--static';
 
         shell()->cd($this->source_dir)
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags() ?: $cflags, 'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags, 'LIBS' => $this->getLibExtraLibs()])
