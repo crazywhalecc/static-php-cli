@@ -46,6 +46,14 @@ jobs:
           brew install automake gzip
           echo "SPC_BUILD_OS=macos" >> $GITHUB_ENV
 
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring, tokenizer
+          ini-values: memory_limit=-1
+
       # Cache composer dependencies
       - id: cache-composer-deps
         uses: actions/cache@v3
