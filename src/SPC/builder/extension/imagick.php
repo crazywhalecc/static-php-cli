@@ -14,11 +14,11 @@ class imagick extends Extension
     public function patchBeforeMake(): bool
     {
         // imagick may call omp_pause_all which requires -lgomp
-        $extra_libs = $this->builder->getOption('extra-libs', '');
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if ($this->builder instanceof LinuxBuilder) {
-            $extra_libs .= ' -lgomp ';
+            $extra_libs .= (empty($extra_libs) ? '' : ' ') . '-lgomp ';
         }
-        $this->builder->setOption('extra-libs', $extra_libs);
+        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
     }
 
