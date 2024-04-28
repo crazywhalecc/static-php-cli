@@ -37,7 +37,7 @@ env:
 jobs:
   build:
     name: build ${{ inputs.version }} on macOS x86_64
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
 
