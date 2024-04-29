@@ -37,7 +37,7 @@ env:
 jobs:
   build:
     name: build ${{ inputs.version }} on macOS x86_64
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
 
@@ -45,6 +45,14 @@ jobs:
       - run: |
           brew install automake gzip
           echo "SPC_BUILD_OS=macos" >> $GITHUB_ENV
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring, tokenizer
+          ini-values: memory_limit=-1
 
       # Cache composer dependencies
       - id: cache-composer-deps
