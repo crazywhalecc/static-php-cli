@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imagick',
+    'Linux', 'Darwin' => 'readline',
     'Windows' => 'mbstring,pdo_sqlite,mbregex',
 };
 
