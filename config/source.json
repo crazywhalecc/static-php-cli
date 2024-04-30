@@ -480,9 +480,13 @@
         }
     },
     "ncurses": {
-        "type": "filelist",
-        "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
-        "regex": "/href=\"(?<file>ncurses-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "alt": {
+            "type": "filelist",
+            "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
+            "regex": "/href=\"(?<file>ncurses-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "type": "url",
+        "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.4.tar.gz",
         "license": {
             "type": "file",
             "path": "COPYING"
