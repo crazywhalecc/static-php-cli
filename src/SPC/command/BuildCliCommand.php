@@ -131,8 +131,8 @@ class BuildCliCommand extends BuildCommand
             if (!empty($not_included)) {
                 $indent_texts['Extra Exts (' . count($not_included) . ')'] = implode(', ', $not_included);
             }
-            $this->printFormatInfo($indent_texts);
             $this->printFormatInfo($this->getDefinedEnvs(), true);
+            $this->printFormatInfo($indent_texts);
             logger()->notice('Build will start after 2s ...');
             sleep(2);
 
