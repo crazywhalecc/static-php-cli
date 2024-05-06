@@ -80,7 +80,9 @@ class GlobalEnvManager
             self::initIfNotExists('CXX', "{$arch}-linux-musl-g++");
             self::initIfNotExists('AR', "{$arch}-linux-musl-ar");
             self::initIfNotExists('LD', 'ld.gold');
-            self::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
+            if (getenv('SPC_NO_MUSL_PATH') !== 'yes') {
+                self::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
+            }
         }
 
         // Init arch-specific cflags
@@ -106,12 +108,11 @@ class GlobalEnvManager
             'SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS' => getenv('SPC_DEFAULT_C_FLAGS'),
             'SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
             'SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS' => '-L' . BUILD_LIB_PATH,
-            'SPC_CMD_VAR_PHP_CONFIGURE_LIBS' => '-ldl -lpthread',
+            'SPC_CMD_VAR_PHP_CONFIGURE_LIBS' => '-ldl -lpthread -lm',
             'SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS' => $php_extra_cflags_optimize . ' -fno-ident -fPIE',
             'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS' => '',
             'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM' => $clang_use_lld . '-all-static',
         ];
-
         foreach ($init_spc_cmd_maps as $name => $value) {
             self::initIfNotExists($name, $value);
         }
