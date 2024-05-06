@@ -17,7 +17,7 @@ trait ncurses
                 '--with-curses-h ' .
                 '--enable-pc-files ' .
                 '--enable-echo ' .
-                // '--enable-widec ' .
+                '--disable-widec ' .
                 '--with-normal ' .
                 '--with-ticlib ' .
                 '--without-tests ' .
