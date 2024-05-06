@@ -62,12 +62,17 @@ class DependencyUtil
 
         if ($include_suggested_libs) {
             foreach ($dep_list as $name => $obj) {
+                $del_list = [];
                 foreach ($obj['suggests'] as $id => $suggest) {
                     if (!str_starts_with($suggest, 'ext@')) {
                         $dep_list[$name]['depends'][] = $suggest;
-                        array_splice($dep_list[$name]['suggests'], $id, 1);
+                        $del_list[] = $id;
                     }
                 }
+                foreach ($del_list as $id) {
+                    unset($dep_list[$name]['suggests'][$id]);
+                }
+                $dep_list[$name]['suggests'] = array_values($dep_list[$name]['suggests']);
             }
         }
 
@@ -93,12 +98,17 @@ class DependencyUtil
         if ($include_suggested_exts) {
             // check every deps suggests contains ext@
             foreach ($dep_list as $name => $obj) {
+                $del_list = [];
                 foreach ($obj['suggests'] as $id => $suggest) {
                     if (str_starts_with($suggest, 'ext@')) {
                         $dep_list[$name]['depends'][] = $suggest;
-                        array_splice($dep_list[$name]['suggests'], $id, 1);
+                        $del_list[] = $id;
                     }
                 }
+                foreach ($del_list as $id) {
+                    unset($dep_list[$name]['suggests'][$id]);
+                }
+                $dep_list[$name]['suggests'] = array_values($dep_list[$name]['suggests']);
             }
         }
 
@@ -106,12 +116,17 @@ class DependencyUtil
         if ($include_suggested_libs) {
             // check every deps suggests
             foreach ($dep_list as $name => $obj) {
+                $del_list = [];
                 foreach ($obj['suggests'] as $id => $suggest) {
                     if (!str_starts_with($suggest, 'ext@')) {
                         $dep_list[$name]['depends'][] = $suggest;
-                        array_splice($dep_list[$name]['suggests'], $id, 1);
+                        $del_list[] = $id;
                     }
                 }
+                foreach ($del_list as $id) {
+                    unset($dep_list[$name]['suggests'][$id]);
+                }
+                $dep_list[$name]['suggests'] = array_values($dep_list[$name]['suggests']);
             }
         }
 
