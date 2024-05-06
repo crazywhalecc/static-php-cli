@@ -145,7 +145,19 @@ class LinuxBuilder extends UnixBuilderBase
         ]);
 
         // upx pack and strip for micro
+        // but always restore Makefile.frag.bak first
+        if (file_exists(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak')) {
+            copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag');
+        }
         if ($this->getOption('with-upx-pack', false)) {
+            // judge $(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)` count
+            // if 2, replace src/globals/extra/micro-triple-Makefile.frag file content
+            if (substr_count(FileSystem::readFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag'), '$(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)`') === 2) {
+                // bak first
+                copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak');
+                // replace Makefile.frag content
+                FileSystem::writeFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', FileSystem::readFile(ROOT_DIR . '/src/globals/extra/micro-triple-Makefile.frag'));
+            }
             // with upx pack always need strip
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
