@@ -173,7 +173,7 @@
         "lib-depends": [
             "imap"
         ],
-        "lib-suggests": [
+        "ext-suggests": [
             "openssl"
         ]
     },
