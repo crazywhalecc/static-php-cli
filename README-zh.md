@@ -66,7 +66,7 @@ static-php-cli（简称 `spc`）有许多特性：
 |---------|----------------------|----------------------|
 | macOS   | :octocat: :computer: | :octocat: :computer: |
 | Linux   | :octocat: :computer: | :octocat: :computer: |
-| Windows | :computer:           |                      |
+| Windows | :octocat: :computer: |                      |
 | FreeBSD | :computer:           | :computer:           |
 
 当前支持编译的 PHP 版本：

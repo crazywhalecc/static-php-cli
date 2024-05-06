@@ -74,7 +74,7 @@ Here is the supported OS and arch, where :octocat: represents support for GitHub
 |---------|----------------------|----------------------|
 | macOS   | :octocat: :computer: | :octocat: :computer: |
 | Linux   | :octocat: :computer: | :octocat: :computer: |
-| Windows | :computer:           |                      |
+| Windows | :octocat: :computer: |                      |
 | FreeBSD | :computer:           | :computer:           |
 
 Currently supported PHP versions for compilation: 
