@@ -21,9 +21,6 @@ on:
       build-micro:
         description: build phpmicro binary
         type: boolean
-      build-fpm:
-        description: build fpm binary
-        type: boolean
       extensions:
         description: extensions to compile (comma separated)
         required: true
@@ -74,8 +71,6 @@ jobs:
         run: echo "SPC_BUILD_CLI=--build-cli" >> $env:GITHUB_ENV
       - if: ${{ inputs.build-micro == true }}
         run: echo "SPC_BUILD_MICRO=--build-micro" >> $env:GITHUB_ENV
-      - if: ${{ inputs.build-fpm == true }}
-        run: echo "SPC_BUILD_FPM=--build-fpm" >> $env:GITHUB_ENV
 
       - run: ./bin/spc doctor
 
@@ -99,13 +94,6 @@ jobs:
         with:
           name: micro-${{ inputs.version }}
           path: buildroot/bin/micro.sfx
-
-      # Upload fpm executable
-      - if: ${{ inputs.build-fpm == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-fpm-${{ inputs.version }}
-          path: buildroot/bin/php-fpm.exe
 
       # Upload extensions metadata
       - uses: actions/upload-artifact@v4
