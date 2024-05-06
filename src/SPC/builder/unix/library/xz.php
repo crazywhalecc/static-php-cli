@@ -20,7 +20,6 @@ trait xz
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
-                "--host={$this->builder->getOption('gnu-arch')}-unknown-linux " .
                 '--disable-scripts ' .
                 '--disable-doc ' .
                 '--with-libiconv ' .
