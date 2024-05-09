@@ -125,6 +125,12 @@
             "gmp.h"
         ]
     },
+    "pthreads4w": {
+        "source": "pthreads4w",
+        "static-libs-windows": [
+            "libpthreadVC3.lib"
+        ]
+    },
     "icu": {
         "source": "icu",
         "cpp-library": true,

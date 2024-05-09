@@ -190,7 +190,10 @@
     "parallel": {
         "type": "external",
         "source": "parallel",
-        "arg-type-windows": "with"
+        "arg-type-windows": "with",
+        "lib-depends-windows": [
+            "pthreads4w"
+        ]
     },
     "ldap": {
         "type": "builtin",

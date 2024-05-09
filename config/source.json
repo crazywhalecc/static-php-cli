@@ -52,6 +52,15 @@
             "path": "COPYING"
         }
     },
+    "pthreads4w": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://git.code.sf.net/p/pthreads4w/code",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ds": {
         "type": "url",
         "url": "https://pecl.php.net/get/ds",
