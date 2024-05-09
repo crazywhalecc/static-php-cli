@@ -133,6 +133,12 @@
             "libicuio.a",
             "libicuuc.a",
             "libicudata.a"
+        ],
+        "static-libs-windows": [
+            "icuuc.lib",
+            "icudt.lib",
+            "icuin.lib",
+            "icuio.lib"
         ]
     },
     "imagemagick": {
