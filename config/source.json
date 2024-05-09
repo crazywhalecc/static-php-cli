@@ -52,15 +52,6 @@
             "path": "COPYING"
         }
     },
-    "pthreads4w": {
-        "type": "git",
-        "rev": "master",
-        "url": "https://git.code.sf.net/p/pthreads4w/code",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "ext-ds": {
         "type": "url",
         "url": "https://pecl.php.net/get/ds",
@@ -488,16 +479,6 @@
             "path": "LICENSE"
         }
     },
-    "parallel": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/parallel",
-        "path": "php-src/ext/parallel",
-        "filename": "parallel.tgz",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "ncurses": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
@@ -534,6 +515,16 @@
             "path": "LICENSE.txt"
         }
     },
+    "parallel": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/parallel",
+        "path": "php-src/ext/parallel",
+        "filename": "parallel.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "pdo_sqlsrv": {
         "type": "url",
         "url": "https://pecl.php.net/get/pdo_sqlsrv",
@@ -565,6 +556,15 @@
         "url": "https://pecl.php.net/get/protobuf",
         "path": "php-src/ext/protobuf",
         "filename": "protobuf.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "pthreads4w": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://git.code.sf.net/p/pthreads4w/code",
         "license": {
             "type": "file",
             "path": "LICENSE"
