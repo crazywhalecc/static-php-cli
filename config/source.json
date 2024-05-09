@@ -479,6 +479,16 @@
             "path": "LICENSE"
         }
     },
+    "parallel": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/parallel",
+        "path": "php-src/ext/parallel",
+        "filename": "parallel.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ncurses": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/ncurses/",

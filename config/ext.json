@@ -187,6 +187,11 @@
             "icu"
         ]
     },
+    "parallel": {
+        "type": "external",
+        "source": "parallel",
+        "arg-type-windows": "with"
+    },
     "ldap": {
         "type": "builtin",
         "arg-type": "with-prefix",
