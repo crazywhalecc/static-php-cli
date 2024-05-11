@@ -561,6 +561,15 @@
             "path": "LICENSE"
         }
     },
+    "pthreads4w": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://git.code.sf.net/p/pthreads4w/code",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "qdbm": {
         "type": "git",
         "url": "https://github.com/static-php/qdbm.git",
