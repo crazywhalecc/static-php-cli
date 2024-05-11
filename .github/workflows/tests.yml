@@ -111,7 +111,6 @@ jobs:
           - "8.1"
           - "8.2"
           - "8.3"
-          - "dev"
         os:
           - ubuntu-latest
           - macos-13
@@ -160,7 +159,6 @@ jobs:
         run: bin/spc doctor --auto-fix
 
       - name: "Run Build Tests (download)"
-        if: matrix.php != 'dev'
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
@@ -168,16 +166,6 @@ jobs:
           retry_on: error
           command: |
             bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=3
-
-      - name: "Run Build Tests (download-dev)"
-        if: matrix.php == 'dev'
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_on: error
-          command: |
-            bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" -U "php-src:https://github.com/php/php-src/archive/refs/heads/master.zip" --ignore-cache-sources=php-src --debug --retry=3
 
       - name: "Run Build Tests (build)"
         run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
