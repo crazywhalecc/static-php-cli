@@ -187,6 +187,11 @@
             "icu"
         ]
     },
+    "parallel": {
+        "type": "external",
+        "source": "parallel",
+        "arg-type-windows": "with"
+    },
     "ldap": {
         "type": "builtin",
         "arg-type": "with-prefix",
@@ -278,6 +283,14 @@
         ],
         "ext-depends": [
             "zlib"
+        ]
+    },
+    "parallel": {
+        "type": "external",
+        "source": "parallel",
+        "arg-type-windows": "with",
+        "lib-depends-windows": [
+            "pthreads4w"
         ]
     },
     "password-argon2": {

@@ -113,7 +113,7 @@ jobs:
           - "8.3"
         os:
           - ubuntu-latest
-          - macos-latest
+          - macos-13
           - windows-latest
           - macos-14
       fail-fast: false
@@ -168,4 +168,4 @@ jobs:
             bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=3
 
       - name: "Run Build Tests (build)"
-        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
+        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
