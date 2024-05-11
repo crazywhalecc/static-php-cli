@@ -114,7 +114,7 @@ jobs:
           - "dev"
         os:
           - ubuntu-latest
-          - macos-latest
+          - macos-13
           - windows-latest
           - macos-14
       fail-fast: false
