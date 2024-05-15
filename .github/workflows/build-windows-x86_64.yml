@@ -53,7 +53,7 @@ jobs:
           php-version: 8.2
           ini-values: memory_limit=-1
 
-      - name: set PHP SDK  Github ENV variables
+      - name: Set PHP SDK  Github ENV variables
         run: |
           echo "PHP_SDK_ARCH=x64" >> $Env:GITHUB_ENV
           echo "PHP_SDK_BIN_PATH=D:\a\static-php-cli\static-php-cli\php-sdk-binary-tools\bin" >> $Env:GITHUB_ENV
@@ -62,7 +62,7 @@ jobs:
           echo "PHP_SDK_PHP_CMD=D:\a\static-php-cli\static-php-cli\php-sdk-binary-tools\bin\php\do_php.bat" >> $Env:GITHUB_ENV
           echo "PHP_SDK_ROOT_PATH=D:\a\static-php-cli\static-php-cli\php-sdk-binary-tools" >> $Env:GITHUB_ENV
           echo "PHP_SDK_VC_DIR=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC" >> $Env:GITHUB_ENV
-          echo "PHP_SDK_VC_TOOLSET_VER=%VCToolsVersion%" >> $Env:GITHUB_ENV
+          echo "PHP_SDK_VC_TOOLSET_VER=$env:VCToolsVersion" >> $Env:GITHUB_ENV
           echo "PHP_SDK_VS=vs17" >> $Env:GITHUB_ENV
           echo "PHP_SDK_VS_NUM=17" >> $Env:GITHUB_ENV
           echo "PHP_SDK_VS_SHELL_CMD=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat amd64" >> $Env:GITHUB_ENV
