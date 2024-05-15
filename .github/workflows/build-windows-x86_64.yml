@@ -1,6 +1,8 @@
 name: CI on x86_64 Windows
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
     inputs:
       version:
