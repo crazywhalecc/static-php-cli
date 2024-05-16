@@ -223,6 +223,11 @@ class Extension
         }
     }
 
+    public function validate(): void
+    {
+        // do nothing, just throw wrong usage exception if not valid
+    }
+
     /**
      * @throws RuntimeException
      */

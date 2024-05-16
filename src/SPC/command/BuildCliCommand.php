@@ -93,6 +93,9 @@ class BuildCliCommand extends BuildCommand
             if ($this->getOption('no-strip')) {
                 logger()->warning('--with-upx-pack conflicts with --no-strip, --no-strip won\'t work!');
             }
+            if (($rule & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+                logger()->warning('Some cases micro.sfx cannot be packed via UPX due to dynamic size bug, be aware!');
+            }
         }
         try {
             // create builder
@@ -133,17 +136,23 @@ class BuildCliCommand extends BuildCommand
             }
             $this->printFormatInfo($this->getDefinedEnvs(), true);
             $this->printFormatInfo($indent_texts);
+
             logger()->notice('Build will start after 2s ...');
             sleep(2);
+
+            // compile libraries
+            $builder->proveLibs($libraries);
+            // check extensions
+            $builder->proveExts($extensions);
+            // validate libs and exts
+            $builder->validateLibsAndExts();
+            // build libraries
+            $builder->buildLibs();
 
             if ($this->input->getOption('with-clean')) {
                 logger()->info('Cleaning source dir...');
                 FileSystem::removeDir(SOURCE_PATH);
             }
-            // compile libraries
-            $builder->buildLibs($libraries);
-            // check extensions
-            $builder->proveExts($extensions);
 
             // Process -I option
             $custom_ini = [];

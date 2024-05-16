@@ -33,7 +33,7 @@ abstract class BuilderBase
     protected string $patch_point = '';
 
     /**
-     * Build libraries
+     * Convert libraries to class
      *
      * @param  array<string>       $sorted_libraries Libraries to build (if not empty, must sort first)
      * @throws FileSystemException
@@ -41,7 +41,27 @@ abstract class BuilderBase
      * @throws WrongUsageException
      * @internal
      */
-    abstract public function buildLibs(array $sorted_libraries);
+    abstract public function proveLibs(array $sorted_libraries);
+
+    /**
+     * Build libraries
+     *
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
+    public function buildLibs(): void
+    {
+        // build all libs
+        foreach ($this->libs as $lib) {
+            match ($lib->tryBuild($this->getOption('rebuild', false))) {
+                BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
+                BUILD_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
+                BUILD_STATUS_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
+                default => logger()->warning('lib [' . $lib::NAME . '] build status unknown'),
+            };
+        }
+    }
 
     /**
      * Add library to build.
@@ -333,6 +353,19 @@ abstract class BuilderBase
     public function getPatchPoint(): string
     {
         return $this->patch_point;
+    }
+
+    /**
+     * Validate libs and exts can be compiled successfully in current environment
+     */
+    public function validateLibsAndExts(): void
+    {
+        foreach ($this->libs as $lib) {
+            $lib->validate();
+        }
+        foreach ($this->exts as $ext) {
+            $ext->validate();
+        }
     }
 
     public function emitPatchPoint(string $point_name): void

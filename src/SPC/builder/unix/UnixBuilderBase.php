@@ -90,7 +90,7 @@ abstract class UnixBuilderBase extends BuilderBase
         return $extra;
     }
 
-    public function buildLibs(array $sorted_libraries): void
+    public function proveLibs(array $sorted_libraries): void
     {
         // search all supported libs
         $support_lib_list = [];
@@ -137,16 +137,6 @@ abstract class UnixBuilderBase extends BuilderBase
         SourceManager::initSource(libs: $sorted_libraries);
 
         $this->emitPatchPoint('after-libs-extract');
-
-        // build all libs
-        foreach ($this->libs as $lib) {
-            match ($lib->tryBuild($this->getOption('rebuild', false))) {
-                BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
-                BUILD_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
-                BUILD_STATUS_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
-                default => logger()->warning('lib [' . $lib::NAME . '] build status unknown'),
-            };
-        }
     }
 
     /**

@@ -177,6 +177,11 @@ abstract class LibraryBase
         return false;
     }
 
+    public function validate(): void
+    {
+        // do nothing, just throw wrong usage exception if not valid
+    }
+
     /**
      * Get current builder object.
      */

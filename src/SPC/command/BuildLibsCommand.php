@@ -63,7 +63,9 @@ class BuildLibsCommand extends BuildCommand
             $libraries = DependencyUtil::getLibs($libraries);
             logger()->info('Building libraries: ' . implode(',', $libraries));
             sleep(2);
-            $builder->buildLibs($libraries);
+            $builder->proveLibs($libraries);
+            $builder->validateLibsAndExts();
+            $builder->buildLibs();
 
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build libs complete, used ' . $time . ' s !');

@@ -17,12 +17,16 @@ class swoole_hook_sqlite extends Extension
         return 'swoole';
     }
 
-    public function getUnixConfigureArg(): string
+    public function validate(): void
     {
         // pdo_pgsql need to be disabled
         if ($this->builder->getExt('pdo_sqlite') !== null) {
             throw new WrongUsageException('swoole-hook-sqlite provides pdo_sqlite, if you enable sqlite hook for swoole, you must remove pdo_sqlite extension.');
         }
+    }
+
+    public function getUnixConfigureArg(): string
+    {
         // enable swoole pgsql hook
         return '--enable-swoole-sqlite';
     }
