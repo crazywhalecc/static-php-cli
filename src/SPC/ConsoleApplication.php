@@ -25,7 +25,7 @@ use Symfony\Component\Console\Command\ListCommand;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.2.0';
+    public const VERSION = '2.2.1';
 
     public function __construct()
     {

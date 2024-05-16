@@ -132,4 +132,14 @@ abstract class BaseCommand extends Command
     {
         return true;
     }
+
+    protected function logWithResult(bool $result, string $success_msg, string $fail_msg): int
+    {
+        if ($result) {
+            logger()->info($success_msg);
+            return static::SUCCESS;
+        }
+        logger()->error($fail_msg);
+        return static::FAILURE;
+    }
 }

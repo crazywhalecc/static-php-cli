@@ -92,6 +92,9 @@ class LinuxBuilder extends UnixBuilderBase
     }
 
     /**
+     * Build PHP from source.
+     *
+     * @param  int                 $build_target Build target, use `BUILD_TARGET_*` constants
      * @throws RuntimeException
      * @throws FileSystemException
      * @throws WrongUsageException
@@ -131,10 +134,10 @@ class LinuxBuilder extends UnixBuilderBase
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
 
-        $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
-        $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
-        $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
-        $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enable_cli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
+        $enable_fpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
+        $enable_micro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
+        $enable_embed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
@@ -144,49 +147,18 @@ class LinuxBuilder extends UnixBuilderBase
             'LIBS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
         ]);
 
-        // upx pack and strip for micro
-        // but always restore Makefile.frag.bak first
-        if (file_exists(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak')) {
-            copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag');
-        }
-        if ($this->getOption('with-upx-pack', false)) {
-            // judge $(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)` count
-            // if 2, replace src/globals/extra/micro-triple-Makefile.frag file content
-            if (substr_count(FileSystem::readFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag'), '$(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)`') === 2) {
-                // bak first
-                copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak');
-                // replace Makefile.frag content
-                FileSystem::writeFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', FileSystem::readFile(ROOT_DIR . '/src/globals/extra/micro-triple-Makefile.frag'));
-            }
-            // with upx pack always need strip
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH) && ' . getenv('UPX_EXEC') . ' --best \$(SAPI_MICRO_PATH)',
-            );
-        } elseif (!$this->getOption('no-strip', false)) {
-            // not-no-strip means strip (default behavior)
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
-            );
-        } else {
-            // just no strip
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=true',
-            );
+        // process micro upx patch if micro sapi enabled
+        if ($enable_micro) {
+            $this->processMicroUPX();
         }
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
-                ($enableCli ? '--enable-cli ' : '--disable-cli ') .
-                ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
-                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
+                ($enable_cli ? '--enable-cli ' : '--disable-cli ') .
+                ($enable_fpm ? '--enable-fpm ' : '--disable-fpm ') .
+                ($enable_embed ? '--enable-embed=static ' : '--disable-embed ') .
+                ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $disable_jit .
                 $json_74 .
                 $zts .
@@ -200,21 +172,21 @@ class LinuxBuilder extends UnixBuilderBase
 
         $this->cleanMake();
 
-        if ($enableCli) {
+        if ($enable_cli) {
             logger()->info('building cli');
             $this->buildCli();
         }
-        if ($enableFpm) {
+        if ($enable_fpm) {
             logger()->info('building fpm');
             $this->buildFpm();
         }
-        if ($enableMicro) {
+        if ($enable_micro) {
             logger()->info('building micro');
             $this->buildMicro();
         }
-        if ($enableEmbed) {
+        if ($enable_embed) {
             logger()->info('building embed');
-            if ($enableMicro) {
+            if ($enable_micro) {
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
@@ -329,5 +301,49 @@ class LinuxBuilder extends UnixBuilderBase
             'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'),
         ];
+    }
+
+    /**
+     * Apply option --no-strip and --with-upx-pack for micro sapi.
+     *
+     * @throws FileSystemException
+     */
+    private function processMicroUPX(): void
+    {
+        // upx pack and strip for micro
+        // but always restore Makefile.frag.bak first
+        if (file_exists(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak')) {
+            copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag');
+        }
+        if ($this->getOption('with-upx-pack', false)) {
+            // judge $(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)` count
+            // if 2, replace src/globals/extra/micro-triple-Makefile.frag file content
+            if (substr_count(FileSystem::readFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag'), '$(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)`') === 2) {
+                // bak first
+                copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak');
+                // replace Makefile.frag content
+                FileSystem::writeFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', FileSystem::readFile(ROOT_DIR . '/src/globals/extra/micro-triple-Makefile.frag'));
+            }
+            // with upx pack always need strip
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
+                '/POST_MICRO_BUILD_COMMANDS=.*/',
+                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH) && ' . getenv('UPX_EXEC') . ' --best \$(SAPI_MICRO_PATH)',
+            );
+        } elseif (!$this->getOption('no-strip', false)) {
+            // not-no-strip means strip (default behavior)
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
+                '/POST_MICRO_BUILD_COMMANDS=.*/',
+                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
+            );
+        } else {
+            // just no strip
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
+                '/POST_MICRO_BUILD_COMMANDS=.*/',
+                'POST_MICRO_BUILD_COMMANDS=true',
+            );
+        }
     }
 }

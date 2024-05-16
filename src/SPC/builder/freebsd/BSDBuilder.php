@@ -28,7 +28,7 @@ class BSDBuilder extends UnixBuilderBase
         // ---------- set necessary options ----------
         // set C Compiler (default: clang)
         f_putenv('CC=' . $this->getOption('cc', 'clang'));
-        // set C++ Composer (default: clang++)
+        // set C++ Compiler (default: clang++)
         f_putenv('CXX=' . $this->getOption('cxx', 'clang++'));
         // set PATH
         f_putenv('PATH=' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
