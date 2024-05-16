@@ -137,7 +137,7 @@ jobs:
             echo "GITHUB_TOKEN=${{ secrets.TEST_GH_TOKEN }}" >> $GITHUB_ENV
           fi
 
-      - name: "Cache Composer packages"
+      - name: "Cache composer packages"
         id: composer-cache
         uses: actions/cache@v4
         with:
