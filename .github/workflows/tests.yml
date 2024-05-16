@@ -104,6 +104,7 @@ jobs:
     name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
+    if: "!contains(github.event.head_commit.message, '[no build test]')"
     strategy:
       matrix:
         php:
