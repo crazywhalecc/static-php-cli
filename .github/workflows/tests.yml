@@ -48,7 +48,7 @@ jobs:
 
       - name: "Cache Composer packages"
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
@@ -86,7 +86,7 @@ jobs:
 
       - name: "Cache Composer packages"
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -104,7 +104,7 @@ jobs:
     name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
-    if: "!contains(github.event.head_commit.message, '[no build test]')"
+    if: !contains(github.event.head_commit.message, '[no build test]')
     strategy:
       matrix:
         php:
@@ -139,7 +139,7 @@ jobs:
 
       - name: "Cache Composer packages"
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
