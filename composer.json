@@ -16,8 +16,8 @@
         "zhamao/logger": "^1.0"
     },
     "require-dev": {
-        "captainhook/captainhook": "^5.10",
-        "captainhook/plugin-composer": "^5.3",
+        "captainhook/captainhook-phar": "^5.23",
+        "captainhook/hook-installer": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.25",
         "humbug/box": "^4.5",
         "nunomaduro/collision": "^7.8",
@@ -50,7 +50,8 @@
     "config": {
         "allow-plugins": {
             "phpstan/extension-installer": true,
-            "captainhook/plugin-composer": true
+            "captainhook/hook-installer": true,
+            "captainhook/captainhook-phar": true
         },
         "optimize-autoloader": true,
         "sort-packages": true
