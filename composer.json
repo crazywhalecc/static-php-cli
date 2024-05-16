@@ -51,6 +51,7 @@
         "allow-plugins": {
             "phpstan/extension-installer": true,
             "captainhook/hook-installer": true,
+            "captainhook/plugin-composer": true,
             "captainhook/captainhook-phar": true
         },
         "optimize-autoloader": true,
