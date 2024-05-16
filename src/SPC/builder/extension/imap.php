@@ -14,11 +14,15 @@ class imap extends Extension
     /**
      * @throws WrongUsageException
      */
-    public function getUnixConfigureArg(): string
+    public function validate(): void
     {
         if ($this->builder->getOption('enable-zts')) {
             throw new WrongUsageException('ext-imap is not thread safe, do not build it with ZTS builds');
         }
+    }
+
+    public function getUnixConfigureArg(): string
+    {
         $arg = '--with-imap=' . BUILD_ROOT_PATH;
         if ($this->builder->getLib('openssl') !== null) {
             $arg .= ' --with-imap-ssl=' . BUILD_ROOT_PATH;
