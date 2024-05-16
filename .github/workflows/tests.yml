@@ -48,7 +48,7 @@ jobs:
 
       - name: "Cache Composer packages"
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
@@ -86,7 +86,7 @@ jobs:
 
       - name: "Cache Composer packages"
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -136,9 +136,9 @@ jobs:
             echo "GITHUB_TOKEN=${{ secrets.TEST_GH_TOKEN }}" >> $GITHUB_ENV
           fi
 
-      - name: "Cache Composer packages"
+      - name: "Cache composer packages"
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}

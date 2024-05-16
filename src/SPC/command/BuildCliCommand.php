@@ -17,7 +17,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use ZM\Logger\ConsoleColor;
 
-#[AsCommand('build', 'build PHP')]
+#[AsCommand('build', 'build PHP', ['build:php'])]
 class BuildCliCommand extends BuildCommand
 {
     public function configure(): void

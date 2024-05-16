@@ -15,6 +15,9 @@ class WindowsCmd
 
     private array $env = [];
 
+    /**
+     * @throws RuntimeException
+     */
     public function __construct(?bool $debug = null)
     {
         if (PHP_OS_FAMILY !== 'Windows') {

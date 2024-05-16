@@ -47,6 +47,13 @@ function arch2gnu(string $arch): string
     };
 }
 
+/**
+ * Match pattern function
+ * Example: match_pattern('*.txt', 'test.txt') will return true.
+ *
+ * @param string $pattern Pattern string
+ * @param string $subject Subject string
+ */
 function match_pattern(string $pattern, string $subject): bool
 {
     $pattern = str_replace(['\*', '\\\\.*'], ['.*', '\*'], preg_quote($pattern, '/'));
@@ -54,6 +61,12 @@ function match_pattern(string $pattern, string $subject): bool
     return preg_match($pattern, $subject) === 1;
 }
 
+/**
+ * Quote a string with a quote character
+ *
+ * @param string $str   String to quote
+ * @param string $quote Quote character, default: `"`
+ */
 function quote(string $str, string $quote = '"'): string
 {
     return $quote . $str . $quote;
@@ -61,7 +74,6 @@ function quote(string $str, string $quote = '"'): string
 
 /**
  * Get Family name of current OS
- *
  * @throws WrongUsageException
  */
 function osfamily2dir(): string
@@ -75,6 +87,41 @@ function osfamily2dir(): string
         default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
     };
 }
+
+function shell(?bool $debug = null): UnixShell
+{
+    /* @noinspection PhpUnhandledExceptionInspection */
+    return new UnixShell($debug);
+}
+
+function cmd(?bool $debug = null): WindowsCmd
+{
+    /* @noinspection PhpUnhandledExceptionInspection */
+    return new WindowsCmd($debug);
+}
+
+/**
+ * Get current builder.
+ *
+ * @throws WrongUsageException
+ */
+function builder(): BuilderBase
+{
+    return BuilderProvider::getBuilder();
+}
+
+/**
+ * Get current patch point.
+ *
+ * @throws WrongUsageException
+ */
+function patch_point(): string
+{
+    return BuilderProvider::getBuilder()->getPatchPoint();
+}
+
+// ------- function f_* part -------
+// f_ means standard function wrapper
 
 /**
  * Execute the shell command, and the output will be directly printed in the terminal. If there is an error, an exception will be thrown
@@ -125,34 +172,4 @@ function f_putenv(string $env): bool
 {
     logger()->debug('Setting env: ' . $env);
     return putenv($env);
-}
-
-function shell(?bool $debug = null): UnixShell
-{
-    return new UnixShell($debug);
-}
-
-function cmd(?bool $debug = null): WindowsCmd
-{
-    return new WindowsCmd($debug);
-}
-
-/**
- * Get current builder.
- *
- * @throws WrongUsageException
- */
-function builder(): BuilderBase
-{
-    return BuilderProvider::getBuilder();
-}
-
-/**
- * Get current patch point.
- *
- * @throws WrongUsageException
- */
-function patch_point(): string
-{
-    return BuilderProvider::getBuilder()->getPatchPoint();
 }

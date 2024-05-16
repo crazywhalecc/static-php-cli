@@ -51,7 +51,7 @@ class GlobalEnvManager
 
         // Init system-specific env
         match (PHP_OS_FAMILY) {
-            'Windows' => self::initWindowsEnv($builder),
+            'Windows' => self::initWindowsEnv(),
             'Darwin' => self::initDarwinEnv($builder),
             'Linux' => self::initLinuxEnv($builder),
             'BSD' => 'TODO',
@@ -59,7 +59,7 @@ class GlobalEnvManager
         };
     }
 
-    private static function initWindowsEnv(BuilderBase $builder): void
+    private static function initWindowsEnv(): void
     {
         // Windows need php-sdk binary tools
         self::initIfNotExists('PHP_SDK_PATH', WORKING_DIR . DIRECTORY_SEPARATOR . 'php-sdk-binary-tools');
@@ -69,7 +69,7 @@ class GlobalEnvManager
     private static function initLinuxEnv(BuilderBase $builder): void
     {
         // Init C Compiler and C++ Compiler (alpine)
-        if (\SPC\builder\linux\SystemUtil::isMuslDist()) {
+        if (LinuxSystemUtil::isMuslDist()) {
             self::initIfNotExists('CC', 'gcc');
             self::initIfNotExists('CXX', 'g++');
             self::initIfNotExists('AR', 'ar');

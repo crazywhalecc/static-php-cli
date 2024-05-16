@@ -57,8 +57,11 @@ class DumpLicenseCommand extends BaseCommand
             $libraries = DependencyUtil::getLibs($libraries);
             $dumper->addLibs($libraries);
             $dumper->dump($this->getOption('dump-dir'));
-            $this->output->writeln('Dump target dir: ' . $this->getOption('dump-dir'));
-            return static::SUCCESS;
+            return $this->logWithResult(
+                $dumper->dump($this->getOption('dump-dir')),
+                'Dump target dir: ' . $this->getOption('dump-dir'),
+                'Dump failed!'
+            );
         }
         if ($this->getOption('for-sources') !== null) {
             $sources = array_map('trim', array_filter(explode(',', $this->getOption('for-sources'))));

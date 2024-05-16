@@ -10,6 +10,9 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 
+/**
+ * License dumper, dump source license files to target directory
+ */
 class LicenseDumper
 {
     private array $exts = [];
@@ -37,6 +40,10 @@ class LicenseDumper
     }
 
     /**
+     * Dump source licenses to target directory
+     *
+     * @param  string              $target_dir Target directory
+     * @return bool                Success or not
      * @throws WrongUsageException
      * @throws FileSystemException
      * @throws RuntimeException
@@ -55,20 +62,29 @@ class LicenseDumper
 
             $source_name = Config::getExt($ext, 'source');
             foreach ($this->getSourceLicenses($source_name) as $index => $license) {
-                file_put_contents("{$target_dir}/ext_{$ext}_{$index}.txt", $license);
+                $result = file_put_contents("{$target_dir}/ext_{$ext}_{$index}.txt", $license);
+                if ($result === false) {
+                    return false;
+                }
             }
         }
 
         foreach ($this->libs as $lib) {
             $source_name = Config::getLib($lib, 'source');
             foreach ($this->getSourceLicenses($source_name) as $index => $license) {
-                file_put_contents("{$target_dir}/lib_{$lib}_{$index}.txt", $license);
+                $result = file_put_contents("{$target_dir}/lib_{$lib}_{$index}.txt", $license);
+                if ($result === false) {
+                    return false;
+                }
             }
         }
 
         foreach ($this->sources as $source) {
             foreach ($this->getSourceLicenses($source) as $index => $license) {
-                file_put_contents("{$target_dir}/src_{$source}_{$index}.txt", $license);
+                $result = file_put_contents("{$target_dir}/src_{$source}_{$index}.txt", $license);
+                if ($result === false) {
+                    return false;
+                }
             }
         }
         return true;
