@@ -11,7 +11,7 @@ on:
 jobs:
   build-release-artifacts:
     name: "Build SPC Binary"
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     strategy:
       matrix:
         php-version:
@@ -45,7 +45,7 @@ jobs:
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: "Cache Composer dependencies"
-        uses: "actions/cache@v3"
+        uses: "actions/cache@v4"
         with:
           path: "${{ steps.composer-cache.outputs.dir }}"
           key: "php-${{ matrix.php-version }}-locked-composer-${{ hashFiles('**/composer.lock') }}"
@@ -77,7 +77,7 @@ jobs:
             chmod +x spc
           fi
           if [ "${{ matrix.operating-system }}" = "macos-aarch64" ] || [ "${{ matrix.operating-system }}" = "macos-x86_64" ]; then
-              xattr -cr spc
+             sudo xattr -cr ./spc
           fi
 
       - name: "Archive Executable"
@@ -86,7 +86,7 @@ jobs:
             tar -czf spc-${{ matrix.operating-system }}.tar.gz spc
             echo "filename=spc-${{ matrix.operating-system }}.tar.gz" >> $GITHUB_ENV
             echo "OS=${{ matrix.operating-system }}" >> $GITHUB_ENV
-            if [ "${{ matrix.operating-system }}" == "linux-x86_64" ]; then
+            if [ "${{ matrix.operating-system }}" == "macos-aarch64" ]; then
               ./spc dev:extensions
             fi
           else
@@ -122,7 +122,7 @@ jobs:
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET_SPC_NIGHTLY }}
 
       - name: "Upload Artifact"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: spc${{ env.SUFFIX }}
           name: spc-${{ matrix.operating-system }}${{ env.SUFFIX }}
