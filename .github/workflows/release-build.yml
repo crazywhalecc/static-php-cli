@@ -76,6 +76,9 @@ jobs:
           else
             chmod +x spc
           fi
+          if [ "${{ matrix.operating-system }}" = "macos-aarch64" ] || [ "${{ matrix.operating-system }}" = "macos-x86_64" ]; then
+              xattr -cr spc
+          fi
 
       - name: "Archive Executable"
         run: |
