@@ -4,6 +4,7 @@
   "blacklist": [
     ".github"
   ],
+  "compression": "GZ",
   "directories": [
     "config",
     "src",
