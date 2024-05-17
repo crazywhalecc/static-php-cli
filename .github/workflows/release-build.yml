@@ -47,7 +47,7 @@ jobs:
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: "Cache Composer dependencies"
-        uses: "actions/cache@v3"
+        uses: "actions/cache@v4"
         with:
           path: "${{ steps.composer-cache.outputs.dir }}"
           key: "php-${{ matrix.php-version }}-locked-composer-${{ hashFiles('**/composer.lock') }}"
@@ -125,7 +125,7 @@ jobs:
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET_SPC_NIGHTLY }}
 
       - name: "Upload Artifact"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: spc${{ env.SUFFIX }}
           name: spc-${{ matrix.operating-system }}${{ env.SUFFIX }}
