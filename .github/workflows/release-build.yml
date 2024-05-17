@@ -1,8 +1,6 @@
 name: Build SPC Binary
 
 on:
-  pull_request:
-    branches: [ "main" ]
   push:
     branches: [ "main" ]
   release:
@@ -112,8 +110,7 @@ jobs:
           files: dist/${{ env.filename }}
 
       - name: "Deploy to Self-Hosted Server"
-        if: 0
-        # if: github.repository == 'crazywhalecc/static-php-cli'
+        if: github.repository == 'crazywhalecc/static-php-cli'
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
