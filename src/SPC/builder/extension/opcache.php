@@ -18,7 +18,7 @@ class opcache extends Extension
      */
     public function validate(): void
     {
-        if ($this->builder->getPHPVersionID() < 80000) {
+        if ($this->builder->getPHPVersionID() < 80000 && getenv('SPC_SKIP_PHP_VERSION_CHECK') !== 'yes') {
             throw new WrongUsageException('Statically compiled PHP with Zend Opcache only available for PHP >= 8.0 !');
         }
     }
