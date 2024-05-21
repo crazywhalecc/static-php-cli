@@ -49,9 +49,12 @@ If you don't want to build or want to test first, you can download example pre-c
 Below are several precompiled static-php binaries with different extension combinations,
 which can be downloaded directly according to your needs.
 
-- [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): `common` contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 22MB.
-- [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 70MB in size.
-- [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 6MB in size.
+- [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): `common` contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 7.5MB.
+- [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 25MB in size.
+- [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 3MB in size.
+
+> Linux and Windows supports UPX compression for binaries, which can reduce the size of the binary by 30% to 50%.
+> macOS does not support UPX compression, so the size of the pre-built binaries for mac is larger.
 
 For Windows systems, there are currently fewer extensions supported, 
 so only `cli` and `micro` that run the minimum extension combination of SPC itself are provided: [Extension-Combination - spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/).

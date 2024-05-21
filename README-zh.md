@@ -43,9 +43,12 @@ static-php-cli（简称 `spc`）有许多特性：
 
 如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载。
 
-- [扩展组合 - common](https://dl.static-php.dev/static-php-cli/common/)：common 组合包含了约 [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) 个常用扩展，体积为 22MB 左右。
-- [扩展组合 - bulk](https://dl.static-php.dev/static-php-cli/bulk/)：bulk 组合包含了 [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) 个扩展，体积为 70MB 左右。
-- [扩展组合 - minimal](https://dl.static-php.dev/static-php-cli/minimal/)：minimal 组合包含了 [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) 个扩展，体积为 6MB 左右。
+- [扩展组合 - common](https://dl.static-php.dev/static-php-cli/common/)：common 组合包含了约 [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) 个常用扩展，体积为 7.5MB 左右。
+- [扩展组合 - bulk](https://dl.static-php.dev/static-php-cli/bulk/)：bulk 组合包含了 [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) 个扩展，体积为 25MB 左右。
+- [扩展组合 - minimal](https://dl.static-php.dev/static-php-cli/minimal/)：minimal 组合包含了 [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) 个扩展，体积为 3MB 左右。
+
+> Linux 和 Windows 默认启用了 UPX 压缩，可减小 30~50% 的 PHP 二进制体积。
+> macOS 当前不支持 UPX，所以上述预编译的 macOS 版本体积可能较大。
 
 对于 Windows 系统，目前支持的扩展较少，故仅提供 SPC 自身运行的最小扩展组合的 `cli` 和 `micro`：[扩展组合 - spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/)。
 
