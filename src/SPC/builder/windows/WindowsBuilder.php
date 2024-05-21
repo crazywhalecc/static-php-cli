@@ -261,6 +261,12 @@ class WindowsBuilder extends BuilderBase
      */
     public function sanityCheck(mixed $build_target): void
     {
+        // remove all .dll from `buildroot/bin/`
+        logger()->debug('Removing all .dll files from buildroot/bin/');
+        $dlls = glob(BUILD_BIN_PATH . '\*.dll');
+        foreach ($dlls as $dll) {
+            @unlink($dll);
+        }
         // sanity check for php-cli
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('running cli sanity check');
