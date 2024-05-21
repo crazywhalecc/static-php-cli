@@ -16,9 +16,8 @@ use SPC\command\DumpLicenseCommand;
 use SPC\command\ExtractCommand;
 use SPC\command\InstallPkgCommand;
 use SPC\command\MicroCombineCommand;
+use SPC\command\SwitchPhpVersionCommand;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\HelpCommand;
-use Symfony\Component\Console\Command\ListCommand;
 
 /**
  * static-php-cli console app entry
@@ -43,6 +42,7 @@ final class ConsoleApplication extends Application
                 new DumpLicenseCommand(),
                 new ExtractCommand(),
                 new MicroCombineCommand(),
+                new SwitchPhpVersionCommand(),
 
                 // Dev commands
                 new AllExtCommand(),
@@ -50,10 +50,5 @@ final class ConsoleApplication extends Application
                 new SortConfigCommand(),
             ]
         );
-    }
-
-    protected function getDefaultCommands(): array
-    {
-        return [new HelpCommand(), new ListCommand()];
     }
 }

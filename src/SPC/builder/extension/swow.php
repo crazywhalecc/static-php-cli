@@ -11,6 +11,13 @@ use SPC\util\CustomExt;
 #[CustomExt('swow')]
 class swow extends Extension
 {
+    public function validate(): void
+    {
+        if ($this->builder->getPHPVersionID() < 80000 && getenv('SPC_SKIP_PHP_VERSION_CHECK') !== 'yes') {
+            throw new RuntimeException('The latest swow extension requires PHP 8.0 or later');
+        }
+    }
+
     public function getUnixConfigureArg(): string
     {
         $arg = '--enable-swow';
