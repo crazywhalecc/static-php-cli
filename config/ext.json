@@ -1,5 +1,8 @@
 {
     "amqp": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "external",
         "arg-type": "custom",
         "source": "amqp",
@@ -18,6 +21,9 @@
         "type": "builtin"
     },
     "bz2": {
+        "support": {
+            "Windows": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -31,6 +37,7 @@
         "type": "builtin"
     },
     "curl": {
+        "notes": true,
         "type": "builtin",
         "arg-type": "with",
         "lib-depends": [
@@ -49,6 +56,9 @@
         ]
     },
     "dom": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "custom",
         "arg-type-windows": "with",
@@ -64,7 +74,21 @@
         "type": "external",
         "source": "ext-ds"
     },
+    "enchant": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip",
+            "Darwin": "wip",
+            "Linux": "wip"
+        },
+        "type": "wip"
+    },
     "event": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "external",
         "source": "ext-event",
         "arg-type": "custom",
@@ -82,6 +106,11 @@
         "type": "builtin"
     },
     "ffi": {
+        "support": {
+            "Linux": "no",
+            "BSD": "wip"
+        },
+        "notes": true,
         "arg-type": "custom",
         "type": "builtin",
         "lib-depends-unix": [
@@ -104,6 +133,11 @@
         ]
     },
     "gd": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "builtin",
         "arg-type": "custom",
         "arg-type-windows": "with",
@@ -122,6 +156,10 @@
         ]
     },
     "gettext": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -129,6 +167,12 @@
         ]
     },
     "glfw": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "no",
+            "Linux": "no"
+        },
+        "notes": true,
         "type": "external",
         "arg-type": "custom",
         "source": "ext-glfw",
@@ -138,6 +182,10 @@
         "lib-depends-windows": []
     },
     "gmp": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -145,6 +193,9 @@
         ]
     },
     "iconv": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "with",
@@ -156,10 +207,18 @@
         ]
     },
     "igbinary": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "igbinary"
     },
     "imagick": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "ext-imagick",
         "arg-type": "custom",
@@ -168,6 +227,11 @@
         ]
     },
     "imap": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
@@ -178,16 +242,29 @@
         ]
     },
     "inotify": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip",
+            "Darwin": "no"
+        },
         "type": "external",
         "source": "inotify"
     },
     "intl": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "lib-depends": [
             "icu"
         ]
     },
     "ldap": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -215,7 +292,21 @@
         "type": "builtin",
         "arg-type": "custom"
     },
+    "mcrypt": {
+        "type": "wip",
+        "support": {
+            "Windows": "no",
+            "BSD": "no",
+            "Darwin": "no",
+            "Linux": "no"
+        },
+        "notes": true
+    },
     "memcache": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "ext-memcache",
         "arg-type": "custom",
@@ -227,6 +318,11 @@
         ]
     },
     "memcached": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip",
+            "Linux": "no"
+        },
         "type": "external",
         "source": "memcached",
         "arg-type": "custom",
@@ -240,6 +336,12 @@
         ]
     },
     "mongodb": {
+        "support": {
+            "Darwin": "no",
+            "BSD": "wip",
+            "Windows": "wip"
+        },
+        "notes": true,
         "type": "external",
         "source": "mongodb",
         "arg-type": "custom",
@@ -264,11 +366,22 @@
             "zlib"
         ]
     },
+    "oci8": {
+        "type": "wip",
+        "support": {
+            "Windows": "wip",
+            "BSD": "no",
+            "Darwin": "no",
+            "Linux": "no"
+        },
+        "notes": true
+    },
     "opcache": {
         "type": "builtin",
         "arg-type": "custom"
     },
     "openssl": {
+        "notes": true,
         "type": "builtin",
         "arg-type": "custom",
         "arg-type-windows": "with",
@@ -281,6 +394,10 @@
         ]
     },
     "parallel": {
+        "support": {
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "external",
         "source": "parallel",
         "arg-type-windows": "with",
@@ -289,6 +406,11 @@
         ]
     },
     "password-argon2": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -296,6 +418,9 @@
         ]
     },
     "pcntl": {
+        "support": {
+            "Windows": "no"
+        },
         "type": "builtin",
         "unix-only": true
     },
@@ -311,6 +436,10 @@
         ]
     },
     "pdo_pgsql": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "ext-depends": [
@@ -322,6 +451,9 @@
         ]
     },
     "pdo_sqlite": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with",
         "ext-depends": [
@@ -333,6 +465,10 @@
         ]
     },
     "pdo_sqlsrv": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "pdo_sqlsrv",
         "arg-type": "with",
@@ -342,6 +478,11 @@
         ]
     },
     "pgsql": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -355,19 +496,36 @@
         ]
     },
     "posix": {
+        "support": {
+            "Windows": "no"
+        },
         "type": "builtin",
         "unix-only": true
     },
     "protobuf": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "protobuf"
     },
     "rar": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip",
+            "Darwin": "partial"
+        },
+        "notes": true,
         "type": "external",
         "source": "rar",
         "cpp-extension": true
     },
     "readline": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -375,6 +533,10 @@
         ]
     },
     "redis": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "redis",
         "arg-type": "custom",
@@ -399,6 +561,9 @@
         "cpp-extension": true
     },
     "simplexml": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
@@ -409,6 +574,10 @@
         ]
     },
     "snappy": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "ext-snappy",
         "cpp-extension": true,
@@ -421,6 +590,9 @@
         ]
     },
     "soap": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
@@ -434,6 +606,10 @@
         "type": "builtin"
     },
     "sodium": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with",
         "lib-depends": [
@@ -441,6 +617,9 @@
         ]
     },
     "sqlite3": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "with",
@@ -449,6 +628,10 @@
         ]
     },
     "sqlsrv": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "sqlsrv",
         "lib-depends": [
@@ -460,6 +643,9 @@
         "cpp-extension": true
     },
     "ssh2": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "ext-ssh2",
         "arg-type": "with-prefix",
@@ -473,6 +659,11 @@
         ]
     },
     "swoole": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "external",
         "source": "swoole",
         "arg-type": "custom",
@@ -495,6 +686,11 @@
         ]
     },
     "swoole-hook-mysql": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "addon",
         "arg-type": "custom",
         "ext-depends": [
@@ -507,6 +703,12 @@
         ]
     },
     "swoole-hook-pgsql": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip",
+            "Darwin": "partial"
+        },
+        "notes": true,
         "type": "addon",
         "arg-type": "custom",
         "ext-depends": [
@@ -515,6 +717,11 @@
         ]
     },
     "swoole-hook-sqlite": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "addon",
         "arg-type": "custom",
         "ext-depends": [
@@ -523,6 +730,11 @@
         ]
     },
     "swow": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "external",
         "source": "swow",
         "arg-type": "custom",
@@ -536,17 +748,32 @@
         ]
     },
     "sysvmsg": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "unix-only": true
     },
     "sysvsem": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "unix-only": true
     },
     "sysvshm": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin"
     },
     "tidy": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -557,6 +784,10 @@
         "type": "builtin"
     },
     "uuid": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "ext-uuid",
         "arg-type": "with-prefix",
@@ -565,6 +796,10 @@
         ]
     },
     "uv": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "ext-uv",
         "arg-type": "with-prefix",
@@ -575,7 +810,22 @@
             "sockets"
         ]
     },
+    "xdebug": {
+        "type": "builtin",
+        "support": {
+            "Windows": "wip",
+            "BSD": "no",
+            "Darwin": "no",
+            "Linux": "no"
+        },
+        "notes": true
+    },
     "xhprof": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "external",
         "source": "xhprof",
         "ext-depends": [
@@ -583,6 +833,10 @@
         ]
     },
     "xlswriter": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "xlswriter",
         "arg-type": "custom",
@@ -592,6 +846,10 @@
         ]
     },
     "xml": {
+        "support": {
+            "BSD": "wip"
+        },
+        "notes": true,
         "type": "builtin",
         "arg-type": "custom",
         "arg-type-windows": "with",
@@ -603,6 +861,9 @@
         ]
     },
     "xmlreader": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
@@ -614,6 +875,9 @@
         ]
     },
     "xmlwriter": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "custom",
         "lib-depends": [
@@ -624,6 +888,10 @@
         ]
     },
     "xsl": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "lib-depends": [
@@ -635,6 +903,9 @@
         ]
     },
     "yac": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "yac",
         "arg-type-unix": "custom",
@@ -643,6 +914,10 @@
         ]
     },
     "yaml": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "yaml",
         "arg-type": "with-prefix",
@@ -651,6 +926,10 @@
         ]
     },
     "zip": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",
@@ -667,6 +946,10 @@
         ]
     },
     "zstd": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "external",
         "source": "ext-zstd",
         "arg-type": "custom",

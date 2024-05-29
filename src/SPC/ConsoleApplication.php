@@ -8,6 +8,7 @@ use SPC\command\BuildCliCommand;
 use SPC\command\BuildLibsCommand;
 use SPC\command\DeleteDownloadCommand;
 use SPC\command\dev\AllExtCommand;
+use SPC\command\dev\GenerateExtDocCommand;
 use SPC\command\dev\PhpVerCommand;
 use SPC\command\dev\SortConfigCommand;
 use SPC\command\DoctorCommand;
@@ -24,7 +25,7 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.2.1';
+    public const VERSION = '2.2.2';
 
     public function __construct()
     {
@@ -48,6 +49,7 @@ final class ConsoleApplication extends Application
                 new AllExtCommand(),
                 new PhpVerCommand(),
                 new SortConfigCommand(),
+                new GenerateExtDocCommand(),
             ]
         );
     }
