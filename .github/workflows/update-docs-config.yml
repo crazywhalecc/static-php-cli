@@ -15,9 +15,6 @@ jobs:
     steps:
       - name: "Checkout static-php-cli"
         uses: actions/checkout@v4
-        with:
-          ref: main
-          path: static-php-cli
 
       - name: "Checkout static-php-cli-docs"
         uses: actions/checkout@v4
@@ -33,7 +30,35 @@ jobs:
           git config --global user.name "GitHub Actions"
 
       - name: "Copy Config Files"
-        run: cp -r static-php-cli/config/* static-php-cli-docs/docs/.vitepress/config/
+        run: cp -r config/* static-php-cli-docs/docs/.vitepress/config/
+
+      - name: "Install PHP for official runners"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: none
+          tools: composer:v2
+          php-version: 8.2
+          ini-values: memory_limit=-1
+
+      - name: "Get Composer Cache Directory"
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: "Cache Composer dependencies"
+        uses: "actions/cache@v4"
+        with:
+          path: "${{ steps.composer-cache.outputs.dir }}"
+          key: "php-8.2-locked-composer-${{ hashFiles('**/composer.lock') }}"
+          restore-keys: |
+            php-8.2-locked-composer
+
+      - name: "Install Locked Dependencies"
+        run: "composer install --no-interaction --no-progress"
+
+      - name: "Generate Extension Support List"
+        run: |
+          bin/spc dev:gen-ext-docs > static-php-cli-docs/docs/extensions.md
 
       - name: "Commit and Push Changes"
         run: |
