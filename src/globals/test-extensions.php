@@ -11,12 +11,12 @@ declare(strict_types=1);
 
 // --------------------------------- edit area ---------------------------------
 
-$zts = true;
+$zts = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'parallel',
-    'Windows' => 'mbstring,pdo_sqlite,mbregex,parallel',
+    'Linux', 'Darwin' => 'libxml',
+    'Windows' => 'mbstring,pdo_sqlite,mbregex,libxml',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
