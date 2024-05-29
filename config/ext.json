@@ -278,6 +278,16 @@
             "openssl"
         ]
     },
+    "libxml": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type": "none",
+        "ext-depends": [
+            "xml"
+        ]
+    },
     "mbregex": {
         "type": "builtin",
         "arg-type": "custom",
