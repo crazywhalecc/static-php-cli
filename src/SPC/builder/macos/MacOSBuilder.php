@@ -241,7 +241,7 @@ class MacOSBuilder extends UnixBuilderBase
 
         // patch fake cli for micro
         $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
-        if (!$this->getOption('no-strip', false)) {
+        if ($this->getOption('no-strip', false)) {
             $vars['STRIP'] = 'dsymutil -f ';
         }
         $vars = SystemUtil::makeEnvVarString($vars);
