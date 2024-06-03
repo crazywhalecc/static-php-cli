@@ -96,6 +96,8 @@ abstract class BaseCommand extends Command
         });
         if ($this->shouldExecute()) {
             try {
+                // show raw argv list for logger()->debug
+                logger()->debug('argv: ' . implode(' ', $_SERVER['argv']));
                 return $this->handle();
             } catch (WrongUsageException $e) {
                 $msg = explode("\n", $e->getMessage());

@@ -9,6 +9,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\FileSystem;
 use SPC\store\SourceManager;
 use SPC\util\CustomExt;
 
@@ -277,7 +278,7 @@ abstract class BuilderBase
 
     public function getMicroVersion(): false|string
     {
-        $file = SOURCE_PATH . '/php-src/sapi/micro/php_micro.h';
+        $file = FileSystem::convertPath(SOURCE_PATH . '/php-src/sapi/micro/php_micro.h');
         if (!file_exists($file)) {
             return false;
         }
