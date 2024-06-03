@@ -158,6 +158,12 @@ jobs:
       - name: "Run Build Tests (doctor)"
         run: bin/spc doctor --auto-fix
 
+      - name: "Prepare UPX for Windows and Linux"
+        if: matrix.os == 'windows-latest' || matrix.os == 'ubuntu-latest'
+        run: |
+          bin/spc install-pkg upx
+          echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
+
       - name: "Run Build Tests (download)"
         uses: nick-fields/retry@v3
         with:
@@ -168,4 +174,4 @@ jobs:
             bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=3
 
       - name: "Run Build Tests (build)"
-        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
+        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) $(php src/globals/test-extensions.php no_strip) $UPX_CMD --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
