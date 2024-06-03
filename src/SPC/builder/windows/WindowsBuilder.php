@@ -291,7 +291,7 @@ class WindowsBuilder extends BuilderBase
                 if (file_exists($test_file)) {
                     @unlink($test_file);
                 }
-                file_put_contents($test_file, file_get_contents(SOURCE_PATH . '/php-src/sapi/micro/micro.sfx') . $task['content']);
+                file_put_contents($test_file, file_get_contents(BUILD_ROOT_PATH . '\bin\micro.sfx') . $task['content']);
                 chmod($test_file, 0755);
                 [$ret, $out] = cmd()->execWithResult($test_file);
                 foreach ($task['conditions'] as $condition => $closure) {
