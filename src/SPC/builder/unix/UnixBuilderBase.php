@@ -212,26 +212,4 @@ abstract class UnixBuilderBase extends BuilderBase
         logger()->info('cleaning up');
         shell()->cd(SOURCE_PATH . '/php-src')->exec('make clean');
     }
-
-    private function getMicroTestTasks(): array
-    {
-        return [
-            'micro_ext_test' => [
-                'content' => ($this->getOption('without-micro-ext-test') ? '<?php echo "[micro-test-start][micro-test-end]";' : $this->generateMicroExtTests()),
-                'conditions' => [
-                    function ($ret) { return $ret === 0; },
-                    function ($ret, $out) {
-                        $raw_out = trim(implode('', $out));
-                        return str_starts_with($raw_out, '[micro-test-start]') && str_ends_with($raw_out, '[micro-test-end]');
-                    },
-                ],
-            ],
-            'micro_zend_bug_test' => [
-                'content' => ($this->getOption('without-micro-ext-test') ? '<?php echo "hello";' : file_get_contents(ROOT_DIR . '/src/globals/common-tests/micro_zend_mm_heap_corrupted.txt')),
-                'conditions' => [
-                    function ($ret) { return $ret === 0; },
-                ],
-            ],
-        ];
-    }
 }
