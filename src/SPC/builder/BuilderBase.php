@@ -9,6 +9,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\FileSystem;
 use SPC\store\SourceManager;
 use SPC\util\CustomExt;
 
@@ -275,6 +276,24 @@ abstract class BuilderBase
         return false;
     }
 
+    public function getMicroVersion(): false|string
+    {
+        $file = FileSystem::convertPath(SOURCE_PATH . '/php-src/sapi/micro/php_micro.h');
+        if (!file_exists($file)) {
+            return false;
+        }
+
+        $content = file_get_contents($file);
+        $ver = '';
+        preg_match('/#define PHP_MICRO_VER_MAJ (\d)/m', $content, $match);
+        $ver .= $match[1] . '.';
+        preg_match('/#define PHP_MICRO_VER_MIN (\d)/m', $content, $match);
+        $ver .= $match[1] . '.';
+        preg_match('/#define PHP_MICRO_VER_PAT (\d)/m', $content, $match);
+        $ver .= $match[1];
+        return $ver;
+    }
+
     /**
      * Get build type name string to display.
      *
@@ -433,5 +452,27 @@ abstract class BuilderBase
         }
         $php .= "echo '[micro-test-end]';\n";
         return $php;
+    }
+
+    protected function getMicroTestTasks(): array
+    {
+        return [
+            'micro_ext_test' => [
+                'content' => ($this->getOption('without-micro-ext-test') ? '<?php echo "[micro-test-start][micro-test-end]";' : $this->generateMicroExtTests()),
+                'conditions' => [
+                    function ($ret) { return $ret === 0; },
+                    function ($ret, $out) {
+                        $raw_out = trim(implode('', $out));
+                        return str_starts_with($raw_out, '[micro-test-start]') && str_ends_with($raw_out, '[micro-test-end]');
+                    },
+                ],
+            ],
+            'micro_zend_bug_test' => [
+                'content' => ($this->getOption('without-micro-ext-test') ? '<?php echo "hello";' : file_get_contents(ROOT_DIR . '/src/globals/common-tests/micro_zend_mm_heap_corrupted.txt')),
+                'conditions' => [
+                    function ($ret) { return $ret === 0; },
+                ],
+            ],
+        ];
     }
 }

@@ -436,6 +436,21 @@ class FileSystem
         return str_replace(array_keys($replacement), array_values($replacement), $path);
     }
 
+    public static function backupFile(string $path): string
+    {
+        copy($path, $path . '.bak');
+        return $path . '.bak';
+    }
+
+    public static function restoreBackupFile(string $path): void
+    {
+        if (!file_exists($path . '.bak')) {
+            throw new RuntimeException('Cannot find bak file for ' . $path);
+        }
+        copy($path . '.bak', $path);
+        unlink($path . '.bak');
+    }
+
     /**
      * @throws RuntimeException
      * @throws FileSystemException

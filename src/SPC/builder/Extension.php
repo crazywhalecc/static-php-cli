@@ -170,19 +170,19 @@ class Extension
     public function runCliCheckUnix(): void
     {
         // Run compile check if build target is cli
-        // If you need to run some check, overwrite this or add your assert in src/globals/tests/{extension_name}.php
+        // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
         [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
         }
 
-        if (file_exists(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php')) {
+        if (file_exists(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')) {
             // Trim additional content & escape special characters to allow inline usage
             $test = str_replace(
                 ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
                 ['', '', '', '\"', '\$'],
-                file_get_contents(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php')
+                file_get_contents(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')
             );
 
             [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
@@ -201,19 +201,19 @@ class Extension
     public function runCliCheckWindows(): void
     {
         // Run compile check if build target is cli
-        // If you need to run some check, overwrite this or add your assert in src/globals/tests/{extension_name}.php
+        // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
         [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
         }
 
-        if (file_exists(FileSystem::convertPath(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php'))) {
+        if (file_exists(FileSystem::convertPath(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php'))) {
             // Trim additional content & escape special characters to allow inline usage
             $test = str_replace(
                 ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
                 ['', '', '', '\"', '$'],
-                file_get_contents(FileSystem::convertPath(ROOT_DIR . '/src/globals/tests/' . $this->getName() . '.php'))
+                file_get_contents(FileSystem::convertPath(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php'))
             );
 
             [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe -r "' . trim($test) . '"');

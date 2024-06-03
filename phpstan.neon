@@ -13,6 +13,6 @@ parameters:
     - PHP_OS_FAMILY
   excludePaths:
       analyseAndScan:
-            - ./src/globals/tests/swoole.php
-            - ./src/globals/tests/swoole.phpt
+            - ./src/globals/ext-tests/swoole.php
+            - ./src/globals/ext-tests/swoole.phpt
             - ./src/globals/test-extensions.php

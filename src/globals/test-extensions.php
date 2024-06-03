@@ -13,6 +13,10 @@ declare(strict_types=1);
 
 $zts = false;
 
+$no_strip = false;
+
+$upx = true;
+
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'libxml',
@@ -74,5 +78,7 @@ echo match ($argv[1]) {
     'libs_cmd' => ($final_libs === '' ? '' : (' --with-libs=' . $final_libs)),
     'cmd' => $final_extensions_cmd . ($final_libs === '' ? '' : (' --with-libs=' . $final_libs)),
     'zts' => $zts ? '--enable-zts' : '',
+    'no_strip' => $no_strip ? '--no-strip' : '',
+    'upx' => $upx ? '--with-upx-pack' : '',
     default => '',
 };
