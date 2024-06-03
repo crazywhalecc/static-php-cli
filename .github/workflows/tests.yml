@@ -147,7 +147,7 @@ jobs:
 
       # Cache downloaded source
       - id: cache-download
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: downloads
           key: php-${{ matrix.php }}-dependencies
