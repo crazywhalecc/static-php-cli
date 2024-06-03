@@ -233,7 +233,7 @@ class MacOSBuilder extends UnixBuilderBase
         }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
-            SourcePatcher::patchMicro(['phar']);
+            SourcePatcher::patchMicroPhar($this->getPHPVersionID());
         }
 
         $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
@@ -251,7 +251,7 @@ class MacOSBuilder extends UnixBuilderBase
         $this->deployBinary(BUILD_TARGET_MICRO);
 
         if ($this->phar_patched) {
-            SourcePatcher::patchMicro(['phar'], true);
+            SourcePatcher::unpatchMicroPhar();
         }
     }
 

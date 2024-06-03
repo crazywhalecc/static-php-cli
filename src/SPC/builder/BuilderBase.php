@@ -275,6 +275,24 @@ abstract class BuilderBase
         return false;
     }
 
+    public function getMicroVersion(): false|string
+    {
+        $file = SOURCE_PATH . '/php-src/sapi/micro/php_micro.h';
+        if (!file_exists($file)) {
+            return false;
+        }
+
+        $content = file_get_contents($file);
+        $ver = '';
+        preg_match('/#define PHP_MICRO_VER_MAJ (\d)/m', $content, $match);
+        $ver .= $match[1] . '.';
+        preg_match('/#define PHP_MICRO_VER_MIN (\d)/m', $content, $match);
+        $ver .= $match[1] . '.';
+        preg_match('/#define PHP_MICRO_VER_PAT (\d)/m', $content, $match);
+        $ver .= $match[1];
+        return $ver;
+    }
+
     /**
      * Get build type name string to display.
      *

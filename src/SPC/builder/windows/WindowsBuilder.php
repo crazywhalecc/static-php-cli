@@ -191,14 +191,14 @@ class WindowsBuilder extends BuilderBase
         // phar patch for micro
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
-            SourcePatcher::patchMicro(['phar']);
+            SourcePatcher::patchMicroPhar($this->getPHPVersionID());
         }
 
         try {
             cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_micro_wrapper.bat --task-args micro");
         } finally {
             if ($this->phar_patched) {
-                SourcePatcher::patchMicro(['phar'], true);
+                SourcePatcher::unpatchMicroPhar();
             }
         }
 
