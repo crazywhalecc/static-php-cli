@@ -18,6 +18,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('micro', [SourcePatcher::class, 'patchMicro']);
         FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl11Darwin']);
         FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
+        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
     }
 
     /**
@@ -294,6 +295,24 @@ class SourcePatcher
         $lines[$line_num] = '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest';
         $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
+    }
+
+    public static function patchPhpLibxml212(): bool
+    {
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
+            $ver_id = intval($match[1]);
+            if ($ver_id < 80100) {
+                self::patchFile('spc_fix_libxml2_12_php80.patch', SOURCE_PATH . '/php-src');
+                return true;
+            }
+            if ($ver_id < 80200) {
+                self::patchFile('spc_fix_libxml2_12_php81.patch', SOURCE_PATH . '/php-src');
+                return true;
+            }
+            return false;
+        }
+        return false;
     }
 
     /**
