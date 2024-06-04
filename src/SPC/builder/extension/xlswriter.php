@@ -12,6 +12,10 @@ class xlswriter extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        return '--with-xlswriter --enable-reader';
+        $arg = '--with-xlswriter --enable-reader';
+        if ($this->builder->getLib('openssl')) {
+            $arg .= ' --with-openssl=' . BUILD_ROOT_PATH;
+        }
+        return $arg;
     }
 }

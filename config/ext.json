@@ -853,6 +853,9 @@
         "ext-depends": [
             "zlib",
             "zip"
+        ],
+        "lib-suggests": [
+            "openssl"
         ]
     },
     "xml": {

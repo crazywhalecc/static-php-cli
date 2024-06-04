@@ -19,8 +19,8 @@ $upx = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'libxml,swoole',
-    'Windows' => 'mbstring,pdo_sqlite,mbregex,libxml',
+    'Linux', 'Darwin' => 'libxml,xlswriter,openssl',
+    'Windows' => 'mbstring,pdo_sqlite,mbregex',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
