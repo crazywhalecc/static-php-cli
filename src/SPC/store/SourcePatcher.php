@@ -337,7 +337,10 @@ class SourcePatcher
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
         if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
             $ver_id = intval($match[1]);
-            if ($ver_id < 80100 && $ver_id >= 80000) {
+            if ($ver_id < 80000) {
+                return false;
+            }
+            if ($ver_id < 80100) {
                 self::patchFile('spc_fix_libxml2_12_php80.patch', SOURCE_PATH . '/php-src');
                 return true;
             }
