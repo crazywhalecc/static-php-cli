@@ -259,9 +259,14 @@
         }
     },
     "libcares": {
-        "type": "filelist",
-        "url": "https://c-ares.org/download/",
-        "regex": "/href=\"\\/download\\/(?<file>c-ares-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "type": "ghrel",
+        "repo": "c-ares/c-ares",
+        "match": "c-ares-.+\\.tar\\.gz",
+        "alt": {
+            "type": "filelist",
+            "url": "https://c-ares.org/download/",
+            "regex": "/href=\"\\/download\\/(?<file>c-ares-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
         "license": {
             "type": "file",
             "path": "LICENSE.md"
