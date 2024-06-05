@@ -347,7 +347,6 @@
     },
     "mongodb": {
         "support": {
-            "Darwin": "no",
             "BSD": "wip",
             "Windows": "wip"
         },
