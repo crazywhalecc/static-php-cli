@@ -68,7 +68,7 @@ class DownloadCommand extends BaseCommand
         }
         // mode: --for-extensions
         if ($for_ext = $input->getOption('for-extensions')) {
-            $ext = array_map('trim', array_filter(explode(',', $for_ext)));
+            $ext = $this->parseExtensionList($for_ext);
             $sources = $this->calculateSourcesByExt($ext, !$input->getOption('without-suggestions'));
             if (PHP_OS_FAMILY !== 'Windows') {
                 array_unshift($sources, 'pkg-config');
