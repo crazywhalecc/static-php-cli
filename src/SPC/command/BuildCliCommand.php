@@ -47,7 +47,7 @@ class BuildCliCommand extends BuildCommand
         // transform string to array
         $libraries = array_map('trim', array_filter(explode(',', $this->getOption('with-libs'))));
         // transform string to array
-        $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions'))));
+        $extensions = $this->parseExtensionList($this->getArgument('extensions'));
 
         // parse rule with options
         $rule = $this->parseRules();

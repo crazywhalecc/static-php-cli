@@ -144,4 +144,24 @@ abstract class BaseCommand extends Command
         logger()->error($fail_msg);
         return static::FAILURE;
     }
+
+    protected function parseExtensionList(string $ext_list): array
+    {
+        $a = array_map('trim', explode(',', $ext_list));
+        return array_values(array_filter($a, function ($x) {
+            $filter_internals = [
+                'core',
+                'hash',
+                'json',
+                'reflection',
+                'spl',
+                'standard',
+            ];
+            if (in_array(strtolower($x), $filter_internals)) {
+                logger()->warning("Extension [{$x}] is an builtin extension, it will be ignored.");
+                return false;
+            }
+            return true;
+        }));
+    }
 }
