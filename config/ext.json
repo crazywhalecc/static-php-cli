@@ -350,7 +350,6 @@
             "BSD": "wip",
             "Windows": "wip"
         },
-        "notes": true,
         "type": "external",
         "source": "mongodb",
         "arg-type": "custom",
