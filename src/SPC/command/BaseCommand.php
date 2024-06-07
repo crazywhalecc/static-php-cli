@@ -147,6 +147,7 @@ abstract class BaseCommand extends Command
 
     protected function parseExtensionList(string $ext_list): array
     {
+        $ext_list = str_replace('zend-opcache', 'opcache', $ext_list);
         $a = array_map('trim', explode(',', $ext_list));
         return array_values(array_filter($a, function ($x) {
             $filter_internals = [
