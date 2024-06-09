@@ -38,6 +38,23 @@ const DANGER_CMD = [
     'rmdir',
 ];
 
+// spc internal extensions
+const SPC_INTERNAL_EXTENSIONS = [
+    'core',
+    'hash',
+    'json',
+    'reflection',
+    'spl',
+    'standard',
+];
+
+// spc extension alias
+const SPC_EXTENSION_ALIAS = [
+    'zend opcache' => 'opcache',
+    'zend-opcache' => 'opcache',
+    'zendopcache' => 'opcache',
+];
+
 // file replace strategy
 const REPLACE_FILE_STR = 1;
 const REPLACE_FILE_PREG = 2;
