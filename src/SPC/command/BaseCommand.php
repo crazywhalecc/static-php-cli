@@ -145,19 +145,26 @@ abstract class BaseCommand extends Command
         return static::FAILURE;
     }
 
+    /**
+     * Parse extension list from string, replace alias and filter internal extensions.
+     *
+     * @param string $ext_list Extension string list, e.g. "mbstring,posix,sockets"
+     */
     protected function parseExtensionList(string $ext_list): array
     {
-        $a = array_map('trim', explode(',', $ext_list));
-        return array_values(array_filter($a, function ($x) {
-            $filter_internals = [
-                'core',
-                'hash',
-                'json',
-                'reflection',
-                'spl',
-                'standard',
-            ];
-            if (in_array(strtolower($x), $filter_internals)) {
+        // replace alias
+        $ls = array_map(function ($x) {
+            $lower = strtolower(trim($x));
+            if (isset(SPC_EXTENSION_ALIAS[$lower])) {
+                logger()->notice("Extension [{$lower}] is an alias of [" . SPC_EXTENSION_ALIAS[$lower] . '], it will be replaced.');
+                return SPC_EXTENSION_ALIAS[$lower];
+            }
+            return $lower;
+        }, explode(',', $ext_list));
+
+        // filter internals
+        return array_values(array_filter($ls, function ($x) {
+            if (in_array($x, SPC_INTERNAL_EXTENSIONS)) {
                 logger()->warning("Extension [{$x}] is an builtin extension, it will be ignored.");
                 return false;
             }
