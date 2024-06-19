@@ -40,6 +40,7 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('without-micro-ext-test', null, null, 'Disable phpmicro with extension test code');
         $this->addOption('with-upx-pack', null, null, 'Compress / pack binary using UPX tool (linux/windows only)');
         $this->addOption('with-micro-logo', null, InputOption::VALUE_REQUIRED, 'Use custom .ico for micro.sfx (windows only)');
+        $this->addOption('enable-micro-win32', null, null, 'Enable win32 mode for phpmicro (Windows only)');
     }
 
     public function handle(): int

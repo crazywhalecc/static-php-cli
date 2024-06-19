@@ -102,6 +102,8 @@ class WindowsBuilder extends BuilderBase
             $micro_logo = '';
         }
 
+        $micro_w32 = $this->getOption('enable-micro-win32') ? ' --enable-micro-win32=yes' : '';
+
         cmd()->cd(SOURCE_PATH . '\php-src')
             ->exec(
                 "{$this->sdk_prefix} configure.bat --task-args \"" .
@@ -111,7 +113,7 @@ class WindowsBuilder extends BuilderBase
                 '--with-extra-includes=' . BUILD_INCLUDE_PATH . ' ' .
                 '--with-extra-libs=' . BUILD_LIB_PATH . ' ' .
                 ($enableCli ? '--enable-cli=yes ' : '--enable-cli=no ') .
-                ($enableMicro ? ('--enable-micro=yes ' . $micro_logo) : '--enable-micro=no ') .
+                ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
                 ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
                 "{$this->makeExtensionArgs()} " .
                 $zts .
@@ -132,6 +134,8 @@ class WindowsBuilder extends BuilderBase
         if ($enableMicro) {
             logger()->info('building micro');
             $this->buildMicro();
+
+            SourcePatcher::unpatchMicroWin32();
         }
         if ($enableEmbed) {
             logger()->warning('Windows does not currently support embed SAPI.');

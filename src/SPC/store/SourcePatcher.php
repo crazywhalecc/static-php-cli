@@ -47,6 +47,12 @@ class SourcePatcher
                 ''
             );
         }
+
+        if ($builder->getOption('enable-micro-win32')) {
+            SourcePatcher::patchMicroWin32();
+        } else {
+            SourcePatcher::unpatchMicroWin32();
+        }
     }
 
     /**
@@ -366,6 +372,22 @@ class SourcePatcher
             logger()->debug('Inserting static-php-cli.version to php-src');
             $file = str_replace('PHP_INI_BEGIN()', "PHP_INI_BEGIN()\n\tPHP_INI_ENTRY(\"static-php-cli.version\",\t\"{$version}\",\tPHP_INI_ALL,\tNULL)", $file);
             FileSystem::writeFile(SOURCE_PATH . '/php-src/main/main.c', $file);
+        }
+    }
+
+    public static function patchMicroWin32(): void
+    {
+        // patch micro win32
+        if (!file_exists(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak')) {
+            copy(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c', SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak');
+            FileSystem::replaceFileStr(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c', '#include "php_variables.h"', '#include "php_variables.h"' . "\n#define PHP_MICRO_WIN32_NO_CONSOLE 1");
+        }
+    }
+
+    public static function unpatchMicroWin32(): void
+    {
+        if (file_exists(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak')) {
+            rename(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak', SOURCE_PATH . '\php-src\sapi\micro\php_micro.c');
         }
     }
 }
