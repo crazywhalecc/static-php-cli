@@ -70,7 +70,7 @@ final class CheckListHandler
      */
     private function loadCheckList(bool $include_manual = false): array
     {
-        foreach (FileSystem::getClassesPsr4(__DIR__ . '/item', 'SPC\\doctor\\item') as $class) {
+        foreach (FileSystem::getClassesPsr4(__DIR__ . '/item', 'SPC\doctor\item') as $class) {
             $ref = new \ReflectionClass($class);
             foreach ($ref->getMethods() as $method) {
                 foreach ($method->getAttributes() as $a) {

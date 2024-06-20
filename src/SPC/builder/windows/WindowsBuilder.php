@@ -216,8 +216,8 @@ class WindowsBuilder extends BuilderBase
         // search all supported libs
         $support_lib_list = [];
         $classes = FileSystem::getClassesPsr4(
-            ROOT_DIR . '\src\SPC\builder\\' . osfamily2dir() . '\\library',
-            'SPC\\builder\\' . osfamily2dir() . '\\library'
+            ROOT_DIR . '\src\SPC\builder\\' . osfamily2dir() . '\library',
+            'SPC\builder\\' . osfamily2dir() . '\library'
         );
         foreach ($classes as $class) {
             if (defined($class . '::NAME') && $class::NAME !== 'unknown' && Config::getLib($class::NAME) !== null) {

@@ -23,7 +23,7 @@ class CustomExt
      */
     public static function loadCustomExt(): void
     {
-        $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/builder/extension', 'SPC\\builder\\extension');
+        $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/builder/extension', 'SPC\builder\extension');
         foreach ($classes as $class) {
             $reflection = new \ReflectionClass($class);
             foreach ($reflection->getAttributes(CustomExt::class) as $attribute) {
