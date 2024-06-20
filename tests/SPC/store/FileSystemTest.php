@@ -94,7 +94,7 @@ class FileSystemTest extends TestCase
      */
     public function testGetClassesPsr4()
     {
-        $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/builder/extension', 'SPC\\builder\\extension');
+        $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/builder/extension', 'SPC\builder\extension');
         foreach ($classes as $class) {
             $this->assertIsString($class);
             new \ReflectionClass($class);
@@ -185,9 +185,9 @@ class FileSystemTest extends TestCase
     public function testIsRelativePath()
     {
         $this->assertTrue(FileSystem::isRelativePath('.'));
-        $this->assertTrue(FileSystem::isRelativePath('.\\sdf'));
+        $this->assertTrue(FileSystem::isRelativePath('.\sdf'));
         if (DIRECTORY_SEPARATOR === '\\') {
-            $this->assertFalse(FileSystem::isRelativePath('C:\\asdasd/fwe\asd'));
+            $this->assertFalse(FileSystem::isRelativePath('C:\asdasd/fwe\asd'));
         } else {
             $this->assertFalse(FileSystem::isRelativePath('/fwefwefewf'));
         }

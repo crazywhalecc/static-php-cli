@@ -460,7 +460,9 @@ abstract class BuilderBase
             'micro_ext_test' => [
                 'content' => ($this->getOption('without-micro-ext-test') ? '<?php echo "[micro-test-start][micro-test-end]";' : $this->generateMicroExtTests()),
                 'conditions' => [
+                    // program success
                     function ($ret) { return $ret === 0; },
+                    // program returns expected output
                     function ($ret, $out) {
                         $raw_out = trim(implode('', $out));
                         return str_starts_with($raw_out, '[micro-test-start]') && str_ends_with($raw_out, '[micro-test-end]');
@@ -470,6 +472,7 @@ abstract class BuilderBase
             'micro_zend_bug_test' => [
                 'content' => ($this->getOption('without-micro-ext-test') ? '<?php echo "hello";' : file_get_contents(ROOT_DIR . '/src/globals/common-tests/micro_zend_mm_heap_corrupted.txt')),
                 'conditions' => [
+                    // program success
                     function ($ret) { return $ret === 0; },
                 ],
             ],

@@ -25,7 +25,7 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.2.3';
+    public const VERSION = '2.2.4';
 
     public function __construct()
     {

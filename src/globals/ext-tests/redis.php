@@ -2,4 +2,4 @@
 
 declare(strict_types=1);
 
-assert(class_exists('\\Redis'));
+assert(class_exists('\Redis'));
