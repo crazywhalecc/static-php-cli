@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  GITHUB_TOKEN: ${{ secrets.TEST_GH_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   php-cs-fixer:
