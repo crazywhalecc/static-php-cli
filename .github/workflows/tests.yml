@@ -175,7 +175,9 @@ jobs:
 
       - name: "Run Build Tests (download)"
         run: |
-            bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=5
+          echo $GITHUB_TOKEN | wc -m
+          echo ${{ secrets.TEST_GH_TOKEN }} | wc -m
+          bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=5
 
       - name: "Run Build Tests (build, *nix)"
         if: matrix.os != 'windows-latest'
