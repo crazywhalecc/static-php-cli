@@ -15,14 +15,20 @@ trait libtiff
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
+        $shell = shell()->cd($this->source_dir)
             ->exec(
                 './configure ' .
                 '--enable-static --disable-shared ' .
                 '--disable-cxx ' .
                 '--prefix='
-            )
-            ->exec('make clean')
+            );
+
+        // TODO: Remove this check when https://gitlab.com/libtiff/libtiff/-/merge_requests/635 will be merged and released
+        if (file_exists($this->source_dir . '/html')) {
+            $shell->exec('make clean');
+        }
+
+        $shell
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libtiff-4.pc']);

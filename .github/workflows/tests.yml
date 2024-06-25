@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   php-cs-fixer:
     runs-on: ubuntu-latest
@@ -129,13 +132,6 @@ jobs:
           extensions: curl, openssl, mbstring
           ini-values: memory_limit=-1
 
-      - name: "Use test token if exists"
-        if: matrix.os != 'windows-latest'
-        run: |
-          if [ "${{ secrets.TEST_GH_TOKEN }}" != "" ]; then
-            echo "GITHUB_TOKEN=${{ secrets.TEST_GH_TOKEN }}" >> $GITHUB_ENV
-          fi
-
       - name: "Cache composer packages"
         id: composer-cache
         uses: actions/cache@v4
@@ -170,15 +166,9 @@ jobs:
           bin/spc install-pkg upx
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
-
       - name: "Run Build Tests (download)"
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_on: error
-          command: |
-            bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src,libcares --debug --retry=3
+        run: |
+          bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=5
 
       - name: "Run Build Tests (build, *nix)"
         if: matrix.os != 'windows-latest'
