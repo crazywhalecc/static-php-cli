@@ -33,6 +33,5 @@ class libavif extends WindowsLibraryBase
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
-
     }
 }
