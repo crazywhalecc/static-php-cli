@@ -19,6 +19,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl11Darwin']);
         FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
+        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchGDWin32']);
     }
 
     /**
@@ -357,6 +358,22 @@ class SourcePatcher
             return false;
         }
         return false;
+    }
+
+    public static function patchGDWin32(): bool
+    {
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
+            $ver_id = intval($match[1]);
+            if ($ver_id < 80200) {
+                // see: https://github.com/php/php-src/commit/243966177e39eb71822935042c3f13fa6c5b9eed
+                FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gd/libgd/gdft.c', '#ifndef MSWIN32', '#ifndef _WIN32');
+            }
+        }
+        // custom config.w32, because official config.w32 is hard-coded many things
+        $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config.w32');
+        file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32.bak', file_get_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32'));
+        return file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32', $origin) !== false;
     }
 
     /**

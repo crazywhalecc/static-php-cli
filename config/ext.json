@@ -134,7 +134,6 @@
     },
     "gd": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "notes": true,

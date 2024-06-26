@@ -90,6 +90,7 @@ class SystemUtil
         $buildroot = str_replace('\\', '\\\\', BUILD_ROOT_PATH);
         $toolchain = <<<CMAKE
 set(CMAKE_SYSTEM_NAME Windows)
+SET(CMAKE_SYSTEM_PROCESSOR x64)
 SET(CMAKE_C_FLAGS "{$cflags}")
 SET(CMAKE_C_FLAGS_DEBUG "{$cflags}")
 SET(CMAKE_CXX_FLAGS "{$cflags}")

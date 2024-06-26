@@ -72,6 +72,9 @@
         "static-libs-unix": [
             "libfreetype.a"
         ],
+        "static-libs-windows": [
+            "libfreetype_a.lib"
+        ],
         "headers-unix": [
             "freetype2/freetype/freetype.h",
             "freetype2/ft2build.h"
@@ -190,6 +193,9 @@
         "source": "libavif",
         "static-libs-unix": [
             "libavif.a"
+        ],
+        "static-libs-windows": [
+            "avif.lib"
         ]
     },
     "libcares": {
@@ -269,6 +275,12 @@
         "static-libs-unix": [
             "libjpeg.a",
             "libturbojpeg.a"
+        ],
+        "static-libs-windows": [
+            "libjpeg_a.lib"
+        ],
+        "lib-suggests-windows": [
+            "zlib"
         ]
     },
     "liblz4": {
@@ -290,7 +302,8 @@
             "libpng16.a"
         ],
         "static-libs-windows": [
-            "libpng16_static.lib"
+            "libpng16_static.lib",
+            "libpng_a.lib"
         ],
         "headers-unix": [
             "png.h",
@@ -372,6 +385,12 @@
             "libwebpdemux.a",
             "libwebpmux.a",
             "libsharpyuv.a"
+        ],
+        "static-libs-windows": [
+            "libwebp.lib",
+            "libwebpdecoder.lib",
+            "libwebpdemux.lib",
+            "libsharpyuv.lib"
         ]
     },
     "libxml2": {
