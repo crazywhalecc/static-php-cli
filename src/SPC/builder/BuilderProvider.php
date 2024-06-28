@@ -27,7 +27,7 @@ class BuilderProvider
      */
     public static function makeBuilderByInput(InputInterface $input): BuilderBase
     {
-        ini_set('memory_limit', '2G');
+        ini_set('memory_limit', '4G');
 
         self::$builder = match (PHP_OS_FAMILY) {
             'Windows' => new WindowsBuilder($input->getOptions()),
