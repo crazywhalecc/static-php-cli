@@ -733,7 +733,6 @@
     },
     "swow": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "notes": true,
@@ -932,7 +931,6 @@
     },
     "zip": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "builtin",
