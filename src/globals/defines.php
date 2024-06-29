@@ -43,6 +43,7 @@ const SPC_INTERNAL_EXTENSIONS = [
     'core',
     'hash',
     'json',
+    'pcre',
     'reflection',
     'spl',
     'standard',
