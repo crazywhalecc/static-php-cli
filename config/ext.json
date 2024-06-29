@@ -21,11 +21,9 @@
         "type": "builtin"
     },
     "bz2": {
-        "support": {
-            "Windows": "wip"
-        },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type-unix": "with-prefix",
+        "arg-type-windows": "with",
         "lib-depends": [
             "bzip2"
         ]
@@ -473,7 +471,6 @@
     },
     "pdo_sqlsrv": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
@@ -519,7 +516,6 @@
     },
     "rar": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip",
             "Darwin": "partial"
         },
@@ -636,12 +632,11 @@
     },
     "sqlsrv": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
         "source": "sqlsrv",
-        "lib-depends": [
+        "lib-depends-unix": [
             "unixodbc"
         ],
         "ext-depends-linux": [
@@ -925,12 +920,12 @@
     },
     "yaml": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
         "source": "yaml",
-        "arg-type": "with-prefix",
+        "arg-type-unix": "with-prefix",
+        "arg-type-windows": "with",
         "lib-depends": [
             "libyaml"
         ]
@@ -943,8 +938,18 @@
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",
-        "lib-depends": [
+        "lib-depends-unix": [
             "libzip"
+        ],
+        "ext-depends-windows": [
+            "zlib",
+            "bz2"
+        ],
+        "lib-depends-windows": [
+            "libzip",
+            "zlib",
+            "bzip2",
+            "xz"
         ]
     },
     "zlib": {

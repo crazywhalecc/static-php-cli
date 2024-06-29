@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+set_and_check(yaml_TARGETS "@PACKAGE_CONFIG_DIR_CONFIG@/yamlTargets.cmake")
+
+if(NOT yaml_TARGETS_IMPORTED)
+  set(yaml_TARGETS_IMPORTED 1)
+  include(${yaml_TARGETS})
+endif()
+
+set(yaml_LIBRARIES yaml)
