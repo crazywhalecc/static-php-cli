@@ -21,10 +21,8 @@
             "libbz2.a"
         ],
         "static-libs-windows": [
-            [
-                "libbz2.lib",
-                "libbz2_a.lib"
-            ]
+            "libbz2.lib",
+            "libbz2_a.lib"
         ],
         "headers": [
             "bzlib.h"
@@ -448,21 +446,28 @@
             "libzip.a"
         ],
         "static-libs-windows": [
-            [
-                "zip.lib",
-                "libzip_a.lib"
-            ]
+            "zip.lib",
+            "libzip_a.lib"
         ],
         "headers": [
             "zip.h",
             "zipconf.h"
         ],
-        "lib-depends": [
+        "lib-depends-unix": [
             "zlib"
         ],
-        "lib-suggests": [
+        "lib-suggests-unix": [
             "bzip2",
             "xz",
+            "zstd",
+            "openssl"
+        ],
+        "lib-depends-windows": [
+            "zlib",
+            "bzip2",
+            "xz"
+        ],
+        "lib-suggests-windows": [
             "zstd",
             "openssl"
         ]
@@ -625,10 +630,8 @@
             "liblzma.a"
         ],
         "static-libs-windows": [
-            [
-                "liblzma.lib",
-                "liblzma_a.lib"
-            ]
+            "liblzma.lib",
+            "liblzma_a.lib"
         ],
         "headers-unix": [
             "lzma"
@@ -637,7 +640,7 @@
             "lzma",
             "lzma.h"
         ],
-        "lib-depends": [
+        "lib-depends-unix": [
             "libiconv"
         ]
     },

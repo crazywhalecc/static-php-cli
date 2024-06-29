@@ -9,6 +9,7 @@ use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 
 class SourcePatcher
 {
@@ -20,12 +21,18 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchGDWin32']);
+        FileSystem::addSourceExtractHook('sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
+        FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
+        FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
     }
 
     /**
      * Source patcher runner before buildconf
      *
-     * @param BuilderBase $builder Builder
+     * @param  BuilderBase         $builder Builder
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function patchBeforeBuildconf(BuilderBase $builder): void
     {
@@ -77,7 +84,7 @@ class SourcePatcher
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public static function patchMicro(?array $list = null, bool $reverse = false): bool
+    public static function patchMicro(): bool
     {
         if (!file_exists(SOURCE_PATH . '/php-src/sapi/micro/php_micro.c')) {
             return false;
@@ -112,7 +119,7 @@ class SourcePatcher
         if (PHP_OS_FAMILY === 'Darwin') {
             $default[] = 'macos_iconv';
         }
-        $patch_list = $list ?? $default;
+        $patch_list = $default;
         $patches = [];
         $serial = ['80', '81', '82', '83', '84'];
         foreach ($patch_list as $patchName) {
@@ -135,7 +142,7 @@ class SourcePatcher
 
         f_passthru(
             'cd ' . SOURCE_PATH . '/php-src && ' .
-            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1 ' . ($reverse ? '-R' : '')
+            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1 '
         );
 
         return true;
@@ -183,6 +190,9 @@ class SourcePatcher
         return false;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function patchSwoole(): bool
     {
         // swoole hook needs pdo/pdo.h
@@ -281,6 +291,9 @@ class SourcePatcher
         return $result;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function patchMicroPhar(int $version_id): void
     {
         FileSystem::backupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
@@ -306,9 +319,33 @@ class SourcePatcher
         }
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public static function unpatchMicroPhar(): void
     {
         FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
+    }
+
+    /**
+     * Fix the compilation issue of sqlsrv and pdo_sqlsrv on Windows (/sdl check is too strict and will cause Zend compilation to fail)
+     *
+     * @throws FileSystemException
+     */
+    public static function patchSQLSRVWin32(string $source_name): bool
+    {
+        $source_name = preg_replace('/[^a-z_]/', '', $source_name);
+        if (file_exists(SOURCE_PATH . '/php-src/ext/' . $source_name . '/config.w32')) {
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/' . $source_name . '/config.w32', '/sdl', '');
+            return true;
+        }
+        return false;
+    }
+
+    public static function patchYamlWin32(): bool
+    {
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/yaml/config.w32', "lib.substr(lib.length - 6, 6) == '_a.lib'", "lib.substr(lib.length - 6, 6) == '_a.lib' || 'yes' == 'yes'");
+        return true;
     }
 
     /**
@@ -325,7 +362,7 @@ class SourcePatcher
         $line_num = 0;
         $found = false;
         foreach ($lines as $v) {
-            if (strpos($v, '$(BUILD_DIR)\php.exe:') !== false) {
+            if (str_contains($v, '$(BUILD_DIR)\php.exe:')) {
                 $found = $line_num;
                 break;
             }
@@ -339,6 +376,9 @@ class SourcePatcher
         FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public static function patchPhpLibxml212(): bool
     {
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
@@ -360,6 +400,9 @@ class SourcePatcher
         return false;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function patchGDWin32(): bool
     {
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
@@ -393,6 +436,9 @@ class SourcePatcher
         }
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public static function patchMicroWin32(): void
     {
         // patch micro win32
