@@ -38,7 +38,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('for-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
         $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
         $this->addOption('without-suggestions', null, null, 'Do not fetch suggested sources when using --for-extensions');
-        $this->addOption('ignore-cache-sources', null, InputOption::VALUE_REQUIRED, 'Ignore some source caches, comma separated, e.g "php-src,curl,openssl"', '');
+        $this->addOption('ignore-cache-sources', null, InputOption::VALUE_OPTIONAL, 'Ignore some source caches, comma separated, e.g "php-src,curl,openssl"', '');
         $this->addOption('retry', 'R', InputOption::VALUE_REQUIRED, 'Set retry time when downloading failed (default: 0)', '0');
     }
 
@@ -147,8 +147,12 @@ class DownloadCommand extends BaseCommand
             }
 
             $chosen_sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
-            $force_list = array_map('trim', array_filter(explode(',', $this->getOption('ignore-cache-sources'))));
-
+            $force_all = empty($this->getOption('ignore-cache-sources'));
+            if (!$force_all) {
+                $force_list = array_map('trim', array_filter(explode(',', $this->getOption('ignore-cache-sources'))));
+            } else {
+                $force_list = [];
+            }
             if ($this->getOption('all')) {
                 logger()->notice('Downloading with --all option will take more times to download, we recommend you to download with --for-extensions option !');
             }
@@ -182,7 +186,7 @@ class DownloadCommand extends BaseCommand
                     Downloader::downloadSource($source, $new_config, true);
                 } else {
                     logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
-                    Downloader::downloadSource($source, Config::getSource($source), in_array($source, $force_list));
+                    Downloader::downloadSource($source, Config::getSource($source), $force_all || in_array($source, $force_list));
                 }
             }
             $time = round(microtime(true) - START_TIME, 3);
