@@ -16,7 +16,7 @@ use SPC\store\source\CustomSourceBase;
 class Downloader
 {
     /**
-     * Get latest version from BitBucket tag
+     * Get latest version from BitBucket tag (type = bitbuckettag)
      *
      * @param  string              $name   source name
      * @param  array               $source source meta info: [repo]
@@ -51,7 +51,7 @@ class Downloader
     }
 
     /**
-     * Get latest version from GitHub tarball
+     * Get latest version from GitHub tarball (type = ghtar / ghtagtar)
      *
      * @param  string             $name   source name
      * @param  array              $source source meta info: [repo]
@@ -68,7 +68,16 @@ class Downloader
             hooks: [[CurlHook::class, 'setupGithubToken']],
             retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
         ), true);
-        $url = $data[0]['tarball_url'];
+
+        if (($source['prefer-stable'] ?? false) === true) {
+            $url = $data[0]['tarball_url'];
+        } else {
+            $id = 0;
+            while ($data[$id]['prerelease'] === true) {
+                ++$id;
+            }
+            $url = $data[$id]['tarball_url'] ?? null;
+        }
         if (!$url) {
             throw new DownloaderException("failed to find {$name} source");
         }
@@ -106,7 +115,7 @@ class Downloader
         ), true);
         $url = null;
         foreach ($data as $release) {
-            if ($release['prerelease'] === true) {
+            if (($source['prefer-stable'] ?? false) === true && $release['prerelease'] === true) {
                 continue;
             }
             foreach ($release['assets'] as $asset) {

@@ -47,6 +47,7 @@
         "type": "ghrel",
         "repo": "curl/curl",
         "match": "curl.+\\.tar\\.xz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -194,6 +195,7 @@
         "type": "ghrel",
         "repo": "unicode-org/icu",
         "match": "icu4c.+-src\\.tgz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -266,6 +268,7 @@
         "type": "ghrel",
         "repo": "c-ares/c-ares",
         "match": "c-ares-.+\\.tar\\.gz",
+        "prefer-stable": true,
         "alt": {
             "type": "filelist",
             "url": "https://c-ares.org/download/",
@@ -280,6 +283,7 @@
         "type": "ghrel",
         "repo": "libevent/libevent",
         "match": "libevent.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -289,6 +293,7 @@
         "type": "ghrel",
         "repo": "libffi/libffi",
         "match": "libffi.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -333,6 +338,7 @@
         "type": "ghrel",
         "repo": "lz4/lz4",
         "match": "lz4-.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -369,6 +375,7 @@
         "type": "ghrel",
         "repo": "jedisct1/libsodium",
         "match": "libsodium-\\d+(\\.\\d+)*\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -378,6 +385,7 @@
         "type": "ghrel",
         "repo": "libssh2/libssh2",
         "match": "libssh2.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -444,6 +452,7 @@
         "type": "ghrel",
         "repo": "yaml/libyaml",
         "match": "yaml-.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "License"
@@ -453,6 +462,7 @@
         "type": "ghrel",
         "repo": "nih-at/libzip",
         "match": "libzip.+\\.tar\\.xz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -483,6 +493,7 @@
         "repo": "mongodb/mongo-php-driver",
         "path": "php-src/ext/mongodb",
         "match": "mongodb.+\\.tgz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -501,6 +512,7 @@
         "type": "ghrel",
         "repo": "nghttp2/nghttp2",
         "match": "nghttp2.+\\.tar\\.xz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -510,6 +522,7 @@
         "type": "ghrel",
         "repo": "kkos/oniguruma",
         "match": "onig-.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -649,6 +662,7 @@
         "type": "ghtar",
         "path": "php-src/ext/swoole",
         "repo": "swoole/swoole-src",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -734,6 +748,7 @@
         "type": "ghrel",
         "repo": "madler/zlib",
         "match": "zlib.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "text",
             "text": "(C) 1995-2022 Jean-loup Gailly and Mark Adler\n\nThis software is provided 'as-is', without any express or implied\nwarranty.  In no event will the authors be held liable for any damages\narising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\n claim that you wrote the original software. If you use this software\n in a product, an acknowledgment in the product documentation would be\n appreciated but is not required.\n2. Altered source versions must be plainly marked as such, and must not be\n misrepresented as being the original software.\n3. This notice may not be removed or altered from any source distribution.\n\nJean-loup Gailly        Mark Adler\njloup@gzip.org          madler@alumni.caltech.edu"
@@ -743,6 +758,7 @@
         "type": "ghrel",
         "repo": "facebook/zstd",
         "match": "zstd.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
