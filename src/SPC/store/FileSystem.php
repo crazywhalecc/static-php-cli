@@ -195,7 +195,7 @@ class FileSystem
         }
         try {
             self::extractArchive($filename, $target);
-            self::emitSourceExtractHook($name);
+            self::emitSourceExtractHook($name, $target);
         } catch (RuntimeException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('rmdir /s /q ' . $target);
@@ -518,10 +518,10 @@ class FileSystem
         return file_put_contents($filename, $file);
     }
 
-    private static function emitSourceExtractHook(string $name): void
+    private static function emitSourceExtractHook(string $name, string $target): void
     {
         foreach ((self::$_extract_hook[$name] ?? []) as $hook) {
-            if ($hook($name) === true) {
+            if ($hook($name, $target) === true) {
                 logger()->info('Patched source [' . $name . '] after extracted');
             }
         }
