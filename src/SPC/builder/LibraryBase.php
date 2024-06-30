@@ -183,6 +183,16 @@ abstract class LibraryBase
     }
 
     /**
+     * Get current lib version
+     *
+     * @return null|string Version string or null
+     */
+    public function getLibVersion(): ?string
+    {
+        return null;
+    }
+
+    /**
      * Get current builder object.
      */
     abstract public function getBuilder(): BuilderBase;

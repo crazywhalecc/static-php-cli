@@ -161,7 +161,7 @@ abstract class BuilderBase
      * @throws WrongUsageException
      * @internal
      */
-    public function proveExts(array $extensions): void
+    public function proveExts(array $extensions, bool $skip_check_deps = false): void
     {
         CustomExt::loadCustomExt();
         $this->emitPatchPoint('before-php-extract');
@@ -179,6 +179,10 @@ abstract class BuilderBase
             $class = CustomExt::getExtClass($extension);
             $ext = new $class($extension, $this);
             $this->addExt($ext);
+        }
+
+        if ($skip_check_deps) {
+            return;
         }
 
         foreach ($this->exts as $ext) {
