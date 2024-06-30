@@ -24,6 +24,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
+        FileSystem::addSourceExtractHook('libyaml', [SourcePatcher::class, 'patchLibYaml']);
     }
 
     /**
@@ -345,6 +346,18 @@ class SourcePatcher
     public static function patchYamlWin32(): bool
     {
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/yaml/config.w32', "lib.substr(lib.length - 6, 6) == '_a.lib'", "lib.substr(lib.length - 6, 6) == '_a.lib' || 'yes' == 'yes'");
+        return true;
+    }
+
+    public static function patchLibYaml(string $name, string $target): bool
+    {
+        if (!file_exists("{$target}\\cmake\\config.h.in")) {
+            FileSystem::createDir("{$target}\\cmake");
+            copy(ROOT_DIR . '\src\globals\extra\libyaml_config.h.in', "{$target}\\cmake\\config.h.in");
+        }
+        if (!file_exists("{$target}\\YamlConfig.cmake.in")) {
+            copy(ROOT_DIR . '\src\globals\extra\libyaml_YamlConfig.cmake.in', "{$target}\\YamlConfig.cmake.in");
+        }
         return true;
     }
 
