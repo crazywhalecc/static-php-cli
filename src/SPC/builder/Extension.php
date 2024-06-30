@@ -229,6 +229,16 @@ class Extension
     }
 
     /**
+     * Get current extension version
+     *
+     * @return null|string Version string or null
+     */
+    public function getExtVersion(): ?string
+    {
+        return null;
+    }
+
+    /**
      * @throws RuntimeException
      */
     protected function addLibraryDependency(string $name, bool $optional = false): void

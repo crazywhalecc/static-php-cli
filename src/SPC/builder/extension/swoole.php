@@ -10,6 +10,18 @@ use SPC\util\CustomExt;
 #[CustomExt('swoole')]
 class swoole extends Extension
 {
+    public function getExtVersion(): ?string
+    {
+        // Get version from source directory
+        $file = SOURCE_PATH . '/php-src/ext/swoole/include/swoole_version.h';
+        // Match #define SWOOLE_VERSION "5.1.3"
+        $pattern = '/#define SWOOLE_VERSION "(.+)"/';
+        if (preg_match($pattern, file_get_contents($file), $matches)) {
+            return $matches[1];
+        }
+        return null;
+    }
+
     public function getUnixConfigureArg(): string
     {
         // enable swoole
