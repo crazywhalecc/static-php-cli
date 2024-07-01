@@ -41,4 +41,3 @@ docker/source/
 /docs/.vitepress/cache/
 package-lock.json
 pnpm-lock.yaml
-yarn.lock
