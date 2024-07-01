@@ -297,7 +297,7 @@ For an advanced example of how to use this feature, take a look at [how to use i
 If the extension you need is missing, you can create an issue.
 If you are familiar with this project, you are also welcome to initiate a pull request.
 
-If you want to contribute documentation, please go to [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs).
+If you want to contribute documentation, please just edit in `docs/`.
 
 Now there is a [static-php](https://github.com/static-php) organization, which is used to store the repo related to the project.
 

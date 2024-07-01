@@ -10,7 +10,7 @@ In the guide section, you will learn how to use static php cli to build standalo
 - [Supported Extensions](./extensions)
 
 ::: tip
-If you are a native English speaker, some corrections to the documentation are welcome. ([Docs repo](https://github.com/static-php/static-php-cli-docs))
+If you are a native English speaker, some corrections to the documentation are welcome.
 :::
 
 ## Compilation Environment
