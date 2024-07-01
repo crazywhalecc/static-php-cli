@@ -7,6 +7,8 @@ on:
       - 'config/**.json'
       - 'docs/**'
       - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/vitepress-deploy.yml'
 
 jobs:
   build:
