@@ -8,6 +8,14 @@ on:
       - 'src/globals/test-extensions.php'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'config/**'
+      - '.github/workflows/tests.yml'
+      - 'bin/**'
+      - 'composer.json'
+      - 'box.json'
+      - '.php-cs-fixer.php'
 
 permissions:
   contents: read

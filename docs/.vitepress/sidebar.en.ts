@@ -25,6 +25,7 @@ export default {
       items: [
         {text: 'Get Started', link: '/en/develop/'},
         {text: 'Project Structure', link: '/en/develop/structure'},
+        {text: 'PHP Source Modification', link: '/en/develop/php-src-changes'},
       ],
     },
     {

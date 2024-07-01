@@ -13,7 +13,7 @@ export default {
       themeConfig: {
         nav: [
           {text: 'Guide', link: '/en/guide/',},
-          {text: 'Developing', link: '/en/develop/'},
+          {text: 'Advanced', link: '/en/develop/'},
           {text: 'Contributing', link: '/en/contributing/'},
           {text: 'FAQ', link: '/en/faq/'},
         ],
@@ -30,7 +30,7 @@ export default {
       themeConfig: {
         nav: [
           {text: '构建指南', link: '/zh/guide/'},
-          {text: '开发指南', link: '/zh/develop/'},
+          {text: '进阶', link: '/zh/develop/'},
           {text: '贡献', link: '/zh/contributing/'},
           {text: 'FAQ', link: '/zh/faq/'},
         ],
