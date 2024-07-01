@@ -25,6 +25,7 @@ export default {
       items: [
         { text: '开发简介', link: '/zh/develop/' },
         { text: '项目结构简介', link: '/zh/develop/structure' },
+        {text: '对 PHP 源码的修改', link: '/zh/develop/php-src-changes'},
       ],
     },
     {
