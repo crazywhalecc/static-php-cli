@@ -8,6 +8,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\SourceManager;
 
 abstract class LibraryBase
 {
@@ -137,6 +138,14 @@ abstract class LibraryBase
         // force means just build
         if ($force_build) {
             logger()->info('Building required library [' . static::NAME . ']');
+
+            // extract first if not exists
+            if (!is_dir($this->source_dir)) {
+                $this->getBuilder()->emitPatchPoint('before-library[ ' . static::NAME . ']-extract');
+                SourceManager::initSource(libs: [static::NAME]);
+                $this->getBuilder()->emitPatchPoint('after-library[ ' . static::NAME . ']-extract');
+            }
+
             if (!$this->patched && $this->patchBeforeBuild()) {
                 file_put_contents($this->source_dir . '/.spc.patched', 'PATCHED!!!');
             }

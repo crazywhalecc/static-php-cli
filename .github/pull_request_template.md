@@ -7,6 +7,6 @@
 > If your PR involves the changes mentioned below and completed the action, please tick the corresponding option.
 > If a modification is not involved, please skip it directly.
 
-- [ ] If it's a extension or dependency update, make sure adding related extensions in `src/global/test-extensions.php`.
-- [ ] If you changed the behavior of static-php-cli, add docs in [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs) .
-- [ ] If you updated `config/xxxx.json` content, run `bin/spc dev:sort-config xxx`.
+- [ ] If it's an extension or dependency update, make sure adding related extensions in `src/global/test-extensions.php`.
+- [ ] If you changed the behavior of static-php-cli, update docs in `./docs/`.
+- [ ] If you updated `config/xxx.json` content, run `bin/spc dev:sort-config xxx`.
