@@ -34,3 +34,11 @@ docker/source/
 
 # default test directory
 /tests/var/
+
+# VitePress
+/node_modules/
+/docs/.vitepress/dist/
+/docs/.vitepress/cache/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

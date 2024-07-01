@@ -274,7 +274,7 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
 
-如果你想贡献文档内容，请到项目仓库 [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs) 贡献。
+如果你想贡献文档内容，请直接修改 `docs/` 目录。
 
 ## 赞助本项目
 
