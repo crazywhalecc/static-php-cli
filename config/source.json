@@ -718,7 +718,7 @@
     },
     "xz": {
         "type": "url",
-        "url": "https://fossies.org/linux/misc/xz-5.4.6.tar.xz",
+        "url": "https://fossies.org/linux/misc/xz-5.4.7.tar.xz",
         "license": {
             "type": "file",
             "path": "COPYING"
