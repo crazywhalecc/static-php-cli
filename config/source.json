@@ -719,7 +719,7 @@
     "xz": {
         "type": "ghrel",
         "repo": "tukaani-project/xz",
-        "match": "zx.+\\.tar\\.xz",
+        "match": "xz.+\\.tar\\.xz",
         "prefer-stable": true,
         "license": {
             "type": "file",
