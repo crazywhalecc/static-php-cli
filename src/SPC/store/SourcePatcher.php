@@ -351,12 +351,12 @@ class SourcePatcher
 
     public static function patchLibYaml(string $name, string $target): bool
     {
-        if (!file_exists("{$target}\\cmake\\config.h.in")) {
-            FileSystem::createDir("{$target}\\cmake");
-            copy(ROOT_DIR . '\src\globals\extra\libyaml_config.h.in', "{$target}\\cmake\\config.h.in");
+        if (!file_exists("{$target}/cmake/config.h.in")) {
+            FileSystem::createDir("{$target}/cmake");
+            copy(ROOT_DIR . '/src/globals/extra/libyaml_config.h.in', "{$target}/cmake/config.h.in");
         }
-        if (!file_exists("{$target}\\YamlConfig.cmake.in")) {
-            copy(ROOT_DIR . '\src\globals\extra\libyaml_YamlConfig.cmake.in', "{$target}\\YamlConfig.cmake.in");
+        if (!file_exists("{$target}/YamlConfig.cmake.in")) {
+            copy(ROOT_DIR . '/src/globals/extra/libyaml_yamlConfig.cmake.in', "{$target}/yamlConfig.cmake.in");
         }
         return true;
     }
