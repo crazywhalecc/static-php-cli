@@ -717,8 +717,10 @@
         }
     },
     "xz": {
-        "type": "url",
-        "url": "https://fossies.org/linux/misc/xz-5.4.7.tar.xz",
+        "type": "ghrel",
+        "repo": "tukaani-project/xz",
+        "match": "xz.+\\.tar\\.xz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
