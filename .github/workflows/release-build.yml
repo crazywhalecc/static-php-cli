@@ -131,4 +131,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: spc${{ env.SUFFIX }}
-          name: ${{ matrix.operating-system.name }}${{ env.SUFFIX }}
+          name: spc-${{ matrix.operating-system.name }}${{ env.SUFFIX }}
