@@ -69,7 +69,7 @@ class Downloader
             retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
         ), true);
 
-        if (($source['prefer-stable'] ?? false) === true) {
+        if (($source['prefer-stable'] ?? false) === false) {
             $url = $data[0]['tarball_url'];
         } else {
             $id = 0;
