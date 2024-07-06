@@ -640,6 +640,16 @@
             "path": "COPYING"
         }
     },
+    "spx": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/static-php/php-spx.git",
+        "path": "php-src/ext/spx",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "sqlite": {
         "type": "url",
         "url": "https://www.sqlite.org/2023/sqlite-autoconf-3430200.tar.gz",

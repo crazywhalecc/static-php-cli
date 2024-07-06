@@ -144,3 +144,8 @@ If you enable event extension on macOS, the `openpty` will be disabled due to is
 ## parallel
 
 Parallel is only supported on PHP 8.0 ZTS and above.
+
+## spx
+
+1. The [SPX extension](https://github.com/NoiseByNorthwest/php-spx) only supports NTS mode.
+2. SPX does not support Windows, and the official repository does not support static compilation. static-php-cli uses a [modified version](https://github.com/static-php/php-spx).
