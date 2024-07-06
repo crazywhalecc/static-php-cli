@@ -619,6 +619,19 @@
             "libsodium"
         ]
     },
+    "spx": {
+        "support": {
+            "BSD": "wip",
+            "Windows": "no"
+        },
+        "notes": true,
+        "type": "external",
+        "source": "spx",
+        "arg-type": "custom",
+        "lib-depends": [
+            "zlib"
+        ]
+    },
     "sqlite3": {
         "support": {
             "BSD": "wip"
