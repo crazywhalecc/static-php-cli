@@ -1,0 +1,88 @@
+name: Tests for PHP Pack Lib
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'config/**'
+      - '.github/workflows/tests.yml'
+      - 'bin/**'
+      - 'composer.json'
+      - 'box.json'
+      - '.php-cs-fixer.php'
+
+permissions:
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: "Pack Lib Test (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
+    runs-on: ${{ matrix.os.runs-on }}
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        os:
+          - runs-on: ubuntu-latest
+            name: "linux"
+            arch: "x86_64"
+          - runs-on: macos-13
+            name: "darwin"
+            arch: "x86_64"
+          - runs-on: windows-latest
+            name: "windows"
+            arch: "x86_64"
+          - runs-on: macos-14
+            name: "darwin"
+            arch: "aarch64"
+        lib:
+          - pkg-config
+          - zlib
+          - bzip2
+          - gmp
+      fail-fast: false
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+
+      - name: "Cache composer packages"
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v4
+        with:
+          path: downloads
+          key: pack-lib-dependencies
+
+      - name: "Install Dependencies"
+        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - run: bin/spc doctor --auto-fix
+
+      - run: bin/spc download --for-libs=${{ matrix.lib }} --debug --retry=5 --shallow-clone
+
+      - run: bin/spc dev:pack-lib --debug ${{ matrix.lib }}
+
+      - name: "Upload packed lib (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist/${{ matrix.lib }}-${{ matrix.os.arch }}-${{ matrix.os.name }}.tar.gz
+          name: ${{ matrix.lib }}-${{ matrix.os.arch }}-${{ matrix.os.name }}
