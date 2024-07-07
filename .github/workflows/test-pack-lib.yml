@@ -41,6 +41,7 @@ jobs:
       fail-fast: false
     steps:
       - name: "Process env string"
+        shell: bash
         run: |
           case "${{ matrix.runner }}" in
             ubuntu-latest)
