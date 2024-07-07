@@ -23,7 +23,6 @@ jobs:
     name: "Pack Lib Test (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
     timeout-minutes: 120
-    if: matrix.os.name != 'windows' || matrix.lib != 'pkg-config'
     strategy:
       matrix:
         os:
@@ -44,6 +43,12 @@ jobs:
           - zlib
           - bzip2
           - gmp
+        exclude:
+          - os:
+              runs-on: windows-latest
+              arch: "x86_64"
+              lib: pkg-config
+            lib: pkg-config
       fail-fast: false
     steps:
       - name: "Checkout"
@@ -92,5 +97,5 @@ jobs:
       - name: "Upload packed lib (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
         uses: actions/upload-artifact@v2
         with:
-          path: dist/${{ matrix.lib }}-${{ matrix.os.arch }}-${{ matrix.os.name }}.tar.gz
+          path: dist/${{ matrix.lib }}-${{ matrix.os.arch }}-${{ matrix.os.name }}.txz
           name: ${{ matrix.lib }}-${{ matrix.os.arch }}-${{ matrix.os.name }}
