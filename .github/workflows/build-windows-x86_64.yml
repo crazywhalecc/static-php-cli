@@ -25,7 +25,12 @@ on:
         description: extensions to compile (comma separated)
         required: true
         type: string
+      prefer-pre-built:
+        description: prefer pre-built binaries (reduce build time)
+        type: boolean
+        default: true
       debug:
+        description: enable debug logs
         type: boolean
 
 env:
@@ -65,6 +70,8 @@ jobs:
       # With or without debug
       - if: inputs.debug == true
         run: echo "SPC_BUILD_DEBUG=--debug" >> $env:GITHUB_ENV
+      - if: inputs.prefer-pre-built == true
+        run: echo "SPC_PRE_BUILT=--prefer-pre-built" >> $env:GITHUB_ENV
 
       # With target select: cli, micro or both
       - if: ${{ inputs.build-cli == true }}
@@ -76,7 +83,7 @@ jobs:
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
-        run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ inputs.extensions }}" ${{ env.SPC_BUILD_DEBUG }}
+        run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ inputs.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
       # Run build command
       - run: ./bin/spc build "${{ inputs.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}

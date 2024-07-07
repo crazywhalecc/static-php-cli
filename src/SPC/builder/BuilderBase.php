@@ -45,20 +45,21 @@ abstract class BuilderBase
     abstract public function proveLibs(array $sorted_libraries);
 
     /**
-     * Build libraries
+     * Set-Up libraries
      *
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function buildLibs(): void
+    public function setupLibs(): void
     {
         // build all libs
         foreach ($this->libs as $lib) {
-            match ($lib->tryBuild($this->getOption('rebuild', false))) {
-                BUILD_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] build success'),
-                BUILD_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
-                BUILD_STATUS_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
+            match ($lib->setup($this->getOption('rebuild', false))) {
+                LIB_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] setup success'),
+                LIB_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
+                LIB_STATUS_BUILD_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
+                LIB_STATUS_INSTALL_FAILED => logger()->error('lib [' . $lib::NAME . '] install failed'),
                 default => logger()->warning('lib [' . $lib::NAME . '] build status unknown'),
             };
         }

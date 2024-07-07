@@ -8,5 +8,5 @@ abstract class CustomSourceBase
 {
     public const NAME = 'unknown';
 
-    abstract public function fetch(bool $force = false);
+    abstract public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_LOCK_SOURCE): void;
 }

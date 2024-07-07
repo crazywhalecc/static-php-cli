@@ -16,7 +16,7 @@ class FileSystem
      */
     public static function loadConfigArray(string $config, ?string $config_dir = null): array
     {
-        $whitelist = ['ext', 'lib', 'source', 'pkg'];
+        $whitelist = ['ext', 'lib', 'source', 'pkg', 'pre-built'];
         if (!in_array($config, $whitelist)) {
             throw new FileSystemException('Reading ' . $config . '.json is not allowed');
         }

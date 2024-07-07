@@ -65,7 +65,7 @@ class BuildLibsCommand extends BuildCommand
             sleep(2);
             $builder->proveLibs($libraries);
             $builder->validateLibsAndExts();
-            $builder->buildLibs();
+            $builder->setupLibs();
 
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build libs complete, used ' . $time . ' s !');
