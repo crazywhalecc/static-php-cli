@@ -64,7 +64,7 @@ class PackLibCommand extends BuildCommand
                     FileSystem::writeFile(WORKING_DIR . '/packlib_files.txt', implode("\n", $increase_files));
                     // pack
                     $filename = WORKING_DIR . '/dist/' . $lib->getName() . '-' . arch2gnu(php_uname('m')) . '-' . strtolower(PHP_OS_FAMILY) . '.' . Config::getPreBuilt('suffix');
-                    f_passthru('tar -czf ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt -C ' . WORKING_DIR);
+                    f_passthru('tar -czf ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt');
                     logger()->info('Pack library ' . $lib->getName() . ' to ' . $filename . ' complete.');
                 }
             }

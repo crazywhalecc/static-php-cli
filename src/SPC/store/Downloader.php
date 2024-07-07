@@ -558,7 +558,6 @@ class Downloader
         try {
             f_passthru($cmd);
         } catch (RuntimeException $e) {
-            var_dump($e->getCode());
             if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
                 throw new WrongUsageException('Keyboard interrupted, download failed !');
             }
