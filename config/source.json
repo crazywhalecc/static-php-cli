@@ -341,6 +341,7 @@
         "repo": "lz4/lz4",
         "match": "lz4-.+\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -656,6 +657,7 @@
     "sqlite": {
         "type": "url",
         "url": "https://www.sqlite.org/2023/sqlite-autoconf-3430200.tar.gz",
+        "provide-pre-built": true,
         "license": {
             "type": "text",
             "text": "The author disclaims copyright to this source code.  In place of\na legal notice, here is a blessing:\n\n  *   May you do good and not evil.\n  *   May you find forgiveness for yourself and forgive others.\n  *   May you share freely, never taking more than you give."
