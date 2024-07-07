@@ -13,5 +13,6 @@ trait sqlite
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+        $this->patchPkgconfPrefix(['sqlite3.pc']);
     }
 }
