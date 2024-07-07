@@ -109,5 +109,5 @@ jobs:
       - name: "Upload packed lib (${{ matrix.lib }} for ${{ steps.process-env.outputs.ARCH }}-${{ steps.process-env.outputs.OS }})"
         uses: actions/upload-artifact@v2
         with:
-          path: dist/${{ matrix.lib }}-${{ env.ARCH }}-${{ env.OS }}.txz
+          path: dist/${{ matrix.lib }}-${{ steps.process-env.outputs.ARCH }}-${{ steps.process-env.outputs.OS }}.txz
           name: ${{ matrix.lib }}-${{ steps.process-env.outputs.ARCH }}-${{ steps.process-env.outputs.OS }}
