@@ -56,15 +56,20 @@ const SPC_EXTENSION_ALIAS = [
     'zendopcache' => 'opcache',
 ];
 
+// spc lock type
+const SPC_LOCK_SOURCE = 1;      // lock source
+const SPC_LOCK_PRE_BUILT = 2;   // lock pre-built
+
 // file replace strategy
 const REPLACE_FILE_STR = 1;
 const REPLACE_FILE_PREG = 2;
 const REPLACE_FILE_USER = 3;
 
 // library build status
-const BUILD_STATUS_OK = 0;
-const BUILD_STATUS_ALREADY = 1;
-const BUILD_STATUS_FAILED = 2;
+const LIB_STATUS_OK = 0;
+const LIB_STATUS_ALREADY = 1;
+const LIB_STATUS_BUILD_FAILED = 2;
+const LIB_STATUS_INSTALL_FAILED = 3;
 
 // build target type
 const BUILD_TARGET_NONE = 0;    // no target

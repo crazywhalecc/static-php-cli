@@ -148,7 +148,7 @@ class BuildCliCommand extends BuildCommand
             // validate libs and exts
             $builder->validateLibsAndExts();
             // build libraries
-            $builder->buildLibs();
+            $builder->setupLibs();
 
             if ($this->input->getOption('with-clean')) {
                 logger()->info('Cleaning source dir...');

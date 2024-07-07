@@ -17,7 +17,7 @@ class PhpSource extends CustomSourceBase
      * @throws DownloaderException
      * @throws FileSystemException
      */
-    public function fetch(bool $force = false): void
+    public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_LOCK_SOURCE): void
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.1';
         Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
@@ -45,7 +45,7 @@ class PhpSource extends CustomSourceBase
         // 从官网直接下载
         return [
             'type' => 'url',
-            'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
+            'url' => "https://www.php.net/distributions/php-{$version}.tar.xz",
         ];
     }
 }

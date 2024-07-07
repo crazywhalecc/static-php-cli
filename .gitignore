@@ -19,6 +19,10 @@ docker/source/
 # default package root directory
 /pkgroot/
 
+# default pack:lib and release directory
+/dist/
+packlib_files.txt
+
 # tools cache files
 .php-cs-fixer.cache
 .phpunit.result.cache

@@ -11,6 +11,7 @@ use SPC\command\dev\AllExtCommand;
 use SPC\command\dev\ExtVerCommand;
 use SPC\command\dev\GenerateExtDocCommand;
 use SPC\command\dev\LibVerCommand;
+use SPC\command\dev\PackLibCommand;
 use SPC\command\dev\PhpVerCommand;
 use SPC\command\dev\SortConfigCommand;
 use SPC\command\DoctorCommand;
@@ -54,6 +55,7 @@ final class ConsoleApplication extends Application
                 new ExtVerCommand(),
                 new SortConfigCommand(),
                 new GenerateExtDocCommand(),
+                new PackLibCommand(),
             ]
         );
     }

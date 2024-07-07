@@ -16,7 +16,7 @@ class PostgreSQLSource extends CustomSourceBase
      * @throws DownloaderException
      * @throws FileSystemException
      */
-    public function fetch(bool $force = false): void
+    public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_LOCK_SOURCE): void
     {
         Downloader::downloadSource('postgresql', self::getLatestInfo(), $force);
     }

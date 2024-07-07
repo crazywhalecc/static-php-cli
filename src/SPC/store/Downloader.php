@@ -100,14 +100,15 @@ class Downloader
     /**
      * Get latest version from GitHub release (uploaded archive)
      *
-     * @param  string              $name   source name
-     * @param  array               $source source meta info: [repo, match]
-     * @return array<int, string>  [url, filename]
+     * @param  string              $name         source name
+     * @param  array               $source       source meta info: [repo, match]
+     * @param  bool                $match_result Whether to return matched result by `match` param (default: true)
+     * @return array<int, string>  When $match_result = true, and we matched, [url, filename]. Otherwise, [{asset object}. ...]
      * @throws DownloaderException
      */
-    public static function getLatestGithubRelease(string $name, array $source): array
+    public static function getLatestGithubRelease(string $name, array $source, bool $match_result = true): array
     {
-        logger()->debug("finding {$name} source from github releases assests");
+        logger()->debug("finding {$name} from github releases assests");
         $data = json_decode(self::curlExec(
             url: "https://api.github.com/repos/{$source['repo']}/releases",
             hooks: [[CurlHook::class, 'setupGithubToken']],
@@ -118,6 +119,9 @@ class Downloader
             if (($source['prefer-stable'] ?? false) === true && $release['prerelease'] === true) {
                 continue;
             }
+            if (!$match_result) {
+                return $release['assets'];
+            }
             foreach ($release['assets'] as $asset) {
                 if (preg_match('|' . $source['match'] . '|', $asset['name'])) {
                     $url = $asset['browser_download_url'];
@@ -127,7 +131,7 @@ class Downloader
         }
 
         if (!$url) {
-            throw new DownloaderException("failed to find {$name} source");
+            throw new DownloaderException("failed to find {$name} release metadata");
         }
         $filename = basename($url);
 
@@ -176,11 +180,10 @@ class Downloader
     /**
      * Just download file using system curl command, and lock it
      *
-     * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
      */
-    public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null): void
+    public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null, int $lock_as = SPC_LOCK_SOURCE): void
     {
         logger()->debug("Downloading {$url}");
         $cancel_func = function () use ($filename) {
@@ -193,7 +196,7 @@ class Downloader
         self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0));
         self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
-        self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path]);
+        self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $lock_as]);
     }
 
     /**
@@ -218,7 +221,7 @@ class Downloader
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retry = 0): void
+    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retry = 0, int $lock_as = SPC_LOCK_SOURCE): void
     {
         $download_path = FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}");
         if (file_exists($download_path)) {
@@ -253,7 +256,7 @@ class Downloader
         }
         // Lock
         logger()->debug("Locking git source {$name}");
-        self::lockSource($name, ['source_type' => 'dir', 'dirname' => $name, 'move_path' => $move_path]);
+        self::lockSource($name, ['source_type' => 'dir', 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
 
         /*
         // 复制目录过去
@@ -313,28 +316,28 @@ class Downloader
             switch ($pkg['type']) {
                 case 'bitbuckettag':    // BitBucket Tag
                     [$url, $filename] = self::getLatestBitbucketTag($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_LOCK_PRE_BUILT);
                     break;
                 case 'ghtar':           // GitHub Release (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_LOCK_PRE_BUILT);
                     break;
                 case 'ghtagtar':        // GitHub Tag (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $pkg, 'tags');
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_LOCK_PRE_BUILT);
                     break;
                 case 'ghrel':           // GitHub Release (uploaded)
                     [$url, $filename] = self::getLatestGithubRelease($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_LOCK_PRE_BUILT);
                     break;
                 case 'filelist':        // Basic File List (regex based crawler)
                     [$url, $filename] = self::getFromFileList($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_LOCK_PRE_BUILT);
                     break;
                 case 'url':             // Direct download URL
                     $url = $pkg['url'];
                     $filename = $pkg['filename'] ?? basename($pkg['url']);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_LOCK_PRE_BUILT);
                     break;
                 case 'git':             // Git repo
                     self::downloadGit(
@@ -342,7 +345,8 @@ class Downloader
                         $pkg['url'],
                         $pkg['rev'],
                         $pkg['extract'] ?? null,
-                        intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
+                        intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0),
+                        SPC_LOCK_PRE_BUILT
                     );
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
@@ -371,12 +375,14 @@ class Downloader
     /**
      * Download source by name and meta.
      *
-     * @param  string              $name   source name
-     * @param  null|array          $source source meta info: [type, path, rev, url, filename, regex, license]
+     * @param  string              $name    source name
+     * @param  null|array          $source  source meta info: [type, path, rev, url, filename, regex, license]
+     * @param  bool                $force   Whether to force download (default: false)
+     * @param  int                 $lock_as Lock source type (default: SPC_LOCK_SOURCE)
      * @throws DownloaderException
      * @throws FileSystemException
      */
-    public static function downloadSource(string $name, ?array $source = null, bool $force = false): void
+    public static function downloadSource(string $name, ?array $source = null, bool $force = false, int $lock_as = SPC_LOCK_SOURCE): void
     {
         if ($source === null) {
             $source = Config::getSource($name);
@@ -413,28 +419,28 @@ class Downloader
             switch ($source['type']) {
                 case 'bitbuckettag':    // BitBucket Tag
                     [$url, $filename] = self::getLatestBitbucketTag($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $lock_as);
                     break;
                 case 'ghtar':           // GitHub Release (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $lock_as);
                     break;
                 case 'ghtagtar':        // GitHub Tag (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $source, 'tags');
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $lock_as);
                     break;
                 case 'ghrel':           // GitHub Release (uploaded)
                     [$url, $filename] = self::getLatestGithubRelease($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $lock_as);
                     break;
                 case 'filelist':        // Basic File List (regex based crawler)
                     [$url, $filename] = self::getFromFileList($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $lock_as);
                     break;
                 case 'url':             // Direct download URL
                     $url = $source['url'];
                     $filename = $source['filename'] ?? basename($source['url']);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $lock_as);
                     break;
                 case 'git':             // Git repo
                     self::downloadGit(
@@ -442,14 +448,15 @@ class Downloader
                         $source['url'],
                         $source['rev'],
                         $source['path'] ?? null,
-                        intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
+                        intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0),
+                        $lock_as
                     );
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
                     foreach ($classes as $class) {
                         if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
-                            (new $class())->fetch($force);
+                            (new $class())->fetch($force, $source, $lock_as);
                             break;
                         }
                     }

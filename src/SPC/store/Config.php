@@ -20,6 +20,16 @@ class Config
 
     public static ?array $ext = null;
 
+    public static ?array $pre_built = null;
+
+    public static function getPreBuilt(string $name): mixed
+    {
+        if (self::$pre_built === null) {
+            self::$pre_built = FileSystem::loadConfigArray('pre-built');
+        }
+        return self::$pre_built[$name] ?? null;
+    }
+
     /**
      * 从配置文件读取一个资源(source)的元信息
      *
