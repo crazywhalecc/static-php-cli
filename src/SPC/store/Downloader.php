@@ -404,7 +404,7 @@ class Downloader
             $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
         }
         // If lock file exists, skip downloading
-        if (isset($lock[$name]) && !$force) {
+        if (isset($lock[$name]) && !$force && ($lock[$name]['lock_as'] ?? SPC_LOCK_SOURCE) === $lock_as) {
             if ($lock[$name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename'])) {
                 logger()->notice("source [{$name}] already downloaded: " . $lock[$name]['filename']);
                 return;
