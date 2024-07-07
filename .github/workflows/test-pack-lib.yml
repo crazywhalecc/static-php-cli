@@ -20,37 +20,47 @@ env:
 
 jobs:
   build:
-    name: "Pack Lib Test (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
-    runs-on: ${{ matrix.os.runs-on }}
+    name: "Pack Lib Test (${{ matrix.lib }} for ${{ matrix.runner }})"
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     strategy:
       matrix:
-        os:
-          - runs-on: ubuntu-latest
-            name: "linux"
-            arch: "x86_64"
-          - runs-on: macos-13
-            name: "darwin"
-            arch: "x86_64"
-          - runs-on: windows-latest
-            name: "windows"
-            arch: "x86_64"
-          - runs-on: macos-14
-            name: "darwin"
-            arch: "aarch64"
+        runner:
+          - ubuntu-latest
+          - macos-13
+          - windows-latest
+          - macos-14
         lib:
-          - pkg-config
           - zlib
+          - pkg-config
           - bzip2
           - gmp
         exclude:
-          - os:
-              runs-on: windows-latest
-              arch: "x86_64"
-              lib: pkg-config
-            lib: pkg-config
+          - { runner: "windows-latest", lib: "pkg-config" }
+          - { runner: "windows-latest", lib: "gmp" }
       fail-fast: false
     steps:
+      - name: "Process env string"
+        run: |
+          case "${{ matrix.runner }}" in
+            ubuntu-latest)
+              echo "OS=linux" >> $env:GITHUB_ENV
+              echo "ARCH=x86_64" >> $env:GITHUB_ENV
+              ;;
+            windows-latest)
+              echo "OS=windows" >> $env:GITHUB_ENV
+              echo "ARCH=x86_64" >> $env:GITHUB_ENV
+              ;;
+            macos-13)
+              echo "OS=darwin" >> $env:GITHUB_ENV
+              echo "ARCH=x86_64" >> $env:GITHUB_ENV
+              ;;
+            macos-14)
+              echo "OS=darwin" >> $env:GITHUB_ENV
+              echo "ARCH=aarch64" >> $env:GITHUB_ENV
+              ;;
+          esac
+
       - name: "Checkout"
         uses: actions/checkout@v4
 
@@ -69,7 +79,7 @@ jobs:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-php
 
       # Cache downloaded source
       - id: cache-download
@@ -86,16 +96,16 @@ jobs:
       - run: bin/spc download --for-libs="${{ matrix.lib }}" --debug --retry=5 --shallow-clone
 
       - name: "Download pre-built pkg-config for *nix if possible"
-        if: matrix.os.name == 'linux' || matrix.os.name == 'darwin'
+        if: (env.OS == 'linux' || env.OS == 'darwin') && matrix.lib != 'pkg-config'
         run: |
           bin/spc download --for-libs="pkg-config" --debug --retry=5 --shallow-clone --prefer-pre-built
           bin/spc build:libs pkg-config --debug
 
-      - if: matrix.os.name != 'windows' || matrix.lib != 'pkg-config'
+      - if: env.OS != 'windows' || matrix.lib != 'pkg-config'
         run: bin/spc dev:pack-lib --debug ${{ matrix.lib }}
 
-      - name: "Upload packed lib (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
+      - name: "Upload packed lib (${{ matrix.lib }} for ${{ env.OS }}-${{ env.ARCH }})"
         uses: actions/upload-artifact@v2
         with:
-          path: dist/${{ matrix.lib }}-${{ matrix.os.arch }}-${{ matrix.os.name }}.txz
-          name: ${{ matrix.lib }}-${{ matrix.os.arch }}-${{ matrix.os.name }}
+          path: dist/${{ matrix.lib }}-${{ env.ARCH }}-${{ env.OS }}.txz
+          name: ${{ matrix.lib }}-${{ env.ARCH }}-${{ env.OS }}
