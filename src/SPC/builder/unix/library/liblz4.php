@@ -8,7 +8,14 @@ use SPC\store\FileSystem;
 
 trait liblz4
 {
-    protected function build()
+    public function patchBeforeBuild(): bool
+    {
+        // disable executables
+        FileSystem::replaceFileStr($this->source_dir . '/programs/Makefile', 'install: lz4', "install: lz4\n\ninstallewfwef: lz4");
+        return true;
+    }
+
+    protected function build(): void
     {
         shell()->cd($this->source_dir)
             ->exec("make PREFIX='' clean")
