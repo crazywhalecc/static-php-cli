@@ -56,6 +56,7 @@ if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-$SPC_USE_ARCH; then
 FROM $ALPINE_FROM
 $SPC_USE_MIRROR
 RUN apk update; \
+    apk upgrade -a; \
     apk add --no-cache \
         autoconf \
         automake \
