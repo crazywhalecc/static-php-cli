@@ -77,9 +77,14 @@ jobs:
 
       - run: bin/spc doctor --auto-fix
 
-      - run: bin/spc download --for-libs=${{ matrix.lib }} --debug --retry=5 --shallow-clone
+      - run: bin/spc download --for-libs="${{ matrix.lib }}" --debug --retry=5 --shallow-clone
 
-      - run: bin/spc dev:pack-lib --debug ${{ matrix.lib }}
+      - name: "Download pre-built pkg-config for *nix if possible"
+        if: matrix.os.name == 'linux' || matrix.os.name == 'darwin'
+        run: bin/spc download --for-libs="pkg-config" --debug --retry=5 --shallow-clone --prefer-pre-built
+
+      - if: matrix.os.name != 'windows' || matrix.lib != 'pkg-config'
+        run: bin/spc dev:pack-lib --debug ${{ matrix.lib }}
 
       - name: "Upload packed lib (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
         uses: actions/upload-artifact@v2
