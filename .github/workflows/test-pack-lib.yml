@@ -41,24 +41,25 @@ jobs:
       fail-fast: false
     steps:
       - name: "Process env string"
+        id: process-env
         shell: bash
         run: |
           case "${{ matrix.runner }}" in
             ubuntu-latest)
-              echo "OS=linux" >> $env:GITHUB_ENV
-              echo "ARCH=x86_64" >> $env:GITHUB_ENV
+              echo "OS=linux" >> "$GITHUB_OUTPUT"
+              echo "ARCH=x86_64" >> "$GITHUB_OUTPUT"
               ;;
             windows-latest)
-              echo "OS=windows" >> $env:GITHUB_ENV
-              echo "ARCH=x86_64" >> $env:GITHUB_ENV
+              echo "OS=windows" >> "$GITHUB_OUTPUT"
+              echo "ARCH=x86_64" >> "$GITHUB_OUTPUT"
               ;;
             macos-13)
-              echo "OS=darwin" >> $env:GITHUB_ENV
-              echo "ARCH=x86_64" >> $env:GITHUB_ENV
+              echo "OS=darwin" >> "$GITHUB_OUTPUT"
+              echo "ARCH=x86_64" >> "$GITHUB_OUTPUT"
               ;;
             macos-14)
-              echo "OS=darwin" >> $env:GITHUB_ENV
-              echo "ARCH=aarch64" >> $env:GITHUB_ENV
+              echo "OS=darwin" >> "$GITHUB_OUTPUT"
+              echo "ARCH=aarch64" >> "$GITHUB_OUTPUT"
               ;;
           esac
 
@@ -96,17 +97,17 @@ jobs:
 
       - run: bin/spc download --for-libs="${{ matrix.lib }}" --debug --retry=5 --shallow-clone
 
-      - name: "Download pre-built pkg-config for ${{ env.OS }}-${{ env.ARCH }}"
-        if: (env.OS == 'linux' || env.OS == 'darwin') && matrix.lib != 'pkg-config'
+      - name: "Download pre-built pkg-config for ${{ matrix.runner }}"
+        if: matrix.runner != 'windows-latest' && matrix.lib != 'pkg-config'
         run: |
           bin/spc download --for-libs="pkg-config" --debug --retry=5 --shallow-clone --prefer-pre-built
           bin/spc build:libs pkg-config --debug
 
-      - if: env.OS != 'windows' || matrix.lib != 'pkg-config'
+      - if: matrix.runner != 'windows-latest' || matrix.lib != 'pkg-config'
         run: bin/spc dev:pack-lib --debug ${{ matrix.lib }}
 
-      - name: "Upload packed lib (${{ matrix.lib }} for ${{ env.OS }}-${{ env.ARCH }})"
+      - name: "Upload packed lib (${{ matrix.lib }} for ${{ steps.process-env.outputs.ARCH }}-${{ steps.process-env.outputs.OS }})"
         uses: actions/upload-artifact@v2
         with:
           path: dist/${{ matrix.lib }}-${{ env.ARCH }}-${{ env.OS }}.txz
-          name: ${{ matrix.lib }}-${{ env.ARCH }}-${{ env.OS }}
+          name: ${{ matrix.lib }}-${{ steps.process-env.outputs.ARCH }}-${{ steps.process-env.outputs.OS }}
