@@ -96,7 +96,7 @@ jobs:
 
       - run: bin/spc download --for-libs="${{ matrix.lib }}" --debug --retry=5 --shallow-clone
 
-      - name: "Download pre-built pkg-config for *nix if possible"
+      - name: "Download pre-built pkg-config for ${{ env.OS }}-${{ env.ARCH }}"
         if: (env.OS == 'linux' || env.OS == 'darwin') && matrix.lib != 'pkg-config'
         run: |
           bin/spc download --for-libs="pkg-config" --debug --retry=5 --shallow-clone --prefer-pre-built
