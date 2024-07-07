@@ -54,7 +54,7 @@ jobs:
             ubuntu-20.04)
               echo "OS=linux" >> "$GITHUB_OUTPUT"
               echo "ARCH=aarch64" >> "$GITHUB_OUTPUT"
-              echo 'CMD="SPC_USE_ARCH=aarch64 bin/spc-alpine-docker"' >> "$GITHUB_OUTPUT"
+              echo CMD="SPC_USE_ARCH=aarch64 bin/spc-alpine-docker" >> "$GITHUB_OUTPUT"
               ;;
             windows-latest)
               echo "OS=windows" >> "$GITHUB_OUTPUT"
