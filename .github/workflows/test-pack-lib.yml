@@ -82,7 +82,9 @@ jobs:
 
       - name: "Download pre-built pkg-config for *nix if possible"
         if: matrix.os.name == 'linux' || matrix.os.name == 'darwin'
-        run: bin/spc download --for-libs="pkg-config" --debug --retry=5 --shallow-clone --prefer-pre-built
+        run: |
+          bin/spc download --for-libs="pkg-config" --debug --retry=5 --shallow-clone --prefer-pre-built
+          bin/spc build:libs pkg-config --debug
 
       - if: matrix.os.name != 'windows' || matrix.lib != 'pkg-config'
         run: bin/spc dev:pack-lib --debug ${{ matrix.lib }}
