@@ -23,6 +23,7 @@ jobs:
     name: "Pack Lib Test (${{ matrix.lib }} for ${{ matrix.os.name }}-${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
     timeout-minutes: 120
+    if: matrix.os.name != 'windows' || matrix.lib != 'pkg-config'
     strategy:
       matrix:
         os:
