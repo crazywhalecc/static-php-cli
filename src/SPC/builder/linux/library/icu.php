@@ -21,10 +21,10 @@ class icu extends LinuxLibraryBase
                 '--disable-shared ' .
                 '--with-data-packaging=static ' .
                 '--enable-release=yes ' .
-                '--enable-extras=yes ' .
+                '--enable-extras=no ' .
                 '--enable-icuio=yes ' .
                 '--enable-dyload=no ' .
-                '--enable-tools=yes ' .
+                '--enable-tools=no ' .
                 '--enable-tests=no ' .
                 '--enable-samples=no ' .
                 '--prefix=' . BUILD_ROOT_PATH

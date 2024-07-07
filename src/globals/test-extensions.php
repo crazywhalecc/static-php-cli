@@ -19,7 +19,7 @@ $upx = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'spx',
+    'Linux', 'Darwin' => 'intl',
     'Windows' => 'mbstring,pdo_sqlite,mbregex,bz2,sqlsrv,pdo_sqlsrv,yaml',
 };
 
