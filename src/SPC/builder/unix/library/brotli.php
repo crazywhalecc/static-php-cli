@@ -34,5 +34,9 @@ trait brotli
                 unlink(BUILD_ROOT_PATH . '/lib/' . $filename);
             }
         }
+
+        if (file_exists(BUILD_BIN_PATH . '/brotli')) {
+            unlink(BUILD_BIN_PATH . '/brotli');
+        }
     }
 }
