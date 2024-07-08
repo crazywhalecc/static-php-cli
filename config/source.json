@@ -532,6 +532,7 @@
         "repo": "kkos/oniguruma",
         "match": "onig-.+\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
