@@ -71,7 +71,7 @@ class WindowsToolCheckList
         if (($path = SystemUtil::findCommand('perl.exe')) === null) {
             return CheckResult::fail('perl not found in path.', 'install-perl');
         }
-        if (!str_contains(implode('', cmd()->execWithResult(quote($path) . ' -v')[1]), 'MSWin32')) {
+        if (!str_contains(implode('', cmd()->execWithResult(quote($path) . ' -v', false)[1]), 'MSWin32')) {
             return CheckResult::fail($path . ' is not built for msvc.', 'install-perl');
         }
         return CheckResult::ok();
