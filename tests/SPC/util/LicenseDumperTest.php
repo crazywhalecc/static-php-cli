@@ -43,7 +43,6 @@ final class LicenseDumperTest extends TestCase
                 'license' => [
                     'type' => 'text',
                     'text' => 'license',
-                    'suffix' => 'zend',
                 ],
             ],
         ];
@@ -52,7 +51,7 @@ final class LicenseDumperTest extends TestCase
         $dumper->addLibs(['fake_lib']);
         $dumper->dump(self::DIRECTORY);
 
-        $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_zend.txt');
+        $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_0.txt');
     }
 
     public function testDumpWithMultipleLicenses(): void
@@ -76,7 +75,6 @@ final class LicenseDumperTest extends TestCase
                     [
                         'type' => 'text',
                         'text' => 'license',
-                        'suffix' => 'zend',
                     ],
                 ],
             ],
@@ -88,6 +86,6 @@ final class LicenseDumperTest extends TestCase
 
         $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_0.txt');
         $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_1.txt');
-        $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_zend.txt');
+        $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_2.txt');
     }
 }
