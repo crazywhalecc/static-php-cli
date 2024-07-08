@@ -29,6 +29,7 @@
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -253,6 +254,7 @@
         "type": "git",
         "rev": "master",
         "url": "https://github.com/static-php/phc-winner-argon2",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -261,6 +263,7 @@
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -314,6 +317,7 @@
         "type": "filelist",
         "url": "https://ftp.gnu.org/gnu/libiconv/",
         "regex": "/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -360,6 +364,7 @@
         "type": "git",
         "url": "https://github.com/glennrp/libpng.git",
         "rev": "libpng16",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -398,6 +403,7 @@
         "type": "filelist",
         "url": "https://download.osgeo.org/libtiff/",
         "regex": "/href=\"(?<file>tiff-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE.md"

@@ -23,5 +23,9 @@ trait libargon2
                 unlink(BUILD_ROOT_PATH . '/lib/' . $filename);
             }
         }
+
+        if (file_exists(BUILD_BIN_PATH . '/argon2')) {
+            unlink(BUILD_BIN_PATH . '/argon2');
+        }
     }
 }
