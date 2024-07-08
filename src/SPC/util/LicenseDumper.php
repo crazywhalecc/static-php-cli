@@ -107,9 +107,9 @@ class LicenseDumper
         }
 
         foreach ($licenses as $index => $license) {
-            yield ($license['suffix'] ?? $index) => match ($license['type']) {
+            yield $index => match ($license['type']) {
                 'text' => $license['text'],
-                'file' => $this->loadSourceFile($source_name, $license['path'], Config::getSource($source_name)['path'] ?? null),
+                'file' => $this->loadSourceFile($source_name, $index, $license['path'], Config::getSource($source_name)['path'] ?? null),
                 default => throw new RuntimeException('source [' . $source_name . '] license type is not allowed'),
             };
         }
@@ -118,15 +118,21 @@ class LicenseDumper
     /**
      * @throws RuntimeException
      */
-    private function loadSourceFile(string $source_name, ?string $in_path, ?string $custom_base_path = null): string
+    private function loadSourceFile(string $source_name, int $index, ?string $in_path, ?string $custom_base_path = null): string
     {
         if (is_null($in_path)) {
             throw new RuntimeException('source [' . $source_name . '] license file is not set, please check config/source.json');
         }
-        if (!file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path)) {
-            throw new RuntimeException('source [' . $source_name . '] license file [' . $in_path . '] not exist');
+
+        if (file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path)) {
+            return file_get_contents(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path);
         }
 
-        return file_get_contents(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path);
+        if (file_exists(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt')) {
+            logger()->debug('source [' . $source_name . '] license file [' . $index . ':' . $in_path . '] not exist, use installed version instead');
+            return file_get_contents(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt');
+        }
+
+        throw new RuntimeException('source [' . $source_name . '] license file [' . $in_path . '] not exist');
     }
 }

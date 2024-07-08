@@ -217,6 +217,7 @@ abstract class LibraryBase
             }
             $this->getBuilder()->emitPatchPoint('before-library[ ' . static::NAME . ']-build');
             $this->build();
+            $this->installLicense();
             $this->getBuilder()->emitPatchPoint('after-library[ ' . static::NAME . ']-build');
             return LIB_STATUS_OK;
         }
@@ -310,5 +311,27 @@ abstract class LibraryBase
     protected function getSnakeCaseName(): string
     {
         return str_replace('-', '_', static::NAME);
+    }
+
+    /**
+     * Install license files in buildroot directory
+     */
+    protected function installLicense(): void
+    {
+        FileSystem::createDir(BUILD_ROOT_PATH . '/source-licenses/' . $this->getName());
+        $source = Config::getLib($this->getName(), 'source');
+        $license_files = Config::getSource($source)['license'] ?? [];
+        if (is_assoc_array($license_files)) {
+            $license_files = [$license_files];
+        }
+        foreach ($license_files as $index => $license) {
+            if ($license['type'] === 'text') {
+                FileSystem::writeFile(BUILD_ROOT_PATH . '/source-licenses/' . $this->getName() . "/{$index}.txt", $license['text']);
+                continue;
+            }
+            if ($license['type'] === 'file') {
+                copy($this->source_dir . '/' . $license['path'], BUILD_ROOT_PATH . '/source-licenses/' . $this->getName() . "/{$index}.txt");
+            }
+        }
     }
 }
