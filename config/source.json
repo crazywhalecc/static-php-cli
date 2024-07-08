@@ -535,6 +535,7 @@
         "type": "filelist",
         "url": "https://www.openssl.org/source/",
         "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE.txt"

@@ -41,5 +41,11 @@ class openssl extends WindowsLibraryBase
             'CNF_LDFLAGS="/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:msvcrt /NODEFAULTLIB:msvcrtd /DEFAULTLIB:libcmt /LIBPATH:' . BUILD_LIB_PATH . ' zlibstatic.lib"'
         );
         copy($this->source_dir . '\ms\applink.c', BUILD_INCLUDE_PATH . '\openssl\applink.c');
+
+        FileSystem::replaceFileRegex(
+            BUILD_LIB_PATH . '\cmake\OpenSSL\OpenSSLConfig.cmake',
+            '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m',
+            'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}" ws2_32.lib gdi32.lib advapi32.lib crypt32.lib user32.lib)'
+        );
     }
 }
