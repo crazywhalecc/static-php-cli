@@ -140,7 +140,7 @@ function f_passthru(string $cmd): ?bool
     if ($danger) {
         logger()->notice('Running dangerous command: ' . $cmd);
     } else {
-        logger()->debug('Running command with direct output: ' . $cmd);
+        logger()->debug('[PASSTHRU] ' . $cmd);
     }
     $ret = passthru($cmd, $code);
     if ($code !== 0) {
