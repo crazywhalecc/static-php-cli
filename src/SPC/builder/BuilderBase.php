@@ -55,8 +55,9 @@ abstract class BuilderBase
     {
         // build all libs
         foreach ($this->libs as $lib) {
+            $starttime = microtime(true);
             match ($lib->setup($this->getOption('rebuild', false))) {
-                LIB_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] setup success'),
+                LIB_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] setup success, took ' . round(microtime(true) - $starttime, 2) . ' s'),
                 LIB_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
                 LIB_STATUS_BUILD_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
                 LIB_STATUS_INSTALL_FAILED => logger()->error('lib [' . $lib::NAME . '] install failed'),
