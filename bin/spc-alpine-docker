@@ -109,6 +109,22 @@ else
     INTERACT=''
 fi
 
+# Mounting volumes
+MOUNT_LIST=""
+# shellcheck disable=SC2089
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/config:/app/config"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/src:/app/src"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/buildroot:/app/buildroot"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/source:/app/source"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/app/dist"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/downloads:/app/downloads"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
+
+echo "$MOUNT_LIST"
+exit 0
+
 # Run docker
 # shellcheck disable=SC2068
-$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" -v "$(pwd)"/config:/app/config -v "$(pwd)"/src:/app/src -v "$(pwd)"/buildroot:/app/buildroot -v "$(pwd)"/source:/app/source -v "$(pwd)"/dist:/app/dist -v "$(pwd)"/downloads:/app/downloads cwcc-spc-$SPC_USE_ARCH bin/spc $@
+# shellcheck disable=SC2086
+# shellcheck disable=SC2090
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH bin/spc $@
