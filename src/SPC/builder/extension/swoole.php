@@ -5,11 +5,24 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\builder\macos\MacOSBuilder;
+use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('swoole')]
 class swoole extends Extension
 {
+    public function patchBeforeMake(): bool
+    {
+        if ($this->builder instanceof MacOSBuilder) {
+            // Fix swoole with event extension <util.h> conflict bug
+            $util_path = shell()->execWithResult('xcrun --show-sdk-path', false)[1][0] . '/usr/include/util.h';
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/swoole/thirdparty/php/standard/proc_open.cc', 'include <util.h>', 'include "' . $util_path . '"');
+            return true;
+        }
+        return false;
+    }
+
     public function getExtVersion(): ?string
     {
         // Get version from source directory
