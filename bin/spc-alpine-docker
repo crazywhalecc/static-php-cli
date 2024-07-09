@@ -120,9 +120,6 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/app/dist"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/downloads:/app/downloads"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
 
-echo "$MOUNT_LIST"
-exit 0
-
 # Run docker
 # shellcheck disable=SC2068
 # shellcheck disable=SC2086
