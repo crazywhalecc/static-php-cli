@@ -8,11 +8,12 @@ trait libsodium
 {
     protected function build(): void
     {
-        $root = BUILD_ROOT_PATH;
         shell()->cd($this->source_dir)
-            ->exec("./configure --enable-static --disable-shared --prefix={$root}")
+            ->exec('./configure --enable-static --disable-shared --prefix=')
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install');
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+
+        $this->patchPkgconfPrefix(['libsodium.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

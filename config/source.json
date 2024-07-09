@@ -291,6 +291,7 @@
         "repo": "libevent/libevent",
         "match": "libevent.+\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -329,6 +330,7 @@
         "type": "git",
         "rev": "master",
         "url": "https://github.com/static-php/libiconv-win.git",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "source/COPYING"
@@ -386,6 +388,7 @@
         "repo": "jedisct1/libsodium",
         "match": "libsodium-\\d+(\\.\\d+)*\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -437,6 +440,7 @@
     "libwebp": {
         "type": "url",
         "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.2.tar.gz",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -464,6 +468,7 @@
         "repo": "yaml/libyaml",
         "match": "yaml-.+\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "License"
@@ -514,6 +519,7 @@
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
         "regex": "/href=\"(?<file>ncurses-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -629,6 +635,7 @@
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/readline/",
         "regex": "/href=\"(?<file>readline-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -716,6 +723,7 @@
     "unixodbc": {
         "type": "url",
         "url": "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -746,6 +754,7 @@
         "repo": "tukaani-project/xz",
         "match": "xz.+\\.tar\\.xz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
