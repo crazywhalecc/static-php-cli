@@ -41,5 +41,12 @@ class libwebp extends WindowsLibraryBase
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
+
+        // Actually we don't need pkgconf in windows, but for packing, we still need patching prefix.
+        // for libsharpyuv, libwebp, libwebpdecoder, libwebpdemux
+        FileSystem::replaceFileRegex(BUILD_LIB_PATH . '\pkgconfig\libsharpyuv.pc', '/^prefix=.*/m', 'prefix=${pcfiledir}/../..');
+        FileSystem::replaceFileRegex(BUILD_LIB_PATH . '\pkgconfig\libwebp.pc', '/^prefix=.*/m', 'prefix=${pcfiledir}/../..');
+        FileSystem::replaceFileRegex(BUILD_LIB_PATH . '\pkgconfig\libwebpdecoder.pc', '/^prefix=.*/m', 'prefix=${pcfiledir}/../..');
+        FileSystem::replaceFileRegex(BUILD_LIB_PATH . '\pkgconfig\libwebpdemux.pc', '/^prefix=.*/m', 'prefix=${pcfiledir}/../..');
     }
 }
