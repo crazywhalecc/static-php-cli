@@ -6,6 +6,8 @@ namespace SPC\builder\linux\library;
 
 class icu extends LinuxLibraryBase
 {
+    use \SPC\builder\unix\library\icu;
+
     public const NAME = 'icu';
 
     protected function build(): void
@@ -32,5 +34,7 @@ class icu extends LinuxLibraryBase
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install');
+
+        $this->patchPkgconfPrefix(['icu-i18n.pc', 'icu-io.pc', 'icu-uc.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

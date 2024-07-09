@@ -199,6 +199,7 @@
         "repo": "unicode-org/icu",
         "match": "icu4c.+-src\\.tgz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
