@@ -275,6 +275,7 @@
         "repo": "c-ares/c-ares",
         "match": "c-ares-.+\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "alt": {
             "type": "filelist",
             "url": "https://c-ares.org/download/",

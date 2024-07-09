@@ -26,8 +26,10 @@ trait libcares
     {
         shell()->cd($this->source_dir)
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv('./configure --prefix=' . BUILD_ROOT_PATH . ' --enable-static --disable-shared --disable-tests')
+            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests')
             ->execWithEnv("make -j {$this->builder->concurrency}")
-            ->exec('make install');
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+
+        $this->patchPkgconfPrefix(['libcares.pc'], PKGCONF_PATCH_PREFIX);
     }
 }
