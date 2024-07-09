@@ -129,7 +129,6 @@ class LicenseDumper
         }
 
         if (file_exists(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt')) {
-            logger()->debug('source [' . $source_name . '] license file [' . $index . ':' . $in_path . '] not exist, use installed version instead');
             return file_get_contents(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt');
         }
 
