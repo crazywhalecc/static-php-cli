@@ -330,7 +330,6 @@
         "type": "git",
         "rev": "master",
         "url": "https://github.com/static-php/libiconv-win.git",
-        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "source/COPYING"
