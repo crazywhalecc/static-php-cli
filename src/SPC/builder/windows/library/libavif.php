@@ -26,6 +26,7 @@ class libavif extends WindowsLibraryBase
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DAVIF_BUILD_APPS=OFF ' .
                 '-DAVIF_BUILD_TESTS=OFF ' .
+                '-DAVIF_LIBYUV=OFF ' .
                 '-DAVID_ENABLE_GTEST=OFF ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '
             )
