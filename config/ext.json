@@ -383,7 +383,7 @@
     },
     "opcache": {
         "type": "builtin",
-        "arg-type": "custom"
+        "arg-type-unix": "custom"
     },
     "openssl": {
         "notes": true,
