@@ -91,6 +91,7 @@ static-php-cli（简称 `spc`）有许多特性：
 | 8.1         | :heavy_check_mark: | PHP 官方仅对 8.1 提供安全更新          |
 | 8.2         | :heavy_check_mark: |                              |
 | 8.3         | :heavy_check_mark: |                              |
+| 8.4         | :x:                | WIP                          |
 
 ### 支持的扩展
 
