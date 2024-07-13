@@ -25,7 +25,7 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'brotli,bip2,gmp,icu,libargon2,libavif,libcares,libevent,libiconv,liblz4,libpng,libsodium,libtiff,libwebp,libyaml,ncurses,onig,openssl,pkg-config,readline,sqlite,unixodbc,xz,zlib',
+    'Linux', 'Darwin' => 'brotli,bzip2,gmp,icu,libargon2,libavif,libcares,libevent,libiconv,liblz4,libpng,libsodium,libtiff,libwebp,libyaml,ncurses,onig,openssl,pkg-config,readline,sqlite,unixodbc,xz,zlib',
     'Windows' => '',
 };
 
