@@ -12,6 +12,7 @@ class curl extends WindowsLibraryBase
 
     protected function build(): void
     {
+        FileSystem::createDir(BUILD_BIN_PATH);
         cmd()->cd($this->source_dir . '\winbuild')
             ->execWithWrapper(
                 $this->builder->makeSimpleWrapper('nmake'),
