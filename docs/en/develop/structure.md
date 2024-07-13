@@ -19,7 +19,7 @@ The project is mainly divided into several folders:
 
 - `bin/`: used to store program entry files, including `bin/spc`, `bin/spc-alpine-docker`, `bin/setup-runtime`.
 - `config/`: Contains all the extensions and dependent libraries supported by the project, 
-    as well as the download link and download methods of these sources. It is divided into files: `lib.json`, `ext.json`, `source.json`, `pkg.json` .
+    as well as the download link and download methods of these sources. It is divided into files: `lib.json`, `ext.json`, `source.json`, `pkg.json`, `pre-built.json` .
 - `src/`: The core code of the project, including the entire framework and commands for compiling various extensions and libraries.
 - `vendor/`: The directory that Composer depends on, you do not need to make any modifications to it.
 

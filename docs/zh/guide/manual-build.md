@@ -135,6 +135,9 @@ bin/spc download --for-libs=liblz4,libevent --without-suggestions
 # 下载资源时，忽略部分资源的缓存，强制下载（如切换 PHP 版本）
 bin/spc download --for-extensions=curl,pcntl,xml --ignore-cache-sources=php-src --with-php=8.3
 
+# 下载资源时，优先下载有预编译包的依赖库（减少编译依赖的时间）
+bin/spc download --for-extensions="curl,pcntl,xml,mbstring" --prefer-pre-built
+
 # 下载所有依赖包
 bin/spc download --all
 
@@ -346,6 +349,8 @@ bin/spc extract php-src,libxml2
 - `dev:sort-config`: 对 `config/` 目录下的配置文件的列表按照字母表排序
 - `dev:lib-ver <lib-name>`: 从依赖库的源码中读取版本（仅特定依赖库可用）
 - `dev:ext-ver <ext-name>`: 从扩展的源码中读取对应版本（仅特定扩展可用）
+- `dev:pack-lib <lib-name>`: 打包指定的依赖库（仅发布者可用）
+- `dev:gen-ext-docs`: 生成扩展文档（仅发布者可用）
 
 ```bash
 # 输出所有扩展
@@ -466,3 +471,12 @@ memory_limit => 8G => 8G
 ::: tip
 static-php-cli 开放的方法非常多，文档中无法一一列举，但只要是 `public function` 并且不被标注为 `@internal`，均可调用。
 :::
+
+## 多次构建
+
+如果你在本地要多次构建，以下方法可以为你节省下载资源、编译的时间。
+
+- 仅切换 PHP 版本，不更换依赖库版本时，可以使用 `bin/spc switch-php-version` 快速切换 PHP 版本，然后重新运行同样的 `build` 命令。
+- 如果你想重新构建一次，但不重新下载源码，可以先 `rm -rf buildroot source` 删除编译目录和源码目录，然后重新构建。
+- 如果你想更新某个依赖的版本，可以使用 `bin/spc del-download <source-name>` 删除指定的源码，然后使用 `download <source-name>` 重新下载。
+- 如果你想更新所有依赖的版本，可以使用 `bin/spc download --clean` 删除所有下载的源码，然后重新下载。

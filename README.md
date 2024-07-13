@@ -49,15 +49,16 @@ If you don't want to build or want to test first, you can download example pre-c
 Below are several precompiled static-php binaries with different extension combinations,
 which can be downloaded directly according to your needs.
 
-- [Extension-Combination - common](https://dl.static-php.dev/static-php-cli/common/): `common` contains about [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) commonly used extensions, and the size is about 7.5MB.
-- [Extension-Combination - bulk](https://dl.static-php.dev/static-php-cli/bulk/): `bulk` contains [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) extensions and is about 25MB in size.
-- [Extension-Combination - minimal](https://dl.static-php.dev/static-php-cli/minimal/): `minimal` contains [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) extensions and is about 3MB in size.
+| Combination                                                          | Extension Count                                                           | OS           | Comment                        |
+|----------------------------------------------------------------------|---------------------------------------------------------------------------|--------------|--------------------------------|
+| [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)         | Linux, macOS | The binary size is about 7.5MB |
+| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)           | Linux, macOS | The binary size is about 25MB  |
+| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)         | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)          | Linux, macOS | The binary size is about 3MB   |
+| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)  | Windows      | The binary size is about 3MB   |
+| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max/) | [10](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows      | The binary size is about 8.5MB |
 
 > Linux and Windows supports UPX compression for binaries, which can reduce the size of the binary by 30% to 50%.
 > macOS does not support UPX compression, so the size of the pre-built binaries for mac is larger.
-
-For Windows systems, there are currently fewer extensions supported, 
-so only `cli` and `micro` that run the minimum extension combination of SPC itself are provided: [Extension-Combination - spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/).
 
 ## Build
 
@@ -97,6 +98,7 @@ Currently supported PHP versions for compilation:
 | 8.1         | :heavy_check_mark: | PHP official has security fixes only              |
 | 8.2         | :heavy_check_mark: |                                                   |
 | 8.3         | :heavy_check_mark: |                                                   |
+| 8.4         | :x:                | WIP                                               | 
 
 ### Supported Extensions
 
@@ -121,7 +123,7 @@ and at the same time define the extensions to be compiled by yourself.
 
 If you enable `debug`, all logs will be output at build time, including compiled logs, for troubleshooting.
 
-### Build Locally (using SPC binary)
+### Build Locally (using SPC binary, recommended)
 
 This project provides a binary file of static-php-cli: `spc`.
 You can use `spc` binary instead of installing any runtime like golang app.
@@ -154,6 +156,9 @@ chmod +x ./spc
 Self-hosted `spc` is built by GitHub Actions, you can also download from Actions artifacts [here](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml).
 
 ### Build Locally (using git source)
+
+If you need to modify the static-php-cli source code, or have problems using the spc binary build, 
+you can download static-php-cli using the git source code.
 
 ```bash
 # just clone me!
@@ -188,6 +193,8 @@ Basic usage for building php with some extensions:
 ./bin/spc download --all
 # only fetch necessary sources by needed extensions (recommended)
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
+# download pre-built libraries first (save time for compiling dependencies)
+./bin/spc download --for-extensions="openssl,curl,mbstring,mbregex" --prefer-pre-built
 # download different PHP version (--with-php=x.y, recommend 7.3 ~ 8.3)
 ./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
@@ -195,7 +202,7 @@ Basic usage for building php with some extensions:
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 # build thread-safe (ZTS) version (--enable-zts)
 ./bin/spc build "curl,phar" --enable-zts --build-cli
-# build, pack executable with UPX (--with-upx-pack) (reduce binary size for 30~50%)
+# build, pack executable with UPX (linux and windows only) (reduce binary size for 30~50%)
 ./bin/spc build "curl,phar" --enable-zts --build-cli --with-upx-pack
 ```
 

@@ -43,14 +43,16 @@ static-php-cli（简称 `spc`）有许多特性：
 
 如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载。
 
-- [扩展组合 - common](https://dl.static-php.dev/static-php-cli/common/)：common 组合包含了约 [30+](https://dl.static-php.dev/static-php-cli/common/README.txt) 个常用扩展，体积为 7.5MB 左右。
-- [扩展组合 - bulk](https://dl.static-php.dev/static-php-cli/bulk/)：bulk 组合包含了 [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt) 个扩展，体积为 25MB 左右。
-- [扩展组合 - minimal](https://dl.static-php.dev/static-php-cli/minimal/)：minimal 组合包含了 [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt) 个扩展，体积为 3MB 左右。
+| 组合名称                                                                | 组合扩展数                                                                      | 系统          | 备注           |
+|---------------------------------------------------------------------|----------------------------------------------------------------------------|-------------|--------------|
+| [common](https://dl.static-php.dev/static-php-cli/common/)          | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux/macOS | 体积为 7.5MB 左右 |
+| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)              | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux/macOS | 体积为 25MB 左右  |
+| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)        | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)           | Linux/macOS | 体积为 3MB 左右   |
+| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)   | Windows     | 体积为 3MB 左右   |
+| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max) | [40+](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows     | 体积为 8.5MB 左右 |
 
 > Linux 和 Windows 默认启用了 UPX 压缩，可减小 30~50% 的 PHP 二进制体积。
 > macOS 当前不支持 UPX，所以上述预编译的 macOS 版本体积可能较大。
-
-对于 Windows 系统，目前支持的扩展较少，故仅提供 SPC 自身运行的最小扩展组合的 `cli` 和 `micro`：[扩展组合 - spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/)。
 
 ## 使用 static-php-cli 构建 PHP
 
@@ -110,7 +112,7 @@ static-php-cli（简称 `spc`）有许多特性：
 
 如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
 
-### 本地构建（使用 spc 二进制）
+### 本地构建（使用 spc 二进制，推荐）
 
 该项目提供了 static-php-cli 的二进制文件：`spc`。
 您可以使用 `spc` 二进制文件，无需安装任何运行时（用起来就像 golang 程序）。
@@ -143,6 +145,8 @@ chmod +x ./spc
 自托管 `spc` 由 GitHub Actions 构建，你也可以从 Actions 直接下载：[此处](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml)。
 
 ### 本地构建（使用 git 源码）
+
+如果你需要修改 static-php-cli 源码，或者使用 spc 二进制构建有问题，你可以使用 git 源码下载 static-php-cli。
 
 ```bash
 # clone 仓库即可
@@ -177,6 +181,8 @@ bin/spc --version
 ./bin/spc download --all
 # 只拉取编译指定扩展需要的所有依赖（推荐）
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
+# 下载依赖时，优先下载有预编译的库（节省编译依赖的时间）
+./bin/spc download --for-extensions="openssl,curl,mbstring,mbregex" --prefer-pre-built
 # 下载编译不同版本的 PHP (--with-php=x.y，推荐 7.3 ~ 8.3)
 ./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
@@ -184,7 +190,7 @@ bin/spc --version
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
 # 编译线程安全版本 (--enable-zts)
 ./bin/spc build "curl,phar" --enable-zts --build-cli
-# 编译后使用 UPX 减小可执行文件体积 (--with-upx-pack) (至少压缩至原来的 30~50%)
+# 编译后使用 UPX 减小可执行文件体积 (仅 Linux、Windows 可用) (至少压缩至原来的 30~50%)
 ./bin/spc build "curl,phar" --enable-zts --build-cli --with-upx-pack
 ```
 

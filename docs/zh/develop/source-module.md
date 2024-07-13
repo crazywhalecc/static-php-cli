@@ -18,6 +18,7 @@ static-php-cli 的下载资源模块是一个主要的功能，它包含了所�
     "type": "ghrel",
     "repo": "libevent/libevent",
     "match": "libevent.+\\.tar\\.gz",
+    "provide-pre-built": true,  
     "license": {
       "type": "file",
       "path": "LICENSE"
@@ -44,6 +45,7 @@ source.json 中每个源文件拥有以下字段：
 - `license`: 源代码的开源许可证，见下方 **开源许可证** 章节
 - `type`: 必须为上面提到的类型之一
 - `path`（可选）: 释放源码到指定目录而非 `source/{name}`
+- `provide-pre-built`（可选）: 是否提供预编译的二进制文件，如果为 `true`，则会在 `bin/spc download` 时尝试自动下载预编译的二进制文件
 
 ::: tip
 `source.json` 中的 `path` 参数可指定相对路径或绝对路径。当指定为相对路径时，路径基于 `source/`。
