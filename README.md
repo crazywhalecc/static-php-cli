@@ -49,13 +49,13 @@ If you don't want to build or want to test first, you can download example pre-c
 Below are several precompiled static-php binaries with different extension combinations,
 which can be downloaded directly according to your needs.
 
-| Combination                                                          | Extension Count                                                           | OS           | Comment                        |
-|----------------------------------------------------------------------|---------------------------------------------------------------------------|--------------|--------------------------------|
-| [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)         | Linux, macOS | The binary size is about 7.5MB |
-| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)           | Linux, macOS | The binary size is about 25MB  |
-| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)         | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)          | Linux, macOS | The binary size is about 3MB   |
-| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)  | Windows      | The binary size is about 3MB   |
-| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max/) | [10](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows      | The binary size is about 8.5MB |
+| Combination                                                          | Extension Count                                                            | OS           | Comment                        |
+|----------------------------------------------------------------------|----------------------------------------------------------------------------|--------------|--------------------------------|
+| [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux, macOS | The binary size is about 7.5MB |
+| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | The binary size is about 25MB  |
+| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)         | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)           | Linux, macOS | The binary size is about 3MB   |
+| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)   | Windows      | The binary size is about 3MB   |
+| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max/) | [40+](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows      | The binary size is about 8.5MB |
 
 > Linux and Windows supports UPX compression for binaries, which can reduce the size of the binary by 30% to 50%.
 > macOS does not support UPX compression, so the size of the pre-built binaries for mac is larger.
