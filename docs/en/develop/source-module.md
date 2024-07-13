@@ -24,7 +24,8 @@ The following is the source download configuration corresponding to the `libeven
     "type": "ghrel",
     "repo": "libevent/libevent",
     "match": "libevent.+\\.tar\\.gz",
-    "license": {
+    "provide-pre-built": true,
+      "license": {
       "type": "file",
       "path": "LICENSE"
     }
@@ -55,6 +56,8 @@ Each source file in source.json has the following params:
 - `license`: the open source license of the source code, see **Open Source License** section below
 - `type`: must be one of the types mentioned above
 - `path` (optional): release the source code to the specified directory instead of `source/{name}`
+- `provide-pre-built` (optional): whether to provide precompiled binary files. 
+    If `true`, it will automatically try to download precompiled binary files when running `bin/spc download`
 
 ::: tip
 The `path` parameter in `source.json` can specify a relative or absolute path. When specified as a relative path, the path is based on `source/`.

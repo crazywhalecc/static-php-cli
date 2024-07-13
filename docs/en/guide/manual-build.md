@@ -157,6 +157,9 @@ bin/spc download php-src,micro,zstd,ext-zstd
 # Download only extensions and libraries to be compiled (use extensions, including suggested libraries)
 bin/spc download --for-extensions=openssl,swoole,zip,pcntl,zstd
 
+# Download resources, prefer to download dependencies with pre-built packages (reduce the time to compile dependencies)
+bin/spc download --for-extensions="curl,pcntl,xml,mbstring" --prefer-pre-built
+
 # Download only the extensions and dependent libraries to be compiled (use extensions, excluding suggested libraries)
 bin/spc download --for-extensions=openssl,swoole,zip,pcntl --without-suggestions
 
@@ -388,6 +391,8 @@ when you use static-php-cli to build PHP or modify and enhance the static-php-cl
 - `dev:sort-config`: Sort the list of configuration files in the `config/` directory in alphabetical order
 - `dev:lib-ver <lib-name>`: Read the version from the source code of the dependency library (only available for specific dependency libraries)
 - `dev:ext-ver <ext-name>`: Read the corresponding version from the source code of the extension (only available for specific extensions)
+- `dev:pack-lib <lib-name>`: Package the specified library into a tar.gz file (maintainer only)
+- `dev:gen-ext-docs`: Generate extension documentation (maintainer only)
 
 ```bash
 # output all extensions information
@@ -523,3 +528,12 @@ Commonly used objects and functions using the `-P` function are:
 static-php-cli has many open methods, which cannot be listed in the docs, 
 but as long as it is a `public function` and is not marked as `@internal`, it theoretically can be called.
 :::
+
+## Multiple builds
+
+If you need to build multiple times locally, the following method can save you time downloading resources and compiling.
+
+- If you only switch the PHP version without changing the dependent libraries, you can use `bin/spc switch-php-version` to quickly switch the PHP version, and then re-run the same `build` command.
+- If you want to rebuild once, but do not re-download the source code, you can first `rm -rf buildroot source` to delete the compilation directory and source code directory, and then rebuild.
+- If you want to update a version of a dependency, you can use `bin/spc del-download <source-name>` to delete the specified source code, and then use `download <source-name>` to download it again.
+- If you want to update all dependent versions, you can use `bin/spc download --clean` to delete all downloaded sources, and then download them again.

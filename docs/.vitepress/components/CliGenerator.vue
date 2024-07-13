@@ -10,8 +10,11 @@
     <h2>{{ I18N[lang].selectExt }}{{ checkedExts.length > 0 ? (' (' + checkedExts.length + ')') : '' }}</h2>
     <div class="box">
       <div v-for="(item, index) in ext" class="ext-item">
-        <input type="checkbox" :id="index" :value="index" v-model="checkedExts" :disabled="extDisableList.indexOf(index) !== -1">
-        <label :for="index">{{ index }}</label>
+        <span v-if="isSupported(index, selectedSystem)">
+          <input type="checkbox" :id="index" :value="index" v-model="checkedExts" :disabled="extDisableList.indexOf(index) !== -1">
+          <label :for="index">{{ index }}</label>
+        </span>
+
       </div>
     </div>
     <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectCommon">{{ I18N[lang].selectCommon }}</div>
@@ -46,59 +49,80 @@
       <p>{{ I18N[lang].windowsSAPIUnavailable }}</p>
     </div>
     <h2>{{ I18N[lang].buildOptions }}</h2>
-    <div class="option-line">
-      <span class="option-title">{{ I18N[lang].buildEnvironment }}</span>
-      <select v-model="selectedEnv">
-        <option value="native">{{ I18N[lang].buildEnvNative }}</option>
-        <option value="spc">{{ I18N[lang].buildEnvSpc }}</option>
-        <option value="docker" v-if="selectedSystem !== 'windows'">{{ I18N[lang].buildEnvDocker }}</option>
-      </select>
-    </div>
-    <div v-if="selectedEnv === 'spc'" class="option-line">
-      <span class="option-title">{{ I18N[lang].selectedArch }}</span>
-      <select v-model="selectedArch">
-        <option value="x86_64">x86_64 (amd64)</option>
-        <option value="aarch64" v-if="selectedSystem !== 'windows'">aarch64 (arm64)</option>
-      </select>
-    </div>
-    <div class="option-line">
-      <span class="option-title">{{ I18N[lang].downloadPhpVersion }}</span>
-      <select v-model="selectedPhpVersion">
-        <option v-for="item in availablePhpVersions" :value="item">{{ item }}</option>
-      </select>
-    </div>
-    <div class="option-line">
-      <span class="option-title">{{ I18N[lang].useDebug }}</span>
-      <input type="radio" id="debug-yes" :value="1" v-model="debug" />
-      <label for="debug-yes">{{ I18N[lang].yes }}</label>
+    <!-- Refactor all build options in table -->
+    <table>
+      <!-- buildEnvironment -->
+      <tr>
+        <td>{{ I18N[lang].buildEnvironment }}</td>
+        <td>
+          <select v-model="selectedEnv">
+            <option value="native">{{ I18N[lang].buildEnvNative }}</option>
+            <option value="spc">{{ I18N[lang].buildEnvSpc }}</option>
+            <option value="docker" v-if="selectedSystem !== 'windows'">{{ I18N[lang].buildEnvDocker }}</option>
+          </select>
+        </td>
+      </tr>
+      <!-- Download PHP version -->
+      <tr>
+        <td>{{ I18N[lang].downloadPhpVersion }}</td>
+        <td>
+          <select v-model="selectedPhpVersion">
+            <option v-for="item in availablePhpVersions" :value="item">{{ item }}</option>
+          </select>
+        </td>
+      </tr>
+      <!-- Enable debug message -->
+      <tr>
+        <td>{{ I18N[lang].useDebug }}</td>
+        <td>
+          <input type="radio" id="debug-yes" :value="1" v-model="debug" />
+          <label for="debug-yes">{{ I18N[lang].yes }}</label>
+          <input type="radio" id="debug-no" :value="0" v-model="debug" />
+          <label for="debug-no">{{ I18N[lang].no }}</label>
+        </td>
+      </tr>
+      <!-- Enable ZTS -->
+      <tr>
+        <td>{{ I18N[lang].useZTS }}</td>
+        <td>
+          <input type="radio" id="zts-yes" :value="1" v-model="zts" />
+          <label for="zts-yes">{{ I18N[lang].yes }}</label>
+          <input type="radio" id="zts-no" :value="0" v-model="zts" />
+          <label for="zts-no">{{ I18N[lang].no }}</label>
+        </td>
+      </tr>
+      <!-- download corresponding extensions -->
+      <tr>
+        <td>{{ I18N[lang].resultShowDownload }}</td>
+        <td>
+          <input type="radio" id="show-download-yes" :value="1" v-model="downloadByExt" />
+          <label for="show-download-yes">{{ I18N[lang].yes }}</label>
+          <input type="radio" id="show-download-no" :value="0" v-model="downloadByExt" />
+          <label for="show-download-no">{{ I18N[lang].no }}</label>
+        </td>
+      </tr>
+      <!-- Download pre-built -->
+      <tr>
+        <td>{{ I18N[lang].usePreBuilt }}</td>
+        <td>
+          <input type="radio" id="pre-built-yes" :value="1" v-model="preBuilt" />
+          <label for="pre-built-yes">{{ I18N[lang].yes }}</label>
+          <input type="radio" id="pre-built-no" :value="0" v-model="preBuilt" />
+          <label for="pre-built-no">{{ I18N[lang].no }}</label>
+        </td>
+      </tr>
+      <!-- Enable UPX -->
+      <tr v-if="selectedSystem !== 'macos'">
+        <td>{{ I18N[lang].useUPX }}</td>
+        <td>
+          <input type="radio" id="upx-yes" :value="1" v-model="enableUPX" />
+          <label for="upx-yes">{{ I18N[lang].yes }}</label>
+          <input type="radio" id="upx-no" :value="0" v-model="enableUPX" />
+          <label for="upx-no">{{ I18N[lang].no }}</label>
+        </td>
+      </tr>
+    </table>
 
-      <input type="radio" id="debug-no" :value="0" v-model="debug" />
-      <label for="debug-no">{{ I18N[lang].no }}</label>
-    </div>
-    <div class="option-line">
-      <span class="option-title">{{ I18N[lang].useZTS }}</span>
-      <input type="radio" id="zts-yes" :value="1" v-model="zts" />
-      <label for="zts-yes">{{ I18N[lang].yes }}</label>
-
-      <input type="radio" id="zts-no" :value="0" v-model="zts" />
-      <label for="zts-no">{{ I18N[lang].no }}</label>
-    </div>
-    <div class="option-line">
-      <span class="option-title">{{ I18N[lang].resultShowDownload }}</span>
-      <input type="radio" id="show-download-yes" :value="1" v-model="downloadByExt" />
-      <label for="show-download-yes">{{ I18N[lang].yes }}</label>
-
-      <input type="radio" id="show-download-no" :value="0" v-model="downloadByExt" />
-      <label for="show-download-no">{{ I18N[lang].no }}</label>
-    </div>
-    <div class="option-line" v-if="selectedSystem !== 'macos'">
-      <span class="option-title">{{ I18N[lang].useUPX }}</span>
-      <input type="radio" id="upx-yes" :value="1" v-model="enableUPX" />
-      <label for="upx-yes">{{ I18N[lang].yes }}</label>
-
-      <input type="radio" id="upx-no" :value="0" v-model="enableUPX" />
-      <label for="upx-no">{{ I18N[lang].no }}</label>
-    </div>
     <h2>{{ I18N[lang].hardcodedINI }}</h2>
     <textarea class="textarea" :placeholder="I18N[lang].hardcodedINIPlacehoder" v-model="hardcodedINIData" rows="5" />
     <h2>{{ I18N[lang].resultShow }}</h2>
@@ -116,11 +140,11 @@
     </div>
     <div v-if="downloadByExt" class="command-container">
       <b>{{ I18N[lang].downloadExtOnlyCommand }}</b>
-      <div class="command-preview">{{ spcCommand }} download --with-php={{ selectedPhpVersion }} --for-extensions "{{ extList }}"{{ debug ? ' --debug' : '' }}</div>
+      <div class="command-preview">{{ spcCommand }} download --with-php={{ selectedPhpVersion }} --for-extensions "{{ extList }}"{{ preBuilt ? ' --prefer-pre-built' : '' }}{{ debug ? ' --debug' : '' }}</div>
     </div>
     <div v-else class="command-container">
       <b>{{ I18N[lang].downloadAllCommand }}</b>
-      <div class="command-preview">{{ spcCommand }} download --all --with-php={{ selectedPhpVersion }}{{ debug ? ' --debug' : '' }}</div>
+      <div class="command-preview">{{ spcCommand }} download --all --with-php={{ selectedPhpVersion }}{{ preBuilt ? ' --prefer-pre-built' : '' }}{{ debug ? ' --debug' : '' }}</div>
     </div>
     <div class="command-container" v-if="enableUPX">
       <b>{{ I18N[lang].downloadUPXCommand }}</b>
@@ -162,6 +186,14 @@ const osList = [
   { os: 'windows', label: 'Windows', disabled: false },
 ];
 
+const isSupported = (extName, os) => {
+  // Convert os to target: linux->Linux, macos->Darwin, windows->Windows (using map)
+  const a = new Map([['linux', 'Linux'], ['macos', 'Darwin'], ['windows', 'Windows']]);
+  const osName = a.get(os);
+  const osSupport = ext.value[extName]?.support?.[osName] ?? 'yes';
+  return osSupport === 'yes' || osSupport === 'partial';
+};
+
 const availablePhpVersions = [
   '7.4',
   '8.0',
@@ -201,8 +233,9 @@ const I18N = {
     depTips: '选择扩展后，不可选中的项目为必需的依赖，编译的依赖库列表中可选的为现有扩展和依赖库的可选依赖。选择可选依赖后，将生成 --with-libs 参数。',
     microUnavailable: 'micro 不支持 PHP 7.4 及更早版本！',
     windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed 构建！',
-    useUPX: '是否开启 UPX 压缩（减小二进制体积，但很少见的情况下 micro SAPI 无法使用）',
+    useUPX: '是否开启 UPX 压缩（减小二进制体积）',
     windowsDownSPCWarning: 'Windows 下请手动下载 spc.exe 二进制文件并解压到当前目录！',
+    usePreBuilt: '如果可能，下载预编译的依赖库（减少编译时间）',
   },
   en: {
     selectExt: 'Select Extensions',
@@ -234,8 +267,9 @@ const I18N = {
     depTips: 'After selecting the extensions, the unselectable items are essential dependencies. In the compiled dependencies list, optional dependencies consist of existing extensions and optional dependencies of libraries. Optional dependencies will be added in --with-libs parameter.',
     microUnavailable: 'Micro does not support PHP 7.4 and earlier versions!',
     windowsSAPIUnavailable: 'Windows does not support fpm and embed build!',
-    useUPX: 'Enable UPX compression (reduce binary size, but in rare cases micro SAPI doesn\'t work with UPX)',
+    useUPX: 'Enable UPX compression (reduce binary size)',
     windowsDownSPCWarning: 'Please download the spc.exe binary file manually and extract it to the current directory on Windows!',
+    usePreBuilt: 'Download pre-built dependencies if possible (reduce compile time)',
   }
 };
 
@@ -304,6 +338,9 @@ const zts = ref(0);
 
 // chosen download by extensions
 const downloadByExt = ref(1);
+
+// use pre-built
+const preBuilt = ref(1);
 
 // chosen upx
 const enableUPX = ref(0);
