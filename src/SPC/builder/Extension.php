@@ -180,8 +180,8 @@ class Extension
         if (file_exists(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')) {
             // Trim additional content & escape special characters to allow inline usage
             $test = str_replace(
-                ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
-                ['', '', '', '\"', '\$'],
+                ['<?php', 'declare(strict_types=1);', "\n", '"', '$', '!'],
+                ['', '', '', '\"', '\$', '"\'!\'"'],
                 file_get_contents(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')
             );
 
