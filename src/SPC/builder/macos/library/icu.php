@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
+use SPC\store\FileSystem;
+
 class icu extends MacOSLibraryBase
 {
     use \SPC\builder\unix\library\icu;
@@ -20,5 +22,6 @@ class icu extends MacOSLibraryBase
             ->exec('make install');
 
         $this->patchPkgconfPrefix(['icu-i18n.pc', 'icu-io.pc', 'icu-uc.pc'], PKGCONF_PATCH_PREFIX);
+        FileSystem::removeDir(BUILD_LIB_PATH . '/icu');
     }
 }
