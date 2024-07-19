@@ -12,7 +12,7 @@ class icu extends LinuxLibraryBase
 
     protected function build(): void
     {
-        $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1  -DU_STATIC_IMPLEMENTATION=1"';
+        $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1"';
         $cxxflags = 'CXXFLAGS="-std=c++17"';
         $ldflags = 'LDFLAGS="-static"';
         shell()->cd($this->source_dir . '/source')
@@ -26,7 +26,7 @@ class icu extends LinuxLibraryBase
                 '--enable-extras=no ' .
                 '--enable-icuio=yes ' .
                 '--enable-dyload=no ' .
-                '--enable-tools=no ' .
+                '--enable-tools=yes ' .
                 '--enable-tests=no ' .
                 '--enable-samples=no ' .
                 '--prefix=' . BUILD_ROOT_PATH

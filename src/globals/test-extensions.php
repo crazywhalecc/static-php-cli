@@ -19,13 +19,13 @@ $upx = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'swoole,bz2,gmp,intl,password-argon2,gd,mbregex,iconv,redis,sodium,yaml,readline,openssl,sqlite3,sqlsrv,zip,zlib',
-    'Windows' => 'amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,ds,exif,ffi,fileinfo,filter,ftp,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,rar,session,shmop,simdjson,simplexml,soap,sockets,sqlite3,sqlsrv,ssh2,swow,sysvshm,tokenizer,xml,xmlreader,xmlwriter,yac,yaml,zip,zlib',
+    'Linux', 'Darwin' => 'intl',
+    'Windows' => 'amqp,apcu',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'brotli,bzip2,gmp,icu,libargon2,libavif,libcares,libevent,libiconv,liblz4,libpng,libsodium,libtiff,libwebp,libyaml,ncurses,onig,openssl,pkg-config,readline,sqlite,unixodbc,xz,zlib',
+    'Linux', 'Darwin' => '',
     'Windows' => '',
 };
 
