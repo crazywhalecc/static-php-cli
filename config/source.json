@@ -546,9 +546,15 @@
         }
     },
     "openssl": {
-        "type": "filelist",
-        "url": "https://www.openssl.org/source/",
-        "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "type": "ghrel",
+        "repo": "openssl/openssl",
+        "match": "openssl.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "alt": {
+            "type": "filelist",
+            "url": "https://www.openssl.org/source/",
+            "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
         "provide-pre-built": true,
         "license": {
             "type": "file",
