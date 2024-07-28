@@ -47,6 +47,7 @@ class imap extends MacOSLibraryBase
         } else {
             $ssl_options = 'SSLTYPE=none';
         }
+        $out = shell()->execWithResult('echo "-include $(xcrun --show-sdk-path)/usr/include/poll.h -include $(xcrun --show-sdk-path)/usr/include/time.h -include $(xcrun --show-sdk-path)/usr/include/utime.h"')[1][0];
         shell()->cd($this->source_dir)
             ->exec('make clean')
             ->exec('touch ip6')
@@ -55,7 +56,7 @@ class imap extends MacOSLibraryBase
             ->exec('chmod +x src/osdep/unix/drivers')
             ->exec('chmod +x src/osdep/unix/mkauths')
             ->exec(
-                "yes | EXTRACFLAGS='-Wimplicit-function-declaration -include $(xcrun --show-sdk-path)/usr/include/poll.h -include $(xcrun --show-sdk-path)/usr/include/time.h -include $(xcrun --show-sdk-path)/usr/include/utime.h' make osx {$ssl_options}"
+                "yes | make osx {$ssl_options} EXTRACFLAGS='-Wimplicit-function-declaration -Wno-incompatible-function-pointer-types {$out}'"
             );
         try {
             shell()
