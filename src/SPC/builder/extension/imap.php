@@ -6,11 +6,23 @@ namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('imap')]
 class imap extends Extension
 {
+    public function patchBeforeBuildconf(): bool
+    {
+        if ($this->builder->getLib('openssl')) {
+            // sometimes imap with openssl does not contain zlib (required by openssl)
+            // we need to add it manually
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/imap/config.m4', 'TST_LIBS="$DLIBS $IMAP_SHARED_LIBADD"', 'TST_LIBS="$DLIBS $IMAP_SHARED_LIBADD -lz"');
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @throws WrongUsageException
      */

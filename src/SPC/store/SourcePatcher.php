@@ -57,6 +57,9 @@ class SourcePatcher
             );
         }
 
+        // patch php-src/build/php.m4 PKG_CHECK_MODULES -> PKG_CHECK_MODULES_STATIC
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+
         if ($builder->getOption('enable-micro-win32')) {
             SourcePatcher::patchMicroWin32();
         } else {
