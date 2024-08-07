@@ -47,6 +47,8 @@ trait curl
         $extra .= $this->builder->getLib('idn2') ? '-DUSE_LIBIDN2=ON ' : '-DUSE_LIBIDN2=OFF ';
         // lib:psl
         $extra .= $this->builder->getLib('psl') ? '-DCURL_USE_LIBPSL=ON ' : '-DCURL_USE_LIBPSL=OFF ';
+        // lib:libcares
+        $extra .= $this->builder->getLib('libcares') ? '-DENABLE_ARES=ON ' : '';
 
         FileSystem::resetDir($this->source_dir . '/build');
         // compile！

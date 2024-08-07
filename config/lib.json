@@ -53,7 +53,8 @@
             "libssh2",
             "brotli",
             "nghttp2",
-            "zstd"
+            "zstd",
+            "libcares"
         ],
         "lib-suggests-windows": [
             "brotli",
