@@ -159,7 +159,8 @@ You can try to use the following commands:
 
 - `--with-clean`: clean up old make files before compiling PHP
 - `--enable-zts`: Make compiled PHP thread-safe version (default is NTS version)
-- `--with-libs=XXX,YYY`: Compile the specified dependent library before compiling PHP, and activate some extension optional functions
+- `--with-libs=XXX,YYY`: Compile the specified dependent library before compiling PHP, and activate some extension optional functions 
+- `--with-config-file-path=XXX`: Set the path in which to look for php.ini)
 - `-I xxx=yyy`: Hard compile INI options into PHP before compiling (support multiple options, alias is `--with-hardcoded-ini`)
 - `--with-micro-fake-cli`: When compiling micro, let micro's `PHP_SAPI` pretend to be `cli` (for compatibility with some programs that check `PHP_SAPI`)
 - `--disable-opcache-jit`: Disable opcache jit (enabled by default)

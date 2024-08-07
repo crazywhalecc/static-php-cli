@@ -134,6 +134,9 @@ class LinuxBuilder extends UnixBuilderBase
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
 
+        $config_file_path = $this->getOption('with-config-file-path', false) ?
+            ( '--with-config-file-path=' . $this->getOption('with-config-file-path') . " " ) : '';
+
         $enable_cli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enable_fpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enable_micro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
@@ -163,6 +166,7 @@ class LinuxBuilder extends UnixBuilderBase
                 ($enable_fpm ? '--enable-fpm ' : '--disable-fpm ') .
                 ($enable_embed ? '--enable-embed=static ' : '--disable-embed ') .
                 ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
+                $config_file_path .
                 $disable_jit .
                 $json_74 .
                 $zts .
