@@ -135,7 +135,7 @@ class LinuxBuilder extends UnixBuilderBase
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
-            ( '--with-config-file-path=' . $this->getOption('with-config-file-path') . " " ) : '';
+            ( '--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ' ) : '';
 
         $enable_cli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enable_fpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;

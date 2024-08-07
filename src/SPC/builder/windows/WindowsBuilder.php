@@ -104,7 +104,7 @@ class WindowsBuilder extends BuilderBase
         $micro_w32 = $this->getOption('enable-micro-win32') ? ' --enable-micro-win32=yes' : '';
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
-            ( '--with-config-file-path=' . $this->getOption('with-config-file-path') . " " ) : '';
+            ( '--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ' ) : '';
 
         cmd()->cd(SOURCE_PATH . '\php-src')
             ->exec(
