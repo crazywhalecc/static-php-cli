@@ -129,7 +129,7 @@
     <div v-if="selectedEnv === 'spc'" class="command-container">
       <b>{{ I18N[lang].downloadSPCBinaryCommand }}</b>
       <div class="command-preview" v-if="selectedSystem !== 'windows'">
-        curl -o spc.tgz https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-{{ selectedSystem }}-{{ selectedArch }}.tar.gz && tar -zxvf spc.tgz && rm spc.tgz<br>
+        curl -fsSL -o spc.tgz https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-{{ selectedSystem }}-{{ selectedArch }}.tar.gz && tar -zxvf spc.tgz && rm spc.tgz<br>
       </div>
       <div v-else>
         <div class="warning custom-block">

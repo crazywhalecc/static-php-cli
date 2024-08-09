@@ -71,10 +71,10 @@ jobs:
       - name: "Download Minimal Combination"
         run: |
           if [ "${{ matrix.operating-system.name }}" = "windows-x64" ]; then
-            curl https://dl.static-php.dev/static-php-cli/windows/spc-min/php-${{ env.MICRO_VERSION }}-micro-win.zip -o tmp.zip
+            curl -fsSL https://dl.static-php.dev/static-php-cli/windows/spc-min/php-${{ env.MICRO_VERSION }}-micro-win.zip -o tmp.zip
             unzip tmp.zip
           else
-            curl https://dl.static-php.dev/static-php-cli/minimal/php-${{ env.MICRO_VERSION }}-micro-${{ matrix.operating-system.name }}.tar.gz -o tmp.tgz
+            curl -fsSL https://dl.static-php.dev/static-php-cli/minimal/php-${{ env.MICRO_VERSION }}-micro-${{ matrix.operating-system.name }}.tar.gz -o tmp.tgz
             tar -zxvf tmp.tgz
           fi
 
