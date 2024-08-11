@@ -15,6 +15,7 @@ trait libiconv
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--enable-extra-encodings ' .
                 '--prefix='
             )
             ->exec('make clean')
