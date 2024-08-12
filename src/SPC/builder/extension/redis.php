@@ -23,4 +23,12 @@ class redis extends Extension
         }
         return $arg;
     }
+
+    public function getWindowsConfigureArg(): string
+    {
+        $arg = '--enable-redis';
+        $arg .= $this->builder->getExt('session') ? ' --enable-redis-session' : ' --disable-redis-session';
+        $arg .= $this->builder->getExt('igbinary') ? ' --enable-redis-igbinary' : ' --disable-redis-igbinary';
+        return $arg;
+    }
 }

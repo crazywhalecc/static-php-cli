@@ -205,11 +205,14 @@
     },
     "igbinary": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
-        "source": "igbinary"
+        "source": "igbinary",
+        "ext-suggests": [
+            "session",
+            "apcu"
+        ]
     },
     "imagick": {
         "support": {
@@ -537,7 +540,6 @@
     },
     "redis": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
@@ -547,7 +549,7 @@
             "session",
             "igbinary"
         ],
-        "lib-suggests": [
+        "lib-suggests-unix": [
             "zstd",
             "liblz4"
         ]
