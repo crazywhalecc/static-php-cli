@@ -205,6 +205,19 @@ class SourcePatcher
             'PHP_ADD_INCLUDE([$ext_srcdir])',
             "PHP_ADD_INCLUDE( [\$ext_srcdir] )\n    PHP_ADD_INCLUDE([\$abs_srcdir/ext])"
         );
+        // swoole 5.1.3 build fix
+        // get swoole version first
+        $file = SOURCE_PATH . '/php-src/ext/swoole/include/swoole_version.h';
+        // Match #define SWOOLE_VERSION "5.1.3"
+        $pattern = '/#define SWOOLE_VERSION "(.+)"/';
+        if (preg_match($pattern, file_get_contents($file), $matches)) {
+            $version = $matches[1];
+        } else {
+            $version = '1.0.0';
+        }
+        if ($version === '5.1.3') {
+            self::patchFile('spc_fix_swoole_50513.patch', SOURCE_PATH . '/php-src/ext/swoole');
+        }
         return true;
     }
 
