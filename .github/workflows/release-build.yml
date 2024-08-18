@@ -115,17 +115,16 @@ jobs:
         with:
           files: dist/${{ matrix.operating-system.filename }}
 
-      - name: "Deploy to Self-Hosted Server"
+      - name: "Deploy to self-hosted OSS"
         if: github.repository == 'crazywhalecc/static-php-cli'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
-          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET_SPC_NIGHTLY }}
+        uses: static-php/upload-s3-action@v1.0.0
+        with:
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
+          source_dir: "dist/"
+          destination_dir: static-php-cli/spc-bin/nightly/
+          endpoint: ${{ secrets.AWS_ENDPOINT }}
 
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v4
