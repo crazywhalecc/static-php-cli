@@ -414,14 +414,17 @@ class SourcePatcher
         if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
             $ver_id = intval($match[1]);
             if ($ver_id < 80000) {
-                return false;
+                self::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
+                return true;
             }
             if ($ver_id < 80100) {
                 self::patchFile('spc_fix_libxml2_12_php80.patch', SOURCE_PATH . '/php-src');
+                self::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
                 return true;
             }
             if ($ver_id < 80200) {
                 self::patchFile('spc_fix_libxml2_12_php81.patch', SOURCE_PATH . '/php-src');
+                self::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
                 return true;
             }
             return false;
