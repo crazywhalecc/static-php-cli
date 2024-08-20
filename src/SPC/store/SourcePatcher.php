@@ -108,22 +108,9 @@ class SourcePatcher
         // $check = !defined('DEBUG_MODE') ? ' -q' : '';
         // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
 
-        $default = [
-            'static_opcache',
-            'static_extensions_win32',
-            'cli_checks',
-            'disable_huge_page',
-            'vcruntime140',
-            'win32',
-            'zend_stream',
-        ];
-        if (PHP_OS_FAMILY === 'Windows') {
-            $default[] = 'cli_static';
-        }
-        if (PHP_OS_FAMILY === 'Darwin') {
-            $default[] = 'macos_iconv';
-        }
-        $patch_list = $default;
+        $spc_micro_patches = getenv('SPC_MICRO_PATCHES');
+        $spc_micro_patches = $spc_micro_patches === false ? [] : explode(',', $spc_micro_patches);
+        $patch_list = $spc_micro_patches;
         $patches = [];
         $serial = ['80', '81', '82', '83', '84'];
         foreach ($patch_list as $patchName) {
@@ -142,12 +129,14 @@ class SourcePatcher
             throw new RuntimeException("failed finding patch {$patchName}");
         }
 
-        $patchesStr = str_replace('/', DIRECTORY_SEPARATOR, implode(' ', $patches));
-
-        f_passthru(
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1 '
-        );
+        foreach ($patches as $patch) {
+            logger()->info("Patching micro with {$patch}");
+            $patchesStr = str_replace('/', DIRECTORY_SEPARATOR, $patch);
+            f_passthru(
+                'cd ' . SOURCE_PATH . '/php-src && ' .
+                (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1 '
+            );
+        }
 
         return true;
     }
