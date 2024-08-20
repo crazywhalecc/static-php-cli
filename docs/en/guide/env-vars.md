@@ -44,27 +44,29 @@ These environment variables are system-specific and will only take effect on a s
 
 ### Windows
 
-| var name       | default value                | comment                   |
-|----------------|------------------------------|---------------------------|
-| `PHP_SDK_PATH` | `{pwd}\php-sdk-binary-tools` | PHP SDK tools path        |
-| `UPX_EXEC`     | `$PKG_ROOT_PATH\bin\upx.exe` | UPX compression tool path |
+| var name            | default value                                                                                                   | comment                                                                                     |
+|---------------------|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `PHP_SDK_PATH`      | `{pwd}\php-sdk-binary-tools`                                                                                    | PHP SDK tools path                                                                          |
+| `UPX_EXEC`          | `$PKG_ROOT_PATH\bin\upx.exe`                                                                                    | UPX compression tool path                                                                   |
+| `SPC_MICRO_PATCHES` | `static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,cli_static` | Used phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
 
 ### macOS
 
-| var name                             | default value                                                                                                                  | comment                                             |
-|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| `CC`                                 | `clang`                                                                                                                        | C Compiler                                          |
-| `CXX`                                | `clang++`                                                                                                                      | C++ Compiler                                        |
-| `SPC_DEFAULT_C_FLAGS`                | `--target=arm64-apple-darwin` or `--target=x86_64-apple-darwin`                                                                | Default C flags (not the same as `CFLAGS`)          |
-| `SPC_DEFAULT_CXX_FLAGS`              | `--target=arm64-apple-darwin` or `--target=x86_64-apple-darwin`                                                                | Default C flags (not the same as `CPPFLAGS`)        |
-| `SPC_CMD_PREFIX_PHP_BUILDCONF`       | `./buildconf --force`                                                                                                          | PHP `buildconf` command prefix                      |
-| `SPC_CMD_PREFIX_PHP_CONFIGURE`       | `./configure --prefix= --with-valgrind=no --enable-shared=no --enable-static=yes --disable-all --disable-cgi --disable-phpdbg` | PHP `configure` command prefix                      |
-| `SPC_CMD_PREFIX_PHP_MAKE`            | `make -j$SPC_CONCURRENCY`                                                                                                      | PHP `make` command prefix                           |
-| `SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS`   | `$SPC_DEFAULT_C_FLAGS -Werror=unknown-warning-option`                                                                          | `CFLAGS` variable of PHP `configure` command        |
-| `SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS` | `-I$BUILD_INCLUDE_PATH`                                                                                                        | `CPPFLAGS` variable of PHP `configure` command      |
-| `SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS`  | `-L$BUILD_LIB_PATH`                                                                                                            | `LDFLAGS` variable of PHP `configure` command       |
-| `SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS`  | `-g0 -Os` or `-g -O0` (the latter when using `--no-strip`)                                                                     | `EXTRA_CFLAGS` variable of PHP `make` command       |
-| `SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS`    | `-lresolv`                                                                                                                     | Extra `EXTRA_LIBS` variables for PHP `make` command |
+| var name                             | default value                                                                                                                  | comment                                                                                     |
+|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `CC`                                 | `clang`                                                                                                                        | C Compiler                                                                                  |
+| `CXX`                                | `clang++`                                                                                                                      | C++ Compiler                                                                                |
+| `SPC_DEFAULT_C_FLAGS`                | `--target=arm64-apple-darwin` or `--target=x86_64-apple-darwin`                                                                | Default C flags (not the same as `CFLAGS`)                                                  |
+| `SPC_DEFAULT_CXX_FLAGS`              | `--target=arm64-apple-darwin` or `--target=x86_64-apple-darwin`                                                                | Default C flags (not the same as `CPPFLAGS`)                                                |
+| `SPC_CMD_PREFIX_PHP_BUILDCONF`       | `./buildconf --force`                                                                                                          | PHP `buildconf` command prefix                                                              |
+| `SPC_CMD_PREFIX_PHP_CONFIGURE`       | `./configure --prefix= --with-valgrind=no --enable-shared=no --enable-static=yes --disable-all --disable-cgi --disable-phpdbg` | PHP `configure` command prefix                                                              |
+| `SPC_CMD_PREFIX_PHP_MAKE`            | `make -j$SPC_CONCURRENCY`                                                                                                      | PHP `make` command prefix                                                                   |
+| `SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS`   | `$SPC_DEFAULT_C_FLAGS -Werror=unknown-warning-option`                                                                          | `CFLAGS` variable of PHP `configure` command                                                |
+| `SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS` | `-I$BUILD_INCLUDE_PATH`                                                                                                        | `CPPFLAGS` variable of PHP `configure` command                                              |
+| `SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS`  | `-L$BUILD_LIB_PATH`                                                                                                            | `LDFLAGS` variable of PHP `configure` command                                               |
+| `SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS`  | `-g0 -Os` or `-g -O0` (the latter when using `--no-strip`)                                                                     | `EXTRA_CFLAGS` variable of PHP `make` command                                               |
+| `SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS`    | `-lresolv`                                                                                                                     | Extra `EXTRA_LIBS` variables for PHP `make` command                                         |
+| `SPC_MICRO_PATCHES`                  | `static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,macos_iconv`               | Used phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
 
 ### Linux
 
@@ -90,6 +92,7 @@ These environment variables are system-specific and will only take effect on a s
 | `SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS`            | empty                                                                                                                                                        | Extra `EXTRA_LIBS` variables for PHP `make` command                                         |
 | `SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM` | `-all-static` (when using `clang`: `-Xcompiler -fuse-ld=lld -all-static`)                                                                                    | Additional `LDFLAGS` variable for `make` command                                            |
 | `SPC_NO_MUSL_PATH`                           | empty                                                                                                                                                        | Whether to not insert the PATH of the musl toolchain (not inserted when the value is `yes`) |
+| `SPC_MICRO_PATCHES`                          | `static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream`                                                         | Used phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
 > `{ld_lib_path}` value is `/usr/local/musl/$GNU_ARCH-linux-musl/lib`。
 
 ### FreeBSD
