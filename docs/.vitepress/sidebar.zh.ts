@@ -10,6 +10,7 @@ export default {
         {text: '扩展注意事项', link: '/zh/guide/extension-notes'},
         {text: '编译命令生成器', link: '/zh/guide/cli-generator'},
         {text: '环境变量列表', link: '/zh/guide/env-vars'},
+        {text: '依赖关系图表', link: '/zh/guide/deps-map'},
       ]
     },
     {
