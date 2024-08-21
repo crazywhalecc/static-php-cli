@@ -132,7 +132,7 @@ event 扩展在 macOS 系统下编译后暂无法使用 `openpty` 特性。相�
 
 parallel 扩展只支持 PHP 8.0 及以上版本，并只支持 ZTS 构建（`--enable-zts`）。
 
-# spx
+## spx
 
 1. [SPX 扩展](https://github.com/NoiseByNorthwest/php-spx) 只支持非线程模式。
 2. SPX 目前不支持 Windows，且官方仓库也不支持静态编译，static-php-cli 使用了 [修改版本](https://github.com/static-php/php-spx)。

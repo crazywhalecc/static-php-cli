@@ -9,7 +9,9 @@ use SPC\command\BuildLibsCommand;
 use SPC\command\DeleteDownloadCommand;
 use SPC\command\dev\AllExtCommand;
 use SPC\command\dev\ExtVerCommand;
+use SPC\command\dev\GenerateExtDepDocsCommand;
 use SPC\command\dev\GenerateExtDocCommand;
+use SPC\command\dev\GenerateLibDepDocsCommand;
 use SPC\command\dev\LibVerCommand;
 use SPC\command\dev\PackLibCommand;
 use SPC\command\dev\PhpVerCommand;
@@ -55,6 +57,8 @@ final class ConsoleApplication extends Application
                 new ExtVerCommand(),
                 new SortConfigCommand(),
                 new GenerateExtDocCommand(),
+                new GenerateExtDepDocsCommand(),
+                new GenerateLibDepDocsCommand(),
                 new PackLibCommand(),
             ]
         );
