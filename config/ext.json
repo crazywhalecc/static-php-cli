@@ -590,7 +590,7 @@
         "lib-depends": [
             "snappy"
         ],
-        "ext-suggest": [
+        "ext-suggests": [
             "apcu"
         ]
     },
