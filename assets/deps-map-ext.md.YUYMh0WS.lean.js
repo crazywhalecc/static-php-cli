@@ -1,0 +1,1 @@
+import{_ as t,c as d,o as b,a1 as r}from"./chunks/framework.CszIUXhs.js";const x=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"deps-map-ext.md","filePath":"deps-map-ext.md"}'),l={name:"deps-map-ext.md"},s=r("",8),i=[s];function e(o,a,p,n,m,h){return b(),d("div",null,i)}const c=t(l,[["render",e]]);export{x as __pageData,c as default};
