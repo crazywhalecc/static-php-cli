@@ -88,7 +88,7 @@ class SourcePatcher
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public static function patchMicro(): bool
+    public static function patchMicro(string $name = '', string $target = '', ?array $items = null): bool
     {
         if (!file_exists(SOURCE_PATH . '/php-src/sapi/micro/php_micro.c')) {
             return false;
@@ -108,8 +108,12 @@ class SourcePatcher
         // $check = !defined('DEBUG_MODE') ? ' -q' : '';
         // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
 
-        $spc_micro_patches = getenv('SPC_MICRO_PATCHES');
-        $spc_micro_patches = $spc_micro_patches === false ? [] : explode(',', $spc_micro_patches);
+        if ($items !== null) {
+            $spc_micro_patches = $items;
+        } else {
+            $spc_micro_patches = getenv('SPC_MICRO_PATCHES');
+            $spc_micro_patches = $spc_micro_patches === false ? [] : explode(',', $spc_micro_patches);
+        }
         $patch_list = $spc_micro_patches;
         $patches = [];
         $serial = ['80', '81', '82', '83', '84'];
