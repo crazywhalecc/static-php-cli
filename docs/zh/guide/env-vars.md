@@ -46,7 +46,7 @@ SPC_CONCURRENCY=4 bin/spc build mbstring,pcntl --build-cli
 |---------------------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
 | `PHP_SDK_PATH`      | `{pwd}\php-sdk-binary-tools`                                                                                    | PHP SDK 工具的安装目录                                                                            |
 | `UPX_EXEC`          | `$PKG_ROOT_PATH\bin\upx.exe`                                                                                    | UPX 压缩工具的路径                                                                                |
-| `SPC_MICRO_PATCHES` | `static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,cli_static` | 使用的 phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
+| `SPC_MICRO_PATCHES` | `static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,cli_static` | 使用的 phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
 
 ### macOS
 
@@ -64,7 +64,7 @@ SPC_CONCURRENCY=4 bin/spc build mbstring,pcntl --build-cli
 | `SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS`  | `-L$BUILD_LIB_PATH`                                                                                                            | PHP `configure` 命令的 `LDFLAGS` 变量                                                           |
 | `SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS`  | `-g0 -Os` 或 `-g -O0`（当使用 `--no-strip` 时为后者）                                                                                    | PHP `make` 命令的 `EXTRA_CFLAGS` 变量                                                           |
 | `SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS`    | `-lresolv`                                                                                                                     | PHP `make` 命令的额外 `EXTRA_LIBS` 变量                                                           |
-| `SPC_MICRO_PATCHES`                  | `static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,macos_iconv`               | 使用的 phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
+| `SPC_MICRO_PATCHES`                  | `static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,macos_iconv`               | 使用的 phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
 
 ### Linux
 
@@ -90,7 +90,7 @@ SPC_CONCURRENCY=4 bin/spc build mbstring,pcntl --build-cli
 | `SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS`            | empty                                                                                                                                                        | PHP `make` 命令的额外 `EXTRA_LIBS` 变量                                                           |
 | `SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM` | `-all-static`（当使用 `clang` 时：`-Xcompiler -fuse-ld=lld -all-static`）                                                                                           | `make` 命令的额外 `LDFLAGS` 变量（用于编译程序）                                                          |
 | `SPC_NO_MUSL_PATH`                           | empty                                                                                                                                                        | 是否不插入 musl 工具链的 PATH（值为 `yes` 时不插入）                                                        |
-| `SPC_MICRO_PATCHES`                          | `static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream`                                                         | 使用的 phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
+| `SPC_MICRO_PATCHES`                          | `static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream`                                                                        | 使用的 phpmicro [patches](https://github.com/easysoft/phpmicro/blob/master/patches/Readme.md) |
 
 > `{ld_lib_path}` 值为 `/usr/local/musl/$GNU_ARCH-linux-musl/lib`。
 

@@ -64,7 +64,7 @@ class GlobalEnvManager
         // Windows need php-sdk binary tools
         self::initIfNotExists('PHP_SDK_PATH', WORKING_DIR . DIRECTORY_SEPARATOR . 'php-sdk-binary-tools');
         self::initIfNotExists('UPX_EXEC', PKG_ROOT_PATH . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'upx.exe');
-        self::initIfNotExists('SPC_MICRO_PATCHES', 'static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,cli_static');
+        self::initIfNotExists('SPC_MICRO_PATCHES', 'static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,cli_static');
     }
 
     private static function initLinuxEnv(BuilderBase $builder): void
@@ -92,7 +92,7 @@ class GlobalEnvManager
         self::initIfNotExists('SPC_EXTRA_LIBS', '');
 
         // SPC_MICRO_PATCHES for linux
-        self::initIfNotExists('SPC_MICRO_PATCHES', 'static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream');
+        self::initIfNotExists('SPC_MICRO_PATCHES', 'static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream');
 
         // Init linux-only env
         self::initIfNotExists('UPX_EXEC', PKG_ROOT_PATH . '/bin/upx');
@@ -145,7 +145,7 @@ class GlobalEnvManager
         self::initIfNotExists('SPC_EXTRA_LIBS', '');
 
         // SPC_MICRO_PATCHES for macOS
-        self::initIfNotExists('SPC_MICRO_PATCHES', 'static_opcache,static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,macos_iconv');
+        self::initIfNotExists('SPC_MICRO_PATCHES', 'static_extensions_win32,cli_checks,disable_huge_page,vcruntime140,win32,zend_stream,macos_iconv');
 
         $init_spc_cmd_maps = [
             // Init default build command prefix
