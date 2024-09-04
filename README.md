@@ -195,7 +195,7 @@ Basic usage for building php with some extensions:
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # download pre-built libraries first (save time for compiling dependencies)
 ./bin/spc download --for-extensions="openssl,curl,mbstring,mbregex" --prefer-pre-built
-# download different PHP version (--with-php=x.y, recommend 7.3 ~ 8.3)
+# download different PHP version (--with-php=x.y or --with-php=x.y.z, recommend 8.1 ~ 8.3)
 ./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI

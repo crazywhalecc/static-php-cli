@@ -184,7 +184,7 @@ bin/spc --version
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # 下载依赖时，优先下载有预编译的库（节省编译依赖的时间）
 ./bin/spc download --for-extensions="openssl,curl,mbstring,mbregex" --prefer-pre-built
-# 下载编译不同版本的 PHP (--with-php=x.y，推荐 7.3 ~ 8.3)
+# 下载编译不同版本的 PHP (--with-php=x.y 或 --with-php=x.y.z，推荐 8.1 ~ 8.3)
 ./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx

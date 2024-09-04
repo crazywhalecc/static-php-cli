@@ -132,8 +132,8 @@ bin/spc download --for-libs=liblz4,libevent --for-extensions=pcntl,rar,xml
 # 仅下载要编译的库（包括其依赖，使用库名，不包含可选库）
 bin/spc download --for-libs=liblz4,libevent --without-suggestions
 
-# 下载资源时，忽略部分资源的缓存，强制下载（如切换 PHP 版本）
-bin/spc download --for-extensions=curl,pcntl,xml --ignore-cache-sources=php-src --with-php=8.3
+# 下载资源时，忽略部分资源的缓存，强制下载（如切换特定 PHP 版本）
+bin/spc download --for-extensions=curl,pcntl,xml --ignore-cache-sources=php-src --with-php=8.3.10
 
 # 下载资源时，优先下载有预编译包的依赖库（减少编译依赖的时间）
 bin/spc download --for-extensions="curl,pcntl,xml,mbstring" --prefer-pre-built
@@ -141,7 +141,7 @@ bin/spc download --for-extensions="curl,pcntl,xml,mbstring" --prefer-pre-built
 # 下载所有依赖包
 bin/spc download --all
 
-# 下载所有依赖包，并指定下载的 PHP 主版本，可选：7.3，7.4，8.0，8.1，8.2，8.3。
+# 下载所有依赖包，并指定下载的 PHP 主版本，可选：7.3，7.4，8.0，8.1，8.2，8.3，也可以使用特定的版本，如 8.3.10。
 bin/spc download --all --with-php=8.2
 
 # 下载时显示下载进度条（curl）
