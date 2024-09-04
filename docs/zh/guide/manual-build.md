@@ -184,7 +184,7 @@ bin/spc download --all -U "curl:https://curl.se/download/curl-7.88.1.tar.gz"
 bin/spc download --for-extensions=redis,phar -G "php-src:master:https://github.com/php/php-src.git"
 
 # 从 swoole-src 仓库下载 master 分支的最新代码，而不是发行版
-bin/spc download --for-extensions=swoole -G "swoole-src:master:https://github.com/swoole/swoole-src.git"
+bin/spc download --for-extensions=swoole -G "swoole:master:https://github.com/swoole/swoole-src.git"
 ```
 
 ## 命令 doctor - 环境检查
