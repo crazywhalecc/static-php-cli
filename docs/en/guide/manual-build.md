@@ -211,10 +211,10 @@ It is also available when downloading with the `--for-extensions` option.
 
 ```bash
 # Specifying to download the source code of the PHP extension from the specified branch of the git repository
-bin/spc download --for-extensions=redis -G "php-redis:master:https://github.com/php/php-src.git"
+bin/spc download --for-extensions=redis -G "php-src:master:https://github.com/php/php-src.git"
 
 # Download the latest code from the master branch of the swoole-src repository instead of PECL release version
-bin/spc download --for-extensions=swoole -G "swoole-src:master:https://github.com/swoole/swoole-src.git"
+bin/spc download --for-extensions=swoole -G "swoole:master:https://github.com/swoole/swoole-src.git"
 ```
 
 ## Command - doctor
