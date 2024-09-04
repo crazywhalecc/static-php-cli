@@ -29,7 +29,17 @@ class opcache extends Extension
         if (file_exists(SOURCE_PATH . '/php-src/.opcache_patched')) {
             return false;
         }
-        return SourcePatcher::patchMicro(items: ['static_opcache']) && file_put_contents(SOURCE_PATH . '/php-src/.opcache_patched', '1') !== false;
+        // if 8.2.0 <= PHP_VERSION < 8.2.23, we need to patch from legacy patch file
+        if (version_compare($this->builder->getPHPVersion(), '8.2.0', '>=') && version_compare($this->builder->getPHPVersion(), '8.2.23', '<')) {
+            SourcePatcher::patchFile('spc_fix_static_opcache_before_80222.patch', SOURCE_PATH . '/php-src');
+        }
+        // if 8.3.0 <= PHP_VERSION < 8.3.11, we need to patch from legacy patch file
+        elseif (version_compare($this->builder->getPHPVersion(), '8.3.0', '>=') && version_compare($this->builder->getPHPVersion(), '8.3.11', '<')) {
+            SourcePatcher::patchFile('spc_fix_static_opcache_before_80310.patch', SOURCE_PATH . '/php-src');
+        } else {
+            SourcePatcher::patchMicro(items: ['static_opcache']);
+        }
+        return file_put_contents(SOURCE_PATH . '/php-src/.opcache_patched', '1') !== false;
     }
 
     public function getUnixConfigureArg(): string
