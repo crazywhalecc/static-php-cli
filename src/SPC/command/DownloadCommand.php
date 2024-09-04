@@ -123,10 +123,15 @@ class DownloadCommand extends BaseCommand
             // Define PHP major version
             $ver = $this->php_major_ver = $this->getOption('with-php') ?? '8.1';
             define('SPC_BUILD_PHP_VERSION', $ver);
+            // match x.y
             preg_match('/^\d+\.\d+$/', $ver, $matches);
             if (!$matches) {
-                logger()->error("bad version arg: {$ver}, x.y required!");
-                return static::FAILURE;
+                // match x.y.z
+                preg_match('/^\d+\.\d+\.\d+$/', $ver, $matches);
+                if (!$matches) {
+                    logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
+                    return static::FAILURE;
+                }
             }
 
             // retry
