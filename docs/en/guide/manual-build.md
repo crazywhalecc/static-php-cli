@@ -143,6 +143,7 @@ including php-src and the source code of various dependent libraries.
 bin/spc download --all
 
 # Download all dependent packages, and specify the main version of PHP to download, optional: 7.3, 7.4, 8.0, 8.1, 8.2, 8.3
+# Also supports specific version of php release: 8.3.10, 8.2.22, etc.
 bin/spc download --all --with-php=8.2
 
 # Show download progress bar while downloading (curl)
@@ -170,7 +171,7 @@ bin/spc download  --for-libs=liblz4,libevent --for-extensions=pcntl,rar,xml
 bin/spc download --for-libs=liblz4,libevent --without-suggestions
 
 # When downloading sources, ignore some source caches (always force download, e.g. switching PHP version)
-bin/spc download --for-extensions=curl,pcntl,xml --ignore-cache-sources=php-src --with-php=8.3
+bin/spc download --for-extensions=curl,pcntl,xml --ignore-cache-sources=php-src --with-php=8.3.10
 
 # Set retry times (default is 0)
 bin/spc download --all --retry=2
