@@ -176,6 +176,17 @@ bin/spc download --all -U "php-src:https://downloads.php.net/~eric/php-8.3.0beta
 bin/spc download --all -U "curl:https://curl.se/download/curl-7.88.1.tar.gz"
 ```
 
+如果你下载的资源不是链接，而是一个 Git 仓库，你可以使用 `-G` 或 `--custom-git` 重写下载链接，让下载器强制使用你指定的 Git 仓库下载此 source 的包。
+使用方法为 `{source-name}:{branch}:{url}` 即可，可同时重写多个库的下载地址。在使用 `--for-extensions` 选项下载时同样可用。
+
+```bash
+# 例如：下载 master 分支的 php-src
+bin/spc download --for-extensions=redis,phar -G "php-src:master:https://github.com/php/php-src.git"
+
+# 从 swoole-src 仓库下载 master 分支的最新代码，而不是发行版
+bin/spc download --for-extensions=swoole -G "swoole:master:https://github.com/swoole/swoole-src.git"
+```
+
 ## 命令 doctor - 环境检查
 
 如果你可以正常运行 `bin/spc` 但无法正常编译静态的 PHP 或依赖库，可以先运行 `bin/spc doctor` 检查系统自身是否缺少依赖。

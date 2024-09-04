@@ -204,6 +204,19 @@ bin/spc download --all -U "php-src:https://downloads.php.net/~eric/php-8.3.0beta
 bin/spc download --all -U "curl:https://curl.se/download/curl-7.88.1.tar.gz"
 ```
 
+If the source you download is not a link, but a git repository, you can use `-G` or `--custom-git` to rewrite the download link,
+so that the downloader can force the use of the specified git repository to download packages from this source.
+The usage method is `{source-name}:{branch}:{url}`, which can rewrite the download link of multiple libraries at the same time. 
+It is also available when downloading with the `--for-extensions` option.
+
+```bash
+# Specifying to download the source code of the PHP extension from the specified branch of the git repository
+bin/spc download --for-extensions=redis -G "php-src:master:https://github.com/php/php-src.git"
+
+# Download the latest code from the master branch of the swoole-src repository instead of PECL release version
+bin/spc download --for-extensions=swoole -G "swoole:master:https://github.com/swoole/swoole-src.git"
+```
+
 ## Command - doctor
 
 If you can run `bin/spc` normally but cannot compile static PHP or dependent libraries normally, 
