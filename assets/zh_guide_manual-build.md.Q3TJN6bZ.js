@@ -45,8 +45,8 @@ import{_ as s,c as i,o as a,a1 as n}from"./chunks/framework.CszIUXhs.js";const g
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 仅下载要编译的库（包括其依赖，使用库名，不包含可选库）</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">bin/spc</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> download</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --for-libs=liblz4,libevent</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --without-suggestions</span></span>
 <span class="line"></span>
-<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 下载资源时，忽略部分资源的缓存，强制下载（如切换 PHP 版本）</span></span>
-<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">bin/spc</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> download</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --for-extensions=curl,pcntl,xml</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --ignore-cache-sources=php-src</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --with-php=8.3</span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 下载资源时，忽略部分资源的缓存，强制下载（如切换特定 PHP 版本）</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">bin/spc</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> download</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --for-extensions=curl,pcntl,xml</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --ignore-cache-sources=php-src</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --with-php=8.3.10</span></span>
 <span class="line"></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 下载资源时，优先下载有预编译包的依赖库（减少编译依赖的时间）</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">bin/spc</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> download</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --for-extensions=</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;curl,pcntl,xml,mbstring&quot;</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --prefer-pre-built</span></span>
@@ -54,7 +54,7 @@ import{_ as s,c as i,o as a,a1 as n}from"./chunks/framework.CszIUXhs.js";const g
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 下载所有依赖包</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">bin/spc</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> download</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --all</span></span>
 <span class="line"></span>
-<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 下载所有依赖包，并指定下载的 PHP 主版本，可选：7.3，7.4，8.0，8.1，8.2，8.3。</span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 下载所有依赖包，并指定下载的 PHP 主版本，可选：7.3，7.4，8.0，8.1，8.2，8.3，也可以使用特定的版本，如 8.3.10。</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">bin/spc</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> download</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --all</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;"> --with-php=8.2</span></span>
 <span class="line"></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;"># 下载时显示下载进度条（curl）</span></span>
