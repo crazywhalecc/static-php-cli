@@ -497,7 +497,7 @@
         "type": "git",
         "path": "php-src/sapi/micro",
         "rev": "master",
-        "url": "https://github.com/easysoft/phpmicro",
+        "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
             "path": "LICENSE"
