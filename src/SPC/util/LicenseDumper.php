@@ -118,20 +118,26 @@ class LicenseDumper
     /**
      * @throws RuntimeException
      */
-    private function loadSourceFile(string $source_name, int $index, ?string $in_path, ?string $custom_base_path = null): string
+    private function loadSourceFile(string $source_name, int $index, null|array|string $in_path, ?string $custom_base_path = null): string
     {
         if (is_null($in_path)) {
             throw new RuntimeException('source [' . $source_name . '] license file is not set, please check config/source.json');
         }
 
-        if (file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path)) {
-            return file_get_contents(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path);
+        if (!is_array($in_path)) {
+            $in_path = [$in_path];
+        }
+
+        foreach ($in_path as $item) {
+            if (file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $item)) {
+                return file_get_contents(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $item);
+            }
         }
 
         if (file_exists(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt')) {
             return file_get_contents(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt');
         }
 
-        throw new RuntimeException('source [' . $source_name . '] license file [' . $in_path . '] not exist');
+        throw new RuntimeException('Cannot find any license file in source [' . $source_name . '] directory!');
     }
 }
