@@ -19,13 +19,13 @@ $upx = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imap,swoole-hook-sqlite,swoole',
-    'Windows' => 'igbinary,redis,session',
+    'Linux', 'Darwin' => 'redis,igbinary',
+    'Windows' => 'redis,igbinary',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => '',
+    'Linux', 'Darwin' => 'liblz4',
     'Windows' => '',
 };
 

@@ -649,11 +649,14 @@
     "redis": {
         "type": "git",
         "path": "php-src/ext/redis",
-        "rev": "5.3.7",
+        "rev": "release/6.0.2",
         "url": "https://github.com/phpredis/phpredis",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": [
+                "LICENSE",
+                "COPYING"
+            ]
         }
     },
     "snappy": {
