@@ -317,3 +317,24 @@ When an open source project has multiple licenses, multiple files can be specifi
    }
 }
 ```
+
+When the license of an open source project uses different files between versions, 
+`path` can be used as an array to list the possible license files:
+
+```json
+{
+  "redis": {
+    "type": "git",
+    "path": "php-src/ext/redis",
+    "rev": "release/6.0.2",
+    "url": "https://github.com/phpredis/phpredis",
+    "license": {
+      "type": "file",
+      "path": [
+        "LICENSE",
+        "COPYING"
+      ]
+    }
+  }
+}
+```
