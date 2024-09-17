@@ -514,6 +514,16 @@
             "path": "LICENSE"
         }
     },
+    "msgpack": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/msgpack",
+        "path": "php-src/ext/msgpack",
+        "filename": "msgpack.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ncurses": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/ncurses/",

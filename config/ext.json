@@ -360,6 +360,15 @@
             "zlib"
         ]
     },
+    "msgpack": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "msgpack",
+        "arg-type-unix": "with",
+        "arg-type-win": "enable"
+    },
     "mysqli": {
         "type": "builtin",
         "arg-type": "with",
