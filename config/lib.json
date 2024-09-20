@@ -127,6 +127,15 @@
             "gmp.h"
         ]
     },
+    "gmssl": {
+        "source": "gmssl",
+        "static-libs-unix": [
+            "libgmssl.a"
+        ],
+        "static-libs-windows": [
+            "gmssl.lib"
+        ]
+    },
     "icu": {
         "source": "icu",
         "cpp-library": true,
