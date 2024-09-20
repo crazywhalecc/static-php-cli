@@ -134,6 +134,9 @@
         ],
         "static-libs-windows": [
             "gmssl.lib"
+        ],
+        "frameworks": [
+            "Security"
         ]
     },
     "icu": {
