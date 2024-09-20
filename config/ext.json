@@ -189,6 +189,16 @@
             "gmp"
         ]
     },
+    "gmssl": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-gmssl",
+        "lib-depends": [
+            "gmssl"
+        ]
+    },
     "iconv": {
         "support": {
             "BSD": "wip"
