@@ -427,9 +427,8 @@
             "librdkafka++.a",
             "librdkafka-static.a"
         ],
-        "lib-depends": [
-            "openssl",
-            "zlib"
+        "lib-suggests": [
+            "zstd"
         ]
     },
     "postgresql": {
