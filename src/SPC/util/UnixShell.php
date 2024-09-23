@@ -15,8 +15,14 @@ class UnixShell
 
     private array $env = [];
 
+    /**
+     * @throws RuntimeException
+     */
     public function __construct(?bool $debug = null)
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            throw new RuntimeException('Windows cannot use UnixShell');
+        }
         $this->debug = $debug ?? defined('DEBUG_MODE');
     }
 
@@ -35,6 +41,7 @@ class UnixShell
     {
         /* @phpstan-ignore-next-line */
         logger()->info(ConsoleColor::yellow('[EXEC] ') . ConsoleColor::green($cmd));
+        logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
         if ($this->cd !== null) {
             $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
         }
@@ -51,15 +58,22 @@ class UnixShell
             /* @phpstan-ignore-next-line */
             logger()->info(ConsoleColor::blue('[EXEC] ') . ConsoleColor::green($cmd));
         } else {
-            logger()->debug('Running command with result: ' . $cmd);
+            /* @phpstan-ignore-next-line */
+            logger()->debug(ConsoleColor::blue('[EXEC] ') . ConsoleColor::gray($cmd));
         }
+        logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
         exec($cmd, $out, $code);
         return [$code, $out];
     }
 
     public function setEnv(array $env): UnixShell
     {
-        $this->env = array_merge($this->env, $env);
+        foreach ($env as $k => $v) {
+            if ($v === '') {
+                continue;
+            }
+            $this->env[$k] = $v;
+        }
         return $this;
     }
 

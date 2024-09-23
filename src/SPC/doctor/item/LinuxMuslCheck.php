@@ -14,6 +14,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\PackageManager;
 
 class LinuxMuslCheck
 {
@@ -84,7 +85,6 @@ class LinuxMuslCheck
 
     /** @noinspection PhpUnused */
     /**
-     * @throws DownloaderException
      * @throws FileSystemException
      * @throws WrongUsageException
      */
@@ -98,15 +98,10 @@ class LinuxMuslCheck
                 logger()->warning('Current user is not root, using sudo for running command');
             }
             $arch = arch2gnu(php_uname('m'));
-            $musl_compile_source = [
-                'type' => 'url',
-                'url' => "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/{$arch}-musl-toolchain.tgz",
-            ];
-            logger()->info('Downloading ' . $musl_compile_source['url']);
-            Downloader::downloadSource('musl-compile', $musl_compile_source);
-            logger()->info('Extracting musl-cross');
-            FileSystem::extractSource('musl-compile', DOWNLOAD_PATH . "/{$arch}-musl-toolchain.tgz");
-            shell()->exec($prefix . 'cp -rf ' . SOURCE_PATH . '/musl-compile/* /usr/local/musl');
+            PackageManager::installPackage("musl-toolchain-{$arch}-linux");
+            $pkg_root = PKG_ROOT_PATH . "/musl-toolchain-{$arch}-linux";
+            shell()->exec("{$prefix}cp -rf {$pkg_root}/* /usr/local/musl");
+            FileSystem::removeDir($pkg_root);
             return true;
         } catch (RuntimeException) {
             return false;

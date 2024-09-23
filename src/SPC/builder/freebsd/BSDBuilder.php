@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace SPC\builder\freebsd;
 
-use SPC\builder\BuilderBase;
-use SPC\builder\traits\UnixBuilderTrait;
+use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 
-class BSDBuilder extends BuilderBase
+class BSDBuilder extends UnixBuilderBase
 {
-    /** Unix compatible builder methods */
-    use UnixBuilderTrait;
-
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -32,7 +28,7 @@ class BSDBuilder extends BuilderBase
         // ---------- set necessary options ----------
         // set C Compiler (default: clang)
         f_putenv('CC=' . $this->getOption('cc', 'clang'));
-        // set C++ Composer (default: clang++)
+        // set C++ Compiler (default: clang++)
         f_putenv('CXX=' . $this->getOption('cxx', 'clang++'));
         // set PATH
         f_putenv('PATH=' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
@@ -81,14 +77,17 @@ class BSDBuilder extends BuilderBase
         }
         $this->setOption('extra-libs', $extra_libs);
 
+        $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
 
         shell()->cd(SOURCE_PATH . '/php-src')->exec('./buildconf --force');
 
+        $this->emitPatchPoint('before-php-configure');
         SourcePatcher::patchBeforeConfigure($this);
 
         $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
-        $zts = $this->getOption('enable-zts', false) ? '--enable-zts --disable-zend-signals ' : '';
+        $zts_enable = $this->getPHPVersionID() < 80000 ? '--enable-maintainer-zts --disable-zend-signals' : '--enable-zts --disable-zend-signals';
+        $zts = $this->getOption('enable-zts', false) ? $zts_enable : '';
 
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
@@ -115,6 +114,7 @@ class BSDBuilder extends BuilderBase
                 $this->makeExtensionArgs()
             );
 
+        $this->emitPatchPoint('before-php-make');
         SourcePatcher::patchBeforeMake($this);
 
         $this->cleanMake();
@@ -140,6 +140,7 @@ class BSDBuilder extends BuilderBase
         }
 
         if (php_uname('m') === $this->getOption('arch')) {
+            $this->emitPatchPoint('before-sanity-check');
             $this->sanityCheck($build_target);
         }
     }
@@ -150,7 +151,7 @@ class BSDBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildCli(): void
+    protected function buildCli(): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
@@ -173,14 +174,14 @@ class BSDBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function buildMicro(): void
+    protected function buildMicro(): void
     {
         if ($this->getPHPVersionID() < 80000) {
             throw new WrongUsageException('phpmicro only support PHP >= 8.0!');
         }
         if ($this->getExt('phar')) {
             $this->phar_patched = true;
-            SourcePatcher::patchMicro(['phar']);
+            SourcePatcher::patchMicroPhar($this->getPHPVersionID());
         }
 
         $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
@@ -201,7 +202,7 @@ class BSDBuilder extends BuilderBase
         $this->deployBinary(BUILD_TARGET_MICRO);
 
         if ($this->phar_patched) {
-            SourcePatcher::patchMicro(['phar'], true);
+            SourcePatcher::unpatchMicroPhar();
         }
     }
 
@@ -211,7 +212,7 @@ class BSDBuilder extends BuilderBase
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function buildFpm(): void
+    protected function buildFpm(): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size
@@ -231,7 +232,7 @@ class BSDBuilder extends BuilderBase
      *
      * @throws RuntimeException
      */
-    public function buildEmbed(): void
+    protected function buildEmbed(): void
     {
         $vars = SystemUtil::makeEnvVarString([
             'EXTRA_CFLAGS' => '-g -Os', // with debug information, but optimize for size

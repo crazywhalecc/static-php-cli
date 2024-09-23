@@ -11,19 +11,18 @@
     "require": {
         "php": ">= 8.1",
         "ext-mbstring": "*",
-        "ext-pcntl": "*",
         "laravel/prompts": "^0.1.12",
         "symfony/console": "^5.4 || ^6 || ^7",
         "zhamao/logger": "^1.0"
     },
     "require-dev": {
-        "captainhook/captainhook": "^5.10",
-        "captainhook/plugin-composer": "^5.3",
+        "captainhook/captainhook-phar": "^5.23",
+        "captainhook/hook-installer": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.25",
-        "humbug/box": "^4.3",
+        "humbug/box": "^4.5",
         "nunomaduro/collision": "^7.8",
         "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10.3"
+        "phpunit/phpunit": "^10.3 || ^9"
     },
     "autoload": {
         "psr-4": {
@@ -51,9 +50,17 @@
     "config": {
         "allow-plugins": {
             "phpstan/extension-installer": true,
-            "captainhook/plugin-composer": true
+            "captainhook/hook-installer": true,
+            "captainhook/plugin-composer": true,
+            "captainhook/captainhook-phar": true
         },
         "optimize-autoloader": true,
         "sort-packages": true
-    }
+    },
+    "funding": [
+        {
+            "type": "other",
+            "url": "https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md"
+        }
+    ]
 }

@@ -110,11 +110,7 @@ class SystemUtil
     public static function getTuneCFlags(string $arch): array
     {
         return match ($arch) {
-            'x86_64' => [
-                '-march=corei7',
-                '-mtune=core-avx2',
-            ],
-            'arm64', 'aarch64' => [],
+            'x86_64', 'arm64', 'aarch64' => [],
             default => throw new RuntimeException('unsupported arch: ' . $arch),
         };
     }
@@ -208,5 +204,24 @@ class SystemUtil
             $ret[] = $path;
         }
         return $ret;
+    }
+
+    /**
+     * Get fully-supported linux distros.
+     *
+     * @return string[] List of supported Linux distro name for doctor
+     */
+    public static function getSupportedDistros(): array
+    {
+        return [
+            // debian-like
+            'debian', 'ubuntu', 'Deepin',
+            // rhel-like
+            'redhat',
+            // alpine
+            'alpine',
+            // arch
+            'arch', 'manjaro',
+        ];
     }
 }

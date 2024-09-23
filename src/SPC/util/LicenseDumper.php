@@ -10,6 +10,9 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 
+/**
+ * License dumper, dump source license files to target directory
+ */
 class LicenseDumper
 {
     private array $exts = [];
@@ -37,6 +40,10 @@ class LicenseDumper
     }
 
     /**
+     * Dump source licenses to target directory
+     *
+     * @param  string              $target_dir Target directory
+     * @return bool                Success or not
      * @throws WrongUsageException
      * @throws FileSystemException
      * @throws RuntimeException
@@ -55,20 +62,29 @@ class LicenseDumper
 
             $source_name = Config::getExt($ext, 'source');
             foreach ($this->getSourceLicenses($source_name) as $index => $license) {
-                file_put_contents("{$target_dir}/ext_{$ext}_{$index}.txt", $license);
+                $result = file_put_contents("{$target_dir}/ext_{$ext}_{$index}.txt", $license);
+                if ($result === false) {
+                    return false;
+                }
             }
         }
 
         foreach ($this->libs as $lib) {
             $source_name = Config::getLib($lib, 'source');
             foreach ($this->getSourceLicenses($source_name) as $index => $license) {
-                file_put_contents("{$target_dir}/lib_{$lib}_{$index}.txt", $license);
+                $result = file_put_contents("{$target_dir}/lib_{$lib}_{$index}.txt", $license);
+                if ($result === false) {
+                    return false;
+                }
             }
         }
 
         foreach ($this->sources as $source) {
             foreach ($this->getSourceLicenses($source) as $index => $license) {
-                file_put_contents("{$target_dir}/src_{$source}_{$index}.txt", $license);
+                $result = file_put_contents("{$target_dir}/src_{$source}_{$index}.txt", $license);
+                if ($result === false) {
+                    return false;
+                }
             }
         }
         return true;
@@ -91,9 +107,9 @@ class LicenseDumper
         }
 
         foreach ($licenses as $index => $license) {
-            yield ($license['suffix'] ?? $index) => match ($license['type']) {
+            yield $index => match ($license['type']) {
                 'text' => $license['text'],
-                'file' => $this->loadSourceFile($source_name, $license['path'], Config::getSource($source_name)['path'] ?? null),
+                'file' => $this->loadSourceFile($source_name, $index, $license['path'], Config::getSource($source_name)['path'] ?? null),
                 default => throw new RuntimeException('source [' . $source_name . '] license type is not allowed'),
             };
         }
@@ -102,15 +118,26 @@ class LicenseDumper
     /**
      * @throws RuntimeException
      */
-    private function loadSourceFile(string $source_name, ?string $in_path, ?string $custom_base_path = null): string
+    private function loadSourceFile(string $source_name, int $index, null|array|string $in_path, ?string $custom_base_path = null): string
     {
         if (is_null($in_path)) {
             throw new RuntimeException('source [' . $source_name . '] license file is not set, please check config/source.json');
         }
-        if (!file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path)) {
-            throw new RuntimeException('source [' . $source_name . '] license file [' . $in_path . '] not exist');
+
+        if (!is_array($in_path)) {
+            $in_path = [$in_path];
         }
 
-        return file_get_contents(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $in_path);
+        foreach ($in_path as $item) {
+            if (file_exists(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $item)) {
+                return file_get_contents(SOURCE_PATH . '/' . ($custom_base_path ?? $source_name) . '/' . $item);
+            }
+        }
+
+        if (file_exists(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt')) {
+            return file_get_contents(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt');
+        }
+
+        throw new RuntimeException('Cannot find any license file in source [' . $source_name . '] directory!');
     }
 }

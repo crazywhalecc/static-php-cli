@@ -34,12 +34,23 @@ final class CheckListHandler
      */
     public function emitFix(OutputInterface $output, CheckResult $result): void
     {
-        pcntl_signal(SIGINT, function () use ($output) {
-            $output->writeln('<error>You cancelled fix</error>');
-        });
+        if (PHP_OS_FAMILY === 'Windows') {
+            sapi_windows_set_ctrl_handler(function () use ($output) {
+                $output->writeln('<error>You cancelled fix</error>');
+            });
+        } elseif (extension_loaded('pcntl')) {
+            pcntl_signal(SIGINT, function () use ($output) {
+                $output->writeln('<error>You cancelled fix</error>');
+            });
+        }
 
         $fix_result = call_user_func($this->fix_map[$result->getFixItem()], ...$result->getFixParams());
-        pcntl_signal(SIGINT, SIG_IGN);
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            sapi_windows_set_ctrl_handler(null);
+        } elseif (extension_loaded('pcntl')) {
+            pcntl_signal(SIGINT, SIG_IGN);
+        }
 
         if ($fix_result) {
             $output->writeln('<info>Fix done</info>');
@@ -59,7 +70,7 @@ final class CheckListHandler
      */
     private function loadCheckList(bool $include_manual = false): array
     {
-        foreach (FileSystem::getClassesPsr4(__DIR__ . '/item', 'SPC\\doctor\\item') as $class) {
+        foreach (FileSystem::getClassesPsr4(__DIR__ . '/item', 'SPC\doctor\item') as $class) {
             $ref = new \ReflectionClass($class);
             foreach ($ref->getMethods() as $method) {
                 foreach ($method->getAttributes() as $a) {

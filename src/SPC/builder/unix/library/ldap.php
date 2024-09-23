@@ -4,25 +4,40 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\store\FileSystem;
+
 trait ldap
 {
+    public function patchBeforeBuild(): bool
+    {
+        FileSystem::replaceFileStr($this->source_dir . '/configure', '"-lssl -lcrypto', '"-lssl -lcrypto -lz');
+        return true;
+    }
+
     protected function build(): void
     {
         $alt = '';
         // openssl support
-        $alt .= $this->builder->getLib('openssl') && $this->builder->getExt('zlib') ? '--with-tls=openssl ' : '';
+        $alt .= $this->builder->getLib('openssl') ? '--with-tls=openssl ' : '';
         // gmp support
         $alt .= $this->builder->getLib('gmp') ? '--with-mp=gmp ' : '';
         // libsodium support
-        $alt .= $this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '';
+        $alt .= $this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '--enable-argon2=no ';
+        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
+        $ldflags = '-L' . BUILD_LIB_PATH;
         shell()->cd($this->source_dir)
-            ->exec(
-                $this->builder->makeAutoconfFlags(AUTOCONF_LDFLAGS | AUTOCONF_CPPFLAGS) .
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags,
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
+            ->execWithEnv(
+                $this->builder->makeAutoconfFlags(AUTOCONF_CPPFLAGS) .
                 ' ./configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--disable-slapd ' .
-                '--disable-slurpd ' .
                 '--without-systemd ' .
                 '--without-cyrus-sasl ' .
                 $alt .

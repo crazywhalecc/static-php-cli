@@ -15,10 +15,15 @@ trait libiconv
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--enable-extra-encodings ' .
                 '--prefix='
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . $destdir);
+
+        if (file_exists(BUILD_BIN_PATH . '/iconv')) {
+            unlink(BUILD_BIN_PATH . '/iconv');
+        }
     }
 }

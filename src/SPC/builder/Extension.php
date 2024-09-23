@@ -8,6 +8,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\FileSystem;
 
 class Extension
 {
@@ -42,7 +43,7 @@ class Extension
         $arg = $this->getEnableArg();
         switch (PHP_OS_FAMILY) {
             case 'Windows':
-                $arg = $this->getWindowsConfigureArg();
+                $arg .= $this->getWindowsConfigureArg();
                 break;
             case 'Darwin':
             case 'Linux':
@@ -161,6 +162,80 @@ class Extension
     public function patchBeforeMake(): bool
     {
         return false;
+    }
+
+    /**
+     * @throws RuntimeException
+     */
+    public function runCliCheckUnix(): void
+    {
+        // Run compile check if build target is cli
+        // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
+        // If check failed, throw RuntimeException
+        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $this->getDistName() . '"', false);
+        if ($ret !== 0) {
+            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+        }
+
+        if (file_exists(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')) {
+            // Trim additional content & escape special characters to allow inline usage
+            $test = str_replace(
+                ['<?php', 'declare(strict_types=1);', "\n", '"', '$', '!'],
+                ['', '', '', '\"', '\$', '"\'!\'"'],
+                file_get_contents(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')
+            );
+
+            [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
+            if ($ret !== 0) {
+                if ($this->builder->getOption('debug')) {
+                    var_dump($out);
+                }
+                throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
+            }
+        }
+    }
+
+    /**
+     * @throws RuntimeException
+     */
+    public function runCliCheckWindows(): void
+    {
+        // Run compile check if build target is cli
+        // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
+        // If check failed, throw RuntimeException
+        [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe --ri "' . $this->getDistName() . '"', false);
+        if ($ret !== 0) {
+            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+        }
+
+        if (file_exists(FileSystem::convertPath(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php'))) {
+            // Trim additional content & escape special characters to allow inline usage
+            $test = str_replace(
+                ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
+                ['', '', '', '\"', '$'],
+                file_get_contents(FileSystem::convertPath(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php'))
+            );
+
+            [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe -r "' . trim($test) . '"');
+            if ($ret !== 0) {
+                throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
+            }
+        }
+    }
+
+    public function validate(): void
+    {
+        // do nothing, just throw wrong usage exception if not valid
+    }
+
+    /**
+     * Get current extension version
+     *
+     * @return null|string Version string or null
+     */
+    public function getExtVersion(): ?string
+    {
+        return null;
     }
 
     /**

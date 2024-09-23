@@ -57,6 +57,15 @@ class SortConfigCommand extends BaseCommand
                     return static::FAILURE;
                 }
                 break;
+            case 'pkg':
+                $file = json_decode(FileSystem::readFile(ROOT_DIR . '/config/pkg.json'), true);
+                ConfigValidator::validatePkgs($file);
+                ksort($file);
+                if (!file_put_contents(ROOT_DIR . '/config/pkg.json', json_encode($file, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n")) {
+                    $this->output->writeln('<error>Write file pkg.json failed!</error>');
+                    return static::FAILURE;
+                }
+                break;
             default:
                 $this->output->writeln("<error>invalid config name: {$name}</error>");
                 return 1;

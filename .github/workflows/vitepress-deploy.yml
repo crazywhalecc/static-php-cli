@@ -1,0 +1,71 @@
+name: Docs Auto Deploy
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'config/**.json'
+      - 'docs/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/vitepress-deploy.yml'
+
+jobs:
+  build:
+    name: Deploy docs
+    runs-on: ubuntu-latest
+    if: github.repository == 'crazywhalecc/static-php-cli'
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - name: "Copy Config Files"
+        run: |
+          mkdir -p docs/.vitepress/config
+          cp -r config/* docs/.vitepress/config/
+
+      - name: "Install PHP for official runners"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: none
+          tools: composer:v2
+          php-version: 8.2
+          ini-values: memory_limit=-1
+
+      - name: "Get Composer Cache Directory"
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: "Cache Composer dependencies"
+        uses: "actions/cache@v4"
+        with:
+          path: "${{ steps.composer-cache.outputs.dir }}"
+          key: "php-8.2-locked-composer-${{ hashFiles('**/composer.lock') }}"
+          restore-keys: |
+            php-8.2-locked-composer
+
+      - name: "Install Locked Dependencies"
+        run: "composer install --no-interaction --no-progress"
+
+      - name: "Generate Extension Support List"
+        run: |
+          bin/spc dev:gen-ext-docs > docs/extensions.md
+          bin/spc dev:gen-ext-dep-docs > docs/deps-map-ext.md
+          bin/spc dev:gen-lib-dep-docs > docs/deps-map-lib.md
+
+      - name: Build
+        run: yarn docs:build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vitepress/dist

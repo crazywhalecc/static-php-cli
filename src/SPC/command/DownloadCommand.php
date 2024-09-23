@@ -34,28 +34,65 @@ class DownloadCommand extends BaseCommand
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
+        $this->addOption('custom-git', 'G', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source git url, e.g "php-src:master:https://github.com/php/php-src.git"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
         $this->addOption('for-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
+        $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
         $this->addOption('without-suggestions', null, null, 'Do not fetch suggested sources when using --for-extensions');
+        $this->addOption('ignore-cache-sources', null, InputOption::VALUE_OPTIONAL, 'Ignore some source caches, comma separated, e.g "php-src,curl,openssl"', false);
+        $this->addOption('retry', 'R', InputOption::VALUE_REQUIRED, 'Set retry time when downloading failed (default: 0)', '0');
+        $this->addOption('prefer-pre-built', 'P', null, 'Download pre-built libraries when available');
     }
 
+    /**
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
     public function initialize(InputInterface $input, OutputInterface $output): void
     {
-        if (
-            $input->getOption('all')
-            || $input->getOption('clean')
-            || $input->getOption('from-zip')
-            || $input->getOption('for-extensions')
-        ) {
+        // mode: --all
+        if ($input->getOption('all')) {
+            $input->setArgument('sources', implode(',', array_keys(Config::getSources())));
+            parent::initialize($input, $output);
+            return;
+        }
+        // mode: --clean and --from-zip
+        if ($input->getOption('clean') || $input->getOption('from-zip')) {
             $input->setArgument('sources', '');
+            parent::initialize($input, $output);
+            return;
+        }
+        // mode: normal
+        if (!empty($input->getArgument('sources'))) {
+            $final_sources = array_map('trim', array_filter(explode(',', $input->getArgument('sources'))));
+        } else {
+            $final_sources = [];
+        }
+        // mode: --for-extensions
+        if ($for_ext = $input->getOption('for-extensions')) {
+            $ext = $this->parseExtensionList($for_ext);
+            $sources = $this->calculateSourcesByExt($ext, !$input->getOption('without-suggestions'));
+            if (PHP_OS_FAMILY !== 'Windows') {
+                array_unshift($sources, 'pkg-config');
+            }
+            array_unshift($sources, 'php-src', 'micro');
+            $final_sources = array_merge($final_sources, array_diff($sources, $final_sources));
+        }
+        // mode: --for-libs
+        if ($for_lib = $input->getOption('for-libs')) {
+            $lib = array_map('trim', array_filter(explode(',', $for_lib)));
+            $sources = $this->calculateSourcesByLib($lib, !$input->getOption('without-suggestions'));
+            $final_sources = array_merge($final_sources, array_diff($sources, $final_sources));
+        }
+        if (!empty($final_sources)) {
+            $input->setArgument('sources', implode(',', $final_sources));
         }
         parent::initialize($input, $output);
     }
 
     /**
-     * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
+     * @throws RuntimeException
      */
     public function handle(): int
     {
@@ -87,11 +124,20 @@ class DownloadCommand extends BaseCommand
             // Define PHP major version
             $ver = $this->php_major_ver = $this->getOption('with-php') ?? '8.1';
             define('SPC_BUILD_PHP_VERSION', $ver);
+            // match x.y
             preg_match('/^\d+\.\d+$/', $ver, $matches);
             if (!$matches) {
-                logger()->error("bad version arg: {$ver}, x.y required!");
-                return static::FAILURE;
+                // match x.y.z
+                preg_match('/^\d+\.\d+\.\d+$/', $ver, $matches);
+                if (!$matches) {
+                    logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
+                    return static::FAILURE;
+                }
             }
+
+            // retry
+            $retry = intval($this->getOption('retry'));
+            f_putenv('SPC_RETRY_TIME=' . $retry);
 
             // Use shallow-clone can reduce git resource download
             if ($this->getOption('shallow-clone')) {
@@ -107,25 +153,49 @@ class DownloadCommand extends BaseCommand
                 Config::$source['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
             }
 
-            // --for-extensions
-            if ($for_ext = $this->getOption('for-extensions')) {
-                $ext = array_map('trim', array_filter(explode(',', $for_ext)));
-                $sources = $this->calculateSourcesByExt($ext, !$this->getOption('without-suggestions'));
-                array_unshift($sources, 'php-src', 'micro', 'pkg-config');
+            $chosen_sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
+
+            $sss = $this->getOption('ignore-cache-sources');
+            if ($sss === false) {
+                // false is no-any-ignores, that is, default.
+                $force_all = false;
+                $force_list = [];
+            } elseif ($sss === null) {
+                // null means all sources will be ignored, equals to --force-all (but we don't want to add too many options)
+                $force_all = true;
+                $force_list = [];
             } else {
-                // get source list that will be downloaded
-                $sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
-                if (empty($sources)) {
-                    $sources = array_keys(Config::getSources());
-                }
+                // ignore some sources
+                $force_all = false;
+                $force_list = array_map('trim', array_filter(explode(',', $this->getOption('ignore-cache-sources'))));
             }
-            $chosen_sources = $sources;
+
+            if ($this->getOption('all')) {
+                logger()->notice('Downloading with --all option will take more times to download, we recommend you to download with --for-extensions option !');
+            }
 
             // Process -U options
             $custom_urls = [];
             foreach ($this->input->getOption('custom-url') as $value) {
                 [$source_name, $url] = explode(':', $value, 2);
                 $custom_urls[$source_name] = $url;
+            }
+            // Process -G options
+            $custom_gits = [];
+            foreach ($this->input->getOption('custom-git') as $value) {
+                [$source_name, $branch, $url] = explode(':', $value, 3);
+                $custom_gits[$source_name] = [$branch, $url];
+            }
+
+            // If passing --prefer-pre-built option, we need to load pre-built library list from pre-built.json targeted releases
+            if ($this->getOption('prefer-pre-built')) {
+                $repo = Config::getPreBuilt('repo');
+                $pre_built_libs = Downloader::getLatestGithubRelease($repo, [
+                    'repo' => $repo,
+                    'prefer-stable' => Config::getPreBuilt('prefer-stable'),
+                ], false);
+            } else {
+                $pre_built_libs = [];
             }
 
             // Download them
@@ -148,9 +218,34 @@ class DownloadCommand extends BaseCommand
                     }
                     logger()->info("Fetching source {$source} from custom url [{$ni}/{$cnt}]");
                     Downloader::downloadSource($source, $new_config, true);
+                } elseif (isset($custom_gits[$source])) {
+                    $config = Config::getSource($source);
+                    $new_config = [
+                        'type' => 'git',
+                        'rev' => $custom_gits[$source][0],
+                        'url' => $custom_gits[$source][1],
+                    ];
+                    if (isset($config['path'])) {
+                        $new_config['path'] = $config['path'];
+                    }
+                    logger()->info("Fetching source {$source} from custom git [{$ni}/{$cnt}]");
+                    Downloader::downloadSource($source, $new_config, true);
                 } else {
+                    $config = Config::getSource($source);
+                    // Prefer pre-built, we need to search pre-built library
+                    if ($this->getOption('prefer-pre-built') && ($config['provide-pre-built'] ?? false) === true) {
+                        // We need to replace pattern
+                        $find = str_replace(['{name}', '{arch}', '{os}'], [$source, arch2gnu(php_uname('m')), strtolower(PHP_OS_FAMILY)], Config::getPreBuilt('match-pattern'));
+                        // find filename in asset list
+                        if (($url = $this->findPreBuilt($pre_built_libs, $find)) !== null) {
+                            logger()->info("Fetching pre-built content {$source} [{$ni}/{$cnt}]");
+                            Downloader::downloadSource($source, ['type' => 'url', 'url' => $url], $force_all || in_array($source, $force_list), SPC_LOCK_PRE_BUILT);
+                            continue;
+                        }
+                        logger()->warning("Pre-built content not found for {$source}, fallback to source download");
+                    }
                     logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
-                    Downloader::downloadSource($source, Config::getSource($source));
+                    Downloader::downloadSource($source, $config, $force_all || in_array($source, $force_list));
                 }
             }
             $time = round(microtime(true) - START_TIME, 3);
@@ -165,6 +260,10 @@ class DownloadCommand extends BaseCommand
         }
     }
 
+    /**
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
     private function downloadFromZip(string $path): int
     {
         if (!file_exists($path)) {
@@ -188,9 +287,12 @@ class DownloadCommand extends BaseCommand
         // create downloads
         try {
             if (PHP_OS_FAMILY !== 'Windows') {
-                f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($path));
+                $abs_path = realpath($path);
+                f_passthru('mkdir ' . DOWNLOAD_PATH . ' && cd ' . DOWNLOAD_PATH . ' && unzip ' . escapeshellarg($abs_path));
+            } else {
+                // Windows TODO
+                throw new WrongUsageException('Windows currently does not support --from-zip !');
             }
-            // Windows TODO
 
             if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
                 throw new RuntimeException('.lock.json not exist in "downloads/"');
@@ -206,13 +308,14 @@ class DownloadCommand extends BaseCommand
     /**
      * Calculate the sources by extensions
      *
-     * @param  array               $extensions extension list
+     * @param  array               $extensions       extension list
+     * @param  bool                $include_suggests include suggested libs and extensions (default: true)
      * @throws FileSystemException
      * @throws WrongUsageException
      */
     private function calculateSourcesByExt(array $extensions, bool $include_suggests = true): array
     {
-        [$extensions, $libraries] = $include_suggests ? DependencyUtil::getAllExtLibsByDeps($extensions) : DependencyUtil::getExtLibsByDeps($extensions);
+        [$extensions, $libraries] = $include_suggests ? DependencyUtil::getExtsAndLibs($extensions, [], true, true) : DependencyUtil::getExtsAndLibs($extensions);
         $sources = [];
         foreach ($extensions as $extension) {
             if (Config::getExt($extension, 'type') === 'external') {
@@ -223,5 +326,38 @@ class DownloadCommand extends BaseCommand
             $sources[] = Config::getLib($library, 'source');
         }
         return array_values(array_unique($sources));
+    }
+
+    /**
+     * Calculate the sources by libraries
+     *
+     * @param  array               $libs             library list
+     * @param  bool                $include_suggests include suggested libs (default: true)
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
+    private function calculateSourcesByLib(array $libs, bool $include_suggests = true): array
+    {
+        $libs = DependencyUtil::getLibs($libs, $include_suggests);
+        $sources = [];
+        foreach ($libs as $library) {
+            $sources[] = Config::getLib($library, 'source');
+        }
+        return array_values(array_unique($sources));
+    }
+
+    /**
+     * @param  array       $assets   Asset list from GitHub API
+     * @param  string      $filename Match file name, e.g. pkg-config-aarch64-darwin.txz
+     * @return null|string Return the download URL if found, otherwise null
+     */
+    private function findPreBuilt(array $assets, string $filename): ?string
+    {
+        foreach ($assets as $asset) {
+            if ($asset['name'] === $filename) {
+                return $asset['browser_download_url'];
+            }
+        }
+        return null;
     }
 }

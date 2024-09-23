@@ -7,6 +7,7 @@ namespace SPC\command;
 use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\RuntimeException;
+use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -59,7 +60,12 @@ class BuildLibsCommand extends BuildCommand
             // 只编译 library 的情况下，标记
             $builder->setLibsOnly();
             // 编译和检查库完整
-            $builder->buildLibs($libraries);
+            $libraries = DependencyUtil::getLibs($libraries);
+            logger()->info('Building libraries: ' . implode(',', $libraries));
+            sleep(2);
+            $builder->proveLibs($libraries);
+            $builder->validateLibsAndExts();
+            $builder->setupLibs();
 
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('Build libs complete, used ' . $time . ' s !');

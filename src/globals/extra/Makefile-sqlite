@@ -1,0 +1,69 @@
+
+CC=cl.exe /nologo
+AR=lib.exe /nologo
+LINK=link.exe /nologo
+
+!IF "" == "$(MACHINE)"
+MACHINE=x64
+!ENDIF
+
+!IF "" == "$(CRT)"
+CRT=vc15
+!ENDIF
+
+!IF "" == "$(PREFIX)"
+PREFIX="$(CRT)-$(MACHINE)"
+!ENDIF
+
+COMMON_CFLAGS=/D SQLITE_THREADSAFE=1 /DSQLITE_ENABLE_FTS3=1 /D SQLITE_ENABLE_FTS4=1 /D SQLITE_ENABLE_FTS5=1 /D SQLITE_ENABLE_JSON1=1 /D SQLITE_ENABLE_COLUMN_METADATA=1 /D SQLITE_CORE=1
+!IF "$(DEBUG)"=="1"
+SQLITE3_STATIC_BASE=libsqlite3_a_debug
+SQLITE3_DLL_BASE=libsqlite3_debug
+SQLITE3_EXE_BASE=sqlite3
+CFLAGS=$(COMMON_CFLAGS) /Zi /MDd /Od /W3
+LDFLAGS=/DEBUG /GUARD:CF /INCREMENTAL:NO
+!ELSE
+SQLITE3_STATIC_BASE=libsqlite3_a
+SQLITE3_DLL_BASE=libsqlite3
+SQLITE3_EXE_BASE=sqlite3
+CFLAGS=$(COMMON_CFLAGS) /Zi /MT /guard:cf /Zc:inline /Qspectre /Ox /W3 /GF /Gw
+LDFLAGS=/GUARD:CF /INCREMENTAL:NO /NXCOMPAT /DYNAMICBASE
+!ENDIF
+
+
+all: $(SQLITE3_STATIC_BASE).lib $(SQLITE3_EXE_BASE).exe $(SQLITE3_DLL_BASE).dll
+
+install: all
+	if not exist $(PREFIX)\bin mkdir $(PREFIX)\bin
+	if not exist $(PREFIX)\include mkdir $(PREFIX)\include
+	if not exist $(PREFIX)\lib mkdir $(PREFIX)\lib
+	copy /Y sqlite3.h $(PREFIX)\include
+	copy /Y sqlite3ext.h $(PREFIX)\include
+	copy /Y $(SQLITE3_STATIC_BASE).lib $(PREFIX)\lib
+	copy /Y $(SQLITE3_STATIC_BASE).pdb $(PREFIX)\lib
+	copy /Y $(SQLITE3_DLL_BASE).lib $(PREFIX)\lib
+	copy /Y $(SQLITE3_DLL_BASE).pdb $(PREFIX)\bin
+	copy /Y $(SQLITE3_DLL_BASE).dll $(PREFIX)\bin
+	copy /Y $(SQLITE3_EXE_BASE).exe $(PREFIX)\bin
+	copy /Y $(SQLITE3_EXE_BASE).pdb $(PREFIX)\bin
+
+install-static: $(SQLITE3_STATIC_BASE).lib
+    if not exist $(PREFIX)\include mkdir $(PREFIX)\include
+    if not exist $(PREFIX)\lib mkdir $(PREFIX)\lib
+    copy /Y sqlite3.h $(PREFIX)\include
+    copy /Y sqlite3ext.h $(PREFIX)\include
+    copy /Y $(SQLITE3_STATIC_BASE).lib $(PREFIX)\lib
+
+clean:
+	del *.obj *.lib *.exe *.pdb *.dll *.exp
+
+$(SQLITE3_STATIC_BASE).lib: sqlite3.c sqlite3.h
+	$(CC) $(CFLAGS) /Fd$(SQLITE3_STATIC_BASE).pdb /c sqlite3.c
+	$(AR) sqlite3.obj /OUT:$(SQLITE3_STATIC_BASE).lib
+
+$(SQLITE3_EXE_BASE).exe: shell.c sqlite3.c sqlite3.h
+	$(CC) $(CFLAGS) shell.c sqlite3.c /Fd$(SQLITE3_EXE_BASE).pdb /Fe$(SQLITE3_EXE_BASE).exe
+
+$(SQLITE3_DLL_BASE).dll: sqlite3.c sqlite3.h
+	$(CC) $(CFLAGS) /DSQLITE_API=__declspec(dllexport) /Fd$(SQLITE3_DLL_BASE).pdb /c sqlite3.c
+	$(LINK) /DLL /OUT:$(SQLITE3_DLL_BASE).dll sqlite3.obj

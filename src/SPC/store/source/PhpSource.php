@@ -7,7 +7,6 @@ namespace SPC\store\source;
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\Downloader;
 
 class PhpSource extends CustomSourceBase
@@ -16,13 +15,12 @@ class PhpSource extends CustomSourceBase
 
     /**
      * @throws DownloaderException
-     * @throws RuntimeException
      * @throws FileSystemException
      */
-    public function fetch(): void
+    public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_LOCK_SOURCE): void
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.1';
-        Downloader::downloadSource('php-src', self::getLatestPHPInfo($major));
+        Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
     }
 
     /**
@@ -34,7 +32,10 @@ class PhpSource extends CustomSourceBase
     public function getLatestPHPInfo(string $major_version): array
     {
         // 查找最新的小版本号
-        $info = json_decode(Downloader::curlExec(url: "https://www.php.net/releases/index.php?json&version={$major_version}"), true);
+        $info = json_decode(Downloader::curlExec(
+            url: "https://www.php.net/releases/index.php?json&version={$major_version}",
+            retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)
+        ), true);
         if (!isset($info['version'])) {
             throw new DownloaderException("Version {$major_version} not found.");
         }
@@ -44,7 +45,7 @@ class PhpSource extends CustomSourceBase
         // 从官网直接下载
         return [
             'type' => 'url',
-            'url' => "https://www.php.net/distributions/php-{$version}.tar.gz",
+            'url' => "https://www.php.net/distributions/php-{$version}.tar.xz",
         ];
     }
 }

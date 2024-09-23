@@ -34,4 +34,9 @@ class glfw extends Extension
     {
         return '--enable-glfw --with-glfw-dir=' . BUILD_ROOT_PATH;
     }
+
+    public function getWindowsConfigureArg(): string
+    {
+        return '--enable-glfw=static';
+    }
 }

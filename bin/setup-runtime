@@ -25,7 +25,7 @@ __DIR__=$(cd "$(dirname "$0")" && pwd)
 __PROJECT__=$(cd "${__DIR__}"/../ && pwd)
 
 # set download dir
-__PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/common/php-8.2.10-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
+__PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.2.13-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
 __COMPOSER_URL__="https://getcomposer.org/download/latest-stable/composer.phar"
 
 # use china mirror
@@ -35,7 +35,6 @@ while [ $# -gt 0 ]; do
   case "$1" in
   --mirror)
     mirror="$2"
-    shift
     ;;
   --*)
     echo "Illegal option $1"
@@ -46,8 +45,8 @@ done
 
 case "$mirror" in
 china)
-  __PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/common/php-8.2.10-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
-  __COMPOSER_URL__="https://mirrors.aliyun.com/composer/composer.phar"
+  __PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.2.13-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
+  __COMPOSER_URL__="https://mirrors.tencent.com/composer/composer.phar"
   ;;
 
 esac

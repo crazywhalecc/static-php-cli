@@ -1,0 +1,46 @@
+{
+    "musl-toolchain-aarch64-linux": {
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz"
+    },
+    "musl-toolchain-x86_64-linux": {
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz"
+    },
+    "nasm-x86_64-win": {
+        "type": "url",
+        "url": "https://www.nasm.us/pub/nasm/releasebuilds/2.16.01/win64/nasm-2.16.01-win64.zip",
+        "extract-files": {
+            "nasm-2.16.01/nasm.exe": "{php_sdk_path}/bin/nasm.exe",
+            "nasm-2.16.01/ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
+        }
+    },
+    "strawberry-perl-x86_64-win": {
+        "type": "url",
+        "url": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip"
+    },
+    "upx-aarch64-linux": {
+        "type": "ghrel",
+        "repo": "upx/upx",
+        "match": "upx.+-arm64_linux\\.tar\\.xz",
+        "extract-files": {
+            "upx": "{pkg_root_path}/bin/upx"
+        }
+    },
+    "upx-x86_64-linux": {
+        "type": "ghrel",
+        "repo": "upx/upx",
+        "match": "upx.+-amd64_linux\\.tar\\.xz",
+        "extract-files": {
+            "upx": "{pkg_root_path}/bin/upx"
+        }
+    },
+    "upx-x86_64-win": {
+        "type": "ghrel",
+        "repo": "upx/upx",
+        "match": "upx.+-win64\\.zip",
+        "extract-files": {
+            "upx-*-win64/upx.exe": "{pkg_root_path}/bin/upx.exe"
+        }
+    }
+}

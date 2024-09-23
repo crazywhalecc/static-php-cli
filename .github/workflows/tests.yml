@@ -1,98 +1,193 @@
 name: Tests
 
 on:
-    push:
-        branches: [ "main" ]
-    pull_request:
-        branches: [ "main" ]
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/globals/test-extensions.php'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'config/**'
+      - '.github/workflows/tests.yml'
+      - 'bin/**'
+      - 'composer.json'
+      - 'box.json'
+      - '.php-cs-fixer.php'
 
 permissions:
-    contents: read
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-    php-cs-fixer:
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  php-cs-fixer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.1'
-                  extensions: curl, openssl, mbstring
-                  ini-values: memory_limit=-1
-                  tools: pecl, composer, php-cs-fixer
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: pecl, composer, php-cs-fixer
 
-            - name: Run PHP-CS-Fixer fix
-              run: php-cs-fixer fix --dry-run --diff --ansi
+      - name: Run PHP-CS-Fixer fix
+        run: php-cs-fixer fix --dry-run --diff --ansi
 
-    phpstan:
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  phpstan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.1'
-                  extensions: curl, openssl, mbstring
-                  ini-values: memory_limit=-1
-                  tools: composer
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: composer
 
-            - name: Cache Composer packages
-              id: composer-cache
-              uses: actions/cache@v3
-              with:
-                  path: vendor
-                  key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-phpstan-
+      - name: "Cache Composer packages"
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-phpstan-
 
-            - name: Install Dependencies
-              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: "Install Dependencies"
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-            - name: Run phpstan
-              run: vendor/bin/phpstan analyse
+      - name: "Run phpstan"
+        run: vendor/bin/phpstan analyse
 
-    phpunit:
-        name: PHPUnit (PHP ${{ matrix.php }})
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        strategy:
-            matrix:
-                include:
-                    - php: '8.1'
-                    - php: '8.2'
-            fail-fast: false
+  phpunit:
+    name: "PHPUnit (PHP ${{ matrix.php }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        include:
+          - php: '8.1'
+          - php: '8.2'
+          - php: '8.3'
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: "${{ matrix.php }}"
-                  tools: pecl, composer
-                  extensions: curl, openssl, mbstring
-                  ini-values: memory_limit=-1
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ matrix.php }}"
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
 
-            - name: Cache Composer packages
-              id: composer-cache
-              uses: actions/cache@v3
-              with:
-                  path: vendor
-                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-
+      - name: "Cache Composer packages"
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
 
-            - name: Install Dependencies
-              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: "Install Dependencies"
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-            - name: Run PHPUnit tests
-              run: |
-                  vendor/bin/phpunit tests/ --no-coverage
+      - name: "Run PHPUnit Tests"
+        run: |
+          vendor/bin/phpunit tests/ --no-coverage
+
+  build:
+    name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        php:
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+        os:
+          - ubuntu-latest
+          - macos-13
+          - windows-latest
+          - macos-14
+      fail-fast: false
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+
+      - name: "Cache composer packages"
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v4
+        with:
+          path: downloads
+          key: php-${{ matrix.php }}-dependencies
+
+      - name: "Install Dependencies"
+        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: "Run Build Tests (doctor)"
+        run: bin/spc doctor --auto-fix
+
+      - name: "Prepare UPX for Windows"
+        if: matrix.os == 'windows-latest'
+        run: |
+          bin/spc install-pkg upx
+          echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $env:GITHUB_ENV
+
+      - name: "Prepare UPX for Linux"
+        if: matrix.os == 'ubunut-latest'
+        run: |
+          bin/spc install-pkg upx
+          echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
+
+      - name: "Run Build Tests (download)"
+        run: |
+          bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=5 --shallow-clone
+
+      - name: "Download pre-built libraries for pkg-config"
+        if: matrix.os != 'windows-latest'
+        run: |
+          bin/spc del-download pkg-config
+          bin/spc download pkg-config --prefer-pre-built --debug
+
+      - name: "Run Build Tests (build, *nix)"
+        if: matrix.os != 'windows-latest'
+        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) $(php src/globals/test-extensions.php no_strip) $UPX_CMD --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
+
+      - name: "Run Build Tests (build, windows)"
+        if: matrix.os == 'windows-latest'
+        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) $(php src/globals/test-extensions.php no_strip) $env:UPX_CMD --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --debug

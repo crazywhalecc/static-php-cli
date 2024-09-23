@@ -1,0 +1,220 @@
+From 5ab3bd7fa858eec0626a9dd0117ca3b050ef4660 Mon Sep 17 00:00:00 2001
+From: crazywhalecc <jesse2061@outlook.com>
+Date: Mon, 13 Nov 2023 00:00:52 +0800
+Subject: [PATCH] make macOS static compile happy
+
+---
+ src/c-client/netmsg.c     | 1 +
+ src/c-client/nntp.c       | 1 +
+ src/osdep/amiga/dummy.c   | 1 +
+ src/osdep/amiga/mbx.c     | 1 +
+ src/osdep/amiga/mh.c      | 1 +
+ src/osdep/amiga/mtx.c     | 1 +
+ src/osdep/amiga/unix.c    | 1 +
+ src/osdep/unix/dummy.c    | 1 +
+ src/osdep/unix/mbx.c      | 1 +
+ src/osdep/unix/mh.c       | 1 +
+ src/osdep/unix/mmdf.c     | 1 +
+ src/osdep/unix/mtx.c      | 1 +
+ src/osdep/unix/mx.c       | 1 +
+ src/osdep/unix/tcp_unix.c | 1 +
+ src/osdep/unix/tenex.c    | 2 ++
+ src/osdep/unix/unix.c     | 1 +
+ 16 files changed, 17 insertions(+)
+
+diff --git a/src/c-client/netmsg.c b/src/c-client/netmsg.c
+index 187e4eb..f316d0b 100644
+--- a/src/c-client/netmsg.c
++++ b/src/c-client/netmsg.c
+@@ -29,6 +29,7 @@
+ 
+ #include <stdio.h>
+ #include <errno.h>
++#include <time.h>
+ extern int errno;		/* just in case */
+ #include "c-client.h"
+ #include "netmsg.h"
+diff --git a/src/c-client/nntp.c b/src/c-client/nntp.c
+index fe90edb..b2f7536 100644
+--- a/src/c-client/nntp.c
++++ b/src/c-client/nntp.c
+@@ -29,6 +29,7 @@
+ 
+ #include <ctype.h>
+ #include <stdio.h>
++#include <time.h>
+ #include "c-client.h"
+ #include "newsrc.h"
+ #include "netmsg.h"
+diff --git a/src/osdep/amiga/dummy.c b/src/osdep/amiga/dummy.c
+index b003a0b..2c65824 100644
+--- a/src/osdep/amiga/dummy.c
++++ b/src/osdep/amiga/dummy.c
+@@ -35,6 +35,7 @@ extern int errno;		/* just in case */
+ #include "osdep.h"
+ #include <pwd.h>
+ #include <sys/stat.h>
++#include <time.h>
+ #include "dummy.h"
+ #include "misc.h"
+ 
+diff --git a/src/osdep/amiga/mbx.c b/src/osdep/amiga/mbx.c
+index 1ece5d8..2495965 100644
+--- a/src/osdep/amiga/mbx.c
++++ b/src/osdep/amiga/mbx.c
+@@ -43,6 +43,7 @@ extern int errno;		/* just in case */
+ #include <pwd.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/amiga/mh.c b/src/osdep/amiga/mh.c
+index 0226b7a..e7c907a 100644
+--- a/src/osdep/amiga/mh.c
++++ b/src/osdep/amiga/mh.c
+@@ -36,6 +36,7 @@ extern int errno;		/* just in case */
+ #include <pwd.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/amiga/mtx.c b/src/osdep/amiga/mtx.c
+index 8e6f76e..ca7b368 100644
+--- a/src/osdep/amiga/mtx.c
++++ b/src/osdep/amiga/mtx.c
+@@ -43,6 +43,7 @@ extern int errno;		/* just in case */
+ #include <pwd.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/amiga/unix.c b/src/osdep/amiga/unix.c
+index be3c437..c755fe7 100644
+--- a/src/osdep/amiga/unix.c
++++ b/src/osdep/amiga/unix.c
+@@ -46,6 +46,7 @@ extern int errno;		/* just in case */
+ #include "osdep.h"
+ #include <time.h>
+ #include <sys/stat.h>
++#include <utime.h>
+ #include "unix.h"
+ #include "pseudo.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/unix/dummy.c b/src/osdep/unix/dummy.c
+index b003a0b..2c65824 100644
+--- a/src/osdep/unix/dummy.c
++++ b/src/osdep/unix/dummy.c
+@@ -35,6 +35,7 @@ extern int errno;		/* just in case */
+ #include "osdep.h"
+ #include <pwd.h>
+ #include <sys/stat.h>
++#include <time.h>
+ #include "dummy.h"
+ #include "misc.h"
+ 
+diff --git a/src/osdep/unix/mbx.c b/src/osdep/unix/mbx.c
+index 1ece5d8..2495965 100644
+--- a/src/osdep/unix/mbx.c
++++ b/src/osdep/unix/mbx.c
+@@ -43,6 +43,7 @@ extern int errno;		/* just in case */
+ #include <pwd.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/unix/mh.c b/src/osdep/unix/mh.c
+index 0226b7a..e7c907a 100644
+--- a/src/osdep/unix/mh.c
++++ b/src/osdep/unix/mh.c
+@@ -36,6 +36,7 @@ extern int errno;		/* just in case */
+ #include <pwd.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/unix/mmdf.c b/src/osdep/unix/mmdf.c
+index e962434..8cc9fae 100644
+--- a/src/osdep/unix/mmdf.c
++++ b/src/osdep/unix/mmdf.c
+@@ -34,6 +34,7 @@ extern int errno;		/* just in case */
+ #include "osdep.h"
+ #include <time.h>
+ #include <sys/stat.h>
++#include <utime.h>
+ #include "pseudo.h"
+ #include "fdstring.h"
+ #include "misc.h"
+diff --git a/src/osdep/unix/mtx.c b/src/osdep/unix/mtx.c
+index 8e6f76e..ca7b368 100644
+--- a/src/osdep/unix/mtx.c
++++ b/src/osdep/unix/mtx.c
+@@ -43,6 +43,7 @@ extern int errno;		/* just in case */
+ #include <pwd.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/unix/mx.c b/src/osdep/unix/mx.c
+index 4549527..9d444c9 100644
+--- a/src/osdep/unix/mx.c
++++ b/src/osdep/unix/mx.c
+@@ -36,6 +36,7 @@ extern int errno;		/* just in case */
+ #include <pwd.h>
+ #include <sys/stat.h>
+ #include <sys/time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ #include "fdstring.h"
+diff --git a/src/osdep/unix/tcp_unix.c b/src/osdep/unix/tcp_unix.c
+index 5bad706..5d6cd03 100644
+--- a/src/osdep/unix/tcp_unix.c
++++ b/src/osdep/unix/tcp_unix.c
+@@ -27,6 +27,7 @@
+  */
+ 
+ #include "ip_unix.c"
++#include <poll.h>
+ 
+ #undef write			/* don't use redefined write() */
+  
+diff --git a/src/osdep/unix/tenex.c b/src/osdep/unix/tenex.c
+index eee61fb..61760f0 100644
+--- a/src/osdep/unix/tenex.c
++++ b/src/osdep/unix/tenex.c
+@@ -46,6 +46,8 @@ extern int errno;		/* just in case */
+ #include "mail.h"
+ #include "osdep.h"
+ #include <sys/stat.h>
++#include <time.h>
++#include <utime.h>
+ #include "misc.h"
+ #include "dummy.h"
+ 
+diff --git a/src/osdep/unix/unix.c b/src/osdep/unix/unix.c
+index be3c437..c755fe7 100644
+--- a/src/osdep/unix/unix.c
++++ b/src/osdep/unix/unix.c
+@@ -46,6 +46,7 @@ extern int errno;		/* just in case */
+ #include "osdep.h"
+ #include <time.h>
+ #include <sys/stat.h>
++#include <utime.h>
+ #include "unix.h"
+ #include "pseudo.h"
+ #include "fdstring.h"
+-- 
+2.39.3 (Apple Git-145)
+

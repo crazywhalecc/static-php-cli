@@ -6,6 +6,16 @@
             "path": "LICENSE"
         }
     },
+    "amqp": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/amqp",
+        "path": "php-src/ext/amqp",
+        "filename": "amqp.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "apcu": {
         "type": "url",
         "url": "https://pecl.php.net/get/APCu",
@@ -19,6 +29,7 @@
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -28,18 +39,30 @@
         "type": "filelist",
         "url": "https://sourceware.org/pub/bzip2/",
         "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "text",
-            "text": "This program, \"bzip2\", the associated library \"libbzip2\", and all documentation, are copyright (C) 1996-2010 Julian R Seward. All rights reserved.\n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n    2. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.\n    3. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.\n    4. The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nJulian Seward, jseward@bzip.org bzip2/libbzip2 version 1.0.6 of 6 September 2010\n\nPATENTS: To the best of my knowledge, bzip2 and libbzip2 do not use any patented algorithms. However, I do not have the resources to carry out a patent search. Therefore I cannot give any guarantee of the above statement."
+            "text": "This program, \"bzip2\", the associated library \"libbzip2\", and all documentation, are copyright (C) 1996-2010 Julian R Seward. All rights reserved. \n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n    2. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.\n    3. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.\n    4. The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nJulian Seward, jseward@bzip.org bzip2/libbzip2 version 1.0.6 of 6 September 2010\n\nPATENTS: To the best of my knowledge, bzip2 and libbzip2 do not use any patented algorithms. However, I do not have the resources to carry out a patent search. Therefore I cannot give any guarantee of the above statement."
         }
     },
     "curl": {
         "type": "ghrel",
         "repo": "curl/curl",
         "match": "curl.+\\.tar\\.xz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "ext-ds": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/ds",
+        "path": "php-src/ext/ds",
+        "filename": "ds.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "librdkafka": {
@@ -77,6 +100,15 @@
             "path": "LICENSE"
         }
     },
+    "ext-gmssl": {
+        "type": "ghtar",
+        "repo": "gmssl/GmSSL-PHP",
+        "path": "php-src/ext/gmssl",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-imagick": {
         "type": "url",
         "url": "https://pecl.php.net/get/imagick",
@@ -92,6 +124,16 @@
         "url": "https://pecl.php.net/get/memcache",
         "path": "php-src/ext/memcache",
         "filename": "memcache.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-simdjson": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/simdjson",
+        "path": "php-src/ext/simdjson",
+        "filename": "simdjson.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -117,6 +159,26 @@
             "path": "LICENSE"
         }
     },
+    "ext-uuid": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/uuid",
+        "path": "php-src/ext/uuid",
+        "filename": "uuid.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-uv": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/uv",
+        "path": "php-src/ext/uv",
+        "filename": "uv.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",
@@ -128,34 +190,77 @@
         }
     },
     "freetype": {
-        "type": "filelist",
-        "url": "https://download-mirror.savannah.gnu.org/releases/freetype/",
-        "regex": "/href=\"(?<file>freetype-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "type": "git",
+        "rev": "VER-2-13-2",
+        "url": "https://github.com/freetype/freetype",
         "license": {
             "type": "file",
             "path": "LICENSE.TXT"
         }
     },
+    "gettext": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/pub/gnu/gettext/",
+        "regex": "/href=\"(?<file>gettext-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "gmp": {
-        "type": "ghtagtar",
-        "repo": "alisw/GMP",
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/gmp/gmp-6.3.0.tar.xz",
+        "provide-pre-built": true,
+        "alt": {
+            "type": "ghtagtar",
+            "repo": "alisw/GMP"
+        },
         "license": {
             "type": "text",
             "text": "Since version 6, GMP is distributed under the dual licenses, GNU LGPL v3 and GNU GPL v2. These licenses make the library free to use, share, and improve, and allow you to pass on the result. The GNU licenses give freedoms, but also set firm restrictions on the use with non-free programs."
+        }
+    },
+    "gmssl": {
+        "type": "ghtar",
+        "repo": "guanzhi/GmSSL",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "icu": {
         "type": "ghrel",
         "repo": "unicode-org/icu",
         "match": "icu4c.+-src\\.tgz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
+    "igbinary": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/igbinary",
+        "path": "php-src/ext/igbinary",
+        "filename": "igbinary.tgz",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "imagemagick": {
         "type": "ghtar",
         "repo": "ImageMagick/ImageMagick",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "imap": {
+        "type": "git",
+        "url": "https://github.com/static-php/imap.git",
+        "rev": "master",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -180,18 +285,47 @@
             "path": "LICENSE"
         }
     },
-    "libavif": {
-        "type": "ghtar",
-        "repo": "AOMediaCodec/libavif",
+    "libargon2": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/static-php/phc-winner-argon2",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "libavif": {
+        "type": "ghtar",
+        "repo": "AOMediaCodec/libavif",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "libcares": {
+        "type": "ghrel",
+        "repo": "c-ares/c-ares",
+        "match": "c-ares-.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
+        "alt": {
+            "type": "filelist",
+            "url": "https://c-ares.org/download/",
+            "regex": "/href=\"\\/download\\/(?<file>c-ares-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
         }
     },
     "libevent": {
         "type": "ghrel",
         "repo": "libevent/libevent",
         "match": "libevent.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -201,6 +335,16 @@
         "type": "ghrel",
         "repo": "libffi/libffi",
         "match": "libffi.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "libffi-win": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/static-php/libffi-win.git",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -210,9 +354,19 @@
         "type": "filelist",
         "url": "https://ftp.gnu.org/gnu/libiconv/",
         "regex": "/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "libiconv-win": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/static-php/libiconv-win.git",
+        "license": {
+            "type": "file",
+            "path": "source/COPYING"
         }
     },
     "libjpeg": {
@@ -223,12 +377,15 @@
             "path": "LICENSE.md"
         }
     },
-    "libmcrypt": {
-        "type": "url",
-        "url": "https://nchc.dl.sourceforge.net/project/mcrypt/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz",
+    "liblz4": {
+        "type": "ghrel",
+        "repo": "lz4/lz4",
+        "match": "lz4-.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "LICENSE"
         }
     },
     "libmemcached": {
@@ -242,16 +399,29 @@
     },
     "libpng": {
         "type": "git",
-        "url": "https://git.code.sf.net/p/libpng/code",
+        "url": "https://github.com/glennrp/libpng.git",
         "rev": "libpng16",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "librabbitmq": {
+        "type": "git",
+        "url": "https://github.com/alanxz/rabbitmq-c.git",
+        "rev": "master",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "libsodium": {
-        "type": "url",
-        "url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz",
+        "type": "ghrel",
+        "repo": "jedisct1/libsodium",
+        "match": "libsodium-\\d+(\\.\\d+)*\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -261,14 +431,49 @@
         "type": "ghrel",
         "repo": "libssh2/libssh2",
         "match": "libssh2.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
         }
     },
+    "libtiff": {
+        "type": "filelist",
+        "url": "https://download.osgeo.org/libtiff/",
+        "regex": "/href=\"(?<file>tiff-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
+        }
+    },
+    "libuuid": {
+        "type": "git",
+        "url": "https://github.com/static-php/libuuid.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "libuv": {
+        "type": "ghtar",
+        "repo": "libuv/libuv",
+        "license": [
+            {
+                "type": "file",
+                "path": "LICENSE"
+            },
+            {
+                "type": "file",
+                "path": "LICENSE-extra"
+            }
+        ]
+    },
     "libwebp": {
         "type": "url",
         "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.2.tar.gz",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -276,7 +481,7 @@
     },
     "libxml2": {
         "type": "url",
-        "url": "https://github.com/GNOME/libxml2/archive/refs/tags/v2.9.14.tar.gz",
+        "url": "https://github.com/GNOME/libxml2/archive/refs/tags/v2.12.5.tar.gz",
         "license": {
             "type": "file",
             "path": "Copyright"
@@ -295,6 +500,8 @@
         "type": "ghrel",
         "repo": "yaml/libyaml",
         "match": "yaml-.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "License"
@@ -304,17 +511,10 @@
         "type": "ghrel",
         "repo": "nih-at/libzip",
         "match": "libzip.+\\.tar\\.xz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "mcrypt": {
-        "type": "url",
-        "url": "https://jaist.dl.sourceforge.net/project/mcrypt/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz",
-        "license": {
-            "type": "file",
-            "path": "COPYING"
         }
     },
     "memcached": {
@@ -342,6 +542,17 @@
         "repo": "mongodb/mongo-php-driver",
         "path": "php-src/ext/mongodb",
         "match": "mongodb.+\\.tgz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "msgpack": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/msgpack",
+        "path": "php-src/ext/msgpack",
+        "filename": "msgpack.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -351,6 +562,7 @@
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
         "regex": "/href=\"(?<file>ncurses-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -360,6 +572,7 @@
         "type": "ghrel",
         "repo": "nghttp2/nghttp2",
         "match": "nghttp2.+\\.tar\\.xz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -369,24 +582,53 @@
         "type": "ghrel",
         "repo": "kkos/oniguruma",
         "match": "onig-.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
         }
     },
     "openssl": {
-        "type": "filelist",
-        "url": "https://www.openssl.org/source/",
-        "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "type": "ghrel",
+        "repo": "openssl/openssl",
+        "match": "openssl.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "alt": {
+            "type": "filelist",
+            "url": "https://www.openssl.org/source/",
+            "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE.txt"
         }
     },
+    "parallel": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/parallel",
+        "path": "php-src/ext/parallel",
+        "filename": "parallel.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "pdo_sqlsrv": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/pdo_sqlsrv",
+        "path": "php-src/ext/pdo_sqlsrv",
+        "filename": "pdo_sqlsrv.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "pkg-config": {
-        "type": "filelist",
-        "url": "https://pkgconfig.freedesktop.org/releases/",
-        "regex": "/href=\"(?<file>pkg-config-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -394,7 +636,7 @@
     },
     "postgresql": {
         "type": "url",
-        "url": "https://ftp.postgresql.org/pub/source/v15.1/postgresql-15.1.tar.gz",
+        "url": "https://ftp.postgresql.org/pub/source/v16.2/postgresql-16.2.tar.bz2",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"
@@ -419,10 +661,30 @@
             "path": "LICENSE"
         }
     },
+    "qdbm": {
+        "type": "git",
+        "url": "https://github.com/static-php/qdbm.git",
+        "rev": "main",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "rar": {
+        "type": "git",
+        "url": "https://github.com/static-php/php-rar.git",
+        "path": "php-src/ext/rar",
+        "rev": "issue-php82",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "readline": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/readline/",
         "regex": "/href=\"(?<file>readline-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -431,11 +693,14 @@
     "redis": {
         "type": "git",
         "path": "php-src/ext/redis",
-        "rev": "5.3.7",
+        "rev": "release/6.0.2",
         "url": "https://github.com/phpredis/phpredis",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": [
+                "LICENSE",
+                "COPYING"
+            ]
         }
     },
     "snappy": {
@@ -448,18 +713,40 @@
             "path": "COPYING"
         }
     },
+    "spx": {
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/static-php/php-spx.git",
+        "path": "php-src/ext/spx",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "sqlite": {
         "type": "url",
         "url": "https://www.sqlite.org/2023/sqlite-autoconf-3430200.tar.gz",
+        "provide-pre-built": true,
         "license": {
             "type": "text",
             "text": "The author disclaims copyright to this source code.  In place of\na legal notice, here is a blessing:\n\n  *   May you do good and not evil.\n  *   May you find forgiveness for yourself and forgive others.\n  *   May you share freely, never taking more than you give."
+        }
+    },
+    "sqlsrv": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/sqlsrv",
+        "path": "php-src/ext/sqlsrv",
+        "filename": "sqlsrv.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "swoole": {
         "type": "ghtar",
         "path": "php-src/ext/swoole",
         "repo": "swoole/swoole-src",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -476,6 +763,34 @@
             "path": "LICENSE"
         }
     },
+    "tidy": {
+        "type": "url",
+        "url": "https://github.com/htacg/tidy-html5/archive/refs/tags/5.8.0.tar.gz",
+        "filename": "tidy-html5.tgz",
+        "license": {
+            "type": "file",
+            "path": "README/LICENSE.md"
+        }
+    },
+    "unixodbc": {
+        "type": "url",
+        "url": "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "xhprof": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/xhprof",
+        "path": "php-src/ext/xhprof-src",
+        "filename": "xhprof.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "xlswriter": {
         "type": "url",
         "url": "https://pecl.php.net/get/xlswriter",
@@ -487,12 +802,24 @@
         }
     },
     "xz": {
-        "type": "filelist",
-        "url": "https://tukaani.org/xz/",
-        "regex": "/href=\"(?<file>xz-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+        "type": "ghrel",
+        "repo": "tukaani-project/xz",
+        "match": "xz.+\\.tar\\.xz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "yac": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/yac",
+        "path": "php-src/ext/yac",
+        "filename": "yac.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "yaml": {
@@ -509,6 +836,8 @@
         "type": "ghrel",
         "repo": "madler/zlib",
         "match": "zlib.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "text",
             "text": "(C) 1995-2022 Jean-loup Gailly and Mark Adler\n\nThis software is provided 'as-is', without any express or implied\nwarranty.  In no event will the authors be held liable for any damages\narising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\n claim that you wrote the original software. If you use this software\n in a product, an acknowledgment in the product documentation would be\n appreciated but is not required.\n2. Altered source versions must be plainly marked as such, and must not be\n misrepresented as being the original software.\n3. This notice may not be removed or altered from any source distribution.\n\nJean-loup Gailly        Mark Adler\njloup@gzip.org          madler@alumni.caltech.edu"
@@ -518,6 +847,7 @@
         "type": "ghrel",
         "repo": "facebook/zstd",
         "match": "zstd.+\\.tar\\.gz",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"

@@ -7,6 +7,7 @@ namespace SPC\builder;
 use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
+use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -17,6 +18,8 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 class BuilderProvider
 {
+    private static ?BuilderBase $builder = null;
+
     /**
      * @throws FileSystemException
      * @throws RuntimeException
@@ -24,16 +27,26 @@ class BuilderProvider
      */
     public static function makeBuilderByInput(InputInterface $input): BuilderBase
     {
-        return match (PHP_OS_FAMILY) {
-            // 'Windows' => new WindowsBuilder(
-            //   binary_sdk_dir: $input->getOption('with-sdk-binary-dir'),
-            //    vs_ver: $input->getOption('vs-ver'),
-            //    arch: $input->getOption('arch'),
-            // ),
+        ini_set('memory_limit', '4G');
+
+        self::$builder = match (PHP_OS_FAMILY) {
+            'Windows' => new WindowsBuilder($input->getOptions()),
             'Darwin' => new MacOSBuilder($input->getOptions()),
             'Linux' => new LinuxBuilder($input->getOptions()),
             'BSD' => new BSDBuilder($input->getOptions()),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
+        return self::$builder;
+    }
+
+    /**
+     * @throws WrongUsageException
+     */
+    public static function getBuilder(): BuilderBase
+    {
+        if (self::$builder === null) {
+            throw new WrongUsageException('Builder has not been initialized');
+        }
+        return self::$builder;
     }
 }

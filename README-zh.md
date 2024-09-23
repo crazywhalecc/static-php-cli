@@ -1,58 +1,99 @@
 # static-php-cli
 
-Build single static PHP binary, with PHP project together, with popular extensions included.
+[![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
+[![Chinese readme](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%20%F0%9F%87%A8%F0%9F%87%B3-moccasin?style=flat-square)](README-zh.md)
+[![Releases](https://img.shields.io/packagist/v/crazywhalecc/static-php-cli?include_prereleases&label=Release&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
+[![Extensions](https://img.shields.io/badge/Extension%20Counter-75+-yellow.svg?style=flat-square)](https://static-php.dev/zh/guide/extensions.html)
 
-🌐 **[中文](README-zh.md)** | **[English](README.md)**
+**static-php-cli**是一个用于静态编译、构建 PHP 解释器的工具，支持众多流行扩展。
 
-编译纯静态的 PHP Binary 二进制文件，带有各种扩展，让 PHP-cli 应用变得更便携！（cli SAPI）
+目前 static-php-cli 支持 `cli`、`fpm`、`embed` 和 `micro` SAPI。
 
-<img width="600" alt="截屏2023-05-02 15 53 13" src="https://user-images.githubusercontent.com/20330940/235610282-23e58d68-bd35-4092-8465-171cff2d5ba8.png">
+**static-php-cli**也支持将 PHP 代码和 PHP 运行时打包为一个文件并运行。
 
-同时可以使用 micro 二进制文件，将 PHP 源码和 PHP 二进制构建为一个文件分发！（micro SAPI）
+## 特性
 
-<img width="600" alt="截屏2023-05-02 15 52 33" src="https://user-images.githubusercontent.com/20330940/235610318-2ef4e3f1-278b-4ca4-99f4-b38120efc395.png">
+static-php-cli（简称 `spc`）有许多特性：
 
-> 该 SAPI 源自 [dixyes/phpmicro](https://github.com/dixyes/phpmicro) 的 [Fork 仓库](https://github.com/static-php/phpmicro)。
+- :handbag: 构建独立的单文件 PHP 解释器，无需任何依赖
+- :hamburger: 构建 **[phpmicro](https://github.com/dixyes/phpmicro)** 自执行二进制（将 PHP 代码和 PHP 解释器打包为一个文件）
+- :pill: 提供一键检查和修复编译环境的 Doctor 模块
+- :zap: 支持多个系统：`Linux`、`macOS`、`FreeBSD`、`Windows`
+- :wrench: 高度自定义的代码 patch 功能
+- :books: 自带编译依赖管理
+- 📦 提供由自身编译的独立 `spc` 二进制（使用 spc 和 [box](https://github.com/box-project/box) 构建）
+- :fire: 支持大量 [扩展](https://static-php.dev/zh/guide/extensions.html)
+- :floppy_disk: 整合 UPX 工具（减小二进制文件体积）
 
-[![Version](https://img.shields.io/badge/Version-2.0--rc8-pink.svg?style=flat-square)]()
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
-[![](https://img.shields.io/github/actions/workflow/status/static-php/static-php-cli-hosted/build-php-common.yml?branch=refactor&label=Build%20Common%20Extensions&style=flat-square)](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-common.yml)
-[![](https://img.shields.io/badge/Extension%20Counter-65+-yellow.svg?style=flat-square)]()
-[![](https://img.shields.io/github/search/crazywhalecc/static-php-cli/TODO?label=TODO%20Counter&style=flat-square)]()
+**静态 php-cli:**
 
-> 项目名称是 static-php-cli，但其实支持 cli、fpm、micro 和 embed SAPI 😎
+<img width="700" alt="out1" src="https://github.com/crazywhalecc/static-php-cli/assets/20330940/01a2e60f-13b0-4242-a645-f7afa4936396">
+
+**使用 phpmicro 打包 PHP 代码:**
+
+<img width="700" alt="out2" src="https://github.com/crazywhalecc/static-php-cli/assets/20330940/46b7128d-fb72-4169-957e-48564c3ff3e2">
 
 ## 文档
 
 目前 README 编写了基本用法。有关 static-php-cli 所有的功能，请点击这里查看文档：<https://static-php.dev>。
 
-## 自托管直接下载
+## 直接下载
 
-如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.static-php.dev/static-php-cli/common/)
+如果你不想自行编译 PHP，可以从本项目现有的示例 Action 下载 Artifact，也可以从自托管的服务器下载。
 
-> 自托管的服务器默认包含的扩展有：`bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip`
+| 组合名称                                                                | 组合扩展数                                                                      | 系统          | 备注           |
+|---------------------------------------------------------------------|----------------------------------------------------------------------------|-------------|--------------|
+| [common](https://dl.static-php.dev/static-php-cli/common/)          | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux/macOS | 体积为 7.5MB 左右 |
+| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)              | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux/macOS | 体积为 25MB 左右  |
+| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)        | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)           | Linux/macOS | 体积为 3MB 左右   |
+| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)   | Windows     | 体积为 3MB 左右   |
+| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max) | [40+](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows     | 体积为 8.5MB 左右 |
+
+> Linux 和 Windows 默认启用了 UPX 压缩，可减小 30~50% 的 PHP 二进制体积。
+> macOS 当前不支持 UPX，所以上述预编译的 macOS 版本体积可能较大。
 
 ## 使用 static-php-cli 构建 PHP
 
 ### 编译环境需求
 
+- PHP >= 8.1（这是 spc 自身需要的版本，不是支持的构建版本）
+- 扩展：`mbstring,tokenizer,phar`
+- 系统安装了 `curl` 和 `git`
+
 是的，本项目采用 PHP 编写，编译前需要一个 PHP 环境，比较滑稽。
-但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含 mbstring、pcntl 扩展和 PHP 版本大于等于 8.1 即可。
+但本项目默认可通过自身构建的 micro 和 static-php 二进制运行，其他只需要包含上面提到的扩展和 PHP 版本大于等于 8.1 即可。
 
 下面是架构支持情况，:octocat: 代表支持 GitHub Action 构建，:computer: 代表支持本地构建，空 代表暂不支持。
 
 |         | x86_64               | aarch64              |
 |---------|----------------------|----------------------|
-| macOS   | :octocat: :computer: | :computer:           |
+| macOS   | :octocat: :computer: | :octocat: :computer: |
 | Linux   | :octocat: :computer: | :octocat: :computer: |
-| Windows |                      |                      |
+| Windows | :octocat: :computer: |                      |
 | FreeBSD | :computer:           | :computer:           |
 
-> macOS-arm64 因 GitHub 暂未提供 arm runner，如果要构建 arm 二进制，可以使用手动构建。
+当前支持编译的 PHP 版本：
 
-目前支持编译的 PHP 版本为：`7.3`，`7.4`，`8.0`，`8.1`，`8.2`，`8.3`。
+> :warning: 支持，但 static-php-cli 作者可能不再提供补丁修复
+> 
+> :heavy_check_mark: 支持
+> 
+> :x: 不支持
 
-### 支持的扩展情况
+| PHP Version | Status             | Comment                      |
+|-------------|--------------------|------------------------------|
+| 7.2         | :x:                |                              |
+| 7.3         | :warning:          | phpmicro 和许多扩展不支持 7.3、7.4 版本 |
+| 7.4         | :warning:          | phpmicro 和许多扩展不支持 7.3、7.4 版本 |
+| 8.0         | :heavy_check_mark: | PHP 官方已停止 8.0 的维护            |
+| 8.1         | :heavy_check_mark: | PHP 官方仅对 8.1 提供安全更新          |
+| 8.2         | :heavy_check_mark: |                              |
+| 8.3         | :heavy_check_mark: |                              |
+| 8.4         | :x:                | WIP                          |
+
+### 支持的扩展
 
 请先根据下方扩展列表选择你要编译的扩展。
 
@@ -61,7 +102,7 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 > 如果这里没有你需要的扩展，可以提交 Issue。
 
-### 使用 Actions 构建
+### 在线构建（使用 GitHub Actions）
 
 使用 GitHub Action 可以方便地构建一个静态编译的 PHP，同时可以自行定义要编译的扩展。
 
@@ -72,72 +113,89 @@ Build single static PHP binary, with PHP project together, with popular extensio
 
 如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
 
-### 手动构建（使用 SPC 二进制）
+### 本地构建（使用 spc 二进制，推荐）
 
-本项目提供了一个 static-php-cli 的二进制文件，你可以直接下载对应平台的二进制文件，然后使用它来构建静态的 PHP。目前 `spc` 二进制支持的平台有 Linux 和 macOS。
+该项目提供了 static-php-cli 的二进制文件：`spc`。
+您可以使用 `spc` 二进制文件，无需安装任何运行时（用起来就像 golang 程序）。
+目前，`spc` 二进制文件提供的平台有 Linux 和 macOS。
 
-下面是从 GitHub Action 下载的方法：
-
-1. 进入 [GitHub Action](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml)。
-2. 选择一个最新的构建任务，进入后选择 `Artifacts`，下载对应平台的二进制文件。
-3. 解压 `.zip` 文件。解压后，为其添加执行权限：`chmod +x ./spc`。
-
-你也可以从自托管的服务器下载二进制文件：[进入](https://dl.static-php.dev/static-php-cli/spc-bin/nightly/)。
-
-### 手动构建（使用源码）
-
-先克隆本项目：
+使用以下命令从自托管服务器下载：
 
 ```bash
+# Download from self-hosted nightly builds (sync with main branch)
+# For Linux x86_64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+# For Linux aarch64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
+# macOS x86_64 (Intel)
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
+# macOS aarch64 (Apple)
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+# Windows (x86_64, win10 build 17063 or later)
+curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+
+# Add execute perm (Linux and macOS only)
+chmod +x ./spc
+
+# Run (Linux and macOS)
+./spc --version
+# Run (Windows powershell)
+.\spc.exe --version
+```
+
+自托管 `spc` 由 GitHub Actions 构建，你也可以从 Actions 直接下载：[此处](https://github.com/crazywhalecc/static-php-cli/actions/workflows/release-build.yml)。
+
+### 本地构建（使用 git 源码）
+
+如果你需要修改 static-php-cli 源码，或者使用 spc 二进制构建有问题，你可以使用 git 源码下载 static-php-cli。
+
+```bash
+# clone 仓库即可
 git clone https://github.com/crazywhalecc/static-php-cli.git
 ```
 
-如果你本机没有安装 PHP，你需要先使用包管理（例如 brew、apt、yum、apk 等）安装 php。
-
-你也可以通过 `bin/setup-runtime` 命令下载静态编译好的 php-cli 和 Composer。下载的 php 和 Composer 将保存为 `bin/php` 和 `bin/composer`。
+如果您的系统上尚未安装 php，我们建议你使用内置的 setup-runtime 自动安装 PHP 和 Composer。
 
 ```bash
 cd static-php-cli
 chmod +x bin/setup-runtime
-./bin/setup-runtime
-
-# 使用独立的 php 运行 static-php-cli
-./bin/php bin/spc
-
-# 使用 composer
-./bin/php bin/composer
-
-# 初始化本项目
-cd static-php-cli
-composer update
+# it will download static php (from self-hosted server) and composer (from getcomposer)
+bin/setup-runtime
+# initialize composer deps
+bin/composer install
+# chmod
 chmod +x bin/spc
+bin/spc --version
 ```
 
-### 使用 static-php-cli 命令行程序
+### 开始构建 PHP
 
-下面是使用 static-php-cli 编译静态 php 和 micro 的基础用法：
+下面是使用 static-php-cli 的基础用法：
 
-> 如果你使用的是打包好的 `spc` 二进制，你需要将下列命令的 `bin/spc` 替换为 `./spc`。
+> 如果你使用的是打包好的 `spc` 二进制，你需要将下列命令的 `./bin/spc` 替换为 `./spc`。
 
 ```bash
-# 检查环境依赖，并根据提示的命令安装缺失的编译工具
-./bin/spc doctor
+# 检查环境依赖，并根据尝试自动安装缺失的编译工具
+./bin/spc doctor --auto-fix
+
 # 拉取所有依赖库
-./bin/spc fetch --all
-# 只拉取编译指定扩展需要的所有依赖
-./bin/spc download --for-extensions=openssl,pcntl,mbstring,pdo_sqlite
+./bin/spc download --all
+# 只拉取编译指定扩展需要的所有依赖（推荐）
+./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
+# 下载依赖时，优先下载有预编译的库（节省编译依赖的时间）
+./bin/spc download --for-extensions="openssl,curl,mbstring,mbregex" --prefer-pre-built
+# 下载编译不同版本的 PHP (--with-php=x.y 或 --with-php=x.y.z，推荐 8.1 ~ 8.3)
+./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
+
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
 ./bin/spc build "bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl" --build-cli --build-micro
+# 编译线程安全版本 (--enable-zts)
+./bin/spc build "curl,phar" --enable-zts --build-cli
+# 编译后使用 UPX 减小可执行文件体积 (仅 Linux、Windows 可用) (至少压缩至原来的 30~50%)
+./bin/spc build "curl,phar" --enable-zts --build-cli --with-upx-pack
 ```
 
-你也可以使用参数 `--with-php=x.y` 来指定下载的 PHP 版本，目前支持 7.3 ~ 8.2：
-
-```bash
-# 优先考虑使用 >= 8.0 的 PHP 版本，因为 phpmicro 不支持在 PHP7 中构建
-./bin/spc download --with-php=8.2 --all
-```
-
-其中，目前支持构建 cli，micro，fpm 三种静态二进制，使用以下参数的一个或多个来指定编译的 SAPI：
+其中，目前支持构建 cli，micro，fpm 和 embed，使用以下参数的一个或多个来指定编译的 SAPI：
 
 - `--build-cli`：构建 cli 二进制
 - `--build-micro`：构建 phpmicro 自执行二进制
@@ -148,17 +206,9 @@ chmod +x bin/spc
 如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：
 
 ```bash
-./bin/spc build openssl,pcntl,mbstring --debug --build-all
-./bin/spc fetch --all --debug
+./bin/spc build "openssl,pcntl,mbstring" --debug --build-all
+./bin/spc download --all --debug
 ```
-
-此外，默认编译的 PHP 为 NTS 版本。如需编译线程安全版本（ZTS），只需添加参数 `--enable-zts` 即可。
-
-```bash
-./bin/spc build openssl,pcntl --build-all --enable-zts
-```
-
-同时，你也可以使用参数 `--no-strip` 来关闭裁剪，关闭裁剪后可以使用 gdb 等工具调试，但这样会让静态二进制体积变大。
 
 ## 不同 SAPI 的使用
 
@@ -231,22 +281,21 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 另外，添加新扩展的贡献方式，可以参考下方 `进阶`。
 
-如果你想贡献文档内容，请到项目仓库 [static-php/static-php-cli-docs](https://github.com/static-php/static-php-cli-docs) 贡献。
+如果你想贡献文档内容，请直接修改 `docs/` 目录。
 
 ## 赞助本项目
 
-你可以在 [我的个人赞助页](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md) 支持我和我的项目。
+你可以在 [我的个人赞助页](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md) 支持我和我的项目。你捐赠的一部分将会被用于维护 **static-php.dev** 服务器。
 
 ## 开源协议
 
-本项目依据旧版本惯例采用 MIT License 开源，部分扩展的集成编译命令参考或修改自以下项目：
+本项目采用 MIT License 许可开源，下面是类似的项目：
 
-- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)（木兰宽松许可证）
-- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)（Apache 2.0 LICENSE、SWOOLE-CLI LICENSE）
+- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)
+- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)
+
+该项目使用了 [dixyes/lwmbs](https://github.com/dixyes/lwmbs) 中的一些代码，例如 Windows 静态构建目标和 libiconv 库支持。
+lwmbs 使用 [Mulan PSL 2](http://license.coscl.org.cn/MulanPSL2) 许可进行分发。对应文件有关于作者和许可的特殊说明，除此之外，均使用 MIT 授权许可。
 
 因本项目的特殊性，使用项目编译过程中会使用很多其他开源项目，例如 curl、protobuf 等，它们都有各自的开源协议。
 请在编译完成后，使用命令 `bin/spc dump-license` 导出项目使用项目的开源协议，并遵守对应项目的 LICENSE。
-
-## 进阶
-
-本项目重构分支为模块化编写。如果你对本项目感兴趣，想加入开发，可以参照文档的 [贡献指南](https://static-php.dev) 贡献代码或文档。

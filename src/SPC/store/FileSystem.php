@@ -14,13 +14,13 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public static function loadConfigArray(string $config): array
+    public static function loadConfigArray(string $config, ?string $config_dir = null): array
     {
-        $whitelist = ['ext', 'lib', 'source'];
+        $whitelist = ['ext', 'lib', 'source', 'pkg', 'pre-built'];
         if (!in_array($config, $whitelist)) {
             throw new FileSystemException('Reading ' . $config . '.json is not allowed');
         }
-        $tries = [
+        $tries = $config_dir !== null ? [FileSystem::convertPath($config_dir . '/' . $config . '.json')] : [
             WORKING_DIR . '/config/' . $config . '.json',
             ROOT_DIR . '/config/' . $config . '.json',
         ];
@@ -139,6 +139,37 @@ class FileSystem
     }
 
     /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    public static function extractPackage(string $name, string $filename, ?string $extract_path = null): void
+    {
+        if ($extract_path !== null) {
+            // replace
+            $extract_path = self::replacePathVariable($extract_path);
+            $extract_path = self::isRelativePath($extract_path) ? (WORKING_DIR . '/' . $extract_path) : $extract_path;
+        } else {
+            $extract_path = PKG_ROOT_PATH . '/' . $name;
+        }
+        logger()->info("extracting {$name} package to {$extract_path} ...");
+        $target = self::convertPath($extract_path);
+
+        if (!is_dir($dir = dirname($target))) {
+            self::createDir($dir);
+        }
+        try {
+            self::extractArchive($filename, $target);
+        } catch (RuntimeException $e) {
+            if (PHP_OS_FAMILY === 'Windows') {
+                f_passthru('rmdir /s /q ' . $target);
+            } else {
+                f_passthru('rm -rf ' . $target);
+            }
+            throw new FileSystemException('Cannot extract package ' . $name, $e->getCode(), $e);
+        }
+    }
+
+    /**
      * 解压缩下载的资源包到 source 目录
      *
      * @param  string              $name     资源名
@@ -152,94 +183,26 @@ class FileSystem
         if (self::$_extract_hook === []) {
             SourcePatcher::init();
         }
-        if (!is_dir(SOURCE_PATH)) {
-            self::createDir(SOURCE_PATH);
-        }
         if ($move_path !== null) {
             $move_path = SOURCE_PATH . '/' . $move_path;
+        } else {
+            $move_path = SOURCE_PATH . "/{$name}";
         }
-        logger()->info("extracting {$name} source to " . ($move_path ?? SOURCE_PATH . "/{$name}") . ' ...');
+        $target = self::convertPath($move_path);
+        logger()->info("extracting {$name} source to {$target}" . ' ...');
+        if (!is_dir($dir = dirname($target))) {
+            self::createDir($dir);
+        }
         try {
-            $target = $move_path ?? (SOURCE_PATH . "/{$name}");
-            // Git source, just move
-            if (is_dir($filename)) {
-                self::copyDir($filename, $target);
-                self::emitSourceExtractHook($name);
-                return;
-            }
-            if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
-                if (f_mkdir(directory: $target, recursive: true) !== true) {
-                    throw new FileSystemException('create ' . $name . 'source dir failed');
-                }
-                switch (self::extname($filename)) {
-                    case 'xz':
-                    case 'txz':
-                        f_passthru("tar -xf {$filename} -C {$target} --strip-components 1");
-                        // f_passthru("cat {$filename} | xz -d | tar -x -C " . SOURCE_PATH . "/{$name} --strip-components 1");
-                        break;
-                    case 'gz':
-                    case 'tgz':
-                        f_passthru("tar -xzf {$filename} -C {$target} --strip-components 1");
-                        break;
-                    case 'bz2':
-                        f_passthru("tar -xjf {$filename} -C {$target} --strip-components 1");
-                        break;
-                    case 'zip':
-                        f_passthru("unzip {$filename} -d {$target}");
-                        break;
-                        // case 'zstd':
-                        // case 'zst':
-                        //     passthru('cat ' . $filename . ' | zstd -d | tar -x -C ".SOURCE_PATH . "/' . $name . ' --strip-components 1', $ret);
-                        //     break;
-                    case 'tar':
-                        f_passthru("tar -xf {$filename} -C {$target} --strip-components 1");
-                        break;
-                    default:
-                        throw new FileSystemException('unknown archive format: ' . $filename);
-                }
-            } elseif (PHP_OS_FAMILY === 'Windows') {
-                // find 7z
-                $_7zExe = self::findCommandPath('7z', [
-                    'C:\Program Files\7-Zip-Zstandard',
-                    'C:\Program Files (x86)\7-Zip-Zstandard',
-                    'C:\Program Files\7-Zip',
-                    'C:\Program Files (x86)\7-Zip',
-                ]);
-                if (!$_7zExe) {
-                    throw new FileSystemException('windows needs 7z to unpack');
-                }
-                f_mkdir(SOURCE_PATH . "/{$name}", recursive: true);
-                switch (self::extname($filename)) {
-                    case 'zstd':
-                    case 'zst':
-                        if (!str_contains($_7zExe, 'Zstandard')) {
-                            throw new FileSystemException("zstd is not supported: {$filename}");
-                        }
-                        // no break
-                    case 'xz':
-                    case 'txz':
-                    case 'gz':
-                    case 'tgz':
-                    case 'bz2':
-                        f_passthru("\"{$_7zExe}\" x -so {$filename} | tar -f - -x -C {$target} --strip-components 1");
-                        break;
-                    case 'tar':
-                        f_passthru("tar -xf {$filename} -C {$target} --strip-components 1");
-                        break;
-                    case 'zip':
-                        f_passthru("\"{$_7zExe}\" x {$filename} -o{$target}");
-                        break;
-                    default:
-                        throw new FileSystemException("unknown archive format: {$filename}");
-                }
-            }
+            self::extractArchive($filename, $target);
+            self::emitSourceExtractHook($name, $target);
         } catch (RuntimeException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
-                f_passthru('rmdir /s /q ' . SOURCE_PATH . "/{$name}");
+                f_passthru('rmdir /s /q ' . $target);
             } else {
-                f_passthru('rm -r ' . SOURCE_PATH . "/{$name}");
+                f_passthru('rm -rf ' . $target);
             }
-            throw new FileSystemException('Cannot extract source ' . $name, $e->getCode(), $e);
+            throw new FileSystemException('Cannot extract source ' . $name . ': ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -256,6 +219,14 @@ class FileSystem
         return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
 
+    public static function convertWinPathToMinGW(string $path): string
+    {
+        if (preg_match('/^[A-Za-z]:/', $path)) {
+            $path = '/' . strtolower(substr($path, 0, 1)) . '/' . str_replace('\\', '/', substr($path, 2));
+        }
+        return $path;
+    }
+
     /**
      * 递归或非递归扫描目录，可返回相对目录的文件列表或绝对目录的文件列表
      *
@@ -269,8 +240,12 @@ class FileSystem
     {
         $dir = self::convertPath($dir);
         // 不是目录不扫，直接 false 处理
+        if (!file_exists($dir)) {
+            logger()->debug('Scan dir failed, no such file or directory.');
+            return false;
+        }
         if (!is_dir($dir)) {
-            logger()->warning('Scan dir failed, no such directory.');
+            logger()->warning('Scan dir failed, not directory.');
             return false;
         }
         logger()->debug('scanning directory ' . $dir);
@@ -359,8 +334,12 @@ class FileSystem
         $dir = FileSystem::convertPath($dir);
         logger()->debug('Removing path recursively: "' . $dir . '"');
         // 不是目录不扫，直接 false 处理
+        if (!file_exists($dir)) {
+            logger()->debug('Scan dir failed, no such file or directory.');
+            return false;
+        }
         if (!is_dir($dir)) {
-            logger()->warning('Scan dir failed, no such directory.');
+            logger()->warning('Scan dir failed, not directory.');
             return false;
         }
         logger()->debug('scanning directory ' . $dir);
@@ -397,7 +376,7 @@ class FileSystem
     public static function createDir(string $path): void
     {
         if (!is_dir($path) && !f_mkdir($path, 0755, true) && !is_dir($path)) {
-            throw new FileSystemException(sprintf('无法建立目录：%s', $path));
+            throw new FileSystemException(sprintf('Unable to create dir: %s', $path));
         }
     }
 
@@ -407,7 +386,7 @@ class FileSystem
      */
     public static function writeFile(string $path, mixed $content, ...$args): bool|int|string
     {
-        $dir = pathinfo($path, PATHINFO_DIRNAME);
+        $dir = pathinfo(self::convertPath($path), PATHINFO_DIRNAME);
         if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
             throw new FileSystemException('Write file failed, cannot create parent directory: ' . $dir);
         }
@@ -445,6 +424,78 @@ class FileSystem
         return strlen($path) > 0 && $path[0] !== '/';
     }
 
+    public static function replacePathVariable(string $path): string
+    {
+        $replacement = [
+            '{pkg_root_path}' => PKG_ROOT_PATH,
+            '{php_sdk_path}' => defined('PHP_SDK_PATH') ? PHP_SDK_PATH : WORKING_DIR . '/php-sdk-binary-tools',
+            '{working_dir}' => WORKING_DIR,
+            '{download_path}' => DOWNLOAD_PATH,
+            '{source_path}' => SOURCE_PATH,
+        ];
+        return str_replace(array_keys($replacement), array_values($replacement), $path);
+    }
+
+    public static function backupFile(string $path): string
+    {
+        copy($path, $path . '.bak');
+        return $path . '.bak';
+    }
+
+    public static function restoreBackupFile(string $path): void
+    {
+        if (!file_exists($path . '.bak')) {
+            throw new RuntimeException('Cannot find bak file for ' . $path);
+        }
+        copy($path . '.bak', $path);
+        unlink($path . '.bak');
+    }
+
+    /**
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    private static function extractArchive(string $filename, string $target): void
+    {
+        // Git source, just move
+        if (is_dir(self::convertPath($filename))) {
+            self::copyDir(self::convertPath($filename), $target);
+            return;
+        }
+        // Create base dir
+        if (f_mkdir(directory: $target, recursive: true) !== true) {
+            throw new FileSystemException('create ' . $target . ' dir failed');
+        }
+        if (!file_exists($filename)) {
+            throw new FileSystemException('File not exists');
+        }
+
+        if (in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
+            match (self::extname($filename)) {
+                'tar', 'xz', 'txz' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
+                'tgz', 'gz' => f_passthru("tar -xzf {$filename} -C {$target} --strip-components 1"),
+                'bz2' => f_passthru("tar -xjf {$filename} -C {$target} --strip-components 1"),
+                'zip' => f_passthru("unzip {$filename} -d {$target}"),
+                default => throw new FileSystemException('unknown archive format: ' . $filename),
+            };
+        } elseif (PHP_OS_FAMILY === 'Windows') {
+            // use php-sdk-binary-tools/bin/7za.exe
+            $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
+
+            // Windows notes: I hate windows tar.......
+            // When extracting .tar.gz like libxml2, it shows a symlink error and returns code[1].
+            // Related posts: https://answers.microsoft.com/en-us/windows/forum/all/tar-on-windows-fails-to-extract-archive-containing/0ee9a7ea-9b1f-4fef-86a9-5d9dc35cea2f
+            // And MinGW tar.exe cannot work on temporarily storage ??? (GitHub Actions hosted runner)
+            // Yeah, I will be an MS HATER !
+            match (self::extname($filename)) {
+                'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => cmd()->execWithResult("\"{$_7z}\" x -so {$filename} | tar -f - -x -C \"{$target}\" --strip-components 1"),
+                'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
+                default => throw new FileSystemException("unknown archive format: {$filename}"),
+            };
+        }
+    }
+
     /**
      * @throws FileSystemException
      */
@@ -467,10 +518,10 @@ class FileSystem
         return file_put_contents($filename, $file);
     }
 
-    private static function emitSourceExtractHook(string $name): void
+    private static function emitSourceExtractHook(string $name, string $target): void
     {
         foreach ((self::$_extract_hook[$name] ?? []) as $hook) {
-            if ($hook() === true) {
+            if ($hook($name, $target) === true) {
                 logger()->info('Patched source [' . $name . '] after extracted');
             }
         }

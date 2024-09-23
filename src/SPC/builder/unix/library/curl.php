@@ -47,14 +47,17 @@ trait curl
         $extra .= $this->builder->getLib('idn2') ? '-DUSE_LIBIDN2=ON ' : '-DUSE_LIBIDN2=OFF ';
         // lib:psl
         $extra .= $this->builder->getLib('psl') ? '-DCURL_USE_LIBPSL=ON ' : '-DCURL_USE_LIBPSL=OFF ';
+        // lib:libcares
+        $extra .= $this->builder->getLib('libcares') ? '-DENABLE_ARES=ON ' : '';
 
         FileSystem::resetDir($this->source_dir . '/build');
         // compile！
         shell()->cd($this->source_dir . '/build')
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ../CMakeLists.txt')
-            ->exec("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF {$extra} ..")
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF {$extra} ..")
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
         // patch pkgconf
         $this->patchPkgconfPrefix(['libcurl.pc']);
         shell()->cd(BUILD_LIB_PATH . '/cmake/CURL/')

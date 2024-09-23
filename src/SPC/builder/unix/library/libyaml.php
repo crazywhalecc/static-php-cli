@@ -10,51 +10,27 @@ use SPC\store\FileSystem;
 
 trait libyaml
 {
+    public function getLibVersion(): ?string
+    {
+        // Match version from CMakeLists.txt:
+        // Format: set (YAML_VERSION_MAJOR 0)
+        // set (YAML_VERSION_MINOR 2)
+        // set (YAML_VERSION_PATCH 5)
+        $content = FileSystem::readFile($this->source_dir . '/CMakeLists.txt');
+        if (preg_match('/set \(YAML_VERSION_MAJOR (\d+)\)/', $content, $major)
+            && preg_match('/set \(YAML_VERSION_MINOR (\d+)\)/', $content, $minor)
+            && preg_match('/set \(YAML_VERSION_PATCH (\d+)\)/', $content, $patch)) {
+            return "{$major[1]}.{$minor[1]}.{$patch[1]}";
+        }
+        return null;
+    }
+
     /**
      * @throws RuntimeException
      * @throws FileSystemException
      */
     protected function build(): void
     {
-        // prepare cmake/config.h.in
-        if (!is_file(SOURCE_PATH . '/libyaml/cmake/config.h.in')) {
-            f_mkdir(SOURCE_PATH . '/libyaml/cmake');
-            file_put_contents(
-                SOURCE_PATH . '/libyaml/cmake/config.h.in',
-                <<<'EOF'
-#define YAML_VERSION_MAJOR @YAML_VERSION_MAJOR@
-#define YAML_VERSION_MINOR @YAML_VERSION_MINOR@
-#define YAML_VERSION_PATCH @YAML_VERSION_PATCH@
-#define YAML_VERSION_STRING "@YAML_VERSION_STRING@"
-EOF
-            );
-        }
-
-        // prepare yamlConfig.cmake.in
-        if (!is_file(SOURCE_PATH . '/libyaml/yamlConfig.cmake.in')) {
-            file_put_contents(
-                SOURCE_PATH . '/libyaml/yamlConfig.cmake.in',
-                <<<'EOF'
-# Config file for the yaml library.
-#
-# It defines the following variables:
-#   yaml_LIBRARIES    - libraries to link against
-
-@PACKAGE_INIT@
-
-set_and_check(yaml_TARGETS "@PACKAGE_CONFIG_DIR_CONFIG@/yamlTargets.cmake")
-
-if(NOT yaml_TARGETS_IMPORTED)
-  set(yaml_TARGETS_IMPORTED 1)
-  include(${yaml_TARGETS})
-endif()
-
-set(yaml_LIBRARIES yaml)
-
-EOF
-            );
-        }
-
         [$lib, $include, $destdir] = SEPARATED_PATH;
 
         FileSystem::resetDir($this->source_dir . '/build');

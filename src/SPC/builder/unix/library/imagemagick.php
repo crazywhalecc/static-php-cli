@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -18,7 +19,7 @@ trait imagemagick
     protected function build(): void
     {
         // TODO: imagemagick build with bzip2 failed with bugs, we need to fix it in the future
-        $extra = '--without-jxl --without-x --disable-openmp --without-bzlib ';
+        $extra = '--without-jxl --without-x --enable-openmp --without-bzlib ';
         $required_libs = '';
         $optional_libs = [
             'libzip' => 'zip',
@@ -38,11 +39,18 @@ trait imagemagick
             }
         }
 
-        $ldflags = $this instanceof LinuxLibraryBase ? ('LDFLAGS="-static" ') : '';
+        $ldflags = $this instanceof LinuxLibraryBase ? ('-static') : '';
+
+        // libxml iconv patch
+        $required_libs .= $this instanceof MacOSLibraryBase ? ('-liconv') : '';
         shell()->cd($this->source_dir)
-            ->exec(
-                $ldflags .
-                "LIBS='{$required_libs}' " .
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags,
+                'LIBS' => $this->getLibExtraLibs() ?: $required_libs,
+                'PKG_CONFIG' => '$PKG_CONFIG --static',
+            ])
+            ->execWithEnv(
                 './configure ' .
                 '--enable-static --disable-shared ' .
                 $extra .

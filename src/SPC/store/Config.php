@@ -12,11 +12,23 @@ use SPC\exception\WrongUsageException;
  */
 class Config
 {
+    public static ?array $pkg = null;
+
     public static ?array $source = null;
 
     public static ?array $lib = null;
 
     public static ?array $ext = null;
+
+    public static ?array $pre_built = null;
+
+    public static function getPreBuilt(string $name): mixed
+    {
+        if (self::$pre_built === null) {
+            self::$pre_built = FileSystem::loadConfigArray('pre-built');
+        }
+        return self::$pre_built[$name] ?? null;
+    }
 
     /**
      * 从配置文件读取一个资源(source)的元信息
@@ -29,6 +41,19 @@ class Config
             self::$source = FileSystem::loadConfigArray('source');
         }
         return self::$source[$name] ?? null;
+    }
+
+    /**
+     * Read pkg from pkg.json
+     *
+     * @throws FileSystemException
+     */
+    public static function getPkg(string $name): ?array
+    {
+        if (self::$pkg === null) {
+            self::$pkg = FileSystem::loadConfigArray('pkg');
+        }
+        return self::$pkg[$name] ?? null;
     }
 
     /**

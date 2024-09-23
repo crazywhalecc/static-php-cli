@@ -1,0 +1,115 @@
+name: CI on x86_64 Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: php version to compile
+        default: '8.2'
+        type: choice
+        options:
+          - '8.3'
+          - '8.2'
+          - '8.1'
+          - '8.0'
+          - '7.4'
+      build-cli:
+        description: build cli binary
+        default: true
+        type: boolean
+      build-micro:
+        description: build phpmicro binary
+        type: boolean
+      extensions:
+        description: extensions to compile (comma separated)
+        required: true
+        type: string
+      prefer-pre-built:
+        description: prefer pre-built binaries (reduce build time)
+        type: boolean
+        default: true
+      debug:
+        description: enable debug logs
+        type: boolean
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: build ${{ inputs.version }} on Windows x86_64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cache composer dependencies
+      - id: cache-composer-deps
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-dependencies
+
+      # If there's no Composer cache, install dependencies
+      - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
+        run: composer update --no-dev --classmap-authoritative
+
+      - name: Generate hashed key for download cache
+        shell: bash
+        run: |
+          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ inputs.extensions }}" | sha256sum | awk '{print $1}')
+          echo "INPUT_HASH=${INPUT_HASH}" >> "$GITHUB_ENV"
+
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v4
+        with:
+          path: downloads
+          key: php-${{ env.INPUT_HASH }}
+
+      # With or without debug
+      - if: inputs.debug == true
+        run: echo "SPC_BUILD_DEBUG=--debug" >> $env:GITHUB_ENV
+      - if: inputs.prefer-pre-built == true
+        run: echo "SPC_PRE_BUILT=--prefer-pre-built" >> $env:GITHUB_ENV
+
+      # With target select: cli, micro or both
+      - if: ${{ inputs.build-cli == true }}
+        run: echo "SPC_BUILD_CLI=--build-cli" >> $env:GITHUB_ENV
+      - if: ${{ inputs.build-micro == true }}
+        run: echo "SPC_BUILD_MICRO=--build-micro" >> $env:GITHUB_ENV
+
+      - run: ./bin/spc doctor
+
+      # If there's no dependencies cache, fetch sources, with or without debug
+      - if: steps.cache-download.outputs.cache-hit != 'true'
+        run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ inputs.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+
+      # Run build command
+      - run: ./bin/spc build "${{ inputs.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+
+      # Upload cli executable
+      - if: ${{ inputs.build-cli == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-${{ inputs.version }}
+          path: buildroot/bin/php.exe
+
+      # Upload micro self-extracted executable
+      - if: ${{ inputs.build-micro == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: micro-${{ inputs.version }}
+          path: buildroot/bin/micro.sfx
+
+      # Upload extensions metadata
+      - uses: actions/upload-artifact@v4
+        with:
+          name: license-files
+          path: buildroot/license/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-meta
+          path: |
+            buildroot/build-extensions.json
+            buildroot/build-libraries.json

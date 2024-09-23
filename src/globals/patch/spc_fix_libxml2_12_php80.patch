@@ -1,0 +1,89 @@
+diff --git a/ext/dom/document.c b/ext/dom/document.c
+index 02522b50..6d1b0740 100644
+--- a/ext/dom/document.c
++++ b/ext/dom/document.c
+@@ -23,6 +23,7 @@
+ #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+ #include "php_dom.h"
+ #include <libxml/SAX.h>
++#include <libxml/xmlsave.h>
+ #ifdef LIBXML_SCHEMAS_ENABLED
+ #include <libxml/relaxng.h>
+ #include <libxml/xmlschemas.h>
+diff --git a/ext/libxml/libxml.c b/ext/libxml/libxml.c
+index 73486ae2..59bd3d20 100644
+--- a/ext/libxml/libxml.c
++++ b/ext/libxml/libxml.c
+@@ -382,7 +382,7 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
+ 
+ 					if (encoding) {
+ 						char *end;
+-						
++
+ 						encoding += sizeof("charset=")-1;
+ 						if (*encoding == '"') {
+ 							encoding++;
+@@ -481,7 +481,11 @@ static void _php_libxml_free_error(void *ptr)
+ 	xmlResetError((xmlErrorPtr) ptr);
+ }
+ 
+-static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
++#if LIBXML_VERSION >= 21200
++static void _php_list_set_error_structure(const xmlError *error, const char *msg)
++#else
++static void _php_list_set_error_structure(xmlError *error, const char *msg)
++#endif
+ {
+ 	xmlError error_copy;
+ 	int ret;
+@@ -732,7 +736,11 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
+ 	va_end(args);
+ }
+ 
++#if LIBXML_VERSION >= 21200
++PHP_LIBXML_API void php_libxml_structured_error_handler(void *userData, const xmlError *error)
++#else
+ PHP_LIBXML_API void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
++#endif
+ {
+ 	_php_list_set_error_structure(error, NULL);
+ 
+@@ -1035,11 +1043,9 @@ PHP_FUNCTION(libxml_use_internal_errors)
+ /* {{{ Retrieve last error from libxml */
+ PHP_FUNCTION(libxml_get_last_error)
+ {
+-	xmlErrorPtr error;
+-
+ 	ZEND_PARSE_PARAMETERS_NONE();
+ 
+-	error = xmlGetLastError();
++	const xmlError *error = xmlGetLastError();
+ 
+ 	if (error) {
+ 		object_init_ex(return_value, libxmlerror_class_entry);
+diff --git a/ext/libxml/php_libxml.h b/ext/libxml/php_libxml.h
+index d0ce7cec..02717417 100644
+--- a/ext/libxml/php_libxml.h
++++ b/ext/libxml/php_libxml.h
+@@ -35,6 +35,7 @@ extern zend_module_entry libxml_module_entry;
+ 
+ #include "zend_smart_str.h"
+ #include <libxml/tree.h>
++#include <libxml/parser.h>
+ 
+ #define LIBXML_SAVE_NOEMPTYTAG 1<<2
+ 
+diff --git a/ext/soap/php_sdl.c b/ext/soap/php_sdl.c
+index e5e7f2f9..00b58b87 100644
+--- a/ext/soap/php_sdl.c
++++ b/ext/soap/php_sdl.c
+@@ -331,8 +331,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
+ 	sdl_restore_uri_credentials(ctx);
+ 
+ 	if (!wsdl) {
+-		xmlErrorPtr xmlErrorPtr = xmlGetLastError();
+-
++		const xmlError *xmlErrorPtr = xmlGetLastError();
+ 		if (xmlErrorPtr) {
+ 			soap_error2(E_ERROR, "Parsing WSDL: Couldn't load from '%s' : %s", struri, xmlErrorPtr->message);
+ 		} else {

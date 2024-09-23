@@ -1,47 +1,133 @@
-name: Upload SPC Binary (Release)
+name: Build SPC Binary
 
 on:
+  push:
+    branches: [ "main" ]
   release:
     types:
       - published
   workflow_dispatch:
 
+env:
+  PHP_VERSION: 8.2
+  MICRO_VERSION: 8.2.18
+
 jobs:
   build-release-artifacts:
-    name: "Upload SPC Binary (Release)"
-    runs-on: ubuntu-latest
+    name: "Build SPC Binary for ${{ matrix.operating-system.name }}"
+    runs-on: ${{ matrix.operating-system.os }}
     strategy:
       matrix:
         operating-system:
-          - "linux-x86_64"
-          - "macos-x86_64"
-          - "linux-aarch64"
-          - "macos-aarch64"
+          - name: "linux-x86_64"
+            os: "ubuntu-latest"
+            filename: "spc-linux-x86_64.tar.gz"
+          - name: "macos-x86_64"
+            os: "macos-13"
+            filename: "spc-macos-x86_64.tar.gz"
+          - name: "linux-aarch64"
+            os: "ubuntu-latest"
+            filename: "spc-linux-aarch64.tar.gz"
+          - name: "macos-aarch64"
+            os: "macos-14"
+            filename: "spc-macos-aarch64.tar.gz"
+          - name: "windows-x64"
+            os: "ubuntu-latest"
+            filename: "spc-windows-x64.exe"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v4"
 
-      - name: Reuse static-php-cli-hosted artifacts
-        uses: dawidd6/action-download-artifact@v2
+      - if: inputs.debug == true
+        run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
+
+      - name: "Install PHP for official runners"
+        uses: "shivammathur/setup-php@v2"
         with:
-          repo: static-php/static-php-cli-hosted
-          branch: master
-          workflow: build-spc-release.yml
-          name: "spc-${{ matrix.operating-system }}"
+          coverage: none
+          tools: composer:v2
+          php-version: "${{ env.PHP_VERSION }}"
+          ini-values: memory_limit=-1
 
-      - name: "Archive Executable"
+      - name: "Get Composer Cache Directory"
+        id: composer-cache
         run: |
-          tar -czf spc-${{ matrix.operating-system }}.tar.gz spc
-          echo "filename=spc-${{ matrix.operating-system }}.tar.gz" >> $GITHUB_ENV
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: upload binaries to release
+      - name: "Cache Composer dependencies"
+        uses: "actions/cache@v4"
+        with:
+          path: "${{ steps.composer-cache.outputs.dir }}"
+          key: "php-${{ env.PHP_VERSION }}-locked-composer-${{ hashFiles('**/composer.lock') }}"
+          restore-keys: |
+            php-${{ env.PHP_VERSION }}-locked-composer
+
+      - name: "Install Locked Dependencies"
+        run: "composer install --no-interaction --no-progress"
+
+      - name: "Build PHAR File"
+        run: "composer build:phar"
+
+      - name: "Download Minimal Combination"
+        run: |
+          if [ "${{ matrix.operating-system.name }}" = "windows-x64" ]; then
+            curl -fsSL https://dl.static-php.dev/static-php-cli/windows/spc-min/php-${{ env.MICRO_VERSION }}-micro-win.zip -o tmp.zip
+            unzip tmp.zip
+          else
+            curl -fsSL https://dl.static-php.dev/static-php-cli/minimal/php-${{ env.MICRO_VERSION }}-micro-${{ matrix.operating-system.name }}.tar.gz -o tmp.tgz
+            tar -zxvf tmp.tgz
+          fi
+
+      - name: "Generate Executable"
+        run: |
+          bin/spc micro:combine spc.phar -M micro.sfx -O spc -I "memory_limit=2G"
+          if [ "${{ matrix.operating-system.name }}" = "windows-x64" ]; then
+            mv spc spc.exe
+          else
+            chmod +x spc
+          fi
+          if [ "${{ matrix.operating-system.name }}" = "macos-aarch64" ] || [ "${{ matrix.operating-system.name }}" = "macos-x86_64" ]; then
+             sudo xattr -cr ./spc
+          fi
+
+      - name: "Archive Executable and Validate Binary"
+        run: |
+          if [ "${{ matrix.operating-system.name }}" != "windows-x64" ]; then
+            tar -czf ${{ matrix.operating-system.filename }} spc
+            # validate spc binary
+            if [ "${{ matrix.operating-system.name }}" == "linux-x86_64" ]; then
+              ./spc dev:extensions
+            fi
+          fi
+
+      - name: "Copy file"
+        run: |
+          if [ "${{ matrix.operating-system.name }}" != "windows-x64" ]; then
+            mkdir dist/ && cp ${{ matrix.operating-system.filename }} dist/ && cp spc dist/spc-${{ matrix.operating-system.name }}
+          else
+            mkdir dist/ && cp spc.exe dist/${{ matrix.operating-system.filename }}
+            echo "SUFFIX=.exe" >> $GITHUB_ENV
+          fi
+
+      - name: "Upload Binaries to Release"
         uses: softprops/action-gh-release@v1
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
-          files: ${{ env.filename }}
+          files: dist/${{ matrix.operating-system.filename }}
+
+      - name: "Deploy to self-hosted OSS"
+        if: github.repository == 'crazywhalecc/static-php-cli'
+        uses: static-php/upload-s3-action@v1.0.0
+        with:
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
+          source_dir: "dist/"
+          destination_dir: static-php-cli/spc-bin/nightly/
+          endpoint: ${{ secrets.AWS_ENDPOINT }}
 
       - name: "Upload Artifact"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          path: spc
-          name: spc-${{ matrix.operating-system }}
+          path: spc${{ env.SUFFIX }}
+          name: spc-${{ matrix.operating-system.name }}${{ env.SUFFIX }}

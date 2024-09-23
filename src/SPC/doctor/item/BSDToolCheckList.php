@@ -57,7 +57,7 @@ class BSDToolCheckList
             $prefix = '';
         }
         try {
-            shell(true)->exec("ASSUME_ALWAYS_YES=yes {$prefix} pkg install -y " . implode(' ', $missing));
+            shell(true)->exec("ASSUME_ALWAYS_YES=yes {$prefix}pkg install -y " . implode(' ', $missing));
         } catch (RuntimeException) {
             return false;
         }

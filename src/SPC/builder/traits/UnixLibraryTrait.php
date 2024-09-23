@@ -12,8 +12,6 @@ use SPC\store\FileSystem;
 
 trait UnixLibraryTrait
 {
-    use LibraryTrait;
-
     /**
      * @throws RuntimeException
      * @throws FileSystemException
@@ -50,7 +48,7 @@ trait UnixLibraryTrait
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public function makeAutoconfEnv(string $prefix = null): string
+    public function makeAutoconfEnv(?string $prefix = null): string
     {
         if ($prefix === null) {
             $prefix = str_replace('-', '_', strtoupper(static::NAME));
@@ -77,10 +75,10 @@ trait UnixLibraryTrait
             logger()->debug('Patching ' . $realpath);
             // replace prefix
             $file = FileSystem::readFile($realpath);
-            $file = ($patch_option & PKGCONF_PATCH_PREFIX) === PKGCONF_PATCH_PREFIX ? preg_replace('/^prefix=.*$/m', 'prefix=' . BUILD_ROOT_PATH, $file) : $file;
-            $file = ($patch_option & PKGCONF_PATCH_EXEC_PREFIX) === PKGCONF_PATCH_EXEC_PREFIX ? preg_replace('/^exec_prefix=.*$/m', 'exec_prefix=${prefix}', $file) : $file;
-            $file = ($patch_option & PKGCONF_PATCH_LIBDIR) === PKGCONF_PATCH_LIBDIR ? preg_replace('/^libdir=.*$/m', 'libdir=${prefix}/lib', $file) : $file;
-            $file = ($patch_option & PKGCONF_PATCH_INCLUDEDIR) === PKGCONF_PATCH_INCLUDEDIR ? preg_replace('/^includedir=.*$/m', 'includedir=${prefix}/include', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_PREFIX) === PKGCONF_PATCH_PREFIX ? preg_replace('/^prefix\s*=.*$/m', 'prefix=${pcfiledir}/../..', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_EXEC_PREFIX) === PKGCONF_PATCH_EXEC_PREFIX ? preg_replace('/^exec_prefix\s*=.*$/m', 'exec_prefix=${prefix}', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_LIBDIR) === PKGCONF_PATCH_LIBDIR ? preg_replace('/^libdir\s*=.*$/m', 'libdir=${prefix}/lib', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_INCLUDEDIR) === PKGCONF_PATCH_INCLUDEDIR ? preg_replace('/^includedir\s*=.*$/m', 'includedir=${prefix}/include', $file) : $file;
             $file = ($patch_option & PKGCONF_PATCH_CUSTOM) === PKGCONF_PATCH_CUSTOM && $custom_replace !== null ? preg_replace($custom_replace[0], $custom_replace[1], $file) : $file;
             FileSystem::writeFile($realpath, $file);
         }
@@ -100,5 +98,20 @@ trait UnixLibraryTrait
                 unlink(BUILD_LIB_PATH . '/' . $filename);
             }
         }
+    }
+
+    public function getLibExtraCFlags(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
+    }
+
+    public function getLibExtraLdFlags(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
+    }
+
+    public function getLibExtraLibs(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
     }
 }

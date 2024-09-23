@@ -13,13 +13,14 @@ class OSCheckList
 {
     use UnixSystemUtilTrait;
 
-    #[AsCheckItem('if current OS are supported', level: 999)]
+    #[AsCheckItem('if current OS are supported', level: 1000)]
     public function checkOS(): ?CheckResult
     {
-        if (!in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD'])) {
-            return CheckResult::fail('Current OS is not supported');
+        if (!in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'BSD', 'Windows'])) {
+            return CheckResult::fail('Current OS is not supported: ' . PHP_OS_FAMILY);
         }
         $distro = PHP_OS_FAMILY === 'Linux' ? (' ' . SystemUtil::getOSRelease()['dist']) : '';
-        return CheckResult::ok(PHP_OS_FAMILY . ' ' . php_uname('m') . $distro . ', supported');
+        $known_distro = PHP_OS_FAMILY !== 'Linux' || in_array(SystemUtil::getOSRelease()['dist'], SystemUtil::getSupportedDistros());
+        return CheckResult::ok(PHP_OS_FAMILY . ' ' . php_uname('m') . $distro . ', supported' . ($known_distro ? '' : ' (but not tested on this distro)'));
     }
 }

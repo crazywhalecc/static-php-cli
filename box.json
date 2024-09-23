@@ -4,6 +4,7 @@
   "blacklist": [
     ".github"
   ],
+  "compression": "GZ",
   "directories": [
     "config",
     "src",
@@ -14,6 +15,5 @@
     "vendor/zhamao"
   ],
   "git-commit-short": "git_commit_short",
-  "metadata": "ConsoleApplication::VERSION",
   "output": "spc.phar"
 }
