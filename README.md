@@ -142,7 +142,7 @@ curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-m
 # macOS aarch64 (Apple)
 curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
 # Windows (x86_64, win10 build 17063 or later)
-curl.exe -fsSL -o spc.exehttps://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
 
 # Add execute perm (Linux and macOS only)
 chmod +x ./spc
