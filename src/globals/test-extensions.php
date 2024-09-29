@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 // --------------------------------- edit area ---------------------------------
 
+$test_php_version = ['8.3'];
+
+$test_os = ['macos-13', 'macos-14', 'ubuntu-latest', 'windows-latest'];
+
 $zts = false;
 
 $no_strip = false;
@@ -58,7 +62,7 @@ function _getCombination(string $type = 'common'): string
 }
 
 if (!isset($argv[1])) {
-    exit("Please use 'extensions', 'cmd' or 'libs' as output type");
+    exit("Please use 'extensions', 'cmd', 'os', 'php' or 'libs' as output type");
 }
 
 $trim_value = "\r\n \t,";
@@ -73,6 +77,8 @@ if (PHP_OS_FAMILY === 'Windows') {
 }
 
 echo match ($argv[1]) {
+    'os' => json_encode($test_os),
+    'php' => json_encode($test_php_version),
     'extensions' => $final_extensions,
     'libs' => $final_libs,
     'libs_cmd' => ($final_libs === '' ? '' : (' --with-libs=' . $final_libs)),

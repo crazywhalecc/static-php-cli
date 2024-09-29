@@ -111,22 +111,38 @@ jobs:
         run: |
           vendor/bin/phpunit tests/ --no-coverage
 
+  define-matrix:
+    name: "Define Matrix"
+    runs-on: ubuntu-latest
+    outputs:
+      php: ${{ steps.gendef.outputs.php }}
+      os: ${{ steps.gendef.outputs.os }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+
+      - name: Define
+        id: gendef
+        run: |
+          PHP_VERSIONS=$(php src/globals/test-extensions.php php)
+          OS_VERSIONS=$(php src/globals/test-extensions.php os)
+          echo 'php='"$PHP_VERSIONS" >> "$GITHUB_OUTPUT"
+          echo 'os='"$OS_VERSIONS" >> "$GITHUB_OUTPUT"
+
+
   build:
     name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     strategy:
       matrix:
-        php:
-          - "8.0"
-          - "8.1"
-          - "8.2"
-          - "8.3"
-        os:
-          - ubuntu-latest
-          - macos-13
-          - windows-latest
-          - macos-14
+        php: ${{ fromJSON(needs.define-matrix.outputs.php) }}
+        os: ${{ fromJSON(needs.define-matrix.outputs.os) }}
       fail-fast: false
     steps:
       - name: "Checkout"
