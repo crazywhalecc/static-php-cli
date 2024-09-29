@@ -138,6 +138,7 @@ jobs:
   build:
     name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
+    needs: define-matrix
     timeout-minutes: 120
     strategy:
       matrix:
