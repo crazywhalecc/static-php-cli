@@ -23,6 +23,8 @@ class DoctorCommand extends BaseCommand
     {
         try {
             $checker = new CheckListHandler();
+            // skipped items
+            $skip_items = array_filter(explode(',', getenv('SPC_SKIP_DOCTOR_CHECK_ITEMS') ?: ''));
 
             $fix_policy = $this->input->getOption('auto-fix') ? FIX_POLICY_AUTOFIX : FIX_POLICY_PROMPT;
             foreach ($checker->runChecks() as $check) {
@@ -32,13 +34,12 @@ class DoctorCommand extends BaseCommand
 
                 $this->output->write('Checking <comment>' . $check->item_name . '</comment> ... ');
 
-                $result = call_user_func($check->callback);
-                if ($result === null) {
+                // check if this item is skipped
+                if (in_array($check->item_name, $skip_items) || ($result = call_user_func($check->callback)) === null) {
                     $this->output->writeln('skipped');
                 } elseif ($result instanceof CheckResult) {
                     if ($result->isOK()) {
                         $this->output->writeln($result->getMessage() ?? 'ok');
-
                         continue;
                     }
 

@@ -10,6 +10,7 @@ use Psr\Log\LogLevel;
 use SPC\ConsoleApplication;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
+use SPC\util\GlobalEnvManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -94,6 +95,11 @@ abstract class BaseCommand extends Command
             $question = new ConfirmationQuestion($prompt->label . $case, $prompt->default);
             return $helper->ask($input, $output, $question);
         });
+
+        // init GlobalEnv
+        if (!$this instanceof BuildCommand) {
+            GlobalEnvManager::init();
+        }
         if ($this->shouldExecute()) {
             try {
                 // show raw argv list for logger()->debug

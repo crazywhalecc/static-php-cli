@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 $test_php_version = ['8.3'];
 
-$test_os = ['macos-13', 'macos-14', 'ubuntu-latest', 'windows-latest'];
+$test_os = ['macos-14', 'ubuntu-latest'];
 
 $zts = false;
 
@@ -23,13 +23,13 @@ $upx = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'gmssl',
-    'Windows' => 'gmssl',
+    'Linux', 'Darwin' => '',
+    'Windows' => '',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'liblz4',
+    'Linux', 'Darwin' => '',
     'Windows' => '',
 };
 
@@ -37,7 +37,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'none',
+    'Linux', 'Darwin' => 'common',
     'Windows' => 'none',
 };
 
