@@ -177,7 +177,7 @@ jobs:
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "Run Build Tests (doctor)"
-        run: bin/spc doctor --auto-fix
+        run: bin/spc doctor --auto-fix --debug
 
       - name: "Prepare UPX for Windows"
         if: matrix.os == 'windows-latest'
