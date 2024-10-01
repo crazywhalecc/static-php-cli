@@ -31,6 +31,11 @@ function logger(): LoggerInterface
     return $ob_logger;
 }
 
+function is_unix(): bool
+{
+    return in_array(PHP_OS_FAMILY, ['Linux', 'Darwin', 'BSD']);
+}
+
 /**
  * Transfer architecture name to gnu triplet
  *

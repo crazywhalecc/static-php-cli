@@ -30,11 +30,14 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.3.4';
+    public const VERSION = '2.3.5';
 
     public function __construct()
     {
         parent::__construct('static-php-cli', self::VERSION);
+
+        // Define internal env vars and constants
+        require_once ROOT_DIR . '/src/globals/internal-env.php';
 
         $this->addCommands(
             [
