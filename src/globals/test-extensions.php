@@ -21,6 +21,8 @@ $no_strip = false;
 
 $upx = true;
 
+$prefer_pre_built = true;
+
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => '',
@@ -86,5 +88,6 @@ echo match ($argv[1]) {
     'zts' => $zts ? '--enable-zts' : '',
     'no_strip' => $no_strip ? '--no-strip' : '',
     'upx' => $upx ? '--with-upx-pack' : '',
+    'prefer_pre_built' => $prefer_pre_built ? '--prefer-pre-built' : '',
     default => '',
 };
