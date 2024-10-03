@@ -428,7 +428,7 @@ class FileSystem
     {
         $replacement = [
             '{pkg_root_path}' => PKG_ROOT_PATH,
-            '{php_sdk_path}' => defined('PHP_SDK_PATH') ? PHP_SDK_PATH : WORKING_DIR . '/php-sdk-binary-tools',
+            '{php_sdk_path}' => getenv('PHP_SDK_PATH') ? getenv('PHP_SDK_PATH') : WORKING_DIR . '/php-sdk-binary-tools',
             '{working_dir}' => WORKING_DIR,
             '{download_path}' => DOWNLOAD_PATH,
             '{source_path}' => SOURCE_PATH,
@@ -480,7 +480,7 @@ class FileSystem
             };
         } elseif (PHP_OS_FAMILY === 'Windows') {
             // use php-sdk-binary-tools/bin/7za.exe
-            $_7z = self::convertPath(PHP_SDK_PATH . '/bin/7za.exe');
+            $_7z = self::convertPath(getenv('PHP_SDK_PATH') . '/bin/7za.exe');
 
             // Windows notes: I hate windows tar.......
             // When extracting .tar.gz like libxml2, it shows a symlink error and returns code[1].
