@@ -109,7 +109,7 @@ jobs:
 
       - name: "Run PHPUnit Tests"
         run: |
-          vendor/bin/phpunit tests/ --no-coverage
+          SPC_NO_MUSL_PATH=yes vendor/bin/phpunit tests/ --no-coverage
 
   define-matrix:
     name: "Define Matrix"
