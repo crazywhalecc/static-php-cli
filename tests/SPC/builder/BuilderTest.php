@@ -166,7 +166,9 @@ class BuilderTest extends TestCase
         ];
     }
 
-    #[DataProvider('providerGetBuildTypeName')]
+    /**
+     * @dataProvider providerGetBuildTypeName
+     */
     public function testGetBuildTypeName(int $target, string $name): void
     {
         $this->assertEquals($name, $this->builder->getBuildTypeName($target));
@@ -228,7 +230,9 @@ class BuilderTest extends TestCase
         ];
     }
 
-    #[DataProvider('providerEmitPatchPoint')]
+    /**
+     * @dataProvider providerEmitPatchPoint
+     */
     public function testEmitPatchPoint(string $point)
     {
         $code = '<?php if (patch_point() === "' . $point . '") echo "GOOD:' . $point . '";';
