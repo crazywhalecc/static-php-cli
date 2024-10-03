@@ -35,7 +35,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         GlobalEnvManager::init($this);
 
-        if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc")) {
+        if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc") && (getenv('SPC_NO_MUSL_PATH') !== 'yes')) {
             throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
         }
 
