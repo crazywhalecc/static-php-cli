@@ -419,30 +419,6 @@ abstract class BuilderBase
     }
 
     /**
-     * Check if all libs are downloaded.
-     * If not, throw exception.
-     *
-     * @throws RuntimeException
-     */
-    protected function checkLibsSource(): void
-    {
-        $not_downloaded = [];
-        foreach ($this->libs as $lib) {
-            if (!file_exists($lib->getSourceDir())) {
-                $not_downloaded[] = $lib::NAME;
-            }
-        }
-        if ($not_downloaded !== []) {
-            throw new RuntimeException(
-                '"' . implode(', ', $not_downloaded) .
-                '" totally ' . count($not_downloaded) .
-                ' source' . (count($not_downloaded) === 1 ? '' : 's') .
-                ' not downloaded, maybe you need to "fetch" ' . (count($not_downloaded) === 1 ? 'it' : 'them') . ' first?'
-            );
-        }
-    }
-
-    /**
      * Generate micro extension test php code.
      */
     protected function generateMicroExtTests(): string
