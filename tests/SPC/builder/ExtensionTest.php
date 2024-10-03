@@ -7,6 +7,7 @@ namespace SPC\Tests\builder;
 use PHPUnit\Framework\TestCase;
 use SPC\builder\BuilderProvider;
 use SPC\builder\Extension;
+use SPC\util\CustomExt;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Input\ArgvInput;
 
@@ -22,7 +23,15 @@ class ExtensionTest extends TestCase
         $builder = BuilderProvider::makeBuilderByInput(new ArgvInput());
         [$extensions, $libs] = DependencyUtil::getExtsAndLibs(['mbregex']);
         $builder->proveLibs($libs);
-        $builder->proveExts($extensions);
+        CustomExt::loadCustomExt();
+        foreach ($extensions as $extension) {
+            $class = CustomExt::getExtClass($extension);
+            $ext = new $class($extension, $builder);
+            $builder->addExt($ext);
+        }
+        foreach ($builder->getExts() as $ext) {
+            $ext->checkDependency();
+        }
         $this->extension = $builder->getExt('mbregex');
     }
 
