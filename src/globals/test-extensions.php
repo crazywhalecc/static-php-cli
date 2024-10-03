@@ -26,7 +26,7 @@ $prefer_pre_built = true;
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => '',
-    'Windows' => '',
+    'Windows' => 'bcmath',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
