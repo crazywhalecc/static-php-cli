@@ -101,7 +101,9 @@ class GlobalEnvManager
     private static function applyConfig(array $ini): void
     {
         foreach ($ini as $k => $v) {
-            self::putenv($k . '=' . $v);
+            if (getenv($k) === false) {
+                self::putenv($k . '=' . $v);
+            }
         }
     }
 }
