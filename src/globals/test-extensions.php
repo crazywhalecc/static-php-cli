@@ -11,15 +11,15 @@ declare(strict_types=1);
 
 // --------------------------------- edit area ---------------------------------
 
-$test_php_version = ['8.3'];
+$test_php_version = ['8.0', '8.1', '8.2', '8.3'];
 
-$test_os = ['macos-14', 'ubuntu-latest'];
+$test_os = ['macos-14', 'ubuntu-latest', 'macos-13', 'windows-latest'];
 
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
-$upx = true;
+$upx = false;
 
 $prefer_pre_built = true;
 
