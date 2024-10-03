@@ -16,7 +16,11 @@ class CurlHookTest extends TestCase
     {
         $header = [];
         CurlHook::setupGithubToken('GET', 'https://example.com', $header);
-        $this->assertEmpty($header);
+        if (getenv('GITHUB_TOKEN') === false) {
+            $this->assertEmpty($header);
+        } else {
+            $this->assertEquals(['Authorization: Bearer ' . getenv('GITHUB_TOKEN')], $header);
+        }
         putenv('GITHUB_TOKEN=token');
         CurlHook::setupGithubToken('GET', 'https://example.com', $header);
         $this->assertEquals(['Authorization: Bearer token'], $header);
