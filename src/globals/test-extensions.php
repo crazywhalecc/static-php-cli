@@ -94,26 +94,30 @@ if (PHP_OS_FAMILY === 'Windows') {
 }
 
 // generate download command
-$down_cmd = 'download ';
-$down_cmd .= '--for-extensions="' . $final_extensions . '" ';
-$down_cmd .= '--for-libs="' . $final_libs . '" ';
-$down_cmd .= '--with-php="' . $argv[3] . '" ';
-$down_cmd .= '--ignore-cache-sources=php-src ';
-$down_cmd .= '--debug ';
-$down_cmd .= '--retry=5 ';
-$down_cmd .= '--shallow-clone ';
-$down_cmd .= $prefer_pre_built ? '--prefer-pre-built ' : '';
+if ($argv[1] === 'download_cmd') {
+    $down_cmd = 'download ';
+    $down_cmd .= '--for-extensions="' . $final_extensions . '" ';
+    $down_cmd .= '--for-libs="' . $final_libs . '" ';
+    $down_cmd .= '--with-php="' . $argv[3] . '" ';
+    $down_cmd .= '--ignore-cache-sources=php-src ';
+    $down_cmd .= '--debug ';
+    $down_cmd .= '--retry=5 ';
+    $down_cmd .= '--shallow-clone ';
+    $down_cmd .= $prefer_pre_built ? '--prefer-pre-built ' : '';
+}
 
 // generate build command
-$build_cmd = 'build ';
-$build_cmd .= '"' . $final_extensions . '" ';
-$build_cmd .= $zts ? '--enable-zts ' : '';
-$build_cmd .= $no_strip ? '--no-strip ' : '';
-$build_cmd .= $upx ? '--with-upx-pack ' : '';
-$build_cmd .= $final_libs === '' ? '' : ('--with-libs="' . $final_libs . '" ');
-$build_cmd .= '--build-cli --build-micro ';
-$build_cmd .= str_starts_with($argv[2], 'windows-') ? '' : '--build-fpm ';
-$build_cmd .= '--debug ';
+if ($argv[1] === 'build_cmd') {
+    $build_cmd = 'build ';
+    $build_cmd .= '"' . $final_extensions . '" ';
+    $build_cmd .= $zts ? '--enable-zts ' : '';
+    $build_cmd .= $no_strip ? '--no-strip ' : '';
+    $build_cmd .= $upx ? '--with-upx-pack ' : '';
+    $build_cmd .= $final_libs === '' ? '' : ('--with-libs="' . $final_libs . '" ');
+    $build_cmd .= '--build-cli --build-micro ';
+    $build_cmd .= str_starts_with($argv[2], 'windows-') ? '' : '--build-fpm ';
+    $build_cmd .= '--debug ';
+}
 
 echo match ($argv[1]) {
     'os' => json_encode($test_os),
