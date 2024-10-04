@@ -171,7 +171,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: downloads
-          key: php-${{ matrix.php }}-dependencies
+          key: php-dependencies-${{ matrix.os }}
 
       - name: "Install Dependencies"
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
