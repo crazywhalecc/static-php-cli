@@ -93,12 +93,21 @@ if (PHP_OS_FAMILY === 'Windows') {
     $final_extensions_cmd = $final_extensions;
 }
 
+function quote2(string $param): string
+{
+    global $argv;
+    if (str_starts_with($argv[2], 'windows-')) {
+        return '"' . $param . '"';
+    }
+    return $param;
+}
+
 // generate download command
 if ($argv[1] === 'download_cmd') {
     $down_cmd = 'download ';
-    $down_cmd .= '--for-extensions="' . $final_extensions . '" ';
-    $down_cmd .= '--for-libs="' . $final_libs . '" ';
-    $down_cmd .= '--with-php="' . $argv[3] . '" ';
+    $down_cmd .= '--for-extensions=' . quote2($final_extensions) . ' ';
+    $down_cmd .= '--for-libs=' . quote2($final_libs) . ' ';
+    $down_cmd .= '--with-php=' . quote2($argv[3]) . ' ';
     $down_cmd .= '--ignore-cache-sources=php-src ';
     $down_cmd .= '--debug ';
     $down_cmd .= '--retry=5 ';
@@ -109,11 +118,11 @@ if ($argv[1] === 'download_cmd') {
 // generate build command
 if ($argv[1] === 'build_cmd') {
     $build_cmd = 'build ';
-    $build_cmd .= '"' . $final_extensions . '" ';
+    $build_cmd .= quote2($final_extensions) . ' ';
     $build_cmd .= $zts ? '--enable-zts ' : '';
     $build_cmd .= $no_strip ? '--no-strip ' : '';
     $build_cmd .= $upx ? '--with-upx-pack ' : '';
-    $build_cmd .= $final_libs === '' ? '' : ('--with-libs="' . $final_libs . '" ');
+    $build_cmd .= $final_libs === '' ? '' : ('--with-libs=' . quote2($final_libs) . ' ');
     $build_cmd .= '--build-cli --build-micro ';
     $build_cmd .= str_starts_with($argv[2], 'windows-') ? '' : '--build-fpm ';
     $build_cmd .= '--debug ';
