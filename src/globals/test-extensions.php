@@ -146,14 +146,16 @@ echo match ($argv[1]) {
 
 if ($argv[1] === 'download_cmd') {
     if (str_starts_with($argv[2], 'windows-')) {
-        passthru('powershell.exe -file .\bin\spc.ps1 ' . $down_cmd);
+        passthru('powershell.exe -file .\bin\spc.ps1 ' . $down_cmd, $retcode);
     } else {
-        passthru('./bin/spc ' . $down_cmd);
+        passthru('./bin/spc ' . $down_cmd, $retcode);
     }
 } elseif ($argv[1] === 'build_cmd') {
     if (str_starts_with($argv[2], 'windows-')) {
-        passthru('powershell.exe -file .\bin\spc.ps1 ' . $build_cmd);
+        passthru('powershell.exe -file .\bin\spc.ps1 ' . $build_cmd, $retcode);
     } else {
-        passthru('./bin/spc ' . $build_cmd);
+        passthru('./bin/spc ' . $build_cmd, $retcode);
     }
 }
+
+exit($retcode);
