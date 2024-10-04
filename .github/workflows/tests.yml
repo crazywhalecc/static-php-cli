@@ -192,9 +192,7 @@ jobs:
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
       - name: "Run Build Tests (download)"
-        run: |
-          bin/spc $(php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }})
+        run: php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }}
 
       - name: "Run Build Tests (build)"
-        run: |
-          bin/spc $(php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }})
+        run: php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }}

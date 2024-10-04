@@ -143,3 +143,11 @@ echo match ($argv[1]) {
     'build_cmd' => $build_cmd,
     default => '',
 };
+
+if ($argv[1] === 'download_cmd' || $argv[1] === 'build_cmd') {
+    if (str_starts_with($argv[2], 'windows-')) {
+        passthru('powershell.exe -file .\bin\spc.ps1 ' . $down_cmd);
+    } else {
+        passthru('./bin/spc ' . $down_cmd);
+    }
+}
