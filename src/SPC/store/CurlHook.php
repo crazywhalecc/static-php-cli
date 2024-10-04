@@ -20,11 +20,17 @@ class CurlHook
         }
         if (getenv('GITHUB_USER')) {
             $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
-            $headers[] = "Authorization: Basic {$auth}";
+            $he = "Authorization: Basic {$auth}";
+            if (!in_array($he, $headers)) {
+                $headers[] = $he;
+            }
             logger()->info("using basic github token for {$method} {$url}");
         } else {
             $auth = getenv('GITHUB_TOKEN');
-            $headers[] = "Authorization: Bearer {$auth}";
+            $he = "Authorization: Bearer {$auth}";
+            if (!in_array($he, $headers)) {
+                $headers[] = $he;
+            }
             logger()->info("using bearer github token for {$method} {$url}");
         }
     }
