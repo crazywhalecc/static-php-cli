@@ -144,10 +144,16 @@ echo match ($argv[1]) {
     default => '',
 };
 
-if ($argv[1] === 'download_cmd' || $argv[1] === 'build_cmd') {
+if ($argv[1] === 'download_cmd') {
     if (str_starts_with($argv[2], 'windows-')) {
         passthru('powershell.exe -file .\bin\spc.ps1 ' . $down_cmd);
     } else {
         passthru('./bin/spc ' . $down_cmd);
+    }
+} elseif ($argv[1] === 'build_cmd') {
+    if (str_starts_with($argv[2], 'windows-')) {
+        passthru('powershell.exe -file .\bin\spc.ps1 ' . $build_cmd);
+    } else {
+        passthru('./bin/spc ' . $build_cmd);
     }
 }
