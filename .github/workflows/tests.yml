@@ -193,18 +193,8 @@ jobs:
 
       - name: "Run Build Tests (download)"
         run: |
-          bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=5 --shallow-clone $(php src/globals/test-extensions.php prefer_pre_built)
+          bin/spc $(php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }})
 
-      - name: "Download pre-built libraries for pkg-config"
-        if: matrix.os != 'windows-latest'
+      - name: "Run Build Tests (build)"
         run: |
-          bin/spc del-download pkg-config
-          bin/spc download pkg-config --prefer-pre-built --debug
-
-      - name: "Run Build Tests (build, *nix)"
-        if: matrix.os != 'windows-latest'
-        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) $(php src/globals/test-extensions.php no_strip) $UPX_CMD --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
-
-      - name: "Run Build Tests (build, windows)"
-        if: matrix.os == 'windows-latest'
-        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) $(php src/globals/test-extensions.php no_strip) $env:UPX_CMD --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --debug
+          bin/spc $(php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }})
