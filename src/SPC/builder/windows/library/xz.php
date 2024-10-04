@@ -32,7 +32,7 @@ class xz extends WindowsLibraryBase
             );
 
         // copy liblzma.lib to liblzma_a.lib
-        copy(BUILD_LIB_PATH . '/liblzma.lib', BUILD_LIB_PATH . '/liblzma_a.lib');
+        copy(BUILD_LIB_PATH . '/lzma.lib', BUILD_LIB_PATH . '/liblzma_a.lib');
         // patch lzma.h
         FileSystem::replaceFileStr(BUILD_INCLUDE_PATH . '/lzma.h', 'defined(LZMA_API_STATIC)', 'defined(_WIN32)');
     }
