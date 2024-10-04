@@ -6,6 +6,8 @@ use ZM\Logger\ConsoleLogger;
 
 define('WORKING_DIR', getcwd());
 define('ROOT_DIR', dirname(__DIR__, 2));
+putenv('WORKING_DIR=' . WORKING_DIR);
+putenv('ROOT_DIR=' . ROOT_DIR);
 
 // CLI start time
 define('START_TIME', microtime(true));
