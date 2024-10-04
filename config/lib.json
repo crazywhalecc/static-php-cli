@@ -544,6 +544,17 @@
     "pkg-config": {
         "source": "pkg-config"
     },
+    "librdkafka": {
+        "source": "librdkafka",
+        "static-libs-unix": [
+            "librdkafka.a",
+            "librdkafka++.a",
+            "librdkafka-static.a"
+        ],
+        "lib-suggests": [
+            "zstd"
+        ]
+    },
     "postgresql": {
         "source": "postgresql",
         "static-libs-unix": [

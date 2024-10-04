@@ -694,6 +694,15 @@
             "zlib"
         ]
     },
+    "rdkafka": {
+        "type": "external",
+        "source": "ext-rdkafka",
+        "arg-type": "custom",
+        "cpp-extension": true,
+        "lib-depends": [
+            "librdkafka"
+        ]
+    },
     "swoole": {
         "support": {
             "Windows": "no",
