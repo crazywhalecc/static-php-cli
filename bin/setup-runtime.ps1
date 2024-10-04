@@ -51,10 +51,10 @@ if ($action -eq 'add-path') {
 }
 
 # get php 8.1 specific version
-$API = (Invoke-WebRequest -Uri "https://www.php.net/releases/index.php?json&version=8.1") | ConvertFrom-Json
+$API = (Invoke-WebRequest -Uri "https://www.php.net/releases/index.php?json&version=8.3") | ConvertFrom-Json
 
 # php windows download
-$PHPRuntimeUrl = "https://windows.php.net/downloads/releases/php-" + $API.version + "-Win32-vs16-x64.zip"
+$PHPRuntimeUrl = "https://windows.php.net/downloads/releases/php-" + $API.version + "-nts-Win32-vs16-x64.zip"
 $ComposerUrl = "https://getcomposer.org/download/latest-stable/composer.phar"
 
 # create dir

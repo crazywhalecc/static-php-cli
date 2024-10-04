@@ -156,6 +156,8 @@ jobs:
           tools: pecl, composer
           extensions: curl, openssl, mbstring
           ini-values: memory_limit=-1
+        env:
+          phpts: nts
 
       - name: "Cache composer packages"
         id: composer-cache
