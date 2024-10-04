@@ -11,16 +11,31 @@ declare(strict_types=1);
 
 // --------------------------------- edit area ---------------------------------
 
-$test_php_version = ['8.0', '8.1', '8.2', '8.3'];
+// test php version
+$test_php_version = [
+    '8.0',
+    // '8.1',
+    // '8.2',
+    '8.3',
+];
 
-$test_os = ['macos-14', 'ubuntu-latest', 'macos-13', 'windows-latest'];
+// test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
+$test_os = [
+    'macos-14',
+    'ubuntu-latest',
+    'macos-13',
+    'windows-latest',
+];
 
+// whether enable thread safe
 $zts = true;
 
 $no_strip = false;
 
+// compress with upx
 $upx = false;
 
+// prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
@@ -78,6 +93,28 @@ if (PHP_OS_FAMILY === 'Windows') {
     $final_extensions_cmd = $final_extensions;
 }
 
+// generate download command
+$down_cmd = 'download ';
+$down_cmd .= '--for-extensions="' . $final_extensions . '" ';
+$down_cmd .= '--for-libs="' . $final_libs . '" ';
+$down_cmd .= '--with-php="' . $argv[3] . '" ';
+$down_cmd .= '--ignore-cache-sources=php-src ';
+$down_cmd .= '--debug ';
+$down_cmd .= '--retry=5 ';
+$down_cmd .= '--shallow-clone ';
+$down_cmd .= $prefer_pre_built ? '--prefer-pre-built ' : '';
+
+// generate build command
+$build_cmd = 'build ';
+$build_cmd .= '"' . $final_extensions . '" ';
+$build_cmd .= $zts ? '--enable-zts ' : '';
+$build_cmd .= $no_strip ? '--no-strip ' : '';
+$build_cmd .= $upx ? '--with-upx-pack ' : '';
+$build_cmd .= $final_libs === '' ? '' : ('--with-libs="' . $final_libs . '" ');
+$build_cmd .= '--build-cli --build-micro ';
+$build_cmd .= str_starts_with($argv[2], 'windows-') ? '' : '--build-fpm ';
+$build_cmd .= '--debug ';
+
 echo match ($argv[1]) {
     'os' => json_encode($test_os),
     'php' => json_encode($test_php_version),
@@ -89,5 +126,7 @@ echo match ($argv[1]) {
     'no_strip' => $no_strip ? '--no-strip' : '',
     'upx' => $upx ? '--with-upx-pack' : '',
     'prefer_pre_built' => $prefer_pre_built ? '--prefer-pre-built' : '',
+    'download_cmd' => $down_cmd,
+    'build_cmd' => $build_cmd,
     default => '',
 };
