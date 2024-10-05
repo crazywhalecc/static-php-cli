@@ -182,6 +182,7 @@ class Downloader
      *
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null, int $lock_as = SPC_LOCK_SOURCE): void
     {
@@ -220,6 +221,7 @@ class Downloader
      *
      * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retry = 0, int $lock_as = SPC_LOCK_SOURCE): void
     {
@@ -381,6 +383,7 @@ class Downloader
      * @param  int                 $lock_as Lock source type (default: SPC_LOCK_SOURCE)
      * @throws DownloaderException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public static function downloadSource(string $name, ?array $source = null, bool $force = false, int $lock_as = SPC_LOCK_SOURCE): void
     {
@@ -539,6 +542,7 @@ class Downloader
      * Use curl to download sources from url
      *
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function curlDown(string $url, string $path, string $method = 'GET', array $headers = [], array $hooks = [], int $retry = 0): void
     {
