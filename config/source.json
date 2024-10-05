@@ -674,10 +674,10 @@
         }
     },
     "redis": {
-        "type": "git",
+        "type": "url",
+        "url": "https://pecl.php.net/get/redis",
         "path": "php-src/ext/redis",
-        "rev": "release/6.0.2",
-        "url": "https://github.com/phpredis/phpredis",
+        "filename": "redis.tgz",
         "license": {
             "type": "file",
             "path": [
