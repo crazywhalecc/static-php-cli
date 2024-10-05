@@ -63,5 +63,13 @@ function f_passthru(string $cmd): bool
         return true;
     }
 
+    // allowed commands
+    $allowed = ['cp', 'copy', 'xcopy'];
+    foreach ($allowed as $a) {
+        if (str_starts_with($cmd, $a)) {
+            \f_passthru($cmd);
+            return true;
+        }
+    }
     throw new RuntimeException('Invalid tests');
 }
