@@ -1,3 +1,7 @@
+<script setup>
+import SearchTable from "../../.vitepress/components/SearchTable.vue";
+</script>
+
 # Extensions
 
 > - `yes`: supported
@@ -5,7 +9,7 @@
 > - `no` with issue link: confirmed to be unavailable due to issue
 > - `partial` with issue link: supported but not perfect due to issue
 
-<!--@include: ../../extensions.md-->
+<search-table />
 
 ::: tip
 If an extension you need is missing, you can create a [Feature Request](https://github.com/crazywhalecc/static-php-cli/issues).
