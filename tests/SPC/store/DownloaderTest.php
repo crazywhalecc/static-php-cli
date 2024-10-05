@@ -104,7 +104,7 @@ class DownloaderTest extends TestCase
     {
         $filelist = Downloader::getFromFileList('fake-filelist', [
             'url' => 'https://fakecmd.com/filelist',
-            'regex' => '/href="(?<file>filelist-(?<version>[^"]+)\\.tar\\.xz)"/',
+            'regex' => '/href="(?<file>filelist-(?<version>[^"]+)\.tar\.xz)"/',
         ]);
         $this->assertIsArray($filelist);
         $this->assertEquals('filelist-4.7.0.tar.xz', $filelist[1]);
