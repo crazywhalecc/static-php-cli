@@ -2,17 +2,29 @@
   <div>
     <h2>{{ I18N[lang].selectedSystem }}</h2>
     <div class="option-line">
-      <span v-for="(item, index) in osList" :key="index" style="margin-right: 4px">
+      <span v-for="(item, index) in osList" :key="index" style="margin-right: 8px">
         <input type="radio" :id="'os-' + item.os" :value="item.os" :disabled="item.disabled === true" v-model="selectedSystem" />
         <label :for="'os-' + item.os">{{ item.label }}</label>
       </span>
     </div>
+    <div class="option-line">
+      <select v-model="selectedArch">
+        <option value="x86_64">x86_64</option>
+        <option value="aarch64" :disabled="selectedSystem === 'windows'">aarch64</option>
+      </select>
+    </div>
     <h2>{{ I18N[lang].selectExt }}{{ checkedExts.length > 0 ? (' (' + checkedExts.length + ')') : '' }}</h2>
     <div class="box">
-      <div v-for="(item, index) in ext" class="ext-item">
-        <span v-if="isSupported(index, selectedSystem)">
-          <input type="checkbox" :id="index" :value="index" v-model="checkedExts" :disabled="extDisableList.indexOf(index) !== -1">
-          <label :for="index">{{ index }}</label>
+      <input class="input" v-model="filterText" placeholder="Highlight search..." />
+      <br>
+      <div v-for="item in extFilter" class="ext-item">
+        <span>
+          <input type="checkbox" :id="item" :value="item" v-model="checkedExts" :disabled="extDisableList.indexOf(item) !== -1">
+          <label :for="item">
+            <span>{{ highlightItem(item, 0) }}</span>
+            <span style="color: orangered; font-weight: bolder">{{ highlightItem(item, 1) }}</span>
+            <span>{{ highlightItem(item, 2) }}</span>
+          </label>
         </span>
 
       </div>
@@ -20,7 +32,7 @@
     <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectCommon">{{ I18N[lang].selectCommon }}</div>
     <div class="my-btn" @click="checkedExts = []">{{ I18N[lang].selectNone }}</div>
 
-    <details class="details custom-block">
+    <details class="details custom-block" open>
       <summary>{{ I18N[lang].buildLibs }}{{ checkedLibs.length > 0 ? (' (' + checkedLibs.length + ')') : '' }}</summary>
       <div class="box">
         <div v-for="(item, index) in libContain" class="ext-item">
@@ -135,24 +147,33 @@
         <div class="warning custom-block">
           <p class="custom-block-title">WARNING</p>
           <p>{{ I18N[lang].windowsDownSPCWarning }}</p>
+          <a href="https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe" target="_blank">https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe</a>
         </div>
       </div>
     </div>
     <div v-if="downloadByExt" class="command-container">
       <b>{{ I18N[lang].downloadExtOnlyCommand }}</b>
-      <div class="command-preview">{{ spcCommand }} download --with-php={{ selectedPhpVersion }} --for-extensions "{{ extList }}"{{ preBuilt ? ' --prefer-pre-built' : '' }}{{ debug ? ' --debug' : '' }}</div>
+      <div id="download-ext-cmd" class="command-preview">
+        {{ downloadExtCommand }}
+      </div>
     </div>
     <div v-else class="command-container">
       <b>{{ I18N[lang].downloadAllCommand }}</b>
-      <div class="command-preview">{{ spcCommand }} download --all --with-php={{ selectedPhpVersion }}{{ preBuilt ? ' --prefer-pre-built' : '' }}{{ debug ? ' --debug' : '' }}</div>
+      <div id="download-all-cmd" class="command-preview">
+        {{ downloadAllCommand }}
+      </div>
     </div>
     <div class="command-container" v-if="enableUPX">
       <b>{{ I18N[lang].downloadUPXCommand }}</b>
-      <div class="command-preview">{{ spcCommand }} install-pkg upx{{ debug ? ' --debug' : '' }}</div>
+      <div id="download-pkg-cmd" class="command-preview">
+        {{ downloadPkgCommand }}
+      </div>
     </div>
     <div class="command-container">
       <b>{{ I18N[lang].compileCommand }}</b>
-      <div class="command-preview">{{ spcCommand }} build {{ buildCommand }} "{{ extList }}"{{ additionalLibs }}{{ debug ? ' --debug' : '' }}{{ zts ? ' --enable-zts' : '' }}{{ enableUPX ? ' --with-upx-pack' : '' }}{{ displayINI }}</div>
+      <div id="build-cmd" class="command-preview">
+        {{ buildCommandString }}
+      </div>
     </div>
   </div>
 </template>
@@ -170,6 +191,15 @@ import libData from '../config/lib.json';
 import { getAllExtLibsByDeps } from './DependencyUtil.js';
 
 const ext = ref(extData);
+const extFilter = computed(() => {
+  const ls = [];
+  for (const [name, item] of Object.entries(ext.value)) {
+    if (isSupported(name, selectedSystem.value)) {
+      ls.push(name);
+    }
+  }
+  return ls;
+});
 const lib = ref(libData);
 const libContain = ref([]);
 
@@ -234,7 +264,7 @@ const I18N = {
     microUnavailable: 'micro 不支持 PHP 7.4 及更早版本！',
     windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed 构建！',
     useUPX: '是否开启 UPX 压缩（减小二进制体积）',
-    windowsDownSPCWarning: 'Windows 下请手动下载 spc.exe 二进制文件并解压到当前目录！',
+    windowsDownSPCWarning: 'Windows 下请手动下载 spc.exe 二进制文件，解压到当前目录并重命名为 spc.exe！',
     usePreBuilt: '如果可能，下载预编译的依赖库（减少编译时间）',
   },
   en: {
@@ -268,7 +298,7 @@ const I18N = {
     microUnavailable: 'Micro does not support PHP 7.4 and earlier versions!',
     windowsSAPIUnavailable: 'Windows does not support fpm and embed build!',
     useUPX: 'Enable UPX compression (reduce binary size)',
-    windowsDownSPCWarning: 'Please download the spc.exe binary file manually and extract it to the current directory on Windows!',
+    windowsDownSPCWarning: 'Please download the binary file manually, extract it to the current directory and rename to spc.exe on Windows!',
     usePreBuilt: 'Download pre-built dependencies if possible (reduce compile time)',
   }
 };
@@ -325,7 +355,7 @@ const libDisableList = ref([]);
 const checkedTargets = ref(['cli']);
 
 // chosen env
-const selectedEnv = ref('native');
+const selectedEnv = ref('spc');
 
 // chosen php version
 const selectedPhpVersion = ref('8.2');
@@ -348,6 +378,13 @@ const enableUPX = ref(0);
 const hardcodedINIData = ref('');
 
 const selectedSystem = ref('linux');
+
+watch(selectedSystem, () => {
+  if (selectedSystem.value === 'windows') {
+    selectedArch.value = 'x86_64';
+  }
+});
+
 const selectedArch = ref('x86_64');
 
 // spc command string, alt: spc-alpine-docker, spc
@@ -380,6 +417,25 @@ const displayINI = computed(() => {
   });
   return ' ' + str.map((x) => '-I "' + x + '"').join(' ');
 });
+
+const filterText = ref('');
+
+const highlightItem = (item, step) => {
+  if (item.includes(filterText.value)) {
+    if (step === 0) {
+      return item.substring(0, item.indexOf(filterText.value));
+    } else if (step === 1) {
+      return filterText.value;
+    } else {
+      return item.substring(item.indexOf(filterText.value) + filterText.value.length);
+    }
+  } else {
+    if (step === 0) {
+      return item;
+    }
+    return '';
+  }
+};
 
 const onTargetChange = (event) => {
   let id;
@@ -426,6 +482,22 @@ const calculateExtDepends = (input) => {
 
   return Array.from(result);
 };
+
+const downloadAllCommand = computed(() => {
+  return `${spcCommand.value} download --all --with-php=${selectedPhpVersion.value}${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
+});
+
+const downloadExtCommand = computed(() => {
+  return `${spcCommand.value} download --with-php=${selectedPhpVersion.value} --for-extensions "${extList.value}"${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
+});
+
+const downloadPkgCommand = computed(() => {
+  return `${spcCommand.value} install-pkg upx${debug.value ? ' --debug' : ''}`;
+});
+
+const buildCommandString = computed(() => {
+  return `${spcCommand.value} build ${buildCommand.value} "${extList.value}"${additionalLibs.value}${debug.value ? ' --debug' : ''}${zts.value ? ' --enable-zts' : ''}${enableUPX.value ? ' --with-upx-pack' : ''}${displayINI.value}`;
+});
 
 const calculateExtLibDepends = (input) => {
   const result = new Set();
@@ -539,9 +611,12 @@ h2 {
 .command-preview {
   padding: 1.2rem;
   background: var(--vp-c-divider);
+  border-radius: 8px;
+  word-break: break-all;
   font-family: monospace;
   overflow-wrap: break-word;
 }
+
 .option-line {
   padding: 4px 8px;
 }
@@ -582,12 +657,38 @@ select {
   background-color: var(--vp-button-alt-active-bg);
 }
 .textarea {
-  border: 1px solid var(--vp-button-alt-border);
-  padding: 0 4px;
-  min-width: 300px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  width: calc(100% - 12px);
+  padding: 4px 8px;
+}
+
+.input {
+  display: block;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  width: 100%;
+  padding: 4px 8px;
 }
 
 .command-container {
   margin-bottom: 24px;
+}
+.modal-button {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-color: var(--vp-button-alt-border);
+  color: var(--vp-button-alt-text);
+  background-color: var(--vp-button-alt-bg);
+}
+.modal-button:hover {
+  border-color: var(--vp-button-alt-hover-border);
+  color: var(--vp-button-alt-hover-text);
+  background-color: var(--vp-button-alt-hover-bg)
+}
+.modal-button:active {
+  border-color: var(--vp-button-alt-active-border);
+  color: var(--vp-button-alt-active-text);
+  background-color: var(--vp-button-alt-active-bg)
 }
 </style>

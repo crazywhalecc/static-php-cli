@@ -1,3 +1,7 @@
+<script setup>
+import SearchTable from "../../.vitepress/components/SearchTable.vue";
+</script>
+
 # 扩展列表
 
 > - `yes`: 已支持
@@ -5,7 +9,8 @@
 > - `no` with issue link: 确定不支持或无法支持
 > - `partial` with issue link: 已支持，但是无法完美工作
 
-<!--@include: ../../extensions.md-->
+
+<search-table />
 
 ::: tip
 如果缺少您需要的扩展，您可以创建 [功能请求](https://github.com/crazywhalecc/static-php-cli/issues)。
