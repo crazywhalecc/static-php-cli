@@ -24,8 +24,9 @@ class GlobalEnvManager
     /**
      * Initialize the environment variables
      *
-     * @param  BuilderBase      $builder Builder
+     * @param  null|BuilderBase    $builder Builder
      * @throws RuntimeException
+     * @throws WrongUsageException
      */
     public static function init(?BuilderBase $builder = null): void
     {

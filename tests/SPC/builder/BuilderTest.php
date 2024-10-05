@@ -102,7 +102,7 @@ class BuilderTest extends TestCase
     {
         if (file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
             $file = SOURCE_PATH . '/php-src/main/php_version.h';
-            $cnt = preg_match('/PHP_VERSION "(\d+\.\d+\.\d+)"/', $file, $match);
+            $cnt = preg_match('/PHP_VERSION "(\d+\.\d+\.\d+)"/', file_get_contents($file), $match);
             if ($cnt !== 0) {
                 $this->assertEquals($match[1], $this->builder->getPHPVersion());
             } else {
