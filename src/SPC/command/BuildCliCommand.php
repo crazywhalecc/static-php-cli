@@ -32,6 +32,7 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('enable-zts', null, null, 'enable ZTS support');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
+        $this->addOption('with-config-file-path', null, InputOption::VALUE_REQUIRED, 'Set the path in which to look for php.ini');
         $this->addOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
         $this->addOption('with-micro-fake-cli', null, null, 'Let phpmicro\'s PHP_SAPI use "cli" instead of "micro"');
         $this->addOption('with-suggested-libs', 'L', null, 'Build with suggested libs for selected exts and libs');
@@ -114,6 +115,9 @@ class BuildCliCommand extends BuildCommand
                 'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
                 'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
             ];
+            if (!empty($this->input->getOption('with-config-file-path'))) {
+                $indent_texts['Config File Path'] = $this->input->getOption('with-config-file-path');
+            }
             if (!empty($this->input->getOption('with-hardcoded-ini'))) {
                 $indent_texts['Hardcoded INI'] = $this->input->getOption('with-hardcoded-ini');
             }
