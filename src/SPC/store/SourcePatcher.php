@@ -88,7 +88,7 @@ class SourcePatcher
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public static function patchMicro(): bool
+    public static function patchMicro(string $name = '', string $target = '', ?array $items = null): bool
     {
         if (!file_exists(SOURCE_PATH . '/php-src/sapi/micro/php_micro.c')) {
             return false;
@@ -108,22 +108,13 @@ class SourcePatcher
         // $check = !defined('DEBUG_MODE') ? ' -q' : '';
         // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
 
-        $default = [
-            'static_opcache',
-            'static_extensions_win32',
-            'cli_checks',
-            'disable_huge_page',
-            'vcruntime140',
-            'win32',
-            'zend_stream',
-        ];
-        if (PHP_OS_FAMILY === 'Windows') {
-            $default[] = 'cli_static';
+        if ($items !== null) {
+            $spc_micro_patches = $items;
+        } else {
+            $spc_micro_patches = getenv('SPC_MICRO_PATCHES');
+            $spc_micro_patches = $spc_micro_patches === false ? [] : explode(',', $spc_micro_patches);
         }
-        if (PHP_OS_FAMILY === 'Darwin') {
-            $default[] = 'macos_iconv';
-        }
-        $patch_list = $default;
+        $patch_list = $spc_micro_patches;
         $patches = [];
         $serial = ['80', '81', '82', '83', '84'];
         foreach ($patch_list as $patchName) {
@@ -142,12 +133,14 @@ class SourcePatcher
             throw new RuntimeException("failed finding patch {$patchName}");
         }
 
-        $patchesStr = str_replace('/', DIRECTORY_SEPARATOR, implode(' ', $patches));
-
-        f_passthru(
-            'cd ' . SOURCE_PATH . '/php-src && ' .
-            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1 '
-        );
+        foreach ($patches as $patch) {
+            logger()->info("Patching micro with {$patch}");
+            $patchesStr = str_replace('/', DIRECTORY_SEPARATOR, $patch);
+            f_passthru(
+                'cd ' . SOURCE_PATH . '/php-src && ' .
+                (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1 '
+            );
+        }
 
         return true;
     }
@@ -205,6 +198,19 @@ class SourcePatcher
             'PHP_ADD_INCLUDE([$ext_srcdir])',
             "PHP_ADD_INCLUDE( [\$ext_srcdir] )\n    PHP_ADD_INCLUDE([\$abs_srcdir/ext])"
         );
+        // swoole 5.1.3 build fix
+        // get swoole version first
+        $file = SOURCE_PATH . '/php-src/ext/swoole/include/swoole_version.h';
+        // Match #define SWOOLE_VERSION "5.1.3"
+        $pattern = '/#define SWOOLE_VERSION "(.+)"/';
+        if (preg_match($pattern, file_get_contents($file), $matches)) {
+            $version = $matches[1];
+        } else {
+            $version = '1.0.0';
+        }
+        if ($version === '5.1.3') {
+            self::patchFile('spc_fix_swoole_50513.patch', SOURCE_PATH . '/php-src/ext/swoole');
+        }
         return true;
     }
 
@@ -401,14 +407,17 @@ class SourcePatcher
         if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
             $ver_id = intval($match[1]);
             if ($ver_id < 80000) {
-                return false;
+                self::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
+                return true;
             }
             if ($ver_id < 80100) {
                 self::patchFile('spc_fix_libxml2_12_php80.patch', SOURCE_PATH . '/php-src');
+                self::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
                 return true;
             }
             if ($ver_id < 80200) {
                 self::patchFile('spc_fix_libxml2_12_php81.patch', SOURCE_PATH . '/php-src');
+                self::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
                 return true;
             }
             return false;

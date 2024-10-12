@@ -53,7 +53,8 @@
             "libssh2",
             "brotli",
             "nghttp2",
-            "zstd"
+            "zstd",
+            "libcares"
         ],
         "lib-suggests-windows": [
             "brotli",
@@ -124,6 +125,18 @@
         ],
         "headers": [
             "gmp.h"
+        ]
+    },
+    "gmssl": {
+        "source": "gmssl",
+        "static-libs-unix": [
+            "libgmssl.a"
+        ],
+        "static-libs-windows": [
+            "gmssl.lib"
+        ],
+        "frameworks": [
+            "Security"
         ]
     },
     "icu": {
@@ -630,7 +643,7 @@
             "liblzma.a"
         ],
         "static-libs-windows": [
-            "liblzma.lib",
+            "lzma.lib",
             "liblzma_a.lib"
         ],
         "headers-unix": [

@@ -9,7 +9,9 @@ use SPC\command\BuildLibsCommand;
 use SPC\command\DeleteDownloadCommand;
 use SPC\command\dev\AllExtCommand;
 use SPC\command\dev\ExtVerCommand;
+use SPC\command\dev\GenerateExtDepDocsCommand;
 use SPC\command\dev\GenerateExtDocCommand;
+use SPC\command\dev\GenerateLibDepDocsCommand;
 use SPC\command\dev\LibVerCommand;
 use SPC\command\dev\PackLibCommand;
 use SPC\command\dev\PhpVerCommand;
@@ -28,11 +30,14 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.3.2';
+    public const VERSION = '2.3.5';
 
     public function __construct()
     {
         parent::__construct('static-php-cli', self::VERSION);
+
+        // Define internal env vars and constants
+        require_once ROOT_DIR . '/src/globals/internal-env.php';
 
         $this->addCommands(
             [
@@ -55,6 +60,8 @@ final class ConsoleApplication extends Application
                 new ExtVerCommand(),
                 new SortConfigCommand(),
                 new GenerateExtDocCommand(),
+                new GenerateExtDepDocsCommand(),
+                new GenerateLibDepDocsCommand(),
                 new PackLibCommand(),
             ]
         );

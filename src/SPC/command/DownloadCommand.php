@@ -34,6 +34,7 @@ class DownloadCommand extends BaseCommand
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
+        $this->addOption('custom-git', 'G', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source git url, e.g "php-src:master:https://github.com/php/php-src.git"');
         $this->addOption('from-zip', 'Z', InputOption::VALUE_REQUIRED, 'Fetch from zip archive');
         $this->addOption('for-extensions', 'e', InputOption::VALUE_REQUIRED, 'Fetch by extensions, e.g "openssl,mbstring"');
         $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
@@ -123,10 +124,15 @@ class DownloadCommand extends BaseCommand
             // Define PHP major version
             $ver = $this->php_major_ver = $this->getOption('with-php') ?? '8.1';
             define('SPC_BUILD_PHP_VERSION', $ver);
+            // match x.y
             preg_match('/^\d+\.\d+$/', $ver, $matches);
             if (!$matches) {
-                logger()->error("bad version arg: {$ver}, x.y required!");
-                return static::FAILURE;
+                // match x.y.z
+                preg_match('/^\d+\.\d+\.\d+$/', $ver, $matches);
+                if (!$matches) {
+                    logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
+                    return static::FAILURE;
+                }
             }
 
             // retry
@@ -174,6 +180,12 @@ class DownloadCommand extends BaseCommand
                 [$source_name, $url] = explode(':', $value, 2);
                 $custom_urls[$source_name] = $url;
             }
+            // Process -G options
+            $custom_gits = [];
+            foreach ($this->input->getOption('custom-git') as $value) {
+                [$source_name, $branch, $url] = explode(':', $value, 3);
+                $custom_gits[$source_name] = [$branch, $url];
+            }
 
             // If passing --prefer-pre-built option, we need to load pre-built library list from pre-built.json targeted releases
             if ($this->getOption('prefer-pre-built')) {
@@ -205,6 +217,18 @@ class DownloadCommand extends BaseCommand
                         $new_config['filename'] = $config['filename'];
                     }
                     logger()->info("Fetching source {$source} from custom url [{$ni}/{$cnt}]");
+                    Downloader::downloadSource($source, $new_config, true);
+                } elseif (isset($custom_gits[$source])) {
+                    $config = Config::getSource($source);
+                    $new_config = [
+                        'type' => 'git',
+                        'rev' => $custom_gits[$source][0],
+                        'url' => $custom_gits[$source][1],
+                    ];
+                    if (isset($config['path'])) {
+                        $new_config['path'] = $config['path'];
+                    }
+                    logger()->info("Fetching source {$source} from custom git [{$ni}/{$cnt}]");
                     Downloader::downloadSource($source, $new_config, true);
                 } else {
                     $config = Config::getSource($source);

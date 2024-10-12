@@ -32,8 +32,12 @@ class SwitchPhpVersionCommand extends BaseCommand
     {
         $php_ver = $this->input->getArgument('php-major-version');
         if (!in_array($php_ver, ['7.4', '8.0', '8.1', '8.2', '8.3'])) {
-            $this->output->writeln('<error>Invalid PHP major version ' . $php_ver . ' !</error>');
-            return static::FAILURE;
+            // match x.y.z
+            preg_match('/^\d+\.\d+\.\d+$/', $php_ver, $matches);
+            if (!$matches) {
+                $this->output->writeln('<error>Invalid PHP version ' . $php_ver . ' !</error>');
+                return static::FAILURE;
+            }
         }
 
         // detect if downloads/.lock.json exists

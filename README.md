@@ -134,15 +134,15 @@ Download from self-hosted nightly builds using commands below:
 ```bash
 # Download from self-hosted nightly builds (sync with main branch)
 # For Linux x86_64
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
 # For Linux aarch64
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
 # macOS x86_64 (Intel)
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
 # macOS aarch64 (Apple)
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
 # Windows (x86_64, win10 build 17063 or later)
-curl.exe -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
 
 # Add execute perm (Linux and macOS only)
 chmod +x ./spc
@@ -195,7 +195,7 @@ Basic usage for building php with some extensions:
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # download pre-built libraries first (save time for compiling dependencies)
 ./bin/spc download --for-extensions="openssl,curl,mbstring,mbregex" --prefer-pre-built
-# download different PHP version (--with-php=x.y, recommend 7.3 ~ 8.3)
+# download different PHP version (--with-php=x.y or --with-php=x.y.z, recommend 8.1 ~ 8.3)
 ./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
 # with bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl extension, build both CLI and phpmicro SAPI

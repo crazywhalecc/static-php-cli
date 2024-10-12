@@ -83,6 +83,15 @@
             "path": "LICENSE"
         }
     },
+    "ext-gmssl": {
+        "type": "ghtar",
+        "repo": "gmssl/GmSSL-PHP",
+        "path": "php-src/ext/gmssl",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-imagick": {
         "type": "url",
         "url": "https://pecl.php.net/get/imagick",
@@ -192,6 +201,14 @@
         "license": {
             "type": "text",
             "text": "Since version 6, GMP is distributed under the dual licenses, GNU LGPL v3 and GNU GPL v2. These licenses make the library free to use, share, and improve, and allow you to pass on the result. The GNU licenses give freedoms, but also set firm restrictions on the use with non-free programs."
+        }
+    },
+    "gmssl": {
+        "type": "ghtar",
+        "repo": "guanzhi/GmSSL",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "icu": {
@@ -497,7 +514,7 @@
         "type": "git",
         "path": "php-src/sapi/micro",
         "rev": "master",
-        "url": "https://github.com/easysoft/phpmicro",
+        "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -509,6 +526,16 @@
         "path": "php-src/ext/mongodb",
         "match": "mongodb.+\\.tgz",
         "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "msgpack": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/msgpack",
+        "path": "php-src/ext/msgpack",
+        "filename": "msgpack.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -647,13 +674,16 @@
         }
     },
     "redis": {
-        "type": "git",
+        "type": "url",
+        "url": "https://pecl.php.net/get/redis",
         "path": "php-src/ext/redis",
-        "rev": "5.3.7",
-        "url": "https://github.com/phpredis/phpredis",
+        "filename": "redis.tgz",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": [
+                "LICENSE",
+                "COPYING"
+            ]
         }
     },
     "snappy": {

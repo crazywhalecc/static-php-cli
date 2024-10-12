@@ -73,9 +73,9 @@ class LinuxMuslCheck
             FileSystem::extractSource($musl_version_name, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
             logger()->info('Installing musl wrapper');
             shell()->cd(SOURCE_PATH . "/{$musl_version_name}")
-                ->exec('./configure --disable-gcc-wrapper')
-                ->exec('make -j')
-                ->exec("{$prefix}make install");
+                ->exec('CC=gcc CXX=g++ AR=ar LD=ld ./configure --disable-gcc-wrapper')
+                ->exec('CC=gcc CXX=g++ AR=ar LD=ld make -j')
+                ->exec("CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
             // TODO: add path using putenv instead of editing /etc/profile
             return true;
         } catch (RuntimeException) {

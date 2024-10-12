@@ -109,24 +109,41 @@ jobs:
 
       - name: "Run PHPUnit Tests"
         run: |
-          vendor/bin/phpunit tests/ --no-coverage
+          SPC_NO_MUSL_PATH=yes vendor/bin/phpunit tests/ --no-coverage
+
+  define-matrix:
+    name: "Define Matrix"
+    runs-on: ubuntu-latest
+    outputs:
+      php: ${{ steps.gendef.outputs.php }}
+      os: ${{ steps.gendef.outputs.os }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+
+      - name: Define
+        id: gendef
+        run: |
+          PHP_VERSIONS=$(php src/globals/test-extensions.php php)
+          OS_VERSIONS=$(php src/globals/test-extensions.php os)
+          echo 'php='"$PHP_VERSIONS" >> "$GITHUB_OUTPUT"
+          echo 'os='"$OS_VERSIONS" >> "$GITHUB_OUTPUT"
+
 
   build:
     name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
+    needs: define-matrix
     timeout-minutes: 120
     strategy:
       matrix:
-        php:
-          - "8.0"
-          - "8.1"
-          - "8.2"
-          - "8.3"
-        os:
-          - ubuntu-latest
-          - macos-13
-          - windows-latest
-          - macos-14
+        php: ${{ fromJSON(needs.define-matrix.outputs.php) }}
+        os: ${{ fromJSON(needs.define-matrix.outputs.os) }}
       fail-fast: false
     steps:
       - name: "Checkout"
@@ -139,6 +156,8 @@ jobs:
           tools: pecl, composer
           extensions: curl, openssl, mbstring
           ini-values: memory_limit=-1
+        env:
+          phpts: nts
 
       - name: "Cache composer packages"
         id: composer-cache
@@ -154,13 +173,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: downloads
-          key: php-${{ matrix.php }}-dependencies
+          key: php-dependencies-${{ matrix.os }}
 
       - name: "Install Dependencies"
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "Run Build Tests (doctor)"
-        run: bin/spc doctor --auto-fix
+        run: bin/spc doctor --auto-fix --debug
 
       - name: "Prepare UPX for Windows"
         if: matrix.os == 'windows-latest'
@@ -175,19 +194,7 @@ jobs:
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
       - name: "Run Build Tests (download)"
-        run: |
-          bin/spc download --for-extensions="$(php src/globals/test-extensions.php extensions)" --for-libs="$(php src/globals/test-extensions.php libs)" --with-php=${{ matrix.php }} --ignore-cache-sources=php-src --debug --retry=5 --shallow-clone
+        run: php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }}
 
-      - name: "Download pre-built libraries for pkg-config"
-        if: matrix.os != 'windows-latest'
-        run: |
-          bin/spc del-download pkg-config
-          bin/spc download pkg-config --prefer-pre-built --debug
-
-      - name: "Run Build Tests (build, *nix)"
-        if: matrix.os != 'windows-latest'
-        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) $(php src/globals/test-extensions.php no_strip) $UPX_CMD --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --build-fpm --debug
-
-      - name: "Run Build Tests (build, windows)"
-        if: matrix.os == 'windows-latest'
-        run: bin/spc build "$(php src/globals/test-extensions.php extensions)" $(php src/globals/test-extensions.php zts) $(php src/globals/test-extensions.php no_strip) $env:UPX_CMD --with-libs="$(php src/globals/test-extensions.php libs)" --build-cli --build-micro --debug
+      - name: "Run Build Tests (build)"
+        run: php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }}

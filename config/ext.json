@@ -189,6 +189,16 @@
             "gmp"
         ]
     },
+    "gmssl": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-gmssl",
+        "lib-depends": [
+            "gmssl"
+        ]
+    },
     "iconv": {
         "support": {
             "BSD": "wip"
@@ -205,11 +215,14 @@
     },
     "igbinary": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
-        "source": "igbinary"
+        "source": "igbinary",
+        "ext-suggests": [
+            "session",
+            "apcu"
+        ]
     },
     "imagick": {
         "support": {
@@ -356,6 +369,15 @@
             "zstd",
             "zlib"
         ]
+    },
+    "msgpack": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "msgpack",
+        "arg-type-unix": "with",
+        "arg-type-win": "enable"
     },
     "mysqli": {
         "type": "builtin",
@@ -537,7 +559,6 @@
     },
     "redis": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
@@ -547,7 +568,7 @@
             "session",
             "igbinary"
         ],
-        "lib-suggests": [
+        "lib-suggests-unix": [
             "zstd",
             "liblz4"
         ]
@@ -588,7 +609,7 @@
         "lib-depends": [
             "snappy"
         ],
-        "ext-suggest": [
+        "ext-suggests": [
             "apcu"
         ]
     },

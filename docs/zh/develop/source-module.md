@@ -297,3 +297,23 @@ pkg.json 存放的是非源码类型的文件资源，例如 musl-toolchain、UP
   }
 }
 ```
+
+当一个开源项目的许可证在不同版本间使用不同的文件，`path` 参数可以使用数组将可能的许可证文件列出：
+
+```json
+{
+  "redis": {
+    "type": "git",
+    "path": "php-src/ext/redis",
+    "rev": "release/6.0.2",
+    "url": "https://github.com/phpredis/phpredis",
+    "license": {
+      "type": "file",
+      "path": [
+        "LICENSE",
+        "COPYING"
+      ]
+    }
+  }
+}
+```

@@ -38,7 +38,7 @@ class WindowsBuilder extends BuilderBase
         // ---------- set necessary options ----------
         // set sdk (require visual studio 16 or 17)
         $vs = SystemUtil::findVisualStudio()['version'];
-        $this->sdk_prefix = PHP_SDK_PATH . "\\phpsdk-{$vs}-x64.bat -t";
+        $this->sdk_prefix = getenv('PHP_SDK_PATH') . "\\phpsdk-{$vs}-x64.bat -t";
 
         // set zts
         $this->zts = $this->getOption('enable-zts', false);

@@ -124,15 +124,15 @@ static-php-cli（简称 `spc`）有许多特性：
 ```bash
 # Download from self-hosted nightly builds (sync with main branch)
 # For Linux x86_64
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
 # For Linux aarch64
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
 # macOS x86_64 (Intel)
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
 # macOS aarch64 (Apple)
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
 # Windows (x86_64, win10 build 17063 or later)
-curl.exe -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
 
 # Add execute perm (Linux and macOS only)
 chmod +x ./spc
@@ -184,7 +184,7 @@ bin/spc --version
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # 下载依赖时，优先下载有预编译的库（节省编译依赖的时间）
 ./bin/spc download --for-extensions="openssl,curl,mbstring,mbregex" --prefer-pre-built
-# 下载编译不同版本的 PHP (--with-php=x.y，推荐 7.3 ~ 8.3)
+# 下载编译不同版本的 PHP (--with-php=x.y 或 --with-php=x.y.z，推荐 8.1 ~ 8.3)
 ./bin/spc download --for-extensions="openssl,curl,mbstring" --with-php=8.1
 
 # 构建包含 bcmath,openssl,tokenizer,sqlite3,pdo_sqlite,ftp,curl 扩展的 php-cli 和 micro.sfx
