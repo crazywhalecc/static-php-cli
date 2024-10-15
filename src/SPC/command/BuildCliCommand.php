@@ -22,6 +22,8 @@ class BuildCliCommand extends BuildCommand
 {
     public function configure(): void
     {
+        $isWindows = PHP_OS_FAMILY === 'Windows';
+
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
         $this->addOption('build-micro', null, null, 'Build micro SAPI');
@@ -32,7 +34,8 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('enable-zts', null, null, 'enable ZTS support');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
-        $this->addOption('with-config-file-path', null, InputOption::VALUE_REQUIRED, 'Set the path in which to look for php.ini');
+        $this->addOption('with-config-file-path', null, InputOption::VALUE_OPTIONAL, 'Set the path in which to look for php.ini', $isWindows ? null : '/usr/local/etc/php');
+        $this->addOption('with-config-file-scan-dir', null, InputOption::VALUE_OPTIONAL, 'Set the directory to scan for .ini files after reading php.ini', $isWindows ? null : '/usr/local/etc/php/conf.d');
         $this->addOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
         $this->addOption('with-micro-fake-cli', null, null, 'Let phpmicro\'s PHP_SAPI use "cli" instead of "micro"');
         $this->addOption('with-suggested-libs', 'L', null, 'Build with suggested libs for selected exts and libs');
