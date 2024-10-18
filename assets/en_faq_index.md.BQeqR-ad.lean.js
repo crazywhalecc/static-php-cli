@@ -1,1 +1,0 @@
-import{_ as e,c as o,o as t,a1 as i}from"./chunks/framework.gjrnbxUT.js";const f=JSON.parse('{"title":"FAQ","description":"","frontmatter":{},"headers":[],"relativePath":"en/faq/index.md","filePath":"en/faq/index.md"}'),a={name:"en/faq/index.md"},s=i("",24),n=[s];function r(c,l,d,p,h,u){return t(),o("div",null,n)}const y=e(a,[["render",r]]);export{f as __pageData,y as default};
