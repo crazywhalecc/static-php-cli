@@ -103,6 +103,9 @@ class WindowsBuilder extends BuilderBase
 
         $micro_w32 = $this->getOption('enable-micro-win32') ? ' --enable-micro-win32=yes' : '';
 
+        $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
+            ('--with-config-file-scan-dir=' . $this->getOption('with-config-file-scan-dir') . ' ') : '';
+
         cmd()->cd(SOURCE_PATH . '\php-src')
             ->exec(
                 "{$this->sdk_prefix} configure.bat --task-args \"" .
@@ -114,6 +117,7 @@ class WindowsBuilder extends BuilderBase
                 ($enableCli ? '--enable-cli=yes ' : '--enable-cli=no ') .
                 ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
                 ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
+                $config_file_scan_dir .
                 "{$this->makeExtensionArgs()} " .
                 $zts .
                 '"'
