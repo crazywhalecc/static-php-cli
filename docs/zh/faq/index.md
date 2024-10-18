@@ -2,6 +2,18 @@
 
 这里将会编写一些你容易遇到的问题。目前有很多，但是我需要花时间来整理一下。
 
+## php.ini 的路径是什么？
+
+在 Linux、macOS 和 FreeBSD 上，`php.ini` 的默认路径是 `/usr/local/etc/php/php.ini`。
+在 Windows 中，路径是 `C:\windows\php.ini` 或 `php.exe` 所在的当前目录。
+可以在 *nix 系统中使用手动构建选项 `--with-config-file-path` 来更改查找 `php.ini` 的目录。
+
+此外，在 Linux、macOS 和 FreeBSD 上，`/usr/local/etc/php/conf.d` 目录中的 `*.ini` 文件也会被加载。
+在 Windows 中，该路径默认为空。
+可以使用手动构建选项 `--with-config-file-scan-dir` 更改该目录。
+
+PHP 默认也会从 [其他标准位置](https://www.php.net/manual/zh/configuration.file.php) 中搜索 `php.ini`。
+
 ## 静态编译的 PHP 可以安装扩展吗
 
 因为传统架构下的 PHP 安装扩展的原理是使用 `.so` 类型的动态链接的库方式安装新扩展，而使用本项目编译的静态链接的 PHP 无法**直接**使用动态链接库安装新扩展。

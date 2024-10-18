@@ -136,6 +136,8 @@ class LinuxBuilder extends UnixBuilderBase
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
+        $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
+            ('--with-config-file-scan-dir=' . $this->getOption('with-config-file-scan-dir') . ' ') : '';
 
         $enable_cli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enable_fpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
@@ -167,6 +169,7 @@ class LinuxBuilder extends UnixBuilderBase
                 ($enable_embed ? '--enable-embed=static ' : '--disable-embed ') .
                 ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
+                $config_file_scan_dir .
                 $disable_jit .
                 $json_74 .
                 $zts .
