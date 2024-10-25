@@ -21,7 +21,7 @@ class PhpSource extends CustomSourceBase
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.1';
         if ($major === '8.4') {
-            Downloader::downloadSource('php-src', ['type' => 'url', 'url' => 'https://downloads.php.net/~saki/php-8.4.0RC1.tar.xz'], $force);
+            Downloader::downloadSource('php-src', ['type' => 'url', 'url' => 'https://downloads.php.net/~saki/php-8.4.0RC3.tar.xz'], $force);
         } else {
             Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
         }
