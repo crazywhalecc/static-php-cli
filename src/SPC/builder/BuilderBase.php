@@ -276,7 +276,7 @@ abstract class BuilderBase
                 return false;
             }
         }
-        if (preg_match('/php-(\d+\.\d+\.\d+)/', $file, $match)) {
+        if (preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+)?)\.tar\.(?:gz|bz2|xz)/', $file, $match)) {
             return $match[1];
         }
         return false;
