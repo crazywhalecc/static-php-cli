@@ -242,7 +242,8 @@
             "BSD": "wip"
         },
         "notes": true,
-        "type": "builtin",
+        "type": "external",
+        "source": "ext-imap",
         "arg-type": "custom",
         "lib-depends": [
             "imap"
