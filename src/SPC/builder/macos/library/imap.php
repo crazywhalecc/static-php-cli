@@ -56,7 +56,7 @@ class imap extends MacOSLibraryBase
             ->exec('chmod +x src/osdep/unix/drivers')
             ->exec('chmod +x src/osdep/unix/mkauths')
             ->exec(
-                "yes | make osx {$ssl_options} EXTRACFLAGS='-Wimplicit-function-declaration -Wno-incompatible-function-pointer-types {$out}'"
+                "echo y | make osx {$ssl_options} EXTRACFLAGS='-Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types {$out}'"
             );
         try {
             shell()
