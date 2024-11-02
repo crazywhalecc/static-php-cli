@@ -25,6 +25,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
         FileSystem::addSourceExtractHook('libyaml', [SourcePatcher::class, 'patchLibYaml']);
+        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchImapLicense']);
     }
 
     /**
@@ -368,6 +369,18 @@ class SourcePatcher
             copy(ROOT_DIR . '/src/globals/extra/libyaml_yamlConfig.cmake.in', "{$target}/yamlConfig.cmake.in");
         }
         return true;
+    }
+
+    /**
+     * Patch imap license file for PHP < 8.4
+     */
+    public static function patchImapLicense(): bool
+    {
+        if (!file_exists(SOURCE_PATH . '/php-src/ext/imap/LICENSE') && is_dir(SOURCE_PATH . '/php-src/ext/imap')) {
+            file_put_contents(SOURCE_PATH . '/php-src/ext/imap/LICENSE', file_get_contents(ROOT_DIR . '/src/globals/extra/Apache_LICENSE'));
+            return true;
+        }
+        return false;
     }
 
     /**

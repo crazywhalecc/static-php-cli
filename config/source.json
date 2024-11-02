@@ -259,6 +259,18 @@
             "path": "LICENSE"
         }
     },
+    "ext-imap": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/imap",
+        "path": "php-src/ext/imap",
+        "filename": "imap.tgz",
+        "license": {
+            "type": "file",
+            "path": [
+                "LICENSE"
+            ]
+        }
+    },
     "inotify": {
         "type": "url",
         "url": "https://pecl.php.net/get/inotify",
