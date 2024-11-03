@@ -26,6 +26,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
         FileSystem::addSourceExtractHook('libyaml', [SourcePatcher::class, 'patchLibYaml']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchImapLicense']);
+        FileSystem::addSourceExtractHook('ext-imagick', [SourcePatcher::class, 'patchImagickWith84']);
     }
 
     /**
@@ -381,6 +382,15 @@ class SourcePatcher
             return true;
         }
         return false;
+    }
+
+    /**
+     * Patch imagick for PHP 8.4
+     */
+    public static function patchImagickWith84(): bool
+    {
+        SourcePatcher::patchFile('imagick_php84.patch', SOURCE_PATH . '/php-src/ext/imagick');
+        return true;
     }
 
     /**
