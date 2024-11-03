@@ -738,13 +738,18 @@
         }
     },
     "swoole": {
-        "type": "ghtar",
         "path": "php-src/ext/swoole",
-        "repo": "swoole/swoole-src",
-        "prefer-stable": true,
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/swoole/swoole-src.git",
         "license": {
             "type": "file",
             "path": "LICENSE"
+        },
+        "alt": {
+            "type": "ghtar",
+            "repo": "swoole/swoole-src",
+            "prefer-stable": true
         }
     },
     "swow": {
