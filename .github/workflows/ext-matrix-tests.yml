@@ -132,8 +132,8 @@ jobs:
       # If there's no dependencies cache, fetch sources
       - name: "Download sources"
         env:
-          GITHUB_TOKEN: ${{ secrets.S_GITHUB_TOKEN }}
-        run: ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug --ignore-cache-sources=php-src
 
       - name: "Build library: ${{ matrix.library }}"
         run: |
