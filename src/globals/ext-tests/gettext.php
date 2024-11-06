@@ -5,7 +5,6 @@ declare(strict_types=1);
 assert(function_exists('gettext'));
 assert(function_exists('bindtextdomain'));
 assert(function_exists('textdomain'));
-assert(function_exists('bind_textdomain_codeset'));
 
 if (!is_dir('locale/en_US/LC_MESSAGES/')) {
     mkdir('locale/en_US/LC_MESSAGES/', 0755, true);
@@ -19,7 +18,6 @@ setlocale(LC_ALL, 'en_US');
 
 $domain = 'test';
 bindtextdomain($domain, 'locale/');
-bind_textdomain_codeset($domain, 'UTF-8');
 textdomain($domain);
 
 assert(gettext(json_decode('"\u793a\u4f8b"', true)) === 'Example');
