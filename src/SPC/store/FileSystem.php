@@ -367,6 +367,9 @@ class FileSystem
                 }
             }
         }
+        if (is_link($dir)) {
+            return unlink($dir);
+        }
         return rmdir($dir);
     }
 
