@@ -139,6 +139,20 @@
             "Security"
         ]
     },
+    "grpc": {
+        "source": "grpc",
+        "static-libs-unix": [
+            "libgrpc.a",
+            "libboringssl.a",
+            "libcares.a"
+        ],
+        "lib-depends": [
+            "zlib"
+        ],
+        "frameworks": [
+            "CoreFoundation"
+        ]
+    },
     "icu": {
         "source": "icu",
         "cpp-library": true,
