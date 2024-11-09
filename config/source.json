@@ -211,6 +211,16 @@
             "path": "LICENSE"
         }
     },
+    "grpc": {
+        "type": "git",
+        "rev": "v1.68.x",
+        "url": "https://github.com/grpc/grpc.git",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "icu": {
         "type": "ghrel",
         "repo": "unicode-org/icu",

@@ -23,8 +23,6 @@ $test_php_version = [
 $test_os = [
     'macos-14',
     'ubuntu-latest',
-    'macos-13',
-    'windows-latest',
 ];
 
 // whether enable thread safe
@@ -40,7 +38,7 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => '',
+    'Linux', 'Darwin' => 'grpc',
     'Windows' => 'amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,ds,exif,ffi,fileinfo,filter,ftp,gd,iconv,igbinary,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,rar,redis,session,shmop,simdjson,simplexml,soap,sockets,sqlite3,sqlsrv,ssh2,swow,sysvshm,tokenizer,xml,xmlreader,xmlwriter,yac,yaml,zip,zlib',
 };
 
@@ -54,7 +52,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'bulk',
+    'Linux', 'Darwin' => 'minimal',
     'Windows' => 'none',
 };
 
