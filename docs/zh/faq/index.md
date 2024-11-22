@@ -71,3 +71,9 @@ PHP 代码的编译器是完全不同的项目，因此不会考虑额外的情�
 有关不同发行版的证书位置，可参考 [Go 标准库](https://go.dev/src/crypto/x509/root_linux.go)。
 
 > INI 配置 `openssl.cafile` 不可以使用 `ini_set()` 函数动态设置，因为 `openssl.cafile` 是一个 `PHP_INI_SYSTEM` 类型的配置，只能在 `php.ini` 文件中设置。
+
+## 为什么不支持旧版本 PHP ？
+
+因为旧版本的 PHP 有很多问题，比如安全问题、性能问题、功能问题等。此外，旧版本的 PHP 很多都无法与最新的依赖库兼容，这也是不支持旧版本 PHP 的原因之一。
+
+你可以使用 static-php-cli 早期编译好的旧版本，如 PHP 8.0，但是不会明确支持早期版本。

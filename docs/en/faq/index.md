@@ -84,3 +84,11 @@ For Linux systems, you can download the [cacert.pem](https://curl.se/docs/caextr
 For the certificate locations of different distros, please refer to [Golang docs](https://go.dev/src/crypto/x509/root_linux.go).
 
 > INI configuration `openssl.cafile` cannot be set dynamically using the `ini_set()` function, because `openssl.cafile` is a `PHP_INI_SYSTEM` type configuration and can only be set in the `php.ini` file.
+
+## Why don't we support older versions of PHP?
+
+Because older versions of PHP have many problems, such as security issues, performance issues, and functional issues. 
+In addition, many older versions of PHP are not compatible with the latest dependency libraries, 
+which is one of the reasons why older versions of PHP are not supported.
+
+You can use older versions compiled earlier by static-php-cli, such as PHP 8.0, but earlier versions will not be explicitly supported.
