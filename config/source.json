@@ -102,6 +102,18 @@
             "path": "LICENSE"
         }
     },
+    "ext-imap": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/imap",
+        "path": "php-src/ext/imap",
+        "filename": "imap.tgz",
+        "license": {
+            "type": "file",
+            "path": [
+                "LICENSE"
+            ]
+        }
+    },
     "ext-memcache": {
         "type": "url",
         "url": "https://pecl.php.net/get/memcache",
@@ -257,18 +269,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "ext-imap": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/imap",
-        "path": "php-src/ext/imap",
-        "filename": "imap.tgz",
-        "license": {
-            "type": "file",
-            "path": [
-                "LICENSE"
-            ]
         }
     },
     "inotify": {
