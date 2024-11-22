@@ -141,8 +141,8 @@ bin/spc download --for-extensions="curl,pcntl,xml,mbstring" --prefer-pre-built
 # 下载所有依赖包
 bin/spc download --all
 
-# 下载所有依赖包，并指定下载的 PHP 主版本，可选：7.3，7.4，8.0，8.1，8.2，8.3，也可以使用特定的版本，如 8.3.10。
-bin/spc download --all --with-php=8.2
+# 下载所有依赖包，并指定下载的 PHP 主版本，可选：8.1，8.2，8.3，8.4，也可以使用特定的版本，如 8.3.10。
+bin/spc download --all --with-php=8.3
 
 # 下载时显示下载进度条（curl）
 bin/spc download --all --debug
@@ -236,12 +236,12 @@ bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
 如果你想构建多个版本的 PHP，且不想每次都重复构建其他依赖库，可以使用 `switch-php-version` 在编译好一个版本后快速切换至另一个版本并编译：
 
 ```shell
-# switch to 8.3
-bin/spc switch-php-version 8.3
+# switch to 8.4
+bin/spc switch-php-version 8.4
 # build
 bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
-# switch to 8.0
-bin/spc switch-php-version 8.0
+# switch to 8.1
+bin/spc switch-php-version 8.1
 # build
 bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
 ```
