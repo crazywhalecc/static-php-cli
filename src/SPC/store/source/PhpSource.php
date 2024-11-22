@@ -19,12 +19,8 @@ class PhpSource extends CustomSourceBase
      */
     public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_LOCK_SOURCE): void
     {
-        $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.1';
-        if ($major === '8.4') {
-            Downloader::downloadSource('php-src', ['type' => 'url', 'url' => 'https://downloads.php.net/~calvinb/php-8.4.0RC4.tar.xz'], $force);
-        } else {
-            Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
-        }
+        $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.3';
+        Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
     }
 
     /**
