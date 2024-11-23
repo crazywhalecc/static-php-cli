@@ -439,7 +439,7 @@ class SourcePatcher
                 return true;
             }
             if ($ver_id < 80200) {
-                self::patchFile('spc_fix_libxml2_12_php81.patch', SOURCE_PATH . '/php-src');
+                // self::patchFile('spc_fix_libxml2_12_php81.patch', SOURCE_PATH . '/php-src');
                 self::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
                 return true;
             }
