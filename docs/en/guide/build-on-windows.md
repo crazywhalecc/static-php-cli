@@ -74,6 +74,12 @@ bin/setup-runtime -action add-path
 bin/setup-runtime -action remove-path
 ```
 
+Finally, now that you have PHP and Composer installed, you need to install static-php-cli's Composer dependencies:
+
+```shell
+composer install
+```
+
 ### Install other Tools (automatic)
 
 For `php-sdk-binary-tools`, `strawberry-perl`, and `nasm`, 
