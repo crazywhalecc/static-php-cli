@@ -1,0 +1,137 @@
+name: "Extension configure tests"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/ext-matrix-tests.yml'
+
+jobs:
+  test:
+    name: "${{ matrix.extension }} (PHP ${{ matrix.php-version }} on ${{ matrix.operating-system }})"
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        extension:
+          - apcu
+          - bcmath
+          - bz2
+          - calendar
+          - ctype
+          - curl
+          - dba
+          - dom
+          - exif
+          - fileinfo
+          - filter
+          - ftp
+          - gd
+          - gmp
+          - gettext
+          - iconv
+          - igbinary
+          - imagick
+          - intl
+          - ldap
+          - mbregex
+          - mbstring
+          - mysqli
+          - mysqlnd
+          - opcache
+          - openssl
+          - parallel
+          - pcntl
+          - pdo
+          - pdo_mysql
+          - pdo_pgsql
+          - pdo_sqlite
+          - pgsql
+          - phar
+          - posix
+          - protobuf
+          - readline
+          - redis
+          - session
+          - shmop
+          - simplexml
+          - soap
+          - sockets
+          - sodium
+          - sqlite3
+          - ssh2
+          - sysvmsg
+          - sysvsem
+          - sysvshm
+          - tidy
+          - tokenizer
+          - xlswriter
+          - xml
+          - xmlreader
+          - xmlwriter
+          - zip
+          - zlib
+          - yaml
+          - zstd
+        php-version:
+          - "8.4"
+        operating-system:
+          - "ubuntu-latest"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: OS type
+        id: os-type
+        run: |
+          OS=""
+          if [ "${{ matrix.operating-system }}" = "ubuntu-latest" ]; then
+              OS="linux-x86_64"
+          elif [ "${{ matrix.operating-system }}" = "macos-13" ]; then
+              OS="macos-x86_64"
+          elif [ "${{ matrix.operating-system }}" = "debian-arm64-self-hosted" ]; then
+              OS="linux-aarch64"
+          elif [ "${{ matrix.operating-system }}" = "macos-14" ]; then
+              OS="macos-aarch64"
+          fi
+          echo "OS=$OS" >> $GITHUB_ENV
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+        env:
+          phpts: nts
+
+      - name: "Install Dependencies"
+        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - id: cache-download
+        uses: actions/cache@v4
+        with:
+          path: downloads
+          key: php-${{ matrix.php-version }}-dependencies-for-tests
+
+      # If there's no dependencies cache, fetch sources
+      - name: "Download sources"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug --ignore-cache-sources=php-src
+
+      - name: "Build library: ${{ matrix.library }}"
+        run: |
+          SPC_USE_SUDO=yes ./bin/spc doctor --auto-fix
+          if [ "${{ env.OS }}" = "linux-x86_64" ]; then
+            ./bin/spc install-pkg upx
+            UPX=--with-upx-pack
+          elif [ "${{ env.OS }}" = "linux-aarch64" ]; then
+            ./bin/spc install-pkg upx
+            UPX=--with-upx-pack
+          fi
+          
+          ./bin/spc build --build-cli --build-micro ${{ matrix.extension }} -P tests/configure.php

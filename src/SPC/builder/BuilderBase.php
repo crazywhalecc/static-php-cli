@@ -6,6 +6,7 @@ namespace SPC\builder;
 
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
+use SPC\exception\InterruptException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
@@ -407,6 +408,13 @@ abstract class BuilderBase
                 }
                 logger()->debug('Running additional patch script: ' . $patch);
                 require $patch;
+            } catch (InterruptException $e) {
+                if ($e->getCode() === 0) {
+                    logger()->notice('Patch script ' . $patch . ' interrupted' . ($e->getMessage() ? (': ' . $e->getMessage()) : '.'));
+                } else {
+                    logger()->error('Patch script ' . $patch . ' interrupted with error code [' . $e->getCode() . ']' . ($e->getMessage() ? (': ' . $e->getMessage()) : '.'));
+                }
+                exit($e->getCode());
             } catch (\Throwable $e) {
                 logger()->critical('Patch script ' . $patch . ' failed to run.');
                 if ($this->getOption('debug')) {
@@ -414,6 +422,7 @@ abstract class BuilderBase
                 } else {
                     logger()->critical('Please check with --debug option to see more details.');
                 }
+                exit(1);
             }
         }
     }
