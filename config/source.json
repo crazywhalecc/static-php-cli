@@ -36,9 +36,13 @@
         }
     },
     "bzip2": {
-        "type": "filelist",
-        "url": "https://sourceware.org/pub/bzip2/",
-        "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "alt": {
+            "type": "filelist",
+            "url": "https://sourceware.org/pub/bzip2/",
+            "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/bzip2/bzip2-1.0.8.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "text",
