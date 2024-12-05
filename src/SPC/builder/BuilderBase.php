@@ -422,7 +422,7 @@ abstract class BuilderBase
                 } else {
                     logger()->critical('Please check with --debug option to see more details.');
                 }
-                exit(1);
+                throw $e;
             }
         }
     }
