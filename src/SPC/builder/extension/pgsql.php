@@ -25,7 +25,7 @@ class pgsql extends Extension
             FileSystem::replaceFileStr(
                 SOURCE_PATH . '/php-src/configure',
                 'LIBS="-lpq',
-                'LIBS="-lpq -lpgport -lpgcommon'
+                'LIBS="-lpq -lpgport -lpgcommon -lssl -lcrypto -lz -lm'
             );
             return true;
         }
