@@ -147,7 +147,8 @@
             "libcares.a"
         ],
         "lib-depends": [
-            "zlib"
+            "zlib",
+            "openssl"
         ],
         "frameworks": [
             "CoreFoundation"
