@@ -15,69 +15,17 @@ jobs:
       fail-fast: false
       matrix:
         extension:
-          - apcu
-          - bcmath
-          - bz2
-          - calendar
-          - ctype
-          - curl
-          - dba
-          - dom
-          - exif
-          - fileinfo
-          - filter
-          - ftp
-          - gd
-          - gmp
-          - gettext
-          - iconv
-          - igbinary
-          - imagick
-          - intl
-          - ldap
-          - mbregex
-          - mbstring
-          - mysqli
-          - mysqlnd
-          - opcache
-          - openssl
           - parallel
-          - pcntl
-          - pdo
-          - pdo_mysql
           - pdo_pgsql
-          - pdo_sqlite
           - pgsql
-          - phar
-          - posix
-          - protobuf
-          - readline
-          - redis
-          - session
-          - shmop
-          - simplexml
-          - soap
-          - sockets
-          - sodium
-          - sqlite3
-          - ssh2
-          - sysvmsg
-          - sysvsem
-          - sysvshm
-          - tidy
-          - tokenizer
-          - xlswriter
-          - xml
-          - xmlreader
-          - xmlwriter
-          - zip
-          - zlib
-          - yaml
-          - zstd
         php-version:
           - "8.4"
+          - "8.3"
+          - "8.2"
+          - "8.1"
         operating-system:
           - "ubuntu-latest"
+          - "macos-14"
 
     steps:
       - name: "Checkout"
@@ -126,12 +74,4 @@ jobs:
       - name: "Build library: ${{ matrix.library }}"
         run: |
           SPC_USE_SUDO=yes ./bin/spc doctor --auto-fix
-          if [ "${{ env.OS }}" = "linux-x86_64" ]; then
-            ./bin/spc install-pkg upx
-            UPX=--with-upx-pack
-          elif [ "${{ env.OS }}" = "linux-aarch64" ]; then
-            ./bin/spc install-pkg upx
-            UPX=--with-upx-pack
-          fi
-          
-          ./bin/spc build --build-cli --build-micro ${{ matrix.extension }} -P tests/configure.php
+          ./bin/spc build --build-cli --build-micro ${{ matrix.extension }} -P tests/configure.php --debug --enable-zts
