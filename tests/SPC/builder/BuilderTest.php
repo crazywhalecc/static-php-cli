@@ -246,6 +246,7 @@ class BuilderTest extends TestCase
     public function testEmitPatchPointNotExists()
     {
         $this->expectOutputRegex('/failed to run/');
+        $this->expectException(RuntimeException::class);
         $this->builder->setOption('with-added-patch', ['/tmp/patch-point.not_exsssists.php']);
         $this->builder->emitPatchPoint('not-exists');
     }
