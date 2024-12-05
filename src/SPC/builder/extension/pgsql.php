@@ -15,7 +15,6 @@ use SPC\util\CustomExt;
 class pgsql extends Extension
 {
     /**
-     * @return bool
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws WrongUsageException
