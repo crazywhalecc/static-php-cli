@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ "main" ]
     paths:
-      - '.github/workflows/ext-matrix-tests.yml'
+      - '.github/workflows/ext-configure-tests.yml'
 
 jobs:
   test:
