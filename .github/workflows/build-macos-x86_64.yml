@@ -83,7 +83,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: downloads
-          key: php-${{ env.INPUT_HASH }}
+          key: php-${{ inputs.version }}-macos-x86_64
 
       # With or without debug
       - if: inputs.debug == true
@@ -102,8 +102,7 @@ jobs:
         run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
-      - if: steps.cache-download.outputs.cache-hit != 'true'
-        run: ./bin/spc download --with-php=${{ inputs.version }} --for-extensions=${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }} --ignore-cache-sources=php-src
+      - run: ./bin/spc download --with-php=${{ inputs.version }} --for-extensions=${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }} --ignore-cache-sources=php-src
 
       # Run build command
       - run: ./bin/spc build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_NO_STRIP }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
