@@ -114,7 +114,7 @@ if ($argv[1] === 'download_cmd') {
 }
 
 // generate build command
-if ($argv[1] === 'build_cmd') {
+if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd = 'build ';
     $build_cmd .= quote2($final_extensions) . ' ';
     $build_cmd .= $zts ? '--enable-zts ' : '';
