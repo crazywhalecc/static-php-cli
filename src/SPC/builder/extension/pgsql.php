@@ -21,14 +21,6 @@ class pgsql extends Extension
      */
     public function patchBeforeConfigure(): bool
     {
-        if ($this->builder->getPHPVersionID() >= 80400) {
-            FileSystem::replaceFileStr(
-                SOURCE_PATH . '/php-src/configure',
-                'LIBS="-lpq',
-                'LIBS="-lpq -lpgport -lpgcommon -lssl -lcrypto -lz -lm'
-            );
-            return true;
-        }
         FileSystem::replaceFileRegex(
             SOURCE_PATH . '/php-src/configure',
             '/-lpq/',
