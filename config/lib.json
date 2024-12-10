@@ -143,7 +143,6 @@
         "source": "grpc",
         "static-libs-unix": [
             "libgrpc.a",
-            "libboringssl.a",
             "libcares.a"
         ],
         "lib-depends": [

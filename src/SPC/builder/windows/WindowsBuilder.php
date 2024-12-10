@@ -248,6 +248,7 @@ class WindowsBuilder extends BuilderBase
         foreach ($this->libs as $lib) {
             $lib->calcDependency();
         }
+        $this->lib_list = $sorted_libraries;
     }
 
     /**

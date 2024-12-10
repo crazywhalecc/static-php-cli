@@ -62,6 +62,9 @@ class UnixShell
             logger()->debug(ConsoleColor::blue('[EXEC] ') . ConsoleColor::gray($cmd));
         }
         logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
+        if ($this->cd !== null) {
+            $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
+        }
         exec($cmd, $out, $code);
         return [$code, $out];
     }

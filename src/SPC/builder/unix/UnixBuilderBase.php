@@ -12,6 +12,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\DependencyUtil;
+use SPC\util\SPCConfigUtil;
 
 abstract class UnixBuilderBase extends BuilderBase
 {
@@ -128,6 +129,7 @@ abstract class UnixBuilderBase extends BuilderBase
         foreach ($this->libs as $lib) {
             $lib->calcDependency();
         }
+        $this->lib_list = $sorted_libraries;
     }
 
     /**
@@ -168,6 +170,32 @@ abstract class UnixBuilderBase extends BuilderBase
                         throw new RuntimeException("micro failed sanity check: {$task_name}, condition [{$condition}], ret[{$ret}], out[{$raw_out}]");
                     }
                 }
+            }
+        }
+
+        // sanity check for embed
+        if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
+            logger()->info('running embed sanity check');
+            $sample_file_path = SOURCE_PATH . '/embed-test';
+            if (!is_dir($sample_file_path)) {
+                @mkdir($sample_file_path);
+            }
+            // copy embed test files
+            copy(ROOT_DIR . '/src/globals/common-tests/embed.c', $sample_file_path . '/embed.c');
+            copy(ROOT_DIR . '/src/globals/common-tests/embed.php', $sample_file_path . '/embed.php');
+            $util = new SPCConfigUtil($this);
+            $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
+            $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
+            if (PHP_OS_FAMILY === 'Linux') {
+                $lens .= ' -static';
+            }
+            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
+            if ($ret !== 0) {
+                throw new RuntimeException('embed failed sanity check: build failed. Error message: ' . implode("\n", $out));
+            }
+            [$ret, $output] = shell()->cd($sample_file_path)->execWithResult('./embed');
+            if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
+                throw new RuntimeException('embed failed sanity check: run failed. Error message: ' . implode("\n", $output));
             }
         }
     }

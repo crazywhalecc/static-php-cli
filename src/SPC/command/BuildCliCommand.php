@@ -181,7 +181,9 @@ class BuildCliCommand extends BuildCommand
 
             // compile stopwatch :P
             $time = round(microtime(true) - START_TIME, 3);
-            logger()->info('Build complete, used ' . $time . ' s !');
+            logger()->info('');
+            logger()->info('   Build complete, used ' . $time . ' s !');
+            logger()->info('');
 
             // ---------- When using bin/spc-alpine-docker, the build root path is different from the host system ----------
             $build_root_path = BUILD_ROOT_PATH;
