@@ -25,6 +25,12 @@ abstract class BuilderBase
     /** @var array<string, Extension> extensions */
     protected array $exts = [];
 
+    /** @var array<int, string> extension names */
+    protected array $ext_list = [];
+
+    /** @var array<int, string> library names */
+    protected array $lib_list = [];
+
     /** @var bool compile libs only (just mark it) */
     protected bool $libs_only = false;
 
@@ -161,7 +167,7 @@ abstract class BuilderBase
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws \ReflectionException
-     * @throws WrongUsageException
+     * @throws \Throwable|WrongUsageException
      * @internal
      */
     public function proveExts(array $extensions, bool $skip_check_deps = false): void
@@ -191,6 +197,7 @@ abstract class BuilderBase
         foreach ($this->exts as $ext) {
             $ext->checkDependency();
         }
+        $this->ext_list = $extensions;
     }
 
     /**
