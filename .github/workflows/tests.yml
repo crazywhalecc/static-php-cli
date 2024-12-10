@@ -199,3 +199,7 @@ jobs:
 
       - name: "Run Build Tests (build)"
         run: php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }}
+
+      - name: "Run Build Tests (build - embed for non-windows)"
+        if: matrix.os != 'windows-latest'
+        run: php src/globals/test-extensions.php build_embed_cmd ${{ matrix.os }} ${{ matrix.php }}
