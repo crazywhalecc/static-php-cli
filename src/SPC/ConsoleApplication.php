@@ -22,6 +22,7 @@ use SPC\command\DumpLicenseCommand;
 use SPC\command\ExtractCommand;
 use SPC\command\InstallPkgCommand;
 use SPC\command\MicroCombineCommand;
+use SPC\command\SPCConfigCommand;
 use SPC\command\SwitchPhpVersionCommand;
 use Symfony\Component\Console\Application;
 
@@ -30,7 +31,7 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.4.1';
+    public const VERSION = '2.4.2';
 
     public function __construct()
     {
@@ -52,6 +53,7 @@ final class ConsoleApplication extends Application
                 new ExtractCommand(),
                 new MicroCombineCommand(),
                 new SwitchPhpVersionCommand(),
+                new SPCConfigCommand(),
 
                 // Dev commands
                 new AllExtCommand(),
