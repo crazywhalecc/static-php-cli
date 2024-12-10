@@ -138,6 +138,7 @@ echo match ($argv[1]) {
     'prefer_pre_built' => $prefer_pre_built ? '--prefer-pre-built' : '',
     'download_cmd' => $down_cmd,
     'build_cmd' => $build_cmd,
+    'build_embed_cmd' => $build_cmd,
     default => '',
 };
 
