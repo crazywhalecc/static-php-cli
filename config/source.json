@@ -69,6 +69,23 @@
             "path": "LICENSE"
         }
     },
+    "librdkafka": {
+        "type": "ghtar",
+        "repo": "confluentinc/librdkafka",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-rdkafka": {
+        "type": "ghtar",
+        "repo": "arnaud-lb/php-rdkafka",
+        "path": "php-src/ext/rdkafka",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-event": {
         "type": "url",
         "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
