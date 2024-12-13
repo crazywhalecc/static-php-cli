@@ -493,3 +493,75 @@ static-php-cli 开放的方法非常多，文档中无法一一列举，但只�
 - 如果你想重新构建一次，但不重新下载源码，可以先 `rm -rf buildroot source` 删除编译目录和源码目录，然后重新构建。
 - 如果你想更新某个依赖的版本，可以使用 `bin/spc del-download <source-name>` 删除指定的源码，然后使用 `download <source-name>` 重新下载。
 - 如果你想更新所有依赖的版本，可以使用 `bin/spc download --clean` 删除所有下载的源码，然后重新下载。
+
+## embed 使用
+
+如果你想将 static-php 嵌入到其他 C 语言程序中，可以使用 `--build-embed` 构建一个 embed 版本的 PHP。
+
+```bash
+bin/spc build {your extensions} --build-embed --debug
+```
+
+在通常的情况下，PHP embed 编译后会生成 `php-config`。对于 static-php，我们提供了 `spc-config`，用于获取编译时的参数。
+另外，在使用 embed SAPI（libphp.a）时，你需要使用和编译 libphp 相同的编译器，否则会出现链接错误。
+
+下面是 spc-config 的基本用法：
+
+```bash
+# output all flags and options
+bin/spc spc-config curl,zlib,phar,openssl
+
+# output libs
+bin/spc spc-config curl,zlib,phar,openssl --libs
+
+# output includes
+bin/spc spc-config curl,zlib,phar,openssl --includes
+```
+
+默认情况下，static-php 在不同系统使用的编译器分别是：
+
+- macOS: `clang`
+- Linux (Alpine Linux): `gcc`
+- Linux (glibc based distros, x86_64): `/usr/local/musl/bin/x86_64-linux-musl-gcc`
+- Linux (glibc based distros, aarch64): `/usr/local/musl/bin/aarch64-linux-musl-gcc`
+- FreeBSD: `clang`
+
+下面是一个使用 embed SAPI 的例子：
+
+```c
+// embed.c
+#include <sapi/embed/php_embed.h>
+
+int main(int argc,char **argv){
+
+    PHP_EMBED_START_BLOCK(argc,argv)
+
+    zend_file_handle file_handle;
+
+    zend_stream_init_filename(&file_handle,"embed.php");
+
+    if(php_execute_script(&file_handle) == FAILURE){
+        php_printf("Failed to execute PHP script.\n");
+    }
+
+    PHP_EMBED_END_BLOCK()
+    return 0;
+}
+```
+
+
+```php
+<?php 
+// embed.php
+echo "Hello world!\n";
+```
+
+```bash
+# compile in debian/ubuntu x86_64
+/usr/local/musl/bin/x86_64-linux-musl-gcc embed.c $(bin/spc spc-config bcmath,zlib) -static -o embed
+# compile in macOS/FreeBSD
+clang embed.c $(bin/spc spc-config bcmath,zlib) -o embed
+
+./embed
+# out: Hello world!
+```
