@@ -751,7 +751,7 @@
     },
     "sqlite": {
         "type": "url",
-        "url": "https://sqlite.org/2024/sqlite-autoconf-3450200.tar.gz",
+        "url": "https://www.sqlite.org/2024/sqlite-autoconf-3450200.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "text",
