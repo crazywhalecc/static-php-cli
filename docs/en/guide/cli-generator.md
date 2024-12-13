@@ -1,3 +1,7 @@
+---
+aside: false
+---
+
 <script setup lang="ts">
 import CliGenerator from "../../.vitepress/components/CliGenerator.vue";
 </script>

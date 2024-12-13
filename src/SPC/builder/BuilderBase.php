@@ -6,6 +6,7 @@ namespace SPC\builder;
 
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
+use SPC\exception\InterruptException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
@@ -23,6 +24,12 @@ abstract class BuilderBase
 
     /** @var array<string, Extension> extensions */
     protected array $exts = [];
+
+    /** @var array<int, string> extension names */
+    protected array $ext_list = [];
+
+    /** @var array<int, string> library names */
+    protected array $lib_list = [];
 
     /** @var bool compile libs only (just mark it) */
     protected bool $libs_only = false;
@@ -160,7 +167,7 @@ abstract class BuilderBase
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws \ReflectionException
-     * @throws WrongUsageException
+     * @throws \Throwable|WrongUsageException
      * @internal
      */
     public function proveExts(array $extensions, bool $skip_check_deps = false): void
@@ -190,6 +197,7 @@ abstract class BuilderBase
         foreach ($this->exts as $ext) {
             $ext->checkDependency();
         }
+        $this->ext_list = $extensions;
     }
 
     /**
@@ -276,7 +284,7 @@ abstract class BuilderBase
                 return false;
             }
         }
-        if (preg_match('/php-(\d+\.\d+\.\d+)/', $file, $match)) {
+        if (preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+)?)\.tar\.(?:gz|bz2|xz)/', $file, $match)) {
             return $match[1];
         }
         return false;
@@ -407,6 +415,13 @@ abstract class BuilderBase
                 }
                 logger()->debug('Running additional patch script: ' . $patch);
                 require $patch;
+            } catch (InterruptException $e) {
+                if ($e->getCode() === 0) {
+                    logger()->notice('Patch script ' . $patch . ' interrupted' . ($e->getMessage() ? (': ' . $e->getMessage()) : '.'));
+                } else {
+                    logger()->error('Patch script ' . $patch . ' interrupted with error code [' . $e->getCode() . ']' . ($e->getMessage() ? (': ' . $e->getMessage()) : '.'));
+                }
+                exit($e->getCode());
             } catch (\Throwable $e) {
                 logger()->critical('Patch script ' . $patch . ' failed to run.');
                 if ($this->getOption('debug')) {
@@ -414,31 +429,8 @@ abstract class BuilderBase
                 } else {
                     logger()->critical('Please check with --debug option to see more details.');
                 }
+                throw $e;
             }
-        }
-    }
-
-    /**
-     * Check if all libs are downloaded.
-     * If not, throw exception.
-     *
-     * @throws RuntimeException
-     */
-    protected function checkLibsSource(): void
-    {
-        $not_downloaded = [];
-        foreach ($this->libs as $lib) {
-            if (!file_exists($lib->getSourceDir())) {
-                $not_downloaded[] = $lib::NAME;
-            }
-        }
-        if ($not_downloaded !== []) {
-            throw new RuntimeException(
-                '"' . implode(', ', $not_downloaded) .
-                '" totally ' . count($not_downloaded) .
-                ' source' . (count($not_downloaded) === 1 ? '' : 's') .
-                ' not downloaded, maybe you need to "fetch" ' . (count($not_downloaded) === 1 ? 'it' : 'them') . ' first?'
-            );
         }
     }
 

@@ -199,6 +199,19 @@
             "gmssl"
         ]
     },
+    "grpc": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "grpc",
+        "arg-type-unix": "custom",
+        "cpp-extension": true,
+        "lib-depends": [
+            "grpc"
+        ]
+    },
     "iconv": {
         "support": {
             "BSD": "wip"
@@ -242,7 +255,8 @@
             "BSD": "wip"
         },
         "notes": true,
-        "type": "builtin",
+        "type": "external",
+        "source": "ext-imap",
         "arg-type": "custom",
         "lib-depends": [
             "imap"
@@ -510,7 +524,7 @@
         },
         "notes": true,
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "custom",
         "lib-depends": [
             "postgresql"
         ]

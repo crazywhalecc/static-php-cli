@@ -46,7 +46,7 @@ This extension contains an implementation of the coroutine environment for `pdo_
 
 ## swow
 
-1. Only PHP version >= 8.0 is supported.
+1. Only PHP 8.0 ~ 8.4 is supported.
 
 ## imap
 

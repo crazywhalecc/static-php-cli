@@ -11,6 +11,7 @@
     "require": {
         "php": ">= 8.1",
         "ext-mbstring": "*",
+        "ext-zlib": "*",
         "laravel/prompts": "^0.1.12",
         "symfony/console": "^5.4 || ^6 || ^7",
         "zhamao/logger": "^1.0"
@@ -19,10 +20,10 @@
         "captainhook/captainhook-phar": "^5.23",
         "captainhook/hook-installer": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.25",
-        "humbug/box": "^4.5",
+        "humbug/box": "^4.5.0 || ^4.6.0",
         "nunomaduro/collision": "^7.8",
         "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10.3 || ^9"
+        "phpunit/phpunit": "^10.3 || ^9.5"
     },
     "autoload": {
         "psr-4": {

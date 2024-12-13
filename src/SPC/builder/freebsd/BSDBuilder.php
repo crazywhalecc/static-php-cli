@@ -89,6 +89,11 @@ class BSDBuilder extends UnixBuilderBase
         $zts_enable = $this->getPHPVersionID() < 80000 ? '--enable-maintainer-zts --disable-zend-signals' : '--enable-zts --disable-zend-signals';
         $zts = $this->getOption('enable-zts', false) ? $zts_enable : '';
 
+        $config_file_path = $this->getOption('with-config-file-path', false) ?
+            ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
+        $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
+            ('--with-config-file-scan-dir=' . $this->getOption('with-config-file-scan-dir') . ' ') : '';
+
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
@@ -109,6 +114,8 @@ class BSDBuilder extends UnixBuilderBase
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
                 ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
                 ($enableMicro ? '--enable-micro ' : '--disable-micro ') .
+                $config_file_path .
+                $config_file_scan_dir .
                 $json_74 .
                 $zts .
                 $this->makeExtensionArgs()

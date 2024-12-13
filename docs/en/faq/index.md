@@ -2,7 +2,19 @@
 
 Here will be some questions that you may encounter easily. There are currently many, but I need to take time to organize them.
 
-## Can statically compiled PHP install extensions?
+## What is the path of php.ini ?
+
+On Linux, macOS and FreeBSD, the path of `php.ini` is `/usr/local/etc/php/php.ini`.
+On Windows, the path is `C:\windows\php.ini` or the current directory of `php.exe`.
+The directory where to look for `php.ini` can be changed on *nix using the manual build option `--with-config-file-path`.
+
+In addition, on Linux, macOS and FreeBSD, `.ini` files present in the `/usr/local/etc/php/conf.d` directory will also be loaded.
+On Windows, this path is empty by default.
+The directory can be changed using the manual build option `--with-config-file-scan-dir`.
+
+`php.ini` will also be searched for in [the other standard locations](https://www.php.net/manual/configuration.file.php). 
+
+## Can statically-compiled PHP install extensions?
 
 Because the principle of installing extensions in PHP under the traditional architecture is to install new extensions using `.so` type dynamic link libraries, 
 and statically linked PHP compiled using this project cannot **directly** install new extensions using dynamic link libraries.
@@ -72,3 +84,11 @@ For Linux systems, you can download the [cacert.pem](https://curl.se/docs/caextr
 For the certificate locations of different distros, please refer to [Golang docs](https://go.dev/src/crypto/x509/root_linux.go).
 
 > INI configuration `openssl.cafile` cannot be set dynamically using the `ini_set()` function, because `openssl.cafile` is a `PHP_INI_SYSTEM` type configuration and can only be set in the `php.ini` file.
+
+## Why don't we support older versions of PHP?
+
+Because older versions of PHP have many problems, such as security issues, performance issues, and functional issues. 
+In addition, many older versions of PHP are not compatible with the latest dependency libraries, 
+which is one of the reasons why older versions of PHP are not supported.
+
+You can use older versions compiled earlier by static-php-cli, such as PHP 8.0, but earlier versions will not be explicitly supported.

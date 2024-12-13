@@ -89,16 +89,19 @@ Currently supported PHP versions for compilation:
 > 
 > :x: not supported
 
-| PHP Version | Status             | Comment                                           |
-|-------------|--------------------|---------------------------------------------------|
-| 7.2         | :x:                |                                                   |
-| 7.3         | :warning:          | phpmicro and some extensions not supported on 7.x |
-| 7.4         | :warning:          | phpmicro and some extensions not supported on 7.x |
-| 8.0         | :heavy_check_mark: | PHP official has stopped maintenance of 8.0       |
-| 8.1         | :heavy_check_mark: | PHP official has security fixes only              |
-| 8.2         | :heavy_check_mark: |                                                   |
-| 8.3         | :heavy_check_mark: |                                                   |
-| 8.4         | :x:                | WIP                                               | 
+| PHP Version | Status             | Comment                                                                                            |
+|-------------|--------------------|----------------------------------------------------------------------------------------------------|
+| 7.2         | :x:                |                                                                                                    |
+| 7.3         | :x:                | phpmicro and some extensions not supported on 7.x                                                  |
+| 7.4         | :x:                | phpmicro and some extensions not supported on 7.x                                                  |
+| 8.0         | :warning:          | PHP official has stopped maintenance of 8.0, we no longer provide backport support for version 8.0 |
+| 8.1         | :heavy_check_mark: | PHP official has security fixes only                                                               |
+| 8.2         | :heavy_check_mark: |                                                                                                    |
+| 8.3         | :heavy_check_mark: |                                                                                                    |
+| 8.4         | :heavy_check_mark: |                                                                                                    |
+
+> This table shows the support status for static-php-cli in building the corresponding version,
+> not the official PHP support status for that version.
 
 ### Supported Extensions
 
@@ -142,7 +145,7 @@ curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-m
 # macOS aarch64 (Apple)
 curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
 # Windows (x86_64, win10 build 17063 or later)
-curl.exe -fsSL -o spc.exehttps://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
 
 # Add execute perm (Linux and macOS only)
 chmod +x ./spc

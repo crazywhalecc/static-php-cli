@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace SPC\command\dev;
 
 use SPC\builder\BuilderProvider;
+use SPC\builder\LibraryBase;
 use SPC\command\BuildCommand;
 use SPC\exception\ExceptionHandler;
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\DependencyUtil;
@@ -53,6 +57,8 @@ class PackLibCommand extends BuildCommand
                     $lib->tryBuild(true);
                     // do something like patching pkg-conf files.
                     $lib->beforePack();
+                    // sanity check for libs (check if the libraries are built correctly)
+                    $this->sanityCheckLib($lib);
                     // After build: load buildroot/ directory, and calculate increase files
                     $after_buildroot = FileSystem::scanDirFiles(BUILD_ROOT_PATH, relative: true);
                     $increase_files = array_diff($after_buildroot, $before_buildroot);
@@ -80,6 +86,22 @@ class PackLibCommand extends BuildCommand
                 logger()->critical('Please check with --debug option to see more details.');
             }
             return static::FAILURE;
+        }
+    }
+
+    /**
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
+    private function sanityCheckLib(LibraryBase $lib): void
+    {
+        logger()->info('Sanity check for library ' . $lib->getName());
+        // config
+        foreach ($lib->getStaticLibs() as $static_lib) {
+            if (!file_exists(FileSystem::convertPath(BUILD_LIB_PATH . '/' . $static_lib))) {
+                throw new RuntimeException('Static library ' . $static_lib . ' not found in ' . BUILD_LIB_PATH);
+            }
         }
     }
 }

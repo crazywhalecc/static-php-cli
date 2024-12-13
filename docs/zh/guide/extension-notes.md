@@ -43,7 +43,7 @@ swoole-hook-sqlite 与 `pdo_sqlite` 扩展冲突。如需使用 Swoole 和 `pdo_
 
 ## swow
 
-1. swow 仅支持 PHP >= 8.0 版本。
+1. swow 仅支持 PHP 8.0 ~ 8.4 版本。
 
 ## imap
 

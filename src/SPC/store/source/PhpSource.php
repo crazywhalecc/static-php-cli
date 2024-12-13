@@ -19,7 +19,7 @@ class PhpSource extends CustomSourceBase
      */
     public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_LOCK_SOURCE): void
     {
-        $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.1';
+        $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.3';
         Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
     }
 

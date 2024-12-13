@@ -1,0 +1,148 @@
+name: "Extension matrix tests"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/ext-matrix-tests.yml'
+
+jobs:
+  test:
+    name: "${{ matrix.extension }} (PHP ${{ matrix.php-version }} on ${{ matrix.operating-system }})"
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        extension:
+          - amqp
+          - apcu
+          - bcmath
+          - bz2
+          - calendar
+          - ctype
+          - curl
+          - dba
+          - dom
+          - ds
+          - event
+          - exif
+          - filter
+          - fileinfo
+          - ftp
+          - gd
+          - gettext
+          - gmp
+          - iconv
+          - igbinary
+          - imagick
+          - imap
+          - intl
+          - ldap
+          - mbstring,mbregex
+          - memcache
+          - mysqli,mysqlnd,pdo_mysql
+          - opcache
+          - openssl
+          - pcntl
+          - password-argon2
+          - pcntl
+          - pdo
+          - pgsql,pdo_pgsql
+          - phar
+          - posix
+          - rar
+          - protobuf
+          - readline
+          - redis
+          - session
+          - shmop
+          - simdjson
+          - simplexml,xml
+          - snappy
+          - soap
+          - sockets
+          - sodium
+          - sqlite3,pdo_sqlite
+          - sqlsrv
+          - ssh2
+          - swoole
+          - swoole,swoole-hook-pgsql,swoole-hook-mysql,swoole-hook-sqlite
+          - swow
+          - sysvmsg,sysvsem,sysvshm
+          - tidy
+          - tokenizer
+          - uuid
+          - uv
+          - xhprof
+          - xlswriter
+          - xmlwriter,xmlreader
+          - xsl
+          - yac
+          - yaml
+          - zip
+          - zlib
+          - zstd
+        php-version:
+          - "8.4"
+        operating-system:
+          - "ubuntu-latest"
+          #- "macos-13"
+          #- "debian-arm64-self-hosted"
+          - "macos-14"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: OS type
+        id: os-type
+        run: |
+          OS=""
+          if [ "${{ matrix.operating-system }}" = "ubuntu-latest" ]; then
+              OS="linux-x86_64"
+          elif [ "${{ matrix.operating-system }}" = "macos-13" ]; then
+              OS="macos-x86_64"
+          elif [ "${{ matrix.operating-system }}" = "debian-arm64-self-hosted" ]; then
+              OS="linux-aarch64"
+          elif [ "${{ matrix.operating-system }}" = "macos-14" ]; then
+              OS="macos-aarch64"
+          fi
+          echo "OS=$OS" >> $GITHUB_ENV
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+        env:
+          phpts: nts
+
+      - name: "Install Dependencies"
+        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - id: cache-download
+        uses: actions/cache@v4
+        with:
+          path: downloads
+          key: php-${{ matrix.php-version }}-dependencies-for-tests
+
+      # If there's no dependencies cache, fetch sources
+      - name: "Download sources"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug --ignore-cache-sources=php-src
+
+      - name: "Build library: ${{ matrix.library }}"
+        run: |
+          SPC_USE_SUDO=yes ./bin/spc doctor --auto-fix
+          if [ "${{ env.OS }}" = "linux-x86_64" ]; then
+            ./bin/spc install-pkg upx
+            UPX=--with-upx-pack
+          elif [ "${{ env.OS }}" = "linux-aarch64" ]; then
+            ./bin/spc install-pkg upx
+            UPX=--with-upx-pack
+          fi
+          ./bin/spc build --build-cli --build-micro --build-fpm ${{ matrix.extension }} --debug $UPX --with-suggested-libs --with-suggested-exts

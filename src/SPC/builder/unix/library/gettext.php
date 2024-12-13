@@ -19,6 +19,7 @@ trait gettext
                 '--disable-java ' .
                 '--disable-c+ ' .
                 $extra .
+                '--with-included-gettext ' .
                 '--with-libiconv-prefix=' . BUILD_ROOT_PATH . ' ' .
                 '--prefix=' . BUILD_ROOT_PATH
             )

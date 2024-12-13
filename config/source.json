@@ -36,9 +36,13 @@
         }
     },
     "bzip2": {
-        "type": "filelist",
-        "url": "https://sourceware.org/pub/bzip2/",
-        "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "alt": {
+            "type": "filelist",
+            "url": "https://sourceware.org/pub/bzip2/",
+            "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/bzip2/bzip2-1.0.8.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "text",
@@ -117,6 +121,18 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "ext-imap": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/imap",
+        "path": "php-src/ext/imap",
+        "filename": "imap.tgz",
+        "license": {
+            "type": "file",
+            "path": [
+                "LICENSE"
+            ]
         }
     },
     "ext-memcache": {
@@ -223,6 +239,16 @@
     "gmssl": {
         "type": "ghtar",
         "repo": "guanzhi/GmSSL",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "grpc": {
+        "type": "git",
+        "rev": "v1.68.x",
+        "url": "https://github.com/grpc/grpc.git",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -530,7 +556,7 @@
     "micro": {
         "type": "git",
         "path": "php-src/sapi/micro",
-        "rev": "master",
+        "rev": "84beta",
         "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
@@ -691,10 +717,10 @@
         }
     },
     "redis": {
-        "type": "git",
+        "type": "url",
+        "url": "https://pecl.php.net/get/redis",
         "path": "php-src/ext/redis",
-        "rev": "release/6.0.2",
-        "url": "https://github.com/phpredis/phpredis",
+        "filename": "redis.tgz",
         "license": {
             "type": "file",
             "path": [
@@ -743,13 +769,18 @@
         }
     },
     "swoole": {
-        "type": "ghtar",
         "path": "php-src/ext/swoole",
-        "repo": "swoole/swoole-src",
-        "prefer-stable": true,
+        "type": "git",
+        "rev": "master",
+        "url": "https://github.com/swoole/swoole-src.git",
         "license": {
             "type": "file",
             "path": "LICENSE"
+        },
+        "alt": {
+            "type": "ghtar",
+            "repo": "swoole/swoole-src",
+            "prefer-stable": true
         }
     },
     "swow": {

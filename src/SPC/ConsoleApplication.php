@@ -22,6 +22,7 @@ use SPC\command\DumpLicenseCommand;
 use SPC\command\ExtractCommand;
 use SPC\command\InstallPkgCommand;
 use SPC\command\MicroCombineCommand;
+use SPC\command\SPCConfigCommand;
 use SPC\command\SwitchPhpVersionCommand;
 use Symfony\Component\Console\Application;
 
@@ -30,11 +31,14 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.3.4';
+    public const VERSION = '2.4.2';
 
     public function __construct()
     {
         parent::__construct('static-php-cli', self::VERSION);
+
+        // Define internal env vars and constants
+        require_once ROOT_DIR . '/src/globals/internal-env.php';
 
         $this->addCommands(
             [
@@ -49,6 +53,7 @@ final class ConsoleApplication extends Application
                 new ExtractCommand(),
                 new MicroCombineCommand(),
                 new SwitchPhpVersionCommand(),
+                new SPCConfigCommand(),
 
                 // Dev commands
                 new AllExtCommand(),

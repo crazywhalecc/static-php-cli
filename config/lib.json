@@ -139,6 +139,20 @@
             "Security"
         ]
     },
+    "grpc": {
+        "source": "grpc",
+        "static-libs-unix": [
+            "libgrpc.a",
+            "libcares.a"
+        ],
+        "lib-depends": [
+            "zlib",
+            "openssl"
+        ],
+        "frameworks": [
+            "CoreFoundation"
+        ]
+    },
     "icu": {
         "source": "icu",
         "cpp-library": true,
@@ -654,7 +668,7 @@
             "liblzma.a"
         ],
         "static-libs-windows": [
-            "liblzma.lib",
+            "lzma.lib",
             "liblzma_a.lib"
         ],
         "headers-unix": [

@@ -2,31 +2,15 @@
 
 declare(strict_types=1);
 
-use SPC\store\FileSystem;
 use ZM\Logger\ConsoleLogger;
 
 define('WORKING_DIR', getcwd());
 define('ROOT_DIR', dirname(__DIR__, 2));
+putenv('WORKING_DIR=' . WORKING_DIR);
+putenv('ROOT_DIR=' . ROOT_DIR);
 
 // CLI start time
 define('START_TIME', microtime(true));
-
-define('BUILD_ROOT_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_ROOT_PATH')) ? $a : (WORKING_DIR . '/buildroot')));
-define('SOURCE_PATH', FileSystem::convertPath(is_string($a = getenv('SOURCE_PATH')) ? $a : (WORKING_DIR . '/source')));
-define('DOWNLOAD_PATH', FileSystem::convertPath(is_string($a = getenv('DOWNLOAD_PATH')) ? $a : (WORKING_DIR . '/downloads')));
-define('PKG_ROOT_PATH', FileSystem::convertPath(is_string($a = getenv('PKG_ROOT_PATH')) ? $a : (WORKING_DIR . '/pkgroot')));
-define('BUILD_BIN_PATH', FileSystem::convertPath(is_string($a = getenv('INSTALL_BIN_PATH')) ? $a : (BUILD_ROOT_PATH . '/bin')));
-define('BUILD_LIB_PATH', FileSystem::convertPath(is_string($a = getenv('INSTALL_LIB_PATH')) ? $a : (BUILD_ROOT_PATH . '/lib')));
-define('BUILD_INCLUDE_PATH', FileSystem::convertPath(is_string($a = getenv('INSTALL_INCLUDE_PATH')) ? $a : (BUILD_ROOT_PATH . '/include')));
-define('SEPARATED_PATH', [
-    '/' . pathinfo(BUILD_LIB_PATH)['basename'], // lib
-    '/' . pathinfo(BUILD_INCLUDE_PATH)['basename'], // include
-    BUILD_ROOT_PATH,
-]);
-
-if (PHP_OS_FAMILY === 'Windows') {
-    define('PHP_SDK_PATH', is_string($a = getenv('PHP_SDK_PATH')) ? $a : (WORKING_DIR . DIRECTORY_SEPARATOR . 'php-sdk-binary-tools'));
-}
 
 // for windows, prevent calling Invoke-WebRequest and wsl command
 const SPC_CURL_EXEC = PHP_OS_FAMILY === 'Windows' ? 'curl.exe' : 'curl';

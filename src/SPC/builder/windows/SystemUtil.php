@@ -21,7 +21,7 @@ class SystemUtil
         if (!$paths) {
             $paths = explode(PATH_SEPARATOR, getenv('Path'));
             if ($include_sdk_bin) {
-                $paths[] = PHP_SDK_PATH . '\bin';
+                $paths[] = getenv('PHP_SDK_PATH') . '\bin';
             }
         }
         foreach ($paths as $path) {
