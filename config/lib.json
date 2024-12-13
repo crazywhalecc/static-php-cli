@@ -565,6 +565,7 @@
             "librdkafka++.a",
             "librdkafka-static.a"
         ],
+        "cpp-library": true,
         "lib-suggests": [
             "zstd"
         ]

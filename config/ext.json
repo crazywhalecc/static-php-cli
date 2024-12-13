@@ -709,6 +709,10 @@
         ]
     },
     "rdkafka": {
+        "support": {
+            "BSD": "wip",
+            "Windows": "wip"
+        },
         "type": "external",
         "source": "ext-rdkafka",
         "arg-type": "custom",
