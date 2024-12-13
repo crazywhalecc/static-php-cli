@@ -21,8 +21,9 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    'macos-14',
-    'ubuntu-latest',
+    // 'macos-14',
+    'macos-13',
+    // 'ubuntu-latest',
 ];
 
 // whether enable thread safe
@@ -52,7 +53,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'bulk',
     'Windows' => 'none',
 };
 
