@@ -69,23 +69,6 @@
             "path": "LICENSE"
         }
     },
-    "librdkafka": {
-        "type": "ghtar",
-        "repo": "confluentinc/librdkafka",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
-    "ext-rdkafka": {
-        "type": "ghtar",
-        "repo": "arnaud-lb/php-rdkafka",
-        "path": "php-src/ext/rdkafka",
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "ext-event": {
         "type": "url",
         "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
@@ -140,6 +123,15 @@
         "url": "https://pecl.php.net/get/memcache",
         "path": "php-src/ext/memcache",
         "filename": "memcache.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-rdkafka": {
+        "type": "ghtar",
+        "repo": "arnaud-lb/php-rdkafka",
+        "path": "php-src/ext/rdkafka",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -437,6 +429,14 @@
         "type": "git",
         "url": "https://github.com/alanxz/rabbitmq-c.git",
         "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "librdkafka": {
+        "type": "ghtar",
+        "repo": "confluentinc/librdkafka",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -751,7 +751,7 @@
     },
     "sqlite": {
         "type": "url",
-        "url": "https://www.sqlite.org/2023/sqlite-autoconf-3430200.tar.gz",
+        "url": "https://www.sqlite.org/2024/sqlite-autoconf-3450200.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "text",
