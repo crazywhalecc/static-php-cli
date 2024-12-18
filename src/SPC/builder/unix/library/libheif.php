@@ -31,6 +31,7 @@ trait libheif
                 '-DWITH_GDK_PIXBUF=OFF ' .
                 '-DBUILD_TESTING=OFF ' .
                 '-DWITH_LIBSHARPYUV=ON ' . // optional: libwebp
+                '-DENABLE_PLUGIN_LOADING=OFF ' .
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")

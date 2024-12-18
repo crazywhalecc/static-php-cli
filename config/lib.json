@@ -299,7 +299,9 @@
         "lib-depends": [
             "libde265",
             "libwebp",
-            "libaom"
+            "libaom",
+            "zlib",
+            "brotli"
         ]
     },
     "libiconv": {
