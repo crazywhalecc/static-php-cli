@@ -4,25 +4,12 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait libheif
 {
-    public function patchBeforeBuild(): bool
-    {
-        if ($this->builder instanceof MacOSBuilder && !str_contains(file_get_contents($this->source_dir . '/CMakeLists.txt'), 'libbrotlienc')) {
-            FileSystem::replaceFileStr(
-                $this->source_dir . '/CMakeLists.txt',
-                'list(APPEND REQUIRES_PRIVATE "libbrotlidec")',
-                'list(APPEND REQUIRES_PRIVATE "libbrotlidec")' . "\n" . '        list(APPEND REQUIRES_PRIVATE "libbrotlienc")'
-            );
-            return true;
-        }
-        return false;
-    }
     /**
      * @throws RuntimeException
      * @throws FileSystemException
