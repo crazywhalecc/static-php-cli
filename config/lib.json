@@ -176,7 +176,8 @@
             "libjpeg",
             "libwebp",
             "freetype",
-            "libtiff"
+            "libtiff",
+            "libheif"
         ],
         "lib-suggests": [
             "zstd",
@@ -208,6 +209,13 @@
             "libsodium"
         ]
     },
+    "libaom": {
+        "source": "libaom",
+        "static-libs-unix": [
+            "libaom.a"
+        ],
+        "cpp-library": true
+    },
     "libargon2": {
         "source": "libargon2",
         "static-libs-unix": [
@@ -234,6 +242,13 @@
             "ares_nameser.h",
             "ares_rules.h"
         ]
+    },
+    "libde265": {
+        "source": "libde265",
+        "static-libs-unix": [
+            "libde265.a"
+        ],
+        "cpp-library": true
     },
     "libevent": {
         "source": "libevent",
@@ -274,6 +289,19 @@
             "ffi.h",
             "ffitarget.h",
             "fficonfig.h"
+        ]
+    },
+    "libheif": {
+        "source": "libheif",
+        "static-libs-unix": [
+            "libheif.a"
+        ],
+        "lib-depends": [
+            "libde265",
+            "libwebp",
+            "libaom",
+            "zlib",
+            "brotli"
         ]
     },
     "libiconv": {
@@ -353,6 +381,18 @@
         ],
         "lib-depends": [
             "openssl"
+        ]
+    },
+    "librdkafka": {
+        "source": "librdkafka",
+        "static-libs-unix": [
+            "librdkafka.a",
+            "librdkafka++.a",
+            "librdkafka-static.a"
+        ],
+        "cpp-library": true,
+        "lib-suggests": [
+            "zstd"
         ]
     },
     "libsodium": {
@@ -557,18 +597,6 @@
     },
     "pkg-config": {
         "source": "pkg-config"
-    },
-    "librdkafka": {
-        "source": "librdkafka",
-        "static-libs-unix": [
-            "librdkafka.a",
-            "librdkafka++.a",
-            "librdkafka-static.a"
-        ],
-        "cpp-library": true,
-        "lib-suggests": [
-            "zstd"
-        ]
     },
     "postgresql": {
         "source": "postgresql",

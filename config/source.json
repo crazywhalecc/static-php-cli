@@ -303,6 +303,16 @@
             "path": "LICENSE"
         }
     },
+    "libaom": {
+        "type": "git",
+        "rev": "main",
+        "url": "https://aomedia.googlesource.com/aom",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "libargon2": {
         "type": "git",
         "rev": "master",
@@ -338,6 +348,17 @@
             "path": "LICENSE.md"
         }
     },
+    "libde265": {
+        "type": "ghrel",
+        "repo": "strukturag/libde265",
+        "match": "libde265-.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libevent": {
         "type": "ghrel",
         "repo": "libevent/libevent",
@@ -366,6 +387,17 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "libheif": {
+        "type": "ghrel",
+        "repo": "strukturag/libheif",
+        "match": "libheif-.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "libiconv": {
