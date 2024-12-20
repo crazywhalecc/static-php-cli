@@ -6,6 +6,7 @@ namespace SPC\store;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -27,6 +28,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('libyaml', [SourcePatcher::class, 'patchLibYaml']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchImapLicense']);
         FileSystem::addSourceExtractHook('ext-imagick', [SourcePatcher::class, 'patchImagickWith84']);
+        FileSystem::addSourceExtractHook('libaom', [SourcePatcher::class, 'patchLibaomForAlpine']);
     }
 
     /**
@@ -391,6 +393,15 @@ class SourcePatcher
     {
         SourcePatcher::patchFile('imagick_php84.patch', SOURCE_PATH . '/php-src/ext/imagick');
         return true;
+    }
+
+    public static function patchLibaomForAlpine(): bool
+    {
+        if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist()) {
+            SourcePatcher::patchFile('libaom_posix_implict.patch', SOURCE_PATH . '/libaom');
+            return true;
+        }
+        return false;
     }
 
     /**
