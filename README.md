@@ -313,7 +313,7 @@ Now there is a [static-php](https://github.com/static-php) organization, which i
 
 ## Sponsor this project
 
-You can sponsor my project on [this page](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md). A portion of your donation will be used to maintain the **static-php.dev** server.
+You can sponsor me or my project from [GitHub Sponsor](https://github.com/crazywhalecc). A portion of your donation will be used to maintain the **static-php.dev** server.
 
 ## Open-Source License
 
