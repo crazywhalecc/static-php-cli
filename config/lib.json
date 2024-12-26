@@ -1,4 +1,18 @@
 {
+    "ast": {
+        "source": "ast",
+        "static-libs-unix": [
+            "ast.la",
+            "ast.lo"
+        ],
+        "static-libs-windows": [
+        ],
+        "headers": [
+            "ast_arginfo.h",
+            "ast_str_defs.h",
+            "php_ast.h"
+        ]
+    },
     "brotli": {
         "source": "brotli",
         "static-libs-unix": [

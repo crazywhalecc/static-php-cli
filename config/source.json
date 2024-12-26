@@ -26,6 +26,16 @@
             "path": "LICENSE"
         }
     },
+    "ast": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/ast",
+        "path": "php-src/ext/ast",
+        "filename": "ast.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",
