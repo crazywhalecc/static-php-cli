@@ -24,6 +24,7 @@ $test_os = [
     'macos-14',
     // 'macos-13',
     'ubuntu-latest',
+    'windows-latest',
 ];
 
 // whether enable thread safe
@@ -39,8 +40,8 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'openssl',
-    'Windows' => 'openssl',
+    'Linux', 'Darwin' => 'ast',
+    'Windows' => 'ast',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
@@ -68,7 +69,7 @@ function _getCombination(string $type = 'common'): string
         'common' => 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,' .
             'mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,' .
             'sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
-        'bulk' => 'apcu,ast,bcmath,bz2,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,ftp,gd,gmp,iconv,imagick,imap,' .
+        'bulk' => 'apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,ftp,gd,gmp,iconv,imagick,imap,' .
             'intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,' .
             'posix,protobuf,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,swoole,sysvmsg,sysvsem,' .
             'sysvshm,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib',
