@@ -21,13 +21,16 @@ class SystemUtil
         switch (true) {
             case file_exists('/etc/centos-release'):
                 $lines = file('/etc/centos-release');
+                $centos = true;
                 goto rh;
             case file_exists('/etc/redhat-release'):
                 $lines = file('/etc/redhat-release');
+                $centos = false;
                 rh:
                 foreach ($lines as $line) {
                     if (preg_match('/release\s+(\d*(\.\d+)*)/', $line, $matches)) {
-                        $ret['dist'] = 'redhat';
+                        /* @phpstan-ignore-next-line */
+                        $ret['dist'] = $centos ? 'centos' : 'redhat';
                         $ret['ver'] = $matches[1];
                     }
                 }
@@ -171,6 +174,8 @@ class SystemUtil
             'debian', 'ubuntu', 'Deepin',
             // rhel-like
             'redhat',
+            // centos
+            'centos',
             // alpine
             'alpine',
             // arch
