@@ -17,6 +17,10 @@
         "type": "external",
         "source": "apcu"
     },
+    "ast": {
+        "type": "external",
+        "source": "ast"
+    },
     "bcmath": {
         "type": "builtin"
     },

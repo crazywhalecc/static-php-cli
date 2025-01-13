@@ -24,6 +24,7 @@ $test_os = [
     'macos-14',
     // 'macos-13',
     'ubuntu-latest',
+    'windows-latest',
 ];
 
 // whether enable thread safe
@@ -39,8 +40,8 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'openssl',
-    'Windows' => 'openssl',
+    'Linux', 'Darwin' => 'ast',
+    'Windows' => 'ast',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
