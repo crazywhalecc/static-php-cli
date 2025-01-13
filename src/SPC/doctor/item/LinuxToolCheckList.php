@@ -57,7 +57,7 @@ class LinuxToolCheckList
 
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
-            'redhat' => self::TOOLS_RHEL,
+            'redhat', 'centos' => self::TOOLS_RHEL,
             'arch' => self::TOOLS_ARCH,
             default => self::TOOLS_DEBIAN,
         };
@@ -72,6 +72,7 @@ class LinuxToolCheckList
                 'ubuntu',
                 'alpine',
                 'redhat',
+                'centos',
                 'Deepin',
                 'arch',
                 'debian' => CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]),
@@ -121,13 +122,14 @@ class LinuxToolCheckList
             'ubuntu', 'debian', 'Deepin' => 'apt-get install -y',
             'alpine' => 'apk add',
             'redhat' => 'dnf install -y',
+            'centos' => 'yum install -y',
             'arch' => 'pacman -S --noconfirm',
             default => throw new RuntimeException('Current linux distro does not have an auto-install script for musl packages yet.'),
         };
         $prefix = '';
-        if (get_current_user() !== 'root') {
+        if (($user = exec('whoami')) !== 'root') {
             $prefix = 'sudo ';
-            logger()->warning('Current user is not root, using sudo for running command');
+            logger()->warning('Current user (' . $user . ') is not root, using sudo for running command');
         }
         try {
             $is_debian = in_array($distro['dist'], ['debian', 'ubuntu', 'Deepin']);
