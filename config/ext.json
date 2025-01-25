@@ -57,6 +57,13 @@
             "qdbm"
         ]
     },
+    "dio": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "dio"
+    },
     "dom": {
         "support": {
             "BSD": "wip"

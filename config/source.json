@@ -69,6 +69,16 @@
             "path": "COPYING"
         }
     },
+    "dio": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/dio",
+        "path": "php-src/ext/dio",
+        "filename": "dio.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ds": {
         "type": "url",
         "url": "https://pecl.php.net/get/ds",
