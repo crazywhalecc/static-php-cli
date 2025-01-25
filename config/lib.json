@@ -425,6 +425,10 @@
         "source": "libtiff",
         "static-libs-unix": [
             "libtiff.a"
+        ],
+        "lib-depends": [
+            "zlib",
+            "libjpeg"
         ]
     },
     "libuuid": {
