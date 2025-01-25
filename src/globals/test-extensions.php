@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
@@ -23,7 +23,7 @@ $test_php_version = [
 $test_os = [
     'macos-14',
     'ubuntu-latest',
-    'windows-latest'
+    // 'windows-latest',
 ];
 
 // whether enable thread safe
@@ -53,7 +53,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'none',
     'Windows' => 'none',
 };
 
