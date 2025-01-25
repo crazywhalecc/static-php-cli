@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 // test php version
 $test_php_version = [
+    '8.1',
+    '8.2',
     '8.3',
     '8.4',
 ];
@@ -20,8 +22,8 @@ $test_php_version = [
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
     'macos-14',
-    'macos-13',
     'ubuntu-latest',
+    'windows-latest'
 ];
 
 // whether enable thread safe
@@ -33,12 +35,12 @@ $no_strip = false;
 $upx = false;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = false;
+$prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imagick',
-    'Windows' => 'ast',
+    'Linux', 'Darwin' => 'dio',
+    'Windows' => 'dio',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
