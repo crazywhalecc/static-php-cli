@@ -153,7 +153,7 @@ jobs:
         name: "Upload PHP cli SAPI"
         uses: actions/upload-artifact@v4
         with:
-          name: php-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          name: php-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/php
 
       # Upload micro self-extracted executable
@@ -161,7 +161,7 @@ jobs:
         name: "Upload PHP micro SAPI"
         uses: actions/upload-artifact@v4
         with:
-          name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          name: micro-${{ inputs.version }}-${{ inputs.os }}
           path: buildroot/bin/micro.sfx
 
       # Upload fpm executable
@@ -169,7 +169,7 @@ jobs:
         name: "Upload PHP fpm SAPI"
         uses: actions/upload-artifact@v4
         with:
-          name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          name: php-fpm-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/php-fpm
 
       # Upload extensions metadata
