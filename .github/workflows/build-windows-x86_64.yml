@@ -14,7 +14,6 @@ on:
           - '8.2'
           - '8.1'
           - '8.0'
-          - '7.4'
       build-cli:
         description: build cli binary
         default: true

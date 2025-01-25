@@ -1,0 +1,187 @@
+name: "CI on Unix"
+
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        required: true
+        description: Build target OS
+        type: choice
+        options:
+          - 'linux-x86_64'
+          - 'linux-aarch64'
+          - 'macos-x86_64'
+          - 'macos-aarch64'
+      php-version:
+        required: true
+        description: PHP version to compile
+        default: '8.3'
+        type: choice
+        options:
+          - '8.4'
+          - '8.3'
+          - '8.2'
+          - '8.1'
+          - '8.0'
+      extensions:
+        description: Extensions to build (comma separated)
+        required: true
+        type: string
+      extra-libs:
+        description: Extra libraries to build (optional, comma separated)
+        type: string
+      build-cli:
+        description: Build cli binary
+        default: true
+        type: boolean
+      build-micro:
+        description: Build phpmicro binary
+        type: boolean
+      build-fpm:
+        description: Build fpm binary
+        type: boolean
+      prefer-pre-built:
+        description: Prefer pre-built binaries (reduce build time)
+        type: boolean
+        default: true
+      debug:
+        description: Show full build logs
+        type: boolean
+      no-strip:
+        description: Keep debug symbols for debugging
+        type: boolean
+        default: false
+
+env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  define-build:
+    name: "Define Build Scripts"
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.gendef.outputs.run }}
+      download: ${{ steps.gendef.outputs.download }}
+      build: ${{ steps.gendef.outputs.build }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Define"
+        id: gendef
+        run: |
+          case "${{ inputs.os }}" in
+            linux-x86_64)
+              DOWN_CMD="./bin/spc-alpine-docker download"
+              BUILD_CMD="./bin/spc-alpine-docker build"
+              RUNS_ON="ubuntu-latest"
+              ;;
+            linux-aarch64)
+              DOWN_CMD="SPC_USE_ARCH=aarch64 ./bin/spc-alpine-docker download"
+              BUILD_CMD="SPC_USE_ARCH=aarch64 ./bin/spc-alpine-docker build"
+              RUNS_ON="ubuntu-latest"
+              ;;
+            macos-x86_64)
+              DOWN_CMD="composer update --no-dev --classmap-authoritative && ./bin/spc download"
+              BUILD_CMD="./bin/spc build"
+              RUNS_ON="macos-13"
+              ;;
+            macos-aarch64)
+              DOWN_CMD="composer update --no-dev --classmap-authoritative && ./bin/spc download"
+              BUILD_CMD="./bin/spc build"
+              RUNS_ON="macos-14"
+              ;;
+          esac
+          DOWN_CMD="$DOWN_CMD --with-php=${{ inputs.php-version }} --for-extensions=${{ inputs.extensions }} --ignore-cache-sources=php-src"
+          BUILD_CMD="$BUILD_CMD ${{ inputs.extensions }}"
+          if [ -n "${{ inputs.extra-libs }}" ]; then
+            DOWN_CMD="$DOWN_CMD --for-libs=${{ inputs.extra-libs }}"
+            BUILD_CMD="$BUILD_CMD --with-libs=${{ inputs.extra-libs }}"
+          fi
+          if [ ${{ inputs.debug }} == true ]; then
+            DOWN_CMD="$DOWN_CMD --debug"
+            BUILD_CMD="$BUILD_CMD --debug"
+          fi
+          if [ ${{ inputs.prefer-pre-built }} == true ]; then
+              DOWN_CMD="$DOWN_CMD --prefer-pre-built"
+          fi
+          if [ ${{ inputs.build-cli }} == true ]; then
+              BUILD_CMD="$DOWN_CMD --build-cli"
+          fi
+          if [ ${{ inputs.build-micro }} == true ]; then
+              BUILD_CMD="$DOWN_CMD --build-micro"
+          fi
+          if [ ${{ inputs.build-fpm }} == true ]; then
+              BUILD_CMD="$DOWN_CMD --build-fpm"
+          fi
+          echo 'download='"$DOWN_CMD" >> "$GITHUB_OUTPUT"
+          echo 'build='"$BUILD_CMD" >> "$GITHUB_OUTPUT"
+          echo 'run='"$RUNS_ON" >> "$GITHUB_OUTPUT"
+  build:
+    name: "Build ${{ inputs.version }} on ${{ inputs.os }}"
+    runs-on: ${{ needs.define-build.outputs.run }}
+    needs: define-build
+    timeout-minutes: 240
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.php-version }}
+          tools: pecl, composer
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+        env:
+          phpts: nts
+
+      # Cache downloaded source
+      - id: cache-download
+        uses: actions/cache@v4
+        with:
+          path: downloads
+          key: php-dependencies-${{ inputs.os }}
+
+      - name: "Download sources"
+        run: ${{ needs.define-build.outputs.download }}
+      - name: "Build PHP"
+        run: ${{ needs.define-build.outputs.build }}
+
+      # Upload cli executable
+      - if: ${{ inputs.build-cli == true }}
+        name: "Upload PHP cli SAPI"
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          path: buildroot/bin/php
+
+      # Upload micro self-extracted executable
+      - if: ${{ inputs.build-micro == true }}
+        name: "Upload PHP micro SAPI"
+        uses: actions/upload-artifact@v4
+        with:
+          name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          path: buildroot/bin/micro.sfx
+
+      # Upload fpm executable
+      - if: ${{ inputs.build-fpm == true }}
+        name: "Upload PHP fpm SAPI"
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          path: buildroot/bin/php-fpm
+
+      # Upload extensions metadata
+      - uses: actions/upload-artifact@v4
+        name: "Upload License Files"
+        with:
+          name: license-files
+          path: buildroot/license/
+      - uses: actions/upload-artifact@v4
+        name: "Upload Build Metadata"
+        with:
+          name: build-meta
+          path: |
+            buildroot/build-extensions.json
+            buildroot/build-libraries.json
