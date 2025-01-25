@@ -106,13 +106,13 @@ jobs:
               DOWN_CMD="$DOWN_CMD --prefer-pre-built"
           fi
           if [ ${{ inputs.build-cli }} == true ]; then
-              BUILD_CMD="$DOWN_CMD --build-cli"
+              BUILD_CMD="$BUILD_CMD --build-cli"
           fi
           if [ ${{ inputs.build-micro }} == true ]; then
-              BUILD_CMD="$DOWN_CMD --build-micro"
+              BUILD_CMD="$BUILD_CMD --build-micro"
           fi
           if [ ${{ inputs.build-fpm }} == true ]; then
-              BUILD_CMD="$DOWN_CMD --build-fpm"
+              BUILD_CMD="$BUILD_CMD --build-fpm"
           fi
           echo 'download='"$DOWN_CMD" >> "$GITHUB_OUTPUT"
           echo 'build='"$BUILD_CMD" >> "$GITHUB_OUTPUT"
