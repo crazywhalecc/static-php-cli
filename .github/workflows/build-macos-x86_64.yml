@@ -89,9 +89,9 @@ jobs:
       - if: inputs.debug == true
         run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
       - if: inputs.prefer-pre-built == true
-        run: echo "SPC_PRE_BUILT=--prefer-pre-built" >> $env:GITHUB_ENV
+        run: echo "SPC_PRE_BUILT=--prefer-pre-built" >> $GITHUB_ENV
       - if: inputs.no-strip == true
-        run: echo "SPC_NO_STRIP=--no-strip" >> $env:GITHUB_ENV
+        run: echo "SPC_NO_STRIP=--no-strip" >> $GITHUB_ENV
 
       # With target select: cli, micro or both
       - if: ${{ inputs.build-cli == true }}
