@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\linux\LinuxBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -52,9 +54,14 @@ trait curl
 
         FileSystem::resetDir($this->source_dir . '/build');
 
+        $cflags = $this instanceof LinuxLibraryBase && $this->builder->libc === 'glibc' ? '-fPIC' : '';
         // compile！
         shell()->cd($this->source_dir . '/build')
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => trim($this->getLibExtraCFlags() . ' ' . $cflags),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs()
+            ])
             ->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ../CMakeLists.txt')
             ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF {$extra} ..")
             ->execWithEnv("make -j{$this->builder->concurrency}")

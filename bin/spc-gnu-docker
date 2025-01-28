@@ -136,5 +136,6 @@ echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"'
 # shellcheck disable=SC2068
 # shellcheck disable=SC2086
 # shellcheck disable=SC2090
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
 
 $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH # bin/spc $@
