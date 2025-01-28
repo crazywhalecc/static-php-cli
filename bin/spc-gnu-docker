@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+# This file is using docker to run commands
+set -e
+
+# Detect docker can run
+if ! which docker >/dev/null; then
+  echo "Docker is not installed, please install docker first !"
+  exit 1
+fi
+DOCKER_EXECUTABLE="docker"
+# shellcheck disable=SC2046
+if [ $(id -u) -ne 0 ]; then
+    if ! docker info > /dev/null 2>&1; then
+        if [ "$SPC_USE_SUDO" != "yes" ]; then
+            echo "Docker command requires sudo"
+            # shellcheck disable=SC2039
+            echo -n 'To use sudo to run docker, run "export SPC_USE_SUDO=yes" and run command again'
+            exit 1
+        fi
+        DOCKER_EXECUTABLE="sudo docker"
+    fi
+fi
+
+
+
+# to check if qemu-docker run
+if [ "$SPC_USE_ARCH" = "" ]; then
+    SPC_USE_ARCH=current
+fi
+case $SPC_USE_ARCH in
+current)
+    BASE_ARCH=$(uname -m)
+    if [ "$BASE_ARCH" = "arm64" ]; then
+        BASE_ARCH=aarch64
+    fi
+    ;;
+aarch64)
+    BASE_ARCH=aarch64
+    # shellcheck disable=SC2039
+    echo -e "\e[033m* Using different arch needs to setup qemu-static for docker !\e[0m"
+    $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static:register --reset > /dev/null
+    ;;
+*)
+    echo "Current arch is not supported to run in docker: $SPC_USE_ARCH"
+    exit 1
+    ;;
+esac
+
+# Detect docker env is setup
+if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-gnu-$SPC_USE_ARCH; then
+    echo "Docker container does not exist. Building docker image ..."
+    $DOCKER_EXECUTABLE build -t cwcc-spc-gnu-$SPC_USE_ARCH -f- . <<EOF
+FROM centos:7
+RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+RUN yum clean all && \
+    yum makecache && \
+    yum update -y
+
+RUN curl -o cmake.tgz -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$BASE_ARCH.tar.gz && \
+    mkdir /cmake && \
+    tar -xzf cmake.tgz -C /cmake --strip-components 1
+
+WORKDIR /app
+ADD ./src /app/src
+COPY ./composer.* /app/
+ADD ./bin/setup-runtime /app/bin/setup-runtime
+ADD ./bin/spc /app/bin/spc
+RUN /app/bin/setup-runtime
+RUN /app/bin/php /app/bin/composer install --no-dev --classmap-authoritative
+ENV PATH="/app/bin:/cmake/bin:$PATH"
+ENV SPC_SKIP_DOCTOR_CHECK_ITEMS="if musl-wrapper is installed,if musl-cross-make is installed"
+
+
+ADD ./config/env.ini /app/config/env.ini
+RUN bin/spc doctor --auto-fix --debug
+EOF
+fi
+
+# Check if in ci (local terminal can execute with -it)
+if [ -t 0 ]; then
+    INTERACT=-it
+else
+    INTERACT=''
+fi
+
+# Mounting volumes
+MOUNT_LIST=""
+# shellcheck disable=SC2089
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/config:/app/config"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/src:/app/src"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/buildroot:/app/buildroot"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/source:/app/source"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/app/dist"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/downloads:/app/downloads"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
+
+# Run docker
+# shellcheck disable=SC2068
+# shellcheck disable=SC2086
+# shellcheck disable=SC2090
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@

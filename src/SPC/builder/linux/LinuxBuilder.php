@@ -15,6 +15,8 @@ use SPC\util\GlobalEnvManager;
 
 class LinuxBuilder extends UnixBuilderBase
 {
+    public string $libc;
+
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -25,13 +27,18 @@ class LinuxBuilder extends UnixBuilderBase
     public function __construct(array $options = [])
     {
         $this->options = $options;
+        SystemUtil::initLibcVar($this->options['libc'] ?? null);
+
+        $this->libc = getenv('SPC_LIBC') ?: LIBC_MUSL_WRAPPER;
 
         // check musl-cross make installed if we use musl-cross-make
         $arch = arch2gnu(php_uname('m'));
 
-        // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
-        $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
-        $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
+        if ($this->libc !== LIBC_GLIBC) {
+            // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
+            $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
+            $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
+        }
 
         GlobalEnvManager::init($this);
 

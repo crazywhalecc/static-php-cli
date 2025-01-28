@@ -43,7 +43,7 @@ class openssl extends LinuxLibraryBase
         $extra = '';
         $ex_lib = '-ldl -pthread';
 
-        $env = "CC='" . getenv('CC') . ' -static -idirafter ' . BUILD_INCLUDE_PATH .
+        $env = "CC='" . getenv('CC') . ' -idirafter ' . BUILD_INCLUDE_PATH .
             ' -idirafter /usr/include/ ' .
             ' -idirafter /usr/include/' . $this->builder->getOption('arch') . '-linux-gnu/ ' .
             "' ";
@@ -70,7 +70,6 @@ class openssl extends LinuxLibraryBase
                 '--prefix=/ ' .
                 '--libdir=lib ' .
                 '--openssldir=/etc/ssl ' .
-                '-static ' .
                 "{$zlib_extra}" .
                 'no-legacy ' .
                 "linux-{$this->builder->getOption('arch')}{$clang_postfix}"

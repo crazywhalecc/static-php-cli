@@ -70,6 +70,10 @@ class GlobalEnvManager
             WORKING_DIR . '/config/env.ini',
             ROOT_DIR . '/config/env.ini',
         ];
+        $ini_custom = [
+            WORKING_DIR . '/config/env.custom.ini',
+            ROOT_DIR . '/config/env.custom.ini',
+        ];
         $ini = null;
         foreach ($ini_files as $ini_file) {
             if (file_exists($ini_file)) {
@@ -82,6 +86,23 @@ class GlobalEnvManager
         }
         if ($ini === false || !isset($ini['global'])) {
             throw new WrongUsageException('Failed to parse ' . $ini_file);
+        }
+        // apply custom env
+        foreach ($ini_custom as $ini_file) {
+            if (file_exists($ini_file)) {
+                $ini_custom = parse_ini_file($ini_file, true);
+                if ($ini_custom !== false) {
+                    $ini['global'] = array_merge($ini['global'], $ini_custom['global'] ?? []);
+                    match (PHP_OS_FAMILY) {
+                        'Windows' => $ini['windows'] = array_merge($ini['windows'], $ini_custom['windows'] ?? []),
+                        'Darwin' => $ini['macos'] = array_merge($ini['macos'], $ini_custom['macos'] ?? []),
+                        'Linux' => $ini['linux'] = array_merge($ini['linux'], $ini_custom['linux'] ?? []),
+                        'BSD' => $ini['freebsd'] = array_merge($ini['freebsd'], $ini_custom['freebsd'] ?? []),
+                        default => null,
+                    };
+                }
+                break;
+            }
         }
         self::applyConfig($ini['global']);
         match (PHP_OS_FAMILY) {
