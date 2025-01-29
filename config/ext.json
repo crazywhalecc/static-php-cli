@@ -432,6 +432,19 @@
         "type": "builtin",
         "arg-type-unix": "custom"
     },
+    "openssl": {
+        "notes": true,
+        "type": "builtin",
+        "arg-type": "custom",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "openssl",
+            "zlib"
+        ],
+        "ext-depends": [
+            "zlib"
+        ]
+    },
     "opentelemetry": {
         "notes": true,
         "support": {
@@ -446,19 +459,6 @@
             "ffi"
         ],
         "type": "external"
-    },
-    "openssl": {
-        "notes": true,
-        "type": "builtin",
-        "arg-type": "custom",
-        "arg-type-windows": "with",
-        "lib-depends": [
-            "openssl",
-            "zlib"
-        ],
-        "ext-depends": [
-            "zlib"
-        ]
     },
     "parallel": {
         "support": {
