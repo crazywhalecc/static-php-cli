@@ -667,6 +667,16 @@
             "path": "COPYING"
         }
     },
+    "opentelemetry": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/opentelemetry",
+        "path": "php-src/ext/opentelemetry",
+        "filename": "opentelemetry.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "openssl": {
         "type": "ghrel",
         "repo": "openssl/openssl",

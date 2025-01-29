@@ -335,3 +335,10 @@ and they all have their own open source licenses.
 
 Please use the `bin/spc dump-license` command to export the open source licenses used in the project after compilation,
 and comply with the corresponding project's LICENSE.
+
+## Troubleshooting
+
+When downloading extensions, you may eventually see errors like `curl: (56) The requested URL returned error: 403` which are often caused by github rate limiting.
+You can verify this by adding `--debug` to the command and will see something like `[DEBU] Running command (no output) : curl -sfSL   "https://api.github.com/repos/openssl/openssl/releases"`.
+
+To fix this, [create](https://github.com/settings/tokens) a personal access token on GitHub and set it as an environment variable `GITHUB_TOKEN=<XXX>`.

@@ -432,6 +432,21 @@
         "type": "builtin",
         "arg-type-unix": "custom"
     },
+    "opentelemetry": {
+        "notes": true,
+        "support": {
+            "Windows": "wip"
+        },
+        "arg-type": "enable",
+        "source": "opentelemetry",
+        "unix-only": true,
+        "ext-suggests": [
+            "grpc",
+            "protobuf",
+            "ffi"
+        ],
+        "type": "external"
+    },
     "openssl": {
         "notes": true,
         "type": "builtin",
