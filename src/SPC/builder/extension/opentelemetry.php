@@ -38,6 +38,6 @@ class opentelemetry extends Extension
 
     public function getUnixConfigureArg(): string
     {
-        return '--enable-opentelemetry=' . BUILD_ROOT_PATH . '/opentelemetry GRPC_LIB_SUBDIR=' . BUILD_LIB_PATH;
+        return '--enable-opentelemetry=' . BUILD_ROOT_PATH . '/opentelemetry';
     }
 }

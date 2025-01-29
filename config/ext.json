@@ -450,7 +450,6 @@
         "support": {
             "Windows": "wip"
         },
-        "arg-type": "enable",
         "source": "opentelemetry",
         "unix-only": true,
         "ext-suggests": [
