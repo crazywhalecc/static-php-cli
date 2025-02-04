@@ -81,3 +81,7 @@ If you have related issues or requirements, please indicate that you are buildin
 
 If you need to build glibc-based binaries without using Docker, 
 please refer to the `bin/spc-gnu-docker` script to manually create a similar environment.
+
+Since glibc binaries are not the main goal of the project, 
+we generally do not test the compatibility of various libraries and extensions under glibc.
+If any specific library builds successfully on musl-libc but fails on glibc, please submit an issue.

@@ -66,6 +66,11 @@ bin/spc-gnu-docker --libc=glibc build bcmath,ctype,openssl,pdo,phar,posix,sessio
 
 ## 注意事项
 
-- 极少数情况下，基于 glibc 的静态 PHP 可能会出现 segment fault 等错误，但目前例子较少，如果遇到问题请提交 issue。
-- glibc 构建为扩展的特性，不属于默认 static-php 的支持范围。如果有相关问题或需求，请在提交 Issue 时注明你是基于 glibc 构建的。
-- 如果你需要不使用 Docker 构建基于 glibc 的二进制，请参考 `bin/spc-gnu-docker` 脚本，手动构建一个类似的环境。
+极少数情况下，基于 glibc 的静态 PHP 可能会出现 segment fault 等错误，但目前例子较少，如果遇到问题请提交 issue。
+
+glibc 构建为扩展的特性，不属于默认 static-php 的支持范围。如果有相关问题或需求，请在提交 Issue 时注明你是基于 glibc 构建的。
+
+如果你需要不使用 Docker 构建基于 glibc 的二进制，请参考 `bin/spc-gnu-docker` 脚本，手动构建一个类似的环境。
+
+由于 glibc 二进制不是项目的主要目标，一般情况下我们不会额外测试 glibc 下的各个库和扩展的兼容性。
+任何特定库如果在 musl-libc 上构建成功，但在 glibc 上构建失败，请提交 issue，我们将会单独解决。
