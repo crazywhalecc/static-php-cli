@@ -13,8 +13,8 @@ However, there are some issues with pure static linking of musl-libc binaries on
 - The FFI extension in PHP cannot be used.
 - In some extreme cases, performance issues may occur. See [musl-libc performance issues](https://github.com/php/php-src/issues/13648).
 
-Different Linux distributions use different default libc. F
-or example, Alpine Linux uses musl libc, while most Linux distributions use glibc. 
+Different Linux distributions use different default libc. 
+For example, Alpine Linux uses musl libc, while most Linux distributions use glibc. 
 However, even so, we cannot directly use any distribution using glibc to build portable static binaries because glibc has some issues:
 
 - Binaries built with gcc and other tools on newer versions of distributions cannot run on older versions of distributions.

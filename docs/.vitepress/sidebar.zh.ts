@@ -18,7 +18,7 @@ export default {
       items: [
         {text: '故障排除', link: '/zh/guide/troubleshooting'},
         {text: '在 Windows 上构建', link: '/zh/guide/build-on-windows'},
-        {text: '构建 glibc 兼容的二进制', link: '/zh/guide/build-with-glibc'},
+        {text: '构建 GNU libc 兼容的二进制', link: '/zh/guide/build-with-glibc'},
       ],
     }
   ],
