@@ -21,14 +21,14 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    'macos-13',
-    'macos-14',
-    'ubuntu-latest',
+    // 'macos-13',
+    // 'macos-14',
+    // 'ubuntu-latest',
     'windows-latest',
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
@@ -36,12 +36,12 @@ $no_strip = false;
 $upx = false;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = true;
+$prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'opentelemetry',
-    'Windows' => 'opentelemetry',
+    'Linux', 'Darwin' => 'curl',
+    'Windows' => 'curl',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).

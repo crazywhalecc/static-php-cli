@@ -34,7 +34,7 @@ class mbregex extends Extension
 
     public function runCliCheckWindows(): void
     {
-        [$ret, $out] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "mbstring"', false);
+        [$ret, $out] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n  --ri "mbstring"', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: compiled php-cli does not contain mbstring !');
         }
