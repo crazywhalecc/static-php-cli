@@ -36,6 +36,19 @@ SPC_CONCURRENCY=4 bin/spc build mbstring,pcntl --build-cli
 
 例如，你需要修改编译 PHP 的 `./configure` 命令，你可以在 `config/env.ini` 文件中找到 `SPC_CMD_PREFIX_PHP_CONFIGURE` 环境变量，然后修改其值即可。
 
+但如果你的构建条件比较复杂，需要多种 env.ini 进行切换，我们推荐你使用 `config/env.custom.ini` 文件，这样你可以在不修改默认的 `config/env.ini` 文件的情况下，
+通过写入额外的重载项目指定你的环境变量。
+
+```ini
+; This is an example of `config/env.custom.ini` file, 
+; we modify the `SPC_CONCURRENCY` and linux default CFLAGS passing to libs and PHP
+[global]
+SPC_CONCURRENCY=4
+
+[linux]
+SPC_DEFAULT_C_FLAGS="-O3"
+```
+
 ## 编译依赖库的环境变量（仅限 Unix 系统）
 
 从 2.2.0 开始，static-php-cli 对所有 macOS、Linux、FreeBSD 等 Unix 系统的编译依赖库的命令均支持自定义环境变量。
