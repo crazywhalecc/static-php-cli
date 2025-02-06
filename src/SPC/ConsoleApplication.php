@@ -18,7 +18,9 @@ use SPC\command\dev\PhpVerCommand;
 use SPC\command\dev\SortConfigCommand;
 use SPC\command\DoctorCommand;
 use SPC\command\DownloadCommand;
+use SPC\command\DumpExtensionsCommand;
 use SPC\command\DumpLicenseCommand;
+use SPC\command\ExtensionDumperCommand;
 use SPC\command\ExtractCommand;
 use SPC\command\InstallPkgCommand;
 use SPC\command\MicroCombineCommand;
@@ -54,6 +56,7 @@ final class ConsoleApplication extends Application
                 new MicroCombineCommand(),
                 new SwitchPhpVersionCommand(),
                 new SPCConfigCommand(),
+                new DumpExtensionsCommand(),
 
                 // Dev commands
                 new AllExtCommand(),

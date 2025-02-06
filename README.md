@@ -194,6 +194,8 @@ Basic usage for building php with some extensions:
 
 # fetch all libraries
 ./bin/spc download --all
+# dump a list of extensions required by your project
+./bin/spc dump-extensions
 # only fetch necessary sources by needed extensions (recommended)
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # download pre-built libraries first (save time for compiling dependencies)
