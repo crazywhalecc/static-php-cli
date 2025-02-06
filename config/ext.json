@@ -445,6 +445,13 @@
             "zlib"
         ]
     },
+    "opentelemetry": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "opentelemetry"
+    },
     "parallel": {
         "support": {
             "BSD": "wip"
