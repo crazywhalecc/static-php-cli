@@ -277,7 +277,7 @@ class WindowsBuilder extends BuilderBase
         // sanity check for php-cli
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('running cli sanity check');
-            [$ret, $output] = cmd()->execWithResult(BUILD_ROOT_PATH . '\bin\php.exe -r "echo \"hello\";"');
+            [$ret, $output] = cmd()->execWithResult(BUILD_ROOT_PATH . '\bin\php.exe -n -r "echo \"hello\";"');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new RuntimeException('cli failed sanity check');
             }
