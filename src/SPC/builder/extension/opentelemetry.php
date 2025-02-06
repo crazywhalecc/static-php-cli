@@ -16,10 +16,6 @@ class opentelemetry extends Extension
         if ($this->builder->getPHPVersionID() < 80000 && getenv('SPC_SKIP_PHP_VERSION_CHECK') !== 'yes') {
             throw new \RuntimeException('The opentelemetry extension requires PHP 8.0 or later');
         }
-
-        if (PHP_OS_FAMILY === 'Windows') {
-            throw new \RuntimeException('opentelemetry extension does not support windows yet');
-        }
     }
 
     public function patchBeforeMake(): bool
