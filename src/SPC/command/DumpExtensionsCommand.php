@@ -7,7 +7,7 @@ namespace SPC\command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Filesystem\Filesystem;
 
-#[AsCommand(name: 'dump-extensions', description: 'Überprüft die benötigten PHP-Extensions')]
+#[AsCommand(name: 'dump-extensions', description: 'Determines the required php extensions')]
 class DumpExtensionsCommand extends BaseCommand
 {
     private array $files = [
