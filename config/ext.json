@@ -446,18 +446,11 @@
         ]
     },
     "opentelemetry": {
-        "notes": true,
         "support": {
-            "Windows": "wip"
+            "BSD": "wip"
         },
-        "source": "opentelemetry",
-        "unix-only": true,
-        "ext-suggests": [
-            "grpc",
-            "protobuf",
-            "ffi"
-        ],
-        "type": "external"
+        "type": "external",
+        "source": "opentelemetry"
     },
     "parallel": {
         "support": {
