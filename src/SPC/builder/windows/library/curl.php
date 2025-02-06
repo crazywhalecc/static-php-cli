@@ -18,7 +18,8 @@ class curl extends WindowsLibraryBase
                 $this->builder->makeSimpleWrapper('nmake'),
                 '/f Makefile.vc WITH_DEVEL=' . BUILD_ROOT_PATH . ' ' .
                 'WITH_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                'mode=static RTLIBCFG=static WITH_SSL=static WITH_NGHTTP2=static WITH_SSH2=static ENABLE_IPV6=yes WITH_ZLIB=static MACHINE=x64 DEBUG=no'
+                'mode=static RTLIBCFG=static WITH_SSL=static WITH_NGHTTP2=static WITH_SSH2=static ENABLE_IPV6=yes WITH_ZLIB=static MACHINE=x64 DEBUG=no' . ' ' .
+                'WINBUILD_ACKNOWLEDGE_DEPRECATED=yes'
             );
         FileSystem::copyDir($this->source_dir . '\include\curl', BUILD_INCLUDE_PATH . '\curl');
     }
