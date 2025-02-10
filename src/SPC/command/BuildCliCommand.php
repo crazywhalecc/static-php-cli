@@ -32,7 +32,6 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('build-embed', null, null, 'Build embed SAPI');
         $this->addOption('build-all', null, null, 'Build all SAPI');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
-        $this->addOption('enable-zts', null, null, 'enable ZTS support');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
         $this->addOption('with-config-file-path', null, InputOption::VALUE_REQUIRED, 'Set the path in which to look for php.ini', $isWindows ? null : '/usr/local/etc/php');
         $this->addOption('with-config-file-scan-dir', null, InputOption::VALUE_REQUIRED, 'Set the directory to scan for .ini files after reading php.ini', $isWindows ? null : '/usr/local/etc/php/conf.d');
