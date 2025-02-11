@@ -143,8 +143,9 @@ abstract class UnixBuilderBase extends BuilderBase
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('running cli sanity check');
             [$ret, $output] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "echo \"hello\";"');
-            if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
-                throw new RuntimeException('cli failed sanity check');
+            $raw_output = implode('', $output);
+            if ($ret !== 0 || trim($raw_output) !== 'hello') {
+                throw new RuntimeException("cli failed sanity check: ret[{$ret}]. out[{$raw_output}]");
             }
 
             foreach ($this->exts as $ext) {
