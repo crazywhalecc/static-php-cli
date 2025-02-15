@@ -18,7 +18,7 @@ class password_argon2 extends Extension
 
     public function runCliCheckUnix(): void
     {
-        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "assert(defined(\'PASSWORD_ARGON2I\'));"');
+        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n -r "assert(defined(\'PASSWORD_ARGON2I\'));"');
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
         }
