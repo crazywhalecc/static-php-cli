@@ -26,7 +26,7 @@ class mbregex extends Extension
      */
     public function runCliCheckUnix(): void
     {
-        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "mbstring" | grep regex', false);
+        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n --ri "mbstring" | grep regex', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: compiled php-cli mbstring extension does not contain regex !');
         }
