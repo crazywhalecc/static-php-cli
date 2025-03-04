@@ -29,11 +29,13 @@ class LinuxBuilder extends UnixBuilderBase
         // check musl-cross make installed if we use musl-cross-make
         $arch = arch2gnu(php_uname('m'));
 
-        // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
-        $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
-        $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
-
         GlobalEnvManager::init($this);
+
+        // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
+        if (getenv('SPC_NO_MUSL_PATH') !== '1') {
+            $this->setOptionIfNotExist('library_path', 'LIBRARY_PATH=/usr/local/musl/lib');
+            $this->setOptionIfNotExist('ld_library_path', 'LD_LIBRARY_PATH=/usr/local/musl/lib');
+        }
 
         if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc") && (getenv('SPC_NO_MUSL_PATH') !== 'yes')) {
             throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');

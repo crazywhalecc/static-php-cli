@@ -57,10 +57,6 @@ class GlobalEnvManager
                 self::putenv("SPC_LINUX_DEFAULT_CXX={$arch}-linux-musl-g++");
                 self::putenv("SPC_LINUX_DEFAULT_AR={$arch}-linux-musl-ar");
             }
-            self::putenv("SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD=LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
-            if (getenv('SPC_NO_MUSL_PATH') !== 'yes') {
-                self::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
-            }
         }
 
         // Init env.ini file, read order:
@@ -91,6 +87,11 @@ class GlobalEnvManager
             'BSD' => self::applyConfig($ini['freebsd']),
             default => null,
         };
+
+        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_NO_MUSL_PATH') !== '1') {
+            self::putenv("SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD=LD_LIBRARY_PATH=/usr/local/musl/{$arch}-linux-musl/lib");
+            self::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
+        }
     }
 
     public static function putenv(string $val): void
