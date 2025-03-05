@@ -174,7 +174,7 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enable_cli ? '--enable-cli ' : '--disable-cli ') .
-                ($enable_fpm ? '--enable-fpm ' : '--disable-fpm ') .
+                ($enable_fpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
                 ($enable_embed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
                 ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
@@ -287,7 +287,14 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildFpm(): void
     {
-        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
+        $vars = $this->getMakeExtraVars();
+        if ($this->getLib('libacl') !== null) {
+            $ldflags_program = $vars['EXTRA_LDFLAGS_PROGRAM'] ?? '';
+            if (!str_contains($ldflags_program, '-L' . BUILD_LIB_PATH)) {
+                $vars['EXTRA_LDFLAGS_PROGRAM'] = trim('-L' . BUILD_LIB_PATH . ' ' . $ldflags_program);
+            }
+        }
+        $vars = $this->getEnvString($vars);
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");
