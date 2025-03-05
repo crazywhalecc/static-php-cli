@@ -287,14 +287,7 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildFpm(): void
     {
-        $vars = $this->getMakeExtraVars();
-        if ($this->getLib('libacl') !== null) {
-            $ldflags_program = $vars['EXTRA_LDFLAGS_PROGRAM'] ?? '';
-            if (!str_contains($ldflags_program, '-L' . BUILD_LIB_PATH)) {
-                $vars['EXTRA_LDFLAGS_PROGRAM'] = trim('-L' . BUILD_LIB_PATH . ' ' . $ldflags_program);
-            }
-        }
-        $vars = $this->getEnvString($vars);
+        $vars = $this->getEnvString($this->getMakeExtraVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");

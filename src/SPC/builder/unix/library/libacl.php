@@ -25,6 +25,5 @@ trait libacl
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['libacl.pc'], PKGCONF_PATCH_PREFIX);
-        $this->cleanLaFiles();
     }
 }

@@ -21,6 +21,5 @@ trait attr
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['libattr.pc'], PKGCONF_PATCH_PREFIX);
-        $this->cleanLaFiles();
     }
 }
