@@ -32,7 +32,7 @@ class LinuxBuilder extends UnixBuilderBase
         GlobalEnvManager::init($this);
 
         // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
-        if (getenv('SPC_NO_MUSL_PATH') !== '1') {
+        if (!filter_var(getenv('SPC_NO_MUSL_PATH'), FILTER_VALIDATE_BOOLEAN)) {
             $this->setOptionIfNotExist('library_path', 'LIBRARY_PATH=/usr/local/musl/lib');
             $this->setOptionIfNotExist('ld_library_path', 'LD_LIBRARY_PATH=/usr/local/musl/lib');
         }
