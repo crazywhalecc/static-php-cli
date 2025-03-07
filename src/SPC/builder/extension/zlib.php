@@ -12,9 +12,7 @@ class zlib extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        if ($this->builder->getPHPVersionID() >= 80400) {
-            return '--with-zlib';
-        }
-        return '--with-zlib --with-zlib-dir="' . BUILD_ROOT_PATH . '"';
+        $zlib_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : ' --with-zlib-dir=' . BUILD_ROOT_PATH;
+        return '--with-zlib' . $zlib_dir;
     }
 }

@@ -14,7 +14,8 @@ class memcache extends Extension
 {
     public function getUnixConfigureArg(): string
     {
-        return '--enable-memcache --with-zlib-dir=' . BUILD_ROOT_PATH;
+        $zlib_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : ' --with-zlib-dir=' . BUILD_ROOT_PATH;
+        return '--enable-memcache' . $zlib_dir;
     }
 
     /**
