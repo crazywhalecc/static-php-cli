@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "php": "~8.4.0 || ~8.3.0",
+        "php": ">= 8.3",
         "ext-mbstring": "*",
         "ext-zlib": "*",
         "laravel/prompts": "^0.1.12",
