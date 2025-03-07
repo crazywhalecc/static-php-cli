@@ -1,4 +1,10 @@
 {
+    "attr": {
+        "source": "attr",
+        "static-libs-unix": [
+            "libattr.a"
+        ]
+    },
     "brotli": {
         "source": "brotli",
         "static-libs-unix": [
@@ -207,6 +213,15 @@
             "zlib",
             "gmp",
             "libsodium"
+        ]
+    },
+    "libacl": {
+        "source": "libacl",
+        "static-libs-unix": [
+            "libacl.a"
+        ],
+        "lib-depends": [
+            "attr"
         ]
     },
     "libaom": {

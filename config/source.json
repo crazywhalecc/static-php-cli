@@ -36,6 +36,16 @@
             "path": "LICENSE"
         }
     },
+    "attr": {
+        "type": "git",
+        "rev": "v2.5.2",
+        "url": "https://git.savannah.nongnu.org/git/attr.git",
+        "provide-pre-built": false,
+        "license": {
+            "type": "file",
+            "path": "doc/COPYING"
+        }
+    },
     "brotli": {
         "type": "ghtar",
         "repo": "google/brotli",
@@ -321,6 +331,16 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "libacl": {
+        "type": "git",
+        "rev": "v2.3.2",
+        "url": "https://git.savannah.nongnu.org/git/acl.git",
+        "provide-pre-built": false,
+        "license": {
+            "type": "file",
+            "path": "doc/COPYING"
         }
     },
     "libaom": {
