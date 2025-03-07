@@ -57,56 +57,6 @@ cd static-php-cli
 composer update
 ```
 
-### Use System PHP
-
-Below are some example commands for installing PHP and Composer in the system. 
-It is recommended to search for the specific installation method yourself or ask the AI search engine to obtain the answer, 
-which will not be elaborated here.
-
-```bash
-# [macOS], need install Homebrew first. See https://brew.sh/
-# Remember change your composer executable path. For M1/M2 Chip mac, "/opt/homebrew/bin/", for Intel mac, "/usr/local/bin/". Or add it to your own path.
-brew install php wget
-wget https://getcomposer.org/download/latest-stable/composer.phar -O /path/to/your/bin/composer && chmod +x /path/to/your/bin/composer
-
-# [Debian], you need to make sure your php version >= 8.1 and composer >= 2.0
-sudo apt install php-cli composer php-tokenizer
-
-# [Alpine]
-apk add bash file wget xz php81 php81-common php81-pcntl php81-tokenizer php81-phar php81-posix php81-xml composer
-```
-
-::: tip
-Currently, some versions of Ubuntu install older PHP versions, 
-so no installation commands are provided. If necessary, it is recommended to add software sources such as ppa first, 
-and then install the latest version of PHP and tokenizer, XML, and phar extensions.
-
-Older versions of Debian may have an older (<= 7.4) version of PHP installed by default, it is recommended to upgrade Debian first.
-:::
-
-### Use Docker
-
-If you don't want to install PHP and Composer runtime environment on your system, you can use the built-in Docker environment build script.
-
-```bash
-# To use directly, replace `bin/spc` with `bin/spc-alpine-docker` in all used commands
-bin/spc-alpine-docker
-```
-
-The first time the command is executed, `docker build` will be used to build a Docker image. 
-The default built Docker image is the `x86_64` architecture, and the image name is `cwcc-spc-x86_64`.
-
-If you want to build `aarch64` static-php-cli in `x86_64` environment, 
-you can use qemu to emulate the arm image to run Docker, but the speed will be very slow.
-Use command: `SPC_USE_ARCH=aarch64 bin/spc-alpine-docker`.
-
-If it prompts that sudo is required to run after running, 
-execute the following command once to grant static-php-cli permission to execute sudo:
-
-```bash
-export SPC_USE_SUDO=yes
-```
-
 ### Use Precompiled Static PHP Binaries
 
 If you don't want to use Docker and install PHP in the system, 
@@ -132,6 +82,56 @@ This script will download two files in total: `bin/php` and `bin/composer`. Afte
 1. Add the `bin/` directory to the PATH: `export PATH="/path/to/your/static-php-cli/bin:$PATH"`, after adding the path, 
 it is equivalent to installing PHP in the system, you can directly Use commands such as `composer`, `php -v`, or directly use `bin/spc`.
 2. Direct call, such as executing static-php-cli command: `bin/php bin/spc --help`, executing Composer: `bin/php bin/composer update`.
+
+### Use Docker
+
+If you don't want to install PHP and Composer runtime environment on your system, you can use the built-in Docker environment build script.
+
+```bash
+# To use directly, replace `bin/spc` with `bin/spc-alpine-docker` in all used commands
+bin/spc-alpine-docker
+```
+
+The first time the command is executed, `docker build` will be used to build a Docker image.
+The default built Docker image is the `x86_64` architecture, and the image name is `cwcc-spc-x86_64`.
+
+If you want to build `aarch64` static-php-cli in `x86_64` environment,
+you can use qemu to emulate the arm image to run Docker, but the speed will be very slow.
+Use command: `SPC_USE_ARCH=aarch64 bin/spc-alpine-docker`.
+
+If it prompts that sudo is required to run after running,
+execute the following command once to grant static-php-cli permission to execute sudo:
+
+```bash
+export SPC_USE_SUDO=yes
+```
+
+### Use System PHP
+
+Below are some example commands for installing PHP and Composer in the system.
+It is recommended to search for the specific installation method yourself or ask the AI search engine to obtain the answer,
+which will not be elaborated here.
+
+```bash
+# [macOS], need install Homebrew first. See https://brew.sh/
+# Remember change your composer executable path. For M1/M2 Chip mac, "/opt/homebrew/bin/", for Intel mac, "/usr/local/bin/". Or add it to your own path.
+brew install php wget
+wget https://getcomposer.org/download/latest-stable/composer.phar -O /path/to/your/bin/composer && chmod +x /path/to/your/bin/composer
+
+# [Debian], you need to make sure your php version >= 8.1 and composer >= 2.0
+sudo apt install php-cli composer php-tokenizer
+
+# [Alpine]
+apk add bash file wget xz php81 php81-common php81-pcntl php81-tokenizer php81-phar php81-posix php81-xml composer
+```
+
+::: tip
+Currently, some versions of Ubuntu install older PHP versions,
+so no installation commands are provided. If necessary, it is recommended to add software sources such as ppa first,
+and then install the latest version of PHP and tokenizer, XML, and phar extensions.
+
+Older versions of Debian may have an older (<= 7.4) version of PHP installed by default, it is recommended to upgrade Debian first.
+:::
 
 ## Command - download
 

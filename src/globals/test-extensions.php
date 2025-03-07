@@ -163,6 +163,8 @@ if ($argv[1] === 'download_cmd') {
     } else {
         passthru('./bin/spc ' . $build_cmd . ' --build-embed', $retcode);
     }
+} else {
+    $retcode = 0;
 }
 
 exit($retcode);
