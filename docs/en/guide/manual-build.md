@@ -397,6 +397,31 @@ manually unpack and copy the package to a specified location, and we can use com
 bin/spc extract php-src,libxml2
 ```
 
+## Command - dump-extensions
+
+Use the command `bin/spc dump-extensions` to export required extensions of the current project.
+
+```bash
+# Print the extension list of the project, pass in the root directory of the project containing composer.json
+bin/spc dump-extensions /path/to/your/project/
+
+# Print the extension list of the project, excluding development dependencies
+bin/spc dump-extensions /path-to/tour/project/ --no-dev
+
+# Output in the extension list format acceptable to the spc command (comma separated)
+bin/spc dump-extensions /path-to/tour/project/ --format=text
+
+# Output as a JSON list
+bin/spc dump-extensions /path-to/tour/project/ --format=json
+
+# When the project does not have any extensions, output the specified extension combination instead of returning failure
+bin/spc dump-extensions /path-to/your/project/ --no-ext-output=mbstring,posix,pcntl,phar
+
+# Do not exclude extensions not supported by spc when outputting
+bin/spc dump-extensions /path/to/your/project/ --no-spc-filter
+```
+It should be noted that the project directory must contain the `vendor/installed.json` and `composer.lock` files, otherwise they cannot be found normally.
+
 ## Dev Command - dev
 
 Debug commands refer to a collection of commands that can assist in outputting some information 
