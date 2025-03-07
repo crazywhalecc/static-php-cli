@@ -58,7 +58,7 @@ static-php-cli（简称 `spc`）有许多特性：
 
 ### 编译环境需求
 
-- PHP >= 8.1（这是 spc 自身需要的版本，不是支持的构建版本）
+- PHP 8.4（这是 spc 自身需要的版本，不是支持的构建版本）
 - 扩展：`mbstring,tokenizer,phar`
 - 系统安装了 `curl` 和 `git`
 
@@ -179,6 +179,9 @@ bin/spc --version
 ```bash
 # 检查环境依赖，并根据尝试自动安装缺失的编译工具
 ./bin/spc doctor --auto-fix
+
+# 输出目标项目依赖的扩展列表
+./bin/spc dump-extensions /path/to/your/project --format=text
 
 # 拉取所有依赖库
 ./bin/spc download --all

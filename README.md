@@ -67,7 +67,7 @@ which can be downloaded directly according to your needs.
 You can say I made a PHP builder written in PHP, pretty funny.
 But static-php-cli runtime only requires an environment above PHP 8.1 and extensions mentioned below.
 
-- PHP >= 8.1 (This is the version required by spc itself, not the build version)
+- PHP 8.4 (This is the version required by spc itself, not the build version)
 - Extension: `mbstring,tokenizer,phar`
 - Supported OS with `curl` and `git` installed
 
@@ -195,7 +195,7 @@ Basic usage for building php with some extensions:
 # fetch all libraries
 ./bin/spc download --all
 # dump a list of extensions required by your project
-./bin/spc dump-extensions
+./bin/spc dump-extensions /path/to/your/project --format=text
 # only fetch necessary sources by needed extensions (recommended)
 ./bin/spc download --for-extensions="openssl,pcntl,mbstring,pdo_sqlite"
 # download pre-built libraries first (save time for compiling dependencies)
