@@ -50,9 +50,9 @@ else
 fi
 
 # Detect docker env is setup
-if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-$SPC_USE_ARCH; then
+if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-$SPC_USE_ARCH-v2; then
     echo "Docker container does not exist. Building docker image ..."
-    $DOCKER_EXECUTABLE build -t cwcc-spc-$SPC_USE_ARCH -f- . <<EOF
+    $DOCKER_EXECUTABLE build -t cwcc-spc-$SPC_USE_ARCH-v2 -f- . <<EOF
 FROM $ALPINE_FROM
 $SPC_USE_MIRROR
 RUN apk update; \
@@ -79,20 +79,15 @@ RUN apk update; \
         linux-headers \
         m4 \
         make \
-        php82 \
-        php82-common \
-        php82-pcntl \
-        php82-phar \
-        php82-posix \
-        php82-sodium \
-        php82-tokenizer \
-        php82-dom \
-        php82-xml \
-        php82-xmlwriter \
-        composer \
         pkgconfig \
         wget \
         xz
+
+RUN curl -#fSL https://dl.static-php.dev/static-php-cli/bulk/php-8.4.4-cli-linux-\$(uname -m).tar.gz | tar -xz -C /usr/local/bin && \
+    chmod +x /usr/local/bin/php
+
+RUN curl -#fSL https://getcomposer.org/download/latest-stable/composer.phar -o /usr/local/bin/composer && \
+    chmod +x /usr/local/bin/composer
 
 WORKDIR /app
 ADD ./src /app/src
@@ -124,4 +119,4 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
 # shellcheck disable=SC2068
 # shellcheck disable=SC2086
 # shellcheck disable=SC2090
-$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH bin/spc $@
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-v2 bin/spc $@
