@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 // test php version
 $test_php_version = [
-    '8.1',
-    '8.2',
     '8.3',
     '8.4',
 ];
@@ -28,7 +26,7 @@ $test_os = [
 ];
 
 // whether enable thread safe
-$zts = true;
+$zts = false;
 
 $no_strip = false;
 
@@ -40,7 +38,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'gettext',
+    'Linux', 'Darwin' => 'imap,openssl,zlib,memcache',
     'Windows' => 'gettext',
 };
 
