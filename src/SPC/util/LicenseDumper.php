@@ -70,7 +70,7 @@ class LicenseDumper
         }
 
         foreach ($this->libs as $lib) {
-            if (Config::getLib($lib, 'type') !== 'lib') {
+            if (Config::getLib($lib, 'type', 'lib') !== 'lib') {
                 continue;
             }
             $source_name = Config::getLib($lib, 'source');
