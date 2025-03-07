@@ -72,10 +72,6 @@ class DownloadCommand extends BaseCommand
         if ($for_ext = $input->getOption('for-extensions')) {
             $ext = $this->parseExtensionList($for_ext);
             $sources = $this->calculateSourcesByExt($ext, !$input->getOption('without-suggestions'));
-            if (PHP_OS_FAMILY !== 'Windows') {
-                array_unshift($sources, 'pkg-config');
-            }
-            array_unshift($sources, 'php-src', 'micro');
             $final_sources = array_merge($final_sources, array_diff($sources, $final_sources));
         }
         // mode: --for-libs
@@ -316,6 +312,7 @@ class DownloadCommand extends BaseCommand
     private function calculateSourcesByExt(array $extensions, bool $include_suggests = true): array
     {
         [$extensions, $libraries] = $include_suggests ? DependencyUtil::getExtsAndLibs($extensions, [], true, true) : DependencyUtil::getExtsAndLibs($extensions);
+        var_dump($libraries);
         $sources = [];
         foreach ($extensions as $extension) {
             if (Config::getExt($extension, 'type') === 'external') {
@@ -323,7 +320,10 @@ class DownloadCommand extends BaseCommand
             }
         }
         foreach ($libraries as $library) {
-            $sources[] = Config::getLib($library, 'source');
+            $source = Config::getLib($library, 'source');
+            if ($source !== null) {
+                $sources[] = $source;
+            }
         }
         return array_values(array_unique($sources));
     }
