@@ -33,8 +33,8 @@ class LinuxBuilder extends UnixBuilderBase
 
         // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
         if (!filter_var(getenv('SPC_NO_MUSL_PATH'), FILTER_VALIDATE_BOOLEAN)) {
-            $this->setOptionIfNotExist('library_path', 'LIBRARY_PATH=/usr/local/musl/lib');
-            $this->setOptionIfNotExist('ld_library_path', 'LD_LIBRARY_PATH=/usr/local/musl/lib');
+            $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
+            $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
         }
 
         if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc") && (getenv('SPC_NO_MUSL_PATH') !== 'yes')) {
