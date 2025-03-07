@@ -353,6 +353,32 @@ memory_limit=1G
 bin/spc extract php-src,libxml2
 ```
 
+## 命令 dump-extensions - 导出项目扩展依赖
+
+使用命令 `bin/spc dump-extensions` 可以导出当前项目的扩展依赖。
+
+```bash
+# 打印项目的扩展列表，传入项目包含composer.json的根目录
+bin/spc dump-extensions /path/to/your/project/
+
+# 打印项目的扩展列表，不包含开发依赖
+bin/spc dump-extensions /path-to/tour/project/ --no-dev
+
+# 输出为 spc 命令可接受的扩展列表格式（逗号分割）
+bin/spc dump-extensions /path-to/tour/project/ --format=text
+
+# 输出为 JSON 列表
+bin/spc dump-extensions /path-to/tour/project/ --format=json
+
+# 当项目没有任何扩展时，输出指定扩展组合，而不是返回失败
+bin/spc dump-extensions /path-to/your/project/ --no-ext-output=mbstring,posix,pcntl,phar
+
+# 输出时不排除 spc 不支持的扩展
+bin/spc dump-extensions /path/to/your/project/ --no-spc-filter
+```
+
+需要注意的是，项目的目录下必须包含 `vendor/installed.json` 和 `composer.lock` 文件，否则无法正常获取。
+
 ## 调试命令 dev - 调试命令集合
 
 调试命令指的是你在使用 static-php-cli 构建 PHP 或改造、增强 static-php-cli 项目本身的时候，可以辅助输出一些信息的命令集合。
