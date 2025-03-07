@@ -40,7 +40,7 @@ jobs:
           tools: pecl, composer, php-cs-fixer
 
       - name: Run PHP-CS-Fixer fix
-        run: php-cs-fixer fix --dry-run --diff --ansi
+        run: bin/php-cs-fixer-wrapper fix --dry-run --diff --ansi
 
   phpstan:
     runs-on: ubuntu-latest

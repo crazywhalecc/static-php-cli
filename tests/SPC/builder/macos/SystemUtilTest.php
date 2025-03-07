@@ -15,7 +15,7 @@ class SystemUtilTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         if (PHP_OS_FAMILY !== 'Darwin') {
-            self::markTestIncomplete('This test is only for macOS');
+            self::markTestSkipped('This test is only for macOS');
         }
     }
 
