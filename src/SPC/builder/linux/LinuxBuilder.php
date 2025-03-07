@@ -287,7 +287,7 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildFpm(): void
     {
-        $vars = $this->getEnvString($this->getMakeExtraVars());
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");
