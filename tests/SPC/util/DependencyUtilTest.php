@@ -29,6 +29,8 @@ final class DependencyUtilTest extends TestCase
             ],
         ];
         Config::$lib = [
+            'lib-base' => ['type' => 'root'],
+            'php' => ['type' => 'root'],
             'libaaa' => [
                 'source' => 'test1',
                 'static-libs' => ['libaaa.a'],

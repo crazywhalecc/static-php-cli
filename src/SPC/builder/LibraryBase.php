@@ -147,6 +147,17 @@ abstract class LibraryBase
     }
 
     /**
+     * Get binary files.
+     *
+     * @throws FileSystemException
+     * @throws WrongUsageException
+     */
+    public function getBinaryFiles(): array
+    {
+        return Config::getLib(static::NAME, 'bin', []);
+    }
+
+    /**
      * @throws WrongUsageException
      * @throws FileSystemException
      */
@@ -203,7 +214,8 @@ abstract class LibraryBase
         }
         // force means just build
         if ($force_build) {
-            logger()->info('Building required library [' . static::NAME . ']');
+            $type = Config::getLib(static::NAME, 'type', 'lib');
+            logger()->info('Building required ' . $type . ' [' . static::NAME . ']');
 
             // extract first if not exists
             if (!is_dir($this->source_dir)) {
@@ -236,10 +248,14 @@ abstract class LibraryBase
                 return LIB_STATUS_OK;
             }
         }
-        // pkg-config is treated specially. If it is pkg-config, check if the pkg-config binary exists
-        if (static::NAME === 'pkg-config' && !file_exists(BUILD_ROOT_PATH . '/bin/pkg-config')) {
-            $this->tryBuild(true);
-            return LIB_STATUS_OK;
+        // current library is package and binary file is not exists
+        if (Config::getLib(static::NAME, 'type', 'lib') === 'package') {
+            foreach ($this->getBinaryFiles() as $name) {
+                if (!file_exists(BUILD_BIN_PATH . "/{$name}")) {
+                    $this->tryBuild(true);
+                    return LIB_STATUS_OK;
+                }
+            }
         }
         // if all the files exist at this point, skip the compilation process
         return LIB_STATUS_ALREADY;
