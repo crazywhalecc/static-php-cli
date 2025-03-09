@@ -22,7 +22,10 @@ trait libssh2
         shell()->cd($this->source_dir . '/build')
             ->exec(
                 'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+                '-DCMAKE_INSTALL_LIBDIR=lib ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DBUILD_EXAMPLES=OFF ' .
                 '-DBUILD_TESTING=OFF ' .
@@ -30,7 +33,7 @@ trait libssh2
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
         $this->patchPkgconfPrefix(['libssh2.pc']);
     }
 }

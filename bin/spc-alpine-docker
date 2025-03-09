@@ -119,4 +119,8 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
 # shellcheck disable=SC2068
 # shellcheck disable=SC2086
 # shellcheck disable=SC2090
-$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-v2 bin/spc $@
+if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
+    $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-v2
+else
+    $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-v2 bin/spc $@
+fi

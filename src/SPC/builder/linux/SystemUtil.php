@@ -182,4 +182,12 @@ class SystemUtil
             'arch', 'manjaro',
         ];
     }
+
+    public static function initLibcVar(?string $libc = null): void
+    {
+        if ($libc === null) {
+            $libc = self::isMuslDist() ? 'musl' : 'musl-wrapper';
+        }
+        f_putenv('SPC_LIBC=' . $libc);
+    }
 }

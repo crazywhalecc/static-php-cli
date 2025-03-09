@@ -33,6 +33,7 @@ packlib_files.txt
 !/bin/setup-runtime*
 !/bin/spc-alpine-docker
 !/bin/php-cs-fixer-wrapper
+!/bin/build-static-frankenphp
 
 # exclude windows build tools
 /php-sdk-binary-tools/

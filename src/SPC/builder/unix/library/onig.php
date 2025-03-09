@@ -18,9 +18,10 @@ trait onig
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
-            ->exec('./configure --enable-static --disable-shared --prefix=')
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags() ?: $this->builder->arch_c_flags, 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->execWithEnv('./configure --enable-static --disable-shared --prefix=')
+            ->execWithEnv('make clean')
+            ->execWithEnv("make -j{$this->builder->concurrency}")
             ->exec("make install DESTDIR={$destdir}");
         $this->patchPkgconfPrefix(['oniguruma.pc']);
     }

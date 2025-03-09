@@ -5,13 +5,9 @@ currently supporting Linux and macOS systems.
 
 In the guide section, you will learn how to use static php cli to build standalone PHP programs.
 
-- [GitHub Action Build](./action-build)
-- [Manual Build](./manual-build)
+- [Build (local)](./manual-build)
+- [Build (GitHub Actions)](./action-build)
 - [Supported Extensions](./extensions)
-
-::: tip
-If you are a native English speaker, some corrections to the documentation are welcome.
-:::
 
 ## Compilation Environment
 

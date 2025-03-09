@@ -15,6 +15,8 @@ use SPC\util\GlobalEnvManager;
 
 class LinuxBuilder extends UnixBuilderBase
 {
+    public string $libc;
+
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -25,6 +27,9 @@ class LinuxBuilder extends UnixBuilderBase
     public function __construct(array $options = [])
     {
         $this->options = $options;
+        SystemUtil::initLibcVar($this->options['libc'] ?? null);
+
+        $this->libc = getenv('SPC_LIBC') ?: LIBC_MUSL_WRAPPER;
 
         // check musl-cross make installed if we use musl-cross-make
         $arch = arch2gnu(php_uname('m'));
@@ -115,6 +120,7 @@ class LinuxBuilder extends UnixBuilderBase
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
+        f_putenv('CFLAGS=' . $cflags);
 
         $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);

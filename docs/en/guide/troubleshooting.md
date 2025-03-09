@@ -38,3 +38,5 @@ and then determine the command that reported the error.
 The error terminal output is very important for fixing compilation errors.
 When submitting an issue, please upload the last error fragment of the terminal log (or the entire terminal log output),
 and include the `spc` command and parameters used.
+
+If you are rebuilding, please refer to the [Local Build - Multiple Builds](./manual-build#multiple-builds) section.
