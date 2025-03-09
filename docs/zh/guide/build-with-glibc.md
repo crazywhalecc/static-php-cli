@@ -29,25 +29,6 @@ musl-libc 是一个轻量级的 libc 实现，它的目标是与 glibc 兼容，
 
 最新版的 static-php-cli 内置了 `bin/spc-gnu-docker` 脚本，可以一键创建一个 CentOS 7.x (glibc-2.17) 的 Docker 容器，并在容器中构建 glibc 兼容的 PHP 静态二进制文件。
 
-请先克隆本项目的仓库，并将下面的内容添加到 `config/env.custom.ini` 文件中：
-
-```ini
-; Modify this file name to `env.custom.ini`, and run `bin/spc-gnu-docker`,
-; you can compile a GNU libc based static binary !
-[global]
-SPC_SKIP_DOCTOR_CHECK_ITEMS="if musl-wrapper is installed,if musl-cross-make is installed"
-
-[linux]
-CC=gcc
-CXX=g++
-AR=ar
-LD=ld
-SPC_DEFAULT_C_FLAGS=-fPIC
-SPC_NO_MUSL_PATH=yes
-SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"
-SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil"
-```
-
 然后，先运行一次以下命令。首次运行时时间较长，因为需要下载 CentOS 7.x 的镜像和一些编译工具。
 
 ```bash

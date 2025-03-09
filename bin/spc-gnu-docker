@@ -59,6 +59,22 @@ RUN yum clean all && \
     yum makecache && \
     yum update -y
 
+RUN yum install -y centos-release-scl
+
+RUN if [ "$BASE_ARCH" = "aarch64" ]; then \
+        sed -i 's|mirror.centos.org/centos|vault.centos.org/altarch|g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo ; \
+        sed -i 's|mirror.centos.org/centos|vault.centos.org/altarch|g' /etc/yum.repos.d/CentOS-SCLo-scl.repo ; \
+    else \
+        sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo ; \
+    fi
+RUN sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+
+RUN yum update -y && \
+    yum install -y devtoolset-7-gcc-*
+RUN echo "source scl_source enable devtoolset-7" >> /etc/bashrc
+RUN source /etc/bashrc
+
 RUN curl -o cmake.tgz -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$BASE_ARCH.tar.gz && \
     mkdir /cmake && \
     tar -xzf cmake.tgz -C /cmake --strip-components 1
@@ -73,9 +89,9 @@ RUN /app/bin/php /app/bin/composer install --no-dev --classmap-authoritative
 ENV PATH="/app/bin:/cmake/bin:$PATH"
 ENV SPC_SKIP_DOCTOR_CHECK_ITEMS="if musl-wrapper is installed,if musl-cross-make is installed"
 
-
 ADD ./config/env.ini /app/config/env.ini
 RUN bin/spc doctor --auto-fix --debug
+RUN git clone https://github.com/dunglas/frankenphp.git --depth=1 /frankenphp
 EOF
 fi
 
@@ -97,8 +113,20 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/app/dist"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/downloads:/app/downloads"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
 
+# Apply env in temp env file
+echo 'SPC_SKIP_DOCTOR_CHECK_ITEMS="if musl-wrapper is installed,if musl-cross-make is installed"' > /tmp/spc-gnu-docker.env
+echo 'CC=/opt/rh/devtoolset-7/root/usr/bin/gcc' >> /tmp/spc-gnu-docker.env
+echo 'CXX=/opt/rh/devtoolset-7/root/usr/bin/g++' >> /tmp/spc-gnu-docker.env
+echo 'AR=/opt/rh/devtoolset-7/root/usr/bin/ar' >> /tmp/spc-gnu-docker.env
+echo 'LD=/opt/rh/devtoolset-7/root/usr/bin/ld' >> /tmp/spc-gnu-docker.env
+echo 'SPC_DEFAULT_C_FLAGS=-fPIC' >> /tmp/spc-gnu-docker.env
+echo 'SPC_NO_MUSL_PATH=yes' >> /tmp/spc-gnu-docker.env
+echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
+echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil"' >> /tmp/spc-gnu-docker.env
+
 # Run docker
 # shellcheck disable=SC2068
 # shellcheck disable=SC2086
 # shellcheck disable=SC2090
-$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
+
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH #  bin/spc $@

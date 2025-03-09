@@ -34,25 +34,6 @@ but **statically linked with all other dependencies**.
 The latest version of static-php-cli includes the `bin/spc-gnu-docker` script, 
 which can create a CentOS 7.x (glibc-2.17) Docker container with one click and build a glibc compatible PHP static binary in the container.
 
-First, clone the repository of this project and add the following content to the `config/env.custom.ini` file:
-
-```ini
-; Modify this file name to `env.custom.ini`, and run `bin/spc-gnu-docker`,
-; you can compile a GNU libc based static binary !
-[global]
-SPC_SKIP_DOCTOR_CHECK_ITEMS="if musl-wrapper is installed,if musl-cross-make is installed"
-
-[linux]
-CC=gcc
-CXX=g++
-AR=ar
-LD=ld
-SPC_DEFAULT_C_FLAGS=-fPIC
-SPC_NO_MUSL_PATH=yes
-SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"
-SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil"
-```
-
 Then, run the following command once. 
 The first run will take a long time because it needs to download the CentOS 7.x image and some build tools.
 
