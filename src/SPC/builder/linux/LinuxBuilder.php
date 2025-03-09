@@ -120,6 +120,7 @@ class LinuxBuilder extends UnixBuilderBase
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
+        f_putenv('CFLAGS=' . $cflags);
 
         $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);

@@ -17,7 +17,7 @@ trait gettext
         $ldflags = $this->builder->getOption('enable-zts') ? '-lpthread' : '';
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags() ?: $cflags, 'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags, 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv(['CFLAGS' => "{$this->getLibExtraCFlags()} {$cflags}", 'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags, 'LIBS' => $this->getLibExtraLibs()])
             ->execWithEnv(
                 './configure ' .
                 '--enable-static ' .

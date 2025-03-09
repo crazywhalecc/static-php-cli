@@ -10,11 +10,11 @@ trait pkgconfig
 {
     protected function build(): void
     {
-        $cflags = PHP_OS_FAMILY !== 'Linux' ? "{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion" : '';
+        $cflags = PHP_OS_FAMILY !== 'Linux' ? '-Wimplicit-function-declaration -Wno-int-conversion' : '';
         $ldflags = !($this instanceof LinuxLibraryBase) || $this->builder->libc === 'glibc' ? '' : '--static';
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags() ?: $cflags, 'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags, 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv(['CFLAGS' => "{$this->getLibExtraCFlags()} {$cflags}", 'LDFLAGS' => "{$this->getLibExtraLdFlags()} {$ldflags}", 'LIBS' => $this->getLibExtraLibs()])
             ->execWithEnv(
                 './configure ' .
                 '--disable-shared ' .

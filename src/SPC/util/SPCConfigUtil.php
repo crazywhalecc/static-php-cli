@@ -36,7 +36,7 @@ class SPCConfigUtil
         $libs = '-lphp -lc ' . $libs;
         $extra_env = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS');
         if (is_string($extra_env)) {
-            $libs .= ' ' . $extra_env;
+            $libs .= ' ' . trim($extra_env, '"');
         }
         // c++
         if ($this->builder->hasCpp()) {

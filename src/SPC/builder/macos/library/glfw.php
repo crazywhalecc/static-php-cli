@@ -21,7 +21,7 @@ class glfw extends MacOSLibraryBase
         shell()->cd(SOURCE_PATH . '/ext-glfw/vendor/glfw')
             ->exec("cmake . {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF")
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
         // patch pkgconf
         $this->patchPkgconfPrefix(['glfw3.pc']);
     }

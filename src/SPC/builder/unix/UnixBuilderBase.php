@@ -61,10 +61,10 @@ abstract class UnixBuilderBase extends BuilderBase
         $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
         return $extra .
             '-DCMAKE_BUILD_TYPE=Release ' .
-            '-DCMAKE_INSTALL_PREFIX=/ ' .
-            '-DCMAKE_INSTALL_BINDIR=/bin ' .
-            '-DCMAKE_INSTALL_LIBDIR=/lib ' .
-            '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+            '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+            '-DCMAKE_INSTALL_BINDIR=bin ' .
+            '-DCMAKE_INSTALL_LIBDIR=lib ' .
+            '-DCMAKE_INSTALL_INCLUDEDIR=include ' .
             "-DCMAKE_TOOLCHAIN_FILE={$this->cmake_toolchain_file}";
     }
 

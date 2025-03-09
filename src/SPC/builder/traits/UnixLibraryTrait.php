@@ -102,7 +102,11 @@ trait UnixLibraryTrait
 
     public function getLibExtraCFlags(): string
     {
-        return getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
+        $env = getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
+        if (!str_contains($env, $this->builder->arch_c_flags)) {
+            $env .= $this->builder->arch_c_flags;
+        }
+        return $env;
     }
 
     public function getLibExtraLdFlags(): string

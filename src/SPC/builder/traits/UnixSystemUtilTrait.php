@@ -33,11 +33,11 @@ trait UnixSystemUtilTrait
         $root = BUILD_ROOT_PATH;
         $ccLine = '';
         if ($cc) {
-            $ccLine = 'SET(CMAKE_C_COMPILER ' . self::findCommand($cc) . ')';
+            $ccLine = 'SET(CMAKE_C_COMPILER ' . $cc . ')';
         }
         $cxxLine = '';
         if ($cxx) {
-            $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . self::findCommand($cxx) . ')';
+            $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . $cxx . ')';
         }
         $toolchain = <<<CMAKE
 {$ccLine}
@@ -46,6 +46,8 @@ SET(CMAKE_C_FLAGS "{$cflags}")
 SET(CMAKE_CXX_FLAGS "{$cflags}")
 SET(CMAKE_FIND_ROOT_PATH "{$root}")
 SET(CMAKE_PREFIX_PATH "{$root}")
+SET(CMAKE_INSTALL_PREFIX "{$root}")
+SET(CMAKE_INSTALL_LIBDIR "lib")
 
 set(PKG_CONFIG_EXECUTABLE "{$root}/bin/pkg-config")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
