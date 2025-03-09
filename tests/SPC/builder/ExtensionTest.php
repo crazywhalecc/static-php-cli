@@ -71,7 +71,7 @@ class ExtensionTest extends TestCase
     public function testRunCliCheckWindows()
     {
         if (is_unix()) {
-            $this->markTestIncomplete('This test is for Windows only');
+            $this->markTestSkipped('This test is for Windows only');
         } else {
             $this->extension->runCliCheckWindows();
             $this->assertTrue(true);

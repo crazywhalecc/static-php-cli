@@ -1,4 +1,29 @@
 {
+    "lib-base": {
+        "type": "root",
+        "lib-depends-unix": [
+            "pkg-config"
+        ]
+    },
+    "php": {
+        "type": "root",
+        "source": "php-src",
+        "lib-depends": [
+            "micro",
+            "lib-base"
+        ]
+    },
+    "micro": {
+        "type": "target",
+        "source": "micro"
+    },
+    "pkg-config": {
+        "type": "package",
+        "source": "pkg-config",
+        "bin-unix": [
+            "pkg-config"
+        ]
+    },
     "brotli": {
         "source": "brotli",
         "static-libs-unix": [
@@ -34,7 +59,7 @@
             "libcurl.a"
         ],
         "static-libs-windows": [
-            "libcurl_a.lib"
+            "libcurl.lib"
         ],
         "headers": [
             "curl"
@@ -598,9 +623,6 @@
         "lib-depends": [
             "zlib"
         ]
-    },
-    "pkg-config": {
-        "source": "pkg-config"
     },
     "postgresql": {
         "source": "postgresql",

@@ -5,7 +5,14 @@
 ## 下载失败问题
 
 下载资源问题是 spc 最常见的问题之一。主要是由于 spc 下载资源使用的地址一般均为对应项目的官方网站或 GitHub 等，而这些网站可能偶尔会宕机、屏蔽 IP 地址。
-目前 2.0.0 版本还没有加入自动重试机制，所以在遇到下载失败后，可以多次尝试调用下载命令。如果确认地址确实无法正常访问，可以提交 Issue 或 PR 更新地址。
+在遇到下载失败后，可以多次尝试调用下载命令。
+
+当下载资源时，你可能最终会看到类似 `curl: (56) The requested URL returned error: 403` 的错误，这通常是由于 GitHub 限制导致的。
+你可以通过在命令中添加 `--debug` 来验证，会看到类似 `[DEBU] Running command (no output) : curl -sfSL   "https://api.github.com/repos/openssl/openssl/releases"` 的输出。
+
+要解决这个问题，可以在 GitHub 上 [创建](https://github.com/settings/token) 一个个人访问令牌，并将其设置为环境变量 `GITHUB_TOKEN=<XXX>`。
+
+如果确认地址确实无法正常访问，可以提交 Issue 或 PR 更新地址。
 
 ## doctor 无法修复
 

@@ -36,7 +36,7 @@ jobs:
         with:
           coverage: none
           tools: composer:v2
-          php-version: 8.2
+          php-version: 8.4
           ini-values: memory_limit=-1
 
       - name: "Get Composer Cache Directory"

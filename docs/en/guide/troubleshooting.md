@@ -8,8 +8,15 @@ here will describe how to check the errors by yourself and report Issue.
 Problems with downloading resources are one of the most common problems with spc. 
 The main reason is that the addresses used for SPC download resources are generally the official website of the corresponding project or GitHub, etc.,
 and these websites may occasionally go down and block IP addresses.
-Currently, version 2.0.0 has not added an automatic retry mechanism, so after encountering a download failure, 
-you can try to call the download command multiple times. If you confirm that the address is indeed inaccessible, 
+After encountering a download failure, 
+you can try to call the download command multiple times. 
+
+When downloading extensions, you may eventually see errors like `curl: (56) The requested URL returned error: 403` which are often caused by github rate limiting.
+You can verify this by adding `--debug` to the command and will see something like `[DEBU] Running command (no output) : curl -sfSL   "https://api.github.com/repos/openssl/openssl/releases"`.
+
+To fix this, [create](https://github.com/settings/tokens) a personal access token on GitHub and set it as an environment variable `GITHUB_TOKEN=<XXX>`.
+
+If you confirm that the address is indeed inaccessible, 
 you can submit an Issue or PR to update the url or download type.
 
 ## Doctor Can't Fix Something

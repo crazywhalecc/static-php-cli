@@ -13,6 +13,7 @@ class memcached extends Extension
     public function getUnixConfigureArg(): string
     {
         $rootdir = BUILD_ROOT_PATH;
-        return "--enable-memcached --with-zlib-dir={$rootdir} --with-libmemcached-dir={$rootdir} --disable-memcached-sasl --enable-memcached-json";
+        $zlib_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : "--with-zlib-dir={$rootdir}";
+        return "--enable-memcached {$zlib_dir} --with-libmemcached-dir={$rootdir} --disable-memcached-sasl --enable-memcached-json";
     }
 }

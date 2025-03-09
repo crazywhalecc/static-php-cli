@@ -12,14 +12,41 @@ class curl extends WindowsLibraryBase
 
     protected function build(): void
     {
-        FileSystem::createDir(BUILD_BIN_PATH);
-        cmd()->cd($this->source_dir . '\winbuild')
+        // reset cmake
+        FileSystem::resetDir($this->source_dir . '\cmakebuild');
+
+        // lib:zstd
+        $alt = $this->builder->getLib('zstd') ? '' : '-DCURL_ZSTD=OFF';
+        // lib:brotli
+        $alt .= $this->builder->getLib('brotli') ? '' : ' -DCURL_BROTLI=OFF';
+
+        // start build
+        cmd()->cd($this->source_dir)
             ->execWithWrapper(
-                $this->builder->makeSimpleWrapper('nmake'),
-                '/f Makefile.vc WITH_DEVEL=' . BUILD_ROOT_PATH . ' ' .
-                'WITH_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                'mode=static RTLIBCFG=static WITH_SSL=static WITH_NGHTTP2=static WITH_SSH2=static ENABLE_IPV6=yes WITH_ZLIB=static MACHINE=x64 DEBUG=no'
+                $this->builder->makeSimpleWrapper('cmake'),
+                '-B cmakebuild ' .
+                '-A x64 ' .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DBUILD_STATIC_LIBS=ON ' .
+                '-DCURL_STATICLIB=ON ' .
+                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+                '-DBUILD_CURL_EXE=OFF ' . // disable curl.exe
+                '-DBUILD_TESTING=OFF ' . // disable tests
+                '-DBUILD_EXAMPLES=OFF ' . // disable examples
+                '-DUSE_LIBIDN2=OFF ' . // disable libidn2
+                '-DCURL_USE_LIBPSL=OFF ' . // disable libpsl
+                '-DCURL_ENABLE_SSL=ON ' .
+                '-DUSE_NGHTTP2=ON ' . // enable nghttp2
+                '-DCURL_USE_LIBSSH2=ON ' . // enable libssh2
+                '-DENABLE_IPV6=ON ' . // enable ipv6
+                '-DNGHTTP2_CFLAGS="/DNGHTTP2_STATICLIB" ' .
+                $alt
+            )
+            ->execWithWrapper(
+                $this->builder->makeSimpleWrapper('cmake'),
+                "--build cmakebuild --config Release --target install -j{$this->builder->concurrency}"
             );
-        FileSystem::copyDir($this->source_dir . '\include\curl', BUILD_INCLUDE_PATH . '\curl');
     }
 }

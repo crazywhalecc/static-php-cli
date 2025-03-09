@@ -172,7 +172,7 @@ class Extension
         // Run compile check if build target is cli
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
-        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php --ri "' . $this->getDistName() . '"', false);
+        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
         }
@@ -185,7 +185,7 @@ class Extension
                 file_get_contents(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')
             );
 
-            [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -r "' . trim($test) . '"');
+            [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n -r "' . trim($test) . '"');
             if ($ret !== 0) {
                 if ($this->builder->getOption('debug')) {
                     var_dump($out);
@@ -203,7 +203,7 @@ class Extension
         // Run compile check if build target is cli
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
-        [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe --ri "' . $this->getDistName() . '"', false);
+        [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe -n --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
         }
@@ -216,7 +216,7 @@ class Extension
                 file_get_contents(FileSystem::convertPath(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php'))
             );
 
-            [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe -r "' . trim($test) . '"');
+            [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe -n -r "' . trim($test) . '"');
             if ($ret !== 0) {
                 throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
             }

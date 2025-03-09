@@ -236,6 +236,9 @@ class WindowsBuilder extends BuilderBase
 
         // add lib object for builder
         foreach ($sorted_libraries as $library) {
+            if (!in_array(Config::getLib($library, 'type', 'lib'), ['lib', 'package'])) {
+                continue;
+            }
             // if some libs are not supported (but in config "lib.json", throw exception)
             if (!isset($support_lib_list[$library])) {
                 throw new WrongUsageException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
@@ -277,7 +280,7 @@ class WindowsBuilder extends BuilderBase
         // sanity check for php-cli
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('running cli sanity check');
-            [$ret, $output] = cmd()->execWithResult(BUILD_ROOT_PATH . '\bin\php.exe -r "echo \"hello\";"');
+            [$ret, $output] = cmd()->execWithResult(BUILD_ROOT_PATH . '\bin\php.exe -n -r "echo \"hello\";"');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new RuntimeException('cli failed sanity check');
             }

@@ -33,7 +33,7 @@ class DependencyUtil
             $ext_suggests = array_map(fn ($x) => "ext@{$x}", $ext_suggests);
             // merge ext-depends with lib-depends
             $lib_depends = Config::getExt($ext_name, 'lib-depends', []);
-            $depends = array_merge($ext_depends, $lib_depends);
+            $depends = array_merge($ext_depends, $lib_depends, ['php']);
             // merge ext-suggests with lib-suggests
             $lib_suggests = Config::getExt($ext_name, 'lib-suggests', []);
             $suggests = array_merge($ext_suggests, $lib_suggests);
@@ -44,7 +44,7 @@ class DependencyUtil
         }
         foreach ($libs as $lib_name => $lib) {
             $dep_list[$lib_name] = [
-                'depends' => Config::getLib($lib_name, 'lib-depends', []),
+                'depends' => array_merge(Config::getLib($lib_name, 'lib-depends', []), ['lib-base']),
                 'suggests' => Config::getLib($lib_name, 'lib-suggests', []),
             ];
         }
@@ -210,6 +210,9 @@ class DependencyUtil
         }
         $visited[$lib_name] = true;
         // 遍历该依赖的所有依赖（此处的 getLib 如果检测到当前库不存在的话，会抛出异常）
+        if (!isset($dep_list[$lib_name])) {
+            throw new WrongUsageException("{$lib_name} not exist !");
+        }
         foreach ($dep_list[$lib_name]['depends'] as $dep) {
             self::visitPlatDeps($dep, $dep_list, $visited, $sorted);
         }

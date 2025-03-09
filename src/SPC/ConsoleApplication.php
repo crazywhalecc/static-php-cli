@@ -18,6 +18,7 @@ use SPC\command\dev\PhpVerCommand;
 use SPC\command\dev\SortConfigCommand;
 use SPC\command\DoctorCommand;
 use SPC\command\DownloadCommand;
+use SPC\command\DumpExtensionsCommand;
 use SPC\command\DumpLicenseCommand;
 use SPC\command\ExtractCommand;
 use SPC\command\InstallPkgCommand;
@@ -31,7 +32,7 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.4.4';
+    public const VERSION = '2.5.0';
 
     public function __construct()
     {
@@ -54,6 +55,7 @@ final class ConsoleApplication extends Application
                 new MicroCombineCommand(),
                 new SwitchPhpVersionCommand(),
                 new SPCConfigCommand(),
+                new DumpExtensionsCommand(),
 
                 // Dev commands
                 new AllExtCommand(),
