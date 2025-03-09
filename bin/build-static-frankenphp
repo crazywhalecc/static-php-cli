@@ -33,10 +33,14 @@ current)
     BASE_ARCH=$(uname -m)
     if [ "$BASE_ARCH" = "arm64" ]; then
         BASE_ARCH=aarch64
+        GO_ARCH=arm64
+    else
+        GO_ARCH=amd64
     fi
     ;;
 aarch64)
     BASE_ARCH=aarch64
+    GO_ARCH=arm64
     # shellcheck disable=SC2039
     echo -e "\e[033m* Using different arch needs to setup qemu-static for docker !\e[0m"
     $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static:register --reset > /dev/null
@@ -48,9 +52,9 @@ aarch64)
 esac
 
 # Detect docker env is setup
-if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-gnu-$SPC_USE_ARCH; then
+if ! $DOCKER_EXECUTABLE images | grep -q cwcc-frankenphp-gnu-$SPC_USE_ARCH; then
     echo "Docker container does not exist. Building docker image ..."
-    $DOCKER_EXECUTABLE build -t cwcc-spc-gnu-$SPC_USE_ARCH -f- . <<EOF
+    $DOCKER_EXECUTABLE build -t cwcc-frankenphp-gnu-$SPC_USE_ARCH -f- . <<EOF
 FROM centos:7
 RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo && \
     sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
@@ -71,7 +75,7 @@ RUN sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
     sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
 
 RUN yum update -y && \
-    yum install -y devtoolset-10-gcc-* && \
+    yum install -y devtoolset-10-gcc-*
 RUN echo "source scl_source enable devtoolset-10" >> /etc/bashrc
 RUN source /etc/bashrc
 
@@ -86,7 +90,7 @@ ADD ./bin/setup-runtime /app/bin/setup-runtime
 ADD ./bin/spc /app/bin/spc
 RUN /app/bin/setup-runtime
 RUN /app/bin/php /app/bin/composer install --no-dev --classmap-authoritative
-ENV PATH="/app/bin:/cmake/bin:$PATH"
+ENV PATH="/app/bin:/cmake/bin:/usr/local/go/bin:$PATH"
 ENV SPC_SKIP_DOCTOR_CHECK_ITEMS="if musl-wrapper is installed,if musl-cross-make is installed"
 
 ADD ./config/env.ini /app/config/env.ini
@@ -100,6 +104,11 @@ RUN curl -o make.tgz -fsSL https://ftp.gnu.org/gnu/make/make-4.4.tar.gz && \
     make install && \
     ln -sf /usr/local/bin/make /usr/bin/make
 
+RUN git clone https://github.com/static-php/gnu-frankenphp --depth=1 /frankenphp
+WORKDIR /frankenphp
+
+RUN curl -o go.tgz -fsSL https://go.dev/dl/go1.24.1.linux-$GO_ARCH.tar.gz && \
+    rm -rf /usr/local/go && tar -C /usr/local -xzf go.tgz
 EOF
 fi
 
@@ -120,6 +129,7 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/source:/app/source"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/app/dist"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/downloads:/app/downloads"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/frankenphp/dist"
 
 # Apply env in temp env file
 echo 'SPC_SKIP_DOCTOR_CHECK_ITEMS=if musl-wrapper is installed,if musl-cross-make is installed' > /tmp/spc-gnu-docker.env
@@ -137,4 +147,4 @@ echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"'
 # shellcheck disable=SC2086
 # shellcheck disable=SC2090
 
-$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
+$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-frankenphp-gnu-$SPC_USE_ARCH ./build-static.sh
