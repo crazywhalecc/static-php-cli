@@ -299,6 +299,11 @@ abstract class LibraryBase
         return false;
     }
 
+    public function patchBeforeMake(): bool
+    {
+        return false;
+    }
+
     /**
      * Build this library.
      *
