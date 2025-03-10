@@ -15,7 +15,7 @@ on:
       php-version:
         required: true
         description: PHP version to compile
-        default: '8.3'
+        default: '8.4'
         type: choice
         options:
           - '8.4'

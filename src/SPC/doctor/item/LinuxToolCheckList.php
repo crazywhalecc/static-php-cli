@@ -17,7 +17,7 @@ class LinuxToolCheckList
 
     public const TOOLS_ALPINE = [
         'make', 'bison', 'flex',
-        'git', 'autoconf', 'automake',
+        'git', 'autoconf', 'automake', 'gettext-dev',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
         'g++', 'patch', 'binutils-gold',
@@ -26,7 +26,7 @@ class LinuxToolCheckList
 
     public const TOOLS_DEBIAN = [
         'make', 'bison', 'flex',
-        'git', 'autoconf', 'automake',
+        'git', 'autoconf', 'automake', 'autopoint',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
         'xz', 'libtoolize',
