@@ -85,6 +85,11 @@ class SourcePatcher
                 logger()->info('Extension [' . $ext->getName() . '] patched before configure');
             }
         }
+        foreach ($builder->getLibs() as $lib) {
+            if ($lib->patchBeforeConfigure() === true) {
+                logger()->info('Library [' . $lib->getName() . '] patched before configure');
+            }
+        }
         // patch capstone
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
         if ($builder instanceof LinuxBuilder && $builder->libc === 'glibc') {

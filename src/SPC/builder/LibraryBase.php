@@ -294,6 +294,11 @@ abstract class LibraryBase
         // do something before pack, default do nothing. overwrite this method to do something (e.g. modify pkg-config file)
     }
 
+    public function patchBeforeConfigure(): bool
+    {
+        return false;
+    }
+
     /**
      * Build this library.
      *
