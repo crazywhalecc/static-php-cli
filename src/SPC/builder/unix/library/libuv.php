@@ -22,7 +22,7 @@ trait libuv
         shell()->cd($this->source_dir . '/build')
             ->exec("cmake {$this->builder->makeCmakeArgs()} -DLIBUV_BUILD_SHARED=OFF ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
         // patch pkgconfig
         $this->patchPkgconfPrefix(['libuv-static.pc']);
     }

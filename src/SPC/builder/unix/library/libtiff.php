@@ -23,7 +23,8 @@ trait libtiff
         $extra_libs .= ' --disable-lzma --disable-zstd --disable-webp --disable-libdeflate';
 
         $shell = shell()->cd($this->source_dir)
-            ->exec(
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->execWithEnv(
                 './configure ' .
                 '--enable-static --disable-shared ' .
                 "{$extra_libs} " .
@@ -33,12 +34,12 @@ trait libtiff
 
         // TODO: Remove this check when https://gitlab.com/libtiff/libtiff/-/merge_requests/635 will be merged and released
         if (file_exists($this->source_dir . '/html')) {
-            $shell->exec('make clean');
+            $shell->execWithEnv('make clean');
         }
 
         $shell
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libtiff-4.pc']);
     }
 }

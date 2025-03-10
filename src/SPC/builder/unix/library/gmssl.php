@@ -23,6 +23,6 @@ trait gmssl
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF ..")
             ->execWithEnv("cmake --build . -j {$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->execWithEnv('make install');
     }
 }

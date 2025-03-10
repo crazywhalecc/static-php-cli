@@ -26,7 +26,7 @@ trait tidy
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
         $this->patchPkgconfPrefix(['tidy.pc']);
     }
 }

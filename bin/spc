@@ -4,6 +4,11 @@
 use SPC\ConsoleApplication;
 use SPC\exception\ExceptionHandler;
 
+// Load custom php if exists
+if (PHP_OS_FAMILY !== 'Windows' && PHP_BINARY !== (__DIR__ . '/php') && file_exists(__DIR__ . '/php') && is_executable(__DIR__ . '/php')) {
+    pcntl_exec(__DIR__ . '/php', $argv);
+}
+
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     // Current: ./bin (git/project mode)
     require_once dirname(__DIR__) . '/vendor/autoload.php';

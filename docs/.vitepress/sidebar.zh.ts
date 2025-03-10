@@ -4,8 +4,8 @@ export default {
       text: '构建指南',
       items: [
         {text: '指南', link: '/zh/guide/'},
-        {text: 'Actions 构建', link: '/zh/guide/action-build'},
         {text: '本地构建', link: '/zh/guide/manual-build'},
+        {text: 'Actions 构建', link: '/zh/guide/action-build'},
         {text: '扩展列表', link: '/zh/guide/extensions'},
         {text: '扩展注意事项', link: '/zh/guide/extension-notes'},
         {text: '编译命令生成器', link: '/zh/guide/cli-generator'},
@@ -14,9 +14,11 @@ export default {
       ]
     },
     {
+      text: '扩展构建指南',
       items: [
         {text: '故障排除', link: '/zh/guide/troubleshooting'},
         {text: '在 Windows 上构建', link: '/zh/guide/build-on-windows'},
+        {text: '构建 GNU libc 兼容的二进制', link: '/zh/guide/build-with-glibc'},
       ],
     }
   ],

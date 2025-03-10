@@ -16,7 +16,8 @@ trait readline
     protected function build(): void
     {
         shell()->cd($this->source_dir)
-            ->exec(
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->execWithEnv(
                 './configure ' .
                 '--enable-static=yes ' .
                 '--enable-shared=no ' .
@@ -24,9 +25,9 @@ trait readline
                 '--with-curses ' .
                 '--enable-multibyte=yes'
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->execWithEnv('make clean')
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['readline.pc']);
     }
 }
