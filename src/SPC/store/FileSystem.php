@@ -454,6 +454,13 @@ class FileSystem
         unlink($path . '.bak');
     }
 
+    public static function removeFileIfExists(string $string): void
+    {
+        if (file_exists($string)) {
+            unlink($string);
+        }
+    }
+
     /**
      * @throws RuntimeException
      * @throws FileSystemException

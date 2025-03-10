@@ -162,12 +162,13 @@ class MacOSBuilder extends UnixBuilderBase
                 );
         }
 
+        $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enableEmbed ? '--enable-embed=static ' : '--disable-embed ') .
+                ($enableEmbed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
                 ($enableMicro ? '--enable-micro ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .

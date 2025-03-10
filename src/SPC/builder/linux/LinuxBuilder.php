@@ -169,12 +169,13 @@ class LinuxBuilder extends UnixBuilderBase
             // micro latest needs do strip and upx pack later (strip, upx, cut binary manually supported)
         }
 
+        $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enable_cli ? '--enable-cli ' : '--disable-cli ') .
                 ($enable_fpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enable_embed ? '--enable-embed=static ' : '--disable-embed ') .
+                ($enable_embed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
                 ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .
