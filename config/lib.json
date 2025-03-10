@@ -8,12 +8,14 @@
     "php": {
         "type": "root",
         "source": "php-src",
-        "lib-depends": [
+        "lib-depends-windows": [
             "micro",
             "lib-base"
         ],
         "lib-depends-unix": [
-            "libacl"
+            "libacl",
+            "micro",
+            "lib-base"
         ]
     },
     "micro": {
