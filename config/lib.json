@@ -8,7 +8,12 @@
     "php": {
         "type": "root",
         "source": "php-src",
-        "lib-depends": [
+        "lib-depends-windows": [
+            "micro",
+            "lib-base"
+        ],
+        "lib-depends-unix": [
+            "libacl",
             "micro",
             "lib-base"
         ]
@@ -22,6 +27,12 @@
         "source": "pkg-config",
         "bin-unix": [
             "pkg-config"
+        ]
+    },
+    "attr": {
+        "source": "attr",
+        "static-libs-unix": [
+            "libattr.a"
         ]
     },
     "brotli": {
@@ -232,6 +243,15 @@
             "zlib",
             "gmp",
             "libsodium"
+        ]
+    },
+    "libacl": {
+        "source": "libacl",
+        "static-libs-unix": [
+            "libacl.a"
+        ],
+        "lib-depends": [
+            "attr"
         ]
     },
     "libaom": {
