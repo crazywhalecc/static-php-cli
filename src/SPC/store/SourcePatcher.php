@@ -252,6 +252,11 @@ class SourcePatcher
                 logger()->info('Extension [' . $ext->getName() . '] patched before make');
             }
         }
+        foreach ($builder->getLibs() as $lib) {
+            if ($lib->patchBeforeMake() === true) {
+                logger()->info('Library [' . $lib->getName() . '] patched before make');
+            }
+        }
     }
 
     /**
@@ -415,7 +420,7 @@ class SourcePatcher
 
     public static function patchAttrForAlpine(): bool
     {
-        if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist()) {
+        if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist() || PHP_OS_FAMILY === 'Darwin') {
             SourcePatcher::patchFile('attr_alpine_gethostname.patch', SOURCE_PATH . '/attr');
             return true;
         }

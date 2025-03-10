@@ -5,14 +5,23 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait libacl
 {
-    public function patchBeforeConfigure(): bool
+    /**
+     * @throws FileSystemException
+     */
+    public function patchBeforeMake(): bool
     {
-        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/sapi/fpm/config.m4', '[AS_VAR_APPEND([FPM_EXTRA_LIBS],', ',');
+        $file_path = SOURCE_PATH . '/php-src/Makefile';
+        $file_content = FileSystem::readFile($file_path);
+        if (!preg_match('/FPM_EXTRA_LIBS =(.*)-lacl/', $file_content)) {
+            return false;
+        }
+        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/Makefile', '/FPM_EXTRA_LIBS =(.*)-lacl ?(.*)/', 'FPM_EXTRA_LIBS =$1$2');
         return true;
     }
 
