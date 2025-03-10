@@ -44,7 +44,7 @@
     ],
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",
-        "cs-fix": "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix",
+        "cs-fix": "php-cs-fixer fix",
         "test": "vendor/bin/phpunit tests/ --no-coverage",
         "build:phar": "vendor/bin/box compile"
     },

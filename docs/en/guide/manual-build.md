@@ -139,7 +139,7 @@ Use the command `bin/spc download` to download the source code required for comp
 including php-src and the source code of various dependent libraries.
 
 ```bash
-# Download all dependencies
+# Download all dependencies, defaults to php 8.4
 bin/spc download --all
 
 # Download all dependent packages, and specify the main version of PHP to download, optional: 8.1, 8.2, 8.3, 8.4
