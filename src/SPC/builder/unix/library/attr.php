@@ -16,7 +16,7 @@ trait attr
         shell()->cd($this->source_dir)
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->execWithEnv('./autogen.sh')
-            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests')
+            ->execWithEnv('./configure --prefix= --enable-static --disable-shared')
             ->execWithEnv("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 

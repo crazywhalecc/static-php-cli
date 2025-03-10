@@ -1,0 +1,11 @@
+diff --git a/tools/attr.c b/tools/attr.c
+index 312aef1..8e82810 100644
+--- a/tools/attr.c
++++ b/tools/attr.c
+@@ -28,6 +28,7 @@
+ #include <errno.h>
+ #include <string.h>
+ #include <locale.h>
++#include <libgen.h>
+
+ #include <attr/attributes.h>
