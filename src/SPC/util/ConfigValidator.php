@@ -53,13 +53,45 @@ class ConfigValidator
      */
     public static function validateLibs(mixed $data, array $source_data = []): void
     {
-        is_array($data) || throw new ValidationException('lib.json is broken');
+        // check if it is an array
+        if (!is_array($data)) {
+            throw new ValidationException('lib.json is broken');
+        }
+        // check each lib
         foreach ($data as $name => $lib) {
-            isset($lib['source']) || throw new ValidationException("lib {$name} does not assign any source");
-            is_string($lib['source']) || throw new ValidationException("lib {$name} source must be string");
-            empty($source_data) || isset($source_data[$lib['source']]) || throw new ValidationException("lib {$name} assigns an invalid source: {$lib['source']}");
-            !isset($lib['lib-depends']) || !is_assoc_array($lib['lib-depends']) || throw new ValidationException("lib {$name} dependencies must be a list");
-            !isset($lib['lib-suggests']) || !is_assoc_array($lib['lib-suggests']) || throw new ValidationException("lib {$name} suggested dependencies must be a list");
+            // check if lib is an assoc array
+            if (!is_assoc_array($lib)) {
+                throw new ValidationException("lib {$name} is not an object");
+            }
+            // check if lib has valid type
+            if (!in_array($lib['type'] ?? 'lib', ['lib', 'package', 'target', 'root'])) {
+                throw new ValidationException("lib {$name} type is invalid");
+            }
+            // check if lib and package has source
+            if (in_array($lib['type'] ?? 'lib', ['lib', 'package']) && !isset($lib['source'])) {
+                throw new ValidationException("lib {$name} does not assign any source");
+            }
+            // check if source is valid
+            if (isset($lib['source']) && !empty($source_data) && !isset($source_data[$lib['source']])) {
+                throw new ValidationException("lib {$name} assigns an invalid source: {$lib['source']}");
+            }
+            // check if [lib-depends|lib-suggests|static-libs][-windows|-unix|-macos|-linux] are valid list array
+            $suffixes = ['', '-windows', '-unix', '-macos', '-linux'];
+            foreach ($suffixes as $suffix) {
+                if (isset($lib['lib-depends' . $suffix]) && !is_list_array($lib['lib-depends' . $suffix])) {
+                    throw new ValidationException("lib {$name} lib-depends must be a list");
+                }
+                if (isset($lib['lib-suggests' . $suffix]) && !is_list_array($lib['lib-suggests' . $suffix])) {
+                    throw new ValidationException("lib {$name} lib-suggests must be a list");
+                }
+                if (isset($lib['static-libs' . $suffix]) && !is_list_array($lib['static-libs' . $suffix])) {
+                    throw new ValidationException("lib {$name} static-libs must be a list");
+                }
+            }
+            // check if frameworks is a list array
+            if (isset($lib['frameworks']) && !is_list_array($lib['frameworks'])) {
+                throw new ValidationException("lib {$name} frameworks must be a list");
+            }
         }
     }
 

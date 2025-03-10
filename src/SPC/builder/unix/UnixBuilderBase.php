@@ -110,13 +110,11 @@ abstract class UnixBuilderBase extends BuilderBase
             $sorted_libraries = DependencyUtil::getLibs($libraries);
         }
 
-        // pkg-config must be compiled first, whether it is specified or not
-        if (!in_array('pkg-config', $sorted_libraries)) {
-            array_unshift($sorted_libraries, 'pkg-config');
-        }
-
         // add lib object for builder
         foreach ($sorted_libraries as $library) {
+            if (!in_array(Config::getLib($library, 'type', 'lib'), ['lib', 'package'])) {
+                continue;
+            }
             // if some libs are not supported (but in config "lib.json", throw exception)
             if (!isset($support_lib_list[$library])) {
                 throw new WrongUsageException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');

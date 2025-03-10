@@ -50,28 +50,28 @@ cd static-php-cli
 composer update
 ```
 
-### 使用系统 PHP 环境
+### 使用预编译静态 PHP 二进制运行 static-php-cli
 
-下面是系统安装 PHP、Composer 的一些示例命令。具体安装方式建议自行搜索或询问 AI 搜索引擎获取答案，这里不多赘述。
+如果你不想使用 Docker、在系统内安装 PHP，可以直接下载本项目自身编译好的 php 二进制 cli 程序。使用流程如下：
 
-```bash
-# [macOS], 需要先安装 Homebrew. See https://brew.sh/
-# Remember change your composer executable path. For M1/M2 Chip mac, "/opt/homebrew/bin/", for Intel mac, "/usr/local/bin/". Or add it to your own path.
-brew install php wget
-wget https://getcomposer.org/download/latest-stable/composer.phar -O /path/to/your/bin/composer && chmod +x /path/to/your/bin/composer
-
-# [Debian], you need to make sure your php version >= 8.1 and composer >= 2.0
-sudo apt install php-cli composer php-tokenizer
-
-# [Alpine]
-apk add bash file wget xz php81 php81-common php81-pcntl php81-tokenizer php81-phar php81-posix php81-xml composer
-```
+使用命令部署环境，此脚本会从 [自托管的服务器](https://dl.static-php.dev/static-php-cli/) 下载一个当前操作系统的 php-cli 包，
+并从 [getcomposer](https://getcomposer.org/download/latest-stable/composer.phar) 或 [Aliyun（镜像）](https://mirrors.aliyun.com/composer/composer.phar) 下载 Composer。
 
 ::: tip
-目前 Ubuntu 部分版本的 apt 安装的 php 版本较旧，故不提供安装命令。如有需要，建议先添加 ppa 等软件源后，安装最新版的 PHP 以及 tokenizer、xml、phar 扩展。
-
-较老版本的 Debian 默认安装的可能为旧版本（<= 7.4）版本的 PHP，建议先升级 Debian。
+使用预编译静态 PHP 二进制目前仅支持 Linux 和 macOS。FreeBSD 环境因为缺少自动化构建环境，所以暂不支持。
 :::
+
+```bash
+bin/setup-runtime
+
+# 对于中国大陆地区等网络环境特殊的用户，可使用镜像站加快下载速度
+bin/setup-runtime --mirror china
+```
+
+此脚本总共会下载两个文件：`bin/php` 和 `bin/composer`，下载完成后，有两种使用方式：
+
+1. 将 `bin/` 目录添加到 PATH 路径中：`export PATH="/path/to/your/static-php-cli/bin:$PATH"`，添加路径后，相当于系统安装了 PHP，可直接使用 `composer`、`php -v` 等命令，也可以直接使用 `bin/spc`。
+2. 直接调用，比如执行 static-php-cli 命令：`bin/php bin/spc --help`，执行 Composer：`bin/php bin/composer update`。
 
 ### 使用 Docker 环境
 
@@ -92,28 +92,25 @@ bin/spc-alpine-docker
 export SPC_USE_SUDO=yes
 ```
 
-### 使用预编译静态 PHP 二进制
+### 使用系统 PHP 环境
 
-如果你不想使用 Docker、在系统内安装 PHP，可以直接下载本项目自身编译好的 php 二进制 cli 程序。使用流程如下：
-
-使用命令部署环境，此脚本会从 [自托管的服务器](https://dl.static-php.dev/static-php-cli/) 下载一个当前操作系统的 php-cli 包，
-并从 [getcomposer](https://getcomposer.org/download/latest-stable/composer.phar) 或 [Aliyun（镜像）](https://mirrors.aliyun.com/composer/composer.phar) 下载 Composer。
-
-::: tip 
-使用预编译静态 PHP 二进制目前仅支持 Linux 和 macOS。FreeBSD 环境因为缺少自动化构建环境，所以暂不支持。
-:::
+下面是系统安装 PHP、Composer 的一些示例命令。具体安装方式建议自行搜索或询问 AI 搜索引擎获取答案，这里不多赘述。
 
 ```bash
-bin/setup-runtime
+# [macOS], 需要先安装 Homebrew. See https://brew.sh/
+# Remember change your composer executable path. For M1/M2 Chip mac, "/opt/homebrew/bin/", for Intel mac, "/usr/local/bin/". Or add it to your own path.
+brew install php wget
+wget https://getcomposer.org/download/latest-stable/composer.phar -O /path/to/your/bin/composer && chmod +x /path/to/your/bin/composer
 
-# 对于中国大陆地区等网络环境特殊的用户，可使用镜像站加快下载速度
-bin/setup-runtime --mirror china
+# [Debian], you need to make sure your php version >= 8.4 and composer >= 2.0
+sudo apt install php-cli composer php-tokenizer
 ```
 
-此脚本总共会下载两个文件：`bin/php` 和 `bin/composer`，下载完成后，有两种使用方式：
+::: tip
+目前 Ubuntu 部分版本的 apt 安装的 php 版本较旧，故不提供安装命令。如有需要，建议先添加 ppa 等软件源后，安装最新版的 PHP 以及 tokenizer、xml、phar 扩展。
 
-1. 将 `bin/` 目录添加到 PATH 路径中：`export PATH="/path/to/your/static-php-cli/bin:$PATH"`，添加路径后，相当于系统安装了 PHP，可直接使用 `composer`、`php -v` 等命令，也可以直接使用 `bin/spc`。
-2. 直接调用，比如执行 static-php-cli 命令：`bin/php bin/spc --help`，执行 Composer：`bin/php bin/composer update`。
+较老版本的 Debian 默认安装的可能为旧版本（<= 8.3）版本的 PHP，建议先升级 Debian 或使用 Docker 或自带的静态二进制环境。
+:::
 
 ## 命令 download - 下载依赖包
 
@@ -352,6 +349,32 @@ memory_limit=1G
 # 解压 php-src 和 libxml2 的下载压缩包，解压的源码存放在 source 目录
 bin/spc extract php-src,libxml2
 ```
+
+## 命令 dump-extensions - 导出项目扩展依赖
+
+使用命令 `bin/spc dump-extensions` 可以导出当前项目的扩展依赖。
+
+```bash
+# 打印项目的扩展列表，传入项目包含composer.json的根目录
+bin/spc dump-extensions /path/to/your/project/
+
+# 打印项目的扩展列表，不包含开发依赖
+bin/spc dump-extensions /path-to/tour/project/ --no-dev
+
+# 输出为 spc 命令可接受的扩展列表格式（逗号分割）
+bin/spc dump-extensions /path-to/tour/project/ --format=text
+
+# 输出为 JSON 列表
+bin/spc dump-extensions /path-to/tour/project/ --format=json
+
+# 当项目没有任何扩展时，输出指定扩展组合，而不是返回失败
+bin/spc dump-extensions /path-to/your/project/ --no-ext-output=mbstring,posix,pcntl,phar
+
+# 输出时不排除 spc 不支持的扩展
+bin/spc dump-extensions /path/to/your/project/ --no-spc-filter
+```
+
+需要注意的是，项目的目录下必须包含 `vendor/installed.json` 和 `composer.lock` 文件，否则无法正常获取。
 
 ## 调试命令 dev - 调试命令集合
 

@@ -21,6 +21,14 @@ function is_assoc_array(mixed $array): bool
 }
 
 /**
+ * Judge if an array is a list
+ */
+function is_list_array(mixed $array): bool
+{
+    return is_array($array) && (empty($array) || array_keys($array) === range(0, count($array) - 1));
+}
+
+/**
  * Return a logger instance
  */
 function logger(): LoggerInterface

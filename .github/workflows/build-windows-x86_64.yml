@@ -6,7 +6,7 @@ on:
       version:
         required: true
         description: php version to compile
-        default: '8.2'
+        default: '8.4'
         type: choice
         options:
           - '8.4'

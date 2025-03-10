@@ -70,6 +70,9 @@ class LicenseDumper
         }
 
         foreach ($this->libs as $lib) {
+            if (Config::getLib($lib, 'type', 'lib') !== 'lib') {
+                continue;
+            }
             $source_name = Config::getLib($lib, 'source');
             foreach ($this->getSourceLicenses($source_name) as $index => $license) {
                 $result = file_put_contents("{$target_dir}/lib_{$lib}_{$index}.txt", $license);

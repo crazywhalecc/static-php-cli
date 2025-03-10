@@ -17,6 +17,11 @@ if (PHP_OS_FAMILY === 'Windows' && Phar::running()) {
     exec('CHCP 65001');
 }
 
+// Print deprecation notice on PHP < 8.4, use red and highlight background
+if (PHP_VERSION_ID < 80400) {
+    echo "\e[43mDeprecation Notice: PHP < 8.4 is deprecated, please upgrade your PHP version.\e[0m\n";
+}
+
 try {
     (new ConsoleApplication())->run();
 } catch (Exception $e) {

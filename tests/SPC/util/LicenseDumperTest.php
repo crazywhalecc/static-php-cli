@@ -34,6 +34,8 @@ final class LicenseDumperTest extends TestCase
     public function testDumpWithSingleLicense(): void
     {
         Config::$lib = [
+            'lib-base' => ['type' => 'root'],
+            'php' => ['type' => 'root'],
             'fake_lib' => [
                 'source' => 'fake_lib',
             ],
@@ -57,6 +59,8 @@ final class LicenseDumperTest extends TestCase
     public function testDumpWithMultipleLicenses(): void
     {
         Config::$lib = [
+            'lib-base' => ['type' => 'root'],
+            'php' => ['type' => 'root'],
             'fake_lib' => [
                 'source' => 'fake_lib',
             ],

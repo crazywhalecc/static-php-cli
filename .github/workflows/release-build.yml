@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  PHP_VERSION: 8.2
-  MICRO_VERSION: 8.2.18
+  PHP_VERSION: 8.4
+  MICRO_VERSION: 8.4.4
 
 jobs:
   build-release-artifacts:

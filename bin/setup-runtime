@@ -25,7 +25,7 @@ __DIR__=$(cd "$(dirname "$0")" && pwd)
 __PROJECT__=$(cd "${__DIR__}"/../ && pwd)
 
 # set download dir
-__PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.2.13-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
+__PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.4.4-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
 __COMPOSER_URL__="https://getcomposer.org/download/latest-stable/composer.phar"
 
 # use china mirror
@@ -45,7 +45,7 @@ done
 
 case "$mirror" in
 china)
-  __PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.2.13-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
+  __PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.4.4-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
   __COMPOSER_URL__="https://mirrors.tencent.com/composer/composer.phar"
   ;;
 
@@ -61,7 +61,7 @@ test -f "${__PROJECT__}"/downloads/runtime.tar.gz || { echo "Downloading $__PHP_
 test -f "${__DIR__}"/php || { tar -xf "${__PROJECT__}"/downloads/runtime.tar.gz -C "${__DIR__}"/ ; }
 chmod +x "${__DIR__}"/php
 # download composer
-test -f "${__DIR__}"/composer || curl -#fSL -o "${__DIR__}"/composer "$__COMPOSER_URL__"
+test -f "${__DIR__}"/composer || { echo "Downloading Composer from $__COMPOSER_URL__" && curl -#fSL -o "${__DIR__}"/composer "$__COMPOSER_URL__" ; }
 chmod +x "${__DIR__}"/composer
 # sanity check for php and composer
 "${__DIR__}"/php -v >/dev/null || { echo "Failed to run php" && exit 1; }

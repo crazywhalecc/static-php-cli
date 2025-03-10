@@ -32,6 +32,7 @@ packlib_files.txt
 !/bin/spc*
 !/bin/setup-runtime*
 !/bin/spc-alpine-docker
+!/bin/php-cs-fixer-wrapper
 
 # exclude windows build tools
 /php-sdk-binary-tools/

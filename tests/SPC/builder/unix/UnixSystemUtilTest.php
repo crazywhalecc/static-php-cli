@@ -26,7 +26,7 @@ class UnixSystemUtilTest extends TestCase
             default => null,
         };
         if ($util_class === null) {
-            self::markTestIncomplete('This test is only for Unix');
+            self::markTestSkipped('This test is only for Unix');
         }
         $this->util = new $util_class();
     }

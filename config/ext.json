@@ -355,10 +355,8 @@
         "type": "external",
         "source": "ext-memcache",
         "arg-type": "custom",
-        "lib-depends": [
-            "zlib"
-        ],
         "ext-depends": [
+            "zlib",
             "session"
         ]
     },
