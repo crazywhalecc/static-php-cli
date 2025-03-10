@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -31,7 +30,7 @@ trait libacl
     protected function build(): void
     {
         $cflags = PHP_OS_FAMILY !== 'Linux' ? '-Wimplicit-function-declaration -Wno-int-conversion' : '';
-        $ldflags = !($this instanceof LinuxLibraryBase) ? '' : '--static';
+        $ldflags = '--static';
         shell()->cd($this->source_dir)
             ->setEnv([
                 'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags() . ' ' . $cflags),
