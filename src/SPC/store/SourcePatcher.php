@@ -47,6 +47,11 @@ class SourcePatcher
                 logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
             }
         }
+        foreach ($builder->getLibs() as $lib) {
+            if ($lib->patchBeforeBuildconf() === true) {
+                logger()->info('Library [' . $lib->getName() . '] patched before buildconf');
+            }
+        }
         // patch windows php 8.1 bug
         if (PHP_OS_FAMILY === 'Windows' && $builder->getPHPVersionID() >= 80100 && $builder->getPHPVersionID() < 80200) {
             logger()->info('Patching PHP 8.1 windows Fiber bug');

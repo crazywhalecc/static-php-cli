@@ -139,7 +139,8 @@ class Extension
 
     /**
      * Patch code before ./buildconf
-     * If you need to patch some code, overwrite this and return true
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
      */
     public function patchBeforeBuildconf(): bool
     {
@@ -148,7 +149,8 @@ class Extension
 
     /**
      * Patch code before ./configure
-     * If you need to patch some code, overwrite this and return true
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
      */
     public function patchBeforeConfigure(): bool
     {
@@ -157,7 +159,8 @@ class Extension
 
     /**
      * Patch code before make
-     * If you need to patch some code, overwrite this and return true
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
      */
     public function patchBeforeMake(): bool
     {

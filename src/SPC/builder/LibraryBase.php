@@ -294,11 +294,31 @@ abstract class LibraryBase
         // do something before pack, default do nothing. overwrite this method to do something (e.g. modify pkg-config file)
     }
 
+    /**
+     * Patch code before ./buildconf
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if notand return true
+     */
+    public function patchBeforeBuildconf(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before ./configure
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
     public function patchBeforeConfigure(): bool
     {
         return false;
     }
 
+    /**
+     * Patch code before make
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
     public function patchBeforeMake(): bool
     {
         return false;
