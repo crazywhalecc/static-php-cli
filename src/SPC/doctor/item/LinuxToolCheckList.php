@@ -37,7 +37,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch',
-        'xz',
+        'xz', 'libtool',
     ];
 
     public const TOOLS_ARCH = [
@@ -57,7 +57,8 @@ class LinuxToolCheckList
 
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
-            'redhat', 'centos' => self::TOOLS_RHEL,
+            'redhat' => self::TOOLS_RHEL,
+            'centos' => array_merge(self::TOOLS_RHEL, ['perl-IPC-Cmd']),
             'arch' => self::TOOLS_ARCH,
             default => self::TOOLS_DEBIAN,
         };

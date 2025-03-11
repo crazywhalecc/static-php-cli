@@ -83,4 +83,9 @@ const AUTOCONF_CPPFLAGS = 4;
 const AUTOCONF_LDFLAGS = 8;
 const AUTOCONF_ALL = 15;
 
+const LIBC_MUSL_WRAPPER = 'musl-wrapper';
+const LIBC_MUSL = 'musl';
+const LIBC_GLIBC = 'glibc';
+
 ConsoleLogger::$date_format = 'H:i:s';
+ConsoleLogger::$format = '[%date%] [I] %body%';

@@ -19,6 +19,8 @@ abstract class BuildCommand extends BaseCommand
                 $this->addOption('arch', null, InputOption::VALUE_REQUIRED, 'architecture, "x64" or "arm64"', 'x64');
                 break;
             case 'Linux':
+                $this->addOption('libc', null, InputOption::VALUE_REQUIRED, 'glibc, musl or musl-wrapper', 'musl-wrapper');
+                // no break
             case 'Darwin':
                 $this->addOption('cc', null, InputOption::VALUE_REQUIRED, 'C compiler');
                 $this->addOption('cxx', null, InputOption::VALUE_REQUIRED, 'C++ compiler');

@@ -12,7 +12,8 @@ trait ncurses
     {
         $filelist = FileSystem::scanDirFiles(BUILD_BIN_PATH, relative: true);
         shell()->cd($this->source_dir)
-            ->exec(
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->execWithEnv(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
@@ -32,9 +33,9 @@ trait ncurses
                 '--libdir=' . BUILD_ROOT_PATH . '/lib ' .
                 '--prefix=' . BUILD_ROOT_PATH
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install');
+            ->execWithEnv('make clean')
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv('make install');
 
         $final = FileSystem::scanDirFiles(BUILD_BIN_PATH, relative: true);
         // Remove the new files

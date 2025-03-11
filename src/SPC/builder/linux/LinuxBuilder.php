@@ -15,6 +15,8 @@ use SPC\util\GlobalEnvManager;
 
 class LinuxBuilder extends UnixBuilderBase
 {
+    public string $libc;
+
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -25,6 +27,9 @@ class LinuxBuilder extends UnixBuilderBase
     public function __construct(array $options = [])
     {
         $this->options = $options;
+        SystemUtil::initLibcVar($this->options['libc'] ?? null);
+
+        $this->libc = getenv('SPC_LIBC') ?: LIBC_MUSL_WRAPPER;
 
         // check musl-cross make installed if we use musl-cross-make
         $arch = arch2gnu(php_uname('m'));
@@ -115,6 +120,7 @@ class LinuxBuilder extends UnixBuilderBase
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
+        f_putenv('CFLAGS=' . $cflags);
 
         $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
@@ -163,12 +169,13 @@ class LinuxBuilder extends UnixBuilderBase
             // micro latest needs do strip and upx pack later (strip, upx, cut binary manually supported)
         }
 
+        $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enable_cli ? '--enable-cli ' : '--disable-cli ') .
                 ($enable_fpm ? '--enable-fpm ' : '--disable-fpm ') .
-                ($enable_embed ? '--enable-embed=static ' : '--disable-embed ') .
+                ($enable_embed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
                 ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .

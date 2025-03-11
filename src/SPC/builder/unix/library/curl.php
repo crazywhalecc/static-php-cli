@@ -51,13 +51,14 @@ trait curl
         $extra .= $this->builder->getLib('libcares') ? '-DENABLE_ARES=ON ' : '';
 
         FileSystem::resetDir($this->source_dir . '/build');
+
         // compile！
         shell()->cd($this->source_dir . '/build')
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ../CMakeLists.txt')
             ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF {$extra} ..")
             ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->execWithEnv('make install');
         // patch pkgconf
         $this->patchPkgconfPrefix(['libcurl.pc']);
         shell()->cd(BUILD_LIB_PATH . '/cmake/CURL/')

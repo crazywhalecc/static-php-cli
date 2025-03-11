@@ -86,6 +86,9 @@ class SourcePatcher
         }
         // patch capstone
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
+        if ($builder instanceof LinuxBuilder && $builder->libc === 'glibc') {
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Zend/zend_operators.h', '# define ZEND_USE_ASM_ARITHMETIC 1', '# define ZEND_USE_ASM_ARITHMETIC 0');
+        }
     }
 
     /**

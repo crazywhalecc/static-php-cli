@@ -192,7 +192,7 @@ class BuildCliCommand extends BuildCommand
             $fixed = '';
             if (!empty(getenv('SPC_FIX_DEPLOY_ROOT'))) {
                 str_replace($cwd, '', $build_root_path);
-                $build_root_path = getenv('SPC_FIX_DEPLOY_ROOT') . $build_root_path;
+                $build_root_path = getenv('SPC_FIX_DEPLOY_ROOT') . '/' . basename($build_root_path);
                 $fixed = ' (host system)';
             }
             if (($rule & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {

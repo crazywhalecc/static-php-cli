@@ -10,7 +10,8 @@ trait ldap
 {
     public function patchBeforeBuild(): bool
     {
-        FileSystem::replaceFileStr($this->source_dir . '/configure', '"-lssl -lcrypto', '"-lssl -lcrypto -lz');
+        $extra = ($this->builder->libc ?? '') === 'glibc' ? '-ldl -lpthread -lm -lresolv -lutil' : '';
+        FileSystem::replaceFileStr($this->source_dir . '/configure', '"-lssl -lcrypto', '"-lssl -lcrypto -lz ' . $extra);
         return true;
     }
 

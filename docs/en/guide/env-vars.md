@@ -39,6 +39,21 @@ Or, if you need to modify an environment variable for a long time, you can modif
 
 For example, if you need to modify the `./configure` command for compiling PHP, you can find the `SPC_CMD_PREFIX_PHP_CONFIGURE` environment variable in the `config/env.ini` file, and then modify its value.
 
+If your build conditions are more complex and require multiple `env.ini` files to switch, 
+we recommend that you use the `config/env.custom.ini` file.
+In this way, you can specify your environment variables by writing additional override items 
+without modifying the default `config/env.ini` file.
+
+```ini
+; This is an example of `config/env.custom.ini` file, 
+; we modify the `SPC_CONCURRENCY` and linux default CFLAGS passing to libs and PHP
+[global]
+SPC_CONCURRENCY=4
+
+[linux]
+SPC_DEFAULT_C_FLAGS="-O3"
+```
+
 ## Library environment variables (Unix only)
 
 Starting from 2.2.0, static-php-cli supports custom environment variables for all compilation dependent library commands of macOS, Linux, FreeBSD and other Unix systems.

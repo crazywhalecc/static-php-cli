@@ -1,22 +1,24 @@
 export default {
   '/en/guide/': [
     {
-      text: 'Guide',
+      text: 'Basic Build Guides',
       items: [
         {text: 'Guide', link: '/en/guide/'},
-        {text: 'Actions Build', link: '/en/guide/action-build'},
-        {text: 'Manual Build', link: '/en/guide/manual-build'},
-        {text: 'Extension List', link: '/en/guide/extensions'},
+        {text: 'Build (Local)', link: '/en/guide/manual-build'},
+        {text: 'Build (CI)', link: '/en/guide/action-build'},
+        {text: 'Supported Extensions', link: '/en/guide/extensions'},
         {text: 'Extension Notes', link: '/en/guide/extension-notes'},
-        {text: 'Command Generator', link: '/en/guide/cli-generator'},
+        {text: 'Build Command Generator', link: '/en/guide/cli-generator'},
         {text: 'Environment Variables', link: '/en/guide/env-vars', collapsed: true,},
         {text: 'Dependency Table', link: '/en/guide/deps-map'},
       ]
     },
     {
+      text: 'Extended Build Guides',
       items: [
         {text: 'Troubleshooting', link: '/en/guide/troubleshooting'},
         {text: 'Build on Windows', link: '/en/guide/build-on-windows'},
+        {text: 'Build with GNU libc', link: '/en/guide/build-with-glibc'},
       ],
     }
   ],

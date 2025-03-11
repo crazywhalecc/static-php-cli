@@ -61,10 +61,10 @@ abstract class UnixBuilderBase extends BuilderBase
         $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
         return $extra .
             '-DCMAKE_BUILD_TYPE=Release ' .
-            '-DCMAKE_INSTALL_PREFIX=/ ' .
-            '-DCMAKE_INSTALL_BINDIR=/bin ' .
-            '-DCMAKE_INSTALL_LIBDIR=/lib ' .
-            '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+            '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+            '-DCMAKE_INSTALL_BINDIR=bin ' .
+            '-DCMAKE_INSTALL_LIBDIR=lib ' .
+            '-DCMAKE_INSTALL_INCLUDEDIR=include ' .
             "-DCMAKE_TOOLCHAIN_FILE={$this->cmake_toolchain_file}";
     }
 
@@ -185,14 +185,22 @@ abstract class UnixBuilderBase extends BuilderBase
             $util = new SPCConfigUtil($this);
             $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
-            if (PHP_OS_FAMILY === 'Linux') {
+            if (PHP_OS_FAMILY === 'Linux' && $this->getOption('libc') !== 'glibc') {
                 $lens .= ' -static';
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
             if ($ret !== 0) {
                 throw new RuntimeException('embed failed sanity check: build failed. Error message: ' . implode("\n", $out));
             }
-            [$ret, $output] = shell()->cd($sample_file_path)->execWithResult('./embed');
+            // if someone changed to --enable-embed=shared, we need to add LD_LIBRARY_PATH
+            if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
+                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_ROOT_PATH . '/lib:$LD_LIBRARY_PATH ';
+                FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.a');
+            } else {
+                $ext_path = '';
+                FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.so');
+            }
+            [$ret, $output] = shell()->cd($sample_file_path)->execWithResult($ext_path . './embed');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new RuntimeException('embed failed sanity check: run failed. Error message: ' . implode("\n", $output));
             }

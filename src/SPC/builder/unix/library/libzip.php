@@ -30,7 +30,9 @@ trait libzip
         shell()->cd($this->source_dir . '/build')
             ->exec(
                 'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
+                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DENABLE_GNUTLS=OFF ' .
                 '-DENABLE_MBEDTLS=OFF ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
@@ -42,7 +44,7 @@ trait libzip
                 '..'
             )
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
         $this->patchPkgconfPrefix(['libzip.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

@@ -14,9 +14,9 @@ class icu extends LinuxLibraryBase
 
     protected function build(): void
     {
-        $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1"';
+        $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1 -fPIC -fPIE -fno-ident"';
         $cxxflags = 'CXXFLAGS="-std=c++17"';
-        $ldflags = 'LDFLAGS="-static"';
+        $ldflags = $this->builder->libc !== 'glibc' ? 'LDFLAGS="-static"' : '';
         shell()->cd($this->source_dir . '/source')
             ->exec(
                 "{$cppflags} {$cxxflags} {$ldflags} " .
