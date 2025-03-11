@@ -47,7 +47,7 @@ class libpng extends LinuxLibraryBase
             ->setEnv([
                 'CFLAGS' => trim($this->getLibExtraCFlags() . ' ' . $this->builder->arch_c_flags),
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs()
+                'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv(
                 'LDFLAGS="-L' . BUILD_LIB_PATH . '" ' .
