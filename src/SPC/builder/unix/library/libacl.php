@@ -29,12 +29,10 @@ trait libacl
      */
     protected function build(): void
     {
-        $cflags = PHP_OS_FAMILY !== 'Linux' ? "{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion" : '';
-        $ldflags = '--static';
         shell()->cd($this->source_dir)
             ->setEnv([
-                'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags() . ' ' . $cflags),
-                'LDFLAGS' => trim('-L' . BUILD_LIB_PATH . ' ' . $this->getLibExtraLdFlags() . ' ' . $ldflags),
+                'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags()),
+                'LDFLAGS' => trim('-L' . BUILD_LIB_PATH . ' ' . $this->getLibExtraLdFlags()),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv('./autogen.sh')

@@ -113,7 +113,7 @@ abstract class LibraryBase
         /*
         Rules:
             If it is a Windows system, try the following dependencies in order: lib-depends-windows, lib-depends-win, lib-depends.
-            If it is a macOS system, try the following dependencies in order: lib-depends-darwin, lib-depends-unix, lib-depends.
+            If it is a macOS system, try the following dependencies in order: lib-depends-macos, lib-depends-unix, lib-depends.
             If it is a Linux system, try the following dependencies in order: lib-depends-linux, lib-depends-unix, lib-depends.
         */
         foreach (Config::getLib(static::NAME, 'lib-depends', []) as $dep_name) {
