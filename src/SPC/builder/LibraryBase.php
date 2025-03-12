@@ -113,7 +113,7 @@ abstract class LibraryBase
         /*
         Rules:
             If it is a Windows system, try the following dependencies in order: lib-depends-windows, lib-depends-win, lib-depends.
-            If it is a macOS system, try the following dependencies in order: lib-depends-darwin, lib-depends-unix, lib-depends.
+            If it is a macOS system, try the following dependencies in order: lib-depends-macos, lib-depends-unix, lib-depends.
             If it is a Linux system, try the following dependencies in order: lib-depends-linux, lib-depends-unix, lib-depends.
         */
         foreach (Config::getLib(static::NAME, 'lib-depends', []) as $dep_name) {
@@ -261,14 +261,6 @@ abstract class LibraryBase
         return LIB_STATUS_ALREADY;
     }
 
-    /**
-     * Patch before build, overwrite this and return true to patch libs.
-     */
-    public function patchBeforeBuild(): bool
-    {
-        return false;
-    }
-
     public function validate(): void
     {
         // do nothing, just throw wrong usage exception if not valid
@@ -292,6 +284,46 @@ abstract class LibraryBase
     public function beforePack(): void
     {
         // do something before pack, default do nothing. overwrite this method to do something (e.g. modify pkg-config file)
+    }
+
+    /**
+     * Patch code before build
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeBuild(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before ./buildconf
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeBuildconf(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before ./configure
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeConfigure(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before make
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeMake(): bool
+    {
+        return false;
     }
 
     /**

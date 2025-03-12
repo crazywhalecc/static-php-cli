@@ -29,6 +29,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchImapLicense']);
         FileSystem::addSourceExtractHook('ext-imagick', [SourcePatcher::class, 'patchImagickWith84']);
         FileSystem::addSourceExtractHook('libaom', [SourcePatcher::class, 'patchLibaomForAlpine']);
+        FileSystem::addSourceExtractHook('attr', [SourcePatcher::class, 'patchAttrForAlpine']);
     }
 
     /**
@@ -44,6 +45,11 @@ class SourcePatcher
         foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeBuildconf() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
+            }
+        }
+        foreach ($builder->getLibs() as $lib) {
+            if ($lib->patchBeforeBuildconf() === true) {
+                logger()->info('Library [' . $lib->getName() . '] patched before buildconf');
             }
         }
         // patch windows php 8.1 bug
@@ -82,6 +88,11 @@ class SourcePatcher
         foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeConfigure() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before configure');
+            }
+        }
+        foreach ($builder->getLibs() as $lib) {
+            if ($lib->patchBeforeConfigure() === true) {
+                logger()->info('Library [' . $lib->getName() . '] patched before configure');
             }
         }
         // patch capstone
@@ -246,6 +257,11 @@ class SourcePatcher
                 logger()->info('Extension [' . $ext->getName() . '] patched before make');
             }
         }
+        foreach ($builder->getLibs() as $lib) {
+            if ($lib->patchBeforeMake() === true) {
+                logger()->info('Library [' . $lib->getName() . '] patched before make');
+            }
+        }
     }
 
     /**
@@ -402,6 +418,15 @@ class SourcePatcher
     {
         if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist()) {
             SourcePatcher::patchFile('libaom_posix_implict.patch', SOURCE_PATH . '/libaom');
+            return true;
+        }
+        return false;
+    }
+
+    public static function patchAttrForAlpine(): bool
+    {
+        if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist() || PHP_OS_FAMILY === 'Darwin') {
+            SourcePatcher::patchFile('attr_alpine_gethostname.patch', SOURCE_PATH . '/attr');
             return true;
         }
         return false;

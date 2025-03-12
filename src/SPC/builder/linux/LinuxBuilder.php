@@ -37,9 +37,13 @@ class LinuxBuilder extends UnixBuilderBase
         GlobalEnvManager::init($this);
 
         // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
-        if (!filter_var(getenv('SPC_NO_MUSL_PATH'), FILTER_VALIDATE_BOOLEAN)) {
+        if (!filter_var(getenv('SPC_NO_MUSL_PATH'), FILTER_VALIDATE_BOOLEAN) && $this->libc !== LIBC_GLIBC) {
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
+            GlobalEnvManager::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
+            $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
+            $configure = "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\" " . $configure;
+            GlobalEnvManager::putenv("SPC_CMD_PREFIX_PHP_CONFIGURE={$configure}");
         }
 
         if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc") && (getenv('SPC_NO_MUSL_PATH') !== 'yes')) {
@@ -174,7 +178,7 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enable_cli ? '--enable-cli ' : '--disable-cli ') .
-                ($enable_fpm ? '--enable-fpm ' : '--disable-fpm ') .
+                ($enable_fpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
                 ($enable_embed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
                 ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
