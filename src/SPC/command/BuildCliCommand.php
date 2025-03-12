@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
-use SPC\builder\linux\LinuxBuilder;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
@@ -109,8 +108,8 @@ class BuildCliCommand extends BuildCommand
             $include_suggest_ext = $this->getOption('with-suggested-exts');
             $include_suggest_lib = $this->getOption('with-suggested-libs');
             [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
-            if ($builder instanceof LinuxBuilder && !in_array('libacl', $libraries) && ($rule & BUILD_TARGET_FPM)) {
-                array_unshift($libraries, 'attr', 'libacl');
+            if (PHP_OS_FAMILY !== 'Linux' || !($rule & BUILD_TARGET_FPM)) {
+                $libraries = array_filter($libraries, fn ($lib) => !in_array($lib, ['attr', 'libacl']));
             }
             $display_libs = array_filter($libraries, fn ($lib) => in_array(Config::getLib($lib, 'type', 'lib'), ['lib', 'package']));
 
