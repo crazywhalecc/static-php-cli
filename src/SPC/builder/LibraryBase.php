@@ -296,7 +296,6 @@ abstract class LibraryBase
         return false;
     }
 
-    
     /**
      * Patch code before ./buildconf
      * If you need to patch some code, overwrite this
