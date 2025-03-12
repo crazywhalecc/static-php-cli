@@ -261,14 +261,6 @@ abstract class LibraryBase
         return LIB_STATUS_ALREADY;
     }
 
-    /**
-     * Patch before build, overwrite this and return true to patch libs.
-     */
-    public function patchBeforeBuild(): bool
-    {
-        return false;
-    }
-
     public function validate(): void
     {
         // do nothing, just throw wrong usage exception if not valid
@@ -295,9 +287,20 @@ abstract class LibraryBase
     }
 
     /**
+     * Patch code before build
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeBuild(): bool
+    {
+        return false;
+    }
+
+    
+    /**
      * Patch code before ./buildconf
      * If you need to patch some code, overwrite this
-     * return true if you patched something, false if notand return true
+     * return true if you patched something, false if not
      */
     public function patchBeforeBuildconf(): bool
     {
