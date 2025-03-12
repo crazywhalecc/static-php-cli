@@ -81,6 +81,9 @@ class DownloadCommand extends BaseCommand
             $final_sources = array_merge($final_sources, array_diff($sources, $final_sources));
         }
         if (!empty($final_sources)) {
+            if (PHP_OS_FAMILY === 'Linux') {
+                array_unshift($final_sources, 'attr', 'libacl');
+            }
             $input->setArgument('sources', implode(',', $final_sources));
         }
         parent::initialize($input, $output);
