@@ -40,6 +40,10 @@ class LinuxBuilder extends UnixBuilderBase
         if (!filter_var(getenv('SPC_NO_MUSL_PATH'), FILTER_VALIDATE_BOOLEAN) && $this->libc !== LIBC_GLIBC) {
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
+            GlobalEnvManager::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
+            $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
+            $configure = "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\" " . $configure;
+            GlobalEnvManager::putenv("SPC_CMD_PREFIX_PHP_CONFIGURE={$configure}");
         }
 
         if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc") && (getenv('SPC_NO_MUSL_PATH') !== 'yes')) {

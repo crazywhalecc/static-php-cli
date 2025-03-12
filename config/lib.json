@@ -11,11 +11,6 @@
         "lib-depends": [
             "lib-base",
             "micro"
-        ],
-        "lib-depends-linux": [
-            "lib-base",
-            "libacl",
-            "micro"
         ]
     },
     "micro": {
