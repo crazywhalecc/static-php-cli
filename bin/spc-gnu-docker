@@ -57,7 +57,8 @@ RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo && \
     sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
 RUN yum clean all && \
     yum makecache && \
-    yum update -y
+    yum update -y && \
+    localedef -c -i en_US -f UTF-8 en_US.UTF-8
 
 RUN yum install -y centos-release-scl
 
