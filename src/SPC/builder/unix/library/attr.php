@@ -13,13 +13,14 @@ trait attr
      */
     protected function build(): void
     {
+        $options = $this->getBuilder()->getLib('libiconv') === null ? '--disable-gettext' : '';
         shell()->cd($this->source_dir)
             ->setEnv([
                 'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags()),
                 'LDFLAGS' => trim('-L' . BUILD_LIB_PATH . ' ' . $this->getLibExtraLdFlags()),
                 'LIBS' => $this->getLibExtraLibs(),
             ])->execWithEnv('./autogen.sh')
-            ->execWithEnv('./configure --prefix= --enable-static --disable-shared')
+            ->execWithEnv("./configure --prefix= --enable-static --disable-shared {$options}")
             ->execWithEnv("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 

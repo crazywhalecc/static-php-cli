@@ -29,6 +29,7 @@ trait libacl
      */
     protected function build(): void
     {
+        $options = $this->getBuilder()->getLib('libiconv') === null ? '--disable-gettext' : '';
         shell()->cd($this->source_dir)
             ->setEnv([
                 'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags()),
@@ -36,7 +37,7 @@ trait libacl
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv('./autogen.sh')
-            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests --disable-nls')
+            ->execWithEnv("./configure --prefix= --enable-static --disable-shared --disable-tests {$options}")
             ->execWithEnv("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
