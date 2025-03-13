@@ -30,6 +30,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('ext-imagick', [SourcePatcher::class, 'patchImagickWith84']);
         FileSystem::addSourceExtractHook('libaom', [SourcePatcher::class, 'patchLibaomForAlpine']);
         FileSystem::addSourceExtractHook('attr', [SourcePatcher::class, 'patchAttrForAlpine']);
+        FileSystem::addSourceExtractHook('gmssl', [SourcePatcher::class, 'patchGMSSL']);
     }
 
     /**
@@ -540,5 +541,11 @@ class SourcePatcher
         if (file_exists(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak')) {
             rename(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak', SOURCE_PATH . '\php-src\sapi\micro\php_micro.c');
         }
+    }
+
+    public static function patchGMSSL(): void
+    {
+        FileSystem::replaceFileStr(SOURCE_PATH . '/gmssl/src/hex.c', 'unsigned char *OPENSSL_hexstr2buf(const char *str, size_t *len)', 'unsigned char *GMSSL_hexstr2buf(const char *str, size_t *len)');
+        FileSystem::replaceFileStr(SOURCE_PATH . '/gmssl/src/hex.c', 'OPENSSL_hexchar2int', 'GMSSL_hexchar2int');
     }
 }
