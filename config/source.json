@@ -261,6 +261,7 @@
     "gmssl": {
         "type": "ghtar",
         "repo": "guanzhi/GmSSL",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
