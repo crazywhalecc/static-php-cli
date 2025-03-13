@@ -123,8 +123,8 @@ For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use
 
 ## ffi
 
-1. Linux not supported yet: Due to limitations of the Linux system, although the ffi extension can be compiled successfully, it cannot be used to load other `so` extensions. 
-   The prerequisite for Linux to support loading `so` extensions is dynamic compilation, but dynamic compilation conflicts with the purpose of this project.
+1. Due to the limitation of Linux system, you cannot use it to load other `so` extensions in the purely static compiled state (spc defaults to pure static compilation). 
+   Linux supports loading so extensions only if they are non-statically compiled. If you need to use the ffi extension, see [Compile PHP with GNU libc](./build-with-glibc).
 2. macOS supports the ffi extension, but errors will occur when some kernels do not contain debugging symbols.
 3. Windows x64 supports the ffi extension.
 
