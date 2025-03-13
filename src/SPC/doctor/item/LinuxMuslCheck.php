@@ -15,6 +15,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\PackageManager;
+use SPC\store\SourcePatcher;
 
 class LinuxMuslCheck
 {
@@ -63,7 +64,7 @@ class LinuxMuslCheck
                 logger()->warning('Current user is not root, using sudo for running command');
             }
             // The hardcoded version here is to be consistent with the version compiled by `musl-cross-toolchain`.
-            $musl_version_name = 'musl-1.2.4';
+            $musl_version_name = 'musl-1.2.5';
             $musl_source = [
                 'type' => 'url',
                 'url' => "https://musl.libc.org/releases/{$musl_version_name}.tar.gz",
@@ -71,6 +72,10 @@ class LinuxMuslCheck
             logger()->info('Downloading ' . $musl_source['url']);
             Downloader::downloadSource($musl_version_name, $musl_source);
             FileSystem::extractSource($musl_version_name, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
+
+            // Apply CVE-2025-26519 patch
+            SourcePatcher::patchFile('musl-1.2.5_CVE-2025-26519_0001.patch', SOURCE_PATH . "/{$musl_version_name}");
+            SourcePatcher::patchFile('musl-1.2.5_CVE-2025-26519_0002.patch', SOURCE_PATH . "/{$musl_version_name}");
             logger()->info('Installing musl wrapper');
             shell()->cd(SOURCE_PATH . "/{$musl_version_name}")
                 ->exec('CC=gcc CXX=g++ AR=ar LD=ld ./configure --disable-gcc-wrapper')
@@ -98,6 +103,7 @@ class LinuxMuslCheck
                 logger()->warning('Current user is not root, using sudo for running command');
             }
             $arch = arch2gnu(php_uname('m'));
+            logger()->info("Downloading package musl-toolchain-{$arch}-linux");
             PackageManager::installPackage("musl-toolchain-{$arch}-linux");
             $pkg_root = PKG_ROOT_PATH . "/musl-toolchain-{$arch}-linux";
             shell()->exec("{$prefix}cp -rf {$pkg_root}/* /usr/local/musl");
