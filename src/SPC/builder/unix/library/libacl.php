@@ -29,7 +29,7 @@ trait libacl
      */
     protected function build(): void
     {
-        $options = $this->getBuilder()->getLib('libiconv') === null ? '--disable-gettext' : '';
+        $options = $this->getBuilder()->getLib('libiconv') === null ? '--disable-nls' : '';
         shell()->cd($this->source_dir)
             ->setEnv([
                 'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags()),
