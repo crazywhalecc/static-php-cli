@@ -16,10 +16,26 @@ PHP 默认也会从 [其他标准位置](https://www.php.net/manual/zh/configura
 
 ## 静态编译的 PHP 可以安装扩展吗
 
-因为传统架构下的 PHP 安装扩展的原理是使用 `.so` 类型的动态链接的库方式安装新扩展，而使用本项目编译的静态链接的 PHP 无法**直接**使用动态链接库安装新扩展。
+因为传统架构下的 PHP 安装扩展的原理是使用 `.so` 类型的动态链接的库方式安装新扩展，而使用本项目编译的静态链接的 PHP。但是静态链接在不同操作系统有不同的定义。
+
+首先对于 Linux 系统来说，静态链接的二进制文件是不会链接系统的动态链接库的，纯静态链接的二进制无法加载动态库，所以无法添加新的扩展。
+同时，在纯静态模式下你也不能使用 `ffi` 等扩展加载外部的 `.so` 模块。
+
+你可以通过命令 `ldd buildroot/bin/php` 来查看你在 Linux 下构建的二进制是否为纯静态链接的。
+
+如果你 [构建 GNU libc 兼容的 PHP](../guide/build-with-glibc)，你可以使用 `ffi` 扩展加载外部的 `.so` 模块，并且加载具有相同 ABI 的 `.so` 扩展。
+
+例如，你可以使用以下命令构建一个 glibc 动态链接的静态 PHP 二进制，同时支持 FFI 扩展和加载相同 PHP 版本和相同 TS 类型的 `xdebug.so` 扩展：
+
+```bash
+bin/spc-gnu-docker download --for-extensions=ffi,xml --with-php=8.4
+bin/spc-gnu-docker build --libc=glibc ffi,xml --build-cli --debug
+
+buildroot/bin/php -d "zend_extension=/path/to/php{PHP_VER}-{ts/nts}/xdebug.so" --ri xdebug
+```
 
 对于 macOS 平台来说，macOS 下的几乎所有二进制文件都无法真正纯静态链接，几乎所有二进制文件都会链接 macOS 的系统库：`/usr/lib/libresolv.9.dylib` 和 `/usr/lib/libSystem.B.dylib`。
-所以在 macOS 系统下，在特定的编译条件下可以使用静态编译的 php 二进制文件，同时使用动态链接的扩展：
+所以在 macOS 系统下，在特定的编译条件下可以使用静态编译的 php 二进制文件，可使用动态链接的扩展：
 
 1. 使用 `--no-strip` 参数，将不会对二进制文件去除调试符号等信息，以供使用 `Xdebug` 等外部 Zend 扩展。
 2. 如果要编译某些 Zend 扩展，使用 Homebrew、MacPorts、源码编译的形式，在所在的操作系统安装一个普通版本的 PHP。
@@ -31,12 +47,10 @@ PHP 默认也会从 [其他标准位置](https://www.php.net/manual/zh/configura
 bin/spc build ffi --build-cli --no-strip
 ```
 
-对于 Linux 平台来说，目前的编译结果为纯静态链接的二进制文件，无法使用动态链接库安装新扩展。
-
 ## 可以支持 Oracle 数据库扩展吗
 
 部分依赖库闭源的扩展，如 `oci8`、`sourceguardian` 等，它们没有提供纯静态编译的依赖库文件（`.a`），仅提供了动态依赖库文件（`.so`），
-这些扩展无法使用源码的形式编译到 static-php-cli 中，所以本项目可能永远也不会支持这些扩展。不过，理论上你可以根据上面的问题在 macOS 下接入和使用这类扩展。
+这些扩展无法使用源码的形式编译到 static-php-cli 中，所以本项目可能永远也不会支持这些扩展。不过，理论上你可以根据上面的问题在 macOS 和 Linux 下接入和使用这类扩展。
 
 如果你对此类扩展有需求，或者大部分人都对这些闭源扩展使用有需求，
 可以看看有关 [standalone-php-cli](https://github.com/crazywhalecc/static-php-cli/discussions/58) 的讨论。欢迎留言。
@@ -61,6 +75,8 @@ bin/spc build ffi --build-cli --no-strip
 PHP 代码的编译器是完全不同的项目，因此不会考虑额外的情况。如果你对加密感兴趣，可以考虑使用现有的加密技术，如 Swoole Compiler、Source Guardian 等。
 
 ## 无法使用 ssl
+
+**更新：该问题已在最新版本的 static-php-cli 中修复，现在默认读取系统的证书文件。如果你仍然遇到问题，再尝试下方的解决方案。**
 
 使用 curl、pgsql 等 请求 HTTPS 网站或建立 SSL 连接时，可能存在 `error:80000002:system library::No such file or directory` 错误，
 这个错误是由于静态编译的 PHP 未通过 `php.ini` 指定 `openssl.cafile` 导致的。
