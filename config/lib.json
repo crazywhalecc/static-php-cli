@@ -11,6 +11,9 @@
         "lib-depends": [
             "lib-base",
             "micro"
+        ],
+        "lib-suggests-linux": [
+            "libacl"
         ]
     },
     "micro": {
