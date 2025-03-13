@@ -104,6 +104,14 @@ RUN curl -o make.tgz -fsSL https://ftp.gnu.org/gnu/make/make-4.4.tar.gz && \
     make install && \
     ln -sf /usr/local/bin/make /usr/bin/make
 
+RUN curl -o automake.tgz -fsSL https://ftp.gnu.org/gnu/automake/automake-1.17.tar.xz && \
+    tar -xvf automake.tgz && \
+    cd automake-1.17 && \
+    ./configure && \
+    make && \
+    make install && \
+    ln -sf /usr/local/bin/automake /usr/bin/automake
+
 RUN git clone https://github.com/static-php/gnu-frankenphp --depth=1 /frankenphp
 WORKDIR /frankenphp
 
