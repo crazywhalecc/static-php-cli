@@ -19,6 +19,5 @@ assert(setlocale(LC_ALL, 'en_US.utf-8') === 'en_US.utf-8');
 $domain = 'test';
 bindtextdomain($domain, 'locale/');
 textdomain($domain);
-gettext(json_decode('"\u793a\u4f8b"', true));
 
 assert(gettext(json_decode('"\u793a\u4f8b"', true)) === 'Example');
