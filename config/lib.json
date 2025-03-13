@@ -31,10 +31,6 @@
         "source": "attr",
         "static-libs-unix": [
             "libattr.a"
-        ],
-        "lib-suggests": [
-            "gettext",
-            "libiconv"
         ]
     },
     "brotli": {
@@ -254,10 +250,6 @@
         ],
         "lib-depends": [
             "attr"
-        ],
-        "lib-suggests": [
-            "gettext",
-            "libiconv"
         ]
     },
     "libaom": {
