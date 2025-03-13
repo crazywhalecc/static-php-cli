@@ -13,7 +13,10 @@ trait attr
      */
     protected function build(): void
     {
-        $options = $this->getBuilder()->getLib('libiconv') === null ? '--disable-nls' : '';
+        $options = $this->getBuilder()->getLib('libiconv') === null ? '--disable-nls' : '--with-libiconv-prefix=' . BUILD_ROOT_PATH;
+        if ($this->getBuilder()->getLib('gettext') !== null) {
+            $options .= ' --with-libintl-prefix=' . BUILD_ROOT_PATH;
+        }
         shell()->cd($this->source_dir)
             ->setEnv([
                 'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags()),

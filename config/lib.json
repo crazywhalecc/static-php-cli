@@ -33,6 +33,7 @@
             "libattr.a"
         ],
         "lib-suggests": [
+            "gettext",
             "libiconv"
         ]
     },
@@ -255,6 +256,7 @@
             "attr"
         ],
         "lib-suggests": [
+            "gettext",
             "libiconv"
         ]
     },
