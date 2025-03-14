@@ -14,7 +14,7 @@ if (!file_exists('locale/en_US/LC_MESSAGES/test.mo')) {
     file_put_contents('locale/en_US/LC_MESSAGES/test.mo', base64_decode($mo));
 }
 putenv('LANG=en_US');
-setlocale(LC_ALL, 'en_US');
+assert(setlocale(LC_ALL, 'en_US.utf-8') === 'en_US.utf-8');
 
 $domain = 'test';
 bindtextdomain($domain, 'locale/');

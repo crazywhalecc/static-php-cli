@@ -61,7 +61,8 @@ RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo && \
     sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
 RUN yum clean all && \
     yum makecache && \
-    yum update -y
+    yum update -y && \
+    localedef -c -i en_US -f UTF-8 en_US.UTF-8
 
 RUN yum install -y centos-release-scl
 
@@ -137,7 +138,7 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/source:/app/source"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/app/dist"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/downloads:/app/downloads"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
-MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/frankenphp/dist"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/frankenphp-dist:/frankenphp/dist"
 
 # Apply env in temp env file
 echo 'SPC_SKIP_DOCTOR_CHECK_ITEMS=if musl-wrapper is installed,if musl-cross-make is installed' > /tmp/spc-gnu-docker.env
@@ -145,7 +146,7 @@ echo 'CC=/opt/rh/devtoolset-10/root/usr/bin/gcc' >> /tmp/spc-gnu-docker.env
 echo 'CXX=/opt/rh/devtoolset-10/root/usr/bin/g++' >> /tmp/spc-gnu-docker.env
 echo 'AR=/opt/rh/devtoolset-10/root/usr/bin/ar' >> /tmp/spc-gnu-docker.env
 echo 'LD=/opt/rh/devtoolset-10/root/usr/bin/ld' >> /tmp/spc-gnu-docker.env
-echo 'SPC_DEFAULT_C_FLAGS=-fPIE' >> /tmp/spc-gnu-docker.env
+echo 'SPC_DEFAULT_C_FLAGS=-fPIE -fPIC' >> /tmp/spc-gnu-docker.env
 echo 'SPC_NO_MUSL_PATH=yes' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
