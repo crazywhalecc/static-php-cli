@@ -39,7 +39,7 @@ trait imagemagick
             }
         }
 
-        $ldflags = ($this instanceof LinuxLibraryBase) && $this->builder->libc !== 'glibc' ? ('-static -ldl') : '-ldl';
+        $ldflags = ($this instanceof LinuxLibraryBase) && getenv('SPC_LIBC') !== 'glibc' ? ('-static -ldl') : '-ldl';
 
         // libxml iconv patch
         $required_libs .= $this instanceof MacOSLibraryBase ? ('-liconv') : '';

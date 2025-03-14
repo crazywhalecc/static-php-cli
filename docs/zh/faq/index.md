@@ -29,7 +29,7 @@ PHP 默认也会从 [其他标准位置](https://www.php.net/manual/zh/configura
 
 ```bash
 bin/spc-gnu-docker download --for-extensions=ffi,xml --with-php=8.4
-bin/spc-gnu-docker build --libc=glibc ffi,xml --build-cli --debug
+bin/spc-gnu-docker build ffi,xml --build-cli --debug
 
 buildroot/bin/php -d "zend_extension=/path/to/php{PHP_VER}-{ts/nts}/xdebug.so" --ri xdebug
 ```

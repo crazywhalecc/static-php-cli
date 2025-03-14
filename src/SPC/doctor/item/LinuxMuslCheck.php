@@ -26,6 +26,9 @@ class LinuxMuslCheck
         if (SystemUtil::isMuslDist()) {
             return CheckResult::ok('musl-based distro, skipped');
         }
+        if (getenv('SPC_LIBC') === 'glibc') {
+            return CheckResult::ok('Building with glibc, skipped');
+        }
 
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         if (file_exists($musl_wrapper_lib) && file_exists('/usr/local/musl/lib/libc.a')) {
@@ -40,6 +43,10 @@ class LinuxMuslCheck
         if (SystemUtil::isMuslDist()) {
             return CheckResult::ok('musl-based distro, skipped');
         }
+        if (getenv('SPC_LIBC') === 'glibc') {
+            return CheckResult::ok('Building with glibc, skipped');
+        }
+
         $arch = arch2gnu(php_uname('m'));
         $cross_compile_lib = "/usr/local/musl/{$arch}-linux-musl/lib/libc.a";
         $cross_compile_gcc = "/usr/local/musl/bin/{$arch}-linux-musl-gcc";

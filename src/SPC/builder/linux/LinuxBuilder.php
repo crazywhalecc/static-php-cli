@@ -15,8 +15,6 @@ use SPC\util\GlobalEnvManager;
 
 class LinuxBuilder extends UnixBuilderBase
 {
-    public string $libc;
-
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
@@ -27,27 +25,23 @@ class LinuxBuilder extends UnixBuilderBase
     public function __construct(array $options = [])
     {
         $this->options = $options;
-        SystemUtil::initLibcVar($this->options['libc'] ?? null);
-
-        $this->libc = getenv('SPC_LIBC') ?: LIBC_MUSL_WRAPPER;
 
         // check musl-cross make installed if we use musl-cross-make
         $arch = arch2gnu(php_uname('m'));
 
         GlobalEnvManager::init($this);
 
-        // set library path, some libraries need it. (We cannot use `putenv` here, because cmake will be confused)
-        if (!filter_var(getenv('SPC_NO_MUSL_PATH'), FILTER_VALIDATE_BOOLEAN) && $this->libc !== LIBC_GLIBC) {
+        if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist()) {
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             GlobalEnvManager::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
             $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
             $configure = "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\" " . $configure;
             GlobalEnvManager::putenv("SPC_CMD_PREFIX_PHP_CONFIGURE={$configure}");
-        }
 
-        if (str_ends_with(getenv('CC'), 'linux-musl-gcc') && !file_exists("/usr/local/musl/bin/{$arch}-linux-musl-gcc") && (getenv('SPC_NO_MUSL_PATH') !== 'yes')) {
-            throw new WrongUsageException('musl-cross-make not installed, please install it first. (You can use `doctor` command to install it)');
+            if (!file_exists("/usr/local/musl/{$arch}-linux-musl/lib/libc.a")) {
+                throw new WrongUsageException('You are building with musl-libc target in glibc distro, but musl-toolchain is not installed, please install musl-toolchain first. (You can use `doctor` command to install it)');
+            }
         }
 
         // concurrency
@@ -216,10 +210,8 @@ class LinuxBuilder extends UnixBuilderBase
             $this->buildEmbed();
         }
 
-        if (php_uname('m') === $this->getOption('arch')) {
-            $this->emitPatchPoint('before-sanity-check');
-            $this->sanityCheck($build_target);
-        }
+        $this->emitPatchPoint('before-sanity-check');
+        $this->sanityCheck($build_target);
     }
 
     /**

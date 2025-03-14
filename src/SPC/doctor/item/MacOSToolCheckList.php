@@ -40,7 +40,7 @@ class MacOSToolCheckList
         if (($path = $this->findCommand('brew')) === null) {
             return CheckResult::fail('Homebrew is not installed', 'brew');
         }
-        if ($path !== '/opt/homebrew/bin/brew' && php_uname('m') === 'arm64') {
+        if ($path !== '/opt/homebrew/bin/brew' && getenv('GNU_ARCH') === 'aarch64') {
             return CheckResult::fail('Current homebrew (/usr/local/bin/homebrew) is not installed for M1 Mac, please re-install homebrew in /opt/homebrew/ !');
         }
         return CheckResult::ok();

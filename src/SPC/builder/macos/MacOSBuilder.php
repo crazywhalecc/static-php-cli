@@ -37,7 +37,7 @@ class MacOSBuilder extends UnixBuilderBase
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
         // cmake toolchain
-        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', $this->getOption('arch', php_uname('m')), $this->arch_c_flags);
+        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', getenv('SPC_ARCH'), $this->arch_c_flags);
 
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
@@ -203,10 +203,8 @@ class MacOSBuilder extends UnixBuilderBase
             $this->buildEmbed();
         }
 
-        if (php_uname('m') === $this->getOption('arch')) {
-            $this->emitPatchPoint('before-sanity-check');
-            $this->sanityCheck($build_target);
-        }
+        $this->emitPatchPoint('before-sanity-check');
+        $this->sanityCheck($build_target);
     }
 
     /**
