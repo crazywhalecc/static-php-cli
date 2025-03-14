@@ -185,7 +185,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $util = new SPCConfigUtil($this);
             $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
-            if (PHP_OS_FAMILY === 'Linux' && $this->getOption('libc') !== 'glibc') {
+            if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
                 $lens .= ' -static';
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);

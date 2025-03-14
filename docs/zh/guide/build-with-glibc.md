@@ -39,10 +39,8 @@ bin/spc-gnu-docker
 
 在容器准备好后，你可以参考 [本地构建](./manual-build) 章节的内容，构建你的 PHP 静态二进制文件。仅需要把 `bin/spc` 或 `./spc` 替换为 `bin/spc-gnu-docker` 即可。
 
-与默认构建不同的是，在 glibc 环境构建时**必须添加**参数 `--libc=glibc`，如：
-
 ```bash
-bin/spc-gnu-docker --libc=glibc build bcmath,ctype,openssl,pdo,phar,posix,session,tokenizer,xml,zip --build-cli --debug
+bin/spc-gnu-docker build bcmath,ctype,openssl,pdo,phar,posix,session,tokenizer,xml,zip --build-cli --debug
 ```
 
 ## 注意事项

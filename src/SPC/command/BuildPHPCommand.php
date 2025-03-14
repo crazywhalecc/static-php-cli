@@ -19,7 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 use ZM\Logger\ConsoleColor;
 
 #[AsCommand('build', 'build PHP', ['build:php'])]
-class BuildCliCommand extends BuildCommand
+class BuildPHPCommand extends BuildCommand
 {
     public function configure(): void
     {
@@ -29,8 +29,8 @@ class BuildCliCommand extends BuildCommand
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
         $this->addOption('build-micro', null, null, 'Build micro SAPI');
         $this->addOption('build-cli', null, null, 'Build cli SAPI');
-        $this->addOption('build-fpm', null, null, 'Build fpm SAPI');
-        $this->addOption('build-embed', null, null, 'Build embed SAPI');
+        $this->addOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
+        $this->addOption('build-embed', null, null, 'Build embed SAPI (not available on Windows)');
         $this->addOption('build-all', null, null, 'Build all SAPI');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
@@ -155,13 +155,16 @@ class BuildCliCommand extends BuildCommand
             $builder->proveExts($extensions);
             // validate libs and exts
             $builder->validateLibsAndExts();
+
+            // clean builds and sources
+            if ($this->input->getOption('with-clean')) {
+                logger()->info('Cleaning source and previous build dir...');
+                FileSystem::removeDir(SOURCE_PATH);
+                FileSystem::removeDir(BUILD_ROOT_PATH);
+            }
+
             // build or install libraries
             $builder->setupLibs();
-
-            if ($this->input->getOption('with-clean')) {
-                logger()->info('Cleaning source dir...');
-                FileSystem::removeDir(SOURCE_PATH);
-            }
 
             // Process -I option
             $custom_ini = [];

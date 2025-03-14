@@ -46,10 +46,8 @@ After the image is built, you will see the same command help menu as `bin/spc`, 
 After the container is ready, you can refer to the [local build](./manual-build) section to build your PHP static binary. 
 Just replace `bin/spc` or `./spc` with `bin/spc-gnu-docker`.
 
-Unlike the default build, when building in the glibc environment, you **must** add the parameter `--libc=glibc`, such as:
-
 ```bash
-bin/spc-gnu-docker --libc=glibc build bcmath,ctype,openssl,pdo,phar,posix,session,tokenizer,xml,zip --build-cli --debug
+bin/spc-gnu-docker build bcmath,ctype,openssl,pdo,phar,posix,session,tokenizer,xml,zip --build-cli --debug
 ```
 
 ## Notes

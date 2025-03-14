@@ -18,13 +18,14 @@ class libffi extends MacOSLibraryBase
     protected function build(): void
     {
         [, , $destdir] = SEPARATED_PATH;
+        $arch = getenv('SPC_ARCH');
         shell()->cd($this->source_dir)
             ->exec(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
-                "--host={$this->builder->getOption('arch')}-apple-darwin " .
-                "--target={$this->builder->getOption('arch')}-apple-darwin " .
+                "--host={$arch}-apple-darwin " .
+                "--target={$arch}-apple-darwin " .
                 '--prefix= ' // use prefix=/
             )
             ->exec('make clean')

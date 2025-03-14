@@ -45,5 +45,6 @@ GlobalEnvManager::putenv('PKG_ROOT_PATH=' . PKG_ROOT_PATH);
 GlobalEnvManager::putenv('SOURCE_PATH=' . SOURCE_PATH);
 GlobalEnvManager::putenv('DOWNLOAD_PATH=' . DOWNLOAD_PATH);
 GlobalEnvManager::putenv('CPU_COUNT=' . CPU_COUNT);
+GlobalEnvManager::putenv('SPC_ARCH=' . php_uname('m'));
 GlobalEnvManager::putenv('GNU_ARCH=' . GNU_ARCH);
 GlobalEnvManager::putenv('MAC_ARCH=' . MAC_ARCH);

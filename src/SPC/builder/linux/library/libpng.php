@@ -36,9 +36,9 @@ class libpng extends LinuxLibraryBase
      */
     public function build(): void
     {
-        $optimizations = match ($this->builder->getOption('arch')) {
+        $optimizations = match (getenv('SPC_ARCH')) {
             'x86_64' => '--enable-intel-sse ',
-            'arm64' => '--enable-arm-neon ',
+            'aarch64' => '--enable-arm-neon ',
             default => '',
         };
         shell()->cd($this->source_dir)

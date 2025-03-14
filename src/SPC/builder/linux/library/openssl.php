@@ -42,10 +42,11 @@ class openssl extends LinuxLibraryBase
 
         $extra = '';
         $ex_lib = '-ldl -pthread';
+        $arch = getenv('SPC_ARCH');
 
         $env = "CC='" . getenv('CC') . ' -idirafter ' . BUILD_INCLUDE_PATH .
             ' -idirafter /usr/include/ ' .
-            ' -idirafter /usr/include/' . $this->builder->getOption('arch') . '-linux-gnu/ ' .
+            ' -idirafter /usr/include/' . getenv('SPC_ARCH') . '-linux-gnu/ ' .
             "' ";
         // lib:zlib
         $zlib = $this->builder->getLib('zlib');
@@ -72,7 +73,7 @@ class openssl extends LinuxLibraryBase
                 '--openssldir=/etc/ssl ' .
                 "{$zlib_extra}" .
                 'no-legacy ' .
-                "linux-{$this->builder->getOption('arch')}{$clang_postfix}"
+                "linux-{$arch}{$clang_postfix}"
             )
             ->exec('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")

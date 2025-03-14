@@ -91,7 +91,7 @@ ADD ./bin/spc /app/bin/spc
 RUN /app/bin/setup-runtime
 RUN /app/bin/php /app/bin/composer install --no-dev --classmap-authoritative
 ENV PATH="/app/bin:/cmake/bin:/usr/local/go/bin:$PATH"
-ENV SPC_SKIP_DOCTOR_CHECK_ITEMS="if musl-wrapper is installed,if musl-cross-make is installed"
+ENV SPC_LIBC=glibc
 
 ADD ./config/env.ini /app/config/env.ini
 RUN bin/spc doctor --auto-fix --debug
@@ -140,13 +140,12 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/frankenphp/dist"
 
 # Apply env in temp env file
-echo 'SPC_SKIP_DOCTOR_CHECK_ITEMS=if musl-wrapper is installed,if musl-cross-make is installed' > /tmp/spc-gnu-docker.env
-echo 'CC=/opt/rh/devtoolset-10/root/usr/bin/gcc' >> /tmp/spc-gnu-docker.env
+echo 'CC=/opt/rh/devtoolset-10/root/usr/bin/gcc' > /tmp/spc-gnu-docker.env
 echo 'CXX=/opt/rh/devtoolset-10/root/usr/bin/g++' >> /tmp/spc-gnu-docker.env
 echo 'AR=/opt/rh/devtoolset-10/root/usr/bin/ar' >> /tmp/spc-gnu-docker.env
 echo 'LD=/opt/rh/devtoolset-10/root/usr/bin/ld' >> /tmp/spc-gnu-docker.env
 echo 'SPC_DEFAULT_C_FLAGS=-fPIE' >> /tmp/spc-gnu-docker.env
-echo 'SPC_NO_MUSL_PATH=yes' >> /tmp/spc-gnu-docker.env
+echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
 

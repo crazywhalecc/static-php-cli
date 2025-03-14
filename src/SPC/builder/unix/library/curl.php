@@ -53,7 +53,7 @@ trait curl
 
         FileSystem::resetDir($this->source_dir . '/build');
 
-        $cflags = $this instanceof LinuxLibraryBase && $this->builder->libc === 'glibc' ? '-fPIC' : '';
+        $cflags = $this instanceof LinuxLibraryBase && getenv('SPC_LIBC') === 'glibc' ? '-fPIC' : '';
         // compile！
         shell()->cd($this->source_dir . '/build')
             ->setEnv([
