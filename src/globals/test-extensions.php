@@ -14,18 +14,17 @@ declare(strict_types=1);
 // test php version
 $test_php_version = [
     '8.1',
-    // '8.2',
-    // '8.3',
+    '8.2',
+    '8.3',
     '8.4',
 ];
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
-    // 'macos-14',
-    // 'ubuntu-latest',
-    'windows-2019',
-    'windows-latest',
+    'macos-13',
+    'macos-14',
+    'ubuntu-latest',
+    // 'windows-latest',
 ];
 
 // whether enable thread safe
@@ -42,13 +41,13 @@ $prefer_pre_built = false;
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'gettext',
-    'Windows' => 'gd',
+    'Windows' => 'bcmath',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => '',
-    'Windows' => 'libavif',
+    'Windows' => '',
 };
 
 // Please change your test base combination. We recommend testing with `common`.

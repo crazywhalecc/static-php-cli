@@ -674,7 +674,6 @@
     },
     "sodium": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "builtin",

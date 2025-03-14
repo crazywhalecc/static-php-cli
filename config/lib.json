@@ -442,6 +442,9 @@
         "source": "libsodium",
         "static-libs-unix": [
             "libsodium.a"
+        ],
+        "static-libs-windows": [
+            "libsodium.lib"
         ]
     },
     "libssh2": {
