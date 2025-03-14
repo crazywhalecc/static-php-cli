@@ -20,5 +20,6 @@ trait grpc
         FileSystem::copyDir($this->source_dir . '/include/grpc', BUILD_INCLUDE_PATH . '/grpc');
         FileSystem::copyDir($this->source_dir . '/include/grpc++', BUILD_INCLUDE_PATH . '/grpc++');
         FileSystem::copyDir($this->source_dir . '/include/grpcpp', BUILD_INCLUDE_PATH . '/grpcpp');
+        FileSystem::copyDir($this->source_dir . '/src/php/ext/grpc', BUILD_ROOT_PATH . '/grpc_php_ext_src');
     }
 }
