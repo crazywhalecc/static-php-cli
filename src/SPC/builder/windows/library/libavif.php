@@ -12,6 +12,8 @@ class libavif extends WindowsLibraryBase
 
     protected function build(): void
     {
+        // workaround for libavif 1.2.0 bug
+        FileSystem::replaceFileStr($this->source_dir . '\src\read.c', 'avifFileType ftyp = {};', 'avifFileType ftyp = { 0 };');
         // reset cmake
         FileSystem::resetDir($this->source_dir . '\build');
 
