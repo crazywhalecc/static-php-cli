@@ -21,10 +21,11 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    'macos-13',
-    'macos-14',
-    'ubuntu-latest',
-    // 'windows-latest',
+    // 'macos-13',
+    // 'macos-14',
+    // 'ubuntu-latest',
+    'windows-latest',
+    'windows-2019',
 ];
 
 // whether enable thread safe
@@ -41,7 +42,7 @@ $prefer_pre_built = false;
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'gettext',
-    'Windows' => 'bcmath',
+    'Windows' => 'sodium',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
