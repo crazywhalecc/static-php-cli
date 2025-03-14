@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -53,11 +52,10 @@ trait curl
 
         FileSystem::resetDir($this->source_dir . '/build');
 
-        $cflags = $this instanceof LinuxLibraryBase && getenv('SPC_LIBC') === 'glibc' ? '-fPIC' : '';
         // compile！
         shell()->cd($this->source_dir . '/build')
             ->setEnv([
-                'CFLAGS' => trim($this->getLibExtraCFlags() . ' ' . $cflags),
+                'CFLAGS' => $this->getLibExtraCFlags(),
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
