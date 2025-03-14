@@ -116,7 +116,7 @@
     },
     "ffi": {
         "support": {
-            "Linux": "no",
+            "Linux": "partial",
             "BSD": "wip"
         },
         "notes": true,

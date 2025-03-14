@@ -18,8 +18,10 @@ trait attr
                 'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags()),
                 'LDFLAGS' => trim('-L' . BUILD_LIB_PATH . ' ' . $this->getLibExtraLdFlags()),
                 'LIBS' => $this->getLibExtraLibs(),
-            ])->execWithEnv('./autogen.sh')
-            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-nls')
+            ])
+            ->execWithEnv('libtoolize --force --copy')
+            ->execWithEnv('./autogen.sh')
+            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --with-pic --disable-nls')
             ->execWithEnv("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 

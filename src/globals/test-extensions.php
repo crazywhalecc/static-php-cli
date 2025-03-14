@@ -21,7 +21,7 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
+    'macos-13',
     'macos-14',
     'ubuntu-latest',
     // 'windows-latest',
@@ -40,7 +40,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imagick',
+    'Linux', 'Darwin' => 'gettext',
     'Windows' => 'bcmath',
 };
 
