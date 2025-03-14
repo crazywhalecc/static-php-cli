@@ -366,7 +366,7 @@
     },
     "libavif": {
         "type": "url",
-        "url": "https://github.com/AOMediaCodec/libavif/archive/refs/tags/v1.1.1.tar.gz",
+        "url": "https://github.com/AOMediaCodec/libavif/archive/refs/tags/v1.2.0.tar.gz",
         "license": {
             "type": "file",
             "path": "LICENSE"

@@ -25,6 +25,7 @@ $test_os = [
     // 'macos-14',
     // 'ubuntu-latest',
     'windows-2019',
+    'windows-latest',
 ];
 
 // whether enable thread safe
