@@ -35,6 +35,7 @@ trait libacl
                 'LDFLAGS' => trim('-L' . BUILD_LIB_PATH . ' ' . $this->getLibExtraLdFlags()),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
+            ->execWithEnv('libtoolize --force --copy')
             ->execWithEnv('./autogen.sh')
             ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests --disable-nls')
             ->execWithEnv("make -j {$this->builder->concurrency}")
