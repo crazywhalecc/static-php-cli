@@ -411,8 +411,21 @@ class SourcePatcher
      */
     public static function patchImagickWith84(): bool
     {
-        SourcePatcher::patchFile('imagick_php84.patch', SOURCE_PATH . '/php-src/ext/imagick');
-        return true;
+        // match imagick version id
+        $file = SOURCE_PATH . '/php-src/ext/imagick/php_imagick.h';
+        if (!file_exists($file)) {
+            return false;
+        }
+        $content = file_get_contents($file);
+        if (preg_match('/#define PHP_IMAGICK_EXTNUM\s+(\d+)/', $content, $match) === 0) {
+            return false;
+        }
+        $extnum = intval($match[1]);
+        if ($extnum < 30800) {
+            SourcePatcher::patchFile('imagick_php84_before_30800.patch', SOURCE_PATH . '/php-src/ext/imagick');
+            return true;
+        }
+        return false;
     }
 
     public static function patchLibaomForAlpine(): bool
