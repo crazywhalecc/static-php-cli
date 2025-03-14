@@ -22,7 +22,13 @@ class grpc extends Extension
             throw new \RuntimeException('grpc extension does not support windows yet');
         }
         if (!is_link(SOURCE_PATH . '/php-src/ext/grpc')) {
-            shell()->exec('ln -s ' . $this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
+            if (is_dir($this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc')) {
+                shell()->exec('ln -s ' . $this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
+            } elseif (is_dir(BUILD_ROOT_PATH . '/grpc_php_ext_src')) {
+                shell()->exec('ln -s ' . BUILD_ROOT_PATH . '/grpc_php_ext_src ' . SOURCE_PATH . '/php-src/ext/grpc');
+            } else {
+                throw new \RuntimeException('Cannot find grpc source code');
+            }
             $macos = $this->builder instanceof MacOSBuilder ? "\n" . '  LDFLAGS="$LDFLAGS -framework CoreFoundation"' : '';
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/ext/grpc/config.m4', '/GRPC_LIBDIR=.*$/m', 'GRPC_LIBDIR=' . BUILD_LIB_PATH . $macos);
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/ext/grpc/config.m4', '/SEARCH_PATH=.*$/m', 'SEARCH_PATH="' . BUILD_ROOT_PATH . '"');
