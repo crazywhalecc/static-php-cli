@@ -18,21 +18,17 @@ trait freetype
      */
     protected function build(): void
     {
-        $suggested = $this->builder->getLib('libpng') ? '--with-png' : '--without-png';
-        $suggested .= ' ';
-        $suggested .= $this->builder->getLib('bzip2') ? ('--with-bzip2=' . BUILD_ROOT_PATH) : '--without-bzip2';
-        $suggested .= ' ';
-        $suggested .= $this->builder->getLib('brotli') ? ('--with-brotli=' . BUILD_ROOT_PATH) : '--without-brotli';
-        $suggested .= ' ';
+        $extra_libs = $this->builder->getLib('libpng') ? '--with-png' : '--without-png';
+        $extra_libs .= ' ';
+        $extra_libs .= $this->builder->getLib('bzip2') ? ('--with-bzip2=' . BUILD_ROOT_PATH) : '--without-bzip2';
+        $extra_libs .= ' ';
+        $extra_libs .= $this->builder->getLib('brotli') ? ('--with-brotli=' . BUILD_ROOT_PATH) : '--without-brotli';
+        $extra_libs .= ' ';
 
         shell()->cd($this->source_dir)
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->exec('sh autogen.sh')
-            ->execWithEnv(
-                './configure ' .
-                '--enable-static --disable-shared --without-harfbuzz --prefix= ' .
-                $suggested
-            )
+            ->execWithEnv('./autogen.sh')
+            ->execWithEnv('./configure --without-harfbuzz --prefix= ' . $extra_libs)
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
