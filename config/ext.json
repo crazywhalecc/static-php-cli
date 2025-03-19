@@ -416,16 +416,6 @@
             "zlib"
         ]
     },
-    "odbc": {
-        "support": {
-            "BSD": "wip"
-        },
-        "type": "builtin",
-        "arg-type-unix": "custom",
-        "lib-depends-unix": [
-            "unixodbc"
-        ]
-    },
     "oci8": {
         "type": "wip",
         "support": {
@@ -435,6 +425,16 @@
             "Linux": "no"
         },
         "notes": true
+    },
+    "odbc": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type-unix": "custom",
+        "lib-depends-unix": [
+            "unixodbc"
+        ]
     },
     "opcache": {
         "type": "builtin",
@@ -502,6 +502,20 @@
             "mysqlnd"
         ]
     },
+    "pdo_odbc": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type": "custom",
+        "lib-depends-unix": [
+            "unixodbc"
+        ],
+        "ext-depends": [
+            "pdo",
+            "odbc"
+        ]
+    },
     "pdo_pgsql": {
         "support": {
             "Windows": "wip",
@@ -541,20 +555,6 @@
         "ext-depends": [
             "pdo",
             "sqlsrv"
-        ]
-    },
-    "pdo_odbc": {
-        "support": {
-            "BSD": "wip"
-        },
-        "type": "builtin",
-        "arg-type": "custom",
-        "lib-depends-unix": [
-            "unixodbc"
-        ],
-        "ext-depends": [
-            "pdo",
-            "odbc"
         ]
     },
     "pgsql": {
