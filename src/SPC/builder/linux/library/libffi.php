@@ -18,22 +18,22 @@ class libffi extends LinuxLibraryBase
     public function build(): void
     {
         [$lib, , $destdir] = SEPARATED_PATH;
-
         $arch = getenv('SPC_ARCH');
 
         shell()->cd($this->source_dir)
-            ->exec(
+            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->execWithEnv(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 "--host={$arch}-unknown-linux " .
                 "--target={$arch}-unknown-linux " .
-                '--prefix= ' . // use prefix=/
+                '--prefix= ' .
                 "--libdir={$lib}"
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            ->execWithEnv('make clean')
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv("make install DESTDIR={$destdir}");
 
         if (is_file(BUILD_ROOT_PATH . '/lib64/libffi.a')) {
             copy(BUILD_ROOT_PATH . '/lib64/libffi.a', BUILD_ROOT_PATH . '/lib/libffi.a');
