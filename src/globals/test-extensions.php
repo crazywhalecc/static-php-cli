@@ -36,17 +36,17 @@ $no_strip = false;
 $upx = false;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = true;
+$prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'grpc',
+    'Linux', 'Darwin' => 'gd',
     'Windows' => 'bcmath',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => '',
+    'Linux', 'Darwin' => 'freetype',
     'Windows' => '',
 };
 
@@ -54,7 +54,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'none',
+    'Linux', 'Darwin' => 'minimal',
     'Windows' => 'none',
 };
 
