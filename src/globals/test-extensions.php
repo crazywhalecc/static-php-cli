@@ -6,12 +6,12 @@ declare(strict_types=1);
 
 /**
  * This is GitHub Actions automatic test extension args generator.
- * You can edit $extensions, $with_libs and $base_combination.
+ * You can edit $test_php_version, $test_os, $zts, $no_strip, $upx, $prefer_pre_built, $extensions, $with_libs and $base_combination.
  */
 
 // --------------------------------- edit area ---------------------------------
 
-// test php version
+// test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
     '8.1',
     '8.2',
@@ -21,7 +21,7 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
+    'macos-13',
     'macos-14',
     'ubuntu-latest',
     // 'windows-latest',
@@ -40,7 +40,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'gd',
+    'Linux', 'Darwin' => '',
     'Windows' => 'bz2,ctype,curl,dom,filter,gd,iconv,mbstring,opcache,openssl,pdo,pdo_sqlite,phar,session,simplexml,sqlite3,tokenizer,xml,xmlwriter,yaml,zip,zlib',
 };
 
@@ -54,7 +54,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'bulk',
     'Windows' => 'none',
 };
 
