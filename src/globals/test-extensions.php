@@ -46,7 +46,7 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'freetype',
+    'Linux', 'Darwin' => 'mimalloc',
     'Windows' => 'libjpeg,libavif,freetype,libwebp',
 };
 
