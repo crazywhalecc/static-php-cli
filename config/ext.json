@@ -416,6 +416,16 @@
             "zlib"
         ]
     },
+    "odbc": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type-unix": "custom",
+        "lib-depends-unix": [
+            "unixodbc"
+        ]
+    },
     "oci8": {
         "type": "wip",
         "support": {
@@ -557,6 +567,20 @@
         "ext-depends": [
             "pdo",
             "sqlsrv"
+        ]
+    },
+    "pdo_odbc": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type": "custom",
+        "lib-depends-unix": [
+            "unixodbc"
+        ],
+        "ext-depends": [
+            "pdo",
+            "odbc"
         ]
     },
     "pgsql": {
