@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 // test php version
 $test_php_version = [
-    // '8.1',
-    // '8.2',
+    '8.1',
+    '8.2',
     '8.3',
     '8.4',
 ];
@@ -40,13 +40,13 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'gd',
+    'Linux', 'Darwin' => 'pdo_odbc',
     'Windows' => 'bcmath',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'freetype',
+    'Linux', 'Darwin' => '',
     'Windows' => '',
 };
 
@@ -54,7 +54,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'bulk',
     'Windows' => 'none',
 };
 
@@ -70,7 +70,7 @@ function _getCombination(string $type = 'common'): string
             'mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,' .
             'sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
         'bulk' => 'apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,ftp,gd,gmp,iconv,imagick,imap,' .
-            'intl,mbregex,mbstring,mysqli,mysqlnd,odbc,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,phar,' .
+            'intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,' .
             'posix,protobuf,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,swoole,sysvmsg,sysvsem,' .
             'sysvshm,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib',
         'minimal' => 'pcntl,posix,mbstring,tokenizer,phar',
