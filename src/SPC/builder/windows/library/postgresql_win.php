@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\windows\library;
 
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 
 class postgresql_win extends WindowsLibraryBase
@@ -23,22 +22,14 @@ class postgresql_win extends WindowsLibraryBase
         copy($this->source_dir . '\pgsql\lib\libpgport.lib', BUILD_LIB_PATH . '\libpgport.lib');
         copy($this->source_dir . '\pgsql\lib\libpgcommon.lib', BUILD_LIB_PATH . '\libpgcommon.lib');
 
-        $headerFiles = ['libpq-fe.h', 'postgres_ext.h'];
+        // create libpq folder in buildroot/includes/libpq
+        if (!file_exists(BUILD_INCLUDE_PATH . '\libpq')) {
+            mkdir(BUILD_INCLUDE_PATH . '\libpq');
+        }
+
+        $headerFiles = ['libpq-fe.h', 'postgres_ext.h', 'pg_config_ext.h', 'libpq\libpq-fs.h'];
         foreach ($headerFiles as $header) {
             copy($this->source_dir . '\pgsql\include\\' . $header, BUILD_INCLUDE_PATH . '\\' . $header);
-        }
-    }
-
-    private function getVersion(): string
-    {
-        try {
-            $file = FileSystem::readFile($this->source_dir . '/meson.build');
-            if (preg_match("/^\\s+version:\\s?'(.*)'/m", $file, $match)) {
-                return $match[1];
-            }
-            return 'unknown';
-        } catch (FileSystemException) {
-            return 'unknown';
         }
     }
 }

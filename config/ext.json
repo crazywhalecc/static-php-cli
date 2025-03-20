@@ -515,8 +515,11 @@
             "pdo",
             "pgsql"
         ],
-        "lib-depends": [
+        "lib-depends-unix": [
             "postgresql"
+        ],
+        "lib-depends-windows": [
+            "postgresql-win"
         ]
     },
     "pdo_sqlite": {
