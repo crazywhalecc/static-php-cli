@@ -150,12 +150,13 @@ class LinuxBuilder extends UnixBuilderBase
         $enable_micro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enable_embed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
+        $mimalloc = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
-            'LIBS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
+            'LIBS' => $mimalloc . getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
         ]);
 
         // process micro upx patch if micro sapi enabled
