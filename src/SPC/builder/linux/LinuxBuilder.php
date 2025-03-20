@@ -150,13 +150,13 @@ class LinuxBuilder extends UnixBuilderBase
         $enable_micro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enable_embed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
-        $mimalloc = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
+        $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
-            'LIBS' => $mimalloc . getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
+            'LIBS' => $mimallocLibs . getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
         ]);
 
         // process micro upx patch if micro sapi enabled
@@ -311,7 +311,13 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
-        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/php-config', 'prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"');
+        $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
+        str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
+        // move mimalloc to the beginning of libs
+        $php_config_str = preg_replace('/(libs=")(.*?)\s*(' . preg_quote(BUILD_LIB_PATH, '/') . '\/mimalloc\.o)\s*(.*?)"/', '$1$3 $2 $4"', $php_config_str);
+        // move lstdc++ to the end of libs
+        $php_config_str = preg_replace('/(libs=")(.*?)\s*(-lstdc\+\+)\s*(.*?)"/', '$1$2 $4 $3"', $php_config_str);
+        FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
     }
 
     private function getMakeExtraVars(): array
