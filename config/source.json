@@ -751,6 +751,10 @@
             "path": "COPYRIGHT"
         }
     },
+    "postgresql-win": {
+        "type": "url",
+        "url": "https://get.enterprisedb.com/postgresql/postgresql-16.8-1-windows-x64-binaries.zip"
+    },
     "protobuf": {
         "type": "url",
         "url": "https://pecl.php.net/get/protobuf",
