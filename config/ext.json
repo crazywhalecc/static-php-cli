@@ -428,7 +428,8 @@
     },
     "odbc": {
         "support": {
-            "BSD": "wip"
+            "BSD": "wip",
+            "Windows": "wip"
         },
         "type": "builtin",
         "arg-type-unix": "custom",
@@ -504,7 +505,8 @@
     },
     "pdo_odbc": {
         "support": {
-            "BSD": "wip"
+            "BSD": "wip",
+            "Windows": "wip"
         },
         "type": "builtin",
         "arg-type": "custom",
