@@ -589,6 +589,15 @@
             "openssl"
         ]
     },
+    "mimalloc": {
+        "source": "mimalloc",
+        "static-libs-unix": [
+            "mimalloc.o"
+        ],
+        "static-libs-windows": [
+            "mimalloc.lib"
+        ]
+    },
     "ncurses": {
         "source": "ncurses",
         "static-libs-unix": [
