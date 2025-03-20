@@ -48,5 +48,7 @@ class curl extends WindowsLibraryBase
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build cmakebuild --config Release --target install -j{$this->builder->concurrency}"
             );
+        // move libcurl.lib to libcurl_a.lib
+        rename(BUILD_LIB_PATH . '\libcurl.lib', BUILD_LIB_PATH . '\libcurl_a.lib');
     }
 }
