@@ -666,6 +666,23 @@
             "zstd"
         ]
     },
+    "postgresql-win": {
+        "source": "postgresql-win",
+        "static-libs": [
+            "libpq.lib",
+            "libpgport.lib",
+            "libpgcommon.lib"
+        ],
+        "lib-depends": [
+            "libiconv-win",
+            "libxml2",
+            "openssl",
+            "zlib"
+        ],
+        "lib-suggests": [
+            "zstd"
+        ]
+    },
     "pthreads4w": {
         "source": "pthreads4w",
         "static-libs-windows": [
