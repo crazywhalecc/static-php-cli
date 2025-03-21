@@ -636,6 +636,16 @@
             "path": "LICENSE"
         }
     },
+    "mimalloc": {
+        "type": "ghtagtar",
+        "repo": "microsoft/mimalloc",
+        "match": "v2.+",
+        "provide-pre-built": false,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "mongodb": {
         "type": "ghrel",
         "repo": "mongodb/mongo-php-driver",
