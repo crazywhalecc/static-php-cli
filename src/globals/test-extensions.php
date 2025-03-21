@@ -21,9 +21,9 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
-    // 'macos-14',
-    // 'ubuntu-latest',
+    'macos-13',
+    'macos-14',
+    'ubuntu-latest',
     'windows-latest',
 ];
 
@@ -40,14 +40,14 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'gd',
-    'Windows' => 'bz2,ctype,curl,dom,filter,gd,iconv,mbstring,opcache,openssl,pdo,pdo_sqlite,phar,session,simplexml,sqlite3,tokenizer,xml,xmlwriter,yaml,zip,zlib',
+    'Linux', 'Darwin' => 'odbc,pdo_odbc',
+    'Windows' => 'odbc,pdo_odbc',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'freetype',
-    'Windows' => 'libjpeg,libavif,freetype,libwebp',
+    'Linux', 'Darwin' => '',
+    'Windows' => '',
 };
 
 // Please change your test base combination. We recommend testing with `common`.
