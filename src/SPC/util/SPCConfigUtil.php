@@ -42,6 +42,10 @@ class SPCConfigUtil
         if ($this->builder->hasCpp()) {
             $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
         }
+        // mimalloc must come first
+        if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
+            $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
+        }
         return [
             'cflags' => $cflags,
             'ldflags' => $ldflags,
