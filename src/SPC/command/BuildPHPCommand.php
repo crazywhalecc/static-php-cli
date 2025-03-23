@@ -116,6 +116,9 @@ class BuildPHPCommand extends BuildCommand
                     $a = explode('\\', $class);
                     return end($a) === $ext;
                 });
+                if (!$extension) {
+                    return false;
+                }
                 $reflector = new \ReflectionClass($extension);
                 $attributes = $reflector->getAttributes();
                 return array_find($attributes, fn ($attr) => $attr->getName() === DynamicExt::class) !== null;
