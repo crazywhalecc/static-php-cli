@@ -78,7 +78,6 @@
             "zlib"
         ],
         "lib-depends-windows": [
-            "openssl",
             "zlib",
             "libssh2",
             "nghttp2"
