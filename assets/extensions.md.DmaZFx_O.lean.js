@@ -1,0 +1,1 @@
+import{_ as t,c as d,o as e,a1 as s}from"./chunks/framework.gjrnbxUT.js";const c=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"extensions.md","filePath":"extensions.md"}'),y={name:"extensions.md"},r=s("",1),o=[r];function n(a,l,i,h,m,p){return e(),d("div",null,o)}const f=t(y,[["render",n]]);export{c as __pageData,f as default};
