@@ -95,8 +95,9 @@ class WindowsBuilder extends BuilderBase
 
         if (($logo = $this->getOption('with-micro-logo')) !== null) {
             // realpath
-            $logo = realpath($logo);
+            // $logo = realpath($logo);
             $micro_logo = '--enable-micro-logo=' . $logo . ' ';
+            copy($logo, SOURCE_PATH . '\php-src\\' . $logo);
         } else {
             $micro_logo = '';
         }
