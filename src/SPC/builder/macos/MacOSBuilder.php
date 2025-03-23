@@ -300,7 +300,8 @@ class MacOSBuilder extends UnixBuilderBase
             ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
             ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
             ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
-
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
         $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
         str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
         // move mimalloc to the beginning of libs

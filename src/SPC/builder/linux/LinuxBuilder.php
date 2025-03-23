@@ -311,6 +311,8 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
         $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
         str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
         // move mimalloc to the beginning of libs
