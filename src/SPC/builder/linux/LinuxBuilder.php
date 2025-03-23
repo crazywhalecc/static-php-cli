@@ -311,6 +311,8 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
         FileSystem::replaceFileStr(BUILD_BIN_PATH . '/php-config', 'prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"');
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
     }
 
     private function getMakeExtraVars(): array
