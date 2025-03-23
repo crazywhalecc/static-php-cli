@@ -895,6 +895,17 @@
             "path": "COPYING"
         }
     },
+    "xdebug": {
+        "type": "ghrel",
+        "repo": "xdebug/xdebug",
+        "match": "Source code",
+        "prefer-stable": true,
+        "provide-pre-built": false,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "xhprof": {
         "type": "url",
         "url": "https://pecl.php.net/get/xhprof",

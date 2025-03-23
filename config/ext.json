@@ -888,13 +888,16 @@
         ]
     },
     "xdebug": {
-        "type": "builtin",
+        "type": "external",
         "support": {
             "Windows": "wip",
             "BSD": "no",
             "Darwin": "no",
-            "Linux": "no"
+            "Linux": "wip"
         },
+        "lib-depends": [
+            "xdebug"
+        ],
         "notes": true
     },
     "xhprof": {

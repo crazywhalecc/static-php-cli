@@ -11,6 +11,7 @@ use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
+use SPC\util\DynamicExt;
 use SPC\util\GlobalEnvManager;
 use SPC\util\LicenseDumper;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -109,6 +110,18 @@ class BuildPHPCommand extends BuildCommand
             $include_suggest_lib = $this->getOption('with-suggested-libs');
             [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
             $display_libs = array_filter($libraries, fn ($lib) => in_array(Config::getLib($lib, 'type', 'lib'), ['lib', 'package']));
+            $dynamic_libs = $dynamic_exts = array_filter($extensions, function (string $ext) {
+                $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/builder/extension', 'SPC\builder\extension');
+                $extension = array_find($classes, function (string $class) use ($ext) {
+                    $a = explode('\\', $class);
+                    return end($a) === $ext;
+                });
+                $reflector = new \ReflectionClass($extension);
+                $attributes = $reflector->getAttributes();
+                return array_find($attributes, fn ($attr) => $attr->getName() === DynamicExt::class) !== null;
+            });
+            $extensions = array_diff($extensions, $dynamic_exts);
+            $libraries = array_diff($libraries, $dynamic_libs);
 
             // print info
             $indent_texts = [
@@ -153,7 +166,7 @@ class BuildPHPCommand extends BuildCommand
             $builder->proveLibs($libraries);
             // check extensions
             $builder->proveExts($extensions);
-            // validate libs and exts
+            // validate libs and extensions
             $builder->validateLibsAndExts();
 
             // clean builds and sources
@@ -182,6 +195,13 @@ class BuildPHPCommand extends BuildCommand
 
             // start to build
             $builder->buildPHP($rule);
+
+            if ($rule & BUILD_TARGET_EMBED) {
+                // build dynamic extensions
+                $builder->proveLibs($dynamic_libs);
+                // build or install libraries
+                $builder->setupLibs();
+            }
 
             // compile stopwatch :P
             $time = round(microtime(true) - START_TIME, 3);
@@ -217,7 +237,7 @@ class BuildPHPCommand extends BuildCommand
             file_put_contents(BUILD_ROOT_PATH . '/build-libraries.json', json_encode($libraries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             // export licenses
             $dumper = new LicenseDumper();
-            $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
+            $dumper->addExts($extensions)->addLibs($libraries)->addLibs($dynamic_libs)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
             $path = FileSystem::convertPath("{$build_root_path}/license/");
             logger()->info("License path{$fixed}: {$path}");
             return static::SUCCESS;
