@@ -69,14 +69,19 @@ class Downloader
             retry: self::getRetryTime()
         ), true);
 
-        if (($source['prefer-stable'] ?? false) === false) {
-            $url = $data[0]['tarball_url'];
-        } else {
-            $id = 0;
-            while ($data[$id]['prerelease'] === true) {
-                ++$id;
+        $url = null;
+        for ($i = 0; $i < count($data); ++$i) {
+            if (($data[$i]['prerelease'] ?? false) === true && ($source['prefer-stable'] ?? false)) {
+                continue;
             }
-            $url = $data[$id]['tarball_url'] ?? null;
+            if (!($source['match'] ?? null)) {
+                $url = $data[$i]['tarball_url'] ?? null;
+                break;
+            }
+            if (preg_match('|' . $source['match'] . '|', $data[$i]['tarball_url'])) {
+                $url = $data[$i]['tarball_url'];
+                break;
+            }
         }
         if (!$url) {
             throw new DownloaderException("failed to find {$name} source");

@@ -6,12 +6,12 @@ declare(strict_types=1);
 
 /**
  * This is GitHub Actions automatic test extension args generator.
- * You can edit $extensions, $with_libs and $base_combination.
+ * You can edit $test_php_version, $test_os, $zts, $no_strip, $upx, $prefer_pre_built, $extensions, $with_libs and $base_combination.
  */
 
 // --------------------------------- edit area ---------------------------------
 
-// test php version
+// test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
     '8.1',
     '8.2',
@@ -21,8 +21,8 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    'macos-13',
-    'macos-14',
+    // 'macos-13',
+    // 'macos-14',
     'ubuntu-latest',
     'windows-latest',
 ];
@@ -40,8 +40,8 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'odbc,pdo_odbc',
-    'Windows' => 'odbc,pdo_odbc',
+    'Linux', 'Darwin' => '',
+    'Windows' => 'mbstring,tokenizer,phar,curl,openssl',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).

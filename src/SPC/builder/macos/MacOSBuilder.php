@@ -148,10 +148,12 @@ class MacOSBuilder extends UnixBuilderBase
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
 
         // prepare build php envs
+        $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
+            'LIBS' => $mimallocLibs . getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
         ]);
 
         if ($this->getLib('postgresql')) {
@@ -298,6 +300,13 @@ class MacOSBuilder extends UnixBuilderBase
             ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
             ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
             ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
+        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
+        $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
+        str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
+        // move mimalloc to the beginning of libs
+        $php_config_str = preg_replace('/(libs=")(.*?)\s*(' . preg_quote(BUILD_LIB_PATH, '/') . '\/mimalloc\.o)\s*(.*?)"/', '$1$3 $2 $4"', $php_config_str);
+        FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
     }
 
     private function getMakeExtraVars(): array
