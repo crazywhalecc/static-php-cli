@@ -751,6 +751,12 @@
             "libiconv"
         ]
     },
+    "xdebug": {
+        "source": "xdebug",
+        "static-libs-unix": [
+            "xdebug.so"
+        ]
+    },
     "xz": {
         "source": "xz",
         "static-libs-unix": [
