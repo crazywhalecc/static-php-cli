@@ -78,7 +78,6 @@
             "zlib"
         ],
         "lib-depends-windows": [
-            "openssl",
             "zlib",
             "libssh2",
             "nghttp2"
@@ -670,6 +669,14 @@
             "libxslt",
             "ldap",
             "zstd"
+        ]
+    },
+    "postgresql-win": {
+        "source": "postgresql-win",
+        "static-libs": [
+            "libpq.lib",
+            "libpgport.lib",
+            "libpgcommon.lib"
         ]
     },
     "pthreads4w": {
