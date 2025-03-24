@@ -1,0 +1,1 @@
+import{_ as t,c as d,o as b,a1 as r}from"./chunks/framework.gjrnbxUT.js";const c=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"deps-map-ext.md","filePath":"deps-map-ext.md"}'),l={name:"deps-map-ext.md"},s=r("",8),i=[s];function e(o,p,a,n,m,q){return b(),d("div",null,i)}const g=t(l,[["render",e]]);export{c as __pageData,g as default};
