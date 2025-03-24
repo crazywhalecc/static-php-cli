@@ -677,15 +677,6 @@
             "libpq.lib",
             "libpgport.lib",
             "libpgcommon.lib"
-        ],
-        "lib-depends": [
-            "libiconv-win",
-            "libxml2",
-            "openssl",
-            "zlib"
-        ],
-        "lib-suggests": [
-            "zstd"
         ]
     },
     "pthreads4w": {

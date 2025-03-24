@@ -523,6 +523,7 @@
         },
         "type": "builtin",
         "arg-type": "with-prefix",
+        "arg-type-windows": "custom",
         "ext-depends": [
             "pdo",
             "pgsql"

@@ -4,20 +4,12 @@ declare(strict_types=1);
 
 namespace SPC\builder\windows\library;
 
-use SPC\store\FileSystem;
-
 class postgresql_win extends WindowsLibraryBase
 {
     public const NAME = 'postgresql-win';
 
     protected function build(): void
     {
-        $builddir = BUILD_ROOT_PATH;
-        $envs = '';
-
-        // reset cmake
-        FileSystem::resetDir($this->source_dir . '\build');
-
         copy($this->source_dir . '\pgsql\lib\libpq.lib', BUILD_LIB_PATH . '\libpq.lib');
         copy($this->source_dir . '\pgsql\lib\libpgport.lib', BUILD_LIB_PATH . '\libpgport.lib');
         copy($this->source_dir . '\pgsql\lib\libpgcommon.lib', BUILD_LIB_PATH . '\libpgcommon.lib');

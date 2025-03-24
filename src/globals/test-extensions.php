@@ -23,7 +23,7 @@ $test_php_version = [
 $test_os = [
     // 'macos-13',
     // 'macos-14',
-    // 'ubuntu-latest',
+    'ubuntu-latest',
     'windows-latest',
 ];
 
@@ -40,8 +40,8 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'gd',
-    'Windows' => 'bz2,ctype,curl,dom,filter,gd,iconv,mbstring,opcache,openssl,pdo,pdo_pgsql,pdo_sqlite,pgsql,phar,session,simplexml,sqlite3,tokenizer,xml,xmlwriter,yaml,zip,zlib',
+    'Linux', 'Darwin' => 'pgsql,pdo_pgsql',
+    'Windows' => 'pgsql,pdo_pgsql',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
