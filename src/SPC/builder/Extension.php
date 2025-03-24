@@ -266,7 +266,7 @@ class Extension
     {
         // prepare configure args
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->builder->arch_c_flags])
+            ->setEnv(['CFLAGS' => $this->builder->arch_c_flags ?? ''])
             ->execWithEnv(BUILD_BIN_PATH . '/phpize')
             ->execWithEnv('./configure ' . $this->getUnixConfigureArg() . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-static --disable-shared')
             ->execWithEnv('make clean')
