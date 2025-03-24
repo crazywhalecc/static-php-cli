@@ -27,6 +27,14 @@
         "webp"
       ]
     },
+    {
+      "name": "libheif",
+      "features": [
+        "aom",
+        "jpeg",
+        "hevc"
+      ]
+    },
     "libiconv",
     "libpng",
     "librabbitmq",
