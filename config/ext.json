@@ -919,15 +919,14 @@
     },
     "xdebug": {
         "type": "external",
+        "source": "xdebug",
+        "target": ["shared"],
         "support": {
             "Windows": "wip",
             "BSD": "no",
             "Darwin": "no",
             "Linux": "wip"
         },
-        "lib-depends": [
-            "xdebug"
-        ],
         "notes": true
     },
     "xhprof": {

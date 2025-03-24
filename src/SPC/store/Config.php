@@ -107,6 +107,21 @@ class Config
     }
 
     /**
+     * @throws WrongUsageException
+     * @throws FileSystemException
+     */
+    public static function getExtTarget(string $name): ?array
+    {
+        if (self::$ext === null) {
+            self::$ext = FileSystem::loadConfigArray('ext');
+        }
+        if (!isset(self::$ext[$name])) {
+            throw new WrongUsageException('ext [' . $name . '] is not supported yet');
+        }
+        return self::$ext[$name]['target'] ?? ['static', 'shared'];
+    }
+
+    /**
      * @throws FileSystemException
      * @throws WrongUsageException
      */

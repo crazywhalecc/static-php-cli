@@ -12,7 +12,7 @@ DOCKER_EXECUTABLE="docker"
 # shellcheck disable=SC2046
 if [ $(id -u) -ne 0 ]; then
     if ! docker info > /dev/null 2>&1; then
-        if [ "$SPC_USE_SUDO" != "yes" ]; then
+        if [ "$SPC_USE_SUDO" != "yes" ] && [ "$SPC_DOCKER_DEBUG" != "yes" ]; then
             echo "Docker command requires sudo"
             # shellcheck disable=SC2039
             echo -n 'To use sudo to run docker, run "export SPC_USE_SUDO=yes" and run command again'
@@ -145,4 +145,9 @@ echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"'
 # shellcheck disable=SC2086
 # shellcheck disable=SC2090
 
-$DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
+if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
+    echo -e "\e[033m* Debug mode enabled, run docker in interactive mode.\e[0m"
+    $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH
+else
+    $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
+fi
