@@ -671,6 +671,14 @@
             "zstd"
         ]
     },
+    "postgresql-win": {
+        "source": "postgresql-win",
+        "static-libs": [
+            "libpq.lib",
+            "libpgport.lib",
+            "libpgcommon.lib"
+        ]
+    },
     "pthreads4w": {
         "source": "pthreads4w",
         "static-libs-windows": [

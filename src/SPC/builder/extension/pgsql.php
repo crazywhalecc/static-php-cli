@@ -40,4 +40,16 @@ class pgsql extends Extension
         }
         return '--with-pgsql=' . BUILD_ROOT_PATH;
     }
+
+    /**
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     */
+    public function getWindowsConfigureArg(): string
+    {
+        if ($this->builder->getPHPVersionID() >= 80400) {
+            return '--with-pgsql';
+        }
+        return '--with-pgsql=' . BUILD_ROOT_PATH;
+    }
 }

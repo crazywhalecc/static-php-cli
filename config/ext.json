@@ -519,17 +519,20 @@
     },
     "pdo_pgsql": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "builtin",
         "arg-type": "with-prefix",
+        "arg-type-windows": "custom",
         "ext-depends": [
             "pdo",
             "pgsql"
         ],
-        "lib-depends": [
+        "lib-depends-unix": [
             "postgresql"
+        ],
+        "lib-depends-windows": [
+            "postgresql-win"
         ]
     },
     "pdo_sqlite": {
@@ -560,14 +563,16 @@
     },
     "pgsql": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "notes": true,
         "type": "builtin",
         "arg-type": "custom",
-        "lib-depends": [
+        "lib-depends-unix": [
             "postgresql"
+        ],
+        "lib-depends-windows": [
+            "postgresql-win"
         ]
     },
     "phar": {
