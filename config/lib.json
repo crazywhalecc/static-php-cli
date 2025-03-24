@@ -78,7 +78,6 @@
             "zlib"
         ],
         "lib-depends-windows": [
-            "openssl",
             "zlib",
             "libssh2",
             "nghttp2"
@@ -587,6 +586,12 @@
         "lib-suggests-windows": [
             "zstd",
             "openssl"
+        ]
+    },
+    "mimalloc": {
+        "source": "mimalloc",
+        "static-libs-unix": [
+            "mimalloc.o"
         ]
     },
     "ncurses": {

@@ -6,12 +6,12 @@ declare(strict_types=1);
 
 /**
  * This is GitHub Actions automatic test extension args generator.
- * You can edit $extensions, $with_libs and $base_combination.
+ * You can edit $test_php_version, $test_os, $zts, $no_strip, $upx, $prefer_pre_built, $extensions, $with_libs and $base_combination.
  */
 
 // --------------------------------- edit area ---------------------------------
 
-// test php version
+// test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
     '8.1',
     '8.2',
@@ -46,8 +46,8 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'freetype',
-    'Windows' => 'libjpeg,libavif,freetype,libwebp',
+    'Linux', 'Darwin' => '',
+    'Windows' => '',
 };
 
 // Please change your test base combination. We recommend testing with `common`.

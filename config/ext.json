@@ -427,7 +427,12 @@
         "notes": true
     },
     "odbc": {
+        "support": {
+            "BSD": "wip",
+            "Windows": "wip"
+        },
         "type": "builtin",
+        "arg-type-unix": "custom",
         "lib-depends-unix": [
             "unixodbc"
         ]
@@ -499,10 +504,17 @@
         ]
     },
     "pdo_odbc": {
+        "support": {
+            "BSD": "wip"
+        },
         "type": "builtin",
-        "arg-type": "with",
+        "arg-type": "custom",
         "lib-depends-unix": [
             "unixodbc"
+        ],
+        "ext-depends": [
+            "pdo",
+            "odbc"
         ]
     },
     "pdo_pgsql": {
