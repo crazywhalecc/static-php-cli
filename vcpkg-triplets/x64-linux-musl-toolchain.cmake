@@ -1,0 +1,5 @@
+﻿set(CMAKE_C_COMPILER /usr/local/musl/bin/x86_64-linux-musl-gcc)
+set(CMAKE_CXX_COMPILER /usr/local/musl/bin/x86_64-linux-musl-g++)
+set(CMAKE_AR /usr/local/musl/bin/x86_64-linux-musl-ar)
+set(CMAKE_LINKER /usr/local/musl/bin/x86_64-linux-musl-ld.gold)
+set(CMAKE_CROSSCOMPILING TRUE)
