@@ -920,7 +920,9 @@
     "xdebug": {
         "type": "external",
         "source": "xdebug",
-        "target": ["shared"],
+        "target": [
+            "shared"
+        ],
         "support": {
             "Windows": "wip",
             "BSD": "no",
