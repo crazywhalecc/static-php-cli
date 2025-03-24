@@ -61,6 +61,18 @@ class BuildPHPCommand extends BuildCommand
         // parse rule with options
         $rule = $this->parseRules($dynamic_extensions);
 
+        // check dynamic extension build env
+        // macOS must use --no-strip option
+        if (!empty($dynamic_extensions) && PHP_OS_FAMILY === 'Darwin' && !$this->getOption('no-strip')) {
+            $this->output->writeln('MacOS does not support dynamic extension loading with stripped binary, please use --no-strip option!');
+            return static::FAILURE;
+        }
+        // linux must build with glibc
+        if (!empty($dynamic_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc') {
+            $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');
+            return static::FAILURE;
+        }
+
         if ($rule === BUILD_TARGET_NONE || $rule === BUILD_TARGET_DEV) {
             $this->output->writeln('<error>Please add at least one build SAPI!</error>');
             $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
@@ -124,7 +136,7 @@ class BuildPHPCommand extends BuildCommand
                 'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
                 'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
             ];
-            if (!empty($dynamic_exts) || ($rule & BUILD_TARGET_EMBED) || ($rule & BUILD_TARGET_DEV)) {
+            if (!empty($dynamic_extensions) || ($rule & BUILD_TARGET_EMBED) || ($rule & BUILD_TARGET_DEV)) {
                 $indent_texts['Build Dev'] = 'yes';
             }
             if (!empty($this->input->getOption('with-config-file-path'))) {
@@ -192,7 +204,8 @@ class BuildPHPCommand extends BuildCommand
             $builder->buildPHP($rule);
 
             // build dynamic extensions if needed
-            if (!empty($dynamic_exts)) {
+            if (!empty($dynamic_extensions)) {
+                logger()->info('Building dynamic extensions ...');
                 $builder->buildDynamicExts();
             }
 
@@ -223,6 +236,12 @@ class BuildPHPCommand extends BuildCommand
             if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM && PHP_OS_FAMILY !== 'Windows') {
                 $path = FileSystem::convertPath("{$build_root_path}/bin/php-fpm");
                 logger()->info("Static php-fpm binary path{$fixed}: {$path}");
+            }
+            if (!empty($dynamic_extensions)) {
+                foreach ($dynamic_extensions as $ext) {
+                    $path = FileSystem::convertPath("{$build_root_path}/ext/{$ext}.so");
+                    logger()->info("Dynamic extension path{$fixed}: {$path}");
+                }
             }
 
             // export metadata

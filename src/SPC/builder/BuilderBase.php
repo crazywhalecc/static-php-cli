@@ -122,9 +122,12 @@ abstract class BuilderBase
      *
      * @return Extension[]
      */
-    public function getExts(): array
+    public function getExts(bool $including_dynamic = true): array
     {
-        return $this->exts;
+        if ($including_dynamic) {
+            return $this->exts;
+        }
+        return array_filter($this->exts, fn ($ext) => !$ext->isBuildShared());
     }
 
     /**
@@ -136,7 +139,7 @@ abstract class BuilderBase
     public function hasCpp(): bool
     {
         // judge cpp-extension
-        $exts = array_keys($this->getExts());
+        $exts = array_keys($this->getExts(false));
         foreach ($exts as $ext) {
             if (Config::getExt($ext, 'cpp-extension', false) === true) {
                 return true;
@@ -170,9 +173,20 @@ abstract class BuilderBase
      * @throws \Throwable|WrongUsageException
      * @internal
      */
-    public function proveExts(array $extensions, bool $skip_check_deps = false): void
+    public function proveExts(array $extensions, bool $skip_check_deps = false, array $shared_build_extensions = []): void
     {
         CustomExt::loadCustomExt();
+        // judge ext
+        foreach ($extensions as $ext) {
+            // if extension does not support static && no shared build, throw exception
+            if (!in_array('static', Config::getExtTarget($ext)) && !in_array($ext, $shared_build_extensions)) {
+                throw new WrongUsageException('Extension [' . $ext . '] does not support static build !');
+            }
+            // if extension does not support shared && no static build, throw exception
+            if (!in_array('shared', Config::getExtTarget($ext)) && !in_array($ext, $shared_build_extensions)) {
+                throw new WrongUsageException('Extension [' . $ext . '] does not support shared build !');
+            }
+        }
         $this->emitPatchPoint('before-php-extract');
         SourceManager::initSource(sources: ['php-src']);
         $this->emitPatchPoint('after-php-extract');
@@ -186,15 +200,21 @@ abstract class BuilderBase
         $this->emitPatchPoint('after-exts-extract');
         foreach ($extensions as $extension) {
             $class = CustomExt::getExtClass($extension);
+            /** @var Extension $ext */
             $ext = new $class($extension, $this);
             $this->addExt($ext);
+            if (in_array($extension, $shared_build_extensions)) {
+                $ext->setBuildShared();
+            } else {
+                $ext->setBuildStatic();
+            }
         }
 
         if ($skip_check_deps) {
             return;
         }
 
-        foreach ($this->exts as $ext) {
+        foreach ($this->getExts() as $ext) {
             $ext->checkDependency();
         }
         $this->ext_list = $extensions;
@@ -207,6 +227,17 @@ abstract class BuilderBase
      */
     abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE);
 
+    public function buildDynamicExts(): void
+    {
+        foreach ($this->getExts() as $ext) {
+            if (!$ext->isBuildShared()) {
+                continue;
+            }
+            logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
+            $ext->buildShared();
+        }
+    }
+
     /**
      * Generate extension enable arguments for configure.
      * e.g. --enable-mbstring
@@ -214,10 +245,10 @@ abstract class BuilderBase
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function makeExtensionArgs(): string
+    public function makeStaticExtensionArgs(): string
     {
         $ret = [];
-        foreach ($this->exts as $ext) {
+        foreach ($this->getExts(false) as $ext) {
             logger()->info($ext->getName() . ' is using ' . $ext->getConfigureArg());
             $ret[] = trim($ext->getConfigureArg());
         }
@@ -396,7 +427,7 @@ abstract class BuilderBase
         foreach ($this->libs as $lib) {
             $lib->validate();
         }
-        foreach ($this->exts as $ext) {
+        foreach ($this->getExts() as $ext) {
             $ext->validate();
         }
     }
@@ -441,7 +472,7 @@ abstract class BuilderBase
     {
         $php = "<?php\n\necho '[micro-test-start]' . PHP_EOL;\n";
 
-        foreach ($this->getExts() as $ext) {
+        foreach ($this->getExts(false) as $ext) {
             $ext_name = $ext->getDistName();
             if (!empty($ext_name)) {
                 $php .= "echo 'Running micro with {$ext_name} test' . PHP_EOL;\n";

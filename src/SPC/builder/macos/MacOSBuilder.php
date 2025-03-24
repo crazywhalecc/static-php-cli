@@ -146,6 +146,7 @@ class MacOSBuilder extends UnixBuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enableDev = ($build_target & BUILD_TARGET_DEV) === BUILD_TARGET_DEV;
 
         // prepare build php envs
         $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
@@ -176,7 +177,7 @@ class MacOSBuilder extends UnixBuilderBase
                 $config_file_scan_dir .
                 $json_74 .
                 $zts .
-                $this->makeExtensionArgs() . ' ' .
+                $this->makeStaticExtensionArgs() . ' ' .
                 $envs_build_php
             );
 
@@ -196,6 +197,11 @@ class MacOSBuilder extends UnixBuilderBase
         if ($enableMicro) {
             logger()->info('building micro');
             $this->buildMicro();
+        }
+        if ($enableDev && !$enableEmbed) {
+            // install dynamic php extension building
+            logger()->info('building dynamic php extension dev dependencies');
+            $this->buildPhpDev();
         }
         if ($enableEmbed) {
             logger()->info('building embed');
@@ -300,13 +306,15 @@ class MacOSBuilder extends UnixBuilderBase
             ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
             ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
             ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
-        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
-        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
-        $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
-        str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
-        // move mimalloc to the beginning of libs
-        $php_config_str = preg_replace('/(libs=")(.*?)\s*(' . preg_quote(BUILD_LIB_PATH, '/') . '\/mimalloc\.o)\s*(.*?)"/', '$1$3 $2 $4"', $php_config_str);
-        FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
+        $this->patchPhpScripts();
+    }
+
+    protected function buildPhpDev(): void
+    {
+        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
+        shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install-build install-programs install-headers");
+        $this->patchPhpScripts();
     }
 
     private function getMakeExtraVars(): array

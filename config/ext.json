@@ -924,8 +924,8 @@
         "support": {
             "Windows": "wip",
             "BSD": "no",
-            "Darwin": "no",
-            "Linux": "wip"
+            "Darwin": "partial",
+            "Linux": "partial"
         },
         "notes": true
     },

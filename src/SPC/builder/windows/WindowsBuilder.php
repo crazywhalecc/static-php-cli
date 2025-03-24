@@ -119,7 +119,7 @@ class WindowsBuilder extends BuilderBase
                 ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
                 ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
                 $config_file_scan_dir .
-                "{$this->makeExtensionArgs()} " .
+                "{$this->makeStaticExtensionArgs()} " .
                 $zts .
                 '"'
             );
@@ -286,7 +286,7 @@ class WindowsBuilder extends BuilderBase
                 throw new RuntimeException('cli failed sanity check');
             }
 
-            foreach ($this->exts as $ext) {
+            foreach ($this->getExts(false) as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
                 $ext->runCliCheckWindows();
             }
