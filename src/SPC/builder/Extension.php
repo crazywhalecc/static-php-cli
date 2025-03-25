@@ -254,6 +254,12 @@ class Extension
         // do nothing, just throw wrong usage exception if not valid
     }
 
+    /**
+     * Build shared extension
+     *
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     */
     public function buildShared(): void
     {
         match (PHP_OS_FAMILY) {
@@ -262,13 +268,18 @@ class Extension
         };
     }
 
+    /**
+     * Build shared extension for Unix
+     *
+     * @throws RuntimeException
+     */
     public function buildUnixShared(): void
     {
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv(['CFLAGS' => $this->builder->arch_c_flags ?? ''])
             ->execWithEnv(BUILD_BIN_PATH . '/phpize')
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg() . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-static --disable-shared')
+            ->execWithEnv('./configure ' . $this->getUnixConfigureArg() . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency);
 
