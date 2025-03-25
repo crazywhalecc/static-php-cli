@@ -227,7 +227,7 @@ abstract class BuilderBase
      */
     abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE);
 
-    public function buildDynamicExts(): void
+    public function buildSharedExts(): void
     {
         foreach ($this->getExts() as $ext) {
             if (!$ext->isBuildShared()) {

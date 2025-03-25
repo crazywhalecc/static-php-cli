@@ -149,7 +149,6 @@ class LinuxBuilder extends UnixBuilderBase
         $enable_fpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enable_micro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enable_embed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
-        $emable_dev = ($build_target & BUILD_TARGET_DEV) === BUILD_TARGET_DEV;
 
         $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         // prepare build php envs
@@ -203,11 +202,6 @@ class LinuxBuilder extends UnixBuilderBase
         if ($enable_micro) {
             logger()->info('building micro');
             $this->buildMicro();
-        }
-        if ($emable_dev && !$enable_embed) {
-            // install dynamic php extension building
-            logger()->info('building dynamic php extension dev dependencies');
-            $this->buildPhpDev();
         }
         if ($enable_embed) {
             logger()->info('building embed');
@@ -317,14 +311,6 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
-        $this->patchPhpScripts();
-    }
-
-    protected function buildPhpDev(): void
-    {
-        $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install-build install-programs install-headers");
         $this->patchPhpScripts();
     }
 
