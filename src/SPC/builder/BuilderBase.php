@@ -202,12 +202,12 @@ abstract class BuilderBase
             $class = CustomExt::getExtClass($extension);
             /** @var Extension $ext */
             $ext = new $class($extension, $this);
-            $this->addExt($ext);
             if (in_array($extension, $shared_build_extensions)) {
                 $ext->setBuildShared();
             } else {
                 $ext->setBuildStatic();
             }
+            $this->addExt($ext);
         }
 
         if ($skip_check_deps) {
