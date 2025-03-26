@@ -9,14 +9,15 @@ use SPC\builder\BuilderProvider;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\store\Config;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Input\InputInterface;
 
 class SPCConfigUtil
 {
-    public function __construct(private ?BuilderBase $builder = null, ?InputInterface $input = null)
+    private ?BuilderBase $builder = null;
+
+    public function __construct(?BuilderBase $builder = null)
     {
-        if ($builder === null) {
-            $this->builder = BuilderProvider::makeBuilderByInput($input ?? new ArgvInput());
+        if ($builder !== null) {
+            $this->builder = $builder; // BuilderProvider::makeBuilderByInput($input ?? new ArgvInput());
         }
     }
 
@@ -25,8 +26,11 @@ class SPCConfigUtil
         [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
         ob_start();
-        $this->builder->proveLibs($libraries);
-        $this->builder->proveExts($extensions);
+        if ($this->builder === null) {
+            $this->builder = BuilderProvider::makeBuilderByInput(new ArgvInput());
+            $this->builder->proveLibs($libraries);
+            $this->builder->proveExts($extensions);
+        }
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $libs = $this->getLibsString($libraries);
