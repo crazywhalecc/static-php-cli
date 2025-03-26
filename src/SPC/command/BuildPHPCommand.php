@@ -238,8 +238,8 @@ class BuildPHPCommand extends BuildCommand
             }
             if (!empty($shared_extensions)) {
                 foreach ($shared_extensions as $ext) {
-                    $path = FileSystem::convertPath("{$build_root_path}/ext/{$ext}.so");
-                    logger()->info("Dynamic extension path{$fixed}: {$path}");
+                    $path = FileSystem::convertPath("{$build_root_path}/lib/{$ext}.so");
+                    logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
                 }
             }
 

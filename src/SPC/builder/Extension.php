@@ -303,6 +303,9 @@ class Extension
 
     public function setBuildStatic(): void
     {
+        if (!in_array('static', Config::getExtTarget($this->name))) {
+            throw new WrongUsageException("Extension [{$this->name}] does not support static build !");
+        }
         $this->build_static = true;
     }
 
