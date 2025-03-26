@@ -27,7 +27,7 @@ class BuildPHPCommand extends BuildCommand
 
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
-        $this->addOption('with-shared', 'D', InputOption::VALUE_REQUIRED, 'Shared extensions to build, comma separated', '');
+        $this->addOption('build-shared', 'D', InputOption::VALUE_REQUIRED, 'Shared extensions to build, comma separated', '');
         $this->addOption('build-micro', null, null, 'Build micro SAPI');
         $this->addOption('build-cli', null, null, 'Build cli SAPI');
         $this->addOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
@@ -53,7 +53,7 @@ class BuildPHPCommand extends BuildCommand
         // transform string to array
         $libraries = array_map('trim', array_filter(explode(',', $this->getOption('with-libs'))));
         // transform string to array
-        $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('with-shared'))));
+        $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
         // transform string to array
         $static_extensions = $this->parseExtensionList($this->getArgument('extensions'));
 
