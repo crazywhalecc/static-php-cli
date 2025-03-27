@@ -122,9 +122,9 @@ abstract class BuilderBase
      *
      * @return Extension[]
      */
-    public function getExts(bool $including_dynamic = true): array
+    public function getExts(bool $including_shared = true): array
     {
-        if ($including_dynamic) {
+        if ($including_shared) {
             return $this->exts;
         }
         return array_filter($this->exts, fn ($ext) => !$ext->isBuildShared());
@@ -173,18 +173,20 @@ abstract class BuilderBase
      * @throws \Throwable|WrongUsageException
      * @internal
      */
-    public function proveExts(array $extensions, bool $skip_check_deps = false, array $shared_build_extensions = []): void
+    public function proveExts(array $static_extensions, array $shared_extensions = [], bool $skip_check_deps = false): void
     {
         CustomExt::loadCustomExt();
         // judge ext
-        foreach ($extensions as $ext) {
-            // if extension does not support static && no shared build, throw exception
-            if (!in_array('static', Config::getExtTarget($ext)) && !in_array($ext, $shared_build_extensions)) {
-                throw new WrongUsageException('Extension [' . $ext . '] does not support static build !');
+        foreach ($static_extensions as $ext) {
+            // if extension does not support static build, throw exception
+            if (!in_array('static', Config::getExtTarget($ext))) {
+                throw new WrongUsageException('Extension [' . $ext . '] does not support static build!');
             }
-            // if extension does not support shared && no static build, throw exception
-            if (!in_array('shared', Config::getExtTarget($ext)) && !in_array($ext, $shared_build_extensions)) {
-                throw new WrongUsageException('Extension [' . $ext . '] does not support shared build !');
+        }
+        foreach ($shared_extensions as $ext) {
+            // if extension does not support shared build, throw exception
+            if (!in_array('shared', Config::getExtTarget($ext)) && !in_array($ext, $shared_extensions)) {
+                throw new WrongUsageException('Extension [' . $ext . '] does not support shared build!');
             }
         }
         $this->emitPatchPoint('before-php-extract');
@@ -196,16 +198,17 @@ abstract class BuilderBase
             $this->emitPatchPoint('after-micro-extract');
         }
         $this->emitPatchPoint('before-exts-extract');
-        SourceManager::initSource(exts: $extensions);
+        SourceManager::initSource(exts: $static_extensions);
         $this->emitPatchPoint('after-exts-extract');
-        foreach ($extensions as $extension) {
+        foreach ([...$static_extensions, ...$shared_extensions] as $extension) {
             $class = CustomExt::getExtClass($extension);
             /** @var Extension $ext */
             $ext = new $class($extension, $this);
-            if (in_array($extension, $shared_build_extensions)) {
-                $ext->setBuildShared();
-            } else {
+            if (in_array($extension, $static_extensions)) {
                 $ext->setBuildStatic();
+            }
+            if (in_array($extension, $shared_extensions)) {
+                $ext->setBuildShared();
             }
             $this->addExt($ext);
         }
@@ -217,7 +220,7 @@ abstract class BuilderBase
         foreach ($this->getExts() as $ext) {
             $ext->checkDependency();
         }
-        $this->ext_list = $extensions;
+        $this->ext_list = [...$static_extensions, ...$shared_extensions];
     }
 
     /**
