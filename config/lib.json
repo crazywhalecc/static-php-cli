@@ -281,8 +281,7 @@
         "headers-unix": [
             "ares.h",
             "ares_dns.h",
-            "ares_nameser.h",
-            "ares_rules.h"
+            "ares_nameser.h"
         ]
     },
     "libde265": {
@@ -749,12 +748,6 @@
         ],
         "lib-depends": [
             "libiconv"
-        ]
-    },
-    "xdebug": {
-        "source": "xdebug",
-        "static-libs-unix": [
-            "xdebug.so"
         ]
     },
     "xz": {

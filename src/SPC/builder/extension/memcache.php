@@ -12,7 +12,7 @@ use SPC\util\CustomExt;
 #[CustomExt('memcache')]
 class memcache extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--enable-memcache --with-zlib-dir=' . BUILD_ROOT_PATH;
     }

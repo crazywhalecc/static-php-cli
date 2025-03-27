@@ -43,7 +43,7 @@ class SourcePatcher
      */
     public static function patchBeforeBuildconf(BuilderBase $builder): void
     {
-        foreach ($builder->getExts() as $ext) {
+        foreach ($builder->getExts(false) as $ext) {
             if ($ext->patchBeforeBuildconf() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
             }
@@ -86,7 +86,7 @@ class SourcePatcher
      */
     public static function patchBeforeConfigure(BuilderBase $builder): void
     {
-        foreach ($builder->getExts() as $ext) {
+        foreach ($builder->getExts(false) as $ext) {
             if ($ext->patchBeforeConfigure() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before configure');
             }
@@ -253,7 +253,7 @@ class SourcePatcher
         // }
 
         // call extension patch before make
-        foreach ($builder->getExts() as $ext) {
+        foreach ($builder->getExts(false) as $ext) {
             if ($ext->patchBeforeMake() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before make');
             }

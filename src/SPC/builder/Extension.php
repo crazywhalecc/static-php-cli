@@ -14,6 +14,12 @@ class Extension
 {
     protected array $dependencies = [];
 
+    protected bool $build_shared = false;
+
+    protected bool $build_static = false;
+
+    protected string $source_dir;
+
     /**
      * @throws FileSystemException
      * @throws RuntimeException
@@ -29,6 +35,18 @@ class Extension
         }
         if (PHP_OS_FAMILY === 'Windows' && $unix_only) {
             throw new RuntimeException("{$ext_type} extension {$name} is not supported on Windows platform");
+        }
+        // set source_dir for builtin
+        if ($ext_type === 'builtin') {
+            $this->source_dir = SOURCE_PATH . '/php-src/ext/' . $this->name;
+        } else {
+            $source = Config::getExt($this->name, 'source');
+            if ($source === null) {
+                throw new RuntimeException("{$ext_type} extension {$name} source not found");
+            }
+            $source_path = Config::getSource($source)['path'] ?? null;
+            $source_path = $source_path === null ? SOURCE_PATH . '/' . $source : SOURCE_PATH . '/' . $source_path;
+            $this->source_dir = $source_path;
         }
     }
 
@@ -132,7 +150,7 @@ class Extension
         // Windows is not supported yet
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '';
     }
@@ -165,6 +183,17 @@ class Extension
     public function patchBeforeMake(): bool
     {
         return false;
+    }
+
+    /**
+     * Run shared extension check when cli is enabled
+     */
+    public function runSharedExtensionCheckUnix(): void
+    {
+        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "extension=' . BUILD_LIB_PATH . '/' . $this->getName() . '.so" --ri ' . $this->getName());
+        if ($ret !== 0) {
+            throw new RuntimeException($this->getName() . '.so failed to load');
+        }
     }
 
     /**
@@ -232,6 +261,43 @@ class Extension
     }
 
     /**
+     * Build shared extension
+     *
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     */
+    public function buildShared(): void
+    {
+        match (PHP_OS_FAMILY) {
+            'Darwin', 'Linux' => $this->buildUnixShared(),
+            default => throw new WrongUsageException(PHP_OS_FAMILY . ' build shared extensions is not supported yet'),
+        };
+    }
+
+    /**
+     * Build shared extension for Unix
+     *
+     * @throws RuntimeException
+     */
+    public function buildUnixShared(): void
+    {
+        // prepare configure args
+        shell()->cd($this->source_dir)
+            ->setEnv(['CFLAGS' => $this->builder->arch_c_flags ?? ''])
+            ->execWithEnv(BUILD_BIN_PATH . '/phpize')
+            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
+            ->execWithEnv('make clean')
+            ->execWithEnv('make -j' . $this->builder->concurrency);
+
+        // copy shared library
+        copy($this->source_dir . '/modules/' . $this->getDistName() . '.so', BUILD_LIB_PATH . '/' . $this->getDistName() . '.so');
+        // check shared extension with php-cli
+        if (file_exists(BUILD_BIN_PATH . '/php')) {
+            $this->runSharedExtensionCheckUnix();
+        }
+    }
+
+    /**
      * Get current extension version
      *
      * @return null|string Version string or null
@@ -239,6 +305,32 @@ class Extension
     public function getExtVersion(): ?string
     {
         return null;
+    }
+
+    public function setBuildStatic(): void
+    {
+        if (!in_array('static', Config::getExtTarget($this->name))) {
+            throw new WrongUsageException("Extension [{$this->name}] does not support static build!");
+        }
+        $this->build_static = true;
+    }
+
+    public function setBuildShared(): void
+    {
+        if (!in_array('shared', Config::getExtTarget($this->name))) {
+            throw new WrongUsageException("Extension [{$this->name}] does not support shared build!");
+        }
+        $this->build_shared = true;
+    }
+
+    public function isBuildShared(): bool
+    {
+        return $this->build_shared;
+    }
+
+    public function isBuildStatic(): bool
+    {
+        return $this->build_static;
     }
 
     /**

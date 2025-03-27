@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('dba')]
 class dba extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $qdbm = $this->builder->getLib('qdbm') ? (' --with-qdbm=' . BUILD_ROOT_PATH) : '';
         return '--enable-dba' . $qdbm;

@@ -26,7 +26,7 @@ class snappy extends Extension
         return true;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--enable-snappy --with-snappy-includedir="' . BUILD_ROOT_PATH . '"';
     }

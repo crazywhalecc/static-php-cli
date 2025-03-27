@@ -165,7 +165,7 @@ abstract class BaseCommand extends Command
                 return SPC_EXTENSION_ALIAS[$lower];
             }
             return $lower;
-        }, is_array($ext_list) ? $ext_list : explode(',', $ext_list));
+        }, is_array($ext_list) ? $ext_list : array_filter(explode(',', $ext_list)));
 
         // filter internals
         return array_values(array_filter($ls, function ($x) {

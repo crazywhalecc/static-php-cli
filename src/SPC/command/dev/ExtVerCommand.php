@@ -6,7 +6,6 @@ namespace SPC\command\dev;
 
 use SPC\builder\BuilderProvider;
 use SPC\command\BaseCommand;
-use SPC\store\Config;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,8 +30,7 @@ class ExtVerCommand extends BaseCommand
         // Get lib object
         $builder = BuilderProvider::makeBuilderByInput($this->input);
 
-        $ext_conf = Config::getExt($this->getArgument('extension'));
-        $builder->proveExts([$this->getArgument('extension')], true);
+        $builder->proveExts([$this->getArgument('extension')], [], true);
 
         // Check whether lib is extracted
         // if (!is_dir(SOURCE_PATH . '/' . $this->getArgument('library'))) {

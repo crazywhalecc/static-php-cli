@@ -33,7 +33,7 @@ class imap extends Extension
         }
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--with-imap=' . BUILD_ROOT_PATH;
         if ($this->builder->getLib('openssl') !== null) {

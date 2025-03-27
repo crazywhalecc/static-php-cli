@@ -914,11 +914,9 @@
         }
     },
     "xdebug": {
-        "type": "ghrel",
-        "repo": "xdebug/xdebug",
-        "match": "Source code",
-        "prefer-stable": true,
-        "provide-pre-built": false,
+        "type": "url",
+        "url": "https://pecl.php.net/get/xdebug",
+        "filename": "xdebug.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"

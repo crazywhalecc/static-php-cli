@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('gd')]
 class gd extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--enable-gd';
         $arg .= $this->builder->getLib('freetype') ? ' --with-freetype' : '';

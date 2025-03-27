@@ -146,7 +146,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 throw new RuntimeException("cli failed sanity check: ret[{$ret}]. out[{$raw_output}]");
             }
 
-            foreach ($this->exts as $ext) {
+            foreach ($this->getExts(false) as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
                 $ext->runCliCheckUnix();
             }
@@ -237,5 +237,30 @@ abstract class UnixBuilderBase extends BuilderBase
     {
         logger()->info('cleaning up');
         shell()->cd(SOURCE_PATH . '/php-src')->exec('make clean');
+    }
+
+    /**
+     * Patch phpize and php-config if needed
+     * @throws FileSystemException
+     */
+    protected function patchPhpScripts(): void
+    {
+        // patch phpize
+        if (file_exists(BUILD_BIN_PATH . '/phpize')) {
+            logger()->debug('Patching phpize prefix');
+            FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
+            FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
+        }
+        // patch php-config
+        if (file_exists(BUILD_BIN_PATH . '/php-config')) {
+            logger()->debug('Patching php-config prefix and libs order');
+            $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
+            $php_config_str = str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
+            // move mimalloc to the beginning of libs
+            $php_config_str = preg_replace('/(libs=")(.*?)\s*(' . preg_quote(BUILD_LIB_PATH, '/') . '\/mimalloc\.o)\s*(.*?)"/', '$1$3 $2 $4"', $php_config_str);
+            // move lstdc++ to the end of libs
+            $php_config_str = preg_replace('/(libs=")(.*?)\s*(-lstdc\+\+)\s*(.*?)"/', '$1$2 $4 $3"', $php_config_str);
+            FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
+        }
     }
 }

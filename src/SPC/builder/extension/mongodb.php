@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('mongodb')]
 class mongodb extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = ' --enable-mongodb ';
         $arg .= ' --with-mongodb-system-libs=no --with-mongodb-client-side-encryption=no ';

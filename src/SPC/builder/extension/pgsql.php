@@ -33,7 +33,7 @@ class pgsql extends Extension
      * @throws WrongUsageException
      * @throws RuntimeException
      */
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         if ($this->builder->getPHPVersionID() >= 80400) {
             return '--with-pgsql PGSQL_CFLAGS=-I' . BUILD_INCLUDE_PATH . ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' -lpq -lpgport -lpgcommon"';

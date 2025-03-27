@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('enchant')]
 class enchant extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $glibs = [
             '/Users/jerry/project/git-project/static-php-cli/buildroot/lib/libgio-2.0.a',

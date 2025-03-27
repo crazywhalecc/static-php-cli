@@ -21,7 +21,7 @@ class spx extends Extension
         }
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--enable-spx';
         if ($this->builder->getExt('zlib') === null) {

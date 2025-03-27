@@ -13,7 +13,7 @@ use SPC\util\CustomExt;
 #[CustomExt('event')]
 class event extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--with-event-core --with-event-extra --with-event-libevent-dir=' . BUILD_ROOT_PATH;
         if ($this->builder->getLib('openssl')) {
