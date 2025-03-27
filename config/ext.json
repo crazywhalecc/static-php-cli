@@ -771,6 +771,10 @@
             "Windows": "no",
             "BSD": "wip"
         },
+        "target": [
+            "static",
+            "shared"
+        ],
         "notes": true,
         "type": "external",
         "source": "swoole",
@@ -1043,6 +1047,10 @@
         "support": {
             "BSD": "wip"
         },
+        "target": [
+            "static",
+            "shared"
+        ],
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",

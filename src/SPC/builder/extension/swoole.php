@@ -35,7 +35,7 @@ class swoole extends Extension
         return null;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         // enable swoole
         $arg = '--enable-swoole';
@@ -49,7 +49,9 @@ class swoole extends Extension
 
         // additional feature: c-ares, brotli, nghttp2 (can be disabled, but we enable it by default in config to support full network feature)
         $arg .= $this->builder->getLib('libcares') ? ' --enable-cares' : '';
-        $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : '';
+        if (!$shared) {
+            $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : '';
+        }
         $arg .= $this->builder->getLib('nghttp2') ? (' --with-nghttp2-dir=' . BUILD_ROOT_PATH) : '';
 
         // additional feature: swoole-pgsql, it should depend on lib [postgresql], but it will lack of CFLAGS etc.

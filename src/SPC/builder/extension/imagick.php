@@ -22,7 +22,7 @@ class imagick extends Extension
         return true;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--with-imagick=' . BUILD_ROOT_PATH;
     }

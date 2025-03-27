@@ -51,9 +51,9 @@ class SPCConfigUtil
             $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
         }
         return [
-            'cflags' => $cflags,
-            'ldflags' => $ldflags,
-            'libs' => $libs,
+            'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
+            'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
+            'libs' => trim(getenv('LIBS') . ' ' . $libs),
         ];
     }
 

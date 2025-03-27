@@ -15,7 +15,7 @@ class xdebug extends Extension
     {
         [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "zend_extension=' . BUILD_LIB_PATH . '/xdebug.so" --ri xdebug');
         if ($ret !== 0) {
-            throw new RuntimeException('xdebug.so not found');
+            throw new RuntimeException('xdebug.so failed to load.');
         }
     }
 }

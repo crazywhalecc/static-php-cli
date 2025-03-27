@@ -198,7 +198,7 @@ abstract class BuilderBase
             $this->emitPatchPoint('after-micro-extract');
         }
         $this->emitPatchPoint('before-exts-extract');
-        SourceManager::initSource(exts: $static_extensions);
+        SourceManager::initSource(exts: [...$static_extensions, ...$shared_extensions]);
         $this->emitPatchPoint('after-exts-extract');
         foreach ([...$static_extensions, ...$shared_extensions] as $extension) {
             $class = CustomExt::getExtClass($extension);

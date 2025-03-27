@@ -150,7 +150,7 @@ class Extension
         // Windows is not supported yet
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '';
     }
@@ -188,7 +188,13 @@ class Extension
     /**
      * Run shared extension check when cli is enabled
      */
-    public function runSharedExtensionCheckUnix(): void {}
+    public function runSharedExtensionCheckUnix(): void
+    {
+        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "extension=' . BUILD_LIB_PATH . '/' . $this->getName() . '.so" --ri ' . $this->getName());
+        if ($ret !== 0) {
+            throw new RuntimeException($this->getName() . '.so failed to load');
+        }
+    }
 
     /**
      * @throws RuntimeException
@@ -279,7 +285,7 @@ class Extension
         shell()->cd($this->source_dir)
             ->setEnv(['CFLAGS' => $this->builder->arch_c_flags ?? ''])
             ->execWithEnv(BUILD_BIN_PATH . '/phpize')
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg() . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
+            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency);
 
@@ -304,15 +310,15 @@ class Extension
     public function setBuildStatic(): void
     {
         if (!in_array('static', Config::getExtTarget($this->name))) {
-            throw new WrongUsageException("Extension [{$this->name}] does not support static build !");
+            throw new WrongUsageException("Extension [{$this->name}] does not support static build!");
         }
         $this->build_static = true;
     }
 
     public function setBuildShared(): void
     {
-        if (!in_array('shared', Config::getExtTarget($this->name)) || Config::getExt($this->name, 'type') === 'builtin') {
-            throw new WrongUsageException("Extension [{$this->name}] does not support shared build !");
+        if (!in_array('shared', Config::getExtTarget($this->name))) {
+            throw new WrongUsageException("Extension [{$this->name}] does not support shared build!");
         }
         $this->build_shared = true;
     }
