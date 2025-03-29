@@ -24,7 +24,7 @@ $test_os = [
     // 'macos-13',
     // 'macos-14',
     'ubuntu-latest',
-    'windows-latest',
+    // 'windows-latest',
 ];
 
 // whether enable thread safe
@@ -40,7 +40,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'pgsql,pdo_pgsql',
+    'Linux', 'Darwin' => 'imagick',
     'Windows' => 'pgsql,pdo_pgsql',
 };
 

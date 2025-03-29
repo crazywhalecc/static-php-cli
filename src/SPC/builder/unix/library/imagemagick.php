@@ -19,7 +19,7 @@ trait imagemagick
     protected function build(): void
     {
         // TODO: imagemagick build with bzip2 failed with bugs, we need to fix it in the future
-        $extra = '--without-jxl --without-x --enable-openmp --without-bzlib ';
+        $extra = '--without-jxl --without-x --disable-openmp --without-bzlib ';
         $required_libs = '';
         $optional_libs = [
             'libzip' => 'zip',
