@@ -5,20 +5,16 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\builder\linux\LinuxBuilder;
+use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('imagick')]
 class imagick extends Extension
 {
-    public function patchBeforeMake(): bool
+    public function patchBeforeBuildconf(): bool
     {
-        // imagick may call omp_pause_all which requires -lgomp
-        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
-        if ($this->builder instanceof LinuxBuilder) {
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . '-lgomp ';
-        }
-        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
+        // destroy imagick build conf to avoid libgomp build error
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/imagick/config.m4', '#include <omp.h>', '#include <NEVER_INCLUDE_OMP_H>');
         return true;
     }
 
