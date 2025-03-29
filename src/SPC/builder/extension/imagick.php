@@ -14,7 +14,7 @@ class imagick extends Extension
     public function patchBeforeBuildconf(): bool
     {
         // destroy imagick build conf to avoid libgomp build error
-        FileSystem::replaceFileStr(SOURCE_PATH . '/ext/imagick/config.m4', '#include <omp.h>', '#include <NEVER_INCLUDE_OMP_H>');
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/imagick/config.m4', '#include <omp.h>', '#include <NEVER_INCLUDE_OMP_H>');
         return true;
     }
 
