@@ -21,7 +21,13 @@ class imagick extends Extension
             $extra_libs = trim($extra_libs . ' -lgomp');
         }
         if (getenv('SPC_LIBC') === 'glibc') {
-            $extra_libs = trim($extra_libs . ' -l:libgomp.a -l:libgomp_nonshared.a');
+            $ld = f_exec('/usr/bin/gcc --print-file-name=libgomp.a', $output, $result_code);
+            if ($result_code !== 0) {
+                logger()->error('Cannot find libgomp.a, please install libgomp-dev');
+                $extra_libs = trim($extra_libs . ' -l:libgomp.a');
+            } else {
+                $extra_libs = trim($extra_libs . ' ' . $ld);
+            }
         }
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
