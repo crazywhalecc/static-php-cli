@@ -93,13 +93,7 @@ class SPCConfigUtil
         // patch: imagick (imagemagick wrapper) for linux needs -lgomp
         if (in_array('imagemagick', $libraries) && PHP_OS_FAMILY === 'Linux') {
             if (getenv('SPC_LIBC') === 'glibc') {
-                $ld = f_exec('/usr/bin/gcc --print-file-name=libgomp.a', $output, $result_code);
-                if ($result_code !== 0) {
-                    // logger()->error('Cannot find libgomp.a, please install libgomp-dev');
-                    $short_name[] = '-l:libgomp.a';
-                } else {
-                    $short_name[] = $ld;
-                }
+                $short_name[] = '-l:libgomp.a -l:libgomp_nonshared.a';
             } else {
                 $short_name[] = '-lgomp';
             }
