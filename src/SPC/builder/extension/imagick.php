@@ -21,7 +21,7 @@ class imagick extends Extension
             $extra_libs = trim($extra_libs . ' -lgomp');
         }
         if (getenv('SPC_LIBC') === 'glibc') {
-            $extra_libs = trim($extra_libs . ' -l:libgomp.a');
+            $extra_libs = trim($extra_libs . ' /libgomp.a');
         }
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
