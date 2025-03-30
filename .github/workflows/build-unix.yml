@@ -88,7 +88,7 @@ jobs:
               BUILD_CMD="./bin/spc-gnu-docker build"
               RUNS_ON="ubuntu-22.04"
               ;;
-            linux-x86_64-glibc)
+            linux-aarch64-glibc)
               DOWN_CMD="./bin/spc-gnu-docker download"
               BUILD_CMD="./bin/spc-gnu-docker build"
               RUNS_ON="ubuntu-22.04-arm"
