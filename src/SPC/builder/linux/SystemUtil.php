@@ -202,7 +202,6 @@ class SystemUtil
             }
             return null;
         }
-        /*
         // for musl, disabled temporarily as musl has better compatibility between different patch version?
         if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
             if (self::isMuslDist()) {
@@ -217,7 +216,6 @@ class SystemUtil
                 return $matches[1];
             }
         }
-        */
         return null;
     }
 }
