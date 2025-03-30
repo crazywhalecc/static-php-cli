@@ -155,7 +155,7 @@ echo match ($argv[1]) {
     default => '',
 };
 
-$prefix = match ($argv[2]) {
+$prefix = match ($argv[2] ?? null) {
     'windows-latest', 'windows-2022', 'windows-2019', 'windows-2025' => 'powershell.exe -file .\bin\spc.ps1 ',
     'ubuntu-latest', 'ubuntu-24.04', 'ubuntu-24.04-arm' => './bin/spc ',
     'ubuntu-22.04', 'ubuntu-22.04-arm' => 'bin/spc-gnu-docker ',
