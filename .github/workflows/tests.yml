@@ -181,13 +181,13 @@ jobs:
       - name: "Prepare UPX for Windows"
         if: ${{ startsWith(matrix.os, 'windows-') }}
         run: |
-          bin/spc install-pkg upx
+          php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $env:GITHUB_ENV
 
       - name: "Prepare UPX for Linux"
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: |
-          bin/spc install-pkg upx
+          php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
       - name: "Run Build Tests (download)"

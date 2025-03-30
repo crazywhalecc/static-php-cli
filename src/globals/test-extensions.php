@@ -120,6 +120,9 @@ if ($argv[1] === 'download_cmd') {
 if ($argv[1] === 'doctor_cmd') {
     $doctor_cmd = 'doctor --auto-fix --debug';
 }
+if ($argv[1] === 'install_upx_cmd') {
+    $install_upx_cmd = 'install-pkg upx';
+}
 
 // generate build command
 if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
@@ -145,6 +148,7 @@ echo match ($argv[1]) {
     'upx' => $upx ? '--with-upx-pack' : '',
     'prefer_pre_built' => $prefer_pre_built ? '--prefer-pre-built' : '',
     'download_cmd' => $down_cmd,
+    'install_upx_cmd' => $install_upx_cmd,
     'doctor_cmd' => $doctor_cmd,
     'build_cmd' => $build_cmd,
     'build_embed_cmd' => $build_cmd,
@@ -172,6 +176,8 @@ if ($argv[1] === 'download_cmd') {
     }
 } elseif ($argv[1] === 'doctor_cmd') {
     passthru($prefix . $doctor_cmd, $retcode);
+} elseif ($argv[1] === 'install_upx_cmd') {
+    passthru($prefix . $install_upx_cmd, $retcode);
 } else {
     $retcode = 0;
 }
