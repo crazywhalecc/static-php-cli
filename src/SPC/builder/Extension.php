@@ -187,12 +187,16 @@ class Extension
 
     /**
      * Run shared extension check when cli is enabled
+     * @throws RuntimeException
      */
     public function runSharedExtensionCheckUnix(): void
     {
         [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "extension=' . BUILD_LIB_PATH . '/' . $this->getName() . '.so" --ri ' . $this->getName());
         if ($ret !== 0) {
             throw new RuntimeException($this->getName() . '.so failed to load');
+        }
+        if ($this->isBuildStatic()) {
+            logger()->warning($this->getName() . '.so test succeeded, but has little significance since it is also compiled in statically.');
         }
     }
 
