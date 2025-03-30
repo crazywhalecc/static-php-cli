@@ -204,7 +204,7 @@ class Downloader
         self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
         if ($download_as === SPC_DOWN_PRE_BUILT) {
-            $name = self::getPreBuiltName($name);
+            $name = self::getPreBuiltLockName($name);
         }
         self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
     }
@@ -594,7 +594,7 @@ class Downloader
         }
     }
 
-    public static function getPreBuiltName(string $source): string
+    public static function getPreBuiltLockName(string $source): string
     {
         return "{$source}-" . PHP_OS_FAMILY . '-' . getenv('GNU_ARCH') . '-' . (getenv('SPC_LIBC') ?: 'default');
     }
@@ -653,7 +653,7 @@ class Downloader
             }
         }
         // If lock file exists for current arch and glibc target, skip downloading
-        $lock_name = self::getPreBuiltName($name);
+        $lock_name = self::getPreBuiltLockName($name);
         if (!$force && $download_as === SPC_DOWN_PRE_BUILT && isset($lock[$lock_name])) {
             // lock name with env
             if (

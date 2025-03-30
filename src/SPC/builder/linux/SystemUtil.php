@@ -182,4 +182,35 @@ class SystemUtil
             'arch', 'manjaro',
         ];
     }
+
+    /**
+     * Get libc version string from ldd
+     */
+    public static function getLibcVersionIfExists(): ?string
+    {
+        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'glibc') {
+            $result = shell()->execWithResult('ldd --version');
+            if ($result[0] !== 0) {
+                return null;
+            }
+            // get first line
+            $first_line = $result[1][0];
+            // match ldd version: "ldd (some useless text) 2.17" match 2.17
+            $pattern = '/ldd\s+\(.*?\)\s+(\d+\.\d+)/';
+            if (preg_match($pattern, $first_line, $matches)) {
+                return $matches[1];
+            }
+            return null;
+        }
+        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+            $result = shell()->execWithResult('ldd 2>&1');
+            // Match Version * line
+            // match ldd version: "Version 1.2.3" match 1.2.3
+            $pattern = '/Version\s+(\d+\.\d+\.\d+)/';
+            if (preg_match($pattern, $result[1][1], $matches)) {
+                return $matches[1];
+            }
+        }
+        return null;
+    }
 }

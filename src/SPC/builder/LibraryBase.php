@@ -46,7 +46,7 @@ abstract class LibraryBase
         $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
         $source = Config::getLib(static::NAME, 'source');
         // if source is locked as pre-built, we just tryInstall it
-        $pre_built_name = Downloader::getPreBuiltName($source);
+        $pre_built_name = Downloader::getPreBuiltLockName($source);
         if (isset($lock[$pre_built_name]) && ($lock[$pre_built_name]['lock_as'] ?? SPC_DOWN_SOURCE) === SPC_DOWN_PRE_BUILT) {
             return $this->tryInstall($lock[$pre_built_name]['filename'], $force);
         }

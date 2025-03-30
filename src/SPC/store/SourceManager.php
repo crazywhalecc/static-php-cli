@@ -55,7 +55,7 @@ class SourceManager
                 throw new WrongUsageException("Source [{$source}] does not exist, please check the name and correct it !");
             }
             // check source downloaded
-            $pre_built_name = Downloader::getPreBuiltName($source);
+            $pre_built_name = Downloader::getPreBuiltLockName($source);
             if (!isset($lock[$pre_built_name])) {
                 if (!isset($lock[$source])) {
                     throw new WrongUsageException("Source [{$source}] not downloaded or not locked, you should download it first !");

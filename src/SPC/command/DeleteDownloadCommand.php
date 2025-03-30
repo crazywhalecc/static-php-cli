@@ -51,7 +51,7 @@ class DeleteDownloadCommand extends BaseCommand
             $deleted_sources = [];
             foreach ($chosen_sources as $source) {
                 $source = trim($source);
-                foreach ([$source, Downloader::getPreBuiltName($source)] as $name) {
+                foreach ([$source, Downloader::getPreBuiltLockName($source)] as $name) {
                     if (isset($lock[$name])) {
                         $deleted_sources[] = $name;
                     }

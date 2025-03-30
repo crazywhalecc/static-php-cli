@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
@@ -236,6 +237,7 @@ class DownloadCommand extends BaseCommand
                             '{arch}' => arch2gnu(php_uname('m')),
                             '{os}' => strtolower(PHP_OS_FAMILY),
                             '{libc}' => getenv('SPC_LIBC') ?: 'default',
+                            '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
                         ];
                         $find = str_replace(array_keys($replace), array_values($replace), Config::getPreBuilt('match-pattern'));
                         // find filename in asset list

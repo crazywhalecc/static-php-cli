@@ -6,6 +6,7 @@ namespace SPC\command\dev;
 
 use SPC\builder\BuilderProvider;
 use SPC\builder\LibraryBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\command\BuildCommand;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
@@ -23,6 +24,7 @@ class PackLibCommand extends BuildCommand
     public function configure(): void
     {
         $this->addArgument('library', InputArgument::REQUIRED, 'The library will be compiled');
+        $this->addOption('show-libc-ver', null, null);
     }
 
     public function handle(): int
@@ -75,6 +77,7 @@ class PackLibCommand extends BuildCommand
                         '{arch}' => arch2gnu(php_uname('m')),
                         '{os}' => strtolower(PHP_OS_FAMILY),
                         '{libc}' => getenv('SPC_LIBC') ?: 'default',
+                        '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
                     ];
                     $filename = str_replace(array_keys($replace), array_values($replace), $filename);
                     $filename = WORKING_DIR . '/dist/' . $filename . '.' . Config::getPreBuilt('suffix');
