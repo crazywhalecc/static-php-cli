@@ -21,8 +21,8 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
-    // 'macos-14',
+    'macos-13',
+    'macos-14',
     'ubuntu-latest',
     // 'windows-latest',
 ];
