@@ -771,6 +771,10 @@
             "Windows": "no",
             "BSD": "wip"
         },
+        "target": [
+            "static",
+            "shared"
+        ],
         "notes": true,
         "type": "external",
         "source": "swoole",
@@ -919,15 +923,16 @@
     },
     "xdebug": {
         "type": "external",
+        "source": "xdebug",
+        "target": [
+            "shared"
+        ],
         "support": {
             "Windows": "wip",
             "BSD": "no",
-            "Darwin": "no",
-            "Linux": "wip"
+            "Darwin": "partial",
+            "Linux": "partial"
         },
-        "lib-depends": [
-            "xdebug"
-        ],
         "notes": true
     },
     "xhprof": {
@@ -1042,6 +1047,10 @@
         "support": {
             "BSD": "wip"
         },
+        "target": [
+            "static",
+            "shared"
+        ],
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",

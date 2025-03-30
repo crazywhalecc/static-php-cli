@@ -44,7 +44,7 @@ class grpc extends Extension
         return true;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--enable-grpc=' . BUILD_ROOT_PATH . '/grpc GRPC_LIB_SUBDIR=' . BUILD_LIB_PATH;
     }

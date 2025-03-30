@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('redis')]
 class redis extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--enable-redis';
         $arg .= $this->builder->getExt('session') ? ' --enable-redis-session' : ' --disable-redis-session';

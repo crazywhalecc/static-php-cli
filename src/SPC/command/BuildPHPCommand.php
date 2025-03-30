@@ -11,7 +11,6 @@ use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
-use SPC\util\DynamicExt;
 use SPC\util\GlobalEnvManager;
 use SPC\util\LicenseDumper;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -28,6 +27,7 @@ class BuildPHPCommand extends BuildCommand
 
         $this->addArgument('extensions', InputArgument::REQUIRED, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
+        $this->addOption('build-shared', 'D', InputOption::VALUE_REQUIRED, 'Shared extensions to build, comma separated', '');
         $this->addOption('build-micro', null, null, 'Build micro SAPI');
         $this->addOption('build-cli', null, null, 'Build cli SAPI');
         $this->addOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
@@ -53,13 +53,27 @@ class BuildPHPCommand extends BuildCommand
         // transform string to array
         $libraries = array_map('trim', array_filter(explode(',', $this->getOption('with-libs'))));
         // transform string to array
-        $extensions = $this->parseExtensionList($this->getArgument('extensions'));
+        $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
+        // transform string to array
+        $static_extensions = $this->parseExtensionList($this->getArgument('extensions'));
 
         // parse rule with options
-        $rule = $this->parseRules();
+        $rule = $this->parseRules($shared_extensions);
+
+        // check dynamic extension build env
+        // macOS must use --no-strip option
+        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Darwin' && !$this->getOption('no-strip')) {
+            $this->output->writeln('MacOS does not support dynamic extension loading with stripped binary, please use --no-strip option!');
+            return static::FAILURE;
+        }
+        // linux must build with glibc
+        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc') {
+            $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');
+            return static::FAILURE;
+        }
 
         if ($rule === BUILD_TARGET_NONE) {
-            $this->output->writeln('<error>Please add at least one build target!</error>');
+            $this->output->writeln('<error>Please add at least one build SAPI!</error>');
             $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
             $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
             $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
@@ -108,33 +122,22 @@ class BuildPHPCommand extends BuildCommand
             $builder = BuilderProvider::makeBuilderByInput($this->input);
             $include_suggest_ext = $this->getOption('with-suggested-exts');
             $include_suggest_lib = $this->getOption('with-suggested-libs');
-            [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
+            [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs(array_merge($static_extensions, $shared_extensions), $libraries, $include_suggest_ext, $include_suggest_lib);
             $display_libs = array_filter($libraries, fn ($lib) => in_array(Config::getLib($lib, 'type', 'lib'), ['lib', 'package']));
-            $dynamic_libs = $dynamic_exts = array_filter($extensions, function (string $ext) {
-                $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/builder/extension', 'SPC\builder\extension');
-                $extension = array_find($classes, function (string $class) use ($ext) {
-                    $a = explode('\\', $class);
-                    return end($a) === $ext;
-                });
-                if (!$extension) {
-                    return false;
-                }
-                $reflector = new \ReflectionClass($extension);
-                $attributes = $reflector->getAttributes();
-                return array_find($attributes, fn ($attr) => $attr->getName() === DynamicExt::class) !== null;
-            });
-            $extensions = array_diff($extensions, $dynamic_exts);
-            $libraries = array_diff($libraries, $dynamic_libs);
+            $display_extensions = array_map(fn ($ext) => in_array($ext, $shared_extensions) ? "*{$ext}" : $ext, $extensions);
 
             // print info
             $indent_texts = [
                 'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
                 'Build SAPI' => $builder->getBuildTypeName($rule),
-                'Extensions (' . count($extensions) . ')' => implode(',', $extensions),
+                'Extensions (' . count($extensions) . ')' => implode(',', $display_extensions),
                 'Libraries (' . count($libraries) . ')' => implode(',', $display_libs),
                 'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
                 'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
             ];
+            if (!empty($shared_extensions) || ($rule & BUILD_TARGET_EMBED)) {
+                $indent_texts['Build Dev'] = 'yes';
+            }
             if (!empty($this->input->getOption('with-config-file-path'))) {
                 $indent_texts['Config File Path'] = $this->input->getOption('with-config-file-path');
             }
@@ -168,7 +171,7 @@ class BuildPHPCommand extends BuildCommand
             // compile libraries
             $builder->proveLibs($libraries);
             // check extensions
-            $builder->proveExts($extensions);
+            $builder->proveExts($static_extensions, $shared_extensions);
             // validate libs and extensions
             $builder->validateLibsAndExts();
 
@@ -199,11 +202,10 @@ class BuildPHPCommand extends BuildCommand
             // start to build
             $builder->buildPHP($rule);
 
-            if ($rule & BUILD_TARGET_EMBED) {
-                // build dynamic extensions
-                $builder->proveLibs($dynamic_libs);
-                // build or install libraries
-                $builder->setupLibs();
+            // build dynamic extensions if needed
+            if (!empty($shared_extensions)) {
+                logger()->info('Building shared extensions ...');
+                $builder->buildSharedExts();
             }
 
             // compile stopwatch :P
@@ -234,13 +236,19 @@ class BuildPHPCommand extends BuildCommand
                 $path = FileSystem::convertPath("{$build_root_path}/bin/php-fpm");
                 logger()->info("Static php-fpm binary path{$fixed}: {$path}");
             }
+            if (!empty($shared_extensions)) {
+                foreach ($shared_extensions as $ext) {
+                    $path = FileSystem::convertPath("{$build_root_path}/lib/{$ext}.so");
+                    logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                }
+            }
 
             // export metadata
             file_put_contents(BUILD_ROOT_PATH . '/build-extensions.json', json_encode($extensions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             file_put_contents(BUILD_ROOT_PATH . '/build-libraries.json', json_encode($libraries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             // export licenses
             $dumper = new LicenseDumper();
-            $dumper->addExts($extensions)->addLibs($libraries)->addLibs($dynamic_libs)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
+            $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
             $path = FileSystem::convertPath("{$build_root_path}/license/");
             logger()->info("License path{$fixed}: {$path}");
             return static::SUCCESS;
@@ -262,13 +270,13 @@ class BuildPHPCommand extends BuildCommand
     /**
      * Parse build options to rule int.
      */
-    private function parseRules(): int
+    private function parseRules(array $dynamic_exts = []): int
     {
         $rule = BUILD_TARGET_NONE;
         $rule |= ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-embed') ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-embed') || !empty($dynamic_exts) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;
     }

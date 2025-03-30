@@ -20,7 +20,7 @@ class xml extends Extension
     /**
      * @throws RuntimeException
      */
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = match ($this->name) {
             'xml' => '--enable-xml',
