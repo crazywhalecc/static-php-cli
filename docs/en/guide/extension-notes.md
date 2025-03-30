@@ -76,10 +76,9 @@ and this extension cannot be compiled into php by static linking, so it cannot b
 
 ## xdebug
 
-1. Xdebug is only buildable as a shared extension. On Linux, you need to use static-php-cli with SPC_LIBC=glibc and then compile php-xdebug from source with the option `--with-php-config=/path/to/buildroot/bin/php-config`.
-2. The macOS platform can compile an xdebug extension under PHP compiled on the same platform, 
-extract the `xdebug.so` file, and then use the `--no-strip` parameter in static-php-cli to retain the debug symbol table and add the `ffi` extension. 
-The compiled `./php` binary can be configured and run by specifying the INI, eg `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
+1. Xdebug is only buildable as a shared extension. On Linux, you need to use static-php-cli with SPC_LIBC=glibc.
+2. When using Linux/glibc or macOS, you can compile Xdebug as a shared extension using --build-shared="xdebug". 
+   The compiled `./php` binary can be configured and run by specifying the INI, eg `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
 
 ## xml
 
@@ -122,8 +121,8 @@ For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use
 
 ## ffi
 
-1. Due to the limitation of Linux system, you cannot use it to load other `so` extensions in the purely static compiled state (spc defaults to pure static compilation). 
-   Linux supports loading so extensions only if they are non-statically compiled. If you need to use the ffi extension, see [Compile PHP with GNU libc](./build-with-glibc).
+1. Due to the limitation of musl libc's static linkage, you cannot use ffi because dynamic libraries cannot be loaded. 
+   If you need to use the ffi extension, see [Compile PHP with GNU libc](./build-with-glibc).
 2. macOS supports the ffi extension, but errors will occur when some kernels do not contain debugging symbols.
 3. Windows x64 supports the ffi extension.
 
