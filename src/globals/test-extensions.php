@@ -42,7 +42,7 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imagick,phar',
+    'Linux', 'Darwin' => 'imagick,zlib',
     'Windows' => 'pgsql,pdo_pgsql',
 };
 
