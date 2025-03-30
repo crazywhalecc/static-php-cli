@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('imagick')]
 class imagick extends Extension
 {
-    public function patchBeforeBuildconf(): bool
+    /**
+     * @throws FileSystemException
+     */
+    public function patchBeforeMake(): bool
     {
-        // destroy imagick build conf to avoid libgomp build error
-        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/imagick/config.m4', '#include <omp.h>', '#include <NEVER_INCLUDE_OMP_H>');
+        // replace php_config.h HAVE_OMP_PAUSE_RESOURCE_ALL line to #define HAVE_OMP_PAUSE_RESOURCE_ALL 0
+        FileSystem::replaceFileLineContainsString(SOURCE_PATH . '/php-src/main/php_config.h', 'HAVE_OMP_PAUSE_RESOURCE_ALL', '#define HAVE_OMP_PAUSE_RESOURCE_ALL 0');
         return true;
     }
 
