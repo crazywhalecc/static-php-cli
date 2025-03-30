@@ -41,9 +41,9 @@ const SPC_EXTENSION_ALIAS = [
 ];
 
 // spc lock type
-const SPC_DOWN_SOURCE = 1;      // lock source
-const SPC_DOWN_PRE_BUILT = 2;   // lock pre-built
-const SPC_DOWN_PACKAGE = 3; // lock as package
+const SPC_DOWNLOAD_SOURCE = 1;      // lock source
+const SPC_DOWNLOAD_PRE_BUILT = 2;   // lock pre-built
+const SPC_DOWNLOAD_PACKAGE = 3; // lock as package
 
 // file replace strategy
 const REPLACE_FILE_STR = 1;

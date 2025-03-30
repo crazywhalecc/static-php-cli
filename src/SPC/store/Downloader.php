@@ -191,7 +191,7 @@ class Downloader
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null, int $download_as = SPC_DOWN_SOURCE): void
+    public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null, int $download_as = SPC_DOWNLOAD_SOURCE): void
     {
         logger()->debug("Downloading {$url}");
         $cancel_func = function () use ($filename) {
@@ -204,7 +204,7 @@ class Downloader
         self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retry: self::getRetryTime());
         self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
-        if ($download_as === SPC_DOWN_PRE_BUILT) {
+        if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
             $name = self::getPreBuiltLockName($name);
         }
         self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
@@ -241,7 +241,7 @@ class Downloader
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retry = 0, int $lock_as = SPC_DOWN_SOURCE): void
+    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retry = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
         $download_path = FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}");
         if (file_exists($download_path)) {
@@ -329,7 +329,7 @@ class Downloader
             FileSystem::createDir(DOWNLOAD_PATH);
         }
 
-        if (self::isAlreadyDownloaded($name, $force, SPC_DOWN_PACKAGE)) {
+        if (self::isAlreadyDownloaded($name, $force, SPC_DOWNLOAD_PACKAGE)) {
             return;
         }
 
@@ -337,28 +337,28 @@ class Downloader
             switch ($pkg['type']) {
                 case 'bitbuckettag':    // BitBucket Tag
                     [$url, $filename] = self::getLatestBitbucketTag($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWN_PACKAGE);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
                     break;
                 case 'ghtar':           // GitHub Release (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWN_PACKAGE);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
                     break;
                 case 'ghtagtar':        // GitHub Tag (tar)
                     [$url, $filename] = self::getLatestGithubTarball($name, $pkg, 'tags');
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWN_PACKAGE);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
                     break;
                 case 'ghrel':           // GitHub Release (uploaded)
                     [$url, $filename] = self::getLatestGithubRelease($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWN_PACKAGE);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
                     break;
                 case 'filelist':        // Basic File List (regex based crawler)
                     [$url, $filename] = self::getFromFileList($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWN_PACKAGE);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
                     break;
                 case 'url':             // Direct download URL
                     $url = $pkg['url'];
                     $filename = $pkg['filename'] ?? basename($pkg['url']);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWN_PACKAGE);
+                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
                     break;
                 case 'git':             // Git repo
                     self::downloadGit(
@@ -367,7 +367,7 @@ class Downloader
                         $pkg['rev'],
                         $pkg['extract'] ?? null,
                         self::getRetryTime(),
-                        SPC_DOWN_PRE_BUILT
+                        SPC_DOWNLOAD_PRE_BUILT
                     );
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
@@ -419,7 +419,7 @@ class Downloader
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public static function downloadSource(string $name, ?array $source = null, bool $force = false, int $download_as = SPC_DOWN_SOURCE): void
+    public static function downloadSource(string $name, ?array $source = null, bool $force = false, int $download_as = SPC_DOWNLOAD_SOURCE): void
     {
         if ($source === null) {
             $source = Config::getSource($name);
@@ -636,7 +636,7 @@ class Downloader
     /**
      * @throws FileSystemException
      */
-    private static function isAlreadyDownloaded(string $name, bool $force, int $download_as = SPC_DOWN_SOURCE): bool
+    private static function isAlreadyDownloaded(string $name, bool $force, int $download_as = SPC_DOWNLOAD_SOURCE): bool
     {
         if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
             $lock = [];
@@ -644,7 +644,7 @@ class Downloader
             $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
         }
         // If lock file exists, skip downloading for source mode
-        if (!$force && $download_as === SPC_DOWN_SOURCE && isset($lock[$name])) {
+        if (!$force && $download_as === SPC_DOWNLOAD_SOURCE && isset($lock[$name])) {
             if (
                 $lock[$name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename']) ||
                 $lock[$name]['source_type'] === 'dir' && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])
@@ -655,7 +655,7 @@ class Downloader
         }
         // If lock file exists for current arch and glibc target, skip downloading
 
-        if (!$force && $download_as === SPC_DOWN_PRE_BUILT && isset($lock[$lock_name = self::getPreBuiltLockName($name)])) {
+        if (!$force && $download_as === SPC_DOWNLOAD_PRE_BUILT && isset($lock[$lock_name = self::getPreBuiltLockName($name)])) {
             // lock name with env
             if (
                 $lock[$lock_name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']) ||

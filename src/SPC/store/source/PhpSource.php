@@ -17,7 +17,7 @@ class PhpSource extends CustomSourceBase
      * @throws DownloaderException
      * @throws FileSystemException
      */
-    public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_DOWN_SOURCE): void
+    public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.3';
         Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);

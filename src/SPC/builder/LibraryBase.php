@@ -47,7 +47,7 @@ abstract class LibraryBase
         $source = Config::getLib(static::NAME, 'source');
         // if source is locked as pre-built, we just tryInstall it
         $pre_built_name = Downloader::getPreBuiltLockName($source);
-        if (isset($lock[$pre_built_name]) && ($lock[$pre_built_name]['lock_as'] ?? SPC_DOWN_SOURCE) === SPC_DOWN_PRE_BUILT) {
+        if (isset($lock[$pre_built_name]) && ($lock[$pre_built_name]['lock_as'] ?? SPC_DOWNLOAD_SOURCE) === SPC_DOWNLOAD_PRE_BUILT) {
             return $this->tryInstall($lock[$pre_built_name]['filename'], $force);
         }
         return $this->tryBuild($force);

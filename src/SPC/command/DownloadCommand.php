@@ -243,7 +243,7 @@ class DownloadCommand extends BaseCommand
                         // find filename in asset list
                         if (($url = $this->findPreBuilt($pre_built_libs, $find)) !== null) {
                             logger()->info("[{$ni}/{$cnt}] Downloading pre-built content {$source}");
-                            Downloader::downloadSource($source, ['type' => 'url', 'url' => $url], $force_all || in_array($source, $force_list), SPC_DOWN_PRE_BUILT);
+                            Downloader::downloadSource($source, ['type' => 'url', 'url' => $url], $force_all || in_array($source, $force_list), SPC_DOWNLOAD_PRE_BUILT);
                             continue;
                         }
                         logger()->warning("Pre-built content not found for {$source}, fallback to source download");
