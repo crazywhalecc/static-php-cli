@@ -203,7 +203,11 @@ class SystemUtil
             return null;
         }
         if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
-            $result = shell()->execWithResult('ldd 2>&1');
+            if (self::isMuslDist()) {
+                $result = shell()->execWithResult('ldd 2>&1');
+            } else {
+                $result = shell()->execWithResult('/usr/local/musl/lib/libc.so 2>&1');
+            }
             // Match Version * line
             // match ldd version: "Version 1.2.3" match 1.2.3
             $pattern = '/Version\s+(\d+\.\d+\.\d+)/';
