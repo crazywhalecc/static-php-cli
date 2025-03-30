@@ -6,6 +6,7 @@ namespace SPC\command\dev;
 
 use SPC\builder\BuilderProvider;
 use SPC\builder\LibraryBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\command\BuildCommand;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
@@ -23,6 +24,7 @@ class PackLibCommand extends BuildCommand
     public function configure(): void
     {
         $this->addArgument('library', InputArgument::REQUIRED, 'The library will be compiled');
+        $this->addOption('show-libc-ver', null, null);
     }
 
     public function handle(): int
@@ -47,7 +49,7 @@ class PackLibCommand extends BuildCommand
                     // Get lock info
                     $lock = json_decode(file_get_contents(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
                     $source = Config::getLib($lib->getName(), 'source');
-                    if (!isset($lock[$source]) || ($lock[$source]['lock_as'] ?? SPC_LOCK_SOURCE) === SPC_LOCK_PRE_BUILT) {
+                    if (!isset($lock[$source]) || ($lock[$source]['lock_as'] ?? SPC_DOWNLOAD_SOURCE) === SPC_DOWNLOAD_PRE_BUILT) {
                         logger()->critical("The library {$lib->getName()} is downloaded as pre-built, we need to build it instead of installing pre-built.");
                         return static::FAILURE;
                     }
@@ -69,7 +71,16 @@ class PackLibCommand extends BuildCommand
                     // write list to packlib_files.txt
                     FileSystem::writeFile(WORKING_DIR . '/packlib_files.txt', implode("\n", $increase_files));
                     // pack
-                    $filename = WORKING_DIR . '/dist/' . $lib->getName() . '-' . arch2gnu(php_uname('m')) . '-' . strtolower(PHP_OS_FAMILY) . '.' . Config::getPreBuilt('suffix');
+                    $filename = Config::getPreBuilt('match-pattern');
+                    $replace = [
+                        '{name}' => $lib->getName(),
+                        '{arch}' => arch2gnu(php_uname('m')),
+                        '{os}' => strtolower(PHP_OS_FAMILY),
+                        '{libc}' => getenv('SPC_LIBC') ?: 'default',
+                        '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
+                    ];
+                    $filename = str_replace(array_keys($replace), array_values($replace), $filename);
+                    $filename = WORKING_DIR . '/dist/' . $filename;
                     f_passthru('tar -czf ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt');
                     logger()->info('Pack library ' . $lib->getName() . ' to ' . $filename . ' complete.');
                 }
