@@ -15,7 +15,7 @@ declare(strict_types=1);
 $test_php_version = [
     // '8.1',
     // '8.2',
-    // '8.3',
+    '8.3',
     '8.4',
 ];
 
@@ -42,7 +42,7 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imagick',
+    'Linux', 'Darwin' => 'imagick,phar',
     'Windows' => 'pgsql,pdo_pgsql',
 };
 
