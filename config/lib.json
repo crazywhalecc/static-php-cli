@@ -210,12 +210,12 @@
             "libwebp",
             "freetype",
             "libtiff",
-            "libheif"
+            "libheif",
+            "bzip2"
         ],
         "lib-suggests": [
             "zstd",
             "xz",
-            "bzip2",
             "libzip",
             "libxml2"
         ]
