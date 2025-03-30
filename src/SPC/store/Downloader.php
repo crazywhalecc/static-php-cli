@@ -124,6 +124,7 @@ class Downloader
             if (($source['prefer-stable'] ?? false) === true && $release['prerelease'] === true) {
                 continue;
             }
+            logger()->debug("Found {$release['name']} releases assets");
             if (!$match_result) {
                 return $release['assets'];
             }
