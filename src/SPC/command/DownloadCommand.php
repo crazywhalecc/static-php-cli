@@ -212,7 +212,7 @@ class DownloadCommand extends BaseCommand
                     if (isset($config['filename'])) {
                         $new_config['filename'] = $config['filename'];
                     }
-                    logger()->info("Fetching source {$source} from custom url [{$ni}/{$cnt}]");
+                    logger()->info("[{$ni}/{$cnt}] Downloading source {$source} from custom url: {$new_config['url']}");
                     Downloader::downloadSource($source, $new_config, true);
                 } elseif (isset($custom_gits[$source])) {
                     $config = Config::getSource($source);
@@ -224,7 +224,7 @@ class DownloadCommand extends BaseCommand
                     if (isset($config['path'])) {
                         $new_config['path'] = $config['path'];
                     }
-                    logger()->info("Fetching source {$source} from custom git [{$ni}/{$cnt}]");
+                    logger()->info("[{$ni}/{$cnt}] Downloading source {$source} from custom git: {$new_config['url']}");
                     Downloader::downloadSource($source, $new_config, true);
                 } else {
                     $config = Config::getSource($source);
@@ -234,13 +234,13 @@ class DownloadCommand extends BaseCommand
                         $find = str_replace(['{name}', '{arch}', '{os}'], [$source, arch2gnu(php_uname('m')), strtolower(PHP_OS_FAMILY)], Config::getPreBuilt('match-pattern'));
                         // find filename in asset list
                         if (($url = $this->findPreBuilt($pre_built_libs, $find)) !== null) {
-                            logger()->info("Fetching pre-built content {$source} [{$ni}/{$cnt}]");
+                            logger()->info("[{$ni}/{$cnt}] Downloading pre-built content {$source}");
                             Downloader::downloadSource($source, ['type' => 'url', 'url' => $url], $force_all || in_array($source, $force_list), SPC_LOCK_PRE_BUILT);
                             continue;
                         }
                         logger()->warning("Pre-built content not found for {$source}, fallback to source download");
                     }
-                    logger()->info("Fetching source {$source} [{$ni}/{$cnt}]");
+                    logger()->info("[{$ni}/{$cnt}] Downloading source {$source}");
                     Downloader::downloadSource($source, $config, $force_all || in_array($source, $force_list));
                 }
             }

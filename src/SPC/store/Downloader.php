@@ -284,8 +284,22 @@ class Downloader
     }
 
     /**
+     * @param string $name Package name
+     * @param null|array{
+     *     type: string,
+     *     repo: ?string,
+     *     url: ?string,
+     *     rev: ?string,
+     *     path: ?string,
+     *     filename: ?string,
+     *     match: ?string,
+     *     prefer-stable: ?bool,
+     *     extract-files: ?array<string, string>
+     * } $pkg Package config
+     * @param  bool                $force Download all the time even if it exists
      * @throws DownloaderException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public static function downloadPackage(string $name, ?array $pkg = null, bool $force = false): void
     {
@@ -383,8 +397,23 @@ class Downloader
     /**
      * Download source by name and meta.
      *
-     * @param  string              $name    source name
-     * @param  null|array          $source  source meta info: [type, path, rev, url, filename, regex, license]
+     * @param string $name source name
+     * @param  null|array{
+     *     type: string,
+     *     repo: ?string,
+     *     url: ?string,
+     *     rev: ?string,
+     *     path: ?string,
+     *     filename: ?string,
+     *     match: ?string,
+     *     prefer-stable: ?bool,
+     *     provide-pre-built: ?bool,
+     *     license: array{
+     *         type: string,
+     *         path: ?string,
+     *         text: ?string
+     *     }
+     * }          $source  source meta info: [type, path, rev, url, filename, regex, license]
      * @param  bool                $force   Whether to force download (default: false)
      * @param  int                 $lock_as Lock source type (default: SPC_LOCK_SOURCE)
      * @throws DownloaderException
@@ -415,11 +444,11 @@ class Downloader
         // If lock file exists, skip downloading
         if (isset($lock[$name]) && !$force && ($lock[$name]['lock_as'] ?? SPC_LOCK_SOURCE) === $lock_as) {
             if ($lock[$name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename'])) {
-                logger()->notice("source [{$name}] already downloaded: " . $lock[$name]['filename']);
+                logger()->notice("Source [{$name}] already downloaded: " . $lock[$name]['filename']);
                 return;
             }
             if ($lock[$name]['source_type'] === 'dir' && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])) {
-                logger()->notice("source [{$name}] already downloaded: " . $lock[$name]['dirname']);
+                logger()->notice("Source [{$name}] already downloaded: " . $lock[$name]['dirname']);
                 return;
             }
         }
