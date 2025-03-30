@@ -185,7 +185,7 @@ jobs:
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $env:GITHUB_ENV
 
       - name: "Prepare UPX for Linux"
-        if: matrix.os == 'ubunut-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           bin/spc install-pkg upx
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
