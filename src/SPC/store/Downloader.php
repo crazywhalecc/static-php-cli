@@ -246,6 +246,7 @@ class Downloader
             self::registerCancelEvent($cancel_func);
             f_passthru(
                 SPC_GIT_EXEC . ' clone' . $check .
+                (defined('DEBUG_MODE') ? '' : ' --quiet') .
                 ' --config core.autocrlf=false ' .
                 "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
             );
