@@ -31,7 +31,7 @@ class Config
         if (self::$pre_built === null) {
             self::$pre_built = FileSystem::loadConfigArray('pre-built');
         }
-        $supported_sys_based = ['match-pattern'];
+        $supported_sys_based = ['match-pattern', 'prefer-stable', 'repo'];
         if (in_array($name, $supported_sys_based)) {
             $m_key = match (PHP_OS_FAMILY) {
                 'Windows' => ['-windows', '-win', ''],

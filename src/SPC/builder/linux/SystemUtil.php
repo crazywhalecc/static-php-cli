@@ -189,7 +189,7 @@ class SystemUtil
     public static function getLibcVersionIfExists(): ?string
     {
         if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'glibc') {
-            $result = shell()->execWithResult('ldd --version');
+            $result = shell()->execWithResult('ldd --version', false);
             if ($result[0] !== 0) {
                 return null;
             }
@@ -202,11 +202,13 @@ class SystemUtil
             }
             return null;
         }
+        /*
+        // for musl, disabled temporarily as musl has better compatibility between different patch version?
         if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
             if (self::isMuslDist()) {
-                $result = shell()->execWithResult('ldd 2>&1');
+                $result = shell()->execWithResult('ldd 2>&1', false);
             } else {
-                $result = shell()->execWithResult('/usr/local/musl/lib/libc.so 2>&1');
+                $result = shell()->execWithResult('/usr/local/musl/lib/libc.so 2>&1', false);
             }
             // Match Version * line
             // match ldd version: "Version 1.2.3" match 1.2.3
@@ -215,6 +217,7 @@ class SystemUtil
                 return $matches[1];
             }
         }
+        */
         return null;
     }
 }
