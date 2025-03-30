@@ -80,7 +80,7 @@ class PackLibCommand extends BuildCommand
                         '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
                     ];
                     $filename = str_replace(array_keys($replace), array_values($replace), $filename);
-                    $filename = WORKING_DIR . '/dist/' . $filename . '.' . Config::getPreBuilt('suffix');
+                    $filename = WORKING_DIR . '/dist/' . $filename;
                     f_passthru('tar -czf ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt');
                     logger()->info('Pack library ' . $lib->getName() . ' to ' . $filename . ' complete.');
                 }

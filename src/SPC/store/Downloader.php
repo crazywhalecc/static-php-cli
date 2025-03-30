@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -596,7 +597,7 @@ class Downloader
 
     public static function getPreBuiltLockName(string $source): string
     {
-        return "{$source}-" . PHP_OS_FAMILY . '-' . getenv('GNU_ARCH') . '-' . (getenv('SPC_LIBC') ?: 'default');
+        return "{$source}-" . PHP_OS_FAMILY . '-' . getenv('GNU_ARCH') . '-' . (getenv('SPC_LIBC') ?: 'default') . '-' . (SystemUtil::getLibcVersionIfExists() ?: 'default');
     }
 
     /**
