@@ -47,7 +47,7 @@ class PackLibCommand extends BuildCommand
                     // Get lock info
                     $lock = json_decode(file_get_contents(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
                     $source = Config::getLib($lib->getName(), 'source');
-                    if (!isset($lock[$source]) || ($lock[$source]['lock_as'] ?? SPC_LOCK_SOURCE) === SPC_LOCK_PRE_BUILT) {
+                    if (!isset($lock[$source]) || ($lock[$source]['lock_as'] ?? SPC_DOWN_SOURCE) === SPC_DOWN_PRE_BUILT) {
                         logger()->critical("The library {$lib->getName()} is downloaded as pre-built, we need to build it instead of installing pre-built.");
                         return static::FAILURE;
                     }
@@ -69,7 +69,15 @@ class PackLibCommand extends BuildCommand
                     // write list to packlib_files.txt
                     FileSystem::writeFile(WORKING_DIR . '/packlib_files.txt', implode("\n", $increase_files));
                     // pack
-                    $filename = WORKING_DIR . '/dist/' . $lib->getName() . '-' . arch2gnu(php_uname('m')) . '-' . strtolower(PHP_OS_FAMILY) . '.' . Config::getPreBuilt('suffix');
+                    $filename = Config::getPreBuilt('match-pattern');
+                    $replace = [
+                        '{name}' => $lib->getName(),
+                        '{arch}' => arch2gnu(php_uname('m')),
+                        '{os}' => strtolower(PHP_OS_FAMILY),
+                        '{libc}' => getenv('SPC_LIBC') ?: 'default',
+                    ];
+                    $filename = str_replace(array_keys($replace), array_values($replace), $filename);
+                    $filename = WORKING_DIR . '/dist/' . $filename . '.' . Config::getPreBuilt('suffix');
                     f_passthru('tar -czf ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt');
                     logger()->info('Pack library ' . $lib->getName() . ' to ' . $filename . ' complete.');
                 }

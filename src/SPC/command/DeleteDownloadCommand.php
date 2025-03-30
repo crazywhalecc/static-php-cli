@@ -7,6 +7,7 @@ namespace SPC\command;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
+use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -47,30 +48,35 @@ class DeleteDownloadCommand extends BaseCommand
             $chosen_sources = $sources;
             $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
 
+            $deleted_sources = [];
             foreach ($chosen_sources as $source) {
                 $source = trim($source);
-                if (!isset($lock[$source])) {
-                    logger()->warning("Source/Package [{$source}] not locked or not downloaded, skipped.");
-                    continue;
+                foreach ([$source, Downloader::getPreBuiltName($source)] as $name) {
+                    if (isset($lock[$name])) {
+                        $deleted_sources[] = $name;
+                    }
                 }
+            }
+
+            foreach ($deleted_sources as $lock_name) {
                 // remove download file/dir if exists
-                if ($lock[$source]['source_type'] === 'archive') {
-                    if (file_exists($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock[$source]['filename']))) {
+                if ($lock[$lock_name]['source_type'] === 'archive') {
+                    if (file_exists($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']))) {
                         logger()->info('Deleting file ' . $path);
                         unlink($path);
                     } else {
-                        logger()->warning("Source/Package [{$source}] file not found, skip deleting file.");
+                        logger()->warning("Source/Package [{$lock_name}] file not found, skip deleting file.");
                     }
                 } else {
-                    if (is_dir($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock[$source]['dirname']))) {
+                    if (is_dir($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock[$lock_name]['dirname']))) {
                         logger()->info('Deleting dir ' . $path);
                         FileSystem::removeDir($path);
                     } else {
-                        logger()->warning("Source/Package [{$source}] directory not found, skip deleting dir.");
+                        logger()->warning("Source/Package [{$lock_name}] directory not found, skip deleting dir.");
                     }
                 }
                 // remove locked sources
-                unset($lock[$source]);
+                unset($lock[$lock_name]);
             }
             FileSystem::writeFile(DOWNLOAD_PATH . '/.lock.json', json_encode($lock, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
             logger()->info('Delete success!');

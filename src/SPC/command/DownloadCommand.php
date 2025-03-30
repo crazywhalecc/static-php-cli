@@ -231,11 +231,17 @@ class DownloadCommand extends BaseCommand
                     // Prefer pre-built, we need to search pre-built library
                     if ($this->getOption('prefer-pre-built') && ($config['provide-pre-built'] ?? false) === true) {
                         // We need to replace pattern
-                        $find = str_replace(['{name}', '{arch}', '{os}'], [$source, arch2gnu(php_uname('m')), strtolower(PHP_OS_FAMILY)], Config::getPreBuilt('match-pattern'));
+                        $replace = [
+                            '{name}' => $source,
+                            '{arch}' => arch2gnu(php_uname('m')),
+                            '{os}' => strtolower(PHP_OS_FAMILY),
+                            '{libc}' => getenv('SPC_LIBC') ?: 'default',
+                        ];
+                        $find = str_replace(array_keys($replace), array_values($replace), Config::getPreBuilt('match-pattern'));
                         // find filename in asset list
                         if (($url = $this->findPreBuilt($pre_built_libs, $find)) !== null) {
                             logger()->info("[{$ni}/{$cnt}] Downloading pre-built content {$source}");
-                            Downloader::downloadSource($source, ['type' => 'url', 'url' => $url], $force_all || in_array($source, $force_list), SPC_LOCK_PRE_BUILT);
+                            Downloader::downloadSource($source, ['type' => 'url', 'url' => $url], $force_all || in_array($source, $force_list), SPC_DOWN_PRE_BUILT);
                             continue;
                         }
                         logger()->warning("Pre-built content not found for {$source}, fallback to source download");
