@@ -95,7 +95,7 @@ WORKDIR /app
 ADD ./src /app/src
 COPY ./composer.* /app/
 ADD ./bin /app/bin
-RUN composer install --no-dev --classmap-authoritative
+RUN composer install --no-dev
 EOF
 fi
 

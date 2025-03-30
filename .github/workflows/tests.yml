@@ -176,18 +176,18 @@ jobs:
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "Run Build Tests (doctor)"
-        run: bin/spc doctor --auto-fix --debug
+        run: php src/globals/test-extensions.php doctor_cmd ${{ matrix.os }} ${{ matrix.php }}
 
       - name: "Prepare UPX for Windows"
-        if: matrix.os == 'windows-latest'
+        if: ${{ startsWith(matrix.os, 'windows-') }}
         run: |
-          bin/spc install-pkg upx
+          php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $env:GITHUB_ENV
 
       - name: "Prepare UPX for Linux"
-        if: matrix.os == 'ubunut-latest'
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: |
-          bin/spc install-pkg upx
+          php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
       - name: "Run Build Tests (download)"

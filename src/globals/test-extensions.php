@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
@@ -24,7 +24,9 @@ $test_os = [
     // 'macos-13',
     // 'macos-14',
     'ubuntu-latest',
-    'windows-latest',
+    'ubuntu-22.04',
+    'ubuntu-22.04-arm',
+    'ubuntu-24.04-arm',
 ];
 
 // whether enable thread safe
@@ -33,14 +35,14 @@ $zts = false;
 $no_strip = false;
 
 // compress with upx
-$upx = false;
+$upx = true;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = false;
+$prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'pgsql,pdo_pgsql',
+    'Linux', 'Darwin' => 'imagick',
     'Windows' => 'pgsql,pdo_pgsql',
 };
 
@@ -115,6 +117,13 @@ if ($argv[1] === 'download_cmd') {
     $down_cmd .= $prefer_pre_built ? '--prefer-pre-built ' : '';
 }
 
+if ($argv[1] === 'doctor_cmd') {
+    $doctor_cmd = 'doctor --auto-fix --debug';
+}
+if ($argv[1] === 'install_upx_cmd') {
+    $install_upx_cmd = 'install-pkg upx';
+}
+
 // generate build command
 if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd = 'build ';
@@ -139,30 +148,36 @@ echo match ($argv[1]) {
     'upx' => $upx ? '--with-upx-pack' : '',
     'prefer_pre_built' => $prefer_pre_built ? '--prefer-pre-built' : '',
     'download_cmd' => $down_cmd,
+    'install_upx_cmd' => $install_upx_cmd,
+    'doctor_cmd' => $doctor_cmd,
     'build_cmd' => $build_cmd,
     'build_embed_cmd' => $build_cmd,
     default => '',
 };
 
+$prefix = match ($argv[2] ?? null) {
+    'windows-latest', 'windows-2022', 'windows-2019', 'windows-2025' => 'powershell.exe -file .\bin\spc.ps1 ',
+    'ubuntu-latest', 'ubuntu-24.04', 'ubuntu-24.04-arm' => './bin/spc ',
+    'ubuntu-22.04', 'ubuntu-22.04-arm' => 'bin/spc-gnu-docker ',
+    'ubuntu-20.04' => 'bin/spc-alpine-docker ',
+    default => 'bin/spc ',
+};
+
 if ($argv[1] === 'download_cmd') {
-    if (str_starts_with($argv[2], 'windows-')) {
-        passthru('powershell.exe -file .\bin\spc.ps1 ' . $down_cmd, $retcode);
-    } else {
-        passthru('./bin/spc ' . $down_cmd, $retcode);
-    }
+    passthru($prefix . $down_cmd, $retcode);
 } elseif ($argv[1] === 'build_cmd') {
-    if (str_starts_with($argv[2], 'windows-')) {
-        passthru('powershell.exe -file .\bin\spc.ps1 ' . $build_cmd . ' --build-cli --build-micro', $retcode);
-    } else {
-        passthru('./bin/spc ' . $build_cmd . ' --build-cli --build-micro', $retcode);
-    }
+    passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
 } elseif ($argv[1] === 'build_embed_cmd') {
     if (str_starts_with($argv[2], 'windows-')) {
         // windows does not accept embed SAPI
-        passthru('powershell.exe -file .\bin\spc.ps1 ' . $build_cmd . ' --build-cli', $retcode);
+        passthru($prefix . $build_cmd . ' --build-cli', $retcode);
     } else {
-        passthru('./bin/spc ' . $build_cmd . ' --build-embed', $retcode);
+        passthru($prefix . $build_cmd . ' --build-embed', $retcode);
     }
+} elseif ($argv[1] === 'doctor_cmd') {
+    passthru($prefix . $doctor_cmd, $retcode);
+} elseif ($argv[1] === 'install_upx_cmd') {
+    passthru($prefix . $install_upx_cmd, $retcode);
 } else {
     $retcode = 0;
 }
