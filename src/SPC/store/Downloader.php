@@ -654,8 +654,8 @@ class Downloader
             }
         }
         // If lock file exists for current arch and glibc target, skip downloading
-        $lock_name = self::getPreBuiltLockName($name);
-        if (!$force && $download_as === SPC_DOWN_PRE_BUILT && isset($lock[$lock_name])) {
+
+        if (!$force && $download_as === SPC_DOWN_PRE_BUILT && isset($lock[$lock_name = self::getPreBuiltLockName($name)])) {
             // lock name with env
             if (
                 $lock[$lock_name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']) ||

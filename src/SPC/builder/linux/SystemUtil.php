@@ -211,7 +211,7 @@ class SystemUtil
             // Match Version * line
             // match ldd version: "Version 1.2.3" match 1.2.3
             $pattern = '/Version\s+(\d+\.\d+\.\d+)/';
-            if (preg_match($pattern, $result[1][1], $matches)) {
+            if (preg_match($pattern, $result[1][1] ?? '', $matches)) {
                 return $matches[1];
             }
         }
