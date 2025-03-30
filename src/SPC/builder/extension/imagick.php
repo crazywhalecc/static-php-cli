@@ -5,25 +5,25 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\FileSystemException;
-use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('imagick')]
 class imagick extends Extension
 {
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeMake(): bool
     {
-        // replace php_config.h HAVE_OMP_PAUSE_RESOURCE_ALL line to #define HAVE_OMP_PAUSE_RESOURCE_ALL 0
-        FileSystem::replaceFileLineContainsString(SOURCE_PATH . '/php-src/main/php_config.h', 'HAVE_OMP_PAUSE_RESOURCE_ALL', '#define HAVE_OMP_PAUSE_RESOURCE_ALL 0');
+        if (getenv('SPC_LIBC') !== 'musl') {
+            return false;
+        }
+        // imagick with calls omp_pause_all which requires -lgomp, on non-musl we build imagick without openmp
+        $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -lgomp');
+        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
     }
 
     public function getUnixConfigureArg(): string
     {
-        return '--with-imagick=' . BUILD_ROOT_PATH;
+        $disable_omp = getenv('SPC_LIBC') === 'musl' ? '' : ' ac_cv_func_omp_pause_resource_all=no';
+        return '--with-imagick=' . BUILD_ROOT_PATH . $disable_omp;
     }
 }
