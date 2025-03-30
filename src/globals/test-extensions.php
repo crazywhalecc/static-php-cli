@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
@@ -33,14 +33,14 @@ $zts = false;
 $no_strip = false;
 
 // compress with upx
-$upx = false;
+$upx = true;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = false;
+$prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'pgsql,pdo_pgsql',
+    'Linux', 'Darwin' => 'imagick',
     'Windows' => 'pgsql,pdo_pgsql',
 };
 
