@@ -160,7 +160,6 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     echo "*    ./pkgroot:   $(pwd)/pkgroot"
     echo "*"
 
-if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     $DOCKER_EXECUTABLE run --rm -it --privileged $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH
 else
     $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@

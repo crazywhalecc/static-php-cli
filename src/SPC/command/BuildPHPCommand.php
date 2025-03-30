@@ -71,6 +71,10 @@ class BuildPHPCommand extends BuildCommand
             $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');
             return static::FAILURE;
         }
+        $static_and_shared = array_intersect($static_extensions, $shared_extensions);
+        if (!empty($static_and_shared)) {
+            $this->output->writeln('<comment>Building extensions [' . implode(',', $static_and_shared) . '] as both static and shared\, tests may not be accurate or fail.</comment>');
+        }
 
         if ($rule === BUILD_TARGET_NONE) {
             $this->output->writeln('<error>Please add at least one build SAPI!</error>');
@@ -270,13 +274,13 @@ class BuildPHPCommand extends BuildCommand
     /**
      * Parse build options to rule int.
      */
-    private function parseRules(array $dynamic_exts = []): int
+    private function parseRules(array $shared_extensions = []): int
     {
         $rule = BUILD_TARGET_NONE;
         $rule |= ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-embed') || !empty($dynamic_exts) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-embed') || !empty($shared_extensions) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;
     }
