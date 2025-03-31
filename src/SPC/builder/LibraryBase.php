@@ -222,7 +222,7 @@ abstract class LibraryBase
             // extract first if not exists
             if (!is_dir($this->source_dir)) {
                 $this->getBuilder()->emitPatchPoint('before-library[ ' . static::NAME . ']-extract');
-                SourceManager::initSource(libs: [static::NAME]);
+                SourceManager::initSource(libs: [static::NAME], source_only: true);
                 $this->getBuilder()->emitPatchPoint('after-library[ ' . static::NAME . ']-extract');
             }
 
