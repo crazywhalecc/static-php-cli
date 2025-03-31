@@ -20,6 +20,7 @@ class ExtractCommand extends BaseCommand
     public function configure(): void
     {
         $this->addArgument('sources', InputArgument::REQUIRED, 'The sources will be compiled, comma separated');
+        $this->addOption('source-only', null, null, 'Only check the source exist, do not check the lib and ext');
     }
 
     /**
@@ -34,7 +35,7 @@ class ExtractCommand extends BaseCommand
             $this->output->writeln('<error>sources cannot be empty, at least contain one !</error>');
             return static::FAILURE;
         }
-        SourceManager::initSource(sources: $sources);
+        SourceManager::initSource(sources: $sources, source_only: $this->getOption('source-only'));
         logger()->info('Extract done !');
         return static::SUCCESS;
     }

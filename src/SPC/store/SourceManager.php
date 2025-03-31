@@ -15,7 +15,7 @@ class SourceManager
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public static function initSource(?array $sources = null, ?array $libs = null, ?array $exts = null): void
+    public static function initSource(?array $sources = null, ?array $libs = null, ?array $exts = null, bool $source_only = false): void
     {
         if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
             throw new WrongUsageException('Download lock file "downloads/.lock.json" not found, maybe you need to download sources first ?');
@@ -56,7 +56,7 @@ class SourceManager
             }
             // check source downloaded
             $pre_built_name = Downloader::getPreBuiltLockName($source);
-            if (!isset($lock[$pre_built_name])) {
+            if ($source_only || !isset($lock[$pre_built_name])) {
                 if (!isset($lock[$source])) {
                     throw new WrongUsageException("Source [{$source}] not downloaded or not locked, you should download it first !");
                 }
