@@ -462,6 +462,23 @@ class FileSystem
     }
 
     /**
+     * @throws FileSystemException
+     */
+    public static function replaceFileLineContainsString(string $file, string $find, string $line): false|int
+    {
+        $lines = file($file);
+        if ($lines === false) {
+            throw new FileSystemException('Cannot read file: ' . $file);
+        }
+        foreach ($lines as $key => $value) {
+            if (str_contains($value, $find)) {
+                $lines[$key] = $line . PHP_EOL;
+            }
+        }
+        return file_put_contents($file, implode('', $lines));
+    }
+
+    /**
      * @throws RuntimeException
      * @throws FileSystemException
      */

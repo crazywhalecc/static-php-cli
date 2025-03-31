@@ -21,8 +21,8 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
-    // 'macos-14',
+    'macos-13',
+    'macos-14',
     'ubuntu-latest',
     'ubuntu-22.04',
     'ubuntu-22.04-arm',
@@ -35,10 +35,10 @@ $zts = false;
 $no_strip = false;
 
 // compress with upx
-$upx = true;
+$upx = false;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = true;
+$prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {

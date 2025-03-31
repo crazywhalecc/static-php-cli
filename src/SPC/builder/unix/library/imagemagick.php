@@ -18,8 +18,9 @@ trait imagemagick
      */
     protected function build(): void
     {
-        // TODO: imagemagick build with bzip2 failed with bugs, we need to fix it in the future
-        $extra = '--without-jxl --without-x --enable-openmp --without-bzlib ';
+        // TODO: glibc rh 10 toolset's libgomp.a was built without -fPIC -fPIE so we can't use openmp without depending on libgomp.so
+        $openmp = getenv('SPC_LIBC') === 'musl' ? '--enable-openmp' : '--disable-openmp';
+        $extra = "--without-jxl --without-x {$openmp} ";
         $required_libs = '';
         $optional_libs = [
             'libzip' => 'zip',
@@ -31,6 +32,7 @@ trait imagemagick
             'xz' => 'lzma',
             'zstd' => 'zstd',
             'freetype' => 'freetype',
+            'bzip2' => 'bzlib',
         ];
         foreach ($optional_libs as $lib => $option) {
             $extra .= $this->builder->getLib($lib) ? "--with-{$option} " : "--without-{$option} ";
