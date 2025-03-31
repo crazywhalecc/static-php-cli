@@ -45,6 +45,10 @@ swoole-hook-sqlite 与 `pdo_sqlite` 扩展冲突。如需使用 Swoole 和 `pdo_
 
 1. swow 仅支持 PHP 8.0 ~ 8.4 版本。
 
+## imagick
+
+imagick 扩展目前仅在 musl libc 上支持 OpenMP（libgomp）。使用 glibc 方式构建的 imagick 扩展无法支持多线程特性。
+
 ## imap
 
 1. 该扩展目前不支持 Kerberos。
