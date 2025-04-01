@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('xlswriter')]
 class xlswriter extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--with-xlswriter --enable-reader';
         if ($this->builder->getLib('openssl')) {

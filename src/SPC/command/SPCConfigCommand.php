@@ -37,7 +37,7 @@ class SPCConfigCommand extends BuildCommand
         $include_suggest_ext = $this->getOption('with-suggested-exts');
         $include_suggest_lib = $this->getOption('with-suggested-libs');
 
-        $util = new SPCConfigUtil(null, $this->input);
+        $util = new SPCConfigUtil();
         $config = $util->config($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
         if ($this->getOption('includes')) {

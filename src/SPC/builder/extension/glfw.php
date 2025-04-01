@@ -30,7 +30,7 @@ class glfw extends Extension
         return true;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--enable-glfw --with-glfw-dir=' . BUILD_ROOT_PATH;
     }

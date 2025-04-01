@@ -913,6 +913,15 @@
             "path": "COPYING"
         }
     },
+    "xdebug": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/xdebug",
+        "filename": "xdebug.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "xhprof": {
         "type": "url",
         "url": "https://pecl.php.net/get/xhprof",

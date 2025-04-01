@@ -21,7 +21,7 @@ class imagick extends Extension
         return true;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $disable_omp = getenv('SPC_LIBC') === 'musl' ? '' : ' ac_cv_func_omp_pause_resource_all=no';
         return '--with-imagick=' . BUILD_ROOT_PATH . $disable_omp;

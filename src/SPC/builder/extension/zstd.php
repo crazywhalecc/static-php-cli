@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('zstd')]
 class zstd extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--enable-zstd --with-libzstd="' . BUILD_ROOT_PATH . '"';
     }
