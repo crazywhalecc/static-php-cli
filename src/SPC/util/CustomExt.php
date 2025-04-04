@@ -24,7 +24,9 @@ class CustomExt
     public static function loadCustomExt(): void
     {
         $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/builder/extension', 'SPC\builder\extension');
-        $classes = array_merge($classes, FileSystem::getClassesPsr4(WORKING_DIR . '/src/builder/extension', 'App\builder\extension'));
+        if (file_exists(WORKING_DIR . '/src/builder/extension')) {
+            $classes = array_merge($classes, FileSystem::getClassesPsr4(WORKING_DIR . '/src/builder/extension', 'App\builder\extension'));
+        }
         foreach ($classes as $class) {
             $reflection = new \ReflectionClass($class);
             foreach ($reflection->getAttributes(CustomExt::class) as $attribute) {

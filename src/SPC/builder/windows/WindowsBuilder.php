@@ -223,10 +223,12 @@ class WindowsBuilder extends BuilderBase
             ROOT_DIR . '\src\SPC\builder\\' . osfamily2dir() . '\library',
             'SPC\builder\\' . osfamily2dir() . '\library'
         );
-        $classes = array_merge($classes, FileSystem::getClassesPsr4(
-            WORKING_DIR . '\src\builder\\' . osfamily2dir() . '\library',
-            'App\builder\\' . osfamily2dir() . '\library'
-        ));
+        if (file_exists(WORKING_DIR . '\src\builder\\' . osfamily2dir() . '\library')) {
+            $classes = array_merge($classes, FileSystem::getClassesPsr4(
+                WORKING_DIR . '\src\builder\\' . osfamily2dir() . '\library',
+                'App\builder\\' . osfamily2dir() . '\library'
+            ));
+        }
         foreach ($classes as $class) {
             if (defined($class . '::NAME') && $class::NAME !== 'unknown' && Config::getLib($class::NAME) !== null) {
                 $support_lib_list[$class::NAME] = $class;
