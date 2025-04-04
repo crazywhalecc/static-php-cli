@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
-use Closure;
 use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
@@ -21,11 +20,12 @@ class BuilderProvider
 {
     private static ?BuilderBase $builder = null;
 
-    private static ?Closure $customizeBuilder = null;
+    private static ?\Closure $customizeBuilder = null;
+
     /**
-     * @param Closure(BuilderBase): void $callback
+     * @param \Closure(BuilderBase): void $callback
      */
-    public static function customize(Closure $callback): void
+    public static function customize(\Closure $callback): void
     {
         self::$customizeBuilder = $callback;
     }

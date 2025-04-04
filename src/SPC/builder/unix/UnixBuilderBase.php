@@ -50,7 +50,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 array_unshift($libFiles, ...$lib->getStaticLibs());
             }
         }
-        return array_map(fn($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
+        return array_map(fn ($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
     }
 
     /**
