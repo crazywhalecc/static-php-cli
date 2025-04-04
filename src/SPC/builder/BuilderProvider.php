@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use Closure;
 use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
@@ -19,6 +20,15 @@ use Symfony\Component\Console\Input\InputInterface;
 class BuilderProvider
 {
     private static ?BuilderBase $builder = null;
+
+    private static ?Closure $customizeBuilder = null;
+    /**
+     * @param Closure(BuilderBase): void $callback
+     */
+    public static function customize(Closure $callback): void
+    {
+        self::$customizeBuilder = $callback;
+    }
 
     /**
      * @throws FileSystemException
@@ -36,6 +46,10 @@ class BuilderProvider
             'BSD' => new BSDBuilder($input->getOptions()),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
+        // allow to add/customize builder instance early
+        if (self::$customizeBuilder) {
+            call_user_func_array(self::$customizeBuilder, [&self::$builder]);
+        }
         return self::$builder;
     }
 

@@ -110,18 +110,18 @@ class WindowsBuilder extends BuilderBase
         cmd()->cd(SOURCE_PATH . '\php-src')
             ->exec(
                 "{$this->sdk_prefix} configure.bat --task-args \"" .
-                '--disable-all ' .
-                '--disable-cgi ' .
-                '--with-php-build=' . BUILD_ROOT_PATH . ' ' .
-                '--with-extra-includes=' . BUILD_INCLUDE_PATH . ' ' .
-                '--with-extra-libs=' . BUILD_LIB_PATH . ' ' .
-                ($enableCli ? '--enable-cli=yes ' : '--enable-cli=no ') .
-                ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
-                ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
-                $config_file_scan_dir .
-                "{$this->makeExtensionArgs()} " .
-                $zts .
-                '"'
+                    '--disable-all ' .
+                    '--disable-cgi ' .
+                    '--with-php-build=' . BUILD_ROOT_PATH . ' ' .
+                    '--with-extra-includes=' . BUILD_INCLUDE_PATH . ' ' .
+                    '--with-extra-libs=' . BUILD_LIB_PATH . ' ' .
+                    ($enableCli ? '--enable-cli=yes ' : '--enable-cli=no ') .
+                    ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
+                    ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
+                    $config_file_scan_dir .
+                    "{$this->makeExtensionArgs()} " .
+                    $zts .
+                    '"'
             );
 
         SourcePatcher::patchBeforeMake($this);
@@ -223,6 +223,10 @@ class WindowsBuilder extends BuilderBase
             ROOT_DIR . '\src\SPC\builder\\' . osfamily2dir() . '\library',
             'SPC\builder\\' . osfamily2dir() . '\library'
         );
+        $classes = array_merge($classes, FileSystem::getClassesPsr4(
+            WORKING_DIR . '\src\builder\\' . osfamily2dir() . '\library',
+            'App\builder\\' . osfamily2dir() . '\library'
+        ));
         foreach ($classes as $class) {
             if (defined($class . '::NAME') && $class::NAME !== 'unknown' && Config::getLib($class::NAME) !== null) {
                 $support_lib_list[$class::NAME] = $class;

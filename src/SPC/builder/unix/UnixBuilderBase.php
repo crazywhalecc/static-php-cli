@@ -50,7 +50,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 array_unshift($libFiles, ...$lib->getStaticLibs());
             }
         }
-        return array_map(fn ($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
+        return array_map(fn($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
     }
 
     /**
@@ -98,6 +98,10 @@ abstract class UnixBuilderBase extends BuilderBase
             ROOT_DIR . '/src/SPC/builder/' . osfamily2dir() . '/library',
             'SPC\builder\\' . osfamily2dir() . '\library'
         );
+        $classes = array_merge($classes, FileSystem::getClassesPsr4(
+            WORKING_DIR . '/src/builder/' . osfamily2dir() . '/library',
+            'App\builder\\' . osfamily2dir() . '\library'
+        ));
         foreach ($classes as $class) {
             if (defined($class . '::NAME') && $class::NAME !== 'unknown' && Config::getLib($class::NAME) !== null) {
                 $support_lib_list[$class::NAME] = $class;
