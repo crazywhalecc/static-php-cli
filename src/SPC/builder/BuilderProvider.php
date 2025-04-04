@@ -20,6 +20,16 @@ class BuilderProvider
 {
     private static ?BuilderBase $builder = null;
 
+    private static ?\Closure $customizeBuilder = null;
+
+    /**
+     * @param \Closure(BuilderBase): void $callback
+     */
+    public static function customize(\Closure $callback): void
+    {
+        self::$customizeBuilder = $callback;
+    }
+
     /**
      * @throws FileSystemException
      * @throws RuntimeException
@@ -36,6 +46,10 @@ class BuilderProvider
             'BSD' => new BSDBuilder($input->getOptions()),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
+        // allow to add/customize builder instance early
+        if (self::$customizeBuilder) {
+            call_user_func_array(self::$customizeBuilder, [&self::$builder]);
+        }
         return self::$builder;
     }
 
