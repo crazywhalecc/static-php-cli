@@ -59,7 +59,7 @@ on:
         required: true
         description: Build target OS
         default: 'linux-x86_64'
-        type: choice
+        type: string
         options:
           - 'linux-x86_64'
           - 'linux-aarch64'
@@ -71,7 +71,7 @@ on:
         required: true
         description: PHP version to compile
         default: '8.4'
-        type: choice
+        type: string
         options:
           - '8.4'
           - '8.3'
