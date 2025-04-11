@@ -60,23 +60,11 @@ on:
         description: Build target OS
         default: 'linux-x86_64'
         type: string
-        options:
-          - 'linux-x86_64'
-          - 'linux-aarch64'
-          - 'linux-x86_64-glibc'
-          - 'linux-aarch64-glibc'
-          - 'macos-x86_64'
-          - 'macos-aarch64'
       php-version:
         required: true
         description: PHP version to compile
         default: '8.4'
         type: string
-        options:
-          - '8.4'
-          - '8.3'
-          - '8.2'
-          - '8.1'
       extensions:
         description: Extensions to build (comma separated)
         required: true
