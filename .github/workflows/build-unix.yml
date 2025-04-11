@@ -113,9 +113,6 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v4
 
-      - if: ${{ inputs.vendor-mode }}
-        run: composer install --no-dev --classmap-authoritative
-
       - name: "Define"
         id: gendef
         run: |
@@ -201,6 +198,9 @@ jobs:
         with:
           path: downloads
           key: php-dependencies-${{ inputs.os }}
+
+      - if: ${{ inputs.vendor-mode }}
+        run: composer install --no-dev --classmap-authoritative
 
       - name: "Download sources"
         run: ${{ needs.define-build.outputs.download }}
