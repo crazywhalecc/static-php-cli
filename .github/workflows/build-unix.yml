@@ -200,7 +200,10 @@ jobs:
           key: php-dependencies-${{ inputs.os }}
 
       - if: ${{ inputs.vendor-mode }}
-        run: composer install --no-dev --classmap-authoritative
+        run: |
+          composer install --no-dev --classmap-authoritative
+          ls -la
+          ls -la bin/
 
       - name: "Download sources"
         run: ${{ needs.define-build.outputs.download }}
