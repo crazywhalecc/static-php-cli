@@ -53,6 +53,58 @@ on:
         description: Keep debug symbols for debugging
         type: boolean
         default: false
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        description: Build target OS
+        default: 'linux-x86_64'
+        type: choice
+        options:
+          - 'linux-x86_64'
+          - 'linux-aarch64'
+          - 'linux-x86_64-glibc'
+          - 'linux-aarch64-glibc'
+          - 'macos-x86_64'
+          - 'macos-aarch64'
+      php-version:
+        required: true
+        description: PHP version to compile
+        default: '8.4'
+        type: choice
+        options:
+          - '8.4'
+          - '8.3'
+          - '8.2'
+          - '8.1'
+      extensions:
+        description: Extensions to build (comma separated)
+        required: true
+        type: string
+      extra-libs:
+        description: Extra libraries to build (optional, comma separated)
+        type: string
+      build-cli:
+        description: Build cli binary
+        default: true
+        type: boolean
+      build-micro:
+        description: Build phpmicro binary
+        type: boolean
+      build-fpm:
+        description: Build fpm binary
+        type: boolean
+      prefer-pre-built:
+        description: Prefer pre-built binaries (reduce build time)
+        type: boolean
+        default: true
+      debug:
+        description: Show full build logs
+        type: boolean
+      no-strip:
+        description: Keep debug symbols for debugging
+        type: boolean
+        default: false
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
