@@ -645,7 +645,7 @@
     "mimalloc": {
         "type": "ghtagtar",
         "repo": "microsoft/mimalloc",
-        "match": "v2.2.[^3].*",
+        "match": "v2\\.\\d\\.[^3].*",
         "provide-pre-built": false,
         "license": {
             "type": "file",
