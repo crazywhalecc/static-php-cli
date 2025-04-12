@@ -28,6 +28,7 @@ trait imagemagick
             'libpng' => 'png',
             'libwebp' => 'webp',
             'libxml2' => 'xml',
+            'libheif' => 'heic',
             'zlib' => 'zlib',
             'xz' => 'lzma',
             'zstd' => 'zstd',
