@@ -93,10 +93,6 @@ on:
         description: Keep debug symbols for debugging
         type: boolean
         default: false
-      vendor-mode:
-        description: Project is in vendor mode
-        type: boolean
-        default: false
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -198,13 +194,6 @@ jobs:
         with:
           path: downloads
           key: php-dependencies-${{ inputs.os }}
-
-      - if: ${{ inputs.vendor-mode }}
-        run: |
-          composer install --no-dev --classmap-authoritative
-          ls -la
-          ls -la bin/
-
       - name: "Download sources"
         run: ${{ needs.define-build.outputs.download }}
       - name: "Build PHP"
