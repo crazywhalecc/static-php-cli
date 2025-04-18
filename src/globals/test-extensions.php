@@ -30,7 +30,7 @@ $test_os = [
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
@@ -44,6 +44,12 @@ $prefer_pre_built = false;
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'imagick,zlib',
     'Windows' => 'pgsql,pdo_pgsql',
+};
+
+// If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
+$shared_extensions = match (PHP_OS_FAMILY) {
+    'Linux' => 'apcu,ffi,xdebug,xsl,zip',
+    'Windows', 'Darwin' => '',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
@@ -87,6 +93,7 @@ if (!isset($argv[1])) {
 $trim_value = "\r\n \t,";
 
 $final_extensions = trim(trim($extensions, $trim_value) . ',' . _getCombination($base_combination), $trim_value);
+$download_extensions = trim($final_extensions . ',' . $shared_extensions, $trim_value);
 $final_libs = trim($with_libs, $trim_value);
 
 if (PHP_OS_FAMILY === 'Windows') {
@@ -107,7 +114,7 @@ function quote2(string $param): string
 // generate download command
 if ($argv[1] === 'download_cmd') {
     $down_cmd = 'download ';
-    $down_cmd .= '--for-extensions=' . quote2($final_extensions) . ' ';
+    $down_cmd .= '--for-extensions=' . quote2($download_extensions) . ' ';
     $down_cmd .= '--for-libs=' . quote2($final_libs) . ' ';
     $down_cmd .= '--with-php=' . quote2($argv[3]) . ' ';
     $down_cmd .= '--ignore-cache-sources=php-src ';
@@ -128,6 +135,7 @@ if ($argv[1] === 'install_upx_cmd') {
 if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd = 'build ';
     $build_cmd .= quote2($final_extensions) . ' ';
+    $build_cmd .= $shared_extensions ? '--build-shared=' . quote2($shared_extensions) . ' ' : '';
     $build_cmd .= $zts ? '--enable-zts ' : '';
     $build_cmd .= $no_strip ? '--no-strip ' : '';
     $build_cmd .= $upx ? '--with-upx-pack ' : '';
