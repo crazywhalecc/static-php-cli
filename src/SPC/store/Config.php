@@ -137,7 +137,7 @@ class Config
         if (!isset(self::$ext[$name])) {
             throw new WrongUsageException('ext [' . $name . '] is not supported yet');
         }
-        return self::$ext[$name]['target'] ?? ['static'];
+        return self::$ext[$name]['target'] ?? ['static', 'shared'];
     }
 
     /**
