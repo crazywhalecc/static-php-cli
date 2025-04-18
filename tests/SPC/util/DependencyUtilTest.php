@@ -16,6 +16,12 @@ final class DependencyUtilTest extends TestCase
 {
     public function testGetExtLibsByDeps(): void
     {
+        // setup
+        $bak = [
+            'source' => Config::$source,
+            'lib' => Config::$lib,
+            'ext' => Config::$ext,
+        ];
         // example
         Config::$source = [
             'test1' => [
@@ -82,6 +88,10 @@ final class DependencyUtilTest extends TestCase
         $this->assertTrue($b < $a);
         $this->assertTrue($c < $a);
         $this->assertTrue($c < $b);
+        // restore
+        Config::$source = $bak['source'];
+        Config::$lib = $bak['lib'];
+        Config::$ext = $bak['ext'];
     }
 
     public function testNotExistExtException(): void
