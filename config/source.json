@@ -37,9 +37,12 @@
         }
     },
     "attr": {
-        "type": "git",
-        "rev": "v2.5.2",
-        "url": "https://git.savannah.nongnu.org/git/attr.git",
+        "alt": {
+            "type": "url",
+            "url": "https://mirror.souseiseki.middlendian.com/nongnu/attr/attr-2.5.2.tar.gz"
+        },
+        "type": "url",
+        "url": "https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "file",
@@ -335,9 +338,12 @@
         }
     },
     "libacl": {
-        "type": "git",
-        "rev": "v2.3.2",
-        "url": "https://git.savannah.nongnu.org/git/acl.git",
+        "alt": {
+            "type": "url",
+            "url": "https://mirror.souseiseki.middlendian.com/nongnu/acl/acl-2.3.2.tar.gz"
+        },
+        "type": "url",
+        "url": "https://download.savannah.nongnu.org/releases/acl/acl-2.3.2.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "file",
