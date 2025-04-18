@@ -130,6 +130,10 @@ class BuildPHPCommand extends BuildCommand
             $display_libs = array_filter($libraries, fn ($lib) => in_array(Config::getLib($lib, 'type', 'lib'), ['lib', 'package']));
             $display_extensions = array_map(fn ($ext) => in_array($ext, $shared_extensions) ? "*{$ext}" : $ext, $extensions);
 
+            // separate static and shared extensions from $extensions
+            // filter rule: including shared extensions if they are in $static_extensions or $shared_extensions
+            $static_extensions = array_filter($extensions, fn ($ext) => !in_array($ext, $shared_extensions) || in_array($ext, $static_extensions));
+
             // print info
             $indent_texts = [
                 'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
