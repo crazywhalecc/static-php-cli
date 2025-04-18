@@ -9,6 +9,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\util\SPCConfigUtil;
 
 class Extension
 {
@@ -281,13 +282,23 @@ class Extension
     /**
      * Build shared extension for Unix
      *
+     * @throws FileSystemException
      * @throws RuntimeException
+     * @throws WrongUsageException
+     * @throws \ReflectionException
+     * @throws \Throwable
      */
     public function buildUnixShared(): void
     {
+        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()]);
+        $env = [
+            'CFLAGS' => $config['cflags'],
+            'LDFLAGS' => $config['ldflags'],
+            'LIBS' => $config['libs'],
+        ];
         // prepare configure args
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->builder->arch_c_flags ?? ''])
+            ->setEnv($env)
             ->execWithEnv(BUILD_BIN_PATH . '/phpize')
             ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
             ->execWithEnv('make clean')

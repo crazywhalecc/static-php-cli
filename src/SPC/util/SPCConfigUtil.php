@@ -7,6 +7,9 @@ namespace SPC\util;
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
 use SPC\builder\macos\MacOSBuilder;
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use Symfony\Component\Console\Input\ArgvInput;
 
@@ -21,6 +24,24 @@ class SPCConfigUtil
         }
     }
 
+    /**
+     * Generate configuration for building PHP extensions.
+     *
+     * @param array $extensions          Extension name list
+     * @param array $libraries           Additional library name list
+     * @param bool  $include_suggest_ext Include suggested extensions
+     * @param bool  $include_suggest_lib Include suggested libraries
+     * @return array{
+     *     cflags: string,
+     *     ldflags: string,
+     *     libs: string
+     * }
+     * @throws \ReflectionException
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     * @throws \Throwable
+     */
     public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
     {
         [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
