@@ -33,6 +33,10 @@ final class LicenseDumperTest extends TestCase
 
     public function testDumpWithSingleLicense(): void
     {
+        $bak = [
+            'source' => Config::$source,
+            'lib' => Config::$lib,
+        ];
         Config::$lib = [
             'lib-base' => ['type' => 'root'],
             'php' => ['type' => 'root'],
@@ -54,10 +58,17 @@ final class LicenseDumperTest extends TestCase
         $dumper->dump(self::DIRECTORY);
 
         $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_0.txt');
+        // restore
+        Config::$source = $bak['source'];
+        Config::$lib = $bak['lib'];
     }
 
     public function testDumpWithMultipleLicenses(): void
     {
+        $bak = [
+            'source' => Config::$source,
+            'lib' => Config::$lib,
+        ];
         Config::$lib = [
             'lib-base' => ['type' => 'root'],
             'php' => ['type' => 'root'],
@@ -91,5 +102,9 @@ final class LicenseDumperTest extends TestCase
         $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_0.txt');
         $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_1.txt');
         $this->assertFileExists(self::DIRECTORY . '/lib_fake_lib_2.txt');
+
+        // restore
+        Config::$source = $bak['source'];
+        Config::$lib = $bak['lib'];
     }
 }
