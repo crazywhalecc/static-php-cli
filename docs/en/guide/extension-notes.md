@@ -48,6 +48,10 @@ This extension contains an implementation of the coroutine environment for `pdo_
 
 1. Only PHP 8.0 ~ 8.4 is supported.
 
+## imagick
+
+1. The imagick extension currently only has openmp support on musl libc. This means that multithreading is disabled on glibc or other operating systems. The extension is still fully functional.
+
 ## imap
 
 1. Kerberos is not supported

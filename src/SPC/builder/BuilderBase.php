@@ -190,11 +190,11 @@ abstract class BuilderBase
             }
         }
         $this->emitPatchPoint('before-php-extract');
-        SourceManager::initSource(sources: ['php-src']);
+        SourceManager::initSource(sources: ['php-src'], source_only: true);
         $this->emitPatchPoint('after-php-extract');
         if ($this->getPHPVersionID() >= 80000) {
             $this->emitPatchPoint('before-micro-extract');
-            SourceManager::initSource(sources: ['micro']);
+            SourceManager::initSource(sources: ['micro'], source_only: true);
             $this->emitPatchPoint('after-micro-extract');
         }
         $this->emitPatchPoint('before-exts-extract');

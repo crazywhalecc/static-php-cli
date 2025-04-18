@@ -257,6 +257,7 @@
             "Windows": "wip",
             "BSD": "wip"
         },
+        "notes": true,
         "type": "external",
         "source": "ext-imagick",
         "arg-type": "custom",
