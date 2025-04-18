@@ -173,7 +173,7 @@ abstract class BuilderBase
      * @throws \Throwable|WrongUsageException
      * @internal
      */
-    public function proveExts(array $static_extensions, array $shared_extensions = [], bool $skip_check_deps = false): void
+    public function proveExts(array $static_extensions, array $shared_extensions = [], bool $skip_check_deps = false, bool $skip_extract = false): void
     {
         CustomExt::loadCustomExt();
         // judge ext
@@ -189,17 +189,20 @@ abstract class BuilderBase
                 throw new WrongUsageException('Extension [' . $ext . '] does not support shared build!');
             }
         }
-        $this->emitPatchPoint('before-php-extract');
-        SourceManager::initSource(sources: ['php-src'], source_only: true);
-        $this->emitPatchPoint('after-php-extract');
-        if ($this->getPHPVersionID() >= 80000) {
-            $this->emitPatchPoint('before-micro-extract');
-            SourceManager::initSource(sources: ['micro'], source_only: true);
-            $this->emitPatchPoint('after-micro-extract');
+        if (!$skip_extract) {
+            $this->emitPatchPoint('before-php-extract');
+            SourceManager::initSource(sources: ['php-src'], source_only: true);
+            $this->emitPatchPoint('after-php-extract');
+            if ($this->getPHPVersionID() >= 80000) {
+                $this->emitPatchPoint('before-micro-extract');
+                SourceManager::initSource(sources: ['micro'], source_only: true);
+                $this->emitPatchPoint('after-micro-extract');
+            }
+            $this->emitPatchPoint('before-exts-extract');
+            SourceManager::initSource(exts: [...$static_extensions, ...$shared_extensions]);
+            $this->emitPatchPoint('after-exts-extract');
         }
-        $this->emitPatchPoint('before-exts-extract');
-        SourceManager::initSource(exts: [...$static_extensions, ...$shared_extensions]);
-        $this->emitPatchPoint('after-exts-extract');
+
         foreach ([...$static_extensions, ...$shared_extensions] as $extension) {
             $class = CustomExt::getExtClass($extension);
             /** @var Extension $ext */

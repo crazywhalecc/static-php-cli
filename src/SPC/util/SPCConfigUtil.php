@@ -50,7 +50,7 @@ class SPCConfigUtil
         if ($this->builder === null) {
             $this->builder = BuilderProvider::makeBuilderByInput(new ArgvInput());
             $this->builder->proveLibs($libraries);
-            $this->builder->proveExts($extensions);
+            $this->builder->proveExts($extensions, skip_extract: true);
         }
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
