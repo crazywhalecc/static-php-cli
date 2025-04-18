@@ -135,7 +135,7 @@ if ($argv[1] === 'install_upx_cmd') {
 if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd = 'build ';
     $build_cmd .= quote2($final_extensions) . ' ';
-    $build_cmd .= $shared_extensions ? '--build-shared=' . quote2($shared_extensions) . ' ' : '';
+    $build_cmd .= $shared_extensions && getenv('SPC_LIBC') === 'glibc' ? '--build-shared=' . quote2($shared_extensions) . ' ' : '';
     $build_cmd .= $zts ? '--enable-zts ' : '';
     $build_cmd .= $no_strip ? '--no-strip ' : '';
     $build_cmd .= $upx ? '--with-upx-pack ' : '';
