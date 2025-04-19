@@ -28,6 +28,7 @@ $test_os = [
     'ubuntu-24.04',
     'ubuntu-22.04-arm',
     'ubuntu-24.04-arm',
+    'windows-latest',
 ];
 
 // whether enable thread safe
@@ -43,8 +44,8 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'phar',
-    'Windows' => 'pgsql,pdo_pgsql',
+    'Linux', 'Darwin' => 'ev',
+    'Windows' => 'ev',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
@@ -63,7 +64,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'common',
+    'Linux', 'Darwin' => 'minimal',
     'Windows' => 'none',
 };
 
