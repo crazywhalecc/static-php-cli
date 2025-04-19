@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    // '8.1',
-    // '8.2',
+    '8.1',
+    '8.2',
     '8.3',
     '8.4',
 ];
@@ -25,6 +25,7 @@ $test_os = [
     'macos-14',
     'ubuntu-latest',
     'ubuntu-22.04',
+    'ubuntu-24.04',
     'ubuntu-22.04-arm',
     'ubuntu-24.04-arm',
 ];
@@ -42,13 +43,13 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imagick,zlib',
+    'Linux', 'Darwin' => 'phar',
     'Windows' => 'pgsql,pdo_pgsql',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'apcu,ffi,xdebug,xsl,zip',
+    'Linux' => 'xdebug',
     'Windows', 'Darwin' => '',
 };
 
@@ -62,7 +63,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'common',
     'Windows' => 'none',
 };
 
@@ -165,9 +166,9 @@ echo match ($argv[1]) {
 
 $prefix = match ($argv[2] ?? null) {
     'windows-latest', 'windows-2022', 'windows-2019', 'windows-2025' => 'powershell.exe -file .\bin\spc.ps1 ',
-    'ubuntu-latest', 'ubuntu-24.04', 'ubuntu-24.04-arm' => './bin/spc ',
+    'ubuntu-latest' => 'bin/spc-alpine-docker ',
+    'ubuntu-24.04', 'ubuntu-24.04-arm' => './bin/spc ',
     'ubuntu-22.04', 'ubuntu-22.04-arm' => 'bin/spc-gnu-docker ',
-    'ubuntu-20.04' => 'bin/spc-alpine-docker ',
     default => 'bin/spc ',
 };
 
