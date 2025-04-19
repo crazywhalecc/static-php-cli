@@ -92,6 +92,10 @@
         },
         "type": "wip"
     },
+    "ev": {
+        "type": "external",
+        "source": "ev"
+    },
     "event": {
         "support": {
             "Windows": "wip",
@@ -894,10 +898,6 @@
         "lib-depends": [
             "tidy"
         ]
-    },
-    "ev": {
-        "type": "external",
-        "source": "ev"
     },
     "tokenizer": {
         "type": "builtin"

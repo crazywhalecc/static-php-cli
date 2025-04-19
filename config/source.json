@@ -92,6 +92,16 @@
             "path": "LICENSE"
         }
     },
+    "ev": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/ev",
+        "path": "php-src/ext/ev",
+        "filename": "ev.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ds": {
         "type": "url",
         "url": "https://pecl.php.net/get/ds",
@@ -617,16 +627,6 @@
         "repo": "nih-at/libzip",
         "match": "libzip.+\\.tar\\.xz",
         "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
-    "ev": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/ev",
-        "path": "php-src/ext/ev",
-        "filename": "ev.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
