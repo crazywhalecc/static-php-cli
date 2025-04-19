@@ -118,7 +118,7 @@ class BSDBuilder extends UnixBuilderBase
                 $config_file_scan_dir .
                 $json_74 .
                 $zts .
-                $this->makeExtensionArgs()
+                $this->makeStaticExtensionArgs()
             );
 
         $this->emitPatchPoint('before-php-make');

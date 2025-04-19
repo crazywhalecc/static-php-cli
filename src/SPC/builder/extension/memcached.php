@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('memcached')]
 class memcached extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         $rootdir = BUILD_ROOT_PATH;
         $zlib_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : "--with-zlib-dir={$rootdir}";

@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('odbc')]
 class odbc extends Extension
 {
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--with-unixODBC=' . BUILD_ROOT_PATH;
     }

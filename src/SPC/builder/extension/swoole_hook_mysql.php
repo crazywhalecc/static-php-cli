@@ -16,7 +16,7 @@ class swoole_hook_mysql extends Extension
         return 'swoole';
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         // pdo_mysql doesn't need to be disabled
         // enable swoole-hook-mysql will enable mysqli, pdo, pdo_mysql, we don't need to add any additional options
