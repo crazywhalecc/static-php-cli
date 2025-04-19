@@ -26,7 +26,6 @@ class ev extends Extension
             'EXTENSION(\'ev\'',
             "		EXTENSION('ev', php_ev_sources, PHP_EV_SHARED, ' /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');"
         );
-        sleep(3);
         return true;
     }
 }
