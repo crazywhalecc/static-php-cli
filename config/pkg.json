@@ -9,7 +9,7 @@
     },
     "nasm-x86_64-win": {
         "type": "url",
-        "url": "https://www.nasm.us/pub/nasm/releasebuilds/2.16.01/win64/nasm-2.16.01-win64.zip",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/nasm/nasm-2.16.01-win64.zip",
         "extract-files": {
             "nasm-2.16.01/nasm.exe": "{php_sdk_path}/bin/nasm.exe",
             "nasm-2.16.01/ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
