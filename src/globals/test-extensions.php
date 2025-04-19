@@ -132,11 +132,39 @@ if ($argv[1] === 'install_upx_cmd') {
     $install_upx_cmd = 'install-pkg upx';
 }
 
+$prefix = match ($argv[2] ?? null) {
+    'windows-latest', 'windows-2022', 'windows-2019', 'windows-2025' => 'powershell.exe -file .\bin\spc.ps1 ',
+    'ubuntu-latest' => 'bin/spc-alpine-docker ',
+    'ubuntu-24.04', 'ubuntu-24.04-arm' => './bin/spc ',
+    'ubuntu-22.04', 'ubuntu-22.04-arm' => 'bin/spc-gnu-docker ',
+    default => 'bin/spc ',
+};
+
+// shared_extension build
+if ($shared_extensions) {
+    switch ($argv[2] ?? null) {
+        case 'ubuntu-22.04':
+        case 'ubuntu-22.04-arm':
+            $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            break;
+        case 'macos-13':
+        case 'macos-14':
+            $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            $no_strip = true;
+            break;
+        default:
+            $shared_cmd = '';
+            break;
+    }
+} else {
+    $shared_cmd = '';
+}
+
 // generate build command
 if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd = 'build ';
     $build_cmd .= quote2($final_extensions) . ' ';
-    $build_cmd .= $shared_extensions && getenv('SPC_LIBC') === 'glibc' ? '--build-shared=' . quote2($shared_extensions) . ' ' : '';
+    $build_cmd .= $shared_cmd;
     $build_cmd .= $zts ? '--enable-zts ' : '';
     $build_cmd .= $no_strip ? '--no-strip ' : '';
     $build_cmd .= $upx ? '--with-upx-pack ' : '';
@@ -164,31 +192,25 @@ echo match ($argv[1]) {
     default => '',
 };
 
-$prefix = match ($argv[2] ?? null) {
-    'windows-latest', 'windows-2022', 'windows-2019', 'windows-2025' => 'powershell.exe -file .\bin\spc.ps1 ',
-    'ubuntu-latest' => 'bin/spc-alpine-docker ',
-    'ubuntu-24.04', 'ubuntu-24.04-arm' => './bin/spc ',
-    'ubuntu-22.04', 'ubuntu-22.04-arm' => 'bin/spc-gnu-docker ',
-    default => 'bin/spc ',
-};
-
-if ($argv[1] === 'download_cmd') {
-    passthru($prefix . $down_cmd, $retcode);
-} elseif ($argv[1] === 'build_cmd') {
-    passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
-} elseif ($argv[1] === 'build_embed_cmd') {
-    if (str_starts_with($argv[2], 'windows-')) {
-        // windows does not accept embed SAPI
-        passthru($prefix . $build_cmd . ' --build-cli', $retcode);
-    } else {
-        passthru($prefix . $build_cmd . ' --build-embed', $retcode);
-    }
-} elseif ($argv[1] === 'doctor_cmd') {
-    passthru($prefix . $doctor_cmd, $retcode);
-} elseif ($argv[1] === 'install_upx_cmd') {
-    passthru($prefix . $install_upx_cmd, $retcode);
-} else {
-    $retcode = 0;
+switch ($argv[1] ?? null) {
+    case 'download_cmd':
+        passthru($prefix . $down_cmd, $retcode);
+        break;
+    case 'build_cmd':
+        passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
+        break;
+    case 'build_embed_cmd':
+        passthru($prefix . $build_cmd . (str_starts_with($argv[2], 'windows-') ? ' --build-cli' : ' --build-embed'), $retcode);
+        break;
+    case 'doctor_cmd':
+        passthru($prefix . $doctor_cmd, $retcode);
+        break;
+    case 'install_upx_cmd':
+        passthru($prefix . $install_upx_cmd, $retcode);
+        break;
+    default:
+        $retcode = 0;
+        break;
 }
 
 exit($retcode);
