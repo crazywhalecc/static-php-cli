@@ -74,9 +74,9 @@ bin/spc build gd --with-libs=freetype,libjpeg,libavif,libwebp --build-cli
 
 ## xdebug
 
-1. Xdebug 只能作为共享扩展构建。在 Linux 上，您需要使用带有 `SPC_LIBC=glibc` 的 static-php-cli，然后使用选项 `--with-php-config=/path/to/buildroot/bin/php-config` 从源代码编译 php-xdebug。
-2. macOS 平台可以通过在相同平台编译的 PHP 下编译一个 xdebug 扩展，并提取其中的 `xdebug.so` 文件，再在 static-php-cli 中使用 `--no-strip` 参数保留调试符号表，同时加入 `ffi` 扩展。
-   编译的 `./php` 二进制可以通过指定 INI 配置并运行，例如`./php -d 'zend_extension=xdebug.so' your-code.php`。
+1. Xdebug 只能作为共享扩展进行构建。在 Linux 上，您需要使用 static-php-cli 并设置 SPC_LIBC=glibc。
+2. 使用 Linux/glibc 或 macOS 时，您可以使用 `--build-shared=xdebug` 将 Xdebug 编译为共享扩展。
+   编译后的 `./php` 二进制文件可以通过指定 INI 文件进行配置和运行，例如 `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`。
 
 ## xml
 
@@ -117,9 +117,10 @@ pgsql 16.2 修复了这个 Bug，现在正常工作了。
 
 ## ffi
 
-1. 因为 Linux 系统的限制，纯静态编译的状态下（spc 默认编译结果为纯静态）无法使用它加载其他 `so` 扩展。Linux 支持加载 so 扩展的前提是非静态编译。如果你需要使用 ffi 扩展，请参见 [编译 GNU libc 的 PHP](./build-with-glibc)。
-2. macOS 支持 ffi 扩展，但是部分内核下不包含调试符号时会出现错误。
-3. Windows 支持 ffi 扩展。
+1. 由于 musl libc 静态链接的限制，无法加载动态库，因此无法使用 ffi。
+   如果您需要使用 ffi 扩展，请参阅 [使用 GNU libc 编译 PHP](./build-with-glibc)。
+2. macOS 支持 ffi 扩展，但某些内核不包含调试符号时会出现错误。
+3. Windows x64 支持 ffi 扩展。
 
 ## xhprof
 
