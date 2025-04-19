@@ -92,6 +92,11 @@
         },
         "type": "wip"
     },
+    "ev": {
+        "type": "external",
+        "source": "ev",
+        "arg-type-windows": "with"
+    },
     "event": {
         "support": {
             "Windows": "wip",
