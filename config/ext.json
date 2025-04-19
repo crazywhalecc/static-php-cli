@@ -94,7 +94,8 @@
     },
     "ev": {
         "type": "external",
-        "source": "ev"
+        "source": "ev",
+        "arg-type-windows": "with"
     },
     "event": {
         "support": {
