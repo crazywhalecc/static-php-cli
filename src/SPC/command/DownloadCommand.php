@@ -120,7 +120,7 @@ class DownloadCommand extends BaseCommand
 
             // retry
             $retry = intval($this->getOption('retry'));
-            f_putenv('SPC_RETRY_TIME=' . $retry);
+            f_putenv('SPC_DOWNLOAD_RETRIES=' . $retry);
 
             // Use shallow-clone can reduce git resource download
             if ($this->getOption('shallow-clone')) {
