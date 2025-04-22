@@ -94,7 +94,7 @@
     },
     "ev": {
         "type": "url",
-        "url": "https://pecl.php.net/get/ev",
+        "url": "https://pecl.php.net/get/evXXXXX",
         "path": "php-src/ext/ev",
         "filename": "ev.tgz",
         "license": {
