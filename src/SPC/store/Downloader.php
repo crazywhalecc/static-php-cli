@@ -201,7 +201,7 @@ class Downloader
             }
         };
         self::registerCancelEvent($cancel_func);
-        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retry: self::getRetryAttempts());
+        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retries: self::getRetryAttempts());
         self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
@@ -241,7 +241,7 @@ class Downloader
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retry = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
+    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retries = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
         $download_path = FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}");
         if (file_exists($download_path)) {
@@ -267,8 +267,8 @@ class Downloader
             if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
                 throw new WrongUsageException('Keyboard interrupted, download failed !');
             }
-            if ($retry > 0) {
-                self::downloadGit($name, $url, $branch, $move_path, $retry - 1);
+            if ($retries > 0) {
+                self::downloadGit($name, $url, $branch, $move_path, $retries - 1);
                 return;
             }
             throw $e;
@@ -510,36 +510,23 @@ class Downloader
             $hook($method, $url, $headers);
         }
 
-        try {
-            FileSystem::findCommandPath('curl');
+        FileSystem::findCommandPath('curl');
 
-            $methodArg = match ($method) {
-                'GET' => '',
-                'HEAD' => '-I',
-                default => "-X \"{$method}\"",
-            };
-            $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
-
-            $cmd = SPC_CURL_EXEC . " -sfSL {$methodArg} {$headerArg} \"{$url}\"";
-            if (getenv('CACHE_API_EXEC') === 'yes') {
-                if (!file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'))) {
-                    $cache = [];
-                } else {
-                    $cache = json_decode(file_get_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache')), true);
-                }
-                if (isset($cache[$cmd]) && $cache[$cmd]['expire'] >= time()) {
-                    return $cache[$cmd]['cache'];
-                }
-                f_exec($cmd, $output, $ret);
-                if ($ret === 2 || $ret === -1073741510) {
-                    throw new RuntimeException('failed http fetch');
-                }
-                if ($ret !== 0) {
-                    throw new DownloaderException('failed http fetch');
-                }
-                $cache[$cmd]['cache'] = implode("\n", $output);
-                $cache[$cmd]['expire'] = time() + 3600;
-                file_put_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'), json_encode($cache));
+        $methodArg = match ($method) {
+            'GET' => '',
+            'HEAD' => '-I',
+            default => "-X \"{$method}\"",
+        };
+        $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
+        $retry = $retries > 0 ? "--retry {$retries}" : '';
+        $cmd = SPC_CURL_EXEC . " -sfSL {$retry} {$methodArg} {$headerArg} \"{$url}\"";
+        if (getenv('CACHE_API_EXEC') === 'yes') {
+            if (!file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'))) {
+                $cache = [];
+            } else {
+                $cache = json_decode(file_get_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache')), true);
+            }
+            if (isset($cache[$cmd]) && $cache[$cmd]['expire'] >= time()) {
                 return $cache[$cmd]['cache'];
             }
             f_exec($cmd, $output, $ret);
@@ -549,15 +536,19 @@ class Downloader
             if ($ret !== 0) {
                 throw new DownloaderException('failed http fetch');
             }
-            return implode("\n", $output);
-        } catch (DownloaderException $e) {
-            if ($retries > 0) {
-                logger()->notice('Retrying curl exec after 5 seconds...');
-                sleep(5);
-                return self::curlExec($url, $method, $headers, $hooks, $retries - 1);
-            }
-            throw $e;
+            $cache[$cmd]['cache'] = implode("\n", $output);
+            $cache[$cmd]['expire'] = time() + 3600;
+            file_put_contents(FileSystem::convertPath(DOWNLOAD_PATH . '/.curl_exec_cache'), json_encode($cache));
+            return $cache[$cmd]['cache'];
         }
+        f_exec($cmd, $output, $ret);
+        if ($ret === 2 || $ret === -1073741510) {
+            throw new RuntimeException('failed http fetch');
+        }
+        if ($ret !== 0) {
+            throw new DownloaderException('failed http fetch');
+        }
+        return implode("\n", $output);
     }
 
     /**
@@ -566,7 +557,7 @@ class Downloader
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function curlDown(string $url, string $path, string $method = 'GET', array $headers = [], array $hooks = [], int $retry = 0): void
+    public static function curlDown(string $url, string $path, string $method = 'GET', array $headers = [], array $hooks = [], int $retries = 0): void
     {
         $used_headers = $headers;
         foreach ($hooks as $hook) {
@@ -580,17 +571,13 @@ class Downloader
         };
         $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $used_headers));
         $check = !defined('DEBUG_MODE') ? 's' : '#';
-        $cmd = SPC_CURL_EXEC . " -{$check}fSL -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
+        $retry = $retries > 0 ? "--retry {$retries}" : '';
+        $cmd = SPC_CURL_EXEC . " -{$check}fSL {$retry} -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
         try {
             f_passthru($cmd);
         } catch (RuntimeException $e) {
             if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
                 throw new WrongUsageException('Keyboard interrupted, download failed !');
-            }
-            if ($retry > 0) {
-                logger()->notice('Retrying curl download ...');
-                self::curlDown($url, $path, $method, $used_headers, retry: $retry - 1);
-                return;
             }
             throw $e;
         }
