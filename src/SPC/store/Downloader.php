@@ -29,7 +29,7 @@ class Downloader
         logger()->debug("finding {$name} source from bitbucket tag");
         $data = json_decode(self::curlExec(
             url: "https://api.bitbucket.org/2.0/repositories/{$source['repo']}/refs/tags",
-            retry: self::getRetryTime()
+            retries: self::getRetryAttempts()
         ), true);
         $ver = $data['values'][0]['name'];
         if (!$ver) {
@@ -39,7 +39,7 @@ class Downloader
         $headers = self::curlExec(
             url: $url,
             method: 'HEAD',
-            retry: self::getRetryTime()
+            retries: self::getRetryAttempts()
         );
         preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+\.tar\.gz)\1/im', $headers, $matches);
         if ($matches) {
@@ -67,7 +67,7 @@ class Downloader
         $data = json_decode(self::curlExec(
             url: "https://api.github.com/repos/{$source['repo']}/{$type}",
             hooks: [[CurlHook::class, 'setupGithubToken']],
-            retry: self::getRetryTime()
+            retries: self::getRetryAttempts()
         ), true);
 
         $url = null;
@@ -91,7 +91,7 @@ class Downloader
             url: $url,
             method: 'HEAD',
             hooks: [[CurlHook::class, 'setupGithubToken']],
-            retry: self::getRetryTime()
+            retries: self::getRetryAttempts()
         );
         preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+\.tar\.gz)\1/im', $headers, $matches);
         if ($matches) {
@@ -118,7 +118,7 @@ class Downloader
         $data = json_decode(self::curlExec(
             url: "https://api.github.com/repos/{$source['repo']}/releases",
             hooks: [[CurlHook::class, 'setupGithubToken']],
-            retry: self::getRetryTime()
+            retries: self::getRetryAttempts()
         ), true);
         $url = null;
         foreach ($data as $release) {
@@ -156,7 +156,7 @@ class Downloader
     public static function getFromFileList(string $name, array $source): array
     {
         logger()->debug("finding {$name} source from file list");
-        $page = self::curlExec($source['url'], retry: self::getRetryTime());
+        $page = self::curlExec($source['url'], retries: self::getRetryAttempts());
         preg_match_all($source['regex'], $page, $matches);
         if (!$matches) {
             throw new DownloaderException("Failed to get {$name} version");
@@ -201,7 +201,7 @@ class Downloader
             }
         };
         self::registerCancelEvent($cancel_func);
-        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retry: self::getRetryTime());
+        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retry: self::getRetryAttempts());
         self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
@@ -366,7 +366,7 @@ class Downloader
                         $pkg['url'],
                         $pkg['rev'],
                         $pkg['extract'] ?? null,
-                        self::getRetryTime(),
+                        self::getRetryAttempts(),
                         SPC_DOWNLOAD_PRE_BUILT
                     );
                     break;
@@ -472,7 +472,7 @@ class Downloader
                         $source['url'],
                         $source['rev'],
                         $source['path'] ?? null,
-                        self::getRetryTime(),
+                        self::getRetryAttempts(),
                         $download_as
                     );
                     break;
@@ -504,7 +504,7 @@ class Downloader
      *
      * @throws DownloaderException
      */
-    public static function curlExec(string $url, string $method = 'GET', array $headers = [], array $hooks = [], int $retry = 0): string
+    public static function curlExec(string $url, string $method = 'GET', array $headers = [], array $hooks = [], int $retries = 0): string
     {
         foreach ($hooks as $hook) {
             $hook($method, $url, $headers);
@@ -551,9 +551,10 @@ class Downloader
             }
             return implode("\n", $output);
         } catch (DownloaderException $e) {
-            if ($retry > 0) {
-                logger()->notice('Retrying curl exec ...');
-                return self::curlExec($url, $method, $headers, $hooks, $retry - 1);
+            if ($retries > 0) {
+                logger()->notice('Retrying curl exec after 5 seconds...');
+                sleep(5);
+                return self::curlExec($url, $method, $headers, $hooks, $retries - 1);
             }
             throw $e;
         }
@@ -628,9 +629,9 @@ class Downloader
         }
     }
 
-    private static function getRetryTime(): int
+    private static function getRetryAttempts(): int
     {
-        return intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0);
+        return intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0);
     }
 
     /**
