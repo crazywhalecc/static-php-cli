@@ -403,7 +403,7 @@ class DownloadCommand extends BaseCommand
                 logger()->debug("Fetching alternative source for {$source_name}");
                 // get from dl.static-php.dev
                 $url = "https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/{$source_name}/?format=json";
-                $json = json_decode(Downloader::curlExec(url: $url, retry: intval(getenv('SPC_RETRY_TIME') ? getenv('SPC_RETRY_TIME') : 0)), true);
+                $json = json_decode(Downloader::curlExec(url: $url, retry: intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0)), true);
                 if (!is_array($json)) {
                     throw new RuntimeException('failed http fetch');
                 }
