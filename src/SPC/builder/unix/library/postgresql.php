@@ -41,7 +41,8 @@ trait postgresql
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
         if (!empty($output[1][0])) {
             $cppflags = $output[1][0];
-            $envs .= " CPPFLAGS=\"{$cppflags} -fPIC -fPIE -fno-ident\"";
+            $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
+            $envs .= " CPPFLAGS=\"{$cppflags} -fPIC -fPIE -fno-ident{$macos_15_bug_cflags}\"";
         }
         $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
