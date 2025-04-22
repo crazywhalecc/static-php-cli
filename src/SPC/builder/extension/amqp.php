@@ -23,7 +23,7 @@ class amqp extends Extension
         return false;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--with-amqp --with-librabbitmq-dir=' . BUILD_ROOT_PATH;
     }

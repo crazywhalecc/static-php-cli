@@ -314,6 +314,7 @@ You can try to use the following commands:
 - `--with-suggested-exts`: Add `ext-suggests` as dependencies when compiling
 - `--with-suggested-libs`: Add `lib-suggests` as dependencies when compiling
 - `--with-upx-pack`: Use UPX to reduce the size of the binary file after compilation (you need to use `bin/spc install-pkg upx` to install upx first)
+- `--build-shared=XXX,YYY`: compile the specified extension into a shared library (the default is to compile into a static library)
 
 For hardcoding INI options, it works for cli, micro, embed sapi. Here is a simple example where we preset a larger `memory_limit` and disable the `system` function:
 

@@ -58,7 +58,7 @@ class SwitchPhpVersionCommand extends BaseCommand
 
         // retry
         $retry = intval($this->getOption('retry'));
-        f_putenv('SPC_RETRY_TIME=' . $retry);
+        f_putenv('SPC_DOWNLOAD_RETRIES=' . $retry);
 
         Downloader::downloadSource('php-src', Config::getSource('php-src'));
 

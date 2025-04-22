@@ -197,5 +197,5 @@ jobs:
         run: php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }}
 
       - name: "Run Build Tests (build - embed for non-windows)"
-        if: matrix.os != 'windows-latest'
+        if: ${{ !startsWith(matrix.os, 'windows-') }}
         run: php src/globals/test-extensions.php build_embed_cmd ${{ matrix.os }} ${{ matrix.php }}

@@ -272,6 +272,7 @@ bin/spc build mysqlnd,pdo_mysql --build-all --debug
 - `--with-suggested-exts`: 编译时将 `ext-suggests` 也作为编译依赖加入
 - `--with-suggested-libs`: 编译时将 `lib-suggests` 也作为编译依赖加入
 - `--with-upx-pack`: 编译后使用 UPX 减小二进制文件体积（需先使用 `bin/spc install-pkg upx` 安装 upx）
+- `--build-shared=XXX,YYY`: 编译时将指定的扩展编译为共享库（默认编译为静态库）
 
 硬编码 INI 选项适用于 cli、micro、embed。有关硬编码 INI 选项，下面是一个简单的例子，我们预设一个更大的 `memory_limit`，并且禁用 `system` 函数：
 

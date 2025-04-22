@@ -37,9 +37,12 @@
         }
     },
     "attr": {
-        "type": "git",
-        "rev": "v2.5.2",
-        "url": "https://git.savannah.nongnu.org/git/attr.git",
+        "alt": {
+            "type": "url",
+            "url": "https://mirror.souseiseki.middlendian.com/nongnu/attr/attr-2.5.2.tar.gz"
+        },
+        "type": "url",
+        "url": "https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "file",
@@ -84,6 +87,16 @@
         "url": "https://pecl.php.net/get/dio",
         "path": "php-src/ext/dio",
         "filename": "dio.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ev": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/ev",
+        "path": "php-src/ext/ev",
+        "filename": "ev.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -335,9 +348,12 @@
         }
     },
     "libacl": {
-        "type": "git",
-        "rev": "v2.3.2",
-        "url": "https://git.savannah.nongnu.org/git/acl.git",
+        "alt": {
+            "type": "url",
+            "url": "https://mirror.souseiseki.middlendian.com/nongnu/acl/acl-2.3.2.tar.gz"
+        },
+        "type": "url",
+        "url": "https://download.savannah.nongnu.org/releases/acl/acl-2.3.2.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "file",
@@ -639,7 +655,7 @@
     "mimalloc": {
         "type": "ghtagtar",
         "repo": "microsoft/mimalloc",
-        "match": "v2.+",
+        "match": "v2\\.\\d\\.[^3].*",
         "provide-pre-built": false,
         "license": {
             "type": "file",
@@ -911,6 +927,15 @@
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "xdebug": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/xdebug",
+        "filename": "xdebug.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
         }
     },
     "xhprof": {

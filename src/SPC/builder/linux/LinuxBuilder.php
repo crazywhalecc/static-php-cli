@@ -182,7 +182,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                $this->makeExtensionArgs() .
+                $this->makeStaticExtensionArgs() .
                 ' ' . $envs_build_php . ' '
             );
 
@@ -311,15 +311,7 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
-        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
-        FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
-        $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
-        str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
-        // move mimalloc to the beginning of libs
-        $php_config_str = preg_replace('/(libs=")(.*?)\s*(' . preg_quote(BUILD_LIB_PATH, '/') . '\/mimalloc\.o)\s*(.*?)"/', '$1$3 $2 $4"', $php_config_str);
-        // move lstdc++ to the end of libs
-        $php_config_str = preg_replace('/(libs=")(.*?)\s*(-lstdc\+\+)\s*(.*?)"/', '$1$2 $4 $3"', $php_config_str);
-        FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
+        $this->patchPhpScripts();
     }
 
     private function getMakeExtraVars(): array

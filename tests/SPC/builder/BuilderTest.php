@@ -72,7 +72,7 @@ class BuilderTest extends TestCase
 
     public function testMakeExtensionArgs()
     {
-        $this->assertStringContainsString('--enable-mbstring', $this->builder->makeExtensionArgs());
+        $this->assertStringContainsString('--enable-mbstring', $this->builder->makeStaticExtensionArgs());
     }
 
     public function testIsLibsOnly()

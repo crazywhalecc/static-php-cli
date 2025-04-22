@@ -92,6 +92,11 @@
         },
         "type": "wip"
     },
+    "ev": {
+        "type": "external",
+        "source": "ev",
+        "arg-type-windows": "with"
+    },
     "event": {
         "support": {
             "Windows": "wip",
@@ -119,6 +124,10 @@
             "Linux": "partial",
             "BSD": "wip"
         },
+        "target": [
+            "static",
+            "shared"
+        ],
         "notes": true,
         "arg-type": "custom",
         "type": "builtin",
@@ -772,6 +781,9 @@
             "Windows": "no",
             "BSD": "wip"
         },
+        "target": [
+            "static"
+        ],
         "notes": true,
         "type": "external",
         "source": "swoole",
@@ -919,12 +931,16 @@
         ]
     },
     "xdebug": {
-        "type": "builtin",
+        "type": "external",
+        "source": "xdebug",
+        "target": [
+            "shared"
+        ],
         "support": {
             "Windows": "wip",
             "BSD": "no",
-            "Darwin": "no",
-            "Linux": "no"
+            "Darwin": "partial",
+            "Linux": "partial"
         },
         "notes": true
     },
@@ -1040,6 +1056,9 @@
         "support": {
             "BSD": "wip"
         },
+        "target": [
+            "static"
+        ],
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",

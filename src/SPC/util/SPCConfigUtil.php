@@ -7,26 +7,51 @@ namespace SPC\util;
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
 use SPC\builder\macos\MacOSBuilder;
+use SPC\exception\FileSystemException;
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Input\InputInterface;
 
 class SPCConfigUtil
 {
-    public function __construct(private ?BuilderBase $builder = null, ?InputInterface $input = null)
+    private ?BuilderBase $builder = null;
+
+    public function __construct(?BuilderBase $builder = null)
     {
-        if ($builder === null) {
-            $this->builder = BuilderProvider::makeBuilderByInput($input ?? new ArgvInput());
+        if ($builder !== null) {
+            $this->builder = $builder; // BuilderProvider::makeBuilderByInput($input ?? new ArgvInput());
         }
     }
 
+    /**
+     * Generate configuration for building PHP extensions.
+     *
+     * @param array $extensions          Extension name list
+     * @param array $libraries           Additional library name list
+     * @param bool  $include_suggest_ext Include suggested extensions
+     * @param bool  $include_suggest_lib Include suggested libraries
+     * @return array{
+     *     cflags: string,
+     *     ldflags: string,
+     *     libs: string
+     * }
+     * @throws \ReflectionException
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     * @throws \Throwable
+     */
     public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
     {
         [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
         ob_start();
-        $this->builder->proveLibs($libraries);
-        $this->builder->proveExts($extensions);
+        if ($this->builder === null) {
+            $this->builder = BuilderProvider::makeBuilderByInput(new ArgvInput());
+            $this->builder->proveLibs($libraries);
+            $this->builder->proveExts($extensions, skip_extract: true);
+        }
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $libs = $this->getLibsString($libraries);
@@ -47,9 +72,9 @@ class SPCConfigUtil
             $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
         }
         return [
-            'cflags' => $cflags,
-            'ldflags' => $ldflags,
-            'libs' => $libs,
+            'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
+            'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
+            'libs' => trim(getenv('LIBS') . ' ' . $libs),
         ];
     }
 

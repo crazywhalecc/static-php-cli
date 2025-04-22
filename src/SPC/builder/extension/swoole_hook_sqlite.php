@@ -25,7 +25,7 @@ class swoole_hook_sqlite extends Extension
         }
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         // enable swoole pgsql hook
         return '--enable-swoole-sqlite';

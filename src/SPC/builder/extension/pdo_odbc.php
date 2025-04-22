@@ -17,7 +17,7 @@ class pdo_odbc extends Extension
         return true;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--with-pdo-odbc=unixODBC,' . BUILD_ROOT_PATH;
     }

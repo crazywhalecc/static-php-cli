@@ -122,6 +122,20 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
 # shellcheck disable=SC2086
 # shellcheck disable=SC2090
 if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
+    echo "* Debug mode enabled, run docker in interactive mode."
+    echo "* You can use 'exit' to exit the docker container."
+    echo "* You can use 'bin/spc' like normal builds."
+    echo "*"
+    echo "*    Mounted directories:"
+    echo "*    ./config:    $(pwd)/config"
+    echo "*    ./src:       $(pwd)/src"
+    echo "*    ./buildroot: $(pwd)/buildroot"
+    echo "*    ./source:    $(pwd)/source"
+    echo "*    ./dist:      $(pwd)/dist"
+    echo "*    ./downloads: $(pwd)/downloads"
+    echo "*    ./pkgroot:   $(pwd)/pkgroot"
+    echo "*"
+
     $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-v2
 else
     $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-v2 bin/spc $@

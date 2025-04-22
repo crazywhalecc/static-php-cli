@@ -137,6 +137,41 @@ class ConfigValidatorTest extends TestCase
         } catch (ValidationException) {
             $this->assertTrue(true);
         }
+        // lib.json is broken by not assoc array
+        try {
+            ConfigValidator::validateLibs(['lib1', 'lib2'], ['source1' => [], 'source2' => []]);
+            $this->fail('should throw ValidationException');
+        } catch (ValidationException) {
+            $this->assertTrue(true);
+        }
+        // lib.json lib is not one of "lib", "package", "root", "target"
+        try {
+            ConfigValidator::validateLibs(['lib1' => ['source' => 'source1', 'type' => 'not one of']], ['source1' => [], 'source2' => []]);
+            $this->fail('should throw ValidationException');
+        } catch (ValidationException) {
+            $this->assertTrue(true);
+        }
+        // lib.json lib if it is "lib" or "package", it must have "source"
+        try {
+            ConfigValidator::validateLibs(['lib1' => ['type' => 'lib']], ['source1' => [], 'source2' => []]);
+            $this->fail('should throw ValidationException');
+        } catch (ValidationException) {
+            $this->assertTrue(true);
+        }
+        // lib.json static-libs must be a list
+        try {
+            ConfigValidator::validateLibs(['lib1' => ['source' => 'source1', 'static-libs-windows' => 'not list']], ['source1' => [], 'source2' => []]);
+            $this->fail('should throw ValidationException');
+        } catch (ValidationException) {
+            $this->assertTrue(true);
+        }
+        // lib.json frameworks must be a list
+        try {
+            ConfigValidator::validateLibs(['lib1' => ['source' => 'source1', 'frameworks' => 'not list']], ['source1' => [], 'source2' => []]);
+            $this->fail('should throw ValidationException');
+        } catch (ValidationException) {
+            $this->assertTrue(true);
+        }
         // source must be string
         try {
             ConfigValidator::validateLibs(['lib1' => ['source' => true]], ['source1' => [], 'source2' => []]);
@@ -168,5 +203,12 @@ class ConfigValidatorTest extends TestCase
         ConfigValidator::validateExts([]);
         $this->expectException(ValidationException::class);
         ConfigValidator::validateExts(null);
+    }
+
+    public function testValidatePkgs(): void
+    {
+        ConfigValidator::validatePkgs([]);
+        $this->expectException(ValidationException::class);
+        ConfigValidator::validatePkgs(null);
     }
 }

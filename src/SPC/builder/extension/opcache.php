@@ -42,7 +42,7 @@ class opcache extends Extension
         return file_put_contents(SOURCE_PATH . '/php-src/.opcache_patched', '1') !== false;
     }
 
-    public function getUnixConfigureArg(): string
+    public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--enable-opcache';
     }
