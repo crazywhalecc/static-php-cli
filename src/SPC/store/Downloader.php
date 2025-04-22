@@ -573,7 +573,14 @@ class Downloader
         $check = !defined('DEBUG_MODE') ? 's' : '#';
         $retry = $retries > 0 ? "--retry {$retries}" : '';
         $cmd = SPC_CURL_EXEC . " -{$check}fSL {$retry} -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
-        f_passthru($cmd);
+        try {
+            f_passthru($cmd);
+        } catch (RuntimeException $e) {
+            if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
+                throw new WrongUsageException('Keyboard interrupted, download failed !');
+            }
+            throw $e;
+        }
     }
 
     public static function getPreBuiltLockName(string $source): string
