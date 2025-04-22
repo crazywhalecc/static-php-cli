@@ -40,7 +40,7 @@ class Extension
         // set source_dir for builtin
         if ($ext_type === 'builtin') {
             $this->source_dir = SOURCE_PATH . '/php-src/ext/' . $this->name;
-        } else {
+        } elseif ($ext_type === 'external') {
             $source = Config::getExt($this->name, 'source');
             if ($source === null) {
                 throw new RuntimeException("{$ext_type} extension {$name} source not found");
@@ -48,6 +48,8 @@ class Extension
             $source_path = Config::getSource($source)['path'] ?? null;
             $source_path = $source_path === null ? SOURCE_PATH . '/' . $source : SOURCE_PATH . '/' . $source_path;
             $this->source_dir = $source_path;
+        } else {
+            $this->source_dir = SOURCE_PATH . '/php-src';
         }
     }
 
