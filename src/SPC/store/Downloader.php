@@ -372,6 +372,12 @@ class Downloader
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
+                    if (file_exists(WORKING_DIR . '/src/store/source')) {
+                        $classes = array_merge($classes, FileSystem::getClassesPsr4(
+                            WORKING_DIR . '/src/store/source',
+                            'App\store\source'
+                        ));
+                    }
                     foreach ($classes as $class) {
                         if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
                             (new $class())->fetch($force);
@@ -478,6 +484,12 @@ class Downloader
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
+                    if (file_exists(WORKING_DIR . '/src/store/source')) {
+                        $classes = array_merge($classes, FileSystem::getClassesPsr4(
+                            WORKING_DIR . '/src/store/source',
+                            'App\store\source'
+                        ));
+                    }
                     foreach ($classes as $class) {
                         if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
                             (new $class())->fetch($force, $source, $download_as);
