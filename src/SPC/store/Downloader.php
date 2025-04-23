@@ -483,6 +483,11 @@ class Downloader
                     );
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
+                    if (isset($source['func']) && is_callable($source['func'])) {
+                        $source['name'] = $name;
+                        $source['func']($force, $source, $download_as);
+                        break;
+                    }
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
                     if (file_exists(WORKING_DIR . '/src/store/source')) {
                         $classes = array_merge($classes, FileSystem::getClassesPsr4(

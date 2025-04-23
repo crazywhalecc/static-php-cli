@@ -905,7 +905,6 @@
         "path": "php-src/ext/swow-src",
         "rev": "ci",
         "url": "https://github.com/swow/swow",
-        "patch": "patchSwow",
         "license": {
             "type": "file",
             "path": "LICENSE"
