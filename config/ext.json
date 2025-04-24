@@ -958,7 +958,6 @@
     },
     "xlswriter": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "external",
