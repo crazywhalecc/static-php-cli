@@ -79,9 +79,11 @@ class PackLibCommand extends BuildCommand
                         '{libc}' => getenv('SPC_LIBC') ?: 'default',
                         '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
                     ];
+                    // detect suffix, for proper tar option
+                    $tar_option = $this->getTarOptionFromSuffix(Config::getPreBuilt('match-pattern'));
                     $filename = str_replace(array_keys($replace), array_values($replace), $filename);
                     $filename = WORKING_DIR . '/dist/' . $filename;
-                    f_passthru('tar -czf ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt');
+                    f_passthru('tar ' . $tar_option . ' ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt');
                     logger()->info('Pack library ' . $lib->getName() . ' to ' . $filename . ' complete.');
                 }
             }
@@ -114,5 +116,31 @@ class PackLibCommand extends BuildCommand
                 throw new RuntimeException('Static library ' . $static_lib . ' not found in ' . BUILD_LIB_PATH);
             }
         }
+    }
+
+    /**
+     * Get tar compress options from suffix
+     *
+     * @param  string $name Package file name
+     * @return string Tar options for packaging libs
+     */
+    private function getTarOptionFromSuffix(string $name): string
+    {
+        if (str_ends_with($name, '.tar')) {
+            return '-cf';
+        }
+        if (str_ends_with($name, '.tar.gz') || str_ends_with($name, '.tgz')) {
+            return '-czf';
+        }
+        if (str_ends_with($name, '.tar.bz2') || str_ends_with($name, '.tbz2')) {
+            return '-cjf';
+        }
+        if (str_ends_with($name, '.tar.xz') || str_ends_with($name, '.txz')) {
+            return '-cJf';
+        }
+        if (str_ends_with($name, '.tar.lz') || str_ends_with($name, '.tlz')) {
+            return '-c --lzma -f';
+        }
+        return '-cf';
     }
 }
