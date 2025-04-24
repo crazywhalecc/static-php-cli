@@ -121,6 +121,7 @@ class Downloader
             retries: self::getRetryAttempts()
         ), true);
         $url = null;
+        $filename = null;
         foreach ($data as $release) {
             if (($source['prefer-stable'] ?? false) === true && $release['prerelease'] === true) {
                 continue;
@@ -131,16 +132,16 @@ class Downloader
             }
             foreach ($release['assets'] as $asset) {
                 if (preg_match('|' . $source['match'] . '|', $asset['name'])) {
-                    $url = $asset['browser_download_url'];
+                    $url = "https://api.github.com/repos/{$source['repo']}/releases/assets/{$asset['id']}";
+                    $filename = $asset['name'];
                     break 2;
                 }
             }
         }
 
-        if (!$url) {
+        if (!$url || !$filename) {
             throw new DownloaderException("failed to find {$name} release metadata");
         }
-        $filename = basename($url);
 
         return [$url, $filename];
     }
@@ -191,7 +192,7 @@ class Downloader
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null, int $download_as = SPC_DOWNLOAD_SOURCE): void
+    public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null, int $download_as = SPC_DOWNLOAD_SOURCE, array $headers = []): void
     {
         logger()->debug("Downloading {$url}");
         $cancel_func = function () use ($filename) {
@@ -201,7 +202,7 @@ class Downloader
             }
         };
         self::registerCancelEvent($cancel_func);
-        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), retries: self::getRetryAttempts());
+        self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), headers: $headers, retries: self::getRetryAttempts());
         self::unregisterCancelEvent();
         logger()->debug("Locking {$filename}");
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
@@ -455,7 +456,7 @@ class Downloader
                     break;
                 case 'ghrel':           // GitHub Release (uploaded)
                     [$url, $filename] = self::getLatestGithubRelease($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as);
+                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as, ['Accept: application/octet-stream']);
                     break;
                 case 'filelist':        // Basic File List (regex based crawler)
                     [$url, $filename] = self::getFromFileList($name, $source);
