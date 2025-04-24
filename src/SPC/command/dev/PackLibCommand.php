@@ -83,7 +83,7 @@ class PackLibCommand extends BuildCommand
                     $tar_option = $this->getTarOptionFromSuffix(Config::getPreBuilt('match-pattern'));
                     $filename = str_replace(array_keys($replace), array_values($replace), $filename);
                     $filename = WORKING_DIR . '/dist/' . $filename;
-                    f_passthru('tar ' . $tar_option . ' ' . $filename . ' -T ' . WORKING_DIR . '/packlib_files.txt');
+                    f_passthru("tar {$tar_option} {$filename} -T " . WORKING_DIR . '/packlib_files.txt');
                     logger()->info('Pack library ' . $lib->getName() . ' to ' . $filename . ' complete.');
                 }
             }
