@@ -9,6 +9,7 @@ use Laravel\Prompts\Prompt;
 use Psr\Log\LogLevel;
 use SPC\ConsoleApplication;
 use SPC\exception\ExceptionHandler;
+use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\util\GlobalEnvManager;
 use Symfony\Component\Console\Command\Command;
@@ -58,12 +59,12 @@ abstract class BaseCommand extends Command
         });
         $version = ConsoleApplication::VERSION;
         if (!$this->no_motd) {
-            echo "     _        _   _                 _           
- ___| |_ __ _| |_(_) ___      _ __ | |__  _ __  
-/ __| __/ _` | __| |/ __|____| '_ \\| '_ \\| '_ \\ 
+            echo "     _        _   _                 _
+ ___| |_ __ _| |_(_) ___      _ __ | |__  _ __
+/ __| __/ _` | __| |/ __|____| '_ \\| '_ \\| '_ \\
 \\__ \\ || (_| | |_| | (_|_____| |_) | | | | |_) |
 |___/\\__\\__,_|\\__|_|\\___|    | .__/|_| |_| .__/   v{$version}
-                             |_|         |_|    
+                             |_|         |_|
 ";
         }
     }
@@ -104,7 +105,7 @@ abstract class BaseCommand extends Command
                 // show raw argv list for logger()->debug
                 logger()->debug('argv: ' . implode(' ', $_SERVER['argv']));
                 return $this->handle();
-            } catch (WrongUsageException $e) {
+            } catch (ValidationException|WrongUsageException $e) {
                 $msg = explode("\n", $e->getMessage());
                 foreach ($msg as $v) {
                     logger()->error($v);

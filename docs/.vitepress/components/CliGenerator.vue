@@ -175,6 +175,12 @@
         {{ buildCommandString }}
       </div>
     </div>
+    <div class="command-container">
+        <b>craft.yml</b>
+        <div id="craft-cmd" class="command-preview pre">
+          {{ craftCommandString }}
+        </div>
+    </div>
   </div>
 </template>
 
@@ -499,6 +505,38 @@ const buildCommandString = computed(() => {
   return `${spcCommand.value} build ${buildCommand.value} "${extList.value}"${additionalLibs.value}${debug.value ? ' --debug' : ''}${zts.value ? ' --enable-zts' : ''}${enableUPX.value ? ' --with-upx-pack' : ''}${displayINI.value}`;
 });
 
+const craftCommandString = computed(() => {
+    let str = `php-version: ${selectedPhpVersion.value}\n`;
+    str += `extensions: "${extList.value}"\n`;
+    if (checkedTargets.value.join(',') === 'all') {
+        str += 'sapi: ' + ['cli', 'fpm', 'micro', 'embed'].join(',') + '\n';
+    } else {
+        str += `sapi: ${checkedTargets.value.join(',')}\n`;
+    }
+    if (additionalLibs.value) {
+        str += `libs: ${additionalLibs.value.replace('--with-libs="', '').replace('"', '').trim()}\n`;
+    }
+    if (debug.value) {
+        str += 'debug: true\n';
+    }
+    str += '{{position_hold}}';
+    if (enableUPX.value) {
+        str += '  with-upx-pack: true\n';
+    }
+    if (zts.value) {
+        str += '  enable-zts: true\n';
+    }
+    if (preBuilt.value) {
+        str += '  prefer-pre-built: true\n';
+    }
+    if (!str.endsWith('{{position_hold}}')) {
+        str = str.replace('{{position_hold}}', 'build-options:\n');
+    } else {
+        str = str.replace('{{position_hold}}', '');
+    }
+    return str;
+});
+
 const calculateExtLibDepends = (input) => {
   const result = new Set();
 
@@ -615,6 +653,12 @@ h2 {
   word-break: break-all;
   font-family: monospace;
   overflow-wrap: break-word;
+}
+
+.pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .option-line {
