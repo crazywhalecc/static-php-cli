@@ -30,8 +30,26 @@ class FileSystem
                 if (!is_array($json)) {
                     throw new FileSystemException('Reading ' . $try . ' failed');
                 }
-                return $json;
+                $result = $json;
+                break;
             }
+        }
+        $try_custom = $config_dir !== null ? [FileSystem::convertPath($config_dir . '/' . $config . '.custom.json')] : [
+            WORKING_DIR . '/config/' . $config . '.custom.json',
+            ROOT_DIR . '/config/' . $config . '.custom.json',
+        ];
+        foreach ($try_custom as $try) {
+            if (file_exists($try)) {
+                $json = json_decode(self::readFile($try), true);
+                if (!is_array($json)) {
+                    throw new FileSystemException('Reading ' . $try . ' failed');
+                }
+                $result = array_merge($result ?? [], $json);
+                break;
+            }
+        }
+        if (isset($result)) {
+            return $result;
         }
         throw new FileSystemException('Reading ' . $config . '.json failed');
     }

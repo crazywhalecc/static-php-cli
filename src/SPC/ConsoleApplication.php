@@ -8,14 +8,17 @@ use SPC\command\BuildLibsCommand;
 use SPC\command\BuildPHPCommand;
 use SPC\command\DeleteDownloadCommand;
 use SPC\command\dev\AllExtCommand;
+use SPC\command\dev\ExtSkeletonCommand;
 use SPC\command\dev\ExtVerCommand;
 use SPC\command\dev\GenerateExtDepDocsCommand;
 use SPC\command\dev\GenerateExtDocCommand;
 use SPC\command\dev\GenerateLibDepDocsCommand;
+use SPC\command\dev\LibSkeletonCommand;
 use SPC\command\dev\LibVerCommand;
 use SPC\command\dev\PackLibCommand;
 use SPC\command\dev\PhpVerCommand;
 use SPC\command\dev\SortConfigCommand;
+use SPC\command\dev\SourceSkeletonCommand;
 use SPC\command\DoctorCommand;
 use SPC\command\DownloadCommand;
 use SPC\command\DumpExtensionsCommand;
@@ -32,7 +35,7 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const VERSION = '2.5.2';
+    public const VERSION = '2.5.3';
 
     public function __construct()
     {
@@ -67,6 +70,9 @@ final class ConsoleApplication extends Application
                 new GenerateExtDepDocsCommand(),
                 new GenerateLibDepDocsCommand(),
                 new PackLibCommand(),
+                new ExtSkeletonCommand(),
+                new LibSkeletonCommand(),
+                new SourceSkeletonCommand(),
             ]
         );
     }
