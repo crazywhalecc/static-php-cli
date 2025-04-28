@@ -181,16 +181,30 @@ class SourcePatcher
         $patch_file = ROOT_DIR . "/src/globals/patch/{$patch_name}";
         $patch_str = str_replace('/', DIRECTORY_SEPARATOR, $patch_file);
 
-        // copy patch from phar
+        // Copy patch from phar
         if (\Phar::running() !== '') {
             file_put_contents(SOURCE_PATH . '/' . $patch_name, file_get_contents($patch_file));
             $patch_str = str_replace('/', DIRECTORY_SEPARATOR, SOURCE_PATH . '/' . $patch_name);
         }
 
-        f_passthru(
-            'cd ' . $cwd . ' && ' .
-            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patch_str . ' | patch -p1 ' . ($reverse ? '-R' : '')
-        );
+        // detect
+        $detect_reverse = !$reverse;
+        $detect_cmd = 'cd ' . escapeshellarg($cwd) . ' && '
+            . (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . escapeshellarg($patch_str)
+            . ' | patch --dry-run -p1 -s -f ' . ($detect_reverse ? '-R' : '')
+            . ' > ' . (PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null') . ' 2>&1';
+        exec($detect_cmd, $output, $detect_status);
+
+        if ($detect_status === 0) {
+            return true;
+        }
+
+        // apply patch
+        $apply_cmd = 'cd ' . escapeshellarg($cwd) . ' && '
+            . (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . escapeshellarg($patch_str)
+            . ' | patch -p1 ' . ($reverse ? '-R' : '');
+
+        f_passthru($apply_cmd);
         return true;
     }
 
