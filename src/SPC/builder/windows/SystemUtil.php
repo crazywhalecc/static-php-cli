@@ -99,6 +99,9 @@ SET(CMAKE_EXE_LINKER_FLAGS "{$ldflags}")
 SET(CMAKE_FIND_ROOT_PATH "{$buildroot}")
 SET(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
 CMAKE;
+        if (!is_dir(SOURCE_PATH)) {
+            FileSystem::createDir(SOURCE_PATH);
+        }
         FileSystem::writeFile(SOURCE_PATH . '\toolchain.cmake', $toolchain);
         return realpath(SOURCE_PATH . '\toolchain.cmake');
     }
