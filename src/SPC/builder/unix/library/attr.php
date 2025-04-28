@@ -20,7 +20,7 @@ trait attr
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv('libtoolize --force --copy')
-            ->execWithEnv('./autogen.sh')
+            ->execWithEnv('./autogen.sh || autoreconf -if')
             ->execWithEnv('./configure --prefix= --enable-static --disable-shared --with-pic --disable-nls')
             ->execWithEnv("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
