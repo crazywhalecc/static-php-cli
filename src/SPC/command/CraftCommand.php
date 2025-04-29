@@ -143,7 +143,7 @@ class CraftCommand extends BaseCommand
         }
         $prefix = PHP_SAPI === 'cli' ? [PHP_BINARY, $argv[0]] : [$argv[0]];
 
-        $process = new Process([...$prefix, $cmd, '--no-motd', ...$args]);
+        $process = new Process([...$prefix, $cmd, '--no-motd', ...$args], timeout: null);
         $this->log("Running: {$process->getCommandLine()}", true);
 
         if (PHP_OS_FAMILY === 'Windows') {
