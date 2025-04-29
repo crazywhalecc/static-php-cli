@@ -166,6 +166,8 @@ class ConfigValidator
         // check libs
         if (isset($craft['libs']) && is_string($craft['libs'])) {
             $craft['libs'] = array_filter(array_map(fn ($x) => trim($x), explode(',', $craft['libs'])));
+        } elseif (!isset($craft['libs'])) {
+            $craft['libs'] = [];
         }
         // check sapi
         if (!isset($craft['sapi'])) {
@@ -177,6 +179,8 @@ class ConfigValidator
         // debug as boolean
         if (isset($craft['debug'])) {
             $craft['debug'] = filter_var($craft['debug'], FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $craft['debug'] = false;
         }
         // check clean-build
         $craft['clean-build'] ??= false;
@@ -194,6 +198,8 @@ class ConfigValidator
                     throw new ValidationException("Craft file build-options {$key} must be an array");
                 }
             }
+        } else {
+            $craft['build-options'] = [];
         }
         // check download options
         if (isset($craft['download-options'])) {
@@ -209,12 +215,16 @@ class ConfigValidator
                     throw new ValidationException("Craft file download-options {$key} must be an array");
                 }
             }
+        } else {
+            $craft['download-options'] = [];
         }
         // check extra-env
         if (isset($craft['extra-env'])) {
             if (!is_assoc_array($craft['extra-env'])) {
                 throw new ValidationException('Craft file extra-env must be an object');
             }
+        } else {
+            $craft['extra-env'] = [];
         }
         // check craft-options
         $craft['craft-options']['doctor'] ??= true;
