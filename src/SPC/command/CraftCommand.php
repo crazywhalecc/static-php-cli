@@ -148,10 +148,13 @@ class CraftCommand extends BaseCommand
 
         if (PHP_OS_FAMILY === 'Windows') {
             sapi_windows_set_ctrl_handler(function () use ($process) {
-                $process->signal(SIGINT);
+                if ($process->isRunning()) {
+                    $process->signal(-1073741510);
+                }
             });
         } elseif (extension_loaded('pcntl')) {
             pcntl_signal(SIGINT, function () use ($process) {
+                /* @noinspection PhpComposerExtensionStubsInspection */
                 $process->signal(SIGINT);
             });
         } else {
