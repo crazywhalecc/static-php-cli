@@ -21,15 +21,15 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
+    'macos-13',
     // 'macos-14',
-    // 'macos-15',
-    // 'ubuntu-latest',
-    // 'ubuntu-22.04',
+    'macos-15',
+    'ubuntu-latest',
+    'ubuntu-22.04',
     // 'ubuntu-24.04',
     // 'ubuntu-22.04-arm',
     // 'ubuntu-24.04-arm',
-    'windows-latest',
+    // 'windows-latest',
 ];
 
 // whether enable thread safe
