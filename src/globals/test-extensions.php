@@ -27,8 +27,8 @@ $test_os = [
     'ubuntu-latest',
     'ubuntu-22.04',
     // 'ubuntu-24.04',
-    // 'ubuntu-22.04-arm',
-    // 'ubuntu-24.04-arm',
+    'ubuntu-22.04-arm',
+    'ubuntu-24.04-arm',
     // 'windows-latest',
 ];
 
