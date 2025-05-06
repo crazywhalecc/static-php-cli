@@ -12,7 +12,7 @@ class spx extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        $arg = '--enable-SPX';
+        $arg = '--enable-spx';
         if ($this->builder->getExt('zlib') === null) {
             $arg .= ' --with-zlib-dir=' . BUILD_ROOT_PATH;
         }
