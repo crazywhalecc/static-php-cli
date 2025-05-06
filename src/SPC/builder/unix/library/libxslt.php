@@ -28,7 +28,7 @@ trait libxslt
             ->setEnv([
                 'CFLAGS' => trim($this->getLibExtraCFlags() . ' -I' . BUILD_INCLUDE_PATH),
                 'LDFLAGS' => trim($this->getLibExtraLdFlags() . ' -L' . BUILD_LIB_PATH),
-                'LIBS' => trim($this->getLibExtraLibs() . "{$required_libs} -lstdc++")
+                'LIBS' => trim($this->getLibExtraLibs() . "{$required_libs} -lstdc++"),
             ])
             ->execWithEnv(
                 "{$this->builder->getOption('library_path')} " .
