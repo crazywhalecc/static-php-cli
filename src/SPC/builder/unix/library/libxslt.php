@@ -25,12 +25,14 @@ trait libxslt
             }
         }
         shell()->cd($this->source_dir)
-            ->exec(
-                'CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ' .
+            ->setEnv([
+                'CFLAGS' => trim($this->getLibExtraCFlags() . ' -I' . BUILD_INCLUDE_PATH),
+                'LDFLAGS' => trim($this->getLibExtraLdFlags() . ' -L' . BUILD_LIB_PATH),
+                'LIBS' => trim($this->getLibExtraLibs() . "{$required_libs} -lstdc++"),
+            ])
+            ->execWithEnv(
                 "{$this->builder->getOption('library_path')} " .
                 "{$this->builder->getOption('ld_library_path')} " .
-                'LDFLAGS="-L' . BUILD_LIB_PATH . '" ' .
-                "LIBS='{$required_libs} -lstdc++' " .
                 './configure ' .
                 '--enable-static --disable-shared ' .
                 '--without-python ' .
@@ -41,9 +43,9 @@ trait libxslt
                 '--with-libxml-prefix=' . escapeshellarg(BUILD_ROOT_PATH) . ' ' .
                 '--prefix='
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . escapeshellarg(BUILD_ROOT_PATH));
+            ->execWithEnv('make clean')
+            ->execWithEnv("make -j{$this->builder->concurrency}")
+            ->execWithEnv('make install DESTDIR=' . escapeshellarg(BUILD_ROOT_PATH));
         $this->patchPkgconfPrefix(['libexslt.pc']);
     }
 }
