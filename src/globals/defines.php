@@ -85,4 +85,4 @@ const AUTOCONF_LDFLAGS = 8;
 const AUTOCONF_ALL = 15;
 
 ConsoleLogger::$date_format = 'H:i:s';
-ConsoleLogger::$format = '[%date%] [I] %body%';
+ConsoleLogger::$format = '[%date%] [%level_short%] %body%';

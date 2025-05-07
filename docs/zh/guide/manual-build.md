@@ -1,3 +1,7 @@
+---
+outline: 'deep'
+---
+
 # 本地构建（Linux、macOS、FreeBSD）
 
 本章节为 Linux、macOS、FreeBSD 的构建过程，如果你要在 Windows 上构建，请到 [在 Windows 上构建](./build-on-windows)。
@@ -112,7 +116,45 @@ sudo apt install php-cli composer php-tokenizer
 较老版本的 Debian 默认安装的可能为旧版本（<= 8.3）版本的 PHP，建议先升级 Debian 或使用 Docker 或自带的静态二进制环境。
 :::
 
-## 命令 download - 下载依赖包
+## 使用 craft 构建（推荐）
+
+使用 `bin/spc craft` 可以使用一个配置文件，一个命令实现自动检查环境、下载源代码、构建依赖库、构建 PHP 及扩展等。
+
+你需要编写一个 `craft.yml` 文件，存放在当前工作目录下。`craft.yml` 可以由 [命令生成器](./cli-generator) 生成，或者手动编写。
+
+手动编写可参考 [craft.yml 配置](../develop/craft-yml.md) 中的注释来编写。我们下面假设你编译一个扩展组合，并选用 PHP 8.4，输出 `cli` 和 `fpm`：
+
+```yaml
+# path/to/craft.yml
+php-version: 8.4
+extensions: bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer
+sapi:
+  - cli
+  - fpm
+```
+
+然后使用 `bin/spc craft` 命令来编译：
+
+```bash
+bin/spc craft --debug
+```
+
+如果构建成功，你会在当前目录下看到 `buildroot/bin` 目录，里面包含了编译好的 PHP 二进制文件，或相应的 SAPI。
+
+- cli: Windows 下构建结果为 `buildroot/bin/php.exe`，其他平台为 `buildroot/bin/php`。
+- fpm: 构建结果为 `buildroot/bin/php-fpm`。
+- micro: 构建结果为 `buildroot/bin/micro.sfx`，如需进一步与 PHP 代码打包，请查看 [打包 micro 二进制](./manual-build#命令-micro-combine-打包-micro-二进制)。
+- embed: 参见 [embed 使用](./manual-build#embed-使用)。
+
+如果中途构建出错，你可以使用 `--debug` 参数查看详细的错误信息，或者使用 `--with-clean` 参数清除旧的编译结果，重新编译。
+
+如使用以上方式仍构建失败，请提交一个 issue，附上你的 `craft.yml`、`craft.log`。
+
+## 分步构建命令
+
+如果你有定制化需求，或分开下载、编译 PHP 和依赖库的需求，可以使用 `bin/spc` 命令分步执行。
+
+### 命令 download - 下载依赖包
 
 使用命令 `bin/spc download` 可以下载编译需要的源代码，包括 php-src 以及依赖的各种库的源码。
 
@@ -184,7 +226,7 @@ bin/spc download --for-extensions=redis,phar -G "php-src:master:https://github.c
 bin/spc download --for-extensions=swoole -G "swoole:master:https://github.com/swoole/swoole-src.git"
 ```
 
-## 命令 doctor - 环境检查
+### 命令 doctor - 环境检查
 
 如果你可以正常运行 `bin/spc` 但无法正常编译静态的 PHP 或依赖库，可以先运行 `bin/spc doctor` 检查系统自身是否缺少依赖。
 
@@ -196,11 +238,11 @@ bin/spc doctor
 bin/spc doctor --auto-fix
 ```
 
-## 命令 build - 编译 PHP
+### 命令 build - 编译 PHP
 
 使用 build 命令可以开始构建静态 php 二进制，在执行 `bin/spc build` 命令前，务必先使用 `download` 命令下载资源，建议使用 `doctor` 检查环境。
 
-### 基本用法
+#### 基本用法
 
 你需要先到 [扩展列表](./extensions) 或 [命令生成器](./cli-generator) 选择你要加入的扩展，然后使用命令 `bin/spc build` 进行编译。你需要指定一个编译目标，从如下参数中选择：
 
@@ -244,15 +286,7 @@ bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
 ```
 :::
 
-### 调试
-
-如果你在编译过程中遇到了问题，或者想查看每个执行的 shell 命令，可以使用 `--debug` 开启 debug 模式，查看所有终端日志：
-
-```bash
-bin/spc build mysqlnd,pdo_mysql --build-all --debug
-```
-
-### 编译运行选项
+#### 编译运行选项
 
 在编译过程中，有些特殊情况需要对编译器、编译目录的内容进行干预，可以尝试使用以下命令：
 
@@ -339,6 +373,14 @@ memory_limit=1G
 :::
 
 如果要打包 phar，只需要将 `a.php` 替换为打包好的 phar 文件即可。但要注意，phar 下的 micro.sfx 需要额外注意路径问题，见 [Developing - Phar 路径问题](../develop/structure#phar-应用目录问题)
+
+## 调试
+
+如果你在编译过程中遇到了问题，或者想查看每个执行的 shell 命令，可以使用 `--debug` 开启 debug 模式，查看所有终端日志：
+
+```bash
+bin/spc build mysqlnd,pdo_mysql --build-all --debug
+```
 
 ## 命令 extract - 手动解压某个库
 

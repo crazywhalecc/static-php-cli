@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace SPC\util;
 
 use SPC\exception\ValidationException;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 class ConfigValidator
 {
@@ -109,5 +112,124 @@ class ConfigValidator
     public static function validatePkgs(mixed $data): void
     {
         is_array($data) || throw new ValidationException('pkg.json is broken');
+    }
+
+    /**
+     * @param mixed   $craft_file craft.yml path
+     * @param Command $command    craft command instance
+     * @return array{
+     *     php-version?: string,
+     *     extensions: array<string>,
+     *     libs?: array<string>,
+     *     sapi: array<string>,
+     *     debug?: bool,
+     *     clean-build?: bool,
+     *     build-options?: array<string, mixed>,
+     *     download-options?: array<string, mixed>,
+     *     extra-env?: array<string, string>,
+     *     craft-options?: array{
+     *         doctor?: bool,
+     *         download?: bool,
+     *         build?: bool
+     *     }
+     * }
+     * @throws ValidationException
+     */
+    public static function validateAndParseCraftFile(mixed $craft_file, Command $command): array
+    {
+        $build_options = $command->getApplication()->find('build')->getDefinition()->getOptions();
+        $download_options = $command->getApplication()->find('download')->getDefinition()->getOptions();
+
+        try {
+            $craft = Yaml::parse(file_get_contents($craft_file));
+        } catch (ParseException $e) {
+            throw new ValidationException('Craft file is broken: ' . $e->getMessage());
+        }
+        if (!is_assoc_array($craft)) {
+            throw new ValidationException('Craft file is broken');
+        }
+        // check php-version
+        if (isset($craft['php-version'])) {
+            // validdate version, accept 8.x, 7.x, 8.x.x, 7.x.x, 8, 7
+            $version = strval($craft['php-version']);
+            if (!preg_match('/^(\d+)(\.\d+)?(\.\d+)?$/', $version, $matches)) {
+                throw new ValidationException('Craft file php-version is invalid');
+            }
+        }
+        // check extensions
+        if (!isset($craft['extensions'])) {
+            throw new ValidationException('Craft file must have extensions');
+        }
+        if (is_string($craft['extensions'])) {
+            $craft['extensions'] = array_filter(array_map(fn ($x) => trim($x), explode(',', $craft['extensions'])));
+        }
+        // check libs
+        if (isset($craft['libs']) && is_string($craft['libs'])) {
+            $craft['libs'] = array_filter(array_map(fn ($x) => trim($x), explode(',', $craft['libs'])));
+        } elseif (!isset($craft['libs'])) {
+            $craft['libs'] = [];
+        }
+        // check sapi
+        if (!isset($craft['sapi'])) {
+            throw new ValidationException('Craft file must have sapi');
+        }
+        if (is_string($craft['sapi'])) {
+            $craft['sapi'] = array_filter(array_map(fn ($x) => trim($x), explode(',', $craft['sapi'])));
+        }
+        // debug as boolean
+        if (isset($craft['debug'])) {
+            $craft['debug'] = filter_var($craft['debug'], FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $craft['debug'] = false;
+        }
+        // check clean-build
+        $craft['clean-build'] ??= false;
+        // check build-options
+        if (isset($craft['build-options'])) {
+            if (!is_assoc_array($craft['build-options'])) {
+                throw new ValidationException('Craft file build-options must be an object');
+            }
+            foreach ($craft['build-options'] as $key => $value) {
+                if (!isset($build_options[$key])) {
+                    throw new ValidationException("Craft file build-options {$key} is invalid");
+                }
+                // check an array
+                if ($build_options[$key]->isArray() && !is_array($value)) {
+                    throw new ValidationException("Craft file build-options {$key} must be an array");
+                }
+            }
+        } else {
+            $craft['build-options'] = [];
+        }
+        // check download options
+        if (isset($craft['download-options'])) {
+            if (!is_assoc_array($craft['download-options'])) {
+                throw new ValidationException('Craft file download-options must be an object');
+            }
+            foreach ($craft['download-options'] as $key => $value) {
+                if (!isset($download_options[$key])) {
+                    throw new ValidationException("Craft file download-options {$key} is invalid");
+                }
+                // check an array
+                if ($download_options[$key]->isArray() && !is_array($value)) {
+                    throw new ValidationException("Craft file download-options {$key} must be an array");
+                }
+            }
+        } else {
+            $craft['download-options'] = [];
+        }
+        // check extra-env
+        if (isset($craft['extra-env'])) {
+            if (!is_assoc_array($craft['extra-env'])) {
+                throw new ValidationException('Craft file extra-env must be an object');
+            }
+        } else {
+            $craft['extra-env'] = [];
+        }
+        // check craft-options
+        $craft['craft-options']['doctor'] ??= true;
+        $craft['craft-options']['download'] ??= true;
+        $craft['craft-options']['build'] ??= true;
+        return $craft;
     }
 }
