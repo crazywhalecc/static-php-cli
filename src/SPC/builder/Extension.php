@@ -297,6 +297,7 @@ class Extension
             'CFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => $config['libs'],
+            'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         // prepare configure args
         shell()->cd($this->source_dir)
