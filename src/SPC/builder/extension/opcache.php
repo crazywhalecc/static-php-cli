@@ -26,7 +26,7 @@ class opcache extends Extension
 
     public function runSharedExtensionCheckUnix(): void
     {
-        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -v');
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "zend_extension=' . BUILD_MODULES_PATH . '/opcache.so" -v');
         if ($ret !== 0) {
             throw new RuntimeException('opcache.so failed to load.');
         }
