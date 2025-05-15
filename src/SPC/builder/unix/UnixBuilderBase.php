@@ -223,8 +223,8 @@ abstract class UnixBuilderBase extends BuilderBase
             default => throw new RuntimeException('Deployment does not accept type ' . $type),
         };
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
-        FileSystem::createDir(BUILD_ROOT_PATH . '/bin');
-        shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '/bin/'));
+        FileSystem::createDir(BUILD_BIN_PATH);
+        shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_BIN_PATH));
         return true;
     }
 

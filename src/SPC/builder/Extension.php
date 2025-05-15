@@ -194,7 +194,7 @@ class Extension
      */
     public function runSharedExtensionCheckUnix(): void
     {
-        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "extension=' . BUILD_LIB_PATH . '/' . $this->getName() . '.so" --ri ' . $this->getName());
+        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "extension=' . BUILD_MODULES_PATH . '/' . $this->getName() . '.so" --ri ' . $this->getName());
         if ($ret !== 0) {
             throw new RuntimeException($this->getName() . '.so failed to load');
         }
@@ -308,7 +308,16 @@ class Extension
             ->execWithEnv('make -j' . $this->builder->concurrency);
 
         // copy shared library
-        copy($this->source_dir . '/modules/' . $this->getDistName() . '.so', BUILD_LIB_PATH . '/' . $this->getDistName() . '.so');
+        FileSystem::createDir(BUILD_MODULES_PATH);
+        $extensionDirFile = (getenv('EXTENSION_DIR') ?: $this->source_dir . '/modules') . '/' . $this->getName() . '.so';
+        $sourceDirFile = $this->source_dir . '/modules/' . $this->getName() . '.so';
+        if (file_exists($extensionDirFile)) {
+            copy($extensionDirFile, BUILD_MODULES_PATH . '/' . $this->getName() . '.so');
+        } elseif (file_exists($sourceDirFile)) {
+            copy($sourceDirFile, BUILD_MODULES_PATH . '/' . $this->getName() . '.so');
+        } else {
+            throw new RuntimeException('extension ' . $this->getName() . ' built successfully, but into an unexpected location.');
+        }
         // check shared extension with php-cli
         if (file_exists(BUILD_BIN_PATH . '/php')) {
             $this->runSharedExtensionCheckUnix();
