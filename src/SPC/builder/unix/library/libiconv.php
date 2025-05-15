@@ -11,7 +11,11 @@ trait libiconv
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 './configure ' .
                 '--enable-static ' .

@@ -14,7 +14,11 @@ trait pkgconfig
         $ldflags = !($this instanceof LinuxLibraryBase) || getenv('SPC_LIBC') === 'glibc' ? '' : '--static';
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => "{$this->getLibExtraCFlags()} {$cflags}", 'LDFLAGS' => "{$this->getLibExtraLdFlags()} {$ldflags}", 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => "{$this->getLibExtraCFlags()} {$cflags}",
+                'LDFLAGS' => "{$this->getLibExtraLdFlags()} {$ldflags}",
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 './configure ' .
                 '--disable-shared ' .

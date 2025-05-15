@@ -44,7 +44,11 @@ trait libevent
         FileSystem::resetDir($this->source_dir . '/build');
         // Start build
         shell()->cd($this->source_dir . '/build')
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 'cmake ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .

@@ -23,7 +23,11 @@ trait libtiff
         $extra_libs .= ' --disable-lzma --disable-zstd --disable-webp --disable-libdeflate';
 
         $shell = shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 './configure ' .
                 '--enable-static --disable-shared ' .
