@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+
+# This file is using docker to build gcc and binutils and copy them to the host
+set -e
+
+# Set default GCC version if not provided
+if [ -z "$GCC_VERSION" ]; then
+    GCC_VERSION="10.5.0"
+fi
+
+# Set default BINUTILS version if not provided
+if [ -z "$BINUTILS_VERSION" ]; then
+    BINUTILS_VERSION="2.41"
+fi
+
+# Detect docker can run
+if ! which docker >/dev/null; then
+  echo "Docker is not installed, please install docker first !"
+  exit 1
+fi
+DOCKER_EXECUTABLE="docker"
+# shellcheck disable=SC2046
+if [ $(id -u) -ne 0 ]; then
+    if ! docker info > /dev/null 2>&1; then
+        if [ "$SPC_USE_SUDO" != "yes" ] && [ "$SPC_DOCKER_DEBUG" != "yes" ]; then
+            echo "Docker command requires sudo"
+            # shellcheck disable=SC2039
+            echo -n 'To use sudo to run docker, run "export SPC_USE_SUDO=yes" and run command again'
+            exit 1
+        fi
+        DOCKER_EXECUTABLE="sudo docker"
+    fi
+fi
+
+# to check if qemu-docker run
+if [ "$SPC_USE_ARCH" = "" ]; then
+    SPC_USE_ARCH=current
+fi
+case $SPC_USE_ARCH in
+current)
+    BASE_ARCH=$(uname -m)
+    if [ "$BASE_ARCH" = "arm64" ]; then
+        BASE_ARCH=aarch64
+    fi
+    ;;
+aarch64)
+    BASE_ARCH=aarch64
+    # shellcheck disable=SC2039
+    echo -e "\e[033m* Using different arch needs to setup qemu-static for docker !\e[0m"
+    $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static:register --reset > /dev/null
+    ;;
+*)
+    echo "Current arch is not supported to run in docker: $SPC_USE_ARCH"
+    exit 1
+    ;;
+esac
+
+# Detect docker env is setup
+if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-gnu-gcc-builder-$SPC_USE_ARCH; then
+    echo "Docker container does not exist. Building docker image ..."
+    $DOCKER_EXECUTABLE build --build-arg GCC_VERSION=$GCC_VERSION --build-arg BINUTILS_VERSION=$BINUTILS_VERSION -t cwcc-spc-gnu-gcc-builder-$SPC_USE_ARCH -f- . <<EOF
+FROM centos:7
+ARG GCC_VERSION
+ARG BINUTILS_VERSION
+RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+RUN yum clean all && \
+    yum makecache && \
+    yum update -y && \
+    localedef -c -i en_US -f UTF-8 en_US.UTF-8
+
+RUN yum install -y centos-release-scl
+
+RUN if [ "$BASE_ARCH" = "aarch64" ]; then \
+        sed -i 's|mirror.centos.org/centos|vault.centos.org/altarch|g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo ; \
+        sed -i 's|mirror.centos.org/centos|vault.centos.org/altarch|g' /etc/yum.repos.d/CentOS-SCLo-scl.repo ; \
+    else \
+        sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo ; \
+    fi
+RUN sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+
+RUN yum update -y && \
+    yum install -y devtoolset-10-gcc-* wget tar gzip bzip2 make file texinfo flex bison patch \
+    gmp-devel mpfr-devel libmpc-devel zlib-devel perl gcc gcc-c++
+
+RUN echo "source scl_source enable devtoolset-10" >> /etc/bashrc
+RUN source /etc/bashrc
+
+# Download GCC and Binutils sources during image build
+RUN mkdir -p /build/sources && \
+    cd /build/sources && \
+    wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz && \
+    wget https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz
+
+WORKDIR /build
+EOF
+fi
+
+# Create the dist directory
+mkdir -p "$(pwd)/dist"
+
+# Run the build process in the Docker container
+# The -v flag creates a volume mount that shares a directory between host and container
+# This allows files created in the container's /dist directory to be directly accessible on the host
+echo "Starting GCC and Binutils build process..."
+$DOCKER_EXECUTABLE run --rm -v "$(pwd)/dist:/dist" -e GCC_VERSION="$GCC_VERSION" -e BINUTILS_VERSION="$BINUTILS_VERSION" cwcc-spc-gnu-gcc-builder-$SPC_USE_ARCH /bin/bash -c "
+set -e
+source /etc/bashrc
+cd /build
+
+# Extract sources
+echo 'Extracting GCC and Binutils sources...'
+tar -xzf /build/sources/gcc-${GCC_VERSION}.tar.gz
+tar -xzf /build/sources/binutils-${BINUTILS_VERSION}.tar.gz
+
+# Download prerequisites for GCC
+cd /build/gcc-\${GCC_VERSION}
+./contrib/download_prerequisites
+
+# Build Binutils first
+echo 'Building Binutils...'
+cd /build
+mkdir -p binutils-build
+cd binutils-build
+../binutils-${BINUTILS_VERSION}/configure \
+  --prefix=/usr/local/gcc10 \
+  --with-lib-path=/usr/local/gcc10/lib:/usr/local/gcc10/lib64 \
+  --enable-gold \
+  --enable-ld=default \
+  --enable-plugins \
+  --enable-shared \
+  --disable-werror \
+  --enable-64-bit-bfd \
+  --with-system-zlib
+
+# Build GCC
+echo 'Building GCC...'
+cd /build
+mkdir -p gcc-build
+cd gcc-build
+../gcc-${GCC_VERSION}/configure \
+  --prefix=/usr/local/gcc10 \
+  --enable-bootstrap \
+  --enable-languages=c,c++,lto \
+  --enable-static \
+  --enable-shared \
+  --enable-threads=posix \
+  --enable-checking=release \
+  --disable-multilib \
+  --with-zlib \
+  --enable-default-pie \
+  --enable-default-ssp \
+  --disable-libunwind-exceptions \
+  --enable-gnu-unique-object \
+  --enable-linker-build-id \
+  --with-gcc-major-version-only \
+  --enable-initfini-array \
+  --enable-plugins \
+  --enable-gnu-indirect-function \
+  --with-tune=generic \
+  --with-arch_32=x86-64 \
+  --build=x86_64-redhat-linux \
+  --disable-libquadmath \
+  --disable-libquadmath-support \
+  --disable-nls \
+  --with-pic \
+  CFLAGS='-O2 -fPIC -fPIE -g0' \
+  CXXFLAGS='-O2 -fPIC -fPIE -g0'
+
+# Build Binutils first
+echo 'Building Binutils...'
+cd /build
+make -C binutils-build -j$(nproc)
+
+# Install Binutils directly to /usr/local/gcc10
+echo 'Installing Binutils...'
+make -C binutils-build install
+
+# Now build GCC (after binutils is installed)
+echo 'Building GCC...'
+make -C gcc-build -j$(nproc)
+echo 'Installing GCC...'
+make -C gcc-build install
+
+# Create tarball
+echo 'Creating tarball...'
+cd /
+cd /usr/local/gcc10 && tar -czf /dist/gcc-${GCC_VERSION}-binutils-${BINUTILS_VERSION}.tar.gz .
+
+echo 'Build completed successfully!'
+"
+
+echo "GCC and Binutils have been built and packaged to $(pwd)/dist/gcc-${GCC_VERSION}-binutils-${BINUTILS_VERSION}.tar.gz on the host machine"
