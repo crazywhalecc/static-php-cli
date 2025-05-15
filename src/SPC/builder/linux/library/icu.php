@@ -26,7 +26,6 @@ class icu extends LinuxLibraryBase
             ->execWithEnv(
                 "{$cppflags} {$cxxflags} {$ldflags} " .
                 './runConfigureICU Linux ' .
-                '--enable-pic ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--with-data-packaging=static ' .
