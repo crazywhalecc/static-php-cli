@@ -124,10 +124,6 @@
             "Linux": "partial",
             "BSD": "wip"
         },
-        "target": [
-            "static",
-            "shared"
-        ],
         "notes": true,
         "arg-type": "custom",
         "type": "builtin",
@@ -781,9 +777,6 @@
             "Windows": "no",
             "BSD": "wip"
         },
-        "target": [
-            "static"
-        ],
         "notes": true,
         "type": "external",
         "source": "swoole",
