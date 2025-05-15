@@ -1055,9 +1055,6 @@
         "support": {
             "BSD": "wip"
         },
-        "target": [
-            "static"
-        ],
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",
