@@ -24,4 +24,9 @@ class bz2 extends Extension
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/-lbz2/', $this->getLibFilesString() . $frameworks);
         return true;
     }
+
+    public function getUnixConfigureArg(bool $shared = false): string
+    {
+        return $shared ? '--with-bz2=' . BUILD_ROOT_PATH : '';
+    }
 }

@@ -275,6 +275,10 @@ class Extension
      */
     public function buildShared(): void
     {
+        if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
+            logger()->info('extension ' . $this->getName() . ' already built, skipping');
+            return;
+        }
         match (PHP_OS_FAMILY) {
             'Darwin', 'Linux' => $this->buildUnixShared(),
             default => throw new WrongUsageException(PHP_OS_FAMILY . ' build shared extensions is not supported yet'),
