@@ -13,7 +13,6 @@ use SPC\util\CustomExt;
 #[CustomExt('soap')]
 #[CustomExt('xmlreader')]
 #[CustomExt('xmlwriter')]
-#[CustomExt('dom')]
 #[CustomExt('simplexml')]
 class xml extends Extension
 {
