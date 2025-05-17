@@ -75,7 +75,7 @@
             "libxml2",
             "zlib"
         ],
-        "ext-depends-windows": [
+        "ext-depends": [
             "xml"
         ]
     },
