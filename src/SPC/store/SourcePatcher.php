@@ -78,6 +78,15 @@ class SourcePatcher
         }
     }
 
+    public static function patchBeforeSharedBuild(BuilderBase $builder): void
+    {
+        foreach ($builder->getExts() as $ext) {
+            if ($ext->patchBeforeSharedBuild() === true) {
+                logger()->info('Extension [' . $ext->getName() . '] patched before shared build');
+            }
+        }
+    }
+
     /**
      * Source patcher runner before configure
      *

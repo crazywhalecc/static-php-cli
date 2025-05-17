@@ -208,7 +208,9 @@ class BuildPHPCommand extends BuildCommand
             SourcePatcher::patchSPCVersionToPHP($this->getApplication()->getVersion());
 
             // start to build
-            $builder->buildPHP($rule);
+            // $builder->buildPHP($rule);
+
+            SourcePatcher::patchBeforeSharedBuild($builder);
 
             // build dynamic extensions if needed
             if (!empty($shared_extensions)) {
