@@ -8,7 +8,6 @@ use SPC\builder\Extension;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
-use SPC\util\SPCConfigUtil;
 
 #[CustomExt('dom')]
 class dom extends Extension
