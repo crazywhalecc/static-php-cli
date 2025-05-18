@@ -42,7 +42,7 @@ trait postgresql
         if (!empty($output[1][0])) {
             $cppflags = $output[1][0];
             $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
-            $envs .= " CPPFLAGS=\"{$cppflags} -fPIC -fPIE -fno-ident{$macos_15_bug_cflags}\"";
+            $envs .= " CPPFLAGS=\"{$cppflags} -DPIC -fpic -fPIC -fPIE -fno-ident{$macos_15_bug_cflags}\"";
         }
         $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
@@ -78,9 +78,15 @@ trait postgresql
             throw new RuntimeException('Unsupported version for postgresql: ' . $version . ' !');
         }
 
+        $env = [
+            'CFLAGS' => $this->getLibExtraCFlags() . ' -DPIC -fpic',
+            'LDFLAGS' => $this->getLibExtraLdFlags(),
+            'LIBS' => $this->getLibExtraLibs(),
+        ];
         // configure
         shell()->cd($this->source_dir . '/build')
-            ->exec(
+            ->setEnv($env)
+            ->execWithEnv(
                 "{$envs} ../configure " .
                 "--prefix={$builddir} " .
                 '--disable-thread-safety ' .
@@ -89,6 +95,7 @@ trait postgresql
                 '--with-readline ' .
                 '--with-libxml ' .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
+                // ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
                 '--without-ldap ' .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
                 ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
@@ -98,16 +105,12 @@ trait postgresql
                 '--without-pam ' .
                 '--without-bonjour ' .
                 '--without-tcl '
-            );
-        // ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
-
-        // build
-        shell()->cd($this->source_dir . '/build')
-            ->exec($envs . ' make -C src/bin/pg_config install')
-            ->exec($envs . ' make -C src/include install')
-            ->exec($envs . ' make -C src/common install')
-            ->exec($envs . ' make -C src/port install')
-            ->exec($envs . ' make -C src/interfaces/libpq install');
+            )
+            ->execWithEnv($envs . ' make -C src/bin/pg_config install')
+            ->execWithEnv($envs . ' make -C src/include install')
+            ->execWithEnv($envs . ' make -C src/common install')
+            ->execWithEnv($envs . ' make -C src/port install')
+            ->execWithEnv($envs . ' make -C src/interfaces/libpq install');
 
         // remove dynamic libs
         shell()->cd($this->source_dir . '/build')
