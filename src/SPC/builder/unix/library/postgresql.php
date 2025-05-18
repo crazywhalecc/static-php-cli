@@ -39,10 +39,12 @@ trait postgresql
 
         $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
+        $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
+        $cflags = '';
         if (!empty($output[1][0])) {
-            $cppflags = $output[1][0];
-            $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
-            $envs .= " CPPFLAGS=\"{$cppflags} -DPIC -fpic -fPIC -fPIE -fno-ident{$macos_15_bug_cflags}\"";
+            $cflags = $output[1][0];
+            $envs .= ' CPPFLAGS="-DPIC"';
+            $cflags = "{$cflags} -fno-ident{$macos_15_bug_cflags}";
         }
         $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
@@ -79,7 +81,7 @@ trait postgresql
         }
 
         $env = [
-            'CFLAGS' => $this->getLibExtraCFlags() . ' -DPIC -fpic',
+            'CFLAGS' => $this->getLibExtraCFlags() . ' ' . $cflags,
             'LDFLAGS' => $this->getLibExtraLdFlags(),
             'LIBS' => $this->getLibExtraLibs(),
         ];

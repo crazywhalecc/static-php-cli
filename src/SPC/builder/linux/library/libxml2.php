@@ -24,13 +24,19 @@ class libxml2 extends LinuxLibraryBase
 
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
-            ->exec(
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
+            ->execWithEnv(
                 'cmake ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
                 '-DCMAKE_INSTALL_LIBDIR=' . BUILD_LIB_PATH . ' ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DIconv_IS_BUILT_IN=OFF ' .
                 '-DLIBXML2_WITH_ICONV=ON ' .
                 "-DLIBXML2_WITH_ZLIB={$enable_zlib} " .
@@ -41,8 +47,8 @@ class libxml2 extends LinuxLibraryBase
                 '-DLIBXML2_WITH_TESTS=OFF ' .
                 '..'
             )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+            ->execWithEnv("cmake --build . -j {$this->builder->concurrency}")
+            ->execWithEnv('make install');
 
         FileSystem::replaceFileStr(
             BUILD_LIB_PATH . '/pkgconfig/libxml-2.0.pc',
