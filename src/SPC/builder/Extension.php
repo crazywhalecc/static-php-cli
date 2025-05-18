@@ -189,6 +189,16 @@ class Extension
     }
 
     /**
+     * Patch code before shared extension ./configure
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeSharedBuild(): bool
+    {
+        return false;
+    }
+
+    /**
      * Run shared extension check when cli is enabled
      * @throws RuntimeException
      */
@@ -422,15 +432,5 @@ class Extension
         }
 
         return $deps;
-    }
-
-    /**
-     * Patch code before shared extension ./configure
-     * If you need to patch some code, overwrite this
-     * return true if you patched something, false if not
-     */
-    public function patchBeforeSharedBuild(): bool
-    {
-        return false;
     }
 }

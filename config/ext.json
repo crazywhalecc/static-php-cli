@@ -75,7 +75,7 @@
             "libxml2",
             "zlib"
         ],
-        "ext-depends": [
+        "ext-depends-windows": [
             "xml"
         ]
     },
@@ -410,6 +410,9 @@
     },
     "mysqli": {
         "type": "builtin",
+        "target": [
+            "static"
+        ],
         "arg-type": "with",
         "ext-depends": [
             "mysqlnd"
@@ -417,6 +420,9 @@
     },
     "mysqlnd": {
         "type": "builtin",
+        "target": [
+            "static"
+        ],
         "arg-type-windows": "with",
         "lib-depends": [
             "zlib"
@@ -450,6 +456,9 @@
     "openssl": {
         "notes": true,
         "type": "builtin",
+        "target": [
+            "static"
+        ],
         "arg-type": "custom",
         "arg-type-windows": "with",
         "lib-depends": [
