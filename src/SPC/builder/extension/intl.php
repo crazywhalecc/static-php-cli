@@ -23,4 +23,9 @@ class intl extends Extension
         }
         return true;
     }
+
+    public function patchBeforeSharedBuild(): bool
+    {
+        return $this->patchBeforeBuildconf();
+    }
 }
