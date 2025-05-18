@@ -233,14 +233,24 @@ abstract class BuilderBase
      */
     abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE);
 
+    /**
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
     public function buildSharedExts(): void
     {
+        FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir="', 'extension_dir="' . BUILD_MODULES_PATH . '"');
+        FileSystem::createDir(BUILD_MODULES_PATH);
         foreach ($this->getExts() as $ext) {
             if (!$ext->isBuildShared()) {
                 continue;
             }
             logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
             $ext->buildShared();
+        }
+        if (getenv('EXTENSION_DIR')) {
+            FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir="', 'extension_dir="' . getenv('EXTENSION_DIR') . '"');
         }
     }
 

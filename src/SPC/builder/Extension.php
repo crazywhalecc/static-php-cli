@@ -319,10 +319,10 @@ class Extension
             ->execWithEnv(BUILD_BIN_PATH . '/phpize')
             ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
             ->execWithEnv('make clean')
-            ->execWithEnv('make -j' . $this->builder->concurrency);
+            ->execWithEnv('make -j' . $this->builder->concurrency)
+            ->execWithEnv('make install');
 
         // copy shared library
-        FileSystem::createDir(BUILD_MODULES_PATH);
         $extensionDirFile = (getenv('EXTENSION_DIR') ?: $this->source_dir . '/modules') . '/' . $this->getName() . '.so';
         $sourceDirFile = $this->source_dir . '/modules/' . $this->getName() . '.so';
         if (file_exists($extensionDirFile)) {
