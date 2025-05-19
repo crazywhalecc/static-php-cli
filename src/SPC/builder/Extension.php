@@ -322,16 +322,6 @@ class Extension
             ->execWithEnv('make -j' . $this->builder->concurrency)
             ->execWithEnv('make install');
 
-        // copy shared library
-        $extensionDirFile = (getenv('EXTENSION_DIR') ?: $this->source_dir . '/modules') . '/' . $this->getName() . '.so';
-        $sourceDirFile = $this->source_dir . '/modules/' . $this->getName() . '.so';
-        if (file_exists($extensionDirFile)) {
-            copy($extensionDirFile, BUILD_MODULES_PATH . '/' . $this->getName() . '.so');
-        } elseif (file_exists($sourceDirFile)) {
-            copy($sourceDirFile, BUILD_MODULES_PATH . '/' . $this->getName() . '.so');
-        } else {
-            throw new RuntimeException('extension ' . $this->getName() . ' built successfully, but into an unexpected location.');
-        }
         // check shared extension with php-cli
         if (file_exists(BUILD_BIN_PATH . '/php')) {
             $this->runSharedExtensionCheckUnix();
