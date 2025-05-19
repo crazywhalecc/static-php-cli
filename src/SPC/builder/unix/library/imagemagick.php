@@ -80,5 +80,17 @@ trait imagemagick
                 'includearchdir=${prefix}/include/ImageMagick-7'
             );
         }
+        $filelist = [
+            'libMagick++-7.Q16HDRI.la',
+            'libMagickCore-7.Q16HDRI.la',
+            'libMagickWand-7.Q16HDRI.la',
+        ];
+        foreach ($filelist as $file) {
+            FileSystem::replaceFileStr(
+                BUILD_LIB_PATH . '/' . $file,
+                ' /lib/',
+                ' ' . BUILD_LIB_PATH . '/',
+            );
+        }
     }
 }
