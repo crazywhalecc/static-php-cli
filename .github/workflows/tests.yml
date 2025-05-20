@@ -142,13 +142,6 @@ jobs:
         os: ${{ fromJSON(needs.define-matrix.outputs.os) }}
       fail-fast: false
     steps:
-      - name: "Check GITHUB_TOKEN is set"
-        run: |
-          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
-            echo "GITHUB_TOKEN is not set. Exiting."
-            exit 1
-          fi
-
       - name: "Checkout"
         uses: actions/checkout@v4
 
@@ -194,6 +187,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: |
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          echo "My Token:[ $GITHUB_TOKEN ]"
           php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
