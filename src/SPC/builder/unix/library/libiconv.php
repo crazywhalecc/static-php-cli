@@ -30,5 +30,6 @@ trait libiconv
         if (file_exists(BUILD_BIN_PATH . '/iconv')) {
             unlink(BUILD_BIN_PATH . '/iconv');
         }
+        $this->patchLaDependencyPrefix(['libiconv.la']);
     }
 }
