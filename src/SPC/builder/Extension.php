@@ -127,6 +127,9 @@ class Extension
         foreach (Config::getExt($this->name, 'ext-suggests', []) as $name) {
             $this->addExtensionDependency($name, true);
         }
+        foreach (Config::getExt($this->name, 'shared-ext-depends', []) as $name) {
+            $this->addExtensionDependency($name);
+        }
         return $this;
     }
 
@@ -300,6 +303,13 @@ class Extension
             logger()->info('extension ' . $this->getName() . ' already built, skipping');
             return;
         }
+        foreach (Config::getExt($this->name, 'shared-ext-depends', []) as $name) {
+            $dependencyExt = $this->builder->getExt($name);
+            if ($dependencyExt === null) {
+                throw new RuntimeException("extension {$this->name} requires shared extension {$name}");
+            }
+            $dependencyExt->buildShared();
+        }
         match (PHP_OS_FAMILY) {
             'Darwin', 'Linux' => $this->buildUnixShared(),
             default => throw new WrongUsageException(PHP_OS_FAMILY . ' build shared extensions is not supported yet'),
@@ -335,7 +345,7 @@ class Extension
         
         shell()->cd($this->source_dir)
             ->setEnv($env)
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
+            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static --with-pic')
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency)
             ->execWithEnv('make install');

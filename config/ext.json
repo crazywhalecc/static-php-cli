@@ -77,6 +77,9 @@
         ],
         "ext-depends-windows": [
             "xml"
+        ],
+        "shared-ext-depends": [
+            "xml"
         ]
     },
     "ds": {

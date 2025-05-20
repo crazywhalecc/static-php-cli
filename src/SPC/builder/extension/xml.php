@@ -26,11 +26,12 @@ class xml extends Extension
             'soap' => '--enable-soap',
             'xmlreader' => '--enable-xmlreader',
             'xmlwriter' => '--enable-xmlwriter',
-            'dom' => '--enable-dom',
             'simplexml' => '--enable-simplexml',
             default => throw new RuntimeException('Not accept non-xml extension'),
         };
-        $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '"';
+        if (!$shared) {
+            $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '"';
+        }
         return $arg;
     }
 
@@ -47,7 +48,6 @@ class xml extends Extension
             'soap' => '--enable-soap',
             'xmlreader' => '--enable-xmlreader',
             'xmlwriter' => '--enable-xmlwriter',
-            'dom' => '--with-dom',
             'simplexml' => '--with-simplexml',
             default => throw new RuntimeException('Not accept non-xml extension'),
         };
