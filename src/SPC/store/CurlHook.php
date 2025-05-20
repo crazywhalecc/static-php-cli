@@ -16,6 +16,7 @@ class CurlHook
     public static function setupGithubToken(string $method, string $url, array &$headers): void
     {
         if (!getenv('GITHUB_TOKEN')) {
+            logger()->debug('no github token found, skip');
             return;
         }
         if (getenv('GITHUB_USER')) {
