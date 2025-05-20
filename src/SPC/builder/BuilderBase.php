@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use PharIo\FileSystem\File;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
 use SPC\exception\InterruptException;
@@ -240,7 +241,16 @@ abstract class BuilderBase
      */
     public function buildSharedExts(): void
     {
-        FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir="', 'extension_dir="' . BUILD_MODULES_PATH . '"');
+        $lines = file(BUILD_BIN_PATH . '/php-config');
+        $extension_dir_line = null;
+        foreach ($lines as $key => $value) {
+            if (str_starts_with($value, 'extension_dir=')) {
+                $lines[$key] = 'extension_dir="' . BUILD_MODULES_PATH . '"' . PHP_EOL;
+                $extension_dir_line = $value;
+                break;
+            }
+        }
+        file_put_contents(BUILD_BIN_PATH . '/php-config', implode('', $lines));
         FileSystem::createDir(BUILD_MODULES_PATH);
         foreach ($this->getExts() as $ext) {
             if (!$ext->isBuildShared()) {
@@ -249,9 +259,7 @@ abstract class BuilderBase
             logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
             $ext->buildShared();
         }
-        if (getenv('EXTENSION_DIR')) {
-            FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir="', 'extension_dir="' . getenv('EXTENSION_DIR') . '"');
-        }
+        FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
     }
 
     /**
