@@ -20,4 +20,15 @@ class mbstring extends Extension
         }
         return $arg;
     }
+
+    public function getUnixConfigureArg(bool $shared = false): string
+    {
+        $arg = '--enable-mbstring';
+        if ($this->builder->getExt('mbregex') === null) {
+            $arg .= ' --disable-mbregex';
+        } else {
+            $arg .= ' --enable-mbregex';
+        }
+        return $arg;
+    }
 }

@@ -9,6 +9,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\store\SourcePatcher;
 use SPC\util\SPCConfigUtil;
 
 class Extension
@@ -189,11 +190,21 @@ class Extension
     }
 
     /**
-     * Patch code before shared extension ./configure
+     * Patch code before shared extension phpize
      * If you need to patch some code, overwrite this
      * return true if you patched something, false if not
      */
     public function patchBeforeSharedBuild(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before shared extension ./configure
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeSharedConfigure(): bool
     {
         return false;
     }
@@ -316,7 +327,14 @@ class Extension
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
-            ->execWithEnv(BUILD_BIN_PATH . '/phpize')
+            ->execWithEnv(BUILD_BIN_PATH . '/phpize');
+
+        if ($this->patchBeforeSharedConfigure()) {
+            logger()->info('ext [ . ' . $this->getName() . '] patching before shared configure');
+        }
+        
+        shell()->cd($this->source_dir)
+            ->setEnv($env)
             ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency)

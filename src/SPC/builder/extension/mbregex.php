@@ -21,6 +21,11 @@ class mbregex extends Extension
         return '';
     }
 
+    public function buildUnixShared(): void
+    {
+        print('mbregex is already built as part of mbstring, skipping build' . PHP_EOL);
+    }
+
     /**
      * mbregex is not an extension, we need to overwrite the default check.
      */
