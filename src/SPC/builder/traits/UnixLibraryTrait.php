@@ -84,6 +84,23 @@ trait UnixLibraryTrait
         }
     }
 
+    public function patchLaDependencyPrefix(array $files): void
+    {
+        logger()->info('Patching library [' . static::NAME . '] la files');
+        foreach ($files as $name) {
+            $realpath = realpath(BUILD_LIB_PATH . '/' . $name);
+            if ($realpath === false) {
+                throw new RuntimeException('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+            }
+            logger()->debug('Patching ' . $realpath);
+            // replace prefix
+            $file = FileSystem::readFile($realpath);
+            $file =  str_replace(' /lib/', ' ' . BUILD_LIB_PATH . '/', $file);
+            $file = preg_replace("/^libdir=.*$/m", "libdir='" . BUILD_LIB_PATH . "'", $file);
+            FileSystem::writeFile($realpath, $file);
+        }
+    }
+
     /**
      * remove libtool archive files
      *

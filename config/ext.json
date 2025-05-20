@@ -456,9 +456,6 @@
     "openssl": {
         "notes": true,
         "type": "builtin",
-        "target": [
-            "static"
-        ],
         "arg-type": "custom",
         "arg-type-windows": "with",
         "lib-depends": [
