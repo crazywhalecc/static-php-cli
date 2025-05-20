@@ -209,6 +209,7 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $doctor_cmd, $retcode);
         break;
     case 'install_upx_cmd':
+        var_dump(getenv('GITHUB_TOKEN'));
         passthru($prefix . $install_upx_cmd, $retcode);
         break;
     default:
