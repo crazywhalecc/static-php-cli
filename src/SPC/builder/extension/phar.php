@@ -12,16 +12,26 @@ use SPC\util\CustomExt;
 #[CustomExt('phar')]
 class phar extends Extension
 {
-    public function patchBeforeSharedBuild(): bool
+    public function buildUnixShared(): void
     {
         if (!$this->builder instanceof LinuxBuilder) {
-            return false;
+            parent::buildUnixShared();
+            return;
         }
+
         FileSystem::replaceFileStr(
             $this->source_dir . '/config.m4',
             ['$ext_dir/phar.1', '$ext_dir/phar.phar.1'],
             ['${ext_dir}phar.1', '${ext_dir}phar.phar.1']
         );
-        return true;
+        try {
+            parent::buildUnixShared();
+        } finally {
+            FileSystem::replaceFileStr(
+                $this->source_dir . '/config.m4',
+                ['${ext_dir}phar.1', '${ext_dir}phar.phar.1'],
+                ['$ext_dir/phar.1', '$ext_dir/phar.phar.1']
+            );
+        }
     }
 }
