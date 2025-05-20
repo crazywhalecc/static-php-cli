@@ -37,6 +37,8 @@ class InstallPkgCommand extends BaseCommand
                 define('GIT_SHALLOW_CLONE', true);
             }
 
+            var_dump(getenv('GITHUB_TOKEN'));
+
             // Process -U options
             $custom_urls = [];
             foreach ($this->input->getOption('custom-url') as $value) {
