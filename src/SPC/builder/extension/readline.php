@@ -24,4 +24,9 @@ class readline extends Extension
         );
         return true;
     }
+
+    public function getUnixConfigureArg(bool $shared = false): string
+    {
+        return '--without-libedit --with-readline=' . BUILD_ROOT_PATH;
+    }
 }
