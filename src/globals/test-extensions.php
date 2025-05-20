@@ -38,7 +38,7 @@ $zts = false;
 $no_strip = false;
 
 // compress with upx
-$upx = true;
+$upx = false;
 
 // prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = false;
