@@ -131,7 +131,7 @@ if ($argv[1] === 'doctor_cmd') {
     $doctor_cmd = 'doctor --auto-fix --debug';
 }
 if ($argv[1] === 'install_upx_cmd') {
-    $install_upx_cmd = 'install-pkg upx';
+    $install_upx_cmd = 'install-pkg upx --debug';
 }
 
 $prefix = match ($argv[2] ?? null) {
