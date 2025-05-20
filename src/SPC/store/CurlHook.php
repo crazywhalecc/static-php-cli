@@ -18,7 +18,6 @@ class CurlHook
         $token = getenv('GITHUB_TOKEN');
         if (!$token) {
             logger()->debug('no github token found, skip');
-            var_dump($token);
             return;
         }
         if (getenv('GITHUB_USER')) {
