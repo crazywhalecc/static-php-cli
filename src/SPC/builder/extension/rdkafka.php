@@ -33,4 +33,12 @@ class rdkafka extends Extension
         $pkgconf_libs = trim(implode('', $pkgconf_libs));
         return '--with-rdkafka=' . BUILD_ROOT_PATH . ' LIBS="' . $pkgconf_libs . '"';
     }
+
+    public function getUnixConfigureArg(bool $shared = false): string
+    {
+        if ($shared) {
+            return '--with-rdkafka=' . BUILD_ROOT_PATH;
+        }
+        return parent::getUnixConfigureArg($shared);
+    }
 }
