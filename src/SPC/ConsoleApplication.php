@@ -6,6 +6,7 @@ namespace SPC;
 
 use SPC\command\BuildLibsCommand;
 use SPC\command\BuildPHPCommand;
+use SPC\command\CraftCommand;
 use SPC\command\DeleteDownloadCommand;
 use SPC\command\dev\AllExtCommand;
 use SPC\command\dev\ExtVerCommand;
@@ -43,6 +44,8 @@ final class ConsoleApplication extends Application
 
         $this->addCommands(
             [
+                // Craft command
+                new CraftCommand(),
                 // Common commands
                 new BuildPHPCommand(),
                 new BuildLibsCommand(),

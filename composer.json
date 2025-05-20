@@ -14,6 +14,8 @@
         "ext-zlib": "*",
         "laravel/prompts": "^0.1.12",
         "symfony/console": "^5.4 || ^6 || ^7",
+        "symfony/process": "^7.2",
+        "symfony/yaml": "^7.2",
         "zhamao/logger": "^1.0"
     },
     "require-dev": {

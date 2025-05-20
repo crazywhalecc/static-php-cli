@@ -47,3 +47,7 @@ packlib_files.txt
 /docs/.vitepress/cache/
 package-lock.json
 pnpm-lock.yaml
+
+# craft.log
+craft.log
+craft.yml
