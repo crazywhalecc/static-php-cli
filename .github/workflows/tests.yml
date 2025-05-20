@@ -17,8 +17,7 @@ on:
       - 'box.json'
       - '.php-cs-fixer.php'
 
-permissions:
-  contents: read
+permissions: read-all
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -186,6 +185,8 @@ jobs:
 
       - name: "Prepare UPX for Linux"
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
