@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This file is using docker to run commands
-set -e
+set -ex
 
 # Detect docker can run
 if ! which docker >/dev/null; then

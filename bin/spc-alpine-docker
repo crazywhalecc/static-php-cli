@@ -3,7 +3,7 @@
 # This file is using docker to run commands
 SPC_DOCKER_VERSION=v3
 
-set -e
+set -ex
 
 # Detect docker can run
 if ! which docker >/dev/null; then
