@@ -15,18 +15,20 @@ class CurlHook
      */
     public static function setupGithubToken(string $method, string $url, array &$headers): void
     {
-        if (!getenv('GITHUB_TOKEN')) {
+        $token = getenv('GITHUB_TOKEN');
+        if (!$token) {
+            logger()->debug('no github token found, skip');
             return;
         }
         if (getenv('GITHUB_USER')) {
-            $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
+            $auth = base64_encode(getenv('GITHUB_USER') . ':' . $token);
             $he = "Authorization: Basic {$auth}";
             if (!in_array($he, $headers)) {
                 $headers[] = $he;
             }
             logger()->info("using basic github token for {$method} {$url}");
         } else {
-            $auth = getenv('GITHUB_TOKEN');
+            $auth = $token;
             $he = "Authorization: Bearer {$auth}";
             if (!in_array($he, $headers)) {
                 $headers[] = $he;
