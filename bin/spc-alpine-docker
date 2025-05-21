@@ -124,7 +124,7 @@ if [ -f "$(pwd)/craft.yml" ]; then
 fi
 
 # Environment variable passthrough
-ENV_LSIT=""
+ENV_LIST=""
 ENV_LIST="$ENV_LIST -e SPC_FIX_DEPLOY_ROOT="$(pwd)""
 if [ ! -z "$GITHUB_TOKEN" ]; then
     ENV_LIST="$ENV_LIST -e GITHUB_TOKEN=$GITHUB_TOKEN"
@@ -149,7 +149,7 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     echo "*    ./pkgroot:   $(pwd)/pkgroot"
     echo "*"
 
-    $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LSIT $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-$SPC_DOCKER_VERSION
+    $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LIST $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-$SPC_DOCKER_VERSION
 else
-    $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LSIT $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-$SPC_DOCKER_VERSION bin/spc $@
+    $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LIST $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-$SPC_DOCKER_VERSION bin/spc $@
 fi

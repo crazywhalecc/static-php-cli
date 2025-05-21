@@ -144,7 +144,7 @@ echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
 
 # Environment variable passthrough
-ENV_LSIT=""
+ENV_LIST=""
 ENV_LIST="$ENV_LIST -e SPC_FIX_DEPLOY_ROOT="$(pwd)""
 if [ ! -z "$GITHUB_TOKEN" ]; then
     ENV_LIST="$ENV_LIST -e GITHUB_TOKEN=$GITHUB_TOKEN"
