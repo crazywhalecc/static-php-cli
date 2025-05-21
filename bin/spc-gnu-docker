@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# This file is using docker to run commands
-set -ex
-
 # Detect docker can run
 if ! which docker >/dev/null; then
   echo "Docker is not installed, please install docker first !"
@@ -169,7 +166,7 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     echo "*    ./downloads: $(pwd)/downloads"
     echo "*    ./pkgroot:   $(pwd)/pkgroot"
     echo "*"
-
+    set -ex
     $DOCKER_EXECUTABLE run --rm -it --privileged $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH
 else
     $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@

@@ -3,8 +3,6 @@
 # This file is using docker to run commands
 SPC_DOCKER_VERSION=v3
 
-set -ex
-
 # Detect docker can run
 if ! which docker >/dev/null; then
   echo "Docker is not installed, please install docker first !"
@@ -148,7 +146,7 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     echo "*    ./downloads: $(pwd)/downloads"
     echo "*    ./pkgroot:   $(pwd)/pkgroot"
     echo "*"
-
+    set -ex
     $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LIST $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-$SPC_DOCKER_VERSION
 else
     $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LIST $MOUNT_LIST cwcc-spc-$SPC_USE_ARCH-$SPC_DOCKER_VERSION bin/spc $@
