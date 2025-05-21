@@ -3,6 +3,8 @@
 # This file is using docker to run commands
 SPC_DOCKER_VERSION=v3
 
+set -e
+
 # Detect docker can run
 if ! which docker >/dev/null; then
   echo "Docker is not installed, please install docker first !"
