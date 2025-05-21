@@ -18,9 +18,7 @@ class dom extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--enable-dom' . ($shared ? '=shared' : '');
-        if (!$shared) {
-            $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '"';
-        }
+        $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '"';
         return $arg;
     }
 

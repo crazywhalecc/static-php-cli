@@ -80,7 +80,7 @@ class Extension
     {
         $_name = str_replace('_', '-', $this->name);
         return match ($arg_type = Config::getExt($this->name, 'arg-type', 'enable')) {
-            'enable' => '--enable-' . $_name . ' ',
+            'enable' => '--enable-' . $_name . ($shared ? '=shared' : '') . ' ',
             'with' => '--with-' . $_name . ($shared ? '=shared' : '') . ' ',
             'with-prefix' => '--with-' . $_name . '=' . ($shared ? 'shared,' : '') . '"' . BUILD_ROOT_PATH . '" ',
             'none', 'custom' => '',

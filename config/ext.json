@@ -77,12 +77,6 @@
         ],
         "ext-depends-windows": [
             "xml"
-        ],
-        "shared-ext-depends": [
-            "libxml",
-            "xmlreader",
-            "xmlwriter",
-            "xml"
         ]
     },
     "ds": {
@@ -331,13 +325,16 @@
         },
         "type": "builtin",
         "arg-type": "none",
-        "ext-depends": [
-            "xml"
+        "target": [
+            "static"
         ]
     },
     "mbregex": {
         "type": "builtin",
         "arg-type": "custom",
+        "target": [
+            "static"
+        ],
         "ext-depends": [
             "mbstring"
         ],
@@ -1083,6 +1080,9 @@
         "arg-type-windows": "enable",
         "lib-depends": [
             "zlib"
+        ],
+        "target": [
+            "static"
         ]
     },
     "zstd": {

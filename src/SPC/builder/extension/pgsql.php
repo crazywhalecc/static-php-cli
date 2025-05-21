@@ -36,9 +36,9 @@ class pgsql extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         if ($this->builder->getPHPVersionID() >= 80400) {
-            return '--with-pgsql PGSQL_CFLAGS=-I' . BUILD_INCLUDE_PATH . ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' -lpq -lpgport -lpgcommon"';
+            return '--with-pgsql' . ($shared ? '=shared' : '') . ' PGSQL_CFLAGS=-I' . BUILD_INCLUDE_PATH . ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' -lpq -lpgport -lpgcommon"';
         }
-        return '--with-pgsql=' . BUILD_ROOT_PATH;
+        return '--with-pgsql=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH;
     }
 
     /**

@@ -249,7 +249,11 @@ class BuildPHPCommand extends BuildCommand
             if (!empty($shared_extensions)) {
                 foreach ($shared_extensions as $ext) {
                     $path = FileSystem::convertPath("{$build_root_path}/modules/{$ext}.so");
-                    logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                    if (file_exists("{$build_root_path}/modules/{$ext}.so")) {
+                        logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                    } else {
+                        logger()->warning("Shared extension [{$ext}] not found, please check!");
+                    }
                 }
             }
 
