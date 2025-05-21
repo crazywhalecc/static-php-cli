@@ -184,6 +184,7 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
+                '--prefix=' . BUILD_ROOT_PATH . ' ' .
                 ($enable_cli ? '--enable-cli ' : '--disable-cli ') .
                 ($enable_fpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
                 ($enable_embed ? "--enable-embed={$embed_type} " : '--disable-embed ') .

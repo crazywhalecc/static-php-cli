@@ -30,15 +30,6 @@ class readline extends Extension
         return '--without-libedit --with-readline=' . BUILD_ROOT_PATH;
     }
 
-    public function patchBeforeSharedConfigure(): bool
-    {
-        FileSystem::replaceFileStr($this->source_dir . '/configure',
-            'test "$PHP_LIBEDIT" = "no" && PHP_LIBEDIT=yes',
-            ''
-        );
-        return true;
-    }
-
     public function buildUnixShared(): void
     {
         if (!file_exists(BUILD_BIN_PATH . '/php') || !file_exists(BUILD_INCLUDE_PATH . '/php/sapi/cli/cli.h')) {
