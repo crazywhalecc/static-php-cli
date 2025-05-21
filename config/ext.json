@@ -643,6 +643,9 @@
         "arg-type": "with-prefix",
         "lib-depends": [
             "readline"
+        ],
+        "target": [
+            "static"
         ]
     },
     "redis": {
