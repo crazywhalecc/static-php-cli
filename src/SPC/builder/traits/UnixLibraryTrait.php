@@ -96,7 +96,10 @@ trait UnixLibraryTrait
             // replace prefix
             $file = FileSystem::readFile($realpath);
             $file = str_replace(
-                ' /lib/', ' ' . BUILD_LIB_PATH . '/', $file);
+                ' /lib/',
+                ' ' . BUILD_LIB_PATH . '/',
+                $file
+            );
             $file = preg_replace('/^libdir=.*$/m', "libdir='" . BUILD_LIB_PATH . "'", $file);
             FileSystem::writeFile($realpath, $file);
         }

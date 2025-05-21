@@ -268,8 +268,7 @@ abstract class BuilderBase
                 logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
                 $ext->buildShared();
             }
-        }
-        catch (RuntimeException $e) {
+        } catch (RuntimeException $e) {
             FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
             throw $e;
         }
