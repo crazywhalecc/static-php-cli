@@ -145,7 +145,10 @@ class BSDBuilder extends UnixBuilderBase
             }
             $this->buildEmbed();
         }
+    }
 
+    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    {
         if (php_uname('m') === $this->getOption('arch')) {
             $this->emitPatchPoint('before-sanity-check');
             $this->sanityCheck($build_target);

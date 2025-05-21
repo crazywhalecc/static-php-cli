@@ -206,21 +206,6 @@ class Extension
         return false;
     }
 
-    /**
-     * Run shared extension check when cli is enabled
-     * @throws RuntimeException
-     */
-    public function runSharedExtensionCheckUnix(): void
-    {
-        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "extension=' . BUILD_MODULES_PATH . '/' . $this->getName() . '.so" --ri ' . $this->getName());
-        if ($ret !== 0) {
-            throw new RuntimeException($this->getName() . '.so failed to load');
-        }
-        if ($this->isBuildStatic()) {
-            logger()->warning($this->getName() . '.so test succeeded, but has little significance since it is also compiled in statically.');
-        }
-    }
-
     public function getRequiredSharedExtensions(): string
     {
         $loaded = [];
@@ -244,7 +229,11 @@ class Extension
         $ret = '';
         foreach ($order as $ext) {
             if ($ext instanceof Extension && $ext->isBuildShared()) {
-                $ret .= ' -d "extension=' . BUILD_MODULES_PATH . '/' . $ext->getName() . '.so"';
+                if ($ext->isZendExtension()) {
+                    $ret .= ' -d "zend_extension=' . BUILD_MODULES_PATH . '/' . $ext->getName() . '.so"';
+                } else {
+                    $ret .= ' -d "extension=' . BUILD_MODULES_PATH . '/' . $ext->getName() . '.so"';
+                }
             }
         }
 
@@ -260,7 +249,7 @@ class Extension
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
         $sharedExtensions = $this->getRequiredSharedExtensions();
-        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"', false);
+        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
         }
@@ -273,7 +262,7 @@ class Extension
                 file_get_contents(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')
             );
 
-            [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
+            [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
             if ($ret !== 0) {
                 if ($this->builder->getOption('debug')) {
                     var_dump($out);
@@ -374,11 +363,6 @@ class Extension
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency)
             ->execWithEnv('make install');
-
-        // check shared extension with php-cli
-        if (file_exists(BUILD_BIN_PATH . '/php')) {
-            $this->runSharedExtensionCheckUnix();
-        }
     }
 
     /**
@@ -447,6 +431,11 @@ class Extension
         } else {
             $this->dependencies[] = $depExt;
         }
+    }
+
+    protected function isZendExtension(): bool
+    {
+        return false;
     }
 
     private function getLibraryDependencies(bool $recursive = false): array

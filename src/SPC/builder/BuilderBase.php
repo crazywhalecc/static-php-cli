@@ -235,6 +235,11 @@ abstract class BuilderBase
     abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE);
 
     /**
+     * Test PHP
+     */
+    abstract public function testPHP(int $build_target = BUILD_TARGET_NONE);
+
+    /**
      * @throws WrongUsageException
      * @throws RuntimeException
      * @throws FileSystemException

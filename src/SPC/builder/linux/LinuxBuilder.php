@@ -222,7 +222,10 @@ class LinuxBuilder extends UnixBuilderBase
             }
             $this->buildEmbed();
         }
+    }
 
+    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    {
         $this->emitPatchPoint('before-sanity-check');
         $this->sanityCheck($build_target);
     }

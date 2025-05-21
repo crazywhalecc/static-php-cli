@@ -218,6 +218,8 @@ class BuildPHPCommand extends BuildCommand
                 $builder->buildSharedExts();
             }
 
+            $builder->testPHP($rule);
+
             // compile stopwatch :P
             $time = round(microtime(true) - START_TIME, 3);
             logger()->info('');

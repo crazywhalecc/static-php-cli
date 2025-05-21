@@ -56,10 +56,5 @@ class xhprof extends Extension
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency)
             ->execWithEnv('make install');
-
-        // check shared extension with php-cli
-        if (file_exists(BUILD_BIN_PATH . '/php')) {
-            $this->runSharedExtensionCheckUnix();
-        }
     }
 }

@@ -138,9 +138,9 @@ abstract class UnixBuilderBase extends BuilderBase
     protected function sanityCheck(int $build_target): void
     {
         // sanity check for php-cli
-        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI || file_exists(BUILD_BIN_PATH . '/php')) {
             logger()->info('running cli sanity check');
-            [$ret, $output] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n -r "echo \"hello\";"');
+            [$ret, $output] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -r "echo \"hello\";"');
             $raw_output = implode('', $output);
             if ($ret !== 0 || trim($raw_output) !== 'hello') {
                 throw new RuntimeException("cli failed sanity check: ret[{$ret}]. out[{$raw_output}]");
@@ -173,7 +173,11 @@ abstract class UnixBuilderBase extends BuilderBase
         }
 
         // sanity check for embed
-        if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
+        if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED ||
+            file_exists(BUILD_BIN_PATH . '/php-config') &&
+            file_exists(BUILD_BIN_PATH . '/phpize') &&
+            (file_exists(BUILD_LIB_PATH . '/libphp.a') || file_exists(BUILD_LIB_PATH . '/libphp.so'))
+        ) {
             logger()->info('running embed sanity check');
             $sample_file_path = SOURCE_PATH . '/embed-test';
             if (!is_dir($sample_file_path)) {
