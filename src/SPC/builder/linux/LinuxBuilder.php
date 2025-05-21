@@ -322,7 +322,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = ' . BUILD_MODULES_PATH . '|" Makefile')
+            ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
         $this->patchPhpScripts();
     }

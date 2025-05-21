@@ -95,7 +95,7 @@ class SourcePatcher
      */
     public static function patchBeforeConfigure(BuilderBase $builder): void
     {
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeConfigure() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before configure');
             }

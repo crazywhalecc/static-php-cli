@@ -79,6 +79,9 @@
             "xml"
         ],
         "shared-ext-depends": [
+            "libxml",
+            "xmlreader",
+            "xmlwriter",
             "xml"
         ]
     },
@@ -413,22 +416,22 @@
     },
     "mysqli": {
         "type": "builtin",
-        "target": [
-            "static"
-        ],
         "arg-type": "with",
         "ext-depends": [
             "mysqlnd"
+        ],
+        "target": [
+            "static"
         ]
     },
     "mysqlnd": {
         "type": "builtin",
-        "target": [
-            "static"
-        ],
         "arg-type-windows": "with",
         "lib-depends": [
             "zlib"
+        ],
+        "target": [
+            "static"
         ]
     },
     "oci8": {

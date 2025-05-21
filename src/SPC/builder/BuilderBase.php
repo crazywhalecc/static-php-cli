@@ -257,7 +257,11 @@ abstract class BuilderBase
                 continue;
             }
             if (Config::getExt($ext->getName(), 'type') === 'builtin') {
-                logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
+                if (file_exists(BUILD_MODULES_PATH . '/' . $ext->getName() . '.so')) {
+                    logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
+                    continue;
+                }
+                logger()->warning('Shared extension [' . $ext->getName() . '] was built statically by php-src/configure');
                 continue;
             }
             logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');

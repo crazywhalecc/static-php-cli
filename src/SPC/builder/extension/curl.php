@@ -53,6 +53,7 @@ class curl extends Extension
     {
         $frameworks = $this->builder instanceof MacOSBuilder ? ' ' . $this->builder->getFrameworks(true) . ' ' : '';
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/-lcurl/', $this->getLibFilesString() . $frameworks);
+        $this->patchBeforeSharedConfigure();
         return true;
     }
 
@@ -97,12 +98,6 @@ class curl extends Extension
 
         FileSystem::writeFile($file, $patched);
         return true;
-    }
-
-
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        return '--with-curl';
     }
 
     public function buildUnixShared(): void

@@ -20,9 +20,4 @@ class ldap extends Extension
         }
         return true;
     }
-
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        return '--with-ldap=' . BUILD_ROOT_PATH;
-    }
 }

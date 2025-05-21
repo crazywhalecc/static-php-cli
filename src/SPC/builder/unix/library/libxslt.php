@@ -47,5 +47,6 @@ trait libxslt
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . escapeshellarg(BUILD_ROOT_PATH));
         $this->patchPkgconfPrefix(['libexslt.pc']);
+        $this->patchLaDependencyPrefix(['libxslt.la', 'libexslt.la']);
     }
 }
