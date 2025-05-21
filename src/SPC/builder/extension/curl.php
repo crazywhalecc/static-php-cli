@@ -74,7 +74,6 @@ class curl extends Extension
         // Match the line containing PHP_CHECK_LIBRARY for curl
         $pattern = '/(PHP_CHECK_LIBRARY\(\[curl],\s*\[curl_easy_perform],)/';
 
-
         // Restore LIBS after the check — append this just after the macro block
         $restore = '
   LIBS="$save_LIBS"';
@@ -87,13 +86,13 @@ class curl extends Extension
         // Inject restore after the matching PHP_CHECK_LIBRARY block
         $patched = preg_replace(
             '/(PHP_CHECK_LIBRARY\(\[curl],\s*\[curl_easy_perform],.*?\)\n)/s',
-            "$1$restore\n",
+            "$1{$restore}\n",
             $patched,
             1
         );
 
         if ($patched === null) {
-            throw new \RuntimeException("Failed to patch config.m4 due to a regex error");
+            throw new \RuntimeException('Failed to patch config.m4 due to a regex error');
         }
 
         FileSystem::writeFile($file, $patched);

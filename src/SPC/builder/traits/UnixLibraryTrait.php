@@ -95,8 +95,8 @@ trait UnixLibraryTrait
             logger()->debug('Patching ' . $realpath);
             // replace prefix
             $file = FileSystem::readFile($realpath);
-            $file =  str_replace(' /lib/', ' ' . BUILD_LIB_PATH . '/', $file);
-            $file = preg_replace("/^libdir=.*$/m", "libdir='" . BUILD_LIB_PATH . "'", $file);
+            $file = str_replace(' /lib/', ' ' . BUILD_LIB_PATH . '/', $file);
+            +            $file = preg_replace('/^libdir=.*$/m', "libdir='" . BUILD_LIB_PATH . "'", $file);
             FileSystem::writeFile($realpath, $file);
         }
     }

@@ -336,7 +336,7 @@ class Extension
         if ($this->patchBeforeSharedConfigure()) {
             logger()->info('ext [ . ' . $this->getName() . '] patching before shared configure');
         }
-        
+
         shell()->cd($this->source_dir)
             ->setEnv($env)
             ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --with-pic')

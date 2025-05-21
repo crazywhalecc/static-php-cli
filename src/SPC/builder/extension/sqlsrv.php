@@ -64,5 +64,6 @@ class sqlsrv extends Extension
         // check shared extension with php-cli
         if (file_exists(BUILD_BIN_PATH . '/php')) {
             $this->runSharedExtensionCheckUnix();
-        }    }
+        }
+    }
 }

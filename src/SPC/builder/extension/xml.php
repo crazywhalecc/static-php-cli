@@ -29,7 +29,7 @@ class xml extends Extension
             'simplexml' => '--enable-simplexml',
             default => throw new RuntimeException('Not accept non-xml extension'),
         };
-        $arg .= ($shared ? '=shared' : '' ) . ' --with-libxml="' . BUILD_ROOT_PATH . '"';
+        $arg .= ($shared ? '=shared' : '') . ' --with-libxml="' . BUILD_ROOT_PATH . '"';
         return $arg;
     }
 
