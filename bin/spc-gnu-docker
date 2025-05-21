@@ -143,6 +143,13 @@ echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
 
+# Environment variable passthrough
+ENV_LSIT=""
+ENV_LIST="$ENV_LIST -e SPC_FIX_DEPLOY_ROOT="$(pwd)""
+if [ ! -z "$GITHUB_TOKEN" ]; then
+    ENV_LIST="$ENV_LIST -e GITHUB_TOKEN=$GITHUB_TOKEN"
+fi
+
 # Run docker
 # shellcheck disable=SC2068
 # shellcheck disable=SC2086
@@ -163,7 +170,7 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     echo "*    ./pkgroot:   $(pwd)/pkgroot"
     echo "*"
 
-    $DOCKER_EXECUTABLE run --rm -it --privileged $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH
+    $DOCKER_EXECUTABLE run --rm -it --privileged $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH
 else
-    $DOCKER_EXECUTABLE run --rm $INTERACT -e SPC_FIX_DEPLOY_ROOT="$(pwd)" --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
+    $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
 fi
