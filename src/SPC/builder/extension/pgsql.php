@@ -36,7 +36,12 @@ class pgsql extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         if ($this->builder->getPHPVersionID() >= 80400) {
-            return '--with-pgsql' . ($shared ? '=shared' : '') . ' PGSQL_CFLAGS=-I' . BUILD_INCLUDE_PATH . ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' -lpq -lpgport -lpgcommon"';
+            $libfiles = $this->getLibFilesString();
+            $libfiles = str_replace(BUILD_LIB_PATH . '/lib', '-l', $libfiles);
+            $libfiles = str_replace('.a', '', $libfiles);
+            return '--with-pgsql' . ($shared ? '=shared' : '') .
+                ' PGSQL_CFLAGS=-I' . BUILD_INCLUDE_PATH .
+                ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' ' . $libfiles . '"';
         }
         return '--with-pgsql=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH;
     }

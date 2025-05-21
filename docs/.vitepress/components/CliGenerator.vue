@@ -30,6 +30,7 @@
       </div>
     </div>
     <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectCommon">{{ I18N[lang].selectCommon }}</div>
+    <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectAll">{{ I18N[lang].selectAll }}</div>
     <div class="my-btn" @click="checkedExts = []">{{ I18N[lang].selectNone }}</div>
 
     <details class="details custom-block" open>
@@ -246,6 +247,7 @@ const I18N = {
     no: '否',
     resultShow: '结果展示',
     selectCommon: '选择常用扩展',
+    selectAll: '选择全部',
     selectNone: '全部取消选择',
     useZTS: '是否编译线程安全版',
     hardcodedINI: '硬编码 INI 选项',
@@ -280,6 +282,7 @@ const I18N = {
     no: 'No',
     resultShow: 'Result',
     selectCommon: 'Select common extensions',
+    selectAll: 'Select all',
     selectNone: 'Unselect all',
     useZTS: 'Enable ZTS',
     hardcodedINI: 'Hardcoded INI options',
@@ -329,6 +332,26 @@ const selectCommon = () => {
       'xml', 'xmlreader', 'xmlwriter',
       'xsl', 'zip', 'zlib',
   ];
+};
+
+const selectAll = () => {
+    checkedExts.value = [
+        'amqp', 'apcu', 'ast', 'bcmath', 'bz2', 'calendar', 'ctype', 'curl',
+        'dba', 'dio', 'dom', 'ds', 'ev', 'event', 'exif', 'ffi', 'fileinfo',
+        'filter', 'ftp', 'gd', 'gettext', 'gmp', 'gmssl', 'grpc', 'iconv',
+        'igbinary', 'imagick', 'imap', 'inotify', 'intl', 'ldap', 'libxml',
+        'mbregex', 'mbstring', 'memcache', 'mongodb', 'msgpack', 'mysqli',
+        'mysqlnd', 'odbc', 'opcache', 'openssl', 'opentelemetry', 'parallel',
+        'password-argon2', 'pcntl', 'pdo', 'pdo_mysql', 'pdo_odbc',
+        'pdo_pgsql', 'pdo_sqlite', 'pdo_sqlsrv', 'pgsql', 'phar', 'posix',
+        'protobuf', 'rar', 'rdkafka', 'readline', 'redis', 'session', 'shmop',
+        'simdjson', 'simplexml', 'snappy', 'soap', 'sockets', 'sodium', 'spx',
+        'sqlite3', 'sqlsrv', 'ssh2', 'swoole', 'swoole-hook-mysql',
+        'swoole-hook-pgsql', 'swoole-hook-sqlite', 'swow', 'sysvmsg',
+        'sysvsem', 'sysvshm', 'tidy', 'tokenizer', 'uuid', 'uv', 'xdebug',
+        'xhprof', 'xlswriter', 'xml', 'xmlreader', 'xmlwriter', 'xsl', 'yac',
+        'zip', 'zlib',
+    ];
 };
 
 const extList = computed(() => {
