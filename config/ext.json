@@ -412,7 +412,10 @@
         "type": "external",
         "source": "msgpack",
         "arg-type-unix": "with",
-        "arg-type-win": "enable"
+        "arg-type-win": "enable",
+        "shared-ext-depends": [
+            "sockets"
+        ]
     },
     "mysqli": {
         "type": "builtin",
