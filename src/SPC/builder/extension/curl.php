@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
@@ -52,6 +53,72 @@ class curl extends Extension
     {
         $frameworks = $this->builder instanceof MacOSBuilder ? ' ' . $this->builder->getFrameworks(true) . ' ' : '';
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/-lcurl/', $this->getLibFilesString() . $frameworks);
+        $this->patchBeforeSharedConfigure();
         return true;
+    }
+
+    public function patchBeforeSharedConfigure(): bool
+    {
+        $file = SOURCE_PATH . '/php-src/ext/curl/config.m4';
+        $content = FileSystem::readFile($file);
+
+        // Inject patch before it
+        $patch = ' save_LIBS="$LIBS"
+  LIBS="$LIBS $CURL_LIBS"
+';
+        // Check if already patched
+        if (str_contains($content, $patch)) {
+            return false; // Already patched
+        }
+
+        // Match the line containing PHP_CHECK_LIBRARY for curl
+        $pattern = '/(PHP_CHECK_LIBRARY\(\[curl],\s*\[curl_easy_perform],)/';
+
+        // Restore LIBS after the check — append this just after the macro block
+        $restore = '
+  LIBS="$save_LIBS"';
+
+        // Apply patch
+        $patched = preg_replace_callback($pattern, function ($matches) use ($patch) {
+            return $patch . $matches[1];
+        }, $content, 1);
+
+        // Inject restore after the matching PHP_CHECK_LIBRARY block
+        $patched = preg_replace(
+            '/(PHP_CHECK_LIBRARY\(\[curl],\s*\[curl_easy_perform],.*?\)\n)/s',
+            "$1{$restore}\n",
+            $patched,
+            1
+        );
+
+        if ($patched === null) {
+            throw new \RuntimeException('Failed to patch config.m4 due to a regex error');
+        }
+
+        FileSystem::writeFile($file, $patched);
+        return true;
+    }
+
+    public function buildUnixShared(): void
+    {
+        if (!$this->builder instanceof LinuxBuilder) {
+            parent::buildUnixShared();
+            return;
+        }
+
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/config.m4',
+            ['$ext_dir/phar.1', '$ext_dir/phar.phar.1'],
+            ['${ext_dir}phar.1', '${ext_dir}phar.phar.1']
+        );
+        try {
+            parent::buildUnixShared();
+        } finally {
+            FileSystem::replaceFileStr(
+                $this->source_dir . '/config.m4',
+                ['${ext_dir}phar.1', '${ext_dir}phar.phar.1'],
+                ['$ext_dir/phar.1', '$ext_dir/phar.phar.1']
+            );
+        }
     }
 }

@@ -24,6 +24,17 @@ class opcache extends Extension
         }
     }
 
+    public function runSharedExtensionCheckUnix(): void
+    {
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "zend_extension=' . BUILD_MODULES_PATH . '/opcache.so" -v');
+        if ($ret !== 0) {
+            throw new RuntimeException('opcache.so failed to load.');
+        }
+        if (!str_contains(join($out), 'with Zend OPcache')) {
+            throw new RuntimeException('opcache.so failed to load.');
+        }
+    }
+
     public function patchBeforeBuildconf(): bool
     {
         if (file_exists(SOURCE_PATH . '/php-src/.opcache_patched')) {

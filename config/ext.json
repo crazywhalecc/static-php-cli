@@ -124,10 +124,6 @@
             "Linux": "partial",
             "BSD": "wip"
         },
-        "target": [
-            "static",
-            "shared"
-        ],
         "notes": true,
         "arg-type": "custom",
         "type": "builtin",
@@ -329,13 +325,16 @@
         },
         "type": "builtin",
         "arg-type": "none",
-        "ext-depends": [
-            "xml"
+        "target": [
+            "static"
         ]
     },
     "mbregex": {
         "type": "builtin",
         "arg-type": "custom",
+        "target": [
+            "static"
+        ],
         "ext-depends": [
             "mbstring"
         ],
@@ -417,6 +416,9 @@
         "arg-type": "with",
         "ext-depends": [
             "mysqlnd"
+        ],
+        "target": [
+            "static"
         ]
     },
     "mysqlnd": {
@@ -424,6 +426,9 @@
         "arg-type-windows": "with",
         "lib-depends": [
             "zlib"
+        ],
+        "target": [
+            "static"
         ]
     },
     "oci8": {
@@ -638,6 +643,9 @@
         "arg-type": "with-prefix",
         "lib-depends": [
             "readline"
+        ],
+        "target": [
+            "static"
         ]
     },
     "redis": {
@@ -781,9 +789,6 @@
             "Windows": "no",
             "BSD": "wip"
         },
-        "target": [
-            "static"
-        ],
         "notes": true,
         "type": "external",
         "source": "swoole",
@@ -1055,9 +1060,6 @@
         "support": {
             "BSD": "wip"
         },
-        "target": [
-            "static"
-        ],
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",
@@ -1081,6 +1083,9 @@
         "arg-type-windows": "enable",
         "lib-depends": [
             "zlib"
+        ],
+        "target": [
+            "static"
         ]
     },
     "zstd": {

@@ -9,10 +9,17 @@ use SPC\builder\windows\SystemUtil as WindowsSystemUtil;
 use SPC\store\FileSystem;
 use SPC\util\GlobalEnvManager;
 
+// output path for everything, other paths are defined relative to this by default
 define('BUILD_ROOT_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_ROOT_PATH')) ? $a : (WORKING_DIR . '/buildroot')));
+// output path for header files for development
 define('BUILD_INCLUDE_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_INCLUDE_PATH')) ? $a : (BUILD_ROOT_PATH . '/include')));
+// output path for libraries and for libphp.so, if building shared embed
 define('BUILD_LIB_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_LIB_PATH')) ? $a : (BUILD_ROOT_PATH . '/lib')));
+// output path for binaries
 define('BUILD_BIN_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_BIN_PATH')) ? $a : (BUILD_ROOT_PATH . '/bin')));
+// output path for shared extensions
+define('BUILD_MODULES_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_MODULES_PATH')) ? $a : (BUILD_ROOT_PATH . '/modules')));
+
 define('PKG_ROOT_PATH', FileSystem::convertPath(is_string($a = getenv('PKG_ROOT_PATH')) ? $a : (WORKING_DIR . '/pkgroot')));
 define('SOURCE_PATH', FileSystem::convertPath(is_string($a = getenv('SOURCE_PATH')) ? $a : (WORKING_DIR . '/source')));
 define('DOWNLOAD_PATH', FileSystem::convertPath(is_string($a = getenv('DOWNLOAD_PATH')) ? $a : (WORKING_DIR . '/downloads')));

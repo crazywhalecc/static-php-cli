@@ -18,7 +18,11 @@ trait brotli
     {
         FileSystem::resetDir($this->source_dir . '/build-dir');
         shell()->cd($this->source_dir . '/build-dir')
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 'cmake ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .

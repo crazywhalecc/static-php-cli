@@ -24,7 +24,7 @@ class redis extends Extension
         return $arg;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         $arg = '--enable-redis';
         $arg .= $this->builder->getExt('session') ? ' --enable-redis-session' : ' --disable-redis-session';

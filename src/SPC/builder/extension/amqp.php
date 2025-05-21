@@ -28,7 +28,7 @@ class amqp extends Extension
         return '--with-amqp --with-librabbitmq-dir=' . BUILD_ROOT_PATH;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg($shared = false): string
     {
         return '--with-amqp';
     }

@@ -13,8 +13,11 @@ class xdebug extends Extension
 {
     public function runSharedExtensionCheckUnix(): void
     {
-        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "zend_extension=' . BUILD_LIB_PATH . '/xdebug.so" --ri xdebug');
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -d "zend_extension=' . BUILD_MODULES_PATH . '/xdebug.so" -v');
         if ($ret !== 0) {
+            throw new RuntimeException('xdebug.so failed to load.');
+        }
+        if (!str_contains(join($out), 'with Xdebug')) {
             throw new RuntimeException('xdebug.so failed to load.');
         }
     }

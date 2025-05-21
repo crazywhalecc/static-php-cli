@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use PharIo\FileSystem\File;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
 use SPC\exception\InterruptException;
@@ -233,15 +234,40 @@ abstract class BuilderBase
      */
     abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE);
 
+    /**
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
     public function buildSharedExts(): void
     {
+        $lines = file(BUILD_BIN_PATH . '/php-config');
+        $extension_dir_line = null;
+        foreach ($lines as $key => $value) {
+            if (str_starts_with($value, 'extension_dir=')) {
+                $lines[$key] = 'extension_dir="' . BUILD_MODULES_PATH . '"' . PHP_EOL;
+                $extension_dir_line = $value;
+                break;
+            }
+        }
+        file_put_contents(BUILD_BIN_PATH . '/php-config', implode('', $lines));
+        FileSystem::createDir(BUILD_MODULES_PATH);
         foreach ($this->getExts() as $ext) {
             if (!$ext->isBuildShared()) {
+                continue;
+            }
+            if (Config::getExt($ext->getName(), 'type') === 'builtin') {
+                if (file_exists(BUILD_MODULES_PATH . '/' . $ext->getName() . '.so')) {
+                    logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
+                    continue;
+                }
+                logger()->warning('Shared extension [' . $ext->getName() . '] was built statically by php-src/configure');
                 continue;
             }
             logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
             $ext->buildShared();
         }
+        FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
     }
 
     /**
@@ -254,9 +280,17 @@ abstract class BuilderBase
     public function makeStaticExtensionArgs(): string
     {
         $ret = [];
-        foreach ($this->getExts(false) as $ext) {
-            logger()->info($ext->getName() . ' is using ' . $ext->getConfigureArg());
-            $ret[] = trim($ext->getConfigureArg());
+        foreach ($this->getExts() as $ext) {
+            $arg = $ext->getConfigureArg();
+            if ($ext->isBuildShared()) {
+                if (Config::getExt($ext->getName(), 'type') === 'builtin') {
+                    $arg = $ext->getConfigureArg(true);
+                } else {
+                    continue;
+                }
+            }
+            logger()->info($ext->getName() . ' is using ' . $arg);
+            $ret[] = trim($arg);
         }
         logger()->debug('Using configure: ' . implode(' ', $ret));
         return implode(' ', $ret);

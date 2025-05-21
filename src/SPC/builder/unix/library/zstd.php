@@ -18,11 +18,17 @@ trait zstd
     {
         FileSystem::resetDir($this->source_dir . '/build/cmake/build');
         shell()->cd($this->source_dir . '/build/cmake/build')
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->exec(
                 'cmake ' .
                 "{$this->builder->makeCmakeArgs()} " .
                 '-DZSTD_BUILD_STATIC=ON ' .
                 '-DZSTD_BUILD_SHARED=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")

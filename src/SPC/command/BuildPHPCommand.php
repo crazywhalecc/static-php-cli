@@ -210,6 +210,8 @@ class BuildPHPCommand extends BuildCommand
             // start to build
             $builder->buildPHP($rule);
 
+            SourcePatcher::patchBeforeSharedBuild($builder);
+
             // build dynamic extensions if needed
             if (!empty($shared_extensions)) {
                 logger()->info('Building shared extensions ...');
@@ -246,8 +248,12 @@ class BuildPHPCommand extends BuildCommand
             }
             if (!empty($shared_extensions)) {
                 foreach ($shared_extensions as $ext) {
-                    $path = FileSystem::convertPath("{$build_root_path}/lib/{$ext}.so");
-                    logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                    $path = FileSystem::convertPath("{$build_root_path}/modules/{$ext}.so");
+                    if (file_exists("{$build_root_path}/modules/{$ext}.so")) {
+                        logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                    } else {
+                        logger()->warning("Shared extension [{$ext}] not found, please check!");
+                    }
                 }
             }
 

@@ -106,6 +106,18 @@ class LinuxBuilder extends UnixBuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
+        if ($build_target === BUILD_TARGET_EMBED &&
+            file_exists(BUILD_BIN_PATH . '/php-config') &&
+            file_exists(BUILD_BIN_PATH . '/phpize')
+        ) {
+            $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+            if ($embed_type === 'shared' && file_exists(BUILD_LIB_PATH . '/libphp.so')) {
+                return;
+            }
+            if (file_exists(BUILD_LIB_PATH . '/libphp.a')) {
+                return;
+            }
+        }
         // ---------- Update extra-libs ----------
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         // bloat means force-load all static libraries, even if they are not used
@@ -310,6 +322,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
         $this->patchPhpScripts();
     }

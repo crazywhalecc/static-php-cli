@@ -50,7 +50,11 @@ class openssl extends MacOSLibraryBase
         $arch = getenv('SPC_ARCH');
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->exec(
                 "./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/
