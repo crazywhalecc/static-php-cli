@@ -41,7 +41,7 @@ class xml extends Extension
         return true;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         $arg = match ($this->name) {
             'xml' => '--with-xml',

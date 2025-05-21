@@ -22,7 +22,7 @@ class pdo_odbc extends Extension
         return '--with-pdo-odbc=unixODBC,' . BUILD_ROOT_PATH;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         return '--with-pdo-odbc';
     }

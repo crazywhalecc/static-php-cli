@@ -16,7 +16,7 @@ class mbregex extends Extension
         return 'mbstring';
     }
 
-    public function getConfigureArg(): string
+    public function getConfigureArg(bool $shared = false): string
     {
         return '';
     }

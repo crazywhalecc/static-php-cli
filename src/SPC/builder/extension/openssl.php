@@ -26,6 +26,6 @@ class openssl extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         $openssl_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : ' --with-openssl-dir=' . BUILD_ROOT_PATH;
-        return '--with-openssl=' . BUILD_ROOT_PATH . $openssl_dir;
+        return '--with-openssl=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $openssl_dir;
     }
 }

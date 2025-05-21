@@ -30,7 +30,7 @@ class dom extends Extension
         return true;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg($shared = false): string
     {
         return '--with-dom --with-libxml';
     }

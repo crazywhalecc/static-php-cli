@@ -45,7 +45,7 @@ class pgsql extends Extension
      * @throws WrongUsageException
      * @throws RuntimeException
      */
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         if ($this->builder->getPHPVersionID() >= 80400) {
             return '--with-pgsql';

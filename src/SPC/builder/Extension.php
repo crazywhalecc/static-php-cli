@@ -9,7 +9,6 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
-use SPC\store\SourcePatcher;
 use SPC\util\SPCConfigUtil;
 
 class Extension
@@ -60,20 +59,15 @@ class Extension
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function getConfigureArg(): string
+    public function getConfigureArg(bool $shared = false): string
     {
-        $arg = $this->getEnableArg();
-        switch (PHP_OS_FAMILY) {
-            case 'Windows':
-                $arg .= $this->getWindowsConfigureArg();
-                break;
-            case 'Darwin':
-            case 'Linux':
-            case 'BSD':
-                $arg .= $this->getUnixConfigureArg();
-                break;
-        }
-        return $arg;
+        return match (PHP_OS_FAMILY) {
+            'Windows' => $this->getWindowsConfigureArg($shared),
+            'Darwin',
+            'Linux',
+            'BSD' => $this->getUnixConfigureArg($shared),
+            default => throw new WrongUsageException(PHP_OS_FAMILY . ' build is not supported yet'),
+        };
     }
 
     /**
@@ -82,13 +76,13 @@ class Extension
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function getEnableArg(): string
+    public function getEnableArg(bool $shared = false): string
     {
         $_name = str_replace('_', '-', $this->name);
         return match ($arg_type = Config::getExt($this->name, 'arg-type', 'enable')) {
             'enable' => '--enable-' . $_name . ' ',
-            'with' => '--with-' . $_name . ' ',
-            'with-prefix' => '--with-' . $_name . '="' . BUILD_ROOT_PATH . '" ',
+            'with' => '--with-' . $_name . ($shared ? '=shared' : '') . ' ',
+            'with-prefix' => '--with-' . $_name . '=' . ($shared ? 'shared,' : '') . '"' . BUILD_ROOT_PATH . '" ',
             'none', 'custom' => '',
             default => throw new WrongUsageException("argType does not accept {$arg_type}, use [enable/with/with-prefix] ."),
         };
@@ -151,15 +145,15 @@ class Extension
         return $this->name;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
-        return '';
+        return $this->getEnableArg();
         // Windows is not supported yet
     }
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '';
+        return $this->getEnableArg($shared);
     }
 
     /**
@@ -345,7 +339,7 @@ class Extension
         
         shell()->cd($this->source_dir)
             ->setEnv($env)
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static --with-pic')
+            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --with-pic')
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency)
             ->execWithEnv('make install');

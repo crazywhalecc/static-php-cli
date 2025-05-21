@@ -16,7 +16,7 @@ class dba extends Extension
         return '--enable-dba' . $qdbm;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         $qdbm = $this->builder->getLib('qdbm') ? ' --with-qdbm' : '';
         return '--with-dba' . $qdbm;

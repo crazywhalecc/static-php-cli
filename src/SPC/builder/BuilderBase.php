@@ -256,6 +256,10 @@ abstract class BuilderBase
             if (!$ext->isBuildShared()) {
                 continue;
             }
+            if (Config::getExt($ext->getName(), 'type') === 'builtin') {
+                logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
+                continue;
+            }
             logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
             $ext->buildShared();
         }
@@ -272,9 +276,17 @@ abstract class BuilderBase
     public function makeStaticExtensionArgs(): string
     {
         $ret = [];
-        foreach ($this->getExts(false) as $ext) {
-            logger()->info($ext->getName() . ' is using ' . $ext->getConfigureArg());
-            $ret[] = trim($ext->getConfigureArg());
+        foreach ($this->getExts() as $ext) {
+            $arg = $ext->getConfigureArg();
+            if ($ext->isBuildShared()) {
+                if (Config::getExt($ext->getName(), 'type') === 'builtin') {
+                    $arg = $ext->getConfigureArg(true);
+                } else {
+                    continue;
+                }
+            }
+            logger()->info($ext->getName() . ' is using ' . $arg);
+            $ret[] = trim($arg);
         }
         logger()->debug('Using configure: ' . implode(' ', $ret));
         return implode(' ', $ret);
