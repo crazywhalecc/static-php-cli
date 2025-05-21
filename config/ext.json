@@ -414,7 +414,7 @@
         "arg-type-unix": "with",
         "arg-type-win": "enable",
         "shared-ext-depends": [
-            "sockets"
+            "session"
         ]
     },
     "mysqli": {
