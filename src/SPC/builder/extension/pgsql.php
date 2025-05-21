@@ -44,7 +44,7 @@ class pgsql extends Extension
             $libfiles = str_replace(' -lpgcommon', '', $libfiles);
             return '--with-pgsql' . ($shared ? '=shared' : '') .
                 ' PGSQL_CFLAGS=-I' . BUILD_INCLUDE_PATH .
-                ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' -Wl,--whole-archive -lpq -lpgport -lpgcommon -Wl,--no-whole-archive ' . $libfiles . '"';
+                ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' -lpq -lpgport -lpgcommon ' . $libfiles . '"';
         }
         return '--with-pgsql=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH;
     }
