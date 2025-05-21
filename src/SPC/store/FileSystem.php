@@ -24,16 +24,25 @@ class FileSystem
             WORKING_DIR . '/config/' . $config . '.json',
             ROOT_DIR . '/config/' . $config . '.json',
         ];
+
+        $all = [];
         foreach ($tries as $try) {
             if (file_exists($try)) {
                 $json = json_decode(self::readFile($try), true);
                 if (!is_array($json)) {
                     throw new FileSystemException('Reading ' . $try . ' failed');
                 }
-                return $json;
+                $all = array_merge($json, $all);
             }
         }
-        throw new FileSystemException('Reading ' . $config . '.json failed');
+
+        ksort($all);
+
+        if (count($all) === 0) {
+            throw new FileSystemException('Reading ' . $config . '.json failed');
+        }
+
+        return $all;
     }
 
     /**
