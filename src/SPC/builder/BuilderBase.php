@@ -252,20 +252,26 @@ abstract class BuilderBase
         }
         file_put_contents(BUILD_BIN_PATH . '/php-config', implode('', $lines));
         FileSystem::createDir(BUILD_MODULES_PATH);
-        foreach ($this->getExts() as $ext) {
-            if (!$ext->isBuildShared()) {
-                continue;
-            }
-            if (Config::getExt($ext->getName(), 'type') === 'builtin') {
-                if (file_exists(BUILD_MODULES_PATH . '/' . $ext->getName() . '.so')) {
-                    logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
+        try {
+            foreach ($this->getExts() as $ext) {
+                if (!$ext->isBuildShared()) {
                     continue;
                 }
-                logger()->warning('Shared extension [' . $ext->getName() . '] was built statically by php-src/configure');
-                continue;
+                if (Config::getExt($ext->getName(), 'type') === 'builtin') {
+                    if (file_exists(BUILD_MODULES_PATH . '/' . $ext->getName() . '.so')) {
+                        logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
+                        continue;
+                    }
+                    logger()->warning('Shared extension [' . $ext->getName() . '] was built statically by php-src/configure');
+                    continue;
+                }
+                logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
+                $ext->buildShared();
             }
-            logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
-            $ext->buildShared();
+        }
+        catch (RuntimeException $e) {
+            FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
+            throw $e;
         }
         FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
     }

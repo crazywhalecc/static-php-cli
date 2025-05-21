@@ -221,6 +221,36 @@ class Extension
         }
     }
 
+    public function getRequiredSharedExtensions(): string
+    {
+        $loaded = [];
+        $order = [];
+
+        $resolve = function ($extension) use (&$resolve, &$loaded, &$order) {
+            if (isset($loaded[$extension->getName()])) {
+                return;
+            }
+            $loaded[$extension->getName()] = true;
+
+            foreach ($this->dependencies as $dependency) {
+                $resolve($dependency);
+            }
+
+            $order[] = $extension;
+        };
+
+        $resolve($this);
+
+        $ret = '';
+        foreach ($order as $ext) {
+            if ($ext instanceof Extension && $ext->isBuildShared()) {
+                $ret .= ' -d "extension=' . BUILD_MODULES_PATH . '/' . $ext->getName() . '.so"';
+            }
+        }
+
+        return $ret;
+    }
+
     /**
      * @throws RuntimeException
      */
@@ -229,7 +259,8 @@ class Extension
         // Run compile check if build target is cli
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
-        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n --ri "' . $this->getDistName() . '"', false);
+        $sharedExtensions = $this->getRequiredSharedExtensions();
+        [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
         }
@@ -242,7 +273,7 @@ class Extension
                 file_get_contents(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')
             );
 
-            [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n -r "' . trim($test) . '"');
+            [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
             if ($ret !== 0) {
                 if ($this->builder->getOption('debug')) {
                     var_dump($out);

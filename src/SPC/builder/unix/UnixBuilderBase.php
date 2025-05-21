@@ -146,7 +146,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 throw new RuntimeException("cli failed sanity check: ret[{$ret}]. out[{$raw_output}]");
             }
 
-            foreach ($this->getExts(false) as $ext) {
+            foreach ($this->getExts() as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
                 $ext->runCliCheckUnix();
             }

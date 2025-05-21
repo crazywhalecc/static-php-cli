@@ -95,7 +95,10 @@
     "ev": {
         "type": "external",
         "source": "ev",
-        "arg-type-windows": "with"
+        "arg-type-windows": "with",
+        "shared-ext-depends": [
+            "sockets"
+        ]
     },
     "event": {
         "support": {
