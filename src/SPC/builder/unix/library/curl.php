@@ -67,13 +67,13 @@ trait curl
         $this->patchPkgconfPrefix(['libcurl.pc']);
         FileSystem::replaceFileStr(
             BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
-            '-lbrolienc -lbrotlidec -lbrotlicommon',
+            '-lbrotlienc -lbrotlidec -lbrotlicommon',
             '-lbrotlidec -lbrotlicommon'
         );
         FileSystem::replaceFileStr(
             BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
             '-lbrotlidec -lbrotlicommon',
-            '-lbrolienc -lbrotlidec -lbrotlicommon'
+            '-lbrotlienc -lbrotlidec -lbrotlicommon'
         );
         FileSystem::replaceFileStr(
             BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
