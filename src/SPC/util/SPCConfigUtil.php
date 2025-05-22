@@ -11,7 +11,6 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
-use SPC\store\FileSystem;
 use Symfony\Component\Console\Input\ArgvInput;
 
 class SPCConfigUtil
@@ -32,6 +31,7 @@ class SPCConfigUtil
      * @param array $libraries           Additional library name list
      * @param bool  $include_suggest_ext Include suggested extensions
      * @param bool  $include_suggest_lib Include suggested libraries
+     * @param mixed $with_dependencies
      * @return array{
      *     cflags: string,
      *     ldflags: string,
@@ -127,8 +127,7 @@ class SPCConfigUtil
                             $short_name[] = $requiredLib;
                         }
                     }
-                }
-                else {
+                } else {
                     $short_name[] = $this->getShortLibName($lib);
                 }
             }
