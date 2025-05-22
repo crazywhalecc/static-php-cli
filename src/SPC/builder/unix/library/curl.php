@@ -65,6 +65,26 @@ trait curl
             ->execWithEnv('make install');
         // patch pkgconf
         $this->patchPkgconfPrefix(['libcurl.pc']);
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            '-lbrolienc -lbrotlidec -lbrotlicommon',
+            '-lbrotlidec -lbrotlicommon'
+        );
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            '-lbrotlidec -lbrotlicommon',
+            '-lbrolienc -lbrotlidec -lbrotlicommon'
+        );
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            'libbrotlienc,libbrotlidec,libbrotlicommon',
+            'libbrotlidec,libbrotlicommon'
+        );
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            'libbrotlidec,libbrotlicommon',
+            'libbrotlienc,libbrotlidec,libbrotlicommon'
+        );
         shell()->cd(BUILD_LIB_PATH . '/cmake/CURL/')
             ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"" . BUILD_LIB_PATH . "/libcurl.a\"|g' CURLTargets-release.cmake");
     }
