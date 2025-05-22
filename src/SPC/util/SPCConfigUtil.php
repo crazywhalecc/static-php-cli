@@ -122,6 +122,9 @@ class SPCConfigUtil
                             }
                         }
                     }
+                    else {
+                        $requiredLibs[] = $this->getShortLibName($lib);
+                    }
                     foreach ($requiredLibs as $requiredLib) {
                         if (!in_array($requiredLib, $short_name)) {
                             $short_name[] = $requiredLib;
