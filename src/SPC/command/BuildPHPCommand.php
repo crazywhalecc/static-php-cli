@@ -137,7 +137,7 @@ class BuildPHPCommand extends BuildCommand
             $indent_texts = [
                 'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
                 'Build SAPI' => $builder->getBuildTypeName($rule),
-                'Static Extensions (' . count($static_extensions) . ')' => implode(',', $extensions),
+                'Static Extensions (' . count($static_extensions) . ')' => implode(',', $static_extensions),
                 'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
                 'Libraries (' . count($libraries) . ')' => implode(',', $display_libs),
                 'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
