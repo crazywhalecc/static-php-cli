@@ -790,8 +790,10 @@
         "arg-type": "with-prefix",
         "arg-type-windows": "with",
         "lib-depends": [
-            "openssl",
             "libssh2"
+        ],
+        "shared-ext-depends": [
+            "openssl"
         ],
         "ext-depends-windows": [
             "openssl",
