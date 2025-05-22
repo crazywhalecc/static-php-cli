@@ -14,6 +14,6 @@ class memcached extends Extension
     {
         $rootdir = BUILD_ROOT_PATH;
         $zlib_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : "--with-zlib-dir={$rootdir}";
-        return "--enable-memcached" . ($shared ? '=shared' : '') . " {$zlib_dir} --with-libmemcached-dir={$rootdir} --disable-memcached-sasl --enable-memcached-json";
+        return '--enable-memcached' . ($shared ? '=shared' : '') . " {$zlib_dir} --with-libmemcached-dir={$rootdir} --disable-memcached-sasl --enable-memcached-json";
     }
 }
