@@ -12,6 +12,6 @@ class xdebug extends Extension
 {
     protected function isZendExtension(): bool
     {
-        return str_contains($this->builder->getExt('zend')->getName(), 'xdebug');
+        return true;
     }
 }

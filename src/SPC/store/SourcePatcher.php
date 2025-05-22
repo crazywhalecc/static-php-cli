@@ -43,7 +43,7 @@ class SourcePatcher
      */
     public static function patchBeforeBuildconf(BuilderBase $builder): void
     {
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeBuildconf() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
             }

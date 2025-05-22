@@ -313,6 +313,7 @@ class Extension
      */
     public function buildShared(): void
     {
+        logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
         if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
             logger()->info('extension ' . $this->getName() . ' already built, skipping');
             return;
@@ -322,7 +323,10 @@ class Extension
             if ($dependencyExt === null) {
                 throw new RuntimeException("extension {$this->name} requires shared extension {$name}");
             }
-            $dependencyExt->buildShared();
+            if ($dependencyExt->isBuildShared()) {
+                logger()->info('extension ' . $this->getName() . ' requires shared extension ' . $name);
+                $dependencyExt->buildShared();
+            }
         }
         match (PHP_OS_FAMILY) {
             'Darwin', 'Linux' => $this->buildUnixShared(),
@@ -341,11 +345,25 @@ class Extension
      */
     public function buildUnixShared(): void
     {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()]);
+        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
+        $sharedLibs = '';
+        $staticLibs = '';
+        foreach (explode('-l', $config['libs']) as $lib) {
+            $lib = trim($lib);
+            if ($lib === '') {
+                continue;
+            }
+            $static_lib = 'lib' . $lib . '.a';
+            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib)) {
+                $staticLibs .= ' -l' . $lib;
+            } else {
+                $sharedLibs .= ' -l' . $lib;
+            }
+        }
         $env = [
             'CFLAGS' => $config['cflags'],
-            'LDFLAGS' => $config['ldflags'],
-            'LIBS' => $config['libs'],
+            'LDFLAGS' => $config['ldflags'] . ' -Wl,--allow-multiple-definition',
+            'LIBS' => '-Wl,-Bstatic ' . $staticLibs . ' -Wl,-Bdynamic ' . $sharedLibs,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         // prepare configure args
