@@ -373,7 +373,8 @@
         ],
         "shared-ext-depends": [
             "session"
-        ]
+        ],
+        "build-with-php": true
     },
     "memcached": {
         "support": {
@@ -677,7 +678,8 @@
         ]
     },
     "session": {
-        "type": "builtin"
+        "type": "builtin",
+        "build-with-php": true
     },
     "shmop": {
         "type": "builtin"
@@ -973,7 +975,8 @@
         "source": "xhprof",
         "ext-depends": [
             "ctype"
-        ]
+        ],
+        "build-with-php": true
     },
     "xlswriter": {
         "support": {

@@ -362,7 +362,7 @@ class Extension
         }
         $env = [
             'CFLAGS' => $config['cflags'],
-            'LDFLAGS' => $config['ldflags'] . ' -Wl,--allow-multiple-definition',
+            'LDFLAGS' => $config['ldflags'],
             'LIBS' => '-Wl,-Bstatic ' . $staticLibs . ' -Wl,-Bdynamic ' . $sharedLibs,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];

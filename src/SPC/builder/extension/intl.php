@@ -18,8 +18,6 @@ class intl extends Extension
         // Also need to use clang++ -std=c++17 to force override the default C++ standard
         if (is_string($env = getenv('CXX')) && !str_contains($env, 'std=c++17')) {
             f_putenv('CXX=' . $env . ' -std=c++17');
-        } else {
-            f_putenv('CXX=clang++ -std=c++17');
         }
         return true;
     }
