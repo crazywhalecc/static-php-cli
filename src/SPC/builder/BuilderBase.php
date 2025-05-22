@@ -262,15 +262,17 @@ abstract class BuilderBase
                 if (!$ext->isBuildShared()) {
                     continue;
                 }
-                if (Config::getExt($ext->getName(), 'type') === 'builtin') {
+                if (Config::getExt($ext->getName(), 'type') === 'builtin' || Config::getExt($ext->getName(), 'build-with-php') === true) {
                     if (file_exists(BUILD_MODULES_PATH . '/' . $ext->getName() . '.so')) {
                         logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
                         continue;
                     }
-                    logger()->warning('Shared extension [' . $ext->getName() . '] was built statically by php-src/configure');
-                    continue;
+                    if (Config::getExt($ext->getName(), 'build-with-php') === true) {
+                        logger()->warning('Shared extension [' . $ext->getName() . '] did not build with php-src/configure (' . $ext->getName() . '.so)');
+                        logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
+                        continue;
+                    }
                 }
-                logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
                 $ext->buildShared();
             }
         } catch (RuntimeException $e) {
@@ -293,7 +295,11 @@ abstract class BuilderBase
         foreach ($this->getExts() as $ext) {
             $arg = $ext->getConfigureArg();
             if ($ext->isBuildShared()) {
-                if (Config::getExt($ext->getName(), 'type') === 'builtin') {
+                if (
+                    (Config::getExt($ext->getName(), 'type') === 'builtin' &&
+                    !file_exists(SOURCE_PATH . '/php-src/ext/' . $ext->getName() . '/config.m4')) ||
+                    Config::getExt($ext->getName(), 'build-with-php') === true
+                ) {
                     $arg = $ext->getConfigureArg(true);
                 } else {
                     continue;
