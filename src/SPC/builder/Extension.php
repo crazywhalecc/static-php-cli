@@ -230,9 +230,9 @@ class Extension
         foreach ($order as $ext) {
             if ($ext instanceof Extension && $ext->isBuildShared()) {
                 if ($ext->isZendExtension()) {
-                    $ret .= ' -d "zend_extension=' . BUILD_MODULES_PATH . '/' . $ext->getName() . '.so"';
+                    $ret .= " -d \"zend_extension={$ext->getName()}\"";
                 } else {
-                    $ret .= ' -d "extension=' . BUILD_MODULES_PATH . '/' . $ext->getName() . '.so"';
+                    $ret .= " -d \"extension={$ext->getName()}\"";
                 }
             }
         }
@@ -249,7 +249,8 @@ class Extension
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
         $sharedExtensions = $this->getRequiredSharedExtensions();
-        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"', false);
+        putenv('EXTENSION_DIR=' . BUILD_MODULES_PATH);
+        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
         }

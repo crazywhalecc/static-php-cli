@@ -430,8 +430,8 @@
         "ext-depends": [
             "mysqlnd"
         ],
-        "target": [
-            "static"
+        "shared-ext-depends": [
+            "mysqlnd"
         ]
     },
     "mysqlnd": {
@@ -439,9 +439,6 @@
         "arg-type-windows": "with",
         "lib-depends": [
             "zlib"
-        ],
-        "target": [
-            "static"
         ]
     },
     "oci8": {
@@ -682,7 +679,8 @@
         "build-with-php": true
     },
     "shmop": {
-        "type": "builtin"
+        "type": "builtin",
+        "build-with-php": true
     },
     "simdjson": {
         "type": "external",
@@ -792,6 +790,7 @@
         "arg-type": "with-prefix",
         "arg-type-windows": "with",
         "lib-depends": [
+            "openssl",
             "libssh2"
         ],
         "ext-depends-windows": [
