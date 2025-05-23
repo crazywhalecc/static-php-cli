@@ -96,7 +96,7 @@
         "type": "external",
         "source": "ev",
         "arg-type-windows": "with",
-        "shared-ext-depends": [
+        "ext-depends": [
             "sockets"
         ]
     },
@@ -371,9 +371,6 @@
             "zlib",
             "session"
         ],
-        "shared-ext-depends": [
-            "session"
-        ],
         "build-with-php": true
     },
     "memcached": {
@@ -392,9 +389,6 @@
         "ext-depends": [
             "session",
             "zlib"
-        ],
-        "shared-ext-depends": [
-            "session"
         ]
     },
     "mongodb": {
@@ -420,7 +414,7 @@
         "source": "msgpack",
         "arg-type-unix": "with",
         "arg-type-win": "enable",
-        "shared-ext-depends": [
+        "ext-depends": [
             "session"
         ]
     },
@@ -428,9 +422,6 @@
         "type": "builtin",
         "arg-type": "with",
         "ext-depends": [
-            "mysqlnd"
-        ],
-        "shared-ext-depends": [
             "mysqlnd"
         ]
     },
@@ -792,10 +783,7 @@
         "lib-depends": [
             "libssh2"
         ],
-        "shared-ext-depends": [
-            "openssl"
-        ],
-        "ext-depends-windows": [
+        "ext-depends": [
             "openssl",
             "zlib"
         ]

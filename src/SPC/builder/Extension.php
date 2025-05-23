@@ -121,9 +121,6 @@ class Extension
         foreach (Config::getExt($this->name, 'ext-suggests', []) as $name) {
             $this->addExtensionDependency($name, true);
         }
-        foreach (Config::getExt($this->name, 'shared-ext-depends', []) as $name) {
-            $this->addExtensionDependency($name);
-        }
         return $this;
     }
 
@@ -319,14 +316,13 @@ class Extension
             logger()->info('extension ' . $this->getName() . ' already built, skipping');
             return;
         }
-        foreach (Config::getExt($this->name, 'shared-ext-depends', []) as $name) {
-            $dependencyExt = $this->builder->getExt($name);
-            if ($dependencyExt === null) {
-                throw new RuntimeException("extension {$this->name} requires shared extension {$name}");
+        foreach ($this->dependencies as $dependency) {
+            if (!$dependency instanceof Extension) {
+                continue;
             }
-            if ($dependencyExt->isBuildShared()) {
-                logger()->info('extension ' . $this->getName() . ' requires shared extension ' . $name);
-                $dependencyExt->buildShared();
+            if (!$dependency->isBuildStatic()) {
+                logger()->info('extension ' . $this->getName() . ' requires extension ' . $dependency->getName());
+                $dependency->buildShared();
             }
         }
         match (PHP_OS_FAMILY) {
