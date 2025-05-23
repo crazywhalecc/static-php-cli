@@ -128,7 +128,7 @@ abstract class BuilderBase
         if ($including_shared) {
             return $this->exts;
         }
-        return array_filter($this->exts, fn ($ext) => !$ext->isBuildShared());
+        return array_filter($this->exts, fn ($ext) => $ext->isBuildStatic());
     }
 
     /**
