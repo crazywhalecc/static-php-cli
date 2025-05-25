@@ -205,8 +205,8 @@ class Extension
 
     /**
      * @return string
-     *  returns a command line string with all required shared extensions to load
-     *  i.e.; pdo_pgsql would return:
+     *                returns a command line string with all required shared extensions to load
+     *                i.e.; pdo_pgsql would return:
      *
      * `-d "extension=pgsql" -d "extension=pdo_pgsql"`
      * @throws FileSystemException
