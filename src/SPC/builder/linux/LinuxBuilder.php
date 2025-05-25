@@ -242,7 +242,7 @@ class LinuxBuilder extends UnixBuilderBase
         $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
+            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
@@ -282,7 +282,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("$SPC_CMD_PREFIX_PHP_MAKE {$vars} micro");
+            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} micro");
 
         $this->processMicroUPX();
 
@@ -305,7 +305,7 @@ class LinuxBuilder extends UnixBuilderBase
         $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");
+            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} fpm");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
