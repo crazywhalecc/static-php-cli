@@ -239,9 +239,10 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildCli(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
+            ->exec("$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
@@ -277,10 +278,11 @@ class LinuxBuilder extends UnixBuilderBase
         // patch fake cli for micro
         $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
         $vars = SystemUtil::makeEnvVarString($vars);
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} micro");
+            ->exec("$SPC_CMD_PREFIX_PHP_MAKE {$vars} micro");
 
         $this->processMicroUPX();
 
@@ -300,9 +302,10 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildFpm(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");
+            ->exec("$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')

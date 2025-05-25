@@ -226,7 +226,8 @@ class MacOSBuilder extends UnixBuilderBase
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
+        $shell->exec("$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
         if (!$this->getOption('no-strip', false)) {
             $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
         }
