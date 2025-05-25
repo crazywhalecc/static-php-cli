@@ -212,7 +212,7 @@ class Extension
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function getRequiredSharedExtensions(): string
+    public function getSharedExtensionLoadString(): string
     {
         $loaded = [];
         $order = [];
@@ -254,7 +254,7 @@ class Extension
         // Run compile check if build target is cli
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
-        $sharedExtensions = $this->getRequiredSharedExtensions();
+        $sharedExtensions = $this->getSharedExtensionLoadString();
         putenv('EXTENSION_DIR=' . BUILD_MODULES_PATH);
         [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         if ($ret !== 0) {
