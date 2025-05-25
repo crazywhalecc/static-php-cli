@@ -294,7 +294,7 @@ abstract class BuilderBase
         $ret = [];
         foreach ($this->getExts() as $ext) {
             $arg = $ext->getConfigureArg();
-            if ($ext->isBuildShared()) {
+            if ($ext->isBuildShared() && !$ext->isBuildStatic()) {
                 if (
                     (Config::getExt($ext->getName(), 'type') === 'builtin' &&
                     !file_exists(SOURCE_PATH . '/php-src/ext/' . $ext->getName() . '/config.m4')) ||
