@@ -859,7 +859,7 @@
     "spx": {
         "type": "git",
         "rev": "master",
-        "url": "https://github.com/NoiseByNorthwest/php-spx.git",
+        "url": "https://github.com/henderkes/php-spx.git",
         "path": "php-src/ext/spx",
         "license": {
             "type": "file",
