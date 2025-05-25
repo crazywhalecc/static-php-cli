@@ -47,7 +47,7 @@ class LinuxToolCheckList
     private const PROVIDED_COMMAND = [
         'binutils-gold' => 'ld.gold',
         'base-devel' => 'automake',
-        'gettext-devel' => 'gettext',
+        'gettext-devel' => 'gettextize',
     ];
 
     /** @noinspection PhpUnused */
