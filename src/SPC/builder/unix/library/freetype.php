@@ -23,7 +23,11 @@ trait freetype
         $extra_libs .= $this->builder->getLib('brotli') ? '-DFT_DISABLE_BROTLI=OFF ' : '-DFT_DISABLE_BROTLI=ON ';
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON " .
                 '-DBUILD_SHARED_LIBS=OFF ' .

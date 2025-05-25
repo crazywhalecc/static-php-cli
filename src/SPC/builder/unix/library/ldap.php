@@ -50,5 +50,6 @@ trait ldap
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['ldap.pc', 'lber.pc']);
+        $this->patchLaDependencyPrefix(['libldap.la', 'liblber.la']);
     }
 }

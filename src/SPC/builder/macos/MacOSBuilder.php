@@ -209,6 +209,12 @@ class MacOSBuilder extends UnixBuilderBase
         $this->sanityCheck($build_target);
     }
 
+    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    {
+        $this->emitPatchPoint('before-sanity-check');
+        $this->sanityCheck($build_target);
+    }
+
     /**
      * Build cli sapi
      *

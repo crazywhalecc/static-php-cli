@@ -51,7 +51,7 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'xdebug',
+    'Linux' => 'xdebug,intl,pgsql',
     'Windows', 'Darwin' => '',
 };
 

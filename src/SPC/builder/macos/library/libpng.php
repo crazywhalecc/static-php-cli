@@ -59,6 +59,7 @@ class libpng extends MacOSLibraryBase
             ->cd(BUILD_LIB_PATH)
             ->exec('ln -sf libpng16.a libpng.a');
         $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
+        $this->patchLaDependencyPrefix(['libpng16.la']);
         $this->cleanLaFiles();
     }
 }

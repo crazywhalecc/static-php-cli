@@ -18,7 +18,11 @@ trait onig
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags() ?: $this->builder->arch_c_flags, 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv('./configure --enable-static --disable-shared --prefix=')
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")

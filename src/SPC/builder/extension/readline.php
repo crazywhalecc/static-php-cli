@@ -24,4 +24,18 @@ class readline extends Extension
         );
         return true;
     }
+
+    public function getUnixConfigureArg(bool $shared = false): string
+    {
+        return '--without-libedit --with-readline=' . BUILD_ROOT_PATH;
+    }
+
+    public function buildUnixShared(): void
+    {
+        if (!file_exists(BUILD_BIN_PATH . '/php') || !file_exists(BUILD_INCLUDE_PATH . '/php/sapi/cli/cli.h')) {
+            logger()->warning('CLI mode is not enabled, skipping readline build');
+            return;
+        }
+        parent::buildUnixShared();
+    }
 }

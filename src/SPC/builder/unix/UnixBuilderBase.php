@@ -138,15 +138,15 @@ abstract class UnixBuilderBase extends BuilderBase
     protected function sanityCheck(int $build_target): void
     {
         // sanity check for php-cli
-        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI || file_exists(BUILD_BIN_PATH . '/php')) {
             logger()->info('running cli sanity check');
-            [$ret, $output] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n -r "echo \"hello\";"');
+            [$ret, $output] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -r "echo \"hello\";"');
             $raw_output = implode('', $output);
             if ($ret !== 0 || trim($raw_output) !== 'hello') {
                 throw new RuntimeException("cli failed sanity check: ret[{$ret}]. out[{$raw_output}]");
             }
 
-            foreach ($this->getExts(false) as $ext) {
+            foreach ($this->getExts() as $ext) {
                 logger()->debug('testing ext: ' . $ext->getName());
                 $ext->runCliCheckUnix();
             }
@@ -173,7 +173,11 @@ abstract class UnixBuilderBase extends BuilderBase
         }
 
         // sanity check for embed
-        if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
+        if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED ||
+            file_exists(BUILD_BIN_PATH . '/php-config') &&
+            file_exists(BUILD_BIN_PATH . '/phpize') &&
+            (file_exists(BUILD_LIB_PATH . '/libphp.a') || file_exists(BUILD_LIB_PATH . '/libphp.so'))
+        ) {
             logger()->info('running embed sanity check');
             $sample_file_path = SOURCE_PATH . '/embed-test';
             if (!is_dir($sample_file_path)) {
@@ -223,8 +227,8 @@ abstract class UnixBuilderBase extends BuilderBase
             default => throw new RuntimeException('Deployment does not accept type ' . $type),
         };
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
-        FileSystem::createDir(BUILD_ROOT_PATH . '/bin');
-        shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '/bin/'));
+        FileSystem::createDir(BUILD_BIN_PATH);
+        shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_BIN_PATH));
         return true;
     }
 
@@ -250,6 +254,7 @@ abstract class UnixBuilderBase extends BuilderBase
             logger()->debug('Patching phpize prefix');
             FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
             FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
+            FileSystem::replaceFileStr(BUILD_LIB_PATH . '/php/build/phpize.m4', 'test "[$]$1" = "no" && $1=yes', '# test "[$]$1" = "no" && $1=yes');
         }
         // patch php-config
         if (file_exists(BUILD_BIN_PATH . '/php-config')) {

@@ -12,7 +12,7 @@ class gd extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        $arg = '--enable-gd';
+        $arg = '--enable-gd' . ($shared ? '=shared' : '');
         $arg .= $this->builder->getLib('freetype') ? ' --with-freetype' : '';
         $arg .= $this->builder->getLib('libjpeg') ? ' --with-jpeg' : '';
         $arg .= $this->builder->getLib('libwebp') ? ' --with-webp' : '';
