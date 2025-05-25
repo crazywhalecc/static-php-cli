@@ -51,9 +51,4 @@ class opcache extends Extension
     {
         return 'Zend Opcache';
     }
-
-    protected function isZendExtension(): bool
-    {
-        return true;
-    }
 }

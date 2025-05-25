@@ -455,7 +455,8 @@
     },
     "opcache": {
         "type": "builtin",
-        "arg-type-unix": "custom"
+        "arg-type-unix": "custom",
+        "zend-extension": true
     },
     "openssl": {
         "notes": true,
@@ -952,7 +953,8 @@
             "Darwin": "partial",
             "Linux": "partial"
         },
-        "notes": true
+        "notes": true,
+        "zend-extension": true
     },
     "xhprof": {
         "support": {

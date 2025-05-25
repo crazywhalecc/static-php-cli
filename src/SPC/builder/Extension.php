@@ -226,7 +226,7 @@ class Extension
         $ret = '';
         foreach ($order as $ext) {
             if ($ext instanceof Extension && $ext->isBuildShared()) {
-                if ($ext->isZendExtension()) {
+                if (Config::getExt($ext->getName(), 'zend_extension', false) === true) {
                     $ret .= " -d \"zend_extension={$ext->getName()}\"";
                 } else {
                     $ret .= " -d \"extension={$ext->getName()}\"";
@@ -446,11 +446,6 @@ class Extension
         } else {
             $this->dependencies[] = $depExt;
         }
-    }
-
-    protected function isZendExtension(): bool
-    {
-        return false;
     }
 
     private function getLibraryDependencies(bool $recursive = false): array
