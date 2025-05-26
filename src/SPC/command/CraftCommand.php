@@ -79,20 +79,7 @@ class CraftCommand extends BaseCommand
                     $craft['download-options']['ignore-cache-sources'] .= ',php-src';
                 }
             }
-            $download_options = $craft['download-options'];
-            foreach ($download_options as $option => $val) {
-                if (is_bool($val) && $val || is_null($val)) {
-                    $args[] = "--{$option}";
-                } elseif (is_string($val)) {
-                    $args[] = "--{$option}={$val}";
-                } elseif (is_array($val)) {
-                    foreach ($val as $v) {
-                        if (is_string($v)) {
-                            $args[] = "--{$option}={$v}";
-                        }
-                    }
-                }
-            }
+            $this->optionsToArguments($craft['download-options'], $args);
             $retcode = $this->runCommand('download', ...$args);
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft download failed</error>');
@@ -104,6 +91,7 @@ class CraftCommand extends BaseCommand
         // craft build
         if ($craft['craft-options']['build']) {
             $args = [$extensions, "--with-libs={$libs}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
+            $this->optionsToArguments($craft['build-options'], $args);
             $retcode = $this->runCommand('build', ...$args);
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft build failed</error>');
@@ -163,5 +151,28 @@ class CraftCommand extends BaseCommand
         // $process->setTty(true);
         $process->run([$this, 'processLogCallback']);
         return $process->getExitCode();
+    }
+
+    private function optionsToArguments(array $options, array &$args): void
+    {
+        foreach ($options as $option => $val) {
+            if ((is_bool($val) && $val) || $val === null) {
+                $args[] = "--{$option}";
+
+                continue;
+            }
+            if (is_string($val)) {
+                $args[] = "--{$option}={$val}";
+
+                continue;
+            }
+            if (is_array($val)) {
+                foreach ($val as $v) {
+                    if (is_string($v)) {
+                        $args[] = "--{$option}={$v}";
+                    }
+                }
+            }
+        }
     }
 }
