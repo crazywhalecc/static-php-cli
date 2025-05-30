@@ -45,6 +45,7 @@
     <div class="tip custom-block">
       <p class="custom-block-title">TIP</p>
       <p>{{ I18N[lang].depTips }}</p>
+      <p>{{ I18N[lang].depTips2 }}</p>
     </div>
     <h2>{{ I18N[lang].buildTarget }}</h2>
     <div class="box">
@@ -263,6 +264,7 @@ const I18N = {
     selectedSystem: '选择操作系统',
     buildLibs: '要构建的库',
     depTips: '选择扩展后，不可选中的项目为必需的依赖，编译的依赖库列表中可选的为现有扩展和依赖库的可选依赖。选择可选依赖后，将生成 --with-libs 参数。',
+    depTips2: '无法同时构建所有扩展，因为有些扩展之间相互冲突。请根据需要选择扩展。',
     microUnavailable: 'micro 不支持 PHP 7.4 及更早版本！',
     windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed 构建！',
     useUPX: '是否开启 UPX 压缩（减小二进制体积）',
@@ -298,6 +300,7 @@ const I18N = {
     selectedSystem: 'Select Build OS',
     buildLibs: 'Select Dependencies',
     depTips: 'After selecting the extensions, the unselectable items are essential dependencies. In the compiled dependencies list, optional dependencies consist of existing extensions and optional dependencies of libraries. Optional dependencies will be added in --with-libs parameter.',
+    depTips2: 'It is not possible to build all extensions at the same time, as some extensions conflict with each other. Please select the extensions you need.',
     microUnavailable: 'Micro does not support PHP 7.4 and earlier versions!',
     windowsSAPIUnavailable: 'Windows does not support fpm and embed build!',
     useUPX: 'Enable UPX compression (reduce binary size)',
@@ -335,23 +338,7 @@ const selectCommon = () => {
 };
 
 const selectAll = () => {
-    checkedExts.value = [
-        'amqp', 'apcu', 'ast', 'bcmath', 'bz2', 'calendar', 'ctype', 'curl',
-        'dba', 'dio', 'dom', 'ds', 'ev', 'event', 'exif', 'ffi', 'fileinfo',
-        'filter', 'ftp', 'gd', 'gettext', 'gmp', 'gmssl', 'grpc', 'iconv',
-        'igbinary', 'imagick', 'imap', 'inotify', 'intl', 'ldap', 'libxml',
-        'mbregex', 'mbstring', 'memcache', 'mongodb', 'msgpack', 'mysqli',
-        'mysqlnd', 'odbc', 'opcache', 'openssl', 'opentelemetry', 'parallel',
-        'password-argon2', 'pcntl', 'pdo', 'pdo_mysql', 'pdo_odbc',
-        'pdo_pgsql', 'pdo_sqlite', 'pdo_sqlsrv', 'pgsql', 'phar', 'posix',
-        'protobuf', 'rar', 'rdkafka', 'readline', 'redis', 'session', 'shmop',
-        'simdjson', 'simplexml', 'snappy', 'soap', 'sockets', 'sodium', 'spx',
-        'sqlite3', 'sqlsrv', 'ssh2', 'swoole', 'swoole-hook-mysql',
-        'swoole-hook-pgsql', 'swoole-hook-sqlite', 'swow', 'sysvmsg',
-        'sysvsem', 'sysvshm', 'tidy', 'tokenizer', 'uuid', 'uv', 'xdebug',
-        'xhprof', 'xlswriter', 'xml', 'xmlreader', 'xmlwriter', 'xsl', 'yac',
-        'zip', 'zlib',
-    ];
+    checkedExts.value = extFilter.value;
 };
 
 const extList = computed(() => {
@@ -381,7 +368,7 @@ const checkedTargets = ref(['cli']);
 const selectedEnv = ref('spc');
 
 // chosen php version
-const selectedPhpVersion = ref('8.2');
+const selectedPhpVersion = ref('8.4');
 
 // chosen debug
 const debug = ref(0);
