@@ -12,7 +12,7 @@ class imagick extends Extension
 {
     public function patchBeforeMake(): bool
     {
-        if (getenv('SPC_LIBC') !== 'musl') {
+        if (getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10')) {
             return false;
         }
         // imagick with calls omp_pause_all which requires -lgomp, on non-musl we build imagick without openmp
