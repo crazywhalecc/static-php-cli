@@ -53,6 +53,7 @@ class libpng extends LinuxLibraryBase
                 './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .
+                '--with-pic ' .
                 '--enable-hardware-optimizations ' .
                 '--with-zlib-prefix="' . BUILD_ROOT_PATH . '" ' .
                 $optimizations .
