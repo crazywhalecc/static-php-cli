@@ -102,6 +102,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-brotli": {
+        "type": "git",
+        "path": "php-src/ext/brotli",
+        "rev": "master",
+        "url": "https://github.com/kjdev/php-ext-brotli",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ds": {
         "type": "url",
         "url": "https://pecl.php.net/get/ds",
@@ -225,6 +235,16 @@
         "url": "https://pecl.php.net/get/uv",
         "path": "php-src/ext/uv",
         "filename": "uv.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-xz": {
+        "type": "git",
+        "path": "php-src/ext/xz",
+        "rev": "main",
+        "url": "https://github.com/codemasher/php-ext-xz",
         "license": {
             "type": "file",
             "path": "LICENSE"

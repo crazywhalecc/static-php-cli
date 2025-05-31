@@ -24,6 +24,14 @@
     "bcmath": {
         "type": "builtin"
     },
+    "brotli": {
+        "type": "external",
+        "source": "ext-brotli",
+        "arg-type": "enable",
+        "lib-depends": [
+            "brotli"
+        ]
+    },
     "bz2": {
         "type": "builtin",
         "arg-type-unix": "with-prefix",
@@ -1042,6 +1050,14 @@
         "ext-depends": [
             "xml",
             "dom"
+        ]
+    },
+    "xz": {
+        "type": "external",
+        "source": "ext-xz",
+        "arg-type": "with",
+        "lib-depends": [
+            "xz"
         ]
     },
     "yac": {
