@@ -38,6 +38,7 @@ trait ldap
                 ' ./configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--with-pic ' .
                 '--disable-slapd ' .
                 '--without-systemd ' .
                 '--without-cyrus-sasl ' .
