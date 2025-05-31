@@ -24,7 +24,7 @@ $test_os = [
     'macos-13',
     // 'macos-14',
     'macos-15',
-    'ubuntu-latest',
+    // 'ubuntu-latest',
     'ubuntu-22.04',
     'ubuntu-24.04',
     'ubuntu-22.04-arm',
@@ -131,7 +131,7 @@ if ($argv[1] === 'doctor_cmd') {
     $doctor_cmd = 'doctor --auto-fix --debug';
 }
 if ($argv[1] === 'install_upx_cmd') {
-    $install_upx_cmd = 'install-pkg upx';
+    $install_upx_cmd = 'install-pkg upx --debug';
 }
 
 $prefix = match ($argv[2] ?? null) {

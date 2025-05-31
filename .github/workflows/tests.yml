@@ -17,8 +17,7 @@ on:
       - 'box.json'
       - '.php-cs-fixer.php'
 
-permissions:
-  contents: read
+permissions: read-all
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -191,7 +190,7 @@ jobs:
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
       - name: "Run Build Tests (download)"
-        run: php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }}
+        run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }}
 
       - name: "Run Build Tests (build)"
         run: php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }}
