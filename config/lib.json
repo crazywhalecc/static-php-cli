@@ -148,6 +148,17 @@
             "IOKit"
         ]
     },
+    "libgomp": {
+        "source": "gcc",
+        "static-libs-linux": [
+            "libgomp.a"
+        ],
+        "headers": [
+            "omp.h",
+            "openacc.h",
+            "acc_prof.h"
+        ]
+    },
     "gmp": {
         "source": "gmp",
         "static-libs-unix": [
@@ -212,6 +223,9 @@
             "libtiff",
             "libheif",
             "bzip2"
+        ],
+        "lib-depends-linux": [
+            "libgomp"
         ],
         "lib-suggests": [
             "zstd",

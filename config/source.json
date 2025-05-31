@@ -249,6 +249,13 @@
             "path": "LICENSE.TXT"
         }
     },
+    "gcc": {
+        "type": "custom",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "gettext": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/gettext/",
