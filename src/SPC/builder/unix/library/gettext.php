@@ -26,6 +26,7 @@ trait gettext
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--enable-pic ' .
                 '--disable-java ' .
                 '--disable-c++ ' .
                 $zts .
