@@ -58,7 +58,7 @@ trait imagemagick
             ])
             ->execWithEnv(
                 './configure ' .
-                '--enable-static --disable-shared ' .
+                '--enable-static --disable-shared --with-pic ' .
                 $extra .
                 '--prefix='
             )
