@@ -30,6 +30,7 @@ class libffi extends LinuxLibraryBase
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--with-pic ' .
                 "--host={$arch}-unknown-linux " .
                 "--target={$arch}-unknown-linux " .
                 '--prefix= ' .
