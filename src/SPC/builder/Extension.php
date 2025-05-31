@@ -243,6 +243,10 @@ class Extension
             }
         }
 
+        if ($ret !== '') {
+            $ret = ' -d "extension_dir=' . BUILD_MODULES_PATH . '"' . $ret;
+        }
+
         return $ret;
     }
 
@@ -255,7 +259,6 @@ class Extension
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
         $sharedExtensions = $this->getSharedExtensionLoadString();
-        putenv('EXTENSION_DIR=' . BUILD_MODULES_PATH);
         [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);

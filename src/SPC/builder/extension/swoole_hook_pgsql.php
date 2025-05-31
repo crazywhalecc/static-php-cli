@@ -38,7 +38,6 @@ class swoole_hook_pgsql extends Extension
             return;
         }
         $sharedExtensions = $this->getSharedExtensionLoadString();
-        putenv('EXTENSION_DIR=' . BUILD_MODULES_PATH);
         [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         $out = implode('', $out);
         if ($ret !== 0) {

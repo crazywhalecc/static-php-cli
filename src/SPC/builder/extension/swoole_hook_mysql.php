@@ -29,7 +29,6 @@ class swoole_hook_mysql extends Extension
         if ($this->builder->getExt('swoole') === null) {
             return;
         }
-        putenv('EXTENSION_DIR=' . BUILD_MODULES_PATH);
         [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n' . $this->getSharedExtensionLoadString() . ' --ri "swoole"', false);
         $out = implode('', $out);
         if ($ret !== 0) {

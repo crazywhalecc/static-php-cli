@@ -26,8 +26,7 @@ class mbregex extends Extension
      */
     public function runCliCheckUnix(): void
     {
-        $sharedext = $this->builder->getExt('mbstring')->isBuildShared() ? ' -d "extension=mbstring"' : '';
-        putenv('EXTENSION_DIR=' . BUILD_MODULES_PATH);
+        $sharedext = $this->builder->getExt('mbstring')->isBuildShared() ? '-d "extension_dir=' . BUILD_MODULES_PATH . '" -d "extension=mbstring"' : '';
         [$ret] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n' . $sharedext . ' --ri "mbstring" | grep regex', false);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: compiled php-cli mbstring extension does not contain regex !');
