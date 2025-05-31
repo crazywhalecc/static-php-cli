@@ -23,6 +23,6 @@ class imagick extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--with-imagick=' . BUILD_ROOT_PATH ;
+        return '--with-imagick=' . BUILD_ROOT_PATH;
     }
 }
