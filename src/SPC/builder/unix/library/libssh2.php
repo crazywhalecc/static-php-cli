@@ -27,6 +27,7 @@ trait libssh2
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
                 '-DCMAKE_INSTALL_LIBDIR=lib ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DBUILD_EXAMPLES=OFF ' .
                 '-DBUILD_TESTING=OFF ' .
                 "-DENABLE_ZLIB_COMPRESSION={$enable_zlib} " .

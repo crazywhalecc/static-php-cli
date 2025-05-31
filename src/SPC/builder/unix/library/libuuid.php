@@ -20,7 +20,7 @@ trait libuuid
         shell()->cd($this->source_dir . '/build')
             ->exec(
                 'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
+                "{$this->builder->makeCmakeArgs()} -DPOSITION_INDEPENDENT_CODE=ON " .
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}");

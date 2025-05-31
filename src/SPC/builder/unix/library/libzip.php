@@ -36,6 +36,7 @@ trait libzip
                 '-DENABLE_GNUTLS=OFF ' .
                 '-DENABLE_MBEDTLS=OFF ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DBUILD_DOC=OFF ' .
                 '-DBUILD_EXAMPLES=OFF ' .
                 '-DBUILD_REGRESS=OFF ' .

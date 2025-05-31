@@ -25,7 +25,7 @@ trait gmssl
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
-            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF ..")
+            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DPOSITION_INDEPENDENT_CODE=ON ..")
             ->execWithEnv("cmake --build . -j {$this->builder->concurrency}")
             ->execWithEnv('make install');
     }

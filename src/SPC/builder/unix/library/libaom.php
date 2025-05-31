@@ -26,6 +26,7 @@ trait libaom
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DAOM_TARGET_CPU=generic ' .
                 '..'
             )

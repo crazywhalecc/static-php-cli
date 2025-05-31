@@ -60,7 +60,7 @@ trait curl
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ../CMakeLists.txt')
-            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF {$extra} ..")
+            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DPOSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF {$extra} ..")
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install');
         // patch pkgconf

@@ -28,6 +28,7 @@ trait mimalloc
                 'cmake ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 $args .
                 '..'

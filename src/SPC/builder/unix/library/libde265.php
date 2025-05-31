@@ -26,6 +26,7 @@ trait libde265
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DENABLE_SDL=OFF ' . // Disable SDL, currently not supported
                 '..'
             )

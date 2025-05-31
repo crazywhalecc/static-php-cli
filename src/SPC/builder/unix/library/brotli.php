@@ -30,6 +30,7 @@ trait brotli
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
                 '-DCMAKE_INSTALL_LIBDIR=lib ' .
                 '-DSHARE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '..'
             )

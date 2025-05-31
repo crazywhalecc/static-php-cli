@@ -27,7 +27,7 @@ trait libavif
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
-            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DAVIF_LIBYUV=OFF ..")
+            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DPOSITION_INDEPENDENT_CODE=ON -DAVIF_LIBYUV=OFF ..")
             ->execWithEnv("cmake --build . -j {$this->builder->concurrency}")
             ->execWithEnv('make install');
         // patch pkgconfig

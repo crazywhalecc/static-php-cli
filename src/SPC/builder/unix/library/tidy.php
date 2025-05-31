@@ -22,6 +22,7 @@ trait tidy
                 'cmake ' .
                 "{$this->builder->makeCmakeArgs()} " .
                 '-DBUILD_SHARED_LIB=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DSUPPORT_CONSOLE_APP=OFF ' .
                 '..'
             )

@@ -41,6 +41,7 @@ trait libyaml
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_TESTING=OFF ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 "-DCMAKE_INSTALL_LIBDIR={$lib} " .
                 "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .

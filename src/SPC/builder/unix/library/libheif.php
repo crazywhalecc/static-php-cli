@@ -27,6 +27,7 @@ trait libheif
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DWITH_EXAMPLES=OFF ' .
                 '-DWITH_GDK_PIXBUF=OFF ' .
                 '-DBUILD_TESTING=OFF ' .

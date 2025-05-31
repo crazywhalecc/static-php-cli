@@ -31,6 +31,7 @@ trait freetype
             ->execWithEnv(
                 "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON " .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 "{$extra_libs}.."
             )
             ->execWithEnv('make clean')

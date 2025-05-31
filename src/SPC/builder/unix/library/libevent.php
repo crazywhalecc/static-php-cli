@@ -53,6 +53,7 @@ trait libevent
                 'cmake ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
+                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DEVENT__LIBRARY_TYPE=STATIC ' .
                 '-DEVENT__DISABLE_BENCHMARK=ON ' .
