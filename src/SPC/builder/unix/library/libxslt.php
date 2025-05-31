@@ -35,6 +35,7 @@ trait libxslt
                 "{$this->builder->getOption('ld_library_path')} " .
                 './configure ' .
                 '--enable-static --disable-shared ' .
+                '--with-pic ' .
                 '--without-python ' .
                 '--without-mem-debug ' .
                 '--without-crypto ' .

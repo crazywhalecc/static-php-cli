@@ -30,7 +30,7 @@ trait libtiff
             ])
             ->execWithEnv(
                 './configure ' .
-                '--enable-static --disable-shared ' .
+                '--enable-static --disable-shared --with-pic ' .
                 "{$extra_libs} " .
                 '--disable-cxx ' .
                 '--prefix='

@@ -14,7 +14,7 @@ trait sqlite
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
-            ->execWithEnv('./configure --enable-static --disable-shared --prefix=')
+            ->execWithEnv('./configure --enable-static --disable-shared --with-pic --prefix=')
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);

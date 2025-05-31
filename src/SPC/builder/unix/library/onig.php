@@ -23,7 +23,7 @@ trait onig
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
-            ->execWithEnv('./configure --enable-static --disable-shared --prefix=')
+            ->execWithEnv('./configure --enable-static --disable-shared --enable-pic --prefix=')
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->exec("make install DESTDIR={$destdir}");

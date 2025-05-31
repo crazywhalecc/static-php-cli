@@ -20,6 +20,7 @@ trait libiconv
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--enable-pic ' .
                 '--enable-extra-encodings ' .
                 '--prefix='
             )

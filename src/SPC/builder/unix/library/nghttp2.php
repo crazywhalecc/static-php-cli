@@ -45,6 +45,7 @@ trait nghttp2
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--with-pic ' .
                 '--enable-lib-only ' .
                 '--with-boost=no ' .
                 $args . ' ' .

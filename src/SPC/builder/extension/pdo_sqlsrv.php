@@ -25,7 +25,7 @@ class pdo_sqlsrv extends Extension
         shell()->cd($this->source_dir)
             ->setEnv($env)
             ->execWithEnv(BUILD_BIN_PATH . '/phpize')
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
+            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static --with-pic')
             ->execWithEnv('make clean')
             ->execWithEnv('make -j' . $this->builder->concurrency)
             ->execWithEnv('make install');

@@ -20,6 +20,7 @@ trait xz
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--enable-pic ' .
                 '--disable-scripts ' .
                 '--disable-doc ' .
                 '--with-libiconv ' .

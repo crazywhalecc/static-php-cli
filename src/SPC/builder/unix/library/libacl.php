@@ -37,7 +37,7 @@ trait libacl
             ])
             ->execWithEnv('libtoolize --force --copy')
             ->execWithEnv('./autogen.sh || autoreconf -if')
-            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests --disable-nls')
+            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests --disable-nls --with-pic')
             ->execWithEnv("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
