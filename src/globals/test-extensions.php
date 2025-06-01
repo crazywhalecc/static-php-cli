@@ -14,21 +14,21 @@ declare(strict_types=1);
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
     // '8.1',
-    '8.2',
-    '8.3',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    'macos-13',
+    // 'macos-13',
     // 'macos-14',
-    'macos-15',
+    // 'macos-15',
     // 'ubuntu-latest',
     'ubuntu-22.04',
-    'ubuntu-24.04',
+    //'ubuntu-24.04',
     'ubuntu-22.04-arm',
-    'ubuntu-24.04-arm',
+    //'ubuntu-24.04-arm',
     // 'windows-latest',
 ];
 
@@ -45,13 +45,14 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'brotli,xsl,simplexml,xlswriter,xz',
+    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,readline,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
     'Windows' => 'xlswriter,openssl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'xdebug,intl,pgsql,imagick',
+    'Linux' => 'amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,memcache,mongodb,msgpack,odbc,opentelemetry,parallel,pdo_odbc,pdo_p
+gsql,pdo_sqlsrv,pgsql,protobuf,rar,redis,shmop,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd,spx',
     'Windows', 'Darwin' => '',
 };
 
