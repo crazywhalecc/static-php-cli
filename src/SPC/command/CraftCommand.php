@@ -77,8 +77,6 @@ class CraftCommand extends BaseCommand
                 $args[] = '--with-php=' . $craft['php-version'];
                 if (!array_key_exists('ignore-cache-sources', $craft['download-options']) || $craft['download-options']['ignore-cache-sources'] === false) {
                     $craft['download-options']['ignore-cache-sources'] = 'php-src';
-                } elseif ($craft['download-options']['ignore-cache-sources'] !== null) {
-                    $craft['download-options']['ignore-cache-sources'] .= ',php-src';
                 }
             }
             $this->optionsToArguments($craft['download-options'], $args);
@@ -144,7 +142,6 @@ class CraftCommand extends BaseCommand
             });
         } elseif (extension_loaded('pcntl')) {
             pcntl_signal(SIGINT, function () use ($process) {
-                /* @noinspection PhpComposerExtensionStubsInspection */
                 $process->signal(SIGINT);
             });
         } else {
