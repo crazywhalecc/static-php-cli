@@ -48,7 +48,8 @@ class CraftCommand extends BaseCommand
             }
         }
 
-        $extensions = implode(',', $craft['extensions']);
+        $static_extensions = implode(',', $craft['extensions']);
+        $shared_extensions = implode(',', $craft['build-options']['build-shared']) ?? '';
         $libs = implode(',', $craft['libs']);
 
         // init log
@@ -67,7 +68,8 @@ class CraftCommand extends BaseCommand
         }
         // craft download
         if ($craft['craft-options']['download']) {
-            $args = ["--for-extensions={$extensions}"];
+            $sharedAppend = $shared_extensions ? ',' . $shared_extensions : '';
+            $args = ["--for-extensions={$static_extensions}{$sharedAppend}"];
             if ($craft['libs'] !== []) {
                 $args[] = "--for-libs={$libs}";
             }
@@ -90,7 +92,7 @@ class CraftCommand extends BaseCommand
 
         // craft build
         if ($craft['craft-options']['build']) {
-            $args = [$extensions, "--with-libs={$libs}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
+            $args = [$static_extensions, "--with-libs={$libs}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
             $this->optionsToArguments($craft['build-options'], $args);
             $retcode = $this->runCommand('build', ...$args);
             if ($retcode !== 0) {
