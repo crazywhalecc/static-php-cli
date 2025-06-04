@@ -18,6 +18,10 @@ trait freetype
      */
     protected function build(): void
     {
+        $extra = '';
+        if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
+            $extra .= '-DCMAKE_POLICY_VERSION_MINIMUM=3.12 ';
+        }
         $extra_libs = $this->builder->getLib('libpng') ? '-DFT_DISABLE_PNG=OFF ' : '-DFT_DISABLE_PNG=ON ';
         $extra_libs .= $this->builder->getLib('bzip2') ? '-DFT_DISABLE_BZIP2=OFF ' : '-DFT_DISABLE_BZIP2=ON ';
         $extra_libs .= $this->builder->getLib('brotli') ? '-DFT_DISABLE_BROTLI=OFF ' : '-DFT_DISABLE_BROTLI=ON ';
@@ -25,7 +29,7 @@ trait freetype
         shell()->cd($this->source_dir . '/build')
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->execWithEnv(
-                "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 " .
+                "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON {$extra}" .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 "{$extra_libs}.."
             )
