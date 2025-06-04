@@ -25,7 +25,7 @@ trait freetype
         shell()->cd($this->source_dir . '/build')
             ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
             ->execWithEnv(
-                "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON " .
+                "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 " .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 "{$extra_libs}.."
             )
