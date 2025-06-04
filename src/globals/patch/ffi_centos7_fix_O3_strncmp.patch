@@ -1,0 +1,31 @@
+--- a/ext/ffi/ffi.c	2025-01-17 10:37:37
++++ a/ext/ffi/ffi.c	2025-01-17 10:39:17
+@@ -57,6 +57,8 @@
+ /* XXX need something better, perhaps with regard to SIMD, etc. */
+ # define __BIGGEST_ALIGNMENT__ sizeof(size_t)
+ #endif
++
++#define ZEND_STRNCMP(s,str) strncmp((s),(str),(sizeof(str)-1))
+ 
+ ZEND_DECLARE_MODULE_GLOBALS(ffi)
+ 
+@@ -5046,16 +5048,16 @@ static char *zend_ffi_parse_directives(const char *fil
+ 	*scope_name = NULL;
+ 	*lib = NULL;
+ 	while (*code_pos == '#') {
+-		if (strncmp(code_pos, ZEND_STRL("#define")) == 0) {
++		if (ZEND_STRNCMP(code_pos, "#define") == 0) {
+ 			p = zend_ffi_skip_ws_and_comments(code_pos + sizeof("#define") - 1, false);
+ 
+ 			char **target = NULL;
+ 			const char *target_name = NULL;
+-			if (strncmp(p, ZEND_STRL("FFI_SCOPE")) == 0) {
++			if (ZEND_STRNCMP(p, "FFI_SCOPE") == 0) {
+ 				p = zend_ffi_skip_ws_and_comments(p + sizeof("FFI_SCOPE") - 1, false);
+ 				target = scope_name;
+ 				target_name = "FFI_SCOPE";
+-			} else if (strncmp(p, ZEND_STRL("FFI_LIB")) == 0) {
++			} else if (ZEND_STRNCMP(p, "FFI_LIB") == 0) {
+ 				p = zend_ffi_skip_ws_and_comments(p + sizeof("FFI_LIB") - 1, false);
+ 				target = lib;
+ 				target_name = "FFI_LIB";

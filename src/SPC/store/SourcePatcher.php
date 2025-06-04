@@ -22,6 +22,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchGDWin32']);
+        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchFfiCentos7FixO3strncmp']);
         FileSystem::addSourceExtractHook('sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
@@ -446,6 +447,15 @@ class SourcePatcher
         $extnum = intval($match[1]);
         if ($extnum < 30800) {
             SourcePatcher::patchFile('imagick_php84_before_30800.patch', SOURCE_PATH . '/php-src/ext/imagick');
+            return true;
+        }
+        return false;
+    }
+
+    public static function patchFfiCentos7FixO3strncmp(): bool
+    {
+        if (PHP_OS_FAMILY === 'Linux' && SystemUtil::getLibcVersionIfExists() === '2.17') {
+            SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
             return true;
         }
         return false;
