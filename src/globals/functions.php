@@ -196,7 +196,7 @@ function f_putenv(string $env): bool
 /**
  * Get the installed CMake version
  *
- * @return string|null The CMake version or null if it couldn't be determined
+ * @return null|string The CMake version or null if it couldn't be determined
  */
 function get_cmake_version(): ?string
 {
