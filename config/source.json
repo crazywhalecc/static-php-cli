@@ -703,6 +703,16 @@
             "path": "COPYING"
         }
     },
+    "nghttp3": {
+        "type": "ghrel",
+        "repo": "ngtcp2/nghttp3",
+        "match": "nghttp3.+\\.tar\\.xz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "onig": {
         "type": "ghrel",
         "repo": "kkos/oniguruma",

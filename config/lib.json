@@ -618,6 +618,25 @@
             "libxml2"
         ]
     },
+    "nghttp3": {
+        "source": "nghttp3",
+        "static-libs-unix": [
+            "libnghttp3.a"
+        ],
+        "static-libs-windows": [
+            "nghttp3.lib"
+        ],
+        "headers": [
+            "nghttp3"
+        ],
+        "lib-depends": [
+            "zlib",
+            "openssl"
+        ],
+        "lib-suggests": [
+            "libxml2"
+        ]
+    },
     "onig": {
         "source": "onig",
         "static-libs-unix": [
