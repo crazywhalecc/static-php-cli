@@ -18,7 +18,15 @@ trait curl
     {
         $extra = '';
         // lib:openssl
-        $extra .= $this->builder->getLib('openssl') ? '-DCURL_USE_OPENSSL=ON ' : '-DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF ';
+        if ($this->builder->getLib('openssl')) {
+            $extra .=
+                '-DCURL_USE_OPENSSL=ON ' .
+                '-DCURL_CA_BUNDLE=OFF ' .
+                '-DCURL_CA_PATH=OFF ' .
+                '-DCURL_CA_FALLBACK=ON ';
+        } else {
+            $extra .= '-DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF ';
+        }
         // lib:brotli
         $extra .= $this->builder->getLib('brotli') ? '-DCURL_BROTLI=ON ' : '-DCURL_BROTLI=OFF ';
         // lib:libssh2
