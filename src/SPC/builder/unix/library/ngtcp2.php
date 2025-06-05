@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\LibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\store\FileSystem;
 
 trait ngtcp2
 {
@@ -31,7 +29,7 @@ trait ngtcp2
             ->setEnv([
                 'CFLAGS' => $this->getLibExtraCFlags(),
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs()
+                'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv(
                 './configure ' .

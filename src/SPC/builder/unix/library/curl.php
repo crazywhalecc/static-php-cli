@@ -58,8 +58,8 @@ trait curl
         }
         // lib:ngtcp2
         if ($ngtcp2 = $this->builder->getLib('ngtcp2')) {
-            $extra .= '-DUSE_NGTCP2=ON '
-                /* @phpstan-ignore-next-line */.
+            $extra .= '-DUSE_NGTCP2=ON ' .
+                /* @phpstan-ignore-next-line */
                 '-DNGTCP2_LIBRARY="' . $ngtcp2->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DNGTCP2_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
         } else {

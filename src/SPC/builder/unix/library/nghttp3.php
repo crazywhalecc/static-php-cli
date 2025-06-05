@@ -26,7 +26,7 @@ trait nghttp3
             ->setEnv([
                 'CFLAGS' => $this->getLibExtraCFlags(),
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs()
+                'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv(
                 './configure ' .
