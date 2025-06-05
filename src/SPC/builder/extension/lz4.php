@@ -12,7 +12,7 @@ class lz4 extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--enable-lz4 --with-lz4-includedir=' . BUILD_ROOT_PATH;
+        return '--enable-lz4' . ($shared ? '=shared' : '') . ' --with-lz4-includedir=' . BUILD_ROOT_PATH;
     }
 
     public function getWindowsConfigureArg(): string
