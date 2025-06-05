@@ -454,6 +454,16 @@ class SourcePatcher
 
     public static function patchFfiCentos7FixO3strncmp(): bool
     {
+        $version = null;
+        if (file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            $file = SOURCE_PATH . '/php-src/main/php_version.h';
+            $cnt = preg_match('/PHP_VERSION "(\d+\.\d+\.\d+)"/', file_get_contents($file), $match);
+            if (!$cnt) return false;
+            $version = $match[1];
+        }
+        if (version_compare($version, '8.3.16', '<')) {
+            return false;
+        }
         if (PHP_OS_FAMILY === 'Linux' && SystemUtil::getLibcVersionIfExists() === '2.17') {
             SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
             return true;
