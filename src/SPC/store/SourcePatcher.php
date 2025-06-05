@@ -461,7 +461,9 @@ class SourcePatcher
         if (file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
             $file = SOURCE_PATH . '/php-src/main/php_version.h';
             $cnt = preg_match('/PHP_VERSION "(\d+\.\d+\.\d+)"/', file_get_contents($file), $match);
-            if (!$cnt) return false;
+            if (!$cnt) {
+                return false;
+            }
             $version = $match[1];
         }
         if (version_compare($version, '8.3.16', '<')) {
