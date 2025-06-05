@@ -30,7 +30,6 @@ trait nghttp2
             'jansson' => null,
             'jemalloc' => null,
             'systemd' => null,
-            'cunit' => null,
         ]);
 
         [,,$destdir] = SEPARATED_PATH;
@@ -41,8 +40,8 @@ trait nghttp2
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--with-pic ' .
                 '--enable-lib-only ' .
-                '--with-boost=no ' .
                 $args . ' ' .
                 '--prefix='
             )

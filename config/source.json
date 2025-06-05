@@ -713,6 +713,16 @@
             "path": "COPYING"
         }
     },
+    "ngtcp2": {
+        "type": "ghrel",
+        "repo": "ngtcp2/ngtcp2",
+        "match": "ngtcp2.+\\.tar\\.xz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "onig": {
         "type": "ghrel",
         "repo": "kkos/oniguruma",

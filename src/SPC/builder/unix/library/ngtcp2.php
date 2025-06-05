@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\LibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 
-trait nghttp3
+trait ngtcp2
 {
     /**
      * @throws FileSystemException
@@ -20,6 +22,9 @@ trait nghttp3
         $args = $this->builder->makeAutoconfArgs(static::NAME, [
             'zlib' => null,
             'openssl' => null,
+            'libxml2' => null,
+            'libev' => null,
+            'jemalloc' => null,
         ]);
 
         shell()->cd($this->source_dir)
@@ -40,6 +45,6 @@ trait nghttp3
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
-        $this->patchPkgconfPrefix(['libnghttp3.pc']);
+        $this->patchPkgconfPrefix(['libngtcp2.pc']);
     }
 }
