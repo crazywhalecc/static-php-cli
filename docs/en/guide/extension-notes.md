@@ -6,6 +6,8 @@ which will be listed one by one here.
 
 ## curl
 
+HTTP3 support is not enabled by default, compile with `--with-libs="nghttp2,nghttp3,ngtcp2"` to enable HTTP3 support for PHP >= 8.4.
+
 When using curl to request HTTPS, there may be an `error:80000002:system library::No such file or directory` error.
 For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use-ssl).
 
