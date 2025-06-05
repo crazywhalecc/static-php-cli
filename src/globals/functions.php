@@ -192,3 +192,21 @@ function f_putenv(string $env): bool
     logger()->debug('Setting env: ' . $env);
     return putenv($env);
 }
+
+/**
+ * Get the installed CMake version
+ *
+ * @return null|string The CMake version or null if it couldn't be determined
+ */
+function get_cmake_version(): ?string
+{
+    try {
+        [,$output] = shell()->execWithResult('cmake --version', false);
+        if (preg_match('/cmake version ([\d.]+)/i', $output[0], $matches)) {
+            return $matches[1];
+        }
+    } catch (Exception $e) {
+        logger()->warning('Failed to get CMake version: ' . $e->getMessage());
+    }
+    return null;
+}
