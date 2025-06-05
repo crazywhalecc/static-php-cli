@@ -454,6 +454,9 @@ class SourcePatcher
 
     public static function patchFfiCentos7FixO3strncmp(): bool
     {
+        if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::getLibcVersionIfExists() >= '2.17') {
+            return false;
+        }
         $version = null;
         if (file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
             $file = SOURCE_PATH . '/php-src/main/php_version.h';
@@ -464,11 +467,8 @@ class SourcePatcher
         if (version_compare($version, '8.3.16', '<')) {
             return false;
         }
-        if (PHP_OS_FAMILY === 'Linux' && SystemUtil::getLibcVersionIfExists() === '2.17') {
-            SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
-            return true;
-        }
-        return false;
+        SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
+        return true;
     }
 
     public static function patchLibaomForAlpine(): bool
