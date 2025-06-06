@@ -6,22 +6,15 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 
 trait nghttp3
 {
     /**
      * @throws FileSystemException
      * @throws RuntimeException
-     * @throws WrongUsageException
      */
     protected function build(): void
     {
-        $args = $this->builder->makeAutoconfArgs(static::NAME, [
-            'zlib' => null,
-            'openssl' => null,
-        ]);
-
         shell()->cd($this->source_dir)
             ->setEnv([
                 'CFLAGS' => $this->getLibExtraCFlags(),
@@ -34,7 +27,6 @@ trait nghttp3
                 '--disable-shared ' .
                 '--with-pic ' .
                 '--enable-lib-only ' .
-                $args . ' ' .
                 '--prefix='
             )
             ->execWithEnv('make clean')

@@ -92,4 +92,13 @@ class openssl extends LinuxLibraryBase
         FileSystem::replaceFileRegex(BUILD_LIB_PATH . '/pkgconfig/libcrypto.pc', '/Libs.private:.*/m', 'Libs.private: ${libdir}/libz.a');
         FileSystem::replaceFileRegex(BUILD_LIB_PATH . '/cmake/OpenSSL/OpenSSLConfig.cmake', '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m', 'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}/libz.a")');
     }
+
+    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
+    {
+        $libFiles = parent::getStaticLibFiles($style, $recursive);
+        if (!str_contains('-ldl -lpthread', $libFiles)) {
+            $libFiles .= ' -ldl -lpthread';
+        }
+        return $libFiles;
+    }
 }
