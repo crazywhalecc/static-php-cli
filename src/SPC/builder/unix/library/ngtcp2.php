@@ -23,8 +23,9 @@ trait ngtcp2
             'jemalloc' => null,
             'libnghttp3' => null,
         ]);
-        if (PHP_OS_FAMILY === 'Linux') {
-            $args = preg_replace('/OPENSSL_LIBS="(.*?)"/', 'OPENSSL_LIBS="\1 -lpthread -ldl"', $args);
+        if ($brotli = $this->builder->getLib('brotli')) {
+            $args .= ' --with-libbrotlidec=yes LIBBROTLIDEC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIDEC_LIBS="' . $brotli->getStaticLibFiles() . '"';
+            $args .= ' --with-libbrotlienc=yes LIBBROTLIENC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIENC_LIBS="' . $brotli->getStaticLibFiles() . '"';
         }
 
         shell()->cd($this->source_dir)

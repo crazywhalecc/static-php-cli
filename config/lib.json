@@ -654,7 +654,8 @@
             "openssl"
         ],
         "lib-suggests": [
-            "nghttp3"
+            "nghttp3",
+            "brotli"
         ]
     },
     "onig": {

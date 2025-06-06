@@ -56,7 +56,7 @@ class MacOSBuilder extends UnixBuilderBase
         foreach ($lib_specs as $libName => $arr) {
             $lib = $this->getLib($libName);
             if ($lib === null && str_starts_with($libName, 'lib')) {
-                $lib = $this->getExt(substr($libName, 3));
+                $lib = $this->getLib(substr($libName, 3));
             }
 
             $arr = $arr ?? [];
