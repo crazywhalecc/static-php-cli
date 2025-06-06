@@ -9,6 +9,7 @@ use SPC\exception\RuntimeException;
 
 class SystemUtil
 {
+    static ?string $libc_version = null;
     use UnixSystemUtilTrait;
 
     /** @noinspection PhpMissingBreakStatementInspection */
@@ -188,6 +189,9 @@ class SystemUtil
      */
     public static function getLibcVersionIfExists(): ?string
     {
+        if (self::$libc_version !== null) {
+            return self::$libc_version;
+        }
         if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'glibc') {
             $result = shell()->execWithResult('ldd --version', false);
             if ($result[0] !== 0) {
@@ -198,7 +202,8 @@ class SystemUtil
             // match ldd version: "ldd (some useless text) 2.17" match 2.17
             $pattern = '/ldd\s+\(.*?\)\s+(\d+\.\d+)/';
             if (preg_match($pattern, $first_line, $matches)) {
-                return $matches[1];
+                self::$libc_version = $matches[1];
+                return self::$libc_version;
             }
             return null;
         }
@@ -212,7 +217,8 @@ class SystemUtil
             // match ldd version: "Version 1.2.3" match 1.2.3
             $pattern = '/Version\s+(\d+\.\d+\.\d+)/';
             if (preg_match($pattern, $result[1][1] ?? '', $matches)) {
-                return $matches[1];
+                self::$libc_version = $matches[1];
+                return self::$libc_version;
             }
         }
         return null;
