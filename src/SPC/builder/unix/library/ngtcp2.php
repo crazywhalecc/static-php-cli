@@ -24,14 +24,14 @@ trait ngtcp2
             'libev' => null,
             'jemalloc' => null,
         ];
-        if ($this->builder instanceof LinuxBuilder) {
+        if (PHP_OS_FAMILY === 'Linux') {
             $available = [...$available, ...[
                 'zlib' => null,
                 'libxml2' => null,
             ]];
         }
         $args = $this->builder->makeAutoconfArgs(static::NAME, $available);
-        if ($this->builder instanceof MacOSBuilder) {
+        if (PHP_OS_FAMILY === 'Darwin') {
             $args = str_replace('=yes', '=' . BUILD_ROOT_PATH, $args);
         }
 
@@ -53,7 +53,6 @@ trait ngtcp2
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
-        $this->patchPkgconfPrefix(['libngtcp2.pc']);
-        $this->patchPkgconfPrefix(['libngtcp2_crypto_ossl.pc']);
+        $this->patchPkgconfPrefix(['libngtcp2.pc', 'libngtcp2_crypto_ossl.pc']);
     }
 }
