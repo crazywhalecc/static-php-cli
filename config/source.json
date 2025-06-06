@@ -50,9 +50,9 @@
         }
     },
     "brotli": {
-        "type": "ghtag",
+        "type": "ghtagtar",
         "repo": "google/brotli",
-        "match": "v1\\.\\d\\d",
+        "match": "v1\\.\\d.*",
         "provide-pre-built": true,
         "license": {
             "type": "file",
