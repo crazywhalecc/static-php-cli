@@ -21,7 +21,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
         'g++', 'patch', 'binutils-gold',
-        'libtoolize',
+        'libtoolize', 'which',
     ];
 
     public const TOOLS_DEBIAN = [
@@ -29,14 +29,14 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake', 'autopoint',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
-        'xz', 'libtoolize',
+        'xz', 'libtoolize', 'which',
     ];
 
     public const TOOLS_RHEL = [
         'perl', 'make', 'bison', 'flex',
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc',
-        'bzip2', 'cmake', 'patch',
+        'bzip2', 'cmake', 'patch', 'which',
         'xz', 'libtool', 'gettext-devel',
     ];
 
