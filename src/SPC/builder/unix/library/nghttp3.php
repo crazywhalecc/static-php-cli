@@ -41,5 +41,6 @@ trait nghttp3
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libnghttp3.pc']);
+        $this->patchLaDependencyPrefix(['libnghttp3.la']);
     }
 }

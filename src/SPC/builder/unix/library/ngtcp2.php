@@ -45,5 +45,6 @@ trait ngtcp2
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libngtcp2.pc']);
         $this->patchPkgconfPrefix(['libngtcp2_crypto_ossl.pc']);
+        $this->patchLaDependencyPrefix(['libngtcp2.la', 'libngtcp2_crypto_ossl.la']);
     }
 }
