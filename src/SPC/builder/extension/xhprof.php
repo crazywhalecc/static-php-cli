@@ -7,7 +7,6 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
-use SPC\util\SPCConfigUtil;
 
 #[CustomExt('xhprof')]
 class xhprof extends Extension
