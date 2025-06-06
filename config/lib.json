@@ -635,9 +635,6 @@
         ],
         "lib-depends": [
             "openssl"
-        ],
-        "lib-suggests": [
-            "ngtcp2"
         ]
     },
     "ngtcp2": {
@@ -655,6 +652,9 @@
         ],
         "lib-depends": [
             "openssl"
+        ],
+        "lib-suggests": [
+            "nghttp3"
         ]
     },
     "onig": {

@@ -17,18 +17,12 @@ trait ngtcp2
      */
     protected function build(): void
     {
-        $available = [
+        $args = $this->builder->makeAutoconfArgs(static::NAME, [
             'openssl' => null,
             'libev' => null,
             'jemalloc' => null,
-        ];
-        if (PHP_OS_FAMILY === 'Linux') {
-            $available = [...$available, ...[
-                'zlib' => null,
-                'libxml2' => null,
-            ]];
-        }
-        $args = $this->builder->makeAutoconfArgs(static::NAME, $available);
+            'libnghttp3' => null,
+        ]);
         if (PHP_OS_FAMILY === 'Linux') {
             $args = preg_replace('/OPENSSL_LIBS="(.*?)"/', 'OPENSSL_LIBS="\1 -lpthread -ldl"', $args);
         }
