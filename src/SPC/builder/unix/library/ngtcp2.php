@@ -18,12 +18,17 @@ trait ngtcp2
     protected function build(): void
     {
         $args = $this->builder->makeAutoconfArgs(static::NAME, [
-            'zlib' => null,
             'openssl' => null,
-            'libxml2' => null,
             'libev' => null,
             'jemalloc' => null,
+            'libnghttp3' => null,
         ]);
+        if ($brotli = $this->builder->getLib('brotli')) {
+            /* @phpstan-ignore-next-line */
+            $args .= ' --with-libbrotlidec=yes LIBBROTLIDEC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIDEC_LIBS="' . $brotli->getStaticLibFiles() . '"';
+            /* @phpstan-ignore-next-line */
+            $args .= ' --with-libbrotlienc=yes LIBBROTLIENC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIENC_LIBS="' . $brotli->getStaticLibFiles() . '"';
+        }
 
         shell()->cd($this->source_dir)
             ->setEnv([
@@ -43,8 +48,6 @@ trait ngtcp2
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
-        $this->patchPkgconfPrefix(['libngtcp2.pc']);
-        $this->patchPkgconfPrefix(['libngtcp2_crypto_ossl.pc']);
-        $this->patchLaDependencyPrefix(['libngtcp2.la', 'libngtcp2_crypto_ossl.la']);
+        $this->patchPkgconfPrefix(['libngtcp2.pc', 'libngtcp2_crypto_ossl.pc']);
     }
 }
