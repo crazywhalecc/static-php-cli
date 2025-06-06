@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\LinuxBuilder;
-use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -31,8 +29,8 @@ trait ngtcp2
             ]];
         }
         $args = $this->builder->makeAutoconfArgs(static::NAME, $available);
-        if (PHP_OS_FAMILY === 'Darwin') {
-            $args = str_replace('=yes', '=' . BUILD_ROOT_PATH, $args);
+        if (PHP_OS_FAMILY === 'Linux') {
+            $args = preg_replace('/OPENSSL_LIBS="(.*?)"/', 'OPENSSL_LIBS="\1 -lpthread -ldl"', $args);
         }
 
         shell()->cd($this->source_dir)
