@@ -86,6 +86,8 @@
             "libssh2",
             "brotli",
             "nghttp2",
+            "nghttp3",
+            "ngtcp2",
             "zstd",
             "libcares"
         ],
@@ -615,7 +617,44 @@
             "openssl"
         ],
         "lib-suggests": [
-            "libxml2"
+            "libxml2",
+            "nghttp3",
+            "ngtcp2"
+        ]
+    },
+    "nghttp3": {
+        "source": "nghttp3",
+        "static-libs-unix": [
+            "libnghttp3.a"
+        ],
+        "static-libs-windows": [
+            "nghttp3.lib"
+        ],
+        "headers": [
+            "nghttp3"
+        ],
+        "lib-depends": [
+            "openssl"
+        ],
+        "lib-suggests": [
+            "ngtcp2"
+        ]
+    },
+    "ngtcp2": {
+        "source": "ngtcp2",
+        "static-libs-unix": [
+            "libngtcp2.a",
+            "libngtcp2_crypto_ossl.a"
+        ],
+        "static-libs-windows": [
+            "ngtcp2.lib",
+            "ngtcp2_crypto_ossl.lib"
+        ],
+        "headers": [
+            "ngtcp2"
+        ],
+        "lib-depends": [
+            "openssl"
         ]
     },
     "onig": {

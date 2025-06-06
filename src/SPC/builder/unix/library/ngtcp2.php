@@ -8,7 +8,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
-trait nghttp2
+trait ngtcp2
 {
     /**
      * @throws FileSystemException
@@ -22,20 +22,15 @@ trait nghttp2
             'openssl' => null,
             'libxml2' => null,
             'libev' => null,
-            'libcares' => null,
-            'libngtcp2' => null,
-            'libnghttp3' => null,
-            'libbpf' => null,
-            'libevent-openssl' => null,
-            'jansson' => null,
             'jemalloc' => null,
-            'systemd' => null,
         ]);
 
-        [,,$destdir] = SEPARATED_PATH;
-
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 './configure ' .
                 '--enable-static ' .
@@ -47,7 +42,8 @@ trait nghttp2
             )
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv("make install DESTDIR={$destdir}");
-        $this->patchPkgconfPrefix(['libnghttp2.pc']);
+            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+        $this->patchPkgconfPrefix(['libngtcp2.pc']);
+        $this->patchPkgconfPrefix(['libngtcp2_crypto_ossl.pc']);
     }
 }

@@ -47,6 +47,24 @@ trait curl
         } else {
             $extra .= '-DUSE_NGHTTP2=OFF ';
         }
+        // lib:nghttp3
+        if ($nghttp3 = $this->builder->getLib('nghttp3')) {
+            $extra .= '-DUSE_NGHTTP3=ON ' .
+                /* @phpstan-ignore-next-line */
+                '-DNGHTTP3_LIBRARY="' . $nghttp3->getStaticLibFiles(style: 'cmake') . '" ' .
+                '-DNGHTTP3_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
+        } else {
+            $extra .= '-DUSE_NGHTTP3=OFF ';
+        }
+        // lib:ngtcp2
+        if ($ngtcp2 = $this->builder->getLib('ngtcp2')) {
+            $extra .= '-DUSE_NGTCP2=ON ' .
+                /* @phpstan-ignore-next-line */
+                '-DNGTCP2_LIBRARY="' . $ngtcp2->getStaticLibFiles(style: 'cmake') . '" ' .
+                '-DNGTCP2_INCLUDE_DIR="' . BUILD_INCLUDE_PATH . '" ';
+        } else {
+            $extra .= '-DUSE_NGTCP2=OFF ';
+        }
         // lib:ldap
         $extra .= $this->builder->getLib('ldap') ? '-DCURL_DISABLE_LDAP=OFF ' : '-DCURL_DISABLE_LDAP=ON ';
         // lib:zstd
