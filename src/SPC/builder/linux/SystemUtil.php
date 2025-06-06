@@ -9,8 +9,9 @@ use SPC\exception\RuntimeException;
 
 class SystemUtil
 {
-    static ?string $libc_version = null;
     use UnixSystemUtilTrait;
+
+    public static ?string $libc_version = null;
 
     /** @noinspection PhpMissingBreakStatementInspection */
     public static function getOSRelease(): array
