@@ -31,30 +31,4 @@ class xhprof extends Extension
         }
         return false;
     }
-
-    public function buildUnixShared(): void
-    {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()]);
-        $env = [
-            'CFLAGS' => $config['cflags'],
-            'LDFLAGS' => $config['ldflags'],
-            'LIBS' => $config['libs'],
-            'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
-        ];
-        // prepare configure args
-        shell()->cd($this->source_dir . '/extension')
-            ->setEnv($env)
-            ->execWithEnv(BUILD_BIN_PATH . '/phpize');
-
-        if ($this->patchBeforeSharedConfigure()) {
-            logger()->info('ext [ . ' . $this->getName() . '] patching before shared configure');
-        }
-
-        shell()->cd($this->source_dir . '/extension')
-            ->setEnv($env)
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --with-pic')
-            ->execWithEnv('make clean')
-            ->execWithEnv('make -j' . $this->builder->concurrency)
-            ->execWithEnv('make install');
-    }
 }
