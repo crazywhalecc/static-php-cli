@@ -75,7 +75,7 @@ class CraftCommand extends BaseCommand
             }
             if (isset($craft['php-version'])) {
                 $args[] = '--with-php=' . $craft['php-version'];
-                if (!array_key_exists('ignore-cache-sources', $craft['download-options']) || $craft['download-options']['ignore-cache-sources'] === false) {
+                if (!array_key_exists('ignore-cache-sources', $craft['download-options'])) {
                     $craft['download-options']['ignore-cache-sources'] = 'php-src';
                 }
             }
