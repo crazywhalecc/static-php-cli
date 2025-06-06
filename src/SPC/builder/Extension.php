@@ -235,7 +235,7 @@ class Extension
         $ret = '';
         foreach ($order as $ext) {
             if ($ext instanceof Extension && $ext->isBuildShared()) {
-                if (Config::getExt($ext->getName(), 'zend_extension', false) === true) {
+                if (Config::getExt($ext->getName(), 'zend-extension', false) === true) {
                     $ret .= " -d \"zend_extension={$ext->getName()}\"";
                 } else {
                     $ret .= " -d \"extension={$ext->getName()}\"";
@@ -371,6 +371,7 @@ class Extension
         }
         $env = [
             'CFLAGS' => $config['cflags'],
+            'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => '-Wl,-Bstatic ' . $staticLibs . ' -Wl,-Bdynamic ' . $sharedLibs,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
@@ -485,6 +486,11 @@ class Extension
             }
         }
 
+        if (array_key_exists(0, $deps)) {
+            $zero = [0 => $deps[0]];
+            unset($deps[0]);
+            return $zero + $deps;
+        }
         return $deps;
     }
 }

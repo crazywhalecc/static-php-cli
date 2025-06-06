@@ -457,16 +457,11 @@ class SourcePatcher
         if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::getLibcVersionIfExists() >= '2.17') {
             return false;
         }
-        $version = null;
-        if (file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
-            $file = SOURCE_PATH . '/php-src/main/php_version.h';
-            $cnt = preg_match('/PHP_VERSION "(\d+\.\d+\.\d+)"/', file_get_contents($file), $match);
-            if (!$cnt) {
-                return false;
-            }
-            $version = $match[1];
+        if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            return false;
         }
-        if (version_compare($version, '8.3.16', '<')) {
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0 && intval($match[1]) < 80316) {
             return false;
         }
         SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');

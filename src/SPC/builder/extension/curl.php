@@ -22,7 +22,7 @@ class curl extends Extension
     {
         logger()->info('patching before-configure for curl checks');
         $file1 = "AC_DEFUN([PHP_CHECK_LIBRARY], [\n  $3\n])";
-        $files = FileSystem::readFile(SOURCE_PATH . '/php-src/ext/curl/config.m4');
+        $files = FileSystem::readFile($this->source_dir . '/config.m4');
         $file2 = 'AC_DEFUN([PHP_CHECK_LIBRARY], [
   save_old_LDFLAGS=$LDFLAGS
   ac_stuff="$5"
@@ -41,7 +41,7 @@ class curl extends Extension
     $4
   ])dnl
 ])';
-        file_put_contents(SOURCE_PATH . '/php-src/ext/curl/config.m4', $file1 . "\n" . $files . "\n" . $file2);
+        file_put_contents($this->source_dir . '/config.m4', $file1 . "\n" . $files . "\n" . $file2);
         return true;
     }
 
@@ -59,7 +59,7 @@ class curl extends Extension
 
     public function patchBeforeSharedConfigure(): bool
     {
-        $file = SOURCE_PATH . '/php-src/ext/curl/config.m4';
+        $file = $this->source_dir . '/config.m4';
         $content = FileSystem::readFile($file);
 
         // Inject patch before it
