@@ -161,6 +161,17 @@
             ]
         }
     },
+    "ext-lz4": {
+        "type": "ghtagtar",
+        "repo": "kjdev/php-ext-lz4",
+        "path": "php-src/ext/lz4",
+        "license": {
+            "type": "file",
+            "path": [
+                "LICENSE"
+            ]
+        }
+    },
     "ext-memcache": {
         "type": "url",
         "url": "https://pecl.php.net/get/memcache",

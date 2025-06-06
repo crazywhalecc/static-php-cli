@@ -13,22 +13,22 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
-    // 'macos-14',
-    // 'macos-15',
+    'macos-13',
+    'macos-14',
+    'macos-15',
     'ubuntu-latest',
-    // 'ubuntu-22.04',
-    // 'ubuntu-24.04',
-    // 'ubuntu-22.04-arm',
-    // 'ubuntu-24.04-arm',
+    'ubuntu-22.04',
+    'ubuntu-24.04',
+    'ubuntu-22.04-arm',
+    'ubuntu-24.04-arm',
     // 'windows-latest',
 ];
 
@@ -45,7 +45,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'xsl,simplexml,xlswriter',
+    'Linux', 'Darwin' => 'lz4',
     'Windows' => 'xlswriter,openssl',
 };
 
