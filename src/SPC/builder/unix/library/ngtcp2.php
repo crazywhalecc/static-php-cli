@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -17,13 +19,21 @@ trait ngtcp2
      */
     protected function build(): void
     {
-        $args = $this->builder->makeAutoconfArgs(static::NAME, [
-            'zlib' => null,
+        $available = [
             'openssl' => null,
-            'libxml2' => null,
             'libev' => null,
             'jemalloc' => null,
-        ]);
+        ];
+        if ($this->builder instanceof LinuxBuilder) {
+            $available = [...$available, ...[
+                'zlib' => null,
+                'libxml2' => null,
+            ]];
+        }
+        $args = $this->builder->makeAutoconfArgs(static::NAME, $available);
+        if ($this->builder instanceof MacOSBuilder) {
+            $args = str_replace('=yes', '=' . BUILD_ROOT_PATH, $args);
+        }
 
         shell()->cd($this->source_dir)
             ->setEnv([
