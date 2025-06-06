@@ -31,6 +31,12 @@ trait nghttp2
             'jemalloc' => null,
             'systemd' => null,
         ]);
+        if ($brotli = $this->builder->getLib('brotli')) {
+            /* @phpstan-ignore-next-line */
+            $args .= ' --with-libbrotlidec=yes LIBBROTLIDEC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIDEC_LIBS="' . $brotli->getStaticLibFiles() . '"';
+            /* @phpstan-ignore-next-line */
+            $args .= ' --with-libbrotlienc=yes LIBBROTLIENC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIENC_LIBS="' . $brotli->getStaticLibFiles() . '"';
+        }
 
         [,,$destdir] = SEPARATED_PATH;
 
