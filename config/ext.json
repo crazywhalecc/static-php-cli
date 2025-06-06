@@ -330,6 +330,18 @@
             "openssl"
         ]
     },
+    "lz4": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-lz4",
+        "arg-type": "custom",
+        "lib-depends": [
+            "liblz4"
+        ]
+    },
     "libxml": {
         "support": {
             "BSD": "wip"

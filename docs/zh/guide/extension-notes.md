@@ -4,6 +4,8 @@
 
 ## curl
 
+HTTP3 支持默认未启用，需在编译时添加 `--with-libs="nghttp2,nghttp3,ngtcp2"` 以启用 PHP 8.4 及以上版本的 HTTP3 支持。
+
 使用 curl 请求 HTTPS 时，可能存在 `error:80000002:system library::No such file or directory` 错误，
 解决办法详见 [FAQ - 无法使用 ssl](../faq/#无法使用-ssl)。
 

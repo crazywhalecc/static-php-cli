@@ -172,6 +172,17 @@
             ]
         }
     },
+    "ext-lz4": {
+        "type": "ghtagtar",
+        "repo": "kjdev/php-ext-lz4",
+        "path": "php-src/ext/lz4",
+        "license": {
+            "type": "file",
+            "path": [
+                "LICENSE"
+            ]
+        }
+    },
     "ext-memcache": {
         "type": "url",
         "url": "https://pecl.php.net/get/memcache",
@@ -718,6 +729,26 @@
         "type": "ghrel",
         "repo": "nghttp2/nghttp2",
         "match": "nghttp2.+\\.tar\\.xz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "nghttp3": {
+        "type": "ghrel",
+        "repo": "ngtcp2/nghttp3",
+        "match": "nghttp3.+\\.tar\\.xz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "ngtcp2": {
+        "type": "ghrel",
+        "repo": "ngtcp2/ngtcp2",
+        "match": "ngtcp2.+\\.tar\\.xz",
         "prefer-stable": true,
         "license": {
             "type": "file",
