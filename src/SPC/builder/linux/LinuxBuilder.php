@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -68,35 +67,6 @@ class LinuxBuilder extends UnixBuilderBase
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
         f_mkdir(BUILD_INCLUDE_PATH, recursive: true);
-    }
-
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
-    public function makeAutoconfArgs(string $name, array $libSpecs): string
-    {
-        $ret = '';
-        foreach ($libSpecs as $libName => $arr) {
-            $lib = $this->getLib($libName);
-            if ($lib === null && str_starts_with($libName, 'lib')) {
-                $lib = $this->getLib(substr($libName, 3));
-            }
-
-            $arr = $arr ?? [];
-
-            $disableArgs = $arr[0] ?? null;
-            $prefix = $arr[1] ?? null;
-            if ($lib instanceof LinuxLibraryBase) {
-                logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
-                $ret .= $lib->makeAutoconfEnv($prefix) . ' ';
-            } else {
-                logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
-                $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
-            }
-        }
-        return rtrim($ret);
     }
 
     /**
