@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -109,9 +111,9 @@ abstract class UnixBuilderBase extends BuilderBase
 
             $disableArgs = $arr[0] ?? null;
             $prefix = $arr[1] ?? null;
-            if ($lib instanceof LinuxLibraryBase) {
+            if ($lib instanceof LinuxLibraryBase || $lib instanceof MacOSLibraryBase || $lib instanceof BSDLibraryBase) {
                 logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
-                $ret .= "--with-{$libName}=no " . $lib->makeAutoconfEnv($prefix) . ' ';
+                $ret .= "--with-{$libName}=yes " . $lib->makeAutoconfEnv($prefix) . ' ';
             } else {
                 logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
                 $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
