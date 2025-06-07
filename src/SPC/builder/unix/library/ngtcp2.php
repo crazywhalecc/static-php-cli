@@ -49,5 +49,10 @@ trait ngtcp2
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libngtcp2.pc', 'libngtcp2_crypto_ossl.pc']);
+
+        // on macOS, the static library may contain other static libraries?
+        // ld: archive member 'libssl.a' not a mach-o file in libngtcp2_crypto_ossl.a
+        shell()->cd(BUILD_LIB_PATH)
+            ->exec("ar -t libngtcp2_crypto_ossl.a | grep '\.a$' | xargs -n1 ar d libngtcp2_crypto_ossl.a");
     }
 }
