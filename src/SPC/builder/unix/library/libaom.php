@@ -20,16 +20,7 @@ trait libaom
         FileSystem::resetDir($this->source_dir . '/builddir');
         // Start build
         shell()->cd($this->source_dir . '/builddir')
-            ->exec(
-                'cmake ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
-                '-DAOM_TARGET_CPU=generic ' .
-                '..'
-            )
+            ->exec("cmake {$this->builder->makeCmakeArgs()} -DAOM_TARGET_CPU=generic ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install');
         $this->patchPkgconfPrefix(['aom.pc']);

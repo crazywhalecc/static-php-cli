@@ -31,24 +31,14 @@ trait libyaml
      */
     protected function build(): void
     {
-        [$lib, $include, $destdir] = SEPARATED_PATH;
-
+        $extra = '';
+        if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
+            $extra .= '-DCMAKE_POLICY_VERSION_MINIMUM=3.5';
+        }
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
-            ->exec(
-                'cmake ' .
-                // '--debug-find ' .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DBUILD_TESTING=OFF ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
-                '-DCMAKE_INSTALL_PREFIX=/ ' .
-                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '..'
-            )
+            ->exec("cmake {$this->builder->makeCmakeArgs()} {$extra} -DBUILD_TESTING=OFF ..")
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
     }
 }

@@ -20,16 +20,7 @@ trait libde265
         FileSystem::resetDir($this->source_dir . '/build');
         // Start build
         shell()->cd($this->source_dir . '/build')
-            ->exec(
-                'cmake ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
-                '-DENABLE_SDL=OFF ' . // Disable SDL, currently not supported
-                '..'
-            )
+            ->exec("cmake {$this->builder->makeCmakeArgs()} ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install');
         $this->patchPkgconfPrefix(['libde265.pc']);

@@ -20,7 +20,7 @@ trait libuv
         FileSystem::resetDir($this->source_dir . '/build');
         // Start build
         shell()->cd($this->source_dir . '/build')
-            ->exec("cmake {$this->builder->makeCmakeArgs()} -DPOSITION_INDEPENDENT_CODE=ON -DLIBUV_BUILD_SHARED=OFF ..")
+            ->exec("cmake {$this->builder->makeCmakeArgs()} -DLIBUV_BUILD_SHARED=OFF ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install');
         // patch pkgconfig

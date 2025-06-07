@@ -18,11 +18,7 @@ trait libuuid
     {
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
-            ->exec(
-                'cmake ' .
-                "{$this->builder->makeCmakeArgs()} -DPOSITION_INDEPENDENT_CODE=ON " .
-                '..'
-            )
+            ->exec("cmake {$this->builder->makeCmakeArgs()} ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}");
         copy($this->source_dir . '/build/libuuid.a', BUILD_LIB_PATH . '/libuuid.a');
         FileSystem::createDir(BUILD_INCLUDE_PATH . '/uuid');

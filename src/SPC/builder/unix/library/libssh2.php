@@ -21,13 +21,7 @@ trait libssh2
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                'cmake ' .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                '-DCMAKE_INSTALL_LIBDIR=lib ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
+                "cmake {$this->builder->makeCmakeArgs()} " .
                 '-DBUILD_EXAMPLES=OFF ' .
                 '-DBUILD_TESTING=OFF ' .
                 "-DENABLE_ZLIB_COMPRESSION={$enable_zlib} " .

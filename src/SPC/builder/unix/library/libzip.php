@@ -29,14 +29,9 @@ trait libzip
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                'cmake ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DCMAKE_BUILD_TYPE=Release ' .
+                "cmake {$this->builder->makeCmakeArgs()} " .
                 '-DENABLE_GNUTLS=OFF ' .
                 '-DENABLE_MBEDTLS=OFF ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DBUILD_DOC=OFF ' .
                 '-DBUILD_EXAMPLES=OFF ' .
                 '-DBUILD_REGRESS=OFF ' .

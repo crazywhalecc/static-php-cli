@@ -24,15 +24,7 @@ trait mimalloc
         $args .= '-DMI_INSTALL_TOPLEVEL=ON ';
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
-            ->execWithEnv(
-                'cmake ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                $args .
-                '..'
-            )
+            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} {$args} ..")
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install');
     }

@@ -26,7 +26,6 @@ trait libjpeg
                 "cmake {$this->builder->makeCmakeArgs()} " .
                 '-DENABLE_STATIC=ON ' .
                 '-DENABLE_SHARED=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")

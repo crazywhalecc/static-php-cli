@@ -39,8 +39,11 @@ trait libevent
      */
     protected function build(): void
     {
-        [$lib, $include, $destdir] = SEPARATED_PATH;
         // CMake needs a clean build directory
+        $extra = '';
+        if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
+            $extra .= '-DCMAKE_POLICY_VERSION_MINIMUM=3.10 ';
+        }
         FileSystem::resetDir($this->source_dir . '/build');
         // Start build
         shell()->cd($this->source_dir . '/build')
@@ -50,11 +53,7 @@ trait libevent
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv(
-                'cmake ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
-                '-DCMAKE_BUILD_TYPE=Release ' .
+                "cmake {$this->builder->makeCmakeArgs()} {$extra}" .
                 '-DEVENT__LIBRARY_TYPE=STATIC ' .
                 '-DEVENT__DISABLE_BENCHMARK=ON ' .
                 '-DEVENT__DISABLE_THREAD_SUPPORT=ON ' .

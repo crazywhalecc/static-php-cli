@@ -33,9 +33,7 @@ trait freetype
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv(
-                "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON " .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                "{$extra}.."
+                "cmake {$this->builder->makeCmakeArgs()} -DFT_DISABLE_HARFBUZZ=ON {$extra}.."
             )
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")

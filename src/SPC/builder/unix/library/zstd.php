@@ -23,16 +23,9 @@ trait zstd
                 'LDFLAGS' => $this->getLibExtraLdFlags(),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
-            ->exec(
-                'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
-                '-DZSTD_BUILD_STATIC=ON ' .
-                '-DZSTD_BUILD_SHARED=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
-                '..'
-            )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} ..")
+            ->execWithEnv("cmake --build . -j {$this->builder->concurrency}")
+            ->execWithEnv('make install');
         $this->patchPkgconfPrefix(['libzstd.pc']);
     }
 }

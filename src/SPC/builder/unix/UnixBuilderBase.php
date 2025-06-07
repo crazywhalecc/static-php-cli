@@ -60,6 +60,9 @@ abstract class UnixBuilderBase extends BuilderBase
     {
         $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
         return $extra .
+            '-DBUILD_STATIC_LIBS=ON ' .
+            '-DBUILD_SHARED_LIBS=OFF ' .
+            '-DPOSITION_INDEPENDENT_CODE=ON ' .
             '-DCMAKE_BUILD_TYPE=Release ' .
             '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
             '-DCMAKE_INSTALL_BINDIR=bin ' .

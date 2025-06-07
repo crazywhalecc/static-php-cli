@@ -21,13 +21,8 @@ trait libheif
         // Start build
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                'cmake ' .
+                "cmake {$this->builder->makeCmakeArgs()} " .
                 '--preset=release ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '-DWITH_EXAMPLES=OFF ' .
                 '-DWITH_GDK_PIXBUF=OFF ' .
                 '-DBUILD_TESTING=OFF ' .

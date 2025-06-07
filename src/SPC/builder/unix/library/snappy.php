@@ -20,11 +20,9 @@ trait snappy
 
         shell()->cd($this->source_dir . '/cmake/build')
             ->exec(
-                'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
+                "cmake {$this->builder->makeCmakeArgs()} " .
                 '-DSNAPPY_BUILD_TESTS=OFF ' .
                 '-DSNAPPY_BUILD_BENCHMARKS=OFF ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON ' .
                 '../..'
             )
             ->exec("cmake --build . -j {$this->builder->concurrency}")

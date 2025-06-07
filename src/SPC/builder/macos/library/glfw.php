@@ -19,7 +19,7 @@ class glfw extends MacOSLibraryBase
     {
         // compile！
         shell()->cd(SOURCE_PATH . '/ext-glfw/vendor/glfw')
-            ->exec("cmake . {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DPOSITION_INDEPENDENT_CODE=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF")
+            ->exec("cmake . {$this->builder->makeCmakeArgs()} -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF")
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install');
         // patch pkgconf

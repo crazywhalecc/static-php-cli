@@ -25,15 +25,9 @@ class libxml2 extends MacOSLibraryBase
         FileSystem::resetDir($this->source_dir . '/build');
         shell()->cd($this->source_dir . '/build')
             ->exec(
-                'cmake ' .
+                "cmake {$this->builder->makeCmakeArgs()} " .
                 // '--debug-find ' .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-                '-DCMAKE_INSTALL_LIBDIR=' . BUILD_LIB_PATH . ' ' .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DLIBXML2_WITH_ICONV=ON ' .
-                '-DPOSITION_INDEPENDENT_CODE=ON  ' .
                 "-DLIBXML2_WITH_ZLIB={$enable_zlib} " .
                 "-DLIBXML2_WITH_ICU={$enable_icu} " .
                 "-DLIBXML2_WITH_LZMA={$enable_xz} " .
