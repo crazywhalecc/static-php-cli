@@ -91,7 +91,7 @@ trait postgresql
             ->execWithEnv(
                 "{$envs} ../configure " .
                 "--prefix={$builddir} " .
-                ($this->builder->getOption('enable-zts') ? '--enable-thread-safety ' :  '--disable-thread-safety ') .
+                ($this->builder->getOption('enable-zts') ? '--enable-thread-safety ' : '--disable-thread-safety ') .
                 '--enable-coverage=no ' .
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
