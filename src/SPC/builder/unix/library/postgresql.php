@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use Hoa\File\File;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -119,6 +120,8 @@ trait postgresql
             ->exec("rm -rf {$builddir}/lib/*.so.*")
             ->exec("rm -rf {$builddir}/lib/*.so")
             ->exec("rm -rf {$builddir}/lib/*.dylib");
+
+        FileSystem::replaceFileStr(BUILD_LIB_PATH . '/libpq.pc', '-lldap', '-lldap -llber');
     }
 
     private function getVersion(): string
