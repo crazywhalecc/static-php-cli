@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\freebsd\library\BSDLibraryBase;
+use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -88,6 +91,35 @@ abstract class UnixBuilderBase extends BuilderBase
             $extra .= 'LDFLAGS="-L' . BUILD_LIB_PATH . '" ';
         }
         return $extra;
+    }
+
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     */
+    public function makeAutoconfArgs(string $name, array $libSpecs): string
+    {
+        $ret = '';
+        foreach ($libSpecs as $libName => $arr) {
+            $lib = $this->getLib($libName);
+            if ($lib === null && str_starts_with($libName, 'lib')) {
+                $lib = $this->getLib(substr($libName, 3));
+            }
+
+            $arr = $arr ?? [];
+
+            $disableArgs = $arr[0] ?? null;
+            $prefix = $arr[1] ?? null;
+            if ($lib instanceof LinuxLibraryBase || $lib instanceof MacOSLibraryBase || $lib instanceof BSDLibraryBase) {
+                logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
+                $ret .= "--with-{$libName}=yes " . $lib->makeAutoconfEnv($prefix) . ' ';
+            } else {
+                logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
+                $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
+            }
+        }
+        return rtrim($ret);
     }
 
     public function proveLibs(array $sorted_libraries): void
