@@ -71,35 +71,6 @@ class LinuxBuilder extends UnixBuilderBase
     }
 
     /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
-    public function makeAutoconfArgs(string $name, array $libSpecs): string
-    {
-        $ret = '';
-        foreach ($libSpecs as $libName => $arr) {
-            $lib = $this->getLib($libName);
-            if ($lib === null && str_starts_with($libName, 'lib')) {
-                $lib = $this->getLib(substr($libName, 3));
-            }
-
-            $arr = $arr ?? [];
-
-            $disableArgs = $arr[0] ?? null;
-            $prefix = $arr[1] ?? null;
-            if ($lib instanceof LinuxLibraryBase) {
-                logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
-                $ret .= $lib->makeAutoconfEnv($prefix) . ' ';
-            } else {
-                logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
-                $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
-            }
-        }
-        return rtrim($ret);
-    }
-
-    /**
      * Build PHP from source.
      *
      * @param  int                 $build_target Build target, use `BUILD_TARGET_*` constants

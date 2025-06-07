@@ -45,35 +45,6 @@ class MacOSBuilder extends UnixBuilderBase
     }
 
     /**
-     * [deprecated] 生成库构建采用的 autoconf 参数列表
-     *
-     * @param string $name      要构建的 lib 库名，传入仅供输出日志
-     * @param array  $lib_specs 依赖的 lib 库的 autoconf 文件
-     */
-    public function makeAutoconfArgs(string $name, array $lib_specs): string
-    {
-        $ret = '';
-        foreach ($lib_specs as $libName => $arr) {
-            $lib = $this->getLib($libName);
-            if ($lib === null && str_starts_with($libName, 'lib')) {
-                $lib = $this->getLib(substr($libName, 3));
-            }
-
-            $arr = $arr ?? [];
-
-            $disableArgs = $arr[0] ?? null;
-            if ($lib instanceof MacOSLibraryBase) {
-                logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
-                $ret .= '--with-' . $libName . '=yes ';
-            } else {
-                logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
-                $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
-            }
-        }
-        return rtrim($ret);
-    }
-
-    /**
      * Get dynamically linked macOS frameworks
      *
      * @param  bool                $asString If true, return as string
