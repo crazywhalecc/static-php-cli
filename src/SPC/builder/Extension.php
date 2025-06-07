@@ -356,16 +356,18 @@ class Extension
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
         $sharedLibs = '';
-        $staticLibs = '';
+        $staticLibs = $this->getLibFilesString();
+        $staticLibs = str_replace(BUILD_LIB_PATH . '/lib', '-l', $staticLibs);
+        $staticLibs = str_replace('.a', '', $staticLibs);
         foreach (explode('-l', $config['libs']) as $lib) {
             $lib = trim($lib);
             if ($lib === '') {
                 continue;
             }
             $static_lib = 'lib' . $lib . '.a';
-            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib)) {
+            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib) && !str_contains($staticLibs, '-llib')) {
                 $staticLibs .= ' -l' . $lib;
-            } else {
+            } elseif (!str_contains($sharedLibs, '-l' . $lib)) {
                 $sharedLibs .= ' -l' . $lib;
             }
         }
@@ -373,7 +375,7 @@ class Extension
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => '-Wl,-Bstatic ' . $staticLibs . ' -Wl,-Bdynamic ' . $sharedLibs,
+            'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibs . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibs,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         // prepare configure args

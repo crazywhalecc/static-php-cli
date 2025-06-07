@@ -120,7 +120,7 @@ trait postgresql
             ->exec("rm -rf {$builddir}/lib/*.so")
             ->exec("rm -rf {$builddir}/lib/*.dylib");
 
-        FileSystem::replaceFileStr(BUILD_LIB_PATH . '/libpq.pc', '-lldap', '-lldap -llber');
+        FileSystem::replaceFileStr(BUILD_LIB_PATH . '/pkgconfig/libpq.pc', '-lldap', '-lldap -llber');
     }
 
     private function getVersion(): string

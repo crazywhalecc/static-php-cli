@@ -31,7 +31,7 @@ class SPCConfigUtil
      * @param array $libraries           Additional library name list
      * @param bool  $include_suggest_ext Include suggested extensions
      * @param bool  $include_suggest_lib Include suggested libraries
-     * @param mixed $with_dependencies
+     * @param bool  $with_dependencies
      * @return array{
      *     cflags: string,
      *     ldflags: string,
@@ -43,7 +43,7 @@ class SPCConfigUtil
      * @throws WrongUsageException
      * @throws \Throwable
      */
-    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false, $with_dependencies = false): array
+    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false, bool $with_dependencies = false): array
     {
         [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 

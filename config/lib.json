@@ -234,8 +234,8 @@
     "ldap": {
         "source": "ldap",
         "static-libs-unix": [
-            "liblber.a",
-            "libldap.a"
+            "libldap.a",
+            "liblber.a"
         ],
         "lib-depends": [
             "openssl",
