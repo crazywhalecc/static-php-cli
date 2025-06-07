@@ -116,7 +116,7 @@ class SPCConfigUtil
             }
         }
         // patch: imagick (imagemagick wrapper) for linux needs libgomp
-        if (in_array('imagemagick', $libraries) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+        if (in_array('imagemagick', $libraries) && PHP_OS_FAMILY === 'Linux') {
             $short_name[] = '-lgomp';
         }
         return implode(' ', $short_name);
