@@ -39,6 +39,6 @@ trait libyaml
         shell()->cd($this->source_dir . '/build')
             ->exec("cmake {$this->builder->makeCmakeArgs()} {$extra} -DBUILD_TESTING=OFF ..")
             ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make install');
     }
 }
