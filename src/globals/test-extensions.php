@@ -21,9 +21,9 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
+    'macos-13',
     // 'macos-14',
-    // 'macos-15',
+    'macos-15',
     // 'ubuntu-latest',
     'ubuntu-22.04',
     // 'ubuntu-24.04',
@@ -52,7 +52,8 @@ $extensions = match (PHP_OS_FAMILY) {
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
     'Linux' => 'amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,mongodb,msgpack,odbc,opentelemetry,parallel,pdo_odbc,pdo_pgsql,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd,spx',
-    'Windows', 'Darwin' => '',
+    'Darwin' => '',
+    'Windows' => '',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
