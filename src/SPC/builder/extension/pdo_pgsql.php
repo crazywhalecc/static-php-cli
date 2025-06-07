@@ -10,7 +10,7 @@ use SPC\util\CustomExt;
 #[CustomExt('pdo_pgsql')]
 class pdo_pgsql extends Extension
 {
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         return '--with-pdo-pgsql=yes';
     }

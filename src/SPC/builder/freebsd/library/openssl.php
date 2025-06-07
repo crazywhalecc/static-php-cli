@@ -49,7 +49,12 @@ class openssl extends BSDLibraryBase
         }
 
         shell()->cd($this->source_dir)
-            ->exec(
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs() . " {$ex_lib}",
+            ])
+            ->execWithEnv(
                 "./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/
                 "--libdir={$lib} " .

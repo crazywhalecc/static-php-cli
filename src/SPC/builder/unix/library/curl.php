@@ -86,11 +86,31 @@ trait curl
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ../CMakeLists.txt')
-            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF {$extra} ..")
+            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF {$extra} ..")
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install');
         // patch pkgconf
         $this->patchPkgconfPrefix(['libcurl.pc']);
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            '-lbrotlienc -lbrotlidec -lbrotlicommon',
+            '-lbrotlidec -lbrotlicommon'
+        );
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            '-lbrotlidec -lbrotlicommon',
+            '-lbrotlienc -lbrotlidec -lbrotlicommon'
+        );
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            'libbrotlienc,libbrotlidec,libbrotlicommon',
+            'libbrotlidec,libbrotlicommon'
+        );
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            'libbrotlidec,libbrotlicommon',
+            'libbrotlienc,libbrotlidec,libbrotlicommon'
+        );
         shell()->cd(BUILD_LIB_PATH . '/cmake/CURL/')
             ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"" . BUILD_LIB_PATH . "/libcurl.a\"|g' CURLTargets-release.cmake");
     }

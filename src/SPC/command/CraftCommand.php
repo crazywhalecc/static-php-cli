@@ -48,7 +48,8 @@ class CraftCommand extends BaseCommand
             }
         }
 
-        $extensions = implode(',', $craft['extensions']);
+        $static_extensions = implode(',', $craft['extensions']);
+        $shared_extensions = implode(',', $craft['shared-extensions']);
         $libs = implode(',', $craft['libs']);
 
         // init log
@@ -67,16 +68,15 @@ class CraftCommand extends BaseCommand
         }
         // craft download
         if ($craft['craft-options']['download']) {
-            $args = ["--for-extensions={$extensions}"];
+            $sharedAppend = $shared_extensions ? ',' . $shared_extensions : '';
+            $args = ["--for-extensions={$static_extensions}{$sharedAppend}"];
             if ($craft['libs'] !== []) {
                 $args[] = "--for-libs={$libs}";
             }
             if (isset($craft['php-version'])) {
                 $args[] = '--with-php=' . $craft['php-version'];
-                if (!array_key_exists('ignore-cache-sources', $craft['download-options']) || $craft['download-options']['ignore-cache-sources'] === false) {
+                if (!array_key_exists('ignore-cache-sources', $craft['download-options'])) {
                     $craft['download-options']['ignore-cache-sources'] = 'php-src';
-                } elseif ($craft['download-options']['ignore-cache-sources'] !== null) {
-                    $craft['download-options']['ignore-cache-sources'] .= ',php-src';
                 }
             }
             $this->optionsToArguments($craft['download-options'], $args);
@@ -90,7 +90,7 @@ class CraftCommand extends BaseCommand
 
         // craft build
         if ($craft['craft-options']['build']) {
-            $args = [$extensions, "--with-libs={$libs}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
+            $args = [$static_extensions, "--with-libs={$libs}", "--build-shared={$shared_extensions}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
             $this->optionsToArguments($craft['build-options'], $args);
             $retcode = $this->runCommand('build', ...$args);
             if ($retcode !== 0) {
@@ -131,7 +131,8 @@ class CraftCommand extends BaseCommand
         }
         $prefix = PHP_SAPI === 'cli' ? [PHP_BINARY, $argv[0]] : [$argv[0]];
 
-        $process = new Process([...$prefix, $cmd, '--no-motd', ...$args], timeout: null);
+        $env = getenv();
+        $process = new Process([...$prefix, $cmd, '--no-motd', ...$args], env: $env, timeout: null);
         $this->log("Running: {$process->getCommandLine()}", true);
 
         if (PHP_OS_FAMILY === 'Windows') {
@@ -142,7 +143,6 @@ class CraftCommand extends BaseCommand
             });
         } elseif (extension_loaded('pcntl')) {
             pcntl_signal(SIGINT, function () use ($process) {
-                /* @noinspection PhpComposerExtensionStubsInspection */
                 $process->signal(SIGINT);
             });
         } else {

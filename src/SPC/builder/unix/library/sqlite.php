@@ -9,8 +9,12 @@ trait sqlite
     protected function build(): void
     {
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv('./configure --enable-static --disable-shared --prefix=')
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
+            ->execWithEnv('./configure --enable-static --disable-shared --with-pic --prefix=')
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);

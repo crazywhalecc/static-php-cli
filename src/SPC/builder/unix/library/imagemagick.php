@@ -18,8 +18,11 @@ trait imagemagick
      */
     protected function build(): void
     {
-        // TODO: glibc rh 10 toolset's libgomp.a was built without -fPIC -fPIE so we can't use openmp without depending on libgomp.so
-        $openmp = getenv('SPC_LIBC') === 'musl' ? '--enable-openmp' : '--disable-openmp';
+        $openmp = '--enable-openmp';
+        // TODO: glibc rh 10 toolset's libgomp.a was built without -fPIC so we can't use openmp without depending on libgomp.so
+        if (getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10')) {
+            $openmp = '--disable-openmp';
+        }
         $extra = "--without-jxl --without-x {$openmp} ";
         $required_libs = '';
         $optional_libs = [
@@ -55,7 +58,7 @@ trait imagemagick
             ])
             ->execWithEnv(
                 './configure ' .
-                '--enable-static --disable-shared ' .
+                '--enable-static --disable-shared --with-pic ' .
                 $extra .
                 '--prefix='
             )
@@ -80,5 +83,10 @@ trait imagemagick
                 'includearchdir=${prefix}/include/ImageMagick-7'
             );
         }
+        $this->patchLaDependencyPrefix([
+            'libMagick++-7.Q16HDRI.la',
+            'libMagickCore-7.Q16HDRI.la',
+            'libMagickWand-7.Q16HDRI.la',
+        ]);
     }
 }

@@ -45,15 +45,15 @@ class libpng extends LinuxLibraryBase
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')
             ->setEnv([
-                'CFLAGS' => trim($this->getLibExtraCFlags() . ' ' . $this->builder->arch_c_flags),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags() . ' -L' . BUILD_LIB_PATH,
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv(
-                'LDFLAGS="-L' . BUILD_LIB_PATH . '" ' .
                 './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .
+                '--with-pic ' .
                 '--enable-hardware-optimizations ' .
                 '--with-zlib-prefix="' . BUILD_ROOT_PATH . '" ' .
                 $optimizations .

@@ -35,6 +35,7 @@ trait libxslt
                 "{$this->builder->getOption('ld_library_path')} " .
                 './configure ' .
                 '--enable-static --disable-shared ' .
+                '--with-pic ' .
                 '--without-python ' .
                 '--without-mem-debug ' .
                 '--without-crypto ' .
@@ -47,5 +48,9 @@ trait libxslt
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install DESTDIR=' . escapeshellarg(BUILD_ROOT_PATH));
         $this->patchPkgconfPrefix(['libexslt.pc']);
+        $this->patchLaDependencyPrefix(['libxslt.la', 'libexslt.la']);
+        shell()->cd(BUILD_LIB_PATH)
+            ->exec("ar -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")
+            ->exec("ar -t libexslt.a | grep '\\.a$' | xargs -n1 ar d libexslt.a");
     }
 }

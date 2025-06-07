@@ -16,16 +16,19 @@ trait gettext
         $cflags = $this->builder->getOption('enable-zts') ? '-lpthread -D_REENTRANT' : '';
         $ldflags = $this->builder->getOption('enable-zts') ? '-lpthread' : '';
 
+        $ldl = $this->builder->getLib('libgomp') && getenv('SPC_LIBC') === 'glibc' ? '-ldl' : '';
+
         shell()->cd($this->source_dir)
             ->setEnv([
                 'CFLAGS' => "{$this->getLibExtraCFlags()} {$cflags}",
-                'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags,
+                'LDFLAGS' => trim($this->getLibExtraLdFlags() . ' ' . $ldflags . ' ' . $ldl),
                 'LIBS' => $this->getLibExtraLibs(),
             ])
             ->execWithEnv(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--enable-pic ' .
                 '--disable-java ' .
                 '--disable-c++ ' .
                 $zts .
@@ -37,5 +40,6 @@ trait gettext
             ->execWithEnv('make clean')
             ->execWithEnv("make -j{$this->builder->concurrency}")
             ->execWithEnv('make install');
+        $this->patchLaDependencyPrefix(['libintl.la']);
     }
 }

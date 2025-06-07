@@ -15,7 +15,7 @@ class lz4 extends Extension
         return '--enable-lz4' . ($shared ? '=shared' : '') . ' --with-lz4-includedir=' . BUILD_ROOT_PATH;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         return '--enable-lz4';
     }

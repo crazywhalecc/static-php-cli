@@ -22,6 +22,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchGDWin32']);
+        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchFfiCentos7FixO3strncmp']);
         FileSystem::addSourceExtractHook('sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
@@ -43,7 +44,7 @@ class SourcePatcher
      */
     public static function patchBeforeBuildconf(BuilderBase $builder): void
     {
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeBuildconf() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
             }
@@ -78,6 +79,15 @@ class SourcePatcher
         }
     }
 
+    public static function patchBeforeSharedBuild(BuilderBase $builder): void
+    {
+        foreach ($builder->getExts() as $ext) {
+            if ($ext->patchBeforeSharedBuild() === true) {
+                logger()->info('Extension [' . $ext->getName() . '] patched before shared build');
+            }
+        }
+    }
+
     /**
      * Source patcher runner before configure
      *
@@ -86,7 +96,7 @@ class SourcePatcher
      */
     public static function patchBeforeConfigure(BuilderBase $builder): void
     {
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeConfigure() === true) {
                 logger()->info('Extension [' . $ext->getName() . '] patched before configure');
             }
@@ -440,6 +450,22 @@ class SourcePatcher
             return true;
         }
         return false;
+    }
+
+    public static function patchFfiCentos7FixO3strncmp(): bool
+    {
+        if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::getLibcVersionIfExists() >= '2.17') {
+            return false;
+        }
+        if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            return false;
+        }
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0 && intval($match[1]) < 80316) {
+            return false;
+        }
+        SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
+        return true;
     }
 
     public static function patchLibaomForAlpine(): bool

@@ -16,10 +16,14 @@ trait gmp
     protected function build(): void
     {
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags() ?: $this->builder->arch_c_flags, 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 './configure ' .
-                '--enable-static --disable-shared ' .
+                '--enable-static --disable-shared --with-pic ' .
                 '--prefix='
             )
             ->execWithEnv('make clean')

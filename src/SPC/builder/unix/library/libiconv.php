@@ -11,11 +11,16 @@ trait libiconv
         [,,$destdir] = SEPARATED_PATH;
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
+            ->setEnv([
+                'CFLAGS' => $this->getLibExtraCFlags(),
+                'LDFLAGS' => $this->getLibExtraLdFlags(),
+                'LIBS' => $this->getLibExtraLibs(),
+            ])
             ->execWithEnv(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                '--enable-pic ' .
                 '--enable-extra-encodings ' .
                 '--prefix='
             )
@@ -26,5 +31,6 @@ trait libiconv
         if (file_exists(BUILD_BIN_PATH . '/iconv')) {
             unlink(BUILD_BIN_PATH . '/iconv');
         }
+        $this->patchLaDependencyPrefix(['libiconv.la']);
     }
 }

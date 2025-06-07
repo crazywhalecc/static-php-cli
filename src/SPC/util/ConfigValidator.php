@@ -120,6 +120,7 @@ class ConfigValidator
      * @return array{
      *     php-version?: string,
      *     extensions: array<string>,
+     *     shared-extensions?: array<string>,
      *     libs?: array<string>,
      *     sapi: array<string>,
      *     debug?: bool,

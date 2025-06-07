@@ -22,13 +22,7 @@ trait libwebp
         FileSystem::resetDir($this->source_dir . '/build');
         // Start build
         shell()->cd($this->source_dir . '/build')
-            ->exec(
-                'cmake ' .
-                $this->builder->makeCmakeArgs() . ' ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DWEBP_BUILD_EXTRAS=ON ' .
-                '..'
-            )
+            ->exec("cmake {$this->builder->makeCmakeArgs()} -DWEBP_BUILD_EXTRAS=ON ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install');
         // patch pkgconfig

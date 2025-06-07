@@ -37,7 +37,8 @@ class swoole_hook_sqlite extends Extension
         if ($this->builder->getExt('swoole') === null) {
             return;
         }
-        [$ret, $out] = shell()->execWithResult(BUILD_ROOT_PATH . '/bin/php -n --ri "swoole"', false);
+        $sharedExtensions = $this->getSharedExtensionLoadString();
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         $out = implode('', $out);
         if ($ret !== 0) {
             throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
