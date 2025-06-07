@@ -50,6 +50,8 @@ trait ldap
             ->exec('sed -i -e "s/SUBDIRS= include libraries clients servers tests doc/SUBDIRS= include libraries clients servers/g" Makefile')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+
+        FileSystem::replaceFileLineContainsString(BUILD_LIB_PATH . '/pkgconfig/ldap.pc', 'Libs: -L${libdir} -lldap', 'Libs: -L${libdir} -lldap -llber');
         $this->patchPkgconfPrefix(['ldap.pc', 'lber.pc']);
         $this->patchLaDependencyPrefix(['libldap.la', 'liblber.la']);
     }

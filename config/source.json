@@ -822,8 +822,9 @@
         }
     },
     "postgresql": {
-        "type": "url",
-        "url": "https://ftp.postgresql.org/pub/source/v16.2/postgresql-16.2.tar.bz2",
+        "type": "ghtagtar",
+        "repo": "postgres/postgres",
+        "match": "REL_16_\\d+",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"

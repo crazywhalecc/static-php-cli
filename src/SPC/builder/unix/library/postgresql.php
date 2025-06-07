@@ -22,7 +22,7 @@ trait postgresql
         $packages = 'zlib openssl readline libxml-2.0';
         $optional_packages = [
             'zstd' => 'libzstd',
-            // 'ldap' => 'ldap',
+            'ldap' => 'ldap',
             'libxslt' => 'libxslt',
             'icu' => 'icu-i18n',
         ];
@@ -97,8 +97,8 @@ trait postgresql
                 '--with-readline ' .
                 '--with-libxml ' .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
-                // ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
-                '--without-ldap ' .
+                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
+                // '--without-ldap ' .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
                 ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
                 '--without-lz4 ' .
