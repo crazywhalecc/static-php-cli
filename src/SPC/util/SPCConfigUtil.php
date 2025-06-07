@@ -31,7 +31,6 @@ class SPCConfigUtil
      * @param array $libraries           Additional library name list
      * @param bool  $include_suggest_ext Include suggested extensions
      * @param bool  $include_suggest_lib Include suggested libraries
-     * @param bool  $with_dependencies
      * @return array{
      *     cflags: string,
      *     ldflags: string,
