@@ -22,7 +22,7 @@ trait tidy
         }
         FileSystem::resetDir($this->source_dir . '/build-dir');
         shell()->cd($this->source_dir . '/build-dir')
-            ->exec("cmake {$this->builder->makeCmakeArgs()} {$extra} -DSUPPORT_CONSOLE_APP=OFF ..")
+            ->exec("cmake {$this->builder->makeCmakeArgs()} {$extra} -DBUILD_SHARED_LIB=OFF -DSUPPORT_CONSOLE_APP=OFF ..")
             ->exec("cmake --build . -j {$this->builder->concurrency}")
             ->exec('make install');
         $this->patchPkgconfPrefix(['tidy.pc']);
