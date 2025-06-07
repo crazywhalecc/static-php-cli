@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
