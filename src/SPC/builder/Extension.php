@@ -344,6 +344,37 @@ class Extension
     }
 
     /**
+     * Get required static and shared libraries as a pair of strings in format -l{libname} -l{libname2}
+     *
+     * @return array [staticLibString, sharedLibString]
+     */
+    private function getStaticAndSharedLibs(): array
+    {
+        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
+        $sharedLibString = '';
+        $staticLibString = '';
+        $staticLibs = $this->getLibFilesString();
+        $staticLibs = str_replace(BUILD_LIB_PATH . '/lib', '-l', $staticLibs);
+        $staticLibs = str_replace('.a', '', $staticLibs);
+        $staticLibs = explode('-l', $staticLibs . ' ' . $config['libs']);
+        foreach ($staticLibs as $lib) {
+            $lib = trim($lib);
+            if ($lib === '') {
+                continue;
+            }
+            $static_lib = 'lib' . $lib . '.a';
+            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib)) {
+                if (!str_contains($staticLibString, '-l' . $lib . ' ')) {
+                    $staticLibString .= '-l' . $lib . ' ';
+                }
+            } elseif (!str_contains($sharedLibString, '-l' . $lib . ' ')) {
+                $sharedLibString .= '-l' . $lib . ' ';
+            }
+        }
+        return [$staticLibString, $sharedLibString];
+    }
+
+    /**
      * Build shared extension for Unix
      *
      * @throws FileSystemException
@@ -355,25 +386,12 @@ class Extension
     public function buildUnixShared(): void
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
-        $sharedLibs = '';
-        $staticLibs = '';
-        foreach (explode('-l', $config['libs']) as $lib) {
-            $lib = trim($lib);
-            if ($lib === '') {
-                continue;
-            }
-            $static_lib = 'lib' . $lib . '.a';
-            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib) && !str_contains($staticLibs, '-llib')) {
-                $staticLibs .= ' -l' . $lib;
-            } elseif (!str_contains($sharedLibs, '-l' . $lib)) {
-                $sharedLibs .= ' -l' . $lib;
-            }
-        }
+        [$staticLibString, $sharedLibString] = $this->getStaticAndSharedLibs();
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibs . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibs,
+            'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibString . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         // prepare configure args
