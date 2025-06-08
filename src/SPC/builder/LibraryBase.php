@@ -328,6 +328,21 @@ abstract class LibraryBase
         return false;
     }
 
+    public function getIncludeDir(): string
+    {
+        return BUILD_INCLUDE_PATH;
+    }
+
+    public function getBuildRootPath(): string
+    {
+        return BUILD_ROOT_PATH;
+    }
+
+    public function getLibDir(): string
+    {
+        return BUILD_LIB_PATH;
+    }
+
     /**
      * Build this library.
      *
