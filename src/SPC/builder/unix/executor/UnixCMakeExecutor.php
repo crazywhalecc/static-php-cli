@@ -48,14 +48,19 @@ class UnixCMakeExecutor extends Executor
      * Add optional library configuration.
      * This method checks if a library is available and adds the corresponding arguments to the CMake configuration.
      *
-     * @param  string $name       library name to check
-     * @param  string $true_args  arguments to use if the library is available
-     * @param  string $false_args arguments to use if the library is not available
+     * @param  string          $name       library name to check
+     * @param  \Closure|string $true_args  arguments to use if the library is available (allow closure, returns string)
+     * @param  string          $false_args arguments to use if the library is not available
      * @return $this
      */
-    public function optionalLib(string $name, string $true_args, string $false_args = ''): static
+    public function optionalLib(string $name, \Closure|string $true_args, string $false_args = ''): static
     {
-        $this->addConfigureArgs($this->library->getBuilder()->getLib($name) ? $true_args : $false_args);
+        if ($get = $this->library->getBuilder()->getLib($name)) {
+            $args = $true_args instanceof \Closure ? $true_args($get) : $true_args;
+        } else {
+            $args = $false_args;
+        }
+        $this->addConfigureArgs($args);
         return $this;
     }
 

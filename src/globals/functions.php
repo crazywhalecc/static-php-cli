@@ -210,3 +210,9 @@ function get_cmake_version(): ?string
     }
     return null;
 }
+
+function cmake_boolean_args(string $arg_name, bool $negative = false): array
+{
+    $res = ["-D{$arg_name}=ON", "-D{$arg_name}=OFF"];
+    return $negative ? array_reverse($res) : $res;
+}
