@@ -78,6 +78,7 @@ class UnixCMakeExecutor extends Executor
     public function toStep(int $step): static
     {
         $this->steps = $step;
+        return $this;
     }
 
     /**
