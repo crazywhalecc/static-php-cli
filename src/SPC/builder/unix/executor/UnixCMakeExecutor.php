@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\executor;
 
+use Closure;
 use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 
+/**
+ * Unix-like OS cmake command executor.
+ */
 class UnixCMakeExecutor extends Executor
 {
-    /** @var null|string CMake build dir */
     protected ?string $cmake_build_dir = null;
 
-    /** @var array CMake additional configure arguments */
     protected array $configure_args = [];
 
     protected ?array $custom_default_args = null;
@@ -80,6 +82,12 @@ class UnixCMakeExecutor extends Executor
         return $this;
     }
 
+    /**
+     * To build steps.
+     *
+     * @param  int   $step Step number, accept 1-3
+     * @return $this
+     */
     public function toStep(int $step): static
     {
         $this->steps = $step;
@@ -106,6 +114,10 @@ class UnixCMakeExecutor extends Executor
         return $this;
     }
 
+    /**
+     * Set the reset status.
+     * If we set it to false, it will not clean and create the specified cmake working directory.
+     */
     public function setReset(bool $reset): static
     {
         $this->reset = $reset;
@@ -152,6 +164,8 @@ class UnixCMakeExecutor extends Executor
     }
 
     /**
+     * Generate cmake toolchain file for current spc instance, and return the file path.
+     *
      * @return string              CMake toolchain file path
      * @throws FileSystemException
      * @throws WrongUsageException
