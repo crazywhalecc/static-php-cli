@@ -20,11 +20,16 @@ class UnixCMakeExecutor extends Executor
 
     protected int $steps = 3;
 
+    protected bool $reset = true;
+
     public function build(string $build_pos = '..'): void
     {
         // set cmake dir
         $this->initCMakeBuildDir();
-        FileSystem::resetDir($this->cmake_build_dir);
+
+        if ($this->reset) {
+            FileSystem::resetDir($this->cmake_build_dir);
+        }
 
         // prepare environment variables
         $env = [
@@ -98,6 +103,12 @@ class UnixCMakeExecutor extends Executor
     public function setCustomDefaultArgs(...$args): static
     {
         $this->custom_default_args = $args;
+        return $this;
+    }
+
+    public function setReset(bool $reset): static
+    {
+        $this->reset = $reset;
         return $this;
     }
 
