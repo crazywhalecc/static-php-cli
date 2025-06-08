@@ -36,8 +36,6 @@ class MacOSBuilder extends UnixBuilderBase
         // cflags
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
-        // cmake toolchain
-        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('Darwin', getenv('SPC_ARCH'), $this->arch_c_flags);
 
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
