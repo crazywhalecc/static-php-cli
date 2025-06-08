@@ -71,7 +71,7 @@ class UnixCMakeExecutor extends Executor
      */
     public function addConfigureArgs(...$args): static
     {
-        $this->configure_args = [$this->configure_args, ...$args];
+        $this->configure_args = [...$this->configure_args, ...$args];
         return $this;
     }
 
@@ -123,7 +123,6 @@ class UnixCMakeExecutor extends Executor
             '-DCMAKE_INSTALL_INCLUDE_DIR=include',
             '-DBUILD_SHARED_LIBS=OFF',
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
-            '..',
         ]);
     }
 
