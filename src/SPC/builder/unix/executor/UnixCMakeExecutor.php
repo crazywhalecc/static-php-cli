@@ -208,7 +208,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(CMAKE_EXE_LINKER_FLAGS "-ldl -lpthread -lm -lutil")
 CMAKE;
-        // 有时候系统的 cmake 找不到 ar 命令，真奇怪
+        // Whoops, linux may need CMAKE_AR sometimes
         if (PHP_OS_FAMILY === 'Linux') {
             $toolchain .= "\nSET(CMAKE_AR \"ar\")";
         }
