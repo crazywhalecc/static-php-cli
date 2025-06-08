@@ -356,9 +356,7 @@ class Extension
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
         $sharedLibs = '';
-        $staticLibs = $this->getLibFilesString();
-        $staticLibs = str_replace(BUILD_LIB_PATH . '/lib', '-l', $staticLibs);
-        $staticLibs = str_replace('.a', '', $staticLibs);
+        $staticLibs = '';
         foreach (explode('-l', $config['libs']) as $lib) {
             $lib = trim($lib);
             if ($lib === '') {
