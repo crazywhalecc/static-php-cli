@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\unix\executor\UnixCMakeExecutor;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\store\FileSystem;
 
 trait zstd
 {
@@ -16,17 +16,13 @@ trait zstd
      */
     protected function build(): void
     {
-        FileSystem::resetDir($this->source_dir . '/build/cmake/build');
-        shell()->cd($this->source_dir . '/build/cmake/build')
-            ->exec(
-                'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
-                '-DZSTD_BUILD_STATIC=ON ' .
-                '-DZSTD_BUILD_SHARED=OFF ' .
-                '..'
+        UnixCMakeExecutor::create($this)
+            ->setCMakeBuildDir("{$this->source_dir}/build/cmake/build")
+            ->addConfigureArgs(
+                '-DZSTD_BUILD_STATIC=ON',
+                '-DZSTD_BUILD_SHARED=OFF',
             )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+            ->build();
         $this->patchPkgconfPrefix(['libzstd.pc']);
     }
 }

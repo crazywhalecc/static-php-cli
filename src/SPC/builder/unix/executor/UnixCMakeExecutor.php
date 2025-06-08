@@ -18,7 +18,9 @@ class UnixCMakeExecutor extends Executor
 
     protected ?array $custom_default_args = null;
 
-    public function build(): void
+    protected int $steps = 3;
+
+    public function build(string $build_pos = '..'): void
     {
         // set cmake dir
         $this->initCMakeBuildDir();
@@ -35,13 +37,13 @@ class UnixCMakeExecutor extends Executor
         $shell = shell()->cd($this->cmake_build_dir)->setEnv($env);
 
         // config
-        $shell->execWithEnv("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()}");
+        $this->steps >= 1 && $shell->execWithEnv("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
 
         // make
-        $shell->execWithEnv("cmake --build . -j {$this->library->getBuilder()->concurrency}");
+        $this->steps >= 2 && $shell->execWithEnv("cmake --build . -j {$this->library->getBuilder()->concurrency}");
 
         // install
-        $shell->execWithEnv('make install');
+        $this->steps >= 3 && $shell->execWithEnv('make install');
     }
 
     /**
@@ -71,6 +73,11 @@ class UnixCMakeExecutor extends Executor
     {
         $this->configure_args = [$this->configure_args, ...$args];
         return $this;
+    }
+
+    public function toStep(int $step): static
+    {
+        $this->steps = $step;
     }
 
     /**
@@ -113,6 +120,7 @@ class UnixCMakeExecutor extends Executor
             '-DCMAKE_INSTALL_BINDIR=bin',
             '-DCMAKE_INSTALL_LIBDIR=lib',
             '-DCMAKE_INSTALL_INCLUDE_DIR=include',
+            '-DBUILD_SHARED_LIBS=OFF',
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
             '..',
         ]);

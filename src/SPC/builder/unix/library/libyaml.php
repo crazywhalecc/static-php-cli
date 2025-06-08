@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\builder\unix\executor\UnixCMakeExecutor;
 use SPC\store\FileSystem;
 
 trait libyaml
@@ -25,29 +24,8 @@ trait libyaml
         return null;
     }
 
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     protected function build(): void
     {
-        [$lib, $include, $destdir] = SEPARATED_PATH;
-
-        FileSystem::resetDir($this->source_dir . '/build');
-        shell()->cd($this->source_dir . '/build')
-            ->exec(
-                'cmake ' .
-                // '--debug-find ' .
-                '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DBUILD_TESTING=OFF ' .
-                '-DBUILD_SHARED_LIBS=OFF ' .
-                '-DCMAKE_INSTALL_PREFIX=/ ' .
-                "-DCMAKE_INSTALL_LIBDIR={$lib} " .
-                "-DCMAKE_INSTALL_INCLUDEDIR={$include} " .
-                "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
-                '..'
-            )
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+        UnixCMakeExecutor::create($this)->addConfigureArgs('-DBUILD_TESTING=OFF')->build();
     }
 }

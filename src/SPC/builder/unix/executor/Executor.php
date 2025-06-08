@@ -17,6 +17,4 @@ abstract class Executor
     {
         return new static($library);
     }
-
-    abstract public function build(): void;
 }

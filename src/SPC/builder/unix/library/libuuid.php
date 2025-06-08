@@ -4,26 +4,18 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\unix\executor\UnixCMakeExecutor;
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait libuuid
 {
     /**
      * @throws FileSystemException
-     * @throws RuntimeException
      */
     protected function build(): void
     {
-        FileSystem::resetDir($this->source_dir . '/build');
-        shell()->cd($this->source_dir . '/build')
-            ->exec(
-                'cmake ' .
-                "{$this->builder->makeCmakeArgs()} " .
-                '..'
-            )
-            ->exec("cmake --build . -j {$this->builder->concurrency}");
+        UnixCMakeExecutor::create($this)->toStep(2)->build();
         copy($this->source_dir . '/build/libuuid.a', BUILD_LIB_PATH . '/libuuid.a');
         FileSystem::createDir(BUILD_INCLUDE_PATH . '/uuid');
         copy($this->source_dir . '/uuid.h', BUILD_INCLUDE_PATH . '/uuid/uuid.h');
