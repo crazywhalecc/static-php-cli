@@ -45,7 +45,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,readline,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
+    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,readline,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
     'Windows' => 'xlswriter,openssl',
 };
 
