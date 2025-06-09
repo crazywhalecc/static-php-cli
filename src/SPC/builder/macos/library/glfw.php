@@ -6,6 +6,7 @@ namespace SPC\builder\macos\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixCMakeExecutor;
 
 class glfw extends MacOSLibraryBase
 {
@@ -17,11 +18,14 @@ class glfw extends MacOSLibraryBase
      */
     protected function build(): void
     {
-        // compile！
-        shell()->cd(SOURCE_PATH . '/ext-glfw/vendor/glfw')
-            ->exec("cmake . {$this->builder->makeCmakeArgs()} -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF")
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install');
+        UnixCMakeExecutor::create($this)
+            ->setBuildDir("{$this->source_dir}/vendor/glfw")
+            ->setReset(false)
+            ->addConfigureArgs(
+                '-DGLFW_BUILD_EXAMPLES=OFF',
+                '-DGLFW_BUILD_TESTS=OFF',
+            )
+            ->build('.');
         // patch pkgconf
         $this->patchPkgconfPrefix(['glfw3.pc']);
     }

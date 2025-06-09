@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use SPC\builder\freebsd\SystemUtil as FreebsdSystemUtil;
 use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
 use SPC\builder\macos\SystemUtil as MacosSystemUtil;
-use SPC\exception\FileSystemException;
 
 /**
  * @internal
@@ -29,15 +28,6 @@ class UnixSystemUtilTest extends TestCase
             self::markTestSkipped('This test is only for Unix');
         }
         $this->util = new $util_class();
-    }
-
-    /**
-     * @throws FileSystemException
-     */
-    public function testMakeCmakeToolchainFile()
-    {
-        $str = $this->util->makeCmakeToolchainFile(PHP_OS_FAMILY, 'x86_64', '');
-        $this->assertIsString($str);
     }
 
     public function testFindCommand()
