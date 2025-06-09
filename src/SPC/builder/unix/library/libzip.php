@@ -20,6 +20,7 @@ trait libzip
             ->optionalLib('bzip2', ...cmake_boolean_args('ENABLE_BZIP2'))
             ->optionalLib('xz', ...cmake_boolean_args('ENABLE_LZMA'))
             ->optionalLib('openssl', ...cmake_boolean_args('ENABLE_OPENSSL'))
+            ->optionalLib('zstd', ...cmake_boolean_args('ENABLE_ZSTD'))
             ->addConfigureArgs(
                 '-DENABLE_GNUTLS=OFF',
                 '-DENABLE_MBEDTLS=OFF',
