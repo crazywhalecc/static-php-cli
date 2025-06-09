@@ -58,7 +58,7 @@ $shared_extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'libffi,libpng,gettext,gmp,imagemagick,ldap,attr,postgresql,libacl,libcares,libiconv,librdkafka,libsodium,libtiff,libxslt,ncurses,nghttp2,nghttp3,ngtcp2,onig,qdbm,readline,sqlite,unixodbc,xz,zlib',
+    'Linux', 'Darwin' => 'libffi,libpng,gettext,gmp,imagemagick,ldap,postgresql,libcares,libiconv,librdkafka,libsodium,libtiff,libxslt,ncurses,nghttp2,nghttp3,ngtcp2,onig,qdbm,readline,sqlite,unixodbc,xz,zlib',
     'Windows' => '',
 };
 
