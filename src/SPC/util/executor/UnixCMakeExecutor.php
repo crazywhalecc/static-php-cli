@@ -33,24 +33,17 @@ class UnixCMakeExecutor extends Executor
             FileSystem::resetDir($this->build_dir);
         }
 
-        // prepare environment variables
-        $env = [
-            'CFLAGS' => $this->library->getLibExtraCFlags(),
-            'LDFLAGS' => $this->library->getLibExtraLdFlags(),
-            'LIBS' => $this->library->getLibExtraLibs(),
-        ];
-
         // prepare shell
-        $shell = shell()->cd($this->build_dir)->setEnv($env);
+        $shell = shell()->cd($this->build_dir)->initializeEnv($this->library);
 
         // config
-        $this->steps >= 1 && $shell->execWithEnv("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
+        $this->steps >= 1 && $shell->exec("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
 
         // make
-        $this->steps >= 2 && $shell->execWithEnv("cmake --build . -j {$this->library->getBuilder()->concurrency}");
+        $this->steps >= 2 && $shell->exec("cmake --build . -j {$this->library->getBuilder()->concurrency}");
 
         // install
-        $this->steps >= 3 && $shell->execWithEnv('make install');
+        $this->steps >= 3 && $shell->exec('make install');
     }
 
     /**

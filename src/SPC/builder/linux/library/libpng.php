@@ -41,15 +41,10 @@ class libpng extends LinuxLibraryBase
             'aarch64' => '--enable-arm-neon ',
             default => '',
         };
-        shell()->cd($this->source_dir)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')
-            ->setEnv([
-                'CFLAGS' => trim($this->getLibExtraCFlags() . ' ' . $this->builder->arch_c_flags),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv(
+            ->exec(
                 'LDFLAGS="-L' . BUILD_LIB_PATH . '" ' .
                 './configure ' .
                 '--disable-shared ' .
@@ -59,9 +54,9 @@ class libpng extends LinuxLibraryBase
                 $optimizations .
                 '--prefix='
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I{$this->source_dir} -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
-            ->execWithEnv('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I{$this->source_dir} -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
+            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
         $this->cleanLaFiles();
     }

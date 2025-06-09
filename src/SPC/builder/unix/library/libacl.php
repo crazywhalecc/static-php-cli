@@ -29,16 +29,12 @@ trait libacl
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => trim('-I' . BUILD_INCLUDE_PATH . ' ' . $this->getLibExtraCFlags()),
-                'LDFLAGS' => trim('-L' . BUILD_LIB_PATH . ' ' . $this->getLibExtraLdFlags()),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv('libtoolize --force --copy')
-            ->execWithEnv('./autogen.sh || autoreconf -if')
-            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests --disable-nls')
-            ->execWithEnv("make -j {$this->builder->concurrency}")
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->appendEnv(['CFLAGS' => "-I{$this->getIncludeDir()}", 'LDFLAGS' => "-L{$this->getLibDir()}"])
+            ->exec('libtoolize --force --copy')
+            ->exec('./autogen.sh || autoreconf -if')
+            ->exec('./configure --prefix= --enable-static --disable-shared --disable-tests --disable-nls')
+            ->exec("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['libacl.pc'], PKGCONF_PATCH_PREFIX);

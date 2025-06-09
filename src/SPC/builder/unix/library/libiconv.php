@@ -10,18 +10,17 @@ trait libiconv
     {
         [,,$destdir] = SEPARATED_PATH;
 
-        shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv(
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->exec(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--enable-extra-encodings ' .
                 '--prefix='
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . $destdir);
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . $destdir);
 
         if (file_exists(BUILD_BIN_PATH . '/iconv')) {
             unlink(BUILD_BIN_PATH . '/iconv');

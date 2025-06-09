@@ -19,6 +19,7 @@ trait brotli
     {
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->getSourceDir()}/build-dir")
+            ->addConfigureArgs("-DSHARE_INSTALL_PREFIX={$this->getBuildRootPath()}")
             ->build();
 
         $this->patchPkgconfPrefix(['libbrotlicommon.pc', 'libbrotlidec.pc', 'libbrotlienc.pc']);

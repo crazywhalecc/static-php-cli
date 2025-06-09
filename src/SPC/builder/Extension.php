@@ -301,10 +301,10 @@ class Extension
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
-            ->execWithEnv(BUILD_BIN_PATH . '/phpize')
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
-            ->execWithEnv('make clean')
-            ->execWithEnv('make -j' . $this->builder->concurrency);
+            ->exec(BUILD_BIN_PATH . '/phpize')
+            ->exec('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
+            ->exec('make clean')
+            ->exec('make -j' . $this->builder->concurrency);
 
         // copy shared library
         copy($this->source_dir . '/modules/' . $this->getDistName() . '.so', BUILD_LIB_PATH . '/' . $this->getDistName() . '.so');

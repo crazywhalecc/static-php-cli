@@ -13,9 +13,9 @@ trait pkgconfig
         $cflags = PHP_OS_FAMILY !== 'Linux' ? "{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion" : '';
         $ldflags = !($this instanceof LinuxLibraryBase) || getenv('SPC_LIBC') === 'glibc' ? '' : '--static';
 
-        shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => "{$this->getLibExtraCFlags()} {$cflags}", 'LDFLAGS' => "{$this->getLibExtraLdFlags()} {$ldflags}", 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv(
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->appendEnv(['CFLAGS' => $cflags, 'LDFLAGS' => $ldflags])
+            ->exec(
                 './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .
@@ -29,8 +29,8 @@ trait pkgconfig
                 '--without-pc-path'
             )
             ->exec('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install-exec');
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install-exec');
         shell()->exec('strip ' . BUILD_ROOT_PATH . '/bin/pkg-config');
     }
 }

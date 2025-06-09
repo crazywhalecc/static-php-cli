@@ -18,7 +18,10 @@ trait tidy
     {
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/build-dir")
-            ->addConfigureArgs('-DSUPPORT_CONSOLE_APP=OFF')
+            ->addConfigureArgs(
+                '-DSUPPORT_CONSOLE_APP=OFF',
+                '-DBUILD_SHARED_LIB=OFF'
+            )
             ->build();
         $this->patchPkgconfPrefix(['tidy.pc']);
     }
