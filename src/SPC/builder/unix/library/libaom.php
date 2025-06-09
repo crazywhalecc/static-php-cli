@@ -18,7 +18,7 @@ trait libaom
     {
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")
-            ->addConfigureArgs('-DAOM_TARGET_GPU=generic')
+            ->addConfigureArgs('-DAOM_TARGET_CPU=generic')
             ->build();
         $this->patchPkgconfPrefix(['aom.pc']);
     }
