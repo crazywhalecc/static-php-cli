@@ -70,6 +70,7 @@ class UnixShell
             'CFLAGS' => $library->getLibExtraCFlags(),
             'LDFLAGS' => $library->getLibExtraLdFlags(),
             'LIBS' => $library->getLibExtraLibs(),
+            'CXXFLAGS' => $library->getLibExtraCXXFlags(),
         ]);
         return $this;
     }
