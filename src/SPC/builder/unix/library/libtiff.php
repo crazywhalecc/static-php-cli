@@ -22,9 +22,8 @@ trait libtiff
         // We disabled lzma, zstd, webp, libdeflate by default to reduce the size of the binary
         $extra_libs .= ' --disable-lzma --disable-zstd --disable-webp --disable-libdeflate';
 
-        $shell = shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv(
+        $shell = shell()->cd($this->source_dir)->initLibBuildEnv($this)
+            ->exec(
                 './configure ' .
                 '--enable-static --disable-shared ' .
                 "{$extra_libs} " .
@@ -34,12 +33,12 @@ trait libtiff
 
         // TODO: Remove this check when https://gitlab.com/libtiff/libtiff/-/merge_requests/635 will be merged and released
         if (file_exists($this->source_dir . '/html')) {
-            $shell->execWithEnv('make clean');
+            $shell->exec('make clean');
         }
 
         $shell
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libtiff-4.pc']);
     }
 }

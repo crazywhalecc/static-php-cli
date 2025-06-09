@@ -24,11 +24,10 @@ trait libcares
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv('./configure --prefix= --enable-static --disable-shared --disable-tests --with-pic')
-            ->execWithEnv("make -j {$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+            ->exec('./configure --prefix= --enable-static --disable-shared --disable-tests --with-pic')
+            ->exec("make -j {$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['libcares.pc'], PKGCONF_PATCH_PREFIX);
     }

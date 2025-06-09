@@ -40,9 +40,8 @@ trait nghttp2
 
         [,,$destdir] = SEPARATED_PATH;
 
-        shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv(
+        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+            ->exec(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
@@ -51,9 +50,9 @@ trait nghttp2
                 $args . ' ' .
                 '--prefix='
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv("make install DESTDIR={$destdir}");
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec("make install DESTDIR={$destdir}");
         $this->patchPkgconfPrefix(['libnghttp2.pc']);
     }
 }

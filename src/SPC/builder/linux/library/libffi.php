@@ -21,8 +21,8 @@ class libffi extends LinuxLibraryBase
         $arch = getenv('SPC_ARCH');
 
         shell()->cd($this->source_dir)
-            ->setEnv(['CFLAGS' => $this->getLibExtraCFlags(), 'LDFLAGS' => $this->getLibExtraLdFlags(), 'LIBS' => $this->getLibExtraLibs()])
-            ->execWithEnv(
+            ->initLibBuildEnv($this)
+            ->exec(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
@@ -31,9 +31,9 @@ class libffi extends LinuxLibraryBase
                 '--prefix= ' .
                 "--libdir={$lib}"
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv("make install DESTDIR={$destdir}");
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec("make install DESTDIR={$destdir}");
 
         if (is_file(BUILD_ROOT_PATH . '/lib64/libffi.a')) {
             copy(BUILD_ROOT_PATH . '/lib64/libffi.a', BUILD_ROOT_PATH . '/lib/libffi.a');

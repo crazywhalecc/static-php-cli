@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
+use SPC\builder\freebsd\library\BSDLibraryBase;
+use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\RuntimeException;
 use ZM\Logger\ConsoleColor;
 
@@ -48,7 +51,41 @@ class UnixShell
         if (!$this->debug) {
             $cmd .= ' 1>/dev/null 2>&1';
         }
-        f_passthru($cmd);
+        $env_str = $this->getEnvString();
+        if (!empty($env_str)) {
+            $env_str = "{$env_str} ";
+        }
+        f_passthru("{$env_str}{$cmd}");
+        return $this;
+    }
+
+    /**
+     * Init the environment variable that common build will be used.
+     *
+     * @param BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library Library class
+     */
+    public function initLibBuildEnv(BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library): UnixShell
+    {
+        $this->setEnv([
+            'CFLAGS' => $library->getLibExtraCFlags(),
+            'LDFLAGS' => $library->getLibExtraLdFlags(),
+            'LIBS' => $library->getLibExtraLibs(),
+        ]);
+        return $this;
+    }
+
+    public function appendEnv(array $env): UnixShell
+    {
+        foreach ($env as $k => $v) {
+            if ($v === '') {
+                continue;
+            }
+            if (!isset($this->env[$k])) {
+                $this->env[$k] = $v;
+            } else {
+                $this->env[$k] = "{$v} {$this->env[$k]}";
+            }
+        }
         return $this;
     }
 
@@ -78,14 +115,6 @@ class UnixShell
             $this->env[$k] = $v;
         }
         return $this;
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    public function execWithEnv(string $cmd): UnixShell
-    {
-        return $this->exec($this->getEnvString() . ' ' . $cmd);
     }
 
     private function getEnvString(): string
