@@ -46,7 +46,7 @@ trait imagemagick
 
         // libxml iconv patch
         $required_libs .= $this instanceof MacOSLibraryBase ? ('-liconv') : '';
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->appendEnv(['LDFLAGS' => $ldflags, 'LIBS' => $required_libs, 'PKG_CONFIG' => '$PKG_CONFIG --static'])
             ->exec(
                 './configure ' .

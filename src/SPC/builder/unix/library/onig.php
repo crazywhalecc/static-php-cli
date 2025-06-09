@@ -17,7 +17,7 @@ trait onig
     {
         [,,$destdir] = SEPARATED_PATH;
 
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec('./configure --enable-static --disable-shared --prefix=')
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")

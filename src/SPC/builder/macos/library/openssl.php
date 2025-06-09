@@ -49,7 +49,7 @@ class openssl extends MacOSLibraryBase
         }
         $arch = getenv('SPC_ARCH');
 
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 "./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/

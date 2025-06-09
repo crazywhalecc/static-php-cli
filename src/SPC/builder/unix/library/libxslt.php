@@ -24,7 +24,7 @@ trait libxslt
                 $required_libs .= ' ' . $dep->getStaticLibFiles();
             }
         }
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->appendEnv([
                 'CFLAGS' => "-I{$this->getIncludeDir()}",
                 'LDFLAGS' => "-L{$this->getLibDir()}",

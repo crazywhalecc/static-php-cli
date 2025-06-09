@@ -64,7 +64,7 @@ class openssl extends LinuxLibraryBase
 
         $clang_postfix = SystemUtil::getCCType(getenv('CC')) === 'clang' ? '-clang' : '';
 
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 "{$env} ./Configure no-shared {$extra} " .
                 '--prefix=/ ' .

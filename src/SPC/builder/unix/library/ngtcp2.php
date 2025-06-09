@@ -30,7 +30,7 @@ trait ngtcp2
             $args .= ' --with-libbrotlienc=yes LIBBROTLIENC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIENC_LIBS="' . $brotli->getStaticLibFiles() . '"';
         }
 
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 './configure ' .
                 '--enable-static ' .

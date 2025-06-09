@@ -64,7 +64,7 @@ class UnixShell
      *
      * @param BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library Library class
      */
-    public function initLibBuildEnv(BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library): UnixShell
+    public function initializeEnv(BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library): UnixShell
     {
         $this->setEnv([
             'CFLAGS' => $library->getLibExtraCFlags(),

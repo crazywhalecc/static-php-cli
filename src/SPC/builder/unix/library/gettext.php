@@ -16,7 +16,7 @@ trait gettext
         $cflags = $this->builder->getOption('enable-zts') ? '-lpthread -D_REENTRANT' : '';
         $ldflags = $this->builder->getOption('enable-zts') ? '-lpthread' : '';
 
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->appendEnv(['CFLAGS' => $cflags, 'LDFLAGS' => $ldflags])
             ->exec(
                 './configure ' .

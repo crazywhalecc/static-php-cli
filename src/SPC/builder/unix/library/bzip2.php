@@ -16,7 +16,7 @@ trait bzip2
 
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec("make PREFIX='" . BUILD_ROOT_PATH . "' clean")
             ->exec("make -j{$this->builder->concurrency} {$this->builder->getEnvString()} PREFIX='" . BUILD_ROOT_PATH . "' libbz2.a")
             ->exec('cp libbz2.a ' . BUILD_LIB_PATH)

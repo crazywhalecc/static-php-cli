@@ -21,7 +21,7 @@ class libffi extends LinuxLibraryBase
         $arch = getenv('SPC_ARCH');
 
         shell()->cd($this->source_dir)
-            ->initLibBuildEnv($this)
+            ->initializeEnv($this)
             ->exec(
                 './configure ' .
                 '--enable-static ' .

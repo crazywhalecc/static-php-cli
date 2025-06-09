@@ -11,7 +11,7 @@ trait ncurses
     protected function build(): void
     {
         $filelist = FileSystem::scanDirFiles(BUILD_BIN_PATH, relative: true);
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 './configure ' .
                 '--enable-static ' .

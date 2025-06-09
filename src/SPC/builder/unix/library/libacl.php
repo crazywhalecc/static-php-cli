@@ -29,7 +29,7 @@ trait libacl
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->appendEnv(['CFLAGS' => "-I{$this->getIncludeDir()}", 'LDFLAGS' => "-L{$this->getLibDir()}"])
             ->exec('libtoolize --force --copy')
             ->exec('./autogen.sh || autoreconf -if')

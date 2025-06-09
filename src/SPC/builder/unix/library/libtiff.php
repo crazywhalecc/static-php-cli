@@ -22,7 +22,7 @@ trait libtiff
         // We disabled lzma, zstd, webp, libdeflate by default to reduce the size of the binary
         $extra_libs .= ' --disable-lzma --disable-zstd --disable-webp --disable-libdeflate';
 
-        $shell = shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        $shell = shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 './configure ' .
                 '--enable-static --disable-shared ' .

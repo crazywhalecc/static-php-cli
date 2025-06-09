@@ -34,7 +34,7 @@ class UnixCMakeExecutor extends Executor
         }
 
         // prepare shell
-        $shell = shell()->cd($this->build_dir)->initLibBuildEnv($this->library);
+        $shell = shell()->cd($this->build_dir)->initializeEnv($this->library);
 
         // config
         $this->steps >= 1 && $shell->exec("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");

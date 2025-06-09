@@ -26,7 +26,7 @@ trait ldap
         $alt .= $this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '--enable-argon2=no ';
         f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
         f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->appendEnv(['LDFLAGS' => "-L{$this->getLibDir()}"])
             ->exec(
                 $this->builder->makeAutoconfFlags(AUTOCONF_CPPFLAGS) .

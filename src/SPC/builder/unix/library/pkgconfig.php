@@ -13,7 +13,7 @@ trait pkgconfig
         $cflags = PHP_OS_FAMILY !== 'Linux' ? "{$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion" : '';
         $ldflags = !($this instanceof LinuxLibraryBase) || getenv('SPC_LIBC') === 'glibc' ? '' : '--static';
 
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->appendEnv(['CFLAGS' => $cflags, 'LDFLAGS' => $ldflags])
             ->exec(
                 './configure ' .

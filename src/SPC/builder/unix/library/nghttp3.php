@@ -15,7 +15,7 @@ trait nghttp3
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 './configure ' .
                 '--enable-static ' .

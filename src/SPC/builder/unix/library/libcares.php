@@ -24,7 +24,7 @@ trait libcares
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec('./configure --prefix= --enable-static --disable-shared --disable-tests --with-pic')
             ->exec("make -j {$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);

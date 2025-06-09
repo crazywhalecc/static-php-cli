@@ -15,7 +15,7 @@ trait readline
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initLibBuildEnv($this)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 './configure ' .
                 '--enable-static=yes ' .
