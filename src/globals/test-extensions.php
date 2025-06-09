@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    // '8.1',
-    // '8.2',
-    // '8.3',
+    '8.1',
+    '8.2',
+    '8.3',
     '8.4',
 ];
 
@@ -45,19 +45,19 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'openssl,curl',
+    'Linux', 'Darwin' => 'curl',
     'Windows' => 'xlswriter,openssl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'xdebug',
+    'Linux' => '',
     'Windows', 'Darwin' => '',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'nghttp2,nghttp3,ngtcp2',
+    'Linux', 'Darwin' => 'brotli,curl,freetype,gmssl,libaom,libavif,libde265,libevent,libheif,libjpeg,librabbitmq,libssh2,libuuid,libuv,libwebp,libxml2,libyaml,libzip,mimalloc,snappy,tidy,zstd',
     'Windows' => '',
 };
 
