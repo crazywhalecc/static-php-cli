@@ -16,7 +16,7 @@ trait zlib
      */
     protected function build(): void
     {
-        UnixAutoconfExecutor::create($this)->configure('--static')->make();
+        UnixAutoconfExecutor::create($this)->exec("./configure --static --prefix={$this->getBuildRootPath()}")->make();
         $this->patchPkgconfPrefix(['zlib.pc']);
     }
 }
