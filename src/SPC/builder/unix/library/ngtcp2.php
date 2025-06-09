@@ -30,13 +30,8 @@ trait ngtcp2
             $args .= ' --with-libbrotlienc=yes LIBBROTLIENC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIENC_LIBS="' . $brotli->getStaticLibFiles() . '"';
         }
 
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv(
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->exec(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
@@ -45,9 +40,9 @@ trait ngtcp2
                 $args . ' ' .
                 '--prefix='
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libngtcp2.pc', 'libngtcp2_crypto_ossl.pc']);
         $this->patchLaDependencyPrefix(['libngtcp2.la', 'libngtcp2_crypto_ossl.la']);
 

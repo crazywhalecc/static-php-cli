@@ -49,14 +49,9 @@ trait imagemagick
 
         // libxml iconv patch
         $required_libs .= $this instanceof MacOSLibraryBase ? ('-liconv') : '';
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags() ?: $ldflags,
-                'LIBS' => $this->getLibExtraLibs() ?: $required_libs,
-                'PKG_CONFIG' => '$PKG_CONFIG --static',
-            ])
-            ->execWithEnv(
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->appendEnv(['LDFLAGS' => $ldflags, 'LIBS' => $required_libs, 'PKG_CONFIG' => '$PKG_CONFIG --static'])
+            ->exec(
                 './configure ' .
                 '--enable-static --disable-shared --with-pic ' .
                 $extra .

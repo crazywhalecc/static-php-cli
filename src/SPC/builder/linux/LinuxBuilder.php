@@ -48,14 +48,6 @@ class LinuxBuilder extends UnixBuilderBase
         // cflags
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
-        // cmake toolchain
-        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile(
-            'Linux',
-            $arch,
-            $this->arch_c_flags,
-            getenv('CC'),
-            getenv('CXX'),
-        );
 
         // cross-compiling is not supported yet
         /*if (php_uname('m') !== $this->arch) {

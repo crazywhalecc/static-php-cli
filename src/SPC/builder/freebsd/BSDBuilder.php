@@ -47,8 +47,6 @@ class BSDBuilder extends UnixBuilderBase
         // cflags
         $this->arch_c_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
         $this->arch_cxx_flags = SystemUtil::getArchCFlags($this->getOption('arch'));
-        // cmake toolchain
-        $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile('BSD', $this->getOption('arch'), $this->arch_c_flags);
 
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);

@@ -15,18 +15,11 @@ trait zlib
      */
     protected function build(): void
     {
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv('./configure --static --prefix=')
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv("make install DESTDIR={$destdir}");
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->exec('./configure --static --prefix=')
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['zlib.pc']);
     }
 }

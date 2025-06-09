@@ -139,4 +139,13 @@ trait UnixLibraryTrait
     {
         return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
     }
+
+    public function getLibExtraCXXFlags(): string
+    {
+        $env = getenv($this->getSnakeCaseName() . '_CXXFLAGS') ?: '';
+        if (!str_contains($env, $this->builder->arch_cxx_flags)) {
+            $env .= $this->builder->arch_cxx_flags;
+        }
+        return $env;
+    }
 }

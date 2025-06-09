@@ -7,7 +7,6 @@ namespace SPC\builder\unix;
 use SPC\builder\BuilderBase;
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -24,9 +23,6 @@ abstract class UnixBuilderBase extends BuilderBase
 
     /** @var string C++ flags */
     public string $arch_cxx_flags;
-
-    /** @var string cmake toolchain file */
-    public string $cmake_toolchain_file;
 
     /**
      * @throws WrongUsageException
@@ -54,24 +50,6 @@ abstract class UnixBuilderBase extends BuilderBase
             }
         }
         return array_map(fn ($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
-    }
-
-    /**
-     * Return generic cmake options when configuring cmake projects
-     */
-    public function makeCmakeArgs(): string
-    {
-        $extra = $this instanceof LinuxBuilder ? '-DCMAKE_C_COMPILER=' . getenv('CC') . ' ' : '';
-        return $extra .
-            '-DBUILD_STATIC_LIBS=ON ' .
-            '-DBUILD_SHARED_LIBS=OFF ' .
-            '-DPOSITION_INDEPENDENT_CODE=ON ' .
-            '-DCMAKE_BUILD_TYPE=Release ' .
-            '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
-            '-DCMAKE_INSTALL_BINDIR=bin ' .
-            '-DCMAKE_INSTALL_LIBDIR=lib ' .
-            '-DCMAKE_INSTALL_INCLUDEDIR=include ' .
-            "-DCMAKE_TOOLCHAIN_FILE={$this->cmake_toolchain_file}";
     }
 
     /**

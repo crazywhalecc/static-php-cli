@@ -6,7 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\store\FileSystem;
+use SPC\util\executor\UnixCMakeExecutor;
 
 trait libssh2
 {
@@ -16,19 +16,14 @@ trait libssh2
      */
     protected function build(): void
     {
-        $enable_zlib = $this->builder->getLib('zlib') !== null ? 'ON' : 'OFF';
-
-        FileSystem::resetDir($this->source_dir . '/build');
-        shell()->cd($this->source_dir . '/build')
-            ->exec(
-                "cmake {$this->builder->makeCmakeArgs()} " .
-                '-DBUILD_EXAMPLES=OFF ' .
-                '-DBUILD_TESTING=OFF ' .
-                "-DENABLE_ZLIB_COMPRESSION={$enable_zlib} " .
-                '..'
+        UnixCMakeExecutor::create($this)
+            ->optionalLib('zlib', ...cmake_boolean_args('ENABLE_ZLIB_COMPRESSION'))
+            ->addConfigureArgs(
+                '-DBUILD_EXAMPLES=OFF',
+                '-DBUILD_TESTING=OFF'
             )
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+            ->build();
+
         $this->patchPkgconfPrefix(['libssh2.pc']);
     }
 }

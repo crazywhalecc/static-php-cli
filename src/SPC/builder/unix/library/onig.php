@@ -17,15 +17,10 @@ trait onig
     {
         [,,$destdir] = SEPARATED_PATH;
 
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv('./configure --enable-static --disable-shared --enable-pic --prefix=')
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->exec('./configure --enable-static --disable-shared --enable-pic --prefix=')
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
             ->exec("make install DESTDIR={$destdir}");
         $this->patchPkgconfPrefix(['oniguruma.pc']);
     }

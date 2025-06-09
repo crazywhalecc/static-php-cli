@@ -6,7 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\store\FileSystem;
+use SPC\util\executor\UnixCMakeExecutor;
 
 trait libde265
 {
@@ -16,13 +16,9 @@ trait libde265
      */
     protected function build(): void
     {
-        // CMake needs a clean build directory
-        FileSystem::resetDir($this->source_dir . '/build');
-        // Start build
-        shell()->cd($this->source_dir . '/build')
-            ->exec("cmake {$this->builder->makeCmakeArgs()} ..")
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+        UnixCMakeExecutor::create($this)
+            ->addConfigureArgs('-DENABLE_SDL=OFF')
+            ->build();
         $this->patchPkgconfPrefix(['libde265.pc']);
     }
 }

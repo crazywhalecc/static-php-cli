@@ -5,25 +5,25 @@ docker/extensions/
 docker/source/
 
 # Vendor files
-/vendor/
+/vendor/**
 
 # default source extract directory
-/source/
+/source/**
 
 # built by shared embed tests
 /locale/
 
 # default source download directory
-/downloads/
+/downloads/**
 
 # default source build root directory
-/buildroot/
+/buildroot/**
 
 # default package root directory
-/pkgroot/
+/pkgroot/**
 
 # default pack:lib and release directory
-/dist/
+/dist/**
 packlib_files.txt
 
 # tools cache files

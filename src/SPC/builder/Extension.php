@@ -366,7 +366,7 @@ class Extension
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
-            ->execWithEnv(BUILD_BIN_PATH . '/phpize');
+            ->exec(BUILD_BIN_PATH . '/phpize');
 
         if ($this->patchBeforeSharedConfigure()) {
             logger()->info('ext [ . ' . $this->getName() . '] patching before shared configure');
@@ -374,10 +374,10 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
-            ->execWithEnv('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --with-pic')
-            ->execWithEnv('make clean')
-            ->execWithEnv('make -j' . $this->builder->concurrency)
-            ->execWithEnv('make install');
+            ->exec('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
+            ->exec('make clean')
+            ->exec('make -j' . $this->builder->concurrency)
+            ->exec('make install');
     }
 
     /**

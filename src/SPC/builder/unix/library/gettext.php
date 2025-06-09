@@ -16,15 +16,9 @@ trait gettext
         $cflags = $this->builder->getOption('enable-zts') ? '-lpthread -D_REENTRANT' : '';
         $ldflags = $this->builder->getOption('enable-zts') ? '-lpthread' : '';
 
-        $ldl = $this->builder->getLib('libgomp') && getenv('SPC_LIBC') === 'glibc' ? '-ldl' : '';
-
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => "{$this->getLibExtraCFlags()} {$cflags}",
-                'LDFLAGS' => trim($this->getLibExtraLdFlags() . ' ' . $ldflags . ' ' . $ldl),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv(
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->appendEnv(['CFLAGS' => $cflags, 'LDFLAGS' => $ldflags])
+            ->exec(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
@@ -37,9 +31,9 @@ trait gettext
                 '--with-libiconv-prefix=' . BUILD_ROOT_PATH . ' ' .
                 '--prefix=' . BUILD_ROOT_PATH
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install');
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install');
         $this->patchLaDependencyPrefix(['libintl.la']);
     }
 }

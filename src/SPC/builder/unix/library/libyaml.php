@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
+use SPC\util\executor\UnixCMakeExecutor;
 
 trait libyaml
 {
@@ -25,20 +24,12 @@ trait libyaml
         return null;
     }
 
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     protected function build(): void
     {
-        $extra = '';
+        $cmake = UnixCMakeExecutor::create($this)->addConfigureArgs('-DBUILD_TESTING=OFF');
         if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
-            $extra .= '-DCMAKE_POLICY_VERSION_MINIMUM=3.5';
+            $cmake->addConfigureArgs('-DCMAKE_POLICY_VERSION_MINIMUM=3.5');
         }
-        FileSystem::resetDir($this->source_dir . '/build');
-        shell()->cd($this->source_dir . '/build')
-            ->exec("cmake {$this->builder->makeCmakeArgs()} {$extra} -DBUILD_TESTING=OFF ..")
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install');
+        $cmake->build();
     }
 }

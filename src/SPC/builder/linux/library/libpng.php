@@ -41,15 +41,11 @@ class libpng extends LinuxLibraryBase
             'aarch64' => '--enable-arm-neon ',
             default => '',
         };
-        shell()->cd($this->source_dir)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags() . ' -L' . BUILD_LIB_PATH,
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv(
+            ->exec(
+                'LDFLAGS="-L' . BUILD_LIB_PATH . '" ' .
                 './configure ' .
                 '--disable-shared ' .
                 '--enable-static ' .

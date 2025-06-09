@@ -7,7 +7,7 @@ namespace SPC\builder\unix\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\store\FileSystem;
+use SPC\util\executor\UnixCMakeExecutor;
 
 trait libavif
 {
@@ -18,18 +18,9 @@ trait libavif
      */
     protected function build(): void
     {
-        // CMake needs a clean build directory
-        FileSystem::resetDir($this->source_dir . '/build');
-        // Start build
-        shell()->cd($this->source_dir . '/build')
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv("cmake {$this->builder->makeCmakeArgs()} -DAVIF_LIBYUV=OFF ..")
-            ->execWithEnv("cmake --build . -j {$this->builder->concurrency}")
-            ->execWithEnv('make install');
+        UnixCMakeExecutor::create($this)
+            ->addConfigureArgs('-DAVIF_LIBYUV=OFF')
+            ->build();
         // patch pkgconfig
         $this->patchPkgconfPrefix(['libavif.pc']);
         $this->cleanLaFiles();

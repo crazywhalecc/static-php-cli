@@ -6,7 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
-use SPC\store\FileSystem;
+use SPC\util\executor\UnixCMakeExecutor;
 
 trait libaom
 {
@@ -16,13 +16,10 @@ trait libaom
      */
     protected function build(): void
     {
-        // CMake needs a clean build directory
-        FileSystem::resetDir($this->source_dir . '/builddir');
-        // Start build
-        shell()->cd($this->source_dir . '/builddir')
-            ->exec("cmake {$this->builder->makeCmakeArgs()} -DAOM_TARGET_CPU=generic ..")
-            ->exec("cmake --build . -j {$this->builder->concurrency}")
-            ->exec('make install');
+        UnixCMakeExecutor::create($this)
+            ->setBuildDir("{$this->source_dir}/builddir")
+            ->addConfigureArgs('-DAOM_TARGET_CPU=generic')
+            ->build();
         $this->patchPkgconfPrefix(['aom.pc']);
     }
 }

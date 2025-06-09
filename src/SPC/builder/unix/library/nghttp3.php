@@ -15,13 +15,8 @@ trait nghttp3
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv(
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->exec(
                 './configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
@@ -29,9 +24,9 @@ trait nghttp3
                 '--enable-lib-only ' .
                 '--prefix='
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libnghttp3.pc']);
         $this->patchLaDependencyPrefix(['libnghttp3.la']);
     }
