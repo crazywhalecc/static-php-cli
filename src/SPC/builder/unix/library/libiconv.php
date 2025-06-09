@@ -10,12 +10,7 @@ trait libiconv
 {
     protected function build(): void
     {
-        UnixAutoconfExecutor::create($this)
-            ->configure(
-                '--enable-pic',
-                '--enable-extra-encodings',
-            )
-            ->make();
+        UnixAutoconfExecutor::create($this)->configure('--enable-extra-encodings')->make();
         $this->patchLaDependencyPrefix(['libiconv.la']);
     }
 }

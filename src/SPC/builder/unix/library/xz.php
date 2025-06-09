@@ -18,7 +18,6 @@ trait xz
     {
         UnixAutoconfExecutor::create($this)
             ->configure(
-                '--enable-pic',
                 '--disable-scripts',
                 '--disable-doc',
                 '--with-libiconv',

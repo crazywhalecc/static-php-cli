@@ -108,6 +108,7 @@ class UnixAutoconfExecutor extends Executor
             '--enable-static',
             "--prefix={$this->library->getBuildRootPath()}",
             '--with-pic',
+            '--enable-pic',
         ];
     }
 
