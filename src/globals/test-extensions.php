@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
@@ -45,20 +45,20 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,readline,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
+    'Linux', 'Darwin' => 'zlib',
     'Windows' => 'xlswriter,openssl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,mongodb,msgpack,odbc,opentelemetry,parallel,pdo_odbc,pdo_pgsql,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
+    'Linux' => '',
     'Darwin' => '',
     'Windows' => '',
 };
 
 // If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'ngtcp2,nghttp2,nghttp3,libavif',
+    'Linux', 'Darwin' => 'libffi,libpng,gettext,gmp,imagemagick,ldap,attr,libacl,libcares,libiconv,librdkafka,libsodium,libtiff,libxslt,ncurses,nghttp2,nghttp3,ngtcp2,onig,qdbm,readline,sqlite,unixodbc,xz,zlib',
     'Windows' => '',
 };
 
