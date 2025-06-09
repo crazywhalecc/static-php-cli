@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait nghttp3
 {
@@ -15,18 +16,7 @@ trait nghttp3
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec(
-                './configure ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--with-pic ' .
-                '--enable-lib-only ' .
-                '--prefix='
-            )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+        UnixAutoconfExecutor::create($this)->configure('--enable-lib-only')->make();
         $this->patchPkgconfPrefix(['libnghttp3.pc']);
         $this->patchLaDependencyPrefix(['libnghttp3.la']);
     }

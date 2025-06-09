@@ -328,6 +328,11 @@ abstract class LibraryBase
         return false;
     }
 
+    public function getBinDir(): string
+    {
+        return BUILD_BIN_PATH;
+    }
+
     public function getIncludeDir(): string
     {
         return BUILD_INCLUDE_PATH;

@@ -216,3 +216,8 @@ function cmake_boolean_args(string $arg_name, bool $negative = false): array
     $res = ["-D{$arg_name}=ON", "-D{$arg_name}=OFF"];
     return $negative ? array_reverse($res) : $res;
 }
+
+function ac_with_args(string $arg_name, bool $use_value = false): array
+{
+    return $use_value ? ["--with-{$arg_name}=yes", "--with-{$arg_name}=no"] : ["--with-{$arg_name}", "--without-{$arg_name}"];
+}

@@ -80,13 +80,9 @@ trait postgresql
             throw new RuntimeException('Unsupported version for postgresql: ' . $version . ' !');
         }
 
-        $env = [
-            'CFLAGS' => $this->getLibExtraCFlags() . ' ' . $cflags,
-            'LDFLAGS' => $this->getLibExtraLdFlags(),
-            'LIBS' => $this->getLibExtraLibs(),
-        ];
         // configure
         shell()->cd($this->source_dir . '/build')->initializeEnv($this)
+            ->appendEnv(['CFLAGS' => $cflags])
             ->exec(
                 "{$envs} ../configure " .
                 "--prefix={$builddir} " .
