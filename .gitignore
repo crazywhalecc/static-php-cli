@@ -11,7 +11,7 @@ docker/source/
 /source/
 
 # default source download directory
-/downloads/
+/downloads/*
 
 # default source build root directory
 /buildroot/
