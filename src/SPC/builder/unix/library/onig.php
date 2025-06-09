@@ -16,7 +16,7 @@ trait onig
      */
     protected function build(): void
     {
-        UnixAutoconfExecutor::create($this)->configure('--enable-pic')->make();
+        UnixAutoconfExecutor::create($this)->configure()->make();
         $this->patchPkgconfPrefix(['oniguruma.pc']);
     }
 }
