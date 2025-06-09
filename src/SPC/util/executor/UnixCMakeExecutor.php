@@ -137,6 +137,7 @@ class UnixCMakeExecutor extends Executor
             '-DCMAKE_INSTALL_BINDIR=bin',
             '-DCMAKE_INSTALL_LIBDIR=lib',
             '-DCMAKE_INSTALL_INCLUDEDIR=include',
+            '-DPOSITION_INDEPENDENT_CODE=ON',
             '-DBUILD_SHARED_LIBS=OFF',
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
         ]);
