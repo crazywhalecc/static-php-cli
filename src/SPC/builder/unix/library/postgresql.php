@@ -86,9 +86,8 @@ trait postgresql
             'LIBS' => $this->getLibExtraLibs(),
         ];
         // configure
-        shell()->cd($this->source_dir . '/build')
-            ->setEnv($env)
-            ->execWithEnv(
+        shell()->cd($this->source_dir . '/build')->initializeEnv($this)
+            ->exec(
                 "{$envs} ../configure " .
                 "--prefix={$builddir} " .
                 ($this->builder->getOption('enable-zts') ? '--enable-thread-safety ' : '--disable-thread-safety ') .
@@ -108,11 +107,11 @@ trait postgresql
                 '--without-bonjour ' .
                 '--without-tcl '
             )
-            ->execWithEnv($envs . ' make -C src/bin/pg_config install')
-            ->execWithEnv($envs . ' make -C src/include install')
-            ->execWithEnv($envs . ' make -C src/common install')
-            ->execWithEnv($envs . ' make -C src/port install')
-            ->execWithEnv($envs . ' make -C src/interfaces/libpq install');
+            ->exec($envs . ' make -C src/bin/pg_config install')
+            ->exec($envs . ' make -C src/include install')
+            ->exec($envs . ' make -C src/common install')
+            ->exec($envs . ' make -C src/port install')
+            ->exec($envs . ' make -C src/interfaces/libpq install');
 
         // remove dynamic libs
         shell()->cd($this->source_dir . '/build')

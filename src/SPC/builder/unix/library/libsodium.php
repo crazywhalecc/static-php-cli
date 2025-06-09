@@ -8,16 +8,11 @@ trait libsodium
 {
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv('./configure --with-pic --enable-static --disable-shared --prefix=')
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install DESTDIR=' . BUILD_ROOT_PATH);
+        shell()->cd($this->source_dir)->initializeEnv($this)
+            ->exec('./configure --with-pic --enable-static --disable-shared --prefix=')
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['libsodium.pc'], PKGCONF_PATCH_PREFIX);
     }

@@ -17,13 +17,8 @@ class icu extends LinuxLibraryBase
         $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1 -DPIC -fPIC"';
         $cxxflags = 'CXXFLAGS="-std=c++17 -DPIC -fPIC -fno-ident"';
         $ldflags = getenv('SPC_LIBC') !== 'glibc' ? 'LDFLAGS="-static"' : '';
-        shell()->cd($this->source_dir . '/source')
-            ->setEnv([
-                'CFLAGS' => $this->getLibExtraCFlags(),
-                'LDFLAGS' => $this->getLibExtraLdFlags(),
-                'LIBS' => $this->getLibExtraLibs(),
-            ])
-            ->execWithEnv(
+        shell()->cd($this->source_dir . '/source')->initializeEnv($this)
+            ->exec(
                 "{$cppflags} {$cxxflags} {$ldflags} " .
                 './runConfigureICU Linux ' .
                 '--enable-static ' .
@@ -38,9 +33,9 @@ class icu extends LinuxLibraryBase
                 '--enable-samples=no ' .
                 '--prefix=' . BUILD_ROOT_PATH
             )
-            ->execWithEnv('make clean')
-            ->execWithEnv("make -j{$this->builder->concurrency}")
-            ->execWithEnv('make install');
+            ->exec('make clean')
+            ->exec("make -j{$this->builder->concurrency}")
+            ->exec('make install');
 
         $this->patchPkgconfPrefix(['icu-i18n.pc', 'icu-io.pc', 'icu-uc.pc'], PKGCONF_PATCH_PREFIX);
         FileSystem::removeDir(BUILD_LIB_PATH . '/icu');
