@@ -136,7 +136,7 @@ class UnixCMakeExecutor extends Executor
             "-DCMAKE_INSTALL_PREFIX={$this->library->getBuildRootPath()}",
             '-DCMAKE_INSTALL_BINDIR=bin',
             '-DCMAKE_INSTALL_LIBDIR=lib',
-            '-DCMAKE_INSTALL_INCLUDE_DIR=include',
+            '-DCMAKE_INSTALL_INCLUDEDIR=include',
             '-DBUILD_SHARED_LIBS=OFF',
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
         ]);

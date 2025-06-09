@@ -19,7 +19,7 @@ trait curl
         shell()->cd($this->source_dir)->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ./CMakeLists.txt');
 
         UnixCMakeExecutor::create($this)
-            ->optionalLib('openssl', '-DCURL_USE_OPENSSL=ON -DCURL_CA_BUNDLE=OFF -DCURL_CA_PATH=OFF -DCURL_FALLBACK=ON', '-DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF')
+            ->optionalLib('openssl', '-DCURL_USE_OPENSSL=ON -DCURL_CA_BUNDLE=OFF -DCURL_CA_PATH=OFF -DCURL_CA_FALLBACK=ON', '-DCURL_USE_OPENSSL=OFF -DCURL_ENABLE_SSL=OFF')
             ->optionalLib('brotli', ...cmake_boolean_args('CURL_BROTLI'))
             ->optionalLib('libssh2', fn ($lib) => "-DLIBSSH2_LIBRARY=\"{$lib->getStaticLibFiles(style: 'cmake')}\" -DLIBSSH2_INCLUDE_DIR={$lib->getIncludeDir()}", '-DCURL_USE_LIBSSH2=OFF')
             ->optionalLib('nghttp2', fn ($lib) => "-DUSE_NGHTTP2=ON -DNGHTTP2_LIBRARY=\"{$lib->getStaticLibFiles(style: 'cmake')}\" -DNGHTTP2_INCLUDE_DIR={$lib->getIncludeDir()}", '-DUSE_NGHTTP2=OFF')
