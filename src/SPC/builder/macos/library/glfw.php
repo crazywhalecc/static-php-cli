@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\builder\unix\executor\UnixCMakeExecutor;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixCMakeExecutor;
 
 class glfw extends MacOSLibraryBase
 {

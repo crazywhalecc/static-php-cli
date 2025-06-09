@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SPC\builder\unix\executor;
+namespace SPC\util\executor;
 
 use Closure;
 use SPC\exception\FileSystemException;

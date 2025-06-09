@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SPC\builder\unix\executor;
+namespace SPC\util\executor;
 
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\LibraryBase;
