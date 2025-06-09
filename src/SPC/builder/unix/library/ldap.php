@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\store\FileSystem;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait ldap
 {
@@ -17,34 +18,19 @@ trait ldap
 
     protected function build(): void
     {
-        $alt = '';
-        // openssl support
-        $alt .= $this->builder->getLib('openssl') ? '--with-tls=openssl ' : '';
-        // gmp support
-        $alt .= $this->builder->getLib('gmp') ? '--with-mp=gmp ' : '';
-        // libsodium support
-        $alt .= $this->builder->getLib('libsodium') ? '--with-argon2=libsodium ' : '--enable-argon2=no ';
-        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
-        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->appendEnv(['LDFLAGS' => "-L{$this->getLibDir()}"])
-            ->exec(
-                $this->builder->makeAutoconfFlags(AUTOCONF_CPPFLAGS) .
-                ' ./configure ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--with-pic ' .
-                '--disable-slapd ' .
-                '--without-systemd ' .
-                '--without-cyrus-sasl ' .
-                $alt .
-                '--prefix='
+        UnixAutoconfExecutor::create($this)
+            ->optionalLib('openssl', '--with-tls=openssl')
+            ->optionalLib('gmp', '--with-mp=gmp')
+            ->optionalLib('libsodium', '--with-argon2=libsodium', '--enable-argon2=no')
+            ->addConfigureArgs(
+                '--disable-slapd',
+                '--without-systemd',
+                '--without-cyrus-sasl',
             )
-            ->exec('make clean')
-            // remove tests and doc to prevent compile failed with error: soelim not found
+            ->appendEnv(['LDFLAGS' => "-L{$this->getLibDir()}"])
+            ->configure()
             ->exec('sed -i -e "s/SUBDIRS= include libraries clients servers tests doc/SUBDIRS= include libraries clients servers/g" Makefile')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->make();
 
         FileSystem::replaceFileLineContainsString(BUILD_LIB_PATH . '/pkgconfig/ldap.pc', 'Libs: -L${libdir} -lldap', 'Libs: -L${libdir} -lldap -llber');
         $this->patchPkgconfPrefix(['ldap.pc', 'lber.pc']);

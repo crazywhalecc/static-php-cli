@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait libtiff
 {
@@ -15,24 +16,26 @@ trait libtiff
      */
     protected function build(): void
     {
-        // zlib
-        $extra_libs = '--enable-zlib --with-zlib-include-dir=' . BUILD_ROOT_PATH . '/include --with-zlib-lib-dir=' . BUILD_ROOT_PATH . '/lib';
-        // libjpeg
-        $extra_libs .= ' --enable-jpeg --disable-old-jpeg --disable-jpeg12 --with-jpeg-include-dir=' . BUILD_ROOT_PATH . '/include --with-jpeg-lib-dir=' . BUILD_ROOT_PATH . '/lib';
-        // We disabled lzma, zstd, webp, libdeflate by default to reduce the size of the binary
-        $extra_libs .= ' --disable-lzma --disable-zstd --disable-webp --disable-libdeflate';
-
-        $shell = shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec(
-                './configure ' .
-                '--enable-static --disable-shared --with-pic ' .
-                "{$extra_libs} " .
-                '--disable-cxx ' .
-                '--prefix='
+        UnixAutoconfExecutor::create($this)
+            ->configure(
+                // zlib deps
+                '--enable-zlib',
+                "--with-zlib-include-dir={$this->getIncludeDir()}",
+                "--with-zlib-lib-dir={$this->getLibDir()}",
+                // libjpeg deps
+                '--enable-jpeg',
+                '--disable-old-jpeg',
+                '--disable-jpeg12',
+                "--with-jpeg-include-dir={$this->getIncludeDir()}",
+                "--with-jpeg-lib-dir={$this->getLibDir()}",
+                // We disabled lzma, zstd, webp, libdeflate by default to reduce the size of the binary
+                '--disable-lzma',
+                '--disable-zstd',
+                '--disable-webp',
+                '--disable-libdeflate',
+                '--disable-cxx',
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->make();
         $this->patchPkgconfPrefix(['libtiff-4.pc']);
     }
 }

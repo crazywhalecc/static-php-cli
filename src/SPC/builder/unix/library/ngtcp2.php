@@ -7,6 +7,7 @@ namespace SPC\builder\unix\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait ngtcp2
 {
@@ -17,32 +18,24 @@ trait ngtcp2
      */
     protected function build(): void
     {
-        $args = $this->builder->makeAutoconfArgs(static::NAME, [
-            'openssl' => null,
-            'libev' => null,
-            'jemalloc' => null,
-            'libnghttp3' => null,
-        ]);
-        if ($brotli = $this->builder->getLib('brotli')) {
-            /* @phpstan-ignore-next-line */
-            $args .= ' --with-libbrotlidec=yes LIBBROTLIDEC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIDEC_LIBS="' . $brotli->getStaticLibFiles() . '"';
-            /* @phpstan-ignore-next-line */
-            $args .= ' --with-libbrotlienc=yes LIBBROTLIENC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIENC_LIBS="' . $brotli->getStaticLibFiles() . '"';
-        }
-
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec(
-                './configure ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--with-pic ' .
-                '--enable-lib-only ' .
-                $args . ' ' .
-                '--prefix='
+        UnixAutoconfExecutor::create($this)
+            ->optionalLib('openssl', ...ac_with_args('openssl', true))
+            ->optionalLib('libev', ...ac_with_args('libev', true))
+            ->optionalLib('nghttp3', ...ac_with_args('libnghttp3', true))
+            ->optionalLib('jemalloc', ...ac_with_args('jemalloc', true))
+            ->optionalLib(
+                'brotli',
+                fn ($lib) => implode(' ', [
+                    '--with-brotlidec=yes',
+                    "LIBBROTLIDEC_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
+                    "LIBBROTLIDEC_LIBS=\"{$lib->getStaticLibFiles()}\"",
+                    '--with-libbrotlienc=yes',
+                    "LIBBROTLIENC_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
+                    "LIBBROTLIENC_LIBS=\"{$lib->getStaticLibFiles()}\"",
+                ])
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->configure('--enable-lib-only')
+            ->make();
         $this->patchPkgconfPrefix(['libngtcp2.pc', 'libngtcp2_crypto_ossl.pc']);
         $this->patchLaDependencyPrefix(['libngtcp2.la', 'libngtcp2_crypto_ossl.la']);
 
