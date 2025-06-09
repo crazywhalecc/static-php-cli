@@ -19,7 +19,7 @@ class glfw extends MacOSLibraryBase
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->setCMakeBuildDir("{$this->source_dir}/vendor/glfw")
+            ->setBuildDir("{$this->source_dir}/vendor/glfw")
             ->setReset(false)
             ->addConfigureArgs(
                 '-DGLFW_BUILD_EXAMPLES=OFF',

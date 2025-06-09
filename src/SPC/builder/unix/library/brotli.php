@@ -18,7 +18,7 @@ trait brotli
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->setCMakeBuildDir("{$this->getSourceDir()}/build-dir")
+            ->setBuildDir("{$this->getSourceDir()}/build-dir")
             ->build();
 
         $this->patchPkgconfPrefix(['libbrotlicommon.pc', 'libbrotlidec.pc', 'libbrotlienc.pc']);

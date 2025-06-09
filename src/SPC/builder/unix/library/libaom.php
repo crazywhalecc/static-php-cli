@@ -17,7 +17,7 @@ trait libaom
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->setCMakeBuildDir("{$this->source_dir}/builddir")
+            ->setBuildDir("{$this->source_dir}/builddir")
             ->addConfigureArgs('-DAOM_TARGET_GPU=generic')
             ->build();
         $this->patchPkgconfPrefix(['aom.pc']);

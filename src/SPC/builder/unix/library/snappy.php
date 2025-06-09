@@ -17,7 +17,7 @@ trait snappy
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->setCMakeBuildDir("{$this->source_dir}/cmake/build")
+            ->setBuildDir("{$this->source_dir}/cmake/build")
             ->addConfigureArgs(
                 '-DSNAPPY_BUILD_TESTS=OFF',
                 '-DSNAPPY_BUILD_BENCHMARKS=OFF',

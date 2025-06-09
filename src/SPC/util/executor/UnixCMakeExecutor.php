@@ -14,7 +14,7 @@ use SPC\store\FileSystem;
  */
 class UnixCMakeExecutor extends Executor
 {
-    protected ?string $cmake_build_dir = null;
+    protected ?string $build_dir = null;
 
     protected array $configure_args = [];
 
@@ -27,10 +27,10 @@ class UnixCMakeExecutor extends Executor
     public function build(string $build_pos = '..'): void
     {
         // set cmake dir
-        $this->initCMakeBuildDir();
+        $this->initBuildDir();
 
         if ($this->reset) {
-            FileSystem::resetDir($this->cmake_build_dir);
+            FileSystem::resetDir($this->build_dir);
         }
 
         // prepare environment variables
@@ -41,7 +41,7 @@ class UnixCMakeExecutor extends Executor
         ];
 
         // prepare shell
-        $shell = shell()->cd($this->cmake_build_dir)->setEnv($env);
+        $shell = shell()->cd($this->build_dir)->setEnv($env);
 
         // config
         $this->steps >= 1 && $shell->execWithEnv("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
@@ -99,9 +99,9 @@ class UnixCMakeExecutor extends Executor
      *
      * @param string $dir custom CMake build directory
      */
-    public function setCMakeBuildDir(string $dir): static
+    public function setBuildDir(string $dir): static
     {
-        $this->cmake_build_dir = $dir;
+        $this->build_dir = $dir;
         return $this;
     }
 
@@ -152,15 +152,12 @@ class UnixCMakeExecutor extends Executor
     /**
      * Initialize the CMake build directory.
      * If the directory is not set, it defaults to the library's source directory with '/build' appended.
-     *
-     * @throws FileSystemException
      */
-    private function initCMakeBuildDir(): void
+    private function initBuildDir(): void
     {
-        if ($this->cmake_build_dir === null) {
-            $this->cmake_build_dir = "{$this->library->getSourceDir()}/build";
+        if ($this->build_dir === null) {
+            $this->build_dir = "{$this->library->getSourceDir()}/build";
         }
-        FileSystem::resetDir($this->cmake_build_dir);
     }
 
     /**

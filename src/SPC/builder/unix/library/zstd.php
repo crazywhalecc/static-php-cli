@@ -17,7 +17,7 @@ trait zstd
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->setCMakeBuildDir("{$this->source_dir}/build/cmake/build")
+            ->setBuildDir("{$this->source_dir}/build/cmake/build")
             ->addConfigureArgs(
                 '-DZSTD_BUILD_STATIC=ON',
                 '-DZSTD_BUILD_SHARED=OFF',

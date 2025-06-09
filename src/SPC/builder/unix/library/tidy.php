@@ -17,7 +17,7 @@ trait tidy
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->setCMakeBuildDir("{$this->source_dir}/build-dir")
+            ->setBuildDir("{$this->source_dir}/build-dir")
             ->addConfigureArgs('-DSUPPORT_CONSOLE_APP=OFF')
             ->build();
         $this->patchPkgconfPrefix(['tidy.pc']);
