@@ -17,7 +17,7 @@ trait ncurses
             ->configure(
                 '--enable-overwrite',
                 '--with-curses-h',
-                '--enable-c-files',
+                '--enable-pc-files',
                 '--enable-echo',
                 '--disable-widec',
                 '--with-normal',
