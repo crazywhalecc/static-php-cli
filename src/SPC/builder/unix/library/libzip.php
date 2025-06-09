@@ -28,7 +28,6 @@ trait libzip
                 '-DBUILD_EXAMPLES=OFF',
                 '-DBUILD_REGRESS=OFF',
                 '-DBUILD_TOOLS=OFF',
-                '-DENABLE_ZSTD=OFF',
             )
             ->build();
         $this->patchPkgconfPrefix(['libzip.pc'], PKGCONF_PATCH_PREFIX);
