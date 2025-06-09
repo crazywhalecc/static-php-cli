@@ -45,17 +45,17 @@ class UnixShell
         /* @phpstan-ignore-next-line */
         logger()->info(ConsoleColor::yellow('[EXEC] ') . ConsoleColor::green($cmd));
         logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
+        $env_str = $this->getEnvString();
+        if (!empty($env_str)) {
+            $cmd = "{$env_str} {$cmd}";
+        }
         if ($this->cd !== null) {
             $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
         }
         if (!$this->debug) {
             $cmd .= ' 1>/dev/null 2>&1';
         }
-        $env_str = $this->getEnvString();
-        if (!empty($env_str)) {
-            $env_str = "{$env_str} ";
-        }
-        f_passthru("{$env_str}{$cmd}");
+        f_passthru($cmd);
         return $this;
     }
 
