@@ -19,7 +19,11 @@ trait ngtcp2
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)
-            ->optionalLib('openssl', ...ac_with_args('openssl', true))
+            ->optionalLib('openssl', fn ($lib) => implode(' ', [
+                '--with-openssl=yes',
+                "OPENSSL_LIBS=\"{$lib->getStaticLibFiles()}\"",
+                "OPENSSL_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
+            ]), '--with-openssl=no')
             ->optionalLib('libev', ...ac_with_args('libev', true))
             ->optionalLib('nghttp3', ...ac_with_args('libnghttp3', true))
             ->optionalLib('jemalloc', ...ac_with_args('jemalloc', true))
@@ -34,6 +38,7 @@ trait ngtcp2
                     "LIBBROTLIENC_LIBS=\"{$lib->getStaticLibFiles()}\"",
                 ])
             )
+            ->appendEnv(['PKG_CONFIG' => '$PKG_CONFIG --static'])
             ->configure('--enable-lib-only')
             ->make();
         $this->patchPkgconfPrefix(['libngtcp2.pc', 'libngtcp2_crypto_ossl.pc']);
@@ -41,7 +46,6 @@ trait ngtcp2
 
         // on macOS, the static library may contain other static libraries?
         // ld: archive member 'libssl.a' not a mach-o file in libngtcp2_crypto_ossl.a
-        shell()->cd(BUILD_LIB_PATH)
-            ->exec("ar -t libngtcp2_crypto_ossl.a | grep '\\.a$' | xargs -n1 ar d libngtcp2_crypto_ossl.a");
+        shell()->cd(BUILD_LIB_PATH)->exec("ar -t libngtcp2_crypto_ossl.a | grep '\\.a$' | xargs -n1 ar d libngtcp2_crypto_ossl.a");
     }
 }
