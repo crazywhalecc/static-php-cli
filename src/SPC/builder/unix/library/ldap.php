@@ -27,7 +27,10 @@ trait ldap
                 '--without-systemd',
                 '--without-cyrus-sasl',
             )
-            ->appendEnv(['LDFLAGS' => "-L{$this->getLibDir()}"])
+            ->appendEnv([
+                'LDFLAGS' => "-L{$this->getLibDir()}",
+                'CPPFLAGS' => "-I{$this->getIncludeDir()}",
+            ])
             ->configure()
             ->exec('sed -i -e "s/SUBDIRS= include libraries clients servers tests doc/SUBDIRS= include libraries clients servers/g" Makefile')
             ->make();
