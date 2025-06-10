@@ -98,10 +98,9 @@ trait UnixLibraryTrait
             if ($realpath === false) {
                 if ($throwOnMissing) {
                     throw new RuntimeException('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
-                } else {
-                    logger()->warning('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
-                    continue;
                 }
+                logger()->warning('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+                continue;
             }
             logger()->debug('Patching ' . $realpath);
             // replace prefix
