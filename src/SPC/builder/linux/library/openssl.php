@@ -92,9 +92,9 @@ class openssl extends LinuxLibraryBase
         FileSystem::replaceFileRegex(BUILD_LIB_PATH . '/cmake/OpenSSL/OpenSSLConfig.cmake', '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m', 'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}/libz.a")');
     }
 
-    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
+    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true, bool $include_self = true): string
     {
-        $libFiles = parent::getStaticLibFiles($style, $recursive);
+        $libFiles = parent::getStaticLibFiles($style, $recursive, $include_self);
         if (!str_contains('-ldl -lpthread', $libFiles)) {
             $libFiles .= ' -ldl -lpthread';
         }

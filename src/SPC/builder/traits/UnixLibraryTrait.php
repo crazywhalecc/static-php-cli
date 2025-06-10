@@ -17,9 +17,9 @@ trait UnixLibraryTrait
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
+    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true, bool $include_self = true): string
     {
-        $libs = [$this];
+        $libs = $include_self ? [$this] : [];
         if ($recursive) {
             array_unshift($libs, ...array_values($this->getDependencies(recursive: true)));
         }

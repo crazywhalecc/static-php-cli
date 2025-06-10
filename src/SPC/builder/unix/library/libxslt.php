@@ -19,7 +19,7 @@ trait libxslt
      */
     protected function build(): void
     {
-        $static_libs = $this instanceof LinuxLibraryBase ? $this->getStaticLibFiles() : '';
+        $static_libs = $this instanceof LinuxLibraryBase ? $this->getStaticLibFiles(include_self: false) : '';
         $ac = UnixAutoconfExecutor::create($this)
             ->appendEnv([
                 'CFLAGS' => "-I{$this->getIncludeDir()}",
@@ -28,7 +28,6 @@ trait libxslt
             ])
             ->addConfigureArgs(
                 '--without-python',
-                '--without-mem-debug',
                 '--without-crypto',
                 '--without-debug',
                 '--without-debugger',
