@@ -16,6 +16,8 @@ class UnixAutoconfExecutor extends Executor
 
     protected array $configure_args = [];
 
+    protected array $ignore_args = [];
+
     public function __construct(protected BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library)
     {
         parent::__construct($library);
@@ -27,7 +29,10 @@ class UnixAutoconfExecutor extends Executor
      */
     public function configure(...$args): static
     {
-        $configure_args = implode(' ', array_merge($args, $this->getDefaultConfigureArgs(), $this->configure_args));
+        // remove all the ignored args
+        $args = array_merge($args, $this->getDefaultConfigureArgs(), $this->configure_args);
+        $args = array_diff($args, $this->ignore_args);
+        $configure_args = implode(' ', $args);
 
         $this->shell->exec("./configure {$configure_args}");
         return $this;
@@ -89,6 +94,15 @@ class UnixAutoconfExecutor extends Executor
     public function addConfigureArgs(...$args): static
     {
         $this->configure_args = [...$this->configure_args, ...$args];
+        return $this;
+    }
+
+    /**
+     * Ignore some configure args, to bypass the configure option checking for some libs.
+     */
+    public function ignoreConfigureArgs(...$args): static
+    {
+        $this->ignore_args = [...$this->ignore_args, ...$args];
         return $this;
     }
 

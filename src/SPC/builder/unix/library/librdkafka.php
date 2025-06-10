@@ -25,6 +25,10 @@ trait librdkafka
                 },
                 '--disable-zstd'
             )
+            ->ignoreConfigureArgs(
+                '--with-pic',
+                '--enable-pic',
+            )
             ->configure(
                 '--disable-curl',
                 '--disable-sasl',
