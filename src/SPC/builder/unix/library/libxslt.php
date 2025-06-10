@@ -47,8 +47,8 @@ trait libxslt
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . escapeshellarg(BUILD_ROOT_PATH));
-        $this->patchPkgconfPrefix(['libexslt.pc']);
-        $this->patchLaDependencyPrefix(['libxslt.la', 'libexslt.la']);
+        $this->patchPkgconfPrefix(['libxslt.pc', 'libexslt.pc']);
+        $this->patchLaDependencyPrefix();
         shell()->cd(BUILD_LIB_PATH)
             ->exec("ar -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")
             ->exec("ar -t libexslt.a | grep '\\.a$' | xargs -n1 ar d libexslt.a");

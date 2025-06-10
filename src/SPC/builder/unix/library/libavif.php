@@ -23,6 +23,5 @@ trait libavif
             ->build();
         // patch pkgconfig
         $this->patchPkgconfPrefix(['libavif.pc']);
-        $this->cleanLaFiles();
     }
 }

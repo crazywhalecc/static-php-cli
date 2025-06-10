@@ -21,6 +21,6 @@ trait libiconv
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
 
-        $this->patchLaDependencyPrefix(['libiconv.la']);
+        $this->patchLaDependencyPrefix();
     }
 }

@@ -48,6 +48,6 @@ trait ldap
 
         FileSystem::replaceFileLineContainsString(BUILD_LIB_PATH . '/pkgconfig/ldap.pc', 'Libs: -L${libdir} -lldap', 'Libs: -L${libdir} -lldap -llber');
         $this->patchPkgconfPrefix(['ldap.pc', 'lber.pc']);
-        $this->patchLaDependencyPrefix(['libldap.la', 'liblber.la']);
+        $this->patchLaDependencyPrefix();
     }
 }

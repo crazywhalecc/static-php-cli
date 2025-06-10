@@ -28,6 +28,6 @@ trait nghttp3
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libnghttp3.pc']);
-        $this->patchLaDependencyPrefix(['libnghttp3.la']);
+        $this->patchLaDependencyPrefix();
     }
 }

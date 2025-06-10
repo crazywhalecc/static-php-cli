@@ -30,6 +30,6 @@ trait xz
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['liblzma.pc']);
-        $this->patchLaDependencyPrefix(['liblzma.la']);
+        $this->patchLaDependencyPrefix();
     }
 }

@@ -78,10 +78,6 @@ trait imagemagick
                 'includearchdir=${prefix}/include/ImageMagick-7'
             );
         }
-        $this->patchLaDependencyPrefix([
-            'libMagick++-7.Q16HDRI.la',
-            'libMagickCore-7.Q16HDRI.la',
-            'libMagickWand-7.Q16HDRI.la',
-        ]);
+        $this->patchLaDependencyPrefix();
     }
 }

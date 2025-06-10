@@ -54,6 +54,6 @@ trait nghttp2
             ->exec("make -j{$this->builder->concurrency}")
             ->exec("make install DESTDIR={$destdir}");
         $this->patchPkgconfPrefix(['libnghttp2.pc']);
-        $this->patchLaDependencyPrefix(['libnghttp2.la']);
+        $this->patchLaDependencyPrefix();
     }
 }

@@ -59,6 +59,6 @@ class libpng extends LinuxLibraryBase
             ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I{$this->source_dir} -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
             ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
-        $this->cleanLaFiles();
+        $this->patchLaDependencyPrefix();
     }
 }

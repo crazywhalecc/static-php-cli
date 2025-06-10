@@ -34,6 +34,6 @@ trait gettext
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install');
-        $this->patchLaDependencyPrefix(['libintl.la']);
+        $this->patchLaDependencyPrefix();
     }
 }

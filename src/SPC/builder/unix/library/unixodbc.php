@@ -31,6 +31,6 @@ trait unixodbc
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
         $this->patchPkgconfPrefix(['odbc.pc', 'odbccr.pc', 'odbcinst.pc']);
-        $this->cleanLaFiles();
+        $this->patchLaDependencyPrefix();
     }
 }

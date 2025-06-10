@@ -84,13 +84,24 @@ trait UnixLibraryTrait
         }
     }
 
-    public function patchLaDependencyPrefix(array $files): void
+    public function patchLaDependencyPrefix(?array $files = null): void
     {
         logger()->info('Patching library [' . static::NAME . '] la files');
+        $throwOnMissing = true;
+        if ($files === null) {
+            $files = $this->getStaticLibs();
+            $files = array_map(fn ($name) => str_replace('.a', '.la', $name), $files);
+            $throwOnMissing = false;
+        }
         foreach ($files as $name) {
             $realpath = realpath(BUILD_LIB_PATH . '/' . $name);
             if ($realpath === false) {
-                throw new RuntimeException('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+                if ($throwOnMissing) {
+                    throw new RuntimeException('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+                } else {
+                    logger()->warning('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+                    continue;
+                }
             }
             logger()->debug('Patching ' . $realpath);
             // replace prefix
@@ -102,22 +113,6 @@ trait UnixLibraryTrait
             );
             $file = preg_replace('/^libdir=.*$/m', "libdir='" . BUILD_LIB_PATH . "'", $file);
             FileSystem::writeFile($realpath, $file);
-        }
-    }
-
-    /**
-     * remove libtool archive files
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
-    public function cleanLaFiles(): void
-    {
-        foreach ($this->getStaticLibs() as $lib) {
-            $filename = pathinfo($lib, PATHINFO_FILENAME) . '.la';
-            if (file_exists(BUILD_LIB_PATH . '/' . $filename)) {
-                unlink(BUILD_LIB_PATH . '/' . $filename);
-            }
         }
     }
 
