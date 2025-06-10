@@ -297,12 +297,14 @@
     },
     "intl": {
         "support": {
-            "Windows": "no",
             "BSD": "wip"
         },
         "type": "builtin",
-        "lib-depends": [
+        "lib-depends-unix": [
             "icu"
+        ],
+        "lib-depends-windows": [
+            "icu-static-win"
         ]
     },
     "ldap": {
@@ -323,6 +325,16 @@
             "openssl"
         ]
     },
+    "libxml": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type": "none",
+        "ext-depends": [
+            "xml"
+        ]
+    },
     "lz4": {
         "support": {
             "Windows": "wip",
@@ -333,16 +345,6 @@
         "arg-type": "custom",
         "lib-depends": [
             "liblz4"
-        ]
-    },
-    "libxml": {
-        "support": {
-            "BSD": "wip"
-        },
-        "type": "builtin",
-        "arg-type": "none",
-        "ext-depends": [
-            "xml"
         ]
     },
     "mbregex": {

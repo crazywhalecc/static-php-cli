@@ -312,6 +312,14 @@
             "path": "LICENSE"
         }
     },
+    "icu-static-win": {
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/icu-static-windows-x64/icu-static-windows-x64.zip",
+        "license": {
+            "type": "text",
+            "text": "none"
+        }
+    },
     "igbinary": {
         "type": "url",
         "url": "https://pecl.php.net/get/igbinary",
