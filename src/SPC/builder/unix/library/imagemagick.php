@@ -18,9 +18,7 @@ trait imagemagick
      */
     protected function build(): void
     {
-        // TODO: glibc rh 10 toolset's libgomp.a was built without -fPIC -fPIE so we can't use openmp without depending on libgomp.so
-        $openmp = getenv('SPC_LIBC') === 'musl' ? '--enable-openmp' : '--disable-openmp';
-        $extra = "--without-jxl --without-x {$openmp} ";
+        $extra = '--without-jxl --without-x --enable-openmp ';
         $required_libs = '';
         $optional_libs = [
             'libzip' => 'zip',
