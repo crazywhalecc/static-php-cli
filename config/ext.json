@@ -325,6 +325,16 @@
             "openssl"
         ]
     },
+    "libxml": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type": "none",
+        "ext-depends": [
+            "xml"
+        ]
+    },
     "lz4": {
         "support": {
             "Windows": "wip",
@@ -335,16 +345,6 @@
         "arg-type": "custom",
         "lib-depends": [
             "liblz4"
-        ]
-    },
-    "libxml": {
-        "support": {
-            "BSD": "wip"
-        },
-        "type": "builtin",
-        "arg-type": "none",
-        "ext-depends": [
-            "xml"
         ]
     },
     "mbregex": {
