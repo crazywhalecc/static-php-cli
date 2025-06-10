@@ -118,7 +118,7 @@ class UnixShell
         return $this;
     }
 
-    private function getEnvString(): string
+    public function getEnvString(): string
     {
         $str = '';
         foreach ($this->env as $k => $v) {
