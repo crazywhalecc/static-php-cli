@@ -198,6 +198,18 @@
             "libicudata.a"
         ]
     },
+    "icu-static-win": {
+        "source": "icu-static-win",
+        "static-libs-windows": [
+            "icudt.lib",
+            "icuin.lib",
+            "icuio.lib",
+            "icuuc.lib"
+        ],
+        "headers-windows": [
+            "unicode"
+        ]
+    },
     "imagemagick": {
         "source": "imagemagick",
         "static-libs-unix": [
