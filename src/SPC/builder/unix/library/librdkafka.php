@@ -25,7 +25,7 @@ trait librdkafka
                 },
                 '--disable-zstd'
             )
-            ->ignoreConfigureArgs(
+            ->removeConfigureArgs(
                 '--with-pic',
                 '--enable-pic',
             )

@@ -100,9 +100,9 @@ class UnixAutoconfExecutor extends Executor
     }
 
     /**
-     * Ignore some configure args, to bypass the configure option checking for some libs.
+     * Remove some configure args, to bypass the configure option checking for some libs.
      */
-    public function ignoreConfigureArgs(...$args): static
+    public function removeConfigureArgs(...$args): static
     {
         $this->ignore_args = [...$this->ignore_args, ...$args];
         return $this;
