@@ -80,8 +80,10 @@ class UnixAutoconfExecutor extends Executor
     public function optionalLib(string $name, \Closure|string $true_args, string $false_args = ''): static
     {
         if ($get = $this->library->getBuilder()->getLib($name)) {
+            logger()->info("Building library [{$this->library->getName()}] with {$name} support");
             $args = $true_args instanceof \Closure ? $true_args($get) : $true_args;
         } else {
+            logger()->info("Building library [{$this->library->getName()}] without {$name} support");
             $args = $false_args;
         }
         $this->addConfigureArgs($args);
