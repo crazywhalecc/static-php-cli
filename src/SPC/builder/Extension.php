@@ -360,7 +360,7 @@ class Extension
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => '-Wl,-Bstatic -Wl,--start-group -Wl,--whole-archive ' . $staticLibString . ' -Wl,--no-whole-archive -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
+            'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibString . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
 
