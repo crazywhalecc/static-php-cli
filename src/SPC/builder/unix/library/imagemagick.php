@@ -33,7 +33,7 @@ trait imagemagick
             ->optionalLib('bzip2', ...ac_with_args('bzlib'))
             ->addConfigureArgs(
                 // TODO: glibc rh 10 toolset's libgomp.a was built without -fPIC so we can't use openmp without depending on libgomp.so
-                getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10') ? '--enable-openmp' : '--disable-openmp',
+                getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10') ? '--disable-openmp' : '--enable-openmp',
                 '--without-jxl',
                 '--without-x',
             );
