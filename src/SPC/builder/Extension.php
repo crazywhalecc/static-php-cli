@@ -364,12 +364,6 @@ class Extension
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
 
-        FileSystem::replaceFileRegex(
-            $this->source_dir . '/config.m4',
-            '/=(.\$PKG_CONFIG\s+(?:[^\s]+\s+)*?)--libs.*/',
-            '"' . $staticLibString . '"'
-        );
-
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
