@@ -15,48 +15,81 @@ jobs:
       fail-fast: false
       matrix:
         extension:
-          - dom,amqp
-          - dom,ast
-          - dom,brotli
-          - dom,dio
-          - dom,ds
-          - dom,ev
-          - dom,ffi
-          - dom,gettext
-          - dom,gmssl
-          - dom,igbinary
-          - dom,ldap
-          - dom,libxml
-          - dom,lz4
-          - dom,memcache
-          - dom,mongodb
-          - dom,msgpack
-          - dom,odbc
-          - dom,opentelemetry
-          - dom,parallel
-          - dom,pdo_odbc
-          - dom,pdo_sqlsrv
-          - dom,rar
-          - dom,rdkafka
-          - dom,spx
-          - dom,sqlsrv
-          - dom,ssh2
-          - dom,tidy
-          - dom,uuid
-          - dom,uv
-          - dom,xhprof
-          - dom,xlswriter
-          - dom,xz
-          - dom,yac
-          - dom,yaml
-          - dom,zstd
+          - amqp
+          - apcu
+          - bcmath
+          - bz2
+          - calendar
+          - ctype
+          - curl
+          - dba
+          - dom
+          - ds
+          - event
+          - exif
+          - filter
+          - fileinfo
+          - ftp
+          - gd
+          - gettext
+          - gmp
+          - iconv
+          - igbinary
+          - imagick
+          - imap
+          - intl
+          - ldap
+          - mbstring,mbregex
+          - memcache
+          - mysqli,mysqlnd,pdo_mysql
+          - opcache
+          - openssl
+          - pcntl
+          - password-argon2
+          - pcntl
+          - pdo
+          - pgsql,pdo_pgsql
+          - phar
+          - posix
+          - rar
+          - protobuf
+          - readline
+          - redis
+          - session
+          - shmop
+          - simdjson
+          - simplexml,xml
+          - snappy
+          - soap
+          - sockets
+          - sodium
+          - sqlite3,pdo_sqlite
+          - sqlsrv
+          - ssh2
+          - swoole
+          - swoole,swoole-hook-pgsql,swoole-hook-mysql,swoole-hook-sqlite
+          - swow
+          - sysvmsg,sysvsem,sysvshm
+          - tidy
+          - tokenizer
+          - uuid
+          - uv
+          - xhprof
+          - xlswriter
+          - xmlwriter,xmlreader
+          - xsl
+          - yac
+          - yaml
+          - zip
+          - zlib
+          - zstd
         php-version:
           - "8.4"
         operating-system:
-          #- "ubuntu-latest"
+          - "ubuntu-latest"
           #- "macos-13"
           #- "debian-arm64-self-hosted"
-          - "macos-15"
+          - "macos-14"
 
     steps:
       - name: "Checkout"
@@ -100,9 +133,7 @@ jobs:
       - name: "Download sources"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug --ignore-cache-sources=php-src
-          ./bin/spc download pkg-config --prefer-pre-built --debug
+        run: ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug --ignore-cache-sources=php-src
 
       - name: "Build library: ${{ matrix.library }}"
         run: |
@@ -114,4 +145,4 @@ jobs:
             ./bin/spc install-pkg upx
             UPX=--with-upx-pack
           fi
-          ./bin/spc build --build-embed ${{ matrix.extension }} --debug $UPX --enable-zts
+          ./bin/spc build --build-cli --build-micro --build-fpm ${{ matrix.extension }} --debug $UPX --with-suggested-libs --with-suggested-exts
