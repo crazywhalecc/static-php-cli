@@ -395,7 +395,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
-                        ->exec('make clean')
+            ->exec('make clean')
             ->exec('make -j' . $this->builder->concurrency)
             ->exec('make install');
     }
