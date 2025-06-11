@@ -15,8 +15,12 @@ class imagick extends Extension
         if (getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10')) {
             return false;
         }
-        // imagick with calls omp_pause_all which requires -lgomp, on non-musl we build imagick without openmp
-        $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -lgomp');
+        // imagick with calls omp_pause_all which requires openmp, on non-musl we build imagick without openmp
+        $extra_libs = match (PHP_OS_FAMILY) {
+            'Linux' => trim(getenv('SPC_EXTRA_LIBS') . ' -lgomp'),
+            'Darwin' => trim(getenv('SPC_EXTRA_LIBS') . ' -lomp'),
+            default => ''
+        };
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
     }
