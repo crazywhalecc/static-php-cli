@@ -100,7 +100,9 @@ jobs:
       - name: "Download sources"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug --ignore-cache-sources=php-src
+        run: |
+          ./bin/spc download --with-php=${{ matrix.php-version }} --for-extensions=${{ matrix.extension }} --debug --ignore-cache-sources=php-src
+          ./bin/spc download pkg-config --prefer-pre-built --debug
 
       - name: "Build library: ${{ matrix.library }}"
         run: |
@@ -112,4 +114,4 @@ jobs:
             ./bin/spc install-pkg upx
             UPX=--with-upx-pack
           fi
-          ./bin/spc build --build-embed ${{ matrix.extension }} --debug $UPX --with-suggested-libs --with-suggested-exts --enable-zts
+          ./bin/spc build --build-embed ${{ matrix.extension }} --debug $UPX --enable-zts
