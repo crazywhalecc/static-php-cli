@@ -67,6 +67,10 @@ class MacOSBuilder extends UnixBuilderBase
             array_push($frameworks, ...$lib->getFrameworks());
         }
 
+        foreach ($this->exts as $ext) {
+            array_push($frameworks, ...$ext->getFrameworks());
+        }
+
         if ($asString) {
             return implode(' ', array_map(fn ($x) => "-framework {$x}", $frameworks));
         }

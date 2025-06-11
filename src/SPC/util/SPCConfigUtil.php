@@ -55,10 +55,13 @@ class SPCConfigUtil
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $libs = $this->getLibsString($libraries, $with_dependencies);
+        if (PHP_OS_FAMILY === 'Darwin') {
+            $libs .= " {$this->getFrameworksString($extensions)}";
+        }
         $cflags = $this->getIncludesString();
 
         // embed
-        $libs = '-lphp -lc ' . $libs;
+        $libs = trim("-lphp -lc {$libs}");
         $extra_env = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS');
         if (is_string($extra_env)) {
             $libs .= ' ' . trim($extra_env, '"');
@@ -156,5 +159,19 @@ class SPCConfigUtil
         }
         // get short name
         return '-l' . substr($lib, 3, -2);
+    }
+
+    private function getFrameworksString(array $extensions): string
+    {
+        $list = [];
+        foreach ($extensions as $extension) {
+            foreach (Config::getExt($extension, 'frameworks', []) as $fw) {
+                $ks = '-framework ' . $fw;
+                if (!in_array($ks, $list)) {
+                    $list[] = $ks;
+                }
+            }
+        }
+        return implode(' ', $list);
     }
 }

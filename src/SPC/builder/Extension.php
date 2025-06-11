@@ -53,6 +53,11 @@ class Extension
         }
     }
 
+    public function getFrameworks(): array
+    {
+        return Config::getExt($this->getName(), 'frameworks', []);
+    }
+
     /**
      * 获取开启该扩展的 PHP 编译添加的参数
      *

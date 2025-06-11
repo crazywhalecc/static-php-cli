@@ -424,6 +424,10 @@
             "openssl",
             "zstd",
             "zlib"
+        ],
+        "frameworks": [
+            "CoreFoundation",
+            "Security"
         ]
     },
     "msgpack": {
