@@ -146,9 +146,6 @@ class SPCConfigUtil
         if (in_array('imagemagick', $libraries) && PHP_OS_FAMILY === 'Linux' && !(getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10'))) {
             $short_name[] = '-lgomp';
         }
-        if (in_array('imagemagick', $libraries) && PHP_OS_FAMILY === 'Darwin') {
-            $short_name[] = '-lomp';
-        }
         return implode(' ', $short_name);
     }
 
