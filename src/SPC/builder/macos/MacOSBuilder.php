@@ -271,14 +271,7 @@ class MacOSBuilder extends UnixBuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install")
-            // Workaround for https://github.com/php/php-src/issues/12082
-            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o')
-            ->exec('mkdir ' . BUILD_ROOT_PATH . '/lib/php-o')
-            ->cd(BUILD_ROOT_PATH . '/lib/php-o')
-            ->exec('ar x ' . BUILD_ROOT_PATH . '/lib/libphp.a')
-            ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
-            ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
-            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
+            ->exec('ar -t ' . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
         $this->patchPhpScripts();
     }
 
