@@ -186,11 +186,7 @@ abstract class UnixBuilderBase extends BuilderBase
         }
 
         // sanity check for embed
-        if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED ||
-            file_exists(BUILD_BIN_PATH . '/php-config') &&
-            file_exists(BUILD_BIN_PATH . '/phpize') &&
-            (file_exists(BUILD_LIB_PATH . '/libphp.a') || file_exists(BUILD_LIB_PATH . '/libphp.so'))
-        ) {
+        if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
             logger()->info('running embed sanity check');
             $sample_file_path = SOURCE_PATH . '/embed-test';
             if (!is_dir($sample_file_path)) {
