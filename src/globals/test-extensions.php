@@ -45,20 +45,23 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,readline,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
+    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,readline,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib,amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,mongodb,msgpack,odbc,opentelemetry,parallel,pdo_odbc,pdo_pgsql,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
     'Windows' => 'xlswriter,openssl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,mongodb,msgpack,odbc,opentelemetry,parallel,pdo_odbc,pdo_pgsql,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
+    'Linux' => 'xdebug',
     'Darwin' => '',
     'Windows' => '',
 };
 
-// If you want to test lib-suggests feature with extension, add them below (comma separated, example `libwebp,libavif`).
+// If you want to test lib-suggests for all extensions and libraries, set it to true.
+$with_suggested_libs = true;
+
+// If you want to test extra libs for extensions, add them below (comma separated, example `libwebp,libavif`). Unnecessary, when $with_suggested_libs is true.
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'libavif,nghttp2,nghttp3,ngtcp2',
+    'Linux', 'Darwin' => '',
     'Windows' => '',
 };
 
@@ -169,6 +172,7 @@ if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd = 'build ';
     $build_cmd .= quote2($final_extensions) . ' ';
     $build_cmd .= $shared_cmd;
+    $build_cmd .= $with_suggested_libs ? '--with-suggested-libs ' : '';
     $build_cmd .= $zts ? '--enable-zts ' : '';
     $build_cmd .= $no_strip ? '--no-strip ' : '';
     $build_cmd .= $upx ? '--with-upx-pack ' : '';
