@@ -26,9 +26,9 @@ $test_os = [
     'macos-15',
     // 'ubuntu-latest',
     'ubuntu-22.04',
-    // 'ubuntu-24.04',
+    'ubuntu-24.04',
     'ubuntu-22.04-arm',
-    // 'ubuntu-24.04-arm',
+    'ubuntu-24.04-arm',
     // 'windows-latest',
 ];
 
