@@ -359,15 +359,36 @@ class Extension
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
-            'LDFLAGS' => $config['ldflags'],
-            'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibString . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
+            'LDFLAGS' => $config['ldflags']
+                . ' -Wl,--require-defined=SSL_CTX_use_RSAPrivateKey'
+                . ' -Wl,--undefined=SSL_connect'
+                . ' -Wl,--undefined=SSL_ctrl'
+                . ' -Wl,--undefined=SSL_CTX_ctrl'
+                . ' -Wl,--undefined=SSL_CTX_free'
+                . ' -Wl,--undefined=SSL_CTX_load_verify_locations'
+                . ' -Wl,--undefined=SSL_CTX_new'
+                . ' -Wl,--undefined=SSL_CTX_set_default_passwd_cb_userdata'
+                . ' -Wl,--undefined=SSL_CTX_set_default_verify_paths'
+                . ' -Wl,--undefined=SSL_CTX_use_certificate_chain_file'
+                . ' -Wl,--undefined=SSL_CTX_use_PrivateKey_file'
+                . ' -Wl,--undefined=SSL_CTX_use_RSAPrivateKey'
+                . ' -Wl,--undefined=SSL_free'
+                . ' -Wl,--undefined=SSL_get1_peer_certificate'
+                . ' -Wl,--undefined=SSL_get_error'
+                . ' -Wl,--undefined=SSL_get_verify_result'
+                . ' -Wl,--undefined=SSL_new'
+                . ' -Wl,--undefined=SSL_read'
+                . ' -Wl,--undefined=SSL_set_bio'
+                . ' -Wl,--undefined=SSL_shutdown'
+                . ' -Wl,--undefined=SSL_write',
+            'LIBS' => '-Wl,-Bstatic -Wl,--start-group -Wl,--whole-archive ' . $staticLibString . ' -Wl,--no-whole-archive -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
 
         FileSystem::replaceFileRegex(
             $this->source_dir . '/config.m4',
-            '/(\$PKG_CONFIG\s+[^\s]+)\s+--libs/',
-            '$1 --static --libs'
+            '/=(.\$PKG_CONFIG\s+(?:[^\s]+\s+)*?)--libs.*/',
+            '"' . $staticLibString . '"'
         );
 
         // prepare configure args
@@ -381,8 +402,21 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
-            ->exec('./configure ' . $this->getUnixConfigureArg(true) . ' --with-php-config=' . BUILD_BIN_PATH . '/php-config --enable-shared --disable-static')
-            ->exec('make clean')
+            ->exec(
+                './configure ' . $this->getUnixConfigureArg(true) .
+                ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
+                '--enable-shared --disable-static'
+            );
+
+        FileSystem::replaceFileRegex(
+            $this->source_dir . '/Makefile',
+            '/^(.*_SHARED_LIBADD\s*=.*)$/m',
+            '$1 ' . $staticLibString
+        );
+
+        shell()->cd($this->source_dir)
+            ->setEnv($env)
+                        ->exec('make clean')
             ->exec('make -j' . $this->builder->concurrency)
             ->exec('make install');
     }
@@ -483,7 +517,7 @@ class Extension
                 $sharedLibString .= '-l' . $lib . ' ';
             }
         }
-        return [$staticLibString, $sharedLibString];
+        return [trim($staticLibString), trim($sharedLibString)];
     }
 
     private function getLibraryDependencies(bool $recursive = false): array
