@@ -363,6 +363,13 @@ class Extension
             'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibString . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
+
+        FileSystem::replaceFileRegex(
+            $this->source_dir . '/config.m4',
+            '/(\$PKG_CONFIG\s+[^\s]+)\s+--libs/',
+            '$1 --static --libs'
+        );
+
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
