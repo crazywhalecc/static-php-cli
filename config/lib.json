@@ -101,6 +101,15 @@
             "SystemConfiguration"
         ]
     },
+    "fastlz": {
+        "source": "fastlz",
+        "static-libs-unix": [
+            "libfastlz.a"
+        ],
+        "headers": [
+            "fastlz/fastlz.h"
+        ]
+    },
     "freetype": {
         "source": "freetype",
         "static-libs-unix": [
@@ -389,7 +398,9 @@
         "source": "libmemcached",
         "static-libs-unix": [
             "libmemcached.a",
-            "libmemcachedutil.a"
+            "libmemcachedprotocol.a",
+            "libmemcachedutil.a",
+            "libhashkit.a"
         ]
     },
     "libpng": {

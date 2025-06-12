@@ -330,6 +330,16 @@
             "openssl"
         ]
     },
+    "libxml": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type": "none",
+        "target": [
+            "static"
+        ]
+    },
     "lz4": {
         "support": {
             "Windows": "wip",
@@ -340,16 +350,6 @@
         "arg-type": "custom",
         "lib-depends": [
             "liblz4"
-        ]
-    },
-    "libxml": {
-        "support": {
-            "BSD": "wip"
-        },
-        "type": "builtin",
-        "arg-type": "none",
-        "target": [
-            "static"
         ]
     },
     "mbregex": {
@@ -396,8 +396,7 @@
     "memcached": {
         "support": {
             "Windows": "wip",
-            "BSD": "wip",
-            "Linux": "no"
+            "BSD": "wip"
         },
         "type": "external",
         "source": "memcached",
@@ -405,6 +404,10 @@
         "cpp-extension": true,
         "lib-depends": [
             "libmemcached"
+        ],
+        "lib-depends-unix": [
+            "libmemcached",
+            "fastlz"
         ],
         "ext-depends": [
             "session",
@@ -1083,6 +1086,9 @@
         "type": "external",
         "source": "yac",
         "arg-type-unix": "custom",
+        "lib-depends-unix": [
+            "fastlz"
+        ],
         "ext-depends-unix": [
             "igbinary"
         ]
