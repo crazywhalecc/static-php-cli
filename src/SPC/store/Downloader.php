@@ -537,10 +537,10 @@ class Downloader
             }
             f_exec($cmd, $output, $ret);
             if ($ret === 2 || $ret === -1073741510) {
-                throw new RuntimeException('failed http fetch');
+                throw new RuntimeException(sprintf('Failed to fetch "%s"', $url));
             }
             if ($ret !== 0) {
-                throw new DownloaderException('failed http fetch');
+                throw new DownloaderException(sprintf('Failed to fetch "%s"', $url));
             }
             $cache[$cmd]['cache'] = implode("\n", $output);
             $cache[$cmd]['expire'] = time() + 3600;
@@ -549,10 +549,10 @@ class Downloader
         }
         f_exec($cmd, $output, $ret);
         if ($ret === 2 || $ret === -1073741510) {
-            throw new RuntimeException('failed http fetch');
+            throw new RuntimeException(sprintf('Failed to fetch "%s"', $url));
         }
         if ($ret !== 0) {
-            throw new DownloaderException('failed http fetch');
+            throw new DownloaderException(sprintf('Failed to fetch "%s"', $url));
         }
         return implode("\n", $output);
     }
