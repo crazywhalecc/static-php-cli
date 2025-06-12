@@ -293,6 +293,24 @@ class LinuxBuilder extends UnixBuilderBase
             $cwd = getcwd();
             chdir(BUILD_LIB_PATH);
             symlink($realLibName, 'libphp.so');
+            chdir(BUILD_MODULES_PATH);
+            foreach ($this->getExts() as $ext) {
+                if (!$ext->isBuildShared()) {
+                    continue;
+                }
+                $name = $ext->getName();
+                $versioned = "{$name}-{$release}.so";
+                $unversioned = "{$name}.so";
+                if (is_file(BUILD_MODULES_PATH . "/{$versioned}")) {
+                    rename(BUILD_MODULES_PATH . "/{$versioned}", BUILD_MODULES_PATH . "/{$unversioned}");
+                    shell()->cd(BUILD_MODULES_PATH)
+                        ->exec(sprintf(
+                            'patchelf --set-soname %s %s',
+                            escapeshellarg($unversioned),
+                            escapeshellarg($unversioned)
+                        ));
+                }
+            }
             chdir($cwd);
         }
         $this->patchPhpScripts();
