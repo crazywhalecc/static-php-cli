@@ -329,10 +329,6 @@ class Extension
     public function buildShared(): void
     {
         logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
-        if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
-            logger()->info('extension ' . $this->getName() . ' already built, skipping');
-            return;
-        }
         foreach ($this->dependencies as $dependency) {
             if (!$dependency instanceof Extension) {
                 continue;
