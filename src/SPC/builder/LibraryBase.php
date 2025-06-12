@@ -11,9 +11,12 @@ use SPC\store\Config;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\SourceManager;
+use SPC\util\GlobalValueTrait;
 
 abstract class LibraryBase
 {
+    use GlobalValueTrait;
+
     /** @var string */
     public const NAME = 'unknown';
 
@@ -31,7 +34,7 @@ abstract class LibraryBase
         if (static::NAME === 'unknown') {
             throw new RuntimeException('no unknown!!!!!');
         }
-        $this->source_dir = $source_dir ?? (SOURCE_PATH . '/' . static::NAME);
+        $this->source_dir = $source_dir ?? (SOURCE_PATH . '/' . Config::getLib(static::NAME, 'source'));
     }
 
     /**
@@ -326,26 +329,6 @@ abstract class LibraryBase
     public function patchBeforeMake(): bool
     {
         return false;
-    }
-
-    public function getBinDir(): string
-    {
-        return BUILD_BIN_PATH;
-    }
-
-    public function getIncludeDir(): string
-    {
-        return BUILD_INCLUDE_PATH;
-    }
-
-    public function getBuildRootPath(): string
-    {
-        return BUILD_ROOT_PATH;
-    }
-
-    public function getLibDir(): string
-    {
-        return BUILD_LIB_PATH;
     }
 
     /**
