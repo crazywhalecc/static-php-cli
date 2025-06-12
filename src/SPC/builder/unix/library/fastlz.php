@@ -9,8 +9,8 @@ trait fastlz
     protected function build(): void
     {
         shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec((getenv('CC') ?? 'cc') . ' -c -O3 -fPIC fastlz.c -o fastlz.o')
-            ->exec((getenv('AR') ?? 'ar') . ' rcs libfastlz.a fastlz.o');
+            ->exec((getenv('CC') ?: 'cc') . ' -c -O3 -fPIC fastlz.c -o fastlz.o')
+            ->exec((getenv('AR') ?: 'ar') . ' rcs libfastlz.a fastlz.o');
 
         if (!copy($this->source_dir . '/fastlz.h', BUILD_INCLUDE_PATH . '/fastlz.h')) {
             throw new \RuntimeException('Failed to copy fastlz.h');
