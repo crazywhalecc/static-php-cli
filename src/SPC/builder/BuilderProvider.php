@@ -36,6 +36,7 @@ class BuilderProvider
             'BSD' => new BSDBuilder($input->getOptions()),
             default => throw new WrongUsageException('Current OS "' . PHP_OS_FAMILY . '" is not supported yet'),
         };
+
         return self::$builder;
     }
 

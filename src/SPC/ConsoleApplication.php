@@ -31,7 +31,7 @@ use Symfony\Component\Console\Application;
 /**
  * static-php-cli console app entry
  */
-final class ConsoleApplication extends Application
+class ConsoleApplication extends Application
 {
     public const VERSION = '2.6.0';
 
