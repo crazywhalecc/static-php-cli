@@ -151,7 +151,7 @@ abstract class UnixBuilderBase extends BuilderBase
     protected function sanityCheck(int $build_target): void
     {
         // sanity check for php-cli
-        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI || file_exists(BUILD_BIN_PATH . '/php')) {
+        if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('running cli sanity check');
             [$ret, $output] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -r "echo \"hello\";"');
             $raw_output = implode('', $output);
