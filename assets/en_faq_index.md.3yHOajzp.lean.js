@@ -1,0 +1,1 @@
+import{_ as i,c as s,o,af as t}from"./chunks/framework.PeLcR_tw.js";const u=JSON.parse('{"title":"FAQ","description":"","frontmatter":{},"headers":[],"relativePath":"en/faq/index.md","filePath":"en/faq/index.md"}'),a={name:"en/faq/index.md"};function n(l,e,r,c,d,p){return o(),s("div",null,e[0]||(e[0]=[t("",36)]))}const m=i(a,[["render",n]]);export{u as __pageData,m as default};

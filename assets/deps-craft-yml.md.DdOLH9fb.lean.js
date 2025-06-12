@@ -1,1 +1,0 @@
-import{_ as s,c as i,o as a,a1 as n}from"./chunks/framework.gjrnbxUT.js";const g=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"deps-craft-yml.md","filePath":"deps-craft-yml.md"}'),l={name:"deps-craft-yml.md"},t=n("",1),p=[t];function h(e,k,r,d,o,c){return a(),i("div",null,p)}const y=s(l,[["render",h]]);export{g as __pageData,y as default};
