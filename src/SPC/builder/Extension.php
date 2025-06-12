@@ -328,6 +328,17 @@ class Extension
      */
     public function buildShared(): void
     {
+        if (Config::getExt($this->getName(), 'type') === 'builtin' || Config::getExt($this->getName(), 'build-with-php') === true) {
+            if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
+                logger()->info('Shared extension [' . $this->getName() . '] was already built by php-src/configure (' . $this->getName() . '.so)');
+                return;
+            }
+            if (Config::getExt($this->getName(), 'build-with-php') === true) {
+                logger()->warning('Shared extension [' . $this->getName() . '] did not build with php-src/configure (' . $this->getName() . '.so)');
+                logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
+                return;
+            }
+        }
         logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
         foreach ($this->dependencies as $dependency) {
             if (!$dependency instanceof Extension) {
