@@ -38,7 +38,5 @@ trait freetype
             ' -L/lib ',
             ' -L' . BUILD_ROOT_PATH . '/lib '
         );
-
-        $this->cleanLaFiles();
     }
 }

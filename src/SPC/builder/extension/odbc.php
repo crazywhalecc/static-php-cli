@@ -12,6 +12,6 @@ class odbc extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--with-unixODBC=' . BUILD_ROOT_PATH;
+        return '--with-unixODBC=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH;
     }
 }

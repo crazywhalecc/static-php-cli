@@ -20,7 +20,7 @@ class xlswriter extends Extension
         return $arg;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         return '--with-xlswriter';
     }

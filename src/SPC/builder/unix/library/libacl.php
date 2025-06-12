@@ -7,6 +7,7 @@ namespace SPC\builder\unix\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait libacl
 {
@@ -29,14 +30,11 @@ trait libacl
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->appendEnv(['CFLAGS' => "-I{$this->getIncludeDir()}", 'LDFLAGS' => "-L{$this->getLibDir()}"])
+        UnixAutoconfExecutor::create($this)
             ->exec('libtoolize --force --copy')
             ->exec('./autogen.sh || autoreconf -if')
-            ->exec('./configure --prefix= --enable-static --disable-shared --disable-tests --disable-nls')
-            ->exec("make -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
-
+            ->configure('--disable-nls', '--disable-tests')
+            ->make();
         $this->patchPkgconfPrefix(['libacl.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

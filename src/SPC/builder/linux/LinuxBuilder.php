@@ -175,7 +175,10 @@ class LinuxBuilder extends UnixBuilderBase
             }
             $this->buildEmbed();
         }
+    }
 
+    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    {
         $this->emitPatchPoint('before-sanity-check');
         $this->sanityCheck($build_target);
     }
@@ -189,9 +192,10 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildCli(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
+            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
@@ -227,10 +231,11 @@ class LinuxBuilder extends UnixBuilderBase
         // patch fake cli for micro
         $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
         $vars = SystemUtil::makeEnvVarString($vars);
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} micro");
+            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} micro");
 
         $this->processMicroUPX();
 
@@ -250,9 +255,10 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildFpm(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} fpm");
+            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} fpm");
 
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
@@ -275,7 +281,20 @@ class LinuxBuilder extends UnixBuilderBase
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
+            ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
+
+        $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
+        if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
+            $release = $matches[1];
+            $realLibName = 'libphp-' . $release . '.so';
+            $realLib = BUILD_LIB_PATH . '/' . $realLibName;
+            rename(BUILD_LIB_PATH . '/libphp.so', $realLib);
+            $cwd = getcwd();
+            chdir(BUILD_LIB_PATH);
+            symlink($realLibName, 'libphp.so');
+            chdir($cwd);
+        }
         $this->patchPhpScripts();
     }
 
@@ -284,6 +303,7 @@ class LinuxBuilder extends UnixBuilderBase
         return [
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
+            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'),
         ];
     }

@@ -67,6 +67,10 @@ class MacOSBuilder extends UnixBuilderBase
             array_push($frameworks, ...$lib->getFrameworks());
         }
 
+        foreach ($this->exts as $ext) {
+            array_push($frameworks, ...$ext->getFrameworks());
+        }
+
         if ($asString) {
             return implode(' ', array_map(fn ($x) => "-framework {$x}", $frameworks));
         }
@@ -181,6 +185,12 @@ class MacOSBuilder extends UnixBuilderBase
         $this->sanityCheck($build_target);
     }
 
+    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    {
+        $this->emitPatchPoint('before-sanity-check');
+        $this->sanityCheck($build_target);
+    }
+
     /**
      * Build cli sapi
      *
@@ -192,7 +202,8 @@ class MacOSBuilder extends UnixBuilderBase
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
+        $shell->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
         if (!$this->getOption('no-strip', false)) {
             $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
         }
@@ -263,15 +274,12 @@ class MacOSBuilder extends UnixBuilderBase
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install")
-            // Workaround for https://github.com/php/php-src/issues/12082
-            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o')
-            ->exec('mkdir ' . BUILD_ROOT_PATH . '/lib/php-o')
-            ->cd(BUILD_ROOT_PATH . '/lib/php-o')
-            ->exec('ar x ' . BUILD_ROOT_PATH . '/lib/libphp.a')
-            ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
-            ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
-            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
+            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
+
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
+            shell()->cd(SOURCE_PATH . '/php-src')
+                ->exec('ar -t ' . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
+        }
         $this->patchPhpScripts();
     }
 

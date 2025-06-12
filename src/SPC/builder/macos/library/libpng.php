@@ -24,6 +24,7 @@ namespace SPC\builder\macos\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 class libpng extends MacOSLibraryBase
 {
@@ -36,29 +37,25 @@ class libpng extends MacOSLibraryBase
      */
     protected function build(): void
     {
-        $optimizations = match (php_uname('m')) {
-            'x86_64' => '--enable-intel-sse ',
-            'arm64' => '--enable-arm-neon ',
-            default => '',
-        };
-        shell()->cd($this->source_dir)
+        $arch = arch2gnu(php_uname('m'));
+        UnixAutoconfExecutor::create($this)
             ->exec('chmod +x ./configure')
             ->exec('chmod +x ./install-sh')
-            ->exec(
-                './configure ' .
-                '--host=' . arch2gnu(php_uname('m')) . '-apple-darwin ' .
-                '--disable-shared ' .
-                '--enable-static ' .
-                '--enable-hardware-optimizations ' .
-                $optimizations .
-                '--prefix='
+            ->appendEnv(['LDFLAGS' => "-L{$this->getLibDir()}"])
+            ->configure(
+                "--host={$arch}-apple-darwin",
+                '--enable-hardware-optimizations',
+                "--with-zlib-prefix={$this->getBuildRootPath()}",
+                match (getenv('SPC_ARCH')) {
+                    'x86_64' => '--enable-intel-sse',
+                    'aarch64' => '--enable-arm-neon',
+                    default => '',
+                }
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency} DEFAULT_INCLUDES='-I. -I" . BUILD_INCLUDE_PATH . "' LIBS= libpng16.la")
-            ->exec('make install-libLTLIBRARIES install-data-am DESTDIR=' . BUILD_ROOT_PATH)
-            ->cd(BUILD_LIB_PATH)
-            ->exec('ln -sf libpng16.a libpng.a');
+            ->make('libpng16.la', 'install-libLTLIBRARIES install-data-am', after_env_vars: ['DEFAULT_INCLUDES' => "-I{$this->source_dir} -I{$this->getIncludeDir()}"]);
+
+        shell()->cd(BUILD_LIB_PATH)->exec('ln -sf libpng16.a libpng.a');
         $this->patchPkgconfPrefix(['libpng16.pc'], PKGCONF_PATCH_PREFIX);
-        $this->cleanLaFiles();
+        $this->patchLaDependencyPrefix();
     }
 }

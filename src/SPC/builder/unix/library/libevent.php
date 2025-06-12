@@ -40,15 +40,19 @@ trait libevent
      */
     protected function build(): void
     {
-        UnixCMakeExecutor::create($this)
+        $cmake = UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DEVENT__LIBRARY_TYPE=STATIC',
                 '-DEVENT__DISABLE_BENCHMARK=ON',
                 '-DEVENT__DISABLE_THREAD_SUPPORT=ON',
                 '-DEVENT__DISABLE_TESTS=ON',
                 '-DEVENT__DISABLE_SAMPLES=ON',
-            )
-            ->build();
+                '-DEVENT__DISABLE_MBEDTLS=ON ',
+            );
+        if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
+            $cmake->addConfigureArgs('-DCMAKE_POLICY_VERSION_MINIMUM=3.10');
+        }
+        $cmake->build();
 
         $this->patchPkgconfPrefix(['libevent.pc', 'libevent_core.pc', 'libevent_extra.pc', 'libevent_openssl.pc']);
 

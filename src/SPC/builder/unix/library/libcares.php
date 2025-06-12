@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait libcares
 {
@@ -24,11 +25,7 @@ trait libcares
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec('./configure --prefix= --enable-static --disable-shared --disable-tests --with-pic')
-            ->exec("make -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
-
+        UnixAutoconfExecutor::create($this)->configure('--disable-tests')->make();
         $this->patchPkgconfPrefix(['libcares.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

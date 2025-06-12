@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait unixodbc
 {
@@ -15,21 +16,16 @@ trait unixodbc
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->exec(
-                './configure ' .
-                '--enable-static --disable-shared ' .
-                '--disable-debug ' .
-                '--disable-dependency-tracking ' .
-                '--with-libiconv-prefix=' . BUILD_ROOT_PATH . ' ' .
-                '--with-included-ltdl ' .
-                '--enable-gui=no ' .
-                '--prefix='
+        UnixAutoconfExecutor::create($this)
+            ->configure(
+                '--disable-debug',
+                '--disable-dependency-tracking',
+                "--with-libiconv-prefix={$this->getBuildRootPath()}",
+                '--with-included-ltdl',
+                '--enable-gui=no',
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->make();
         $this->patchPkgconfPrefix(['odbc.pc', 'odbccr.pc', 'odbcinst.pc']);
-        $this->cleanLaFiles();
+        $this->patchLaDependencyPrefix();
     }
 }

@@ -110,15 +110,15 @@ class UnixShell
     public function setEnv(array $env): UnixShell
     {
         foreach ($env as $k => $v) {
-            if ($v === '') {
+            if (trim($v) === '') {
                 continue;
             }
-            $this->env[$k] = $v;
+            $this->env[$k] = trim($v);
         }
         return $this;
     }
 
-    private function getEnvString(): string
+    public function getEnvString(): string
     {
         $str = '';
         foreach ($this->env as $k => $v) {

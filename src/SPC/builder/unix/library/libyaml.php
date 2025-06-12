@@ -26,6 +26,10 @@ trait libyaml
 
     protected function build(): void
     {
-        UnixCMakeExecutor::create($this)->addConfigureArgs('-DBUILD_TESTING=OFF')->build();
+        $cmake = UnixCMakeExecutor::create($this)->addConfigureArgs('-DBUILD_TESTING=OFF');
+        if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
+            $cmake->addConfigureArgs('-DCMAKE_POLICY_VERSION_MINIMUM=3.5');
+        }
+        $cmake->build();
     }
 }

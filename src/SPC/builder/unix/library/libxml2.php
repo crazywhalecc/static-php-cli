@@ -17,7 +17,13 @@ trait libxml2
     public function build(): void
     {
         $cmake = UnixCMakeExecutor::create($this)
-            ->optionalLib('zlib', "-DLIBXML2_WITH_ZLIB=ON -DZLIB_LIBRARY={$this->getLibDir()}/libz.a -DZLIB_INCLUDE_DIR={$this->getIncludeDir()}", '-DLIBXML2_WITH_ZLIB=OFF')
+            ->optionalLib(
+                'zlib',
+                '-DLIBXML2_WITH_ZLIB=ON ' .
+                "-DZLIB_LIBRARY={$this->getLibDir()}/libz.a " .
+                "-DZLIB_INCLUDE_DIR={$this->getIncludeDir()}",
+                '-DLIBXML2_WITH_ZLIB=OFF',
+            )
             ->optionalLib('icu', ...cmake_boolean_args('LIBXML2_WITH_ICU'))
             ->optionalLib('xz', ...cmake_boolean_args('LIBXML2_WITH_LZMA'))
             ->addConfigureArgs(
@@ -35,8 +41,13 @@ trait libxml2
 
         FileSystem::replaceFileStr(
             BUILD_LIB_PATH . '/pkgconfig/libxml-2.0.pc',
-            '-licudata -licui18n -licuuc',
-            '-licui18n -licuuc -licudata'
+            '-lxml2 -liconv',
+            '-lxml2'
+        );
+        FileSystem::replaceFileStr(
+            BUILD_LIB_PATH . '/pkgconfig/libxml-2.0.pc',
+            '-lxml2',
+            '-lxml2 -liconv'
         );
     }
 }

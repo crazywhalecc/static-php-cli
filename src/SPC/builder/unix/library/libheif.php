@@ -6,10 +6,24 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait libheif
 {
+    public function patchBeforeBuild(): bool
+    {
+        if (!str_contains(file_get_contents($this->source_dir . '/CMakeLists.txt'), 'libbrotlienc')) {
+            FileSystem::replaceFileStr(
+                $this->source_dir . '/CMakeLists.txt',
+                'list(APPEND REQUIRES_PRIVATE "libbrotlidec")',
+                'list(APPEND REQUIRES_PRIVATE "libbrotlidec")' . "\n" . '        list(APPEND REQUIRES_PRIVATE "libbrotlienc")'
+            );
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @throws RuntimeException
      * @throws FileSystemException

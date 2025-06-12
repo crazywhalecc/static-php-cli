@@ -13,7 +13,6 @@ use SPC\util\CustomExt;
 #[CustomExt('soap')]
 #[CustomExt('xmlreader')]
 #[CustomExt('xmlwriter')]
-#[CustomExt('dom')]
 #[CustomExt('simplexml')]
 class xml extends Extension
 {
@@ -27,11 +26,10 @@ class xml extends Extension
             'soap' => '--enable-soap',
             'xmlreader' => '--enable-xmlreader',
             'xmlwriter' => '--enable-xmlwriter',
-            'dom' => '--enable-dom',
             'simplexml' => '--enable-simplexml',
             default => throw new RuntimeException('Not accept non-xml extension'),
         };
-        $arg .= ' --with-libxml="' . BUILD_ROOT_PATH . '"';
+        $arg .= ($shared ? '=shared' : '') . ' --with-libxml="' . BUILD_ROOT_PATH . '"';
         return $arg;
     }
 
@@ -41,14 +39,13 @@ class xml extends Extension
         return true;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         $arg = match ($this->name) {
             'xml' => '--with-xml',
             'soap' => '--enable-soap',
             'xmlreader' => '--enable-xmlreader',
             'xmlwriter' => '--enable-xmlwriter',
-            'dom' => '--with-dom',
             'simplexml' => '--with-simplexml',
             default => throw new RuntimeException('Not accept non-xml extension'),
         };

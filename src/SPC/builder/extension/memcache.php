@@ -14,7 +14,7 @@ class memcache extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--enable-memcache --with-zlib-dir=' . BUILD_ROOT_PATH;
+        return '--enable-memcache' . ($shared ? '=shared' : '') . ' --with-zlib-dir=' . BUILD_ROOT_PATH;
     }
 
     /**

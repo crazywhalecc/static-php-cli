@@ -12,10 +12,10 @@ class ffi extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--with-ffi --enable-zend-signals';
+        return '--with-ffi' . ($shared ? '=shared' : '') . ' --enable-zend-signals';
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         return '--with-ffi';
     }

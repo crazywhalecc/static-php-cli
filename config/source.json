@@ -50,8 +50,9 @@
         }
     },
     "brotli": {
-        "type": "ghtar",
+        "type": "ghtagtar",
         "repo": "google/brotli",
+        "match": "v1\\.\\d.*",
         "provide-pre-built": true,
         "license": {
             "type": "file",
@@ -97,6 +98,16 @@
         "url": "https://pecl.php.net/get/ev",
         "path": "php-src/ext/ev",
         "filename": "ev.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-brotli": {
+        "type": "git",
+        "path": "php-src/ext/brotli",
+        "rev": "master",
+        "url": "https://github.com/kjdev/php-ext-brotli",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -241,6 +252,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-xz": {
+        "type": "git",
+        "path": "php-src/ext/xz",
+        "rev": "main",
+        "url": "https://github.com/codemasher/php-ext-xz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",
@@ -249,6 +270,15 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "fastlz": {
+        "type": "git",
+        "url": "https://github.com/ariya/FastLZ.git",
+        "rev": "master",
+        "license": {
+            "type": "file",
+            "path": "LICENSE.MIT"
         }
     },
     "freetype": {
@@ -507,12 +537,12 @@
         }
     },
     "libmemcached": {
-        "type": "git",
-        "url": "https://github.com/static-php/libmemcached-macos.git",
-        "rev": "master",
+        "type": "ghtagtar",
+        "repo": "awesomized/libmemcached",
+        "match": "1.\\d.\\d",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "LICENSE"
         }
     },
     "libpng": {
@@ -801,8 +831,9 @@
         }
     },
     "postgresql": {
-        "type": "url",
-        "url": "https://ftp.postgresql.org/pub/source/v16.2/postgresql-16.2.tar.bz2",
+        "type": "ghtagtar",
+        "repo": "postgres/postgres",
+        "match": "REL_16_\\d+",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"
