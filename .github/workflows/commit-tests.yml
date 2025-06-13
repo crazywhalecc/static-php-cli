@@ -32,12 +32,14 @@ jobs:
             echo "skip_craft=yes" >> $GITHUB_OUTPUT
             exit 0
           else
-            echo "\e[32mCraft tags found in commit message.\e[0m"
+            echo -e "\e[32mCraft tags found in commit message.\e[0m"
             # get the craft content
             CRAFT_CONTENT=$(echo "$COMMIT_MESSAGE" | sed -nz 's/.*{craft}\(.*\){\/craft}.*/\1/p')
             echo "Craft content: $CRAFT_CONTENT"
             # set the output variable
-            echo "craft=$CRAFT_CONTENT" >> $GITHUB_OUTPUT
+            echo "craft<<EOF" >> $GITHUB_OUTPUT
+            echo "$CRAFT_CONTENT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           fi
 
           # parse the bash test script from the commit message
@@ -45,12 +47,14 @@ jobs:
             echo "No {bash} tags found in commit message. Skipping bash test."
             echo "skip_bash=yes" >> $GITHUB_OUTPUT
           else
-            echo "\e[32mBash tags found in commit message.\e[0m"
+            echo -e "\e[32mBash tags found in commit message.\e[0m"
             # get the bash content
             BASH_CONTENT=$(echo "$COMMIT_MESSAGE" | sed -nz 's/.*{bash}\(.*\){\/bash}.*/\1/p')
             echo "Bash content: $BASH_CONTENT"
             # set the output variable
-            echo "bash=$BASH_CONTENT" >> $GITHUB_OUTPUT
+            echo "bash<<EOF" >> $GITHUB_OUTPUT
+            echo "$BASH_CONTENT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           fi
 
           # parse spc_prefix from commit message, e.g. [spc_prefix:bin/spc-gnu-docker], default: bin/spc
