@@ -18,6 +18,9 @@ jobs:
       build_os: ${{ steps.parse_commit.outputs.build_os }}
       spc_prefix: ${{ steps.parse_commit.outputs.spc_prefix }}
     steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
       - name: "Parse commit message"
         id: parse_commit
         run: |
