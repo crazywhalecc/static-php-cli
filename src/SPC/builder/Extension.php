@@ -328,6 +328,17 @@ class Extension
      */
     public function buildShared(): void
     {
+        if (Config::getExt($this->getName(), 'type') === 'builtin' || Config::getExt($this->getName(), 'build-with-php') === true) {
+            if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
+                logger()->info('Shared extension [' . $this->getName() . '] was already built by php-src/configure (' . $this->getName() . '.so)');
+                return;
+            }
+            if (Config::getExt($this->getName(), 'build-with-php') === true) {
+                logger()->warning('Shared extension [' . $this->getName() . '] did not build with php-src/configure (' . $this->getName() . '.so)');
+                logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
+                return;
+            }
+        }
         logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
         foreach ($this->dependencies as $dependency) {
             if (!$dependency instanceof Extension) {
@@ -357,11 +368,16 @@ class Extension
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
         [$staticLibString, $sharedLibString] = $this->getStaticAndSharedLibs();
+
+        // macOS ld64 doesn't understand these, while Linux and BSD do
+        // use them to make sure that all symbols are picked up, even if a library has already been visited before
+        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,-Bstatic -Wl,--start-group ' : '';
+        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group -Wl,-Bdynamic ' : ' ';
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibString . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
+            'LIBS' => $preStatic . $staticLibString . $postStatic . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
 
@@ -382,6 +398,7 @@ class Extension
                 '--enable-shared --disable-static'
             );
 
+        // some extensions don't define their dependencies well, this patch is only needed for a few
         FileSystem::replaceFileRegex(
             $this->source_dir . '/Makefile',
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',

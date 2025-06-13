@@ -262,17 +262,6 @@ abstract class BuilderBase
                 if (!$ext->isBuildShared()) {
                     continue;
                 }
-                if (Config::getExt($ext->getName(), 'type') === 'builtin' || Config::getExt($ext->getName(), 'build-with-php') === true) {
-                    if (file_exists(BUILD_MODULES_PATH . '/' . $ext->getName() . '.so')) {
-                        logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
-                        continue;
-                    }
-                    if (Config::getExt($ext->getName(), 'build-with-php') === true) {
-                        logger()->warning('Shared extension [' . $ext->getName() . '] did not build with php-src/configure (' . $ext->getName() . '.so)');
-                        logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
-                        continue;
-                    }
-                }
                 $ext->buildShared();
             }
         } catch (RuntimeException $e) {

@@ -1070,5 +1070,14 @@
             "type": "file",
             "path": "LICENSE"
         }
+    },
+    "watcher": {
+        "type": "ghtar",
+        "repo": "e-dant/watcher",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "license"
+        }
     }
 }
