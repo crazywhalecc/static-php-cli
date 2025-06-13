@@ -6,6 +6,7 @@ namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
+use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
@@ -158,14 +159,24 @@ class BuildPHPCommand extends BuildCommand
             if ($this->input->getOption('with-upx-pack') && in_array(PHP_OS_FAMILY, ['Linux', 'Windows'])) {
                 $indent_texts['UPX Pack'] = 'enabled';
             }
+
             try {
-                $ver = $builder->getPHPVersion();
-                $indent_texts['PHP Version'] = $ver;
-            } catch (\Throwable) {
-                if (($ver = $builder->getPHPVersionFromArchive()) !== false) {
-                    $indent_texts['PHP Version'] = $ver;
+                $cleanPhpSrc = $builder->getPHPVersion() !== $builder->getPHPVersionFromArchive();
+            } catch (RuntimeException|WrongUsageException) {
+                $cleanPhpSrc = true;
+            }
+            if ($cleanPhpSrc) {
+                logger()->info('Cleaning previous php build due to mismatching versions...');
+                FileSystem::removeDir(SOURCE_PATH . '/php-src');
+                FileSystem::removeDir(BUILD_MODULES_PATH);
+                $binFiles = glob(BUILD_BIN_PATH . '/php*');
+                $libFiles = glob(BUILD_LIB_PATH . '/libphp*');
+                foreach ([...$binFiles, ...$libFiles] as $file) {
+                    unlink($file);
                 }
             }
+            $ver = $builder->getPHPVersionFromArchive() ?: $builder->getPHPVersion();
+            $indent_texts['PHP Version'] = $ver;
 
             if (!empty($not_included)) {
                 $indent_texts['Extra Exts (' . count($not_included) . ')'] = implode(', ', $not_included);
