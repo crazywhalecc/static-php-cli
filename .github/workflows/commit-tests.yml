@@ -1,0 +1,128 @@
+name: Single Test
+on:
+  push:
+
+permissions: read-all
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  parse-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      skip_craft: ${{ steps.parse_commit.outputs.skip_craft }}
+      craft: ${{ steps.parse_commit.outputs.craft }}
+      skip_bash: ${{ steps.parse_commit.outputs.skip_bash }}
+      bash: ${{ steps.parse_commit.outputs.bash }}
+      build_os: ${{ steps.parse_commit.outputs.build_os }}
+      spc_prefix: ${{ steps.parse_commit.outputs.spc_prefix }}
+    steps:
+      - name: "Parse commit message"
+        id: parse_commit
+        run: |
+          # parse the commit message, see if it has {craft} and {/craft} tags
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          # judge it, it it's not exist, then skip this test
+          if [[ "$COMMIT_MESSAGE" != *"{craft}"* ]] || [[ "$COMMIT_MESSAGE" != *"{/craft}"* ]]; then
+            echo "No {craft} tags found in commit message. Skipping test."
+            echo "skip_craft=yes" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "\e[32mCraft tags found in commit message.\e[0m"
+            # get the craft content
+            CRAFT_CONTENT=$(echo "$COMMIT_MESSAGE" | sed -nz 's/.*{craft}\(.*\){\/craft}.*/\1/p')
+            echo "Craft content: $CRAFT_CONTENT"
+            # set the output variable
+            echo "craft=$CRAFT_CONTENT" >> $GITHUB_OUTPUT
+          fi
+
+          # parse the bash test script from the commit message
+          if [[ "$COMMIT_MESSAGE" != *"{bash}"* ]] || [[ "$COMMIT_MESSAGE" != *"{/bash}"* ]]; then
+            echo "No {bash} tags found in commit message. Skipping bash test."
+            echo "skip_bash=yes" >> $GITHUB_OUTPUT
+          else
+            echo "\e[32mBash tags found in commit message.\e[0m"
+            # get the bash content
+            BASH_CONTENT=$(echo "$COMMIT_MESSAGE" | sed -nz 's/.*{bash}\(.*\){\/bash}.*/\1/p')
+            echo "Bash content: $BASH_CONTENT"
+            # set the output variable
+            echo "bash=$BASH_CONTENT" >> $GITHUB_OUTPUT
+          fi
+
+          # parse spc_prefix from commit message, e.g. [spc_prefix:bin/spc-gnu-docker], default: bin/spc
+          if [[ "$COMMIT_MESSAGE" =~ \[spc_prefix:([^\]]+)\] ]]; then
+              SPC_PREFIX=${BASH_REMATCH[1]}
+              echo "SPC prefix found: $SPC_PREFIX"
+          else
+              SPC_PREFIX="bin/spc"
+              echo "No SPC prefix found, using default: $SPC_PREFIX"
+          fi
+          echo "spc_prefix=$SPC_PREFIX" >> $GITHUB_OUTPUT
+
+          # parse build_os from commit message, e.g. [build_os:ubuntu-latest], default: ubuntu-latest
+          if [[ "$COMMIT_MESSAGE" =~ \[build_os:([^\]]+)\] ]]; then
+              BUILD_OS=${BASH_REMATCH[1]}
+              echo "Build OS found: $BUILD_OS"
+          else
+              BUILD_OS="ubuntu-latest"
+              echo "No Build OS found, using default: $BUILD_OS"
+          fi
+          echo "build_os=$BUILD_OS" >> $GITHUB_OUTPUT
+
+  craft-test:
+    needs: parse-commit
+    if: needs.parse-commit.outputs.skip_craft != 'yes'
+    runs-on: ${{ needs.parse-commit.outputs.build_os }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: composer
+
+      - name: "Install Dependencies"
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: "Doctor"
+        run: ${{ needs.parse-commit.outputs.spc_prefix }} doctor --auto-fix --debug
+
+      - name: "Run Craft Test"
+        run: |
+          echo "Running craft test with content:"
+          echo "${{ needs.parse-commit.outputs.craft }}"
+          echo "${{ needs.parse-commit.outputs.craft }}" > craft.yml
+          ${{ needs.parse-commit.outputs.spc_prefix }} craft --debug
+
+  bash-test:
+    needs: parse-commit
+    if: needs.parse-commit.outputs.skip_bash != 'yes'
+    runs-on: ${{ needs.parse-commit.outputs.build_os }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: composer
+
+      - name: "Install Dependencies"
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: "Doctor"
+        run: ${{ needs.parse-commit.outputs.spc_prefix }} doctor --auto-fix --debug
+
+      - name: "Run Bash Test"
+        run: |
+          echo "Running bash test with content:"
+          echo "${{ needs.parse-commit.outputs.bash }}"
+          echo "${{ needs.parse-commit.outputs.bash }}" | bash
