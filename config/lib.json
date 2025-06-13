@@ -854,5 +854,14 @@
             "zstd.h",
             "zstd_errors.h"
         ]
+    },
+    "watcher": {
+        "source": "watcher",
+        "static-libs-unix": [
+            "libwatcher-c.a"
+        ],
+        "headers": [
+            "wtr/watcher-c.h"
+        ]
     }
 }
