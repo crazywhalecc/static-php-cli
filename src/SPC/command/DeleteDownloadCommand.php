@@ -60,7 +60,7 @@ class DeleteDownloadCommand extends BaseCommand
 
             foreach ($deleted_sources as $lock_name) {
                 // remove download file/dir if exists
-                if ($lock[$lock_name]['source_type'] === 'archive') {
+                if ($lock[$lock_name]['source_type'] === SPC_SOURCE_ARCHIVE) {
                     if (file_exists($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']))) {
                         logger()->info('Deleting file ' . $path);
                         unlink($path);
