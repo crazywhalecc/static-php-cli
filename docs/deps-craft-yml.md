@@ -42,6 +42,9 @@ build-options:
   # Set micro SAPI as win32 mode, without this, micro SAPI will be compiled as a console application (only for Windows, default: false)
   enable-micro-win32: false
 
+# Build options for shared extensions (list or comma-separated are both accepted)
+shared-extensions: [ ]
+
 # Download options
 download-options:
   # Use custom url for specified sources, format: "{source-name}:{url}" (e.g. "php-src:https://example.com/php-8.4.0.tar.gz")

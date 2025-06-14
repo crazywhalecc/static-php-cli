@@ -164,6 +164,12 @@ class ConfigValidator
         if (is_string($craft['extensions'])) {
             $craft['extensions'] = array_filter(array_map(fn ($x) => trim($x), explode(',', $craft['extensions'])));
         }
+        if (!isset($craft['shared-extensions'])) {
+            $craft['shared-extensions'] = [];
+        }
+        if (is_string($craft['shared-extensions'] ?? [])) {
+            $craft['shared-extensions'] = array_filter(array_map(fn ($x) => trim($x), explode(',', $craft['shared-extensions'])));
+        }
         // check libs
         if (isset($craft['libs']) && is_string($craft['libs'])) {
             $craft['libs'] = array_filter(array_map(fn ($x) => trim($x), explode(',', $craft['libs'])));

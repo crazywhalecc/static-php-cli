@@ -49,7 +49,7 @@ class CraftCommand extends BaseCommand
         }
 
         $static_extensions = implode(',', $craft['extensions']);
-        $shared_extensions = implode(',', $craft['shared-extensions']);
+        $shared_extensions = implode(',', $craft['shared-extensions'] ?? []);
         $libs = implode(',', $craft['libs']);
 
         // init log
