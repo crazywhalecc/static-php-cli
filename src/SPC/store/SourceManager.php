@@ -69,10 +69,39 @@ class SourceManager
             $check = $lock[$lock_name]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (SOURCE_PATH . '/' . $lock[$lock_name]['move_path']);
             if (!is_dir($check)) {
                 logger()->debug('Extracting source [' . $source . '] to ' . $check . ' ...');
-                FileSystem::extractSource($source, DOWNLOAD_PATH . '/' . ($lock[$lock_name]['filename'] ?? $lock[$lock_name]['dirname']), $lock[$lock_name]['move_path']);
-            } else {
-                logger()->debug('Source [' . $source . '] already extracted in ' . $check . ', skip !');
+                $filename = self::getSourceFullPath($lock[$lock_name]);
+                FileSystem::extractSource($source, $lock[$lock_name]['source_type'], $filename, $lock[$lock_name]['move_path']);
+                Downloader::putLockSourceHash($lock[$lock_name], $check);
+                continue;
             }
+            // if a lock file does not have hash, calculate with the current source (backward compatibility)
+            if (!isset($lock[$lock_name]['hash'])) {
+                $hash = Downloader::getLockSourceHash($lock[$lock_name]);
+            } else {
+                $hash = $lock[$lock_name]['hash'];
+            }
+
+            // when source already extracted, detect if the extracted source hash is the same as the lock file one
+            if (file_exists("{$check}/.spc-hash") && FileSystem::readFile("{$check}/.spc-hash") === $hash) {
+                logger()->debug('Source [' . $source . '] already extracted in ' . $check . ', skip !');
+                continue;
+            }
+
+            // if not, remove the source dir and extract again
+            logger()->notice("Source [{$source}] hash mismatch, removing old source dir and extracting again ...");
+            FileSystem::removeDir($check);
+            $filename = self::getSourceFullPath($lock[$lock_name]);
+            FileSystem::extractSource($source, $lock[$lock_name]['source_type'], $filename, $lock[$lock_name]['move_path']);
+            Downloader::putLockSourceHash($lock[$lock_name], $check);
         }
+    }
+
+    private static function getSourceFullPath(array $lock_options): string
+    {
+        return match ($lock_options['source_type']) {
+            SPC_SOURCE_ARCHIVE => FileSystem::isRelativePath($lock_options['filename']) ? (DOWNLOAD_PATH . '/' . $lock_options['filename']) : $lock_options['filename'],
+            SPC_SOURCE_GIT, SPC_SOURCE_LOCAL => FileSystem::isRelativePath($lock_options['dirname']) ? (DOWNLOAD_PATH . '/' . $lock_options['dirname']) : $lock_options['dirname'],
+            default => throw new WrongUsageException("Unknown source type: {$lock_options['source_type']}"),
+        };
     }
 }

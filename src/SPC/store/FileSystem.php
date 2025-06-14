@@ -142,7 +142,7 @@ class FileSystem
      * @throws RuntimeException
      * @throws FileSystemException
      */
-    public static function extractPackage(string $name, string $filename, ?string $extract_path = null): void
+    public static function extractPackage(string $name, string $source_type, string $filename, ?string $extract_path = null): void
     {
         if ($extract_path !== null) {
             // replace
@@ -151,14 +151,15 @@ class FileSystem
         } else {
             $extract_path = PKG_ROOT_PATH . '/' . $name;
         }
-        logger()->info("extracting {$name} package to {$extract_path} ...");
+        logger()->info("Extracting {$name} package to {$extract_path} ...");
         $target = self::convertPath($extract_path);
 
         if (!is_dir($dir = dirname($target))) {
             self::createDir($dir);
         }
         try {
-            self::extractArchive($filename, $target);
+            // extract wrapper command
+            self::extractWithType($source_type, $filename, $extract_path);
         } catch (RuntimeException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('rmdir /s /q ' . $target);
@@ -177,24 +178,23 @@ class FileSystem
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public static function extractSource(string $name, string $filename, ?string $move_path = null): void
+    public static function extractSource(string $name, string $source_type, string $filename, ?string $move_path = null): void
     {
         // if source hook is empty, load it
         if (self::$_extract_hook === []) {
             SourcePatcher::init();
         }
-        if ($move_path !== null) {
-            $move_path = SOURCE_PATH . '/' . $move_path;
-        } else {
-            $move_path = SOURCE_PATH . "/{$name}";
-        }
+        $move_path = match ($move_path) {
+            null => SOURCE_PATH . '/' . $name,
+            default => self::isRelativePath($move_path) ? (SOURCE_PATH . '/' . $move_path) : $move_path,
+        };
         $target = self::convertPath($move_path);
-        logger()->info("extracting {$name} source to {$target}" . ' ...');
+        logger()->info("Extracting {$name} source to {$target}" . ' ...');
         if (!is_dir($dir = dirname($target))) {
             self::createDir($dir);
         }
         try {
-            self::extractArchive($filename, $target);
+            self::extractWithType($source_type, $filename, $move_path);
             self::emitSourceExtractHook($name, $target);
         } catch (RuntimeException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
@@ -484,11 +484,6 @@ class FileSystem
      */
     private static function extractArchive(string $filename, string $target): void
     {
-        // Git source, just move
-        if (is_dir(self::convertPath($filename))) {
-            self::copyDir(self::convertPath($filename), $target);
-            return;
-        }
         // Create base dir
         if (f_mkdir(directory: $target, recursive: true) !== true) {
             throw new FileSystemException('create ' . $target . ' dir failed');
@@ -552,5 +547,17 @@ class FileSystem
                 logger()->info('Patched source [' . $name . '] after extracted');
             }
         }
+    }
+
+    private static function extractWithType(string $source_type, string $filename, string $extract_path): void
+    {
+        logger()->debug('Extracting source [' . $source_type . ']: ' . $filename);
+        /* @phpstan-ignore-next-line */
+        match ($source_type) {
+            SPC_SOURCE_ARCHIVE => self::extractArchive($filename, $extract_path),
+            SPC_SOURCE_GIT => self::copyDir(self::convertPath($filename), $extract_path),
+            // soft link to the local source
+            SPC_SOURCE_LOCAL => symlink(self::convertPath($filename), $extract_path),
+        };
     }
 }
