@@ -42,7 +42,7 @@ build-options:
   # Set micro SAPI as win32 mode, without this, micro SAPI will be compiled as a console application (only for Windows, default: false)
   enable-micro-win32: false
 
-# Build options for shared extensions (same as `build-shared` command options, all options are optional)
+# Build options for shared extensions (list or comma-separated are both accepted)
 shared-extensions: [ ]
 
 # Download options
