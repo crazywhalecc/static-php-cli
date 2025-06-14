@@ -40,7 +40,7 @@ const SPC_EXTENSION_ALIAS = [
     'zendopcache' => 'opcache',
 ];
 
-// spc lock type
+// spc download lock type
 const SPC_DOWNLOAD_SOURCE = 1;      // lock source
 const SPC_DOWNLOAD_PRE_BUILT = 2;   // lock pre-built
 const SPC_DOWNLOAD_PACKAGE = 3; // lock as package
@@ -83,6 +83,11 @@ const AUTOCONF_CFLAGS = 2;
 const AUTOCONF_CPPFLAGS = 4;
 const AUTOCONF_LDFLAGS = 8;
 const AUTOCONF_ALL = 15;
+
+// spc download source type
+const SPC_SOURCE_ARCHIVE = 'archive'; // download as archive
+const SPC_SOURCE_GIT = 'git'; // download as git repository
+const SPC_SOURCE_LOCAL = 'local'; // download as local directory
 
 ConsoleLogger::$date_format = 'H:i:s';
 ConsoleLogger::$format = '[%date%] [%level_short%] %body%';
