@@ -264,9 +264,12 @@ class Extension
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
         $sharedExtensions = $this->getSharedExtensionLoadString();
-        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         if ($ret !== 0) {
-            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+            throw new RuntimeException(
+                'extension ' . $this->getName() . ' failed runtime check: php-cli returned ' . $ret . "\n" .
+                join("\n", $out)
+            );
         }
 
         if (file_exists(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')) {
