@@ -72,7 +72,7 @@ RUN yum update -y && \
     yum install -y devtoolset-10-gcc-*
 RUN echo "source scl_source enable devtoolset-10" >> /etc/bashrc
 RUN source /etc/bashrc
-RUN yum install -y which
+RUN yum install -y which patchelf
 
 RUN curl -o cmake.tgz -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$BASE_ARCH.tar.gz && \
     mkdir /cmake && \
