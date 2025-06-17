@@ -488,7 +488,7 @@ class Extension
      *
      * @return array [staticLibString, sharedLibString]
      */
-    private function getStaticAndSharedLibs(): array
+    protected function getStaticAndSharedLibs(): array
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
         $sharedLibString = '';
