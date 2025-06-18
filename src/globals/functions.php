@@ -105,7 +105,7 @@ function osfamily2dir(): string
 function osfamily2shortname(): string
 {
     return match (PHP_OS_FAMILY) {
-        'Windows', 'WINNT', 'Cygwin' => 'win',
+        'Windows' => 'win',
         'Darwin' => 'macos',
         'Linux' => 'linux',
         'BSD' => 'bsd',
