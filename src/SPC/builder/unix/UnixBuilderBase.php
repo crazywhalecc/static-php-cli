@@ -297,7 +297,7 @@ abstract class UnixBuilderBase extends BuilderBase
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => '$(php-config --includes) -I$(php-config --include-dir)/..',
             'CGO_LDFLAGS' => "$(php-config --ldflags) $(php-config --libs) {$brotliLibs} {$watcherLibs} -lphp",
-            'XCADDY_GO_BUILD_FLAGS' => "-ldflags='-w -s' -tags=nobadger,nomysql,nopgx" . $nobrotli . $nowatcher,
+            'XCADDY_GO_BUILD_FLAGS' => "-ldflags='-w -s' -tags=nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         shell()->cd(BUILD_BIN_PATH)
