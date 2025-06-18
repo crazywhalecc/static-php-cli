@@ -40,6 +40,9 @@ $no_strip = false;
 // compress with upx
 $upx = false;
 
+// whether to test frankenphp build, only available for macos and linux
+$frankenphp = false;
+
 // prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = false;
 
@@ -177,7 +180,7 @@ if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd .= $no_strip ? '--no-strip ' : '';
     $build_cmd .= $upx ? '--with-upx-pack ' : '';
     $build_cmd .= $final_libs === '' ? '' : ('--with-libs=' . quote2($final_libs) . ' ');
-    $build_cmd .= str_starts_with($argv[2], 'windows-') ? '' : '--build-fpm --build-frankenphp';
+    $build_cmd .= str_starts_with($argv[2], 'windows-') ? '' : '--build-fpm ';
     $build_cmd .= '--debug ';
 }
 
@@ -208,7 +211,7 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
         break;
     case 'build_embed_cmd':
-        passthru($prefix . $build_cmd . (str_starts_with($argv[2], 'windows-') ? ' --build-cli' : ' --build-embed'), $retcode);
+        passthru($prefix . $build_cmd . (str_starts_with($argv[2], 'windows-') ? ' --build-cli' : (' --build-embed' . ($frankenphp ? ' --build-frankenphp' : ''))), $retcode);
         break;
     case 'doctor_cmd':
         passthru($prefix . $doctor_cmd, $retcode);
