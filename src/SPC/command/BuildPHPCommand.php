@@ -33,6 +33,7 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('build-cli', null, null, 'Build cli SAPI');
         $this->addOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
         $this->addOption('build-embed', null, null, 'Build embed SAPI (not available on Windows)');
+        $this->addOption('build-frankenphp', null, null, 'Build FrankenPHP SAPI (not available on Windows)');
         $this->addOption('build-all', null, null, 'Build all SAPI');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
@@ -83,7 +84,8 @@ class BuildPHPCommand extends BuildCommand
             $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
             $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
             $this->output->writeln("<comment>\t--build-embed\tBuild embed SAPI/libphp</comment>");
-            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm, embed</comment>");
+            $this->output->writeln("<comment>\t--build-frankenphp\tBuild FrankenPHP SAPI/libphp</comment>");
+            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm, embed, frankenphp</comment>");
             return static::FAILURE;
         }
         if ($rule === BUILD_TARGET_ALL) {
@@ -304,6 +306,7 @@ class BuildPHPCommand extends BuildCommand
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-embed') || !empty($shared_extensions) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-frankenphp') || !empty($shared_extensions) ? BUILD_TARGET_FRANKENPHP : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;
     }

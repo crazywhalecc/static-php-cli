@@ -277,4 +277,34 @@ abstract class UnixBuilderBase extends BuilderBase
             FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
         }
     }
+
+    protected function buildFrankenphp(): void
+    {
+        $path = getenv('PATH');
+        $xcaddyPath = getenv('GOBIN') ?: (getenv('HOME') . '/go/bin');
+        if (!str_contains($path, $xcaddyPath)) {
+            $path = $path . ':' . $xcaddyPath;
+        }
+        $path = BUILD_BIN_PATH . ':' . $path;
+        f_putenv("PATH={$path}");
+
+        $brotliLibs = $this->getLib('brotli') !== null ? '-lbrotlienc -lbrotlidec -lbrotlicommon' : '';
+        $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
+        $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
+
+        $env = [
+            'CGO_ENABLED' => '1',
+            'CGO_CFLAGS' => '$(php-config --includes) -I$(php-config --include-dir)/..',
+            'CGO_LDFLAGS' => "$(php-config --ldflags) $(php-config --libs) {$brotliLibs} -lwatcher-c -lphp -Wl,-rpath=" . BUILD_LIB_PATH,
+            'XCADDY_GO_BUILD_FLAGS' => "-ldflags='-w -s' -tags=nobadger,nomysql,nopgx" . $nobrotli . $nowatcher,
+        ];
+        shell()->cd(BUILD_BIN_PATH)
+            ->setEnv($env)
+            ->exec(
+                'xcaddy build ' .
+                '--output frankenphp ' .
+                '--with github.com/dunglas/frankenphp/caddy ' .
+                getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES')
+            );
+    }
 }

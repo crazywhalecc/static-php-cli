@@ -114,6 +114,7 @@ class LinuxBuilder extends UnixBuilderBase
         $enable_fpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enable_micro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enable_embed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enable_frankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
         $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         // prepare build php envs
@@ -174,6 +175,10 @@ class LinuxBuilder extends UnixBuilderBase
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
+        }
+        if ($enable_frankenphp) {
+            logger()->info('building frankenphp');
+            $this->buildFrankenphp();
         }
     }
 

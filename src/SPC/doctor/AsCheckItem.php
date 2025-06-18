@@ -14,5 +14,6 @@ class AsCheckItem
         public ?string $limit_os = null,
         public int $level = 100,
         public bool $manual = false,
-    ) {}
+    ) {
+    }
 }
