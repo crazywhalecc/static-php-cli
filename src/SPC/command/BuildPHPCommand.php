@@ -306,7 +306,7 @@ class BuildPHPCommand extends BuildCommand
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-embed') || !empty($shared_extensions) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-frankenphp') || !empty($shared_extensions) ? BUILD_TARGET_FRANKENPHP : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-frankenphp') ? BUILD_TARGET_FRANKENPHP : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;
     }
