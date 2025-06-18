@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\doctor\item;
 
 use SPC\builder\linux\SystemUtil;
-use SPC\builder\traits\UnixGoCheckTrait;
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
@@ -15,7 +14,6 @@ use SPC\exception\RuntimeException;
 class LinuxToolCheckList
 {
     use UnixSystemUtilTrait;
-    use UnixGoCheckTrait;
 
     public const TOOLS_ALPINE = [
         'make', 'bison', 'flex',
@@ -87,12 +85,6 @@ class LinuxToolCheckList
             };
         }
         return CheckResult::ok();
-    }
-
-    #[AsCheckItem('if xcaddy is installed', limit_os: 'Linux')]
-    public function checkXcaddy(): ?CheckResult
-    {
-        return $this->checkGoAndXcaddy();
     }
 
     #[AsCheckItem('if cmake version >= 3.18', limit_os: 'Linux')]
