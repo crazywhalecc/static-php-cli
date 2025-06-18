@@ -527,8 +527,8 @@ abstract class BuilderBase
                 throw new WrongUsageException("FrankenPHP SAPI requires go-mod-frankenphp package, please install it first: {$argv[0]} install-pkg go-mod-frankenphp");
             }
             // frankenphp needs libxml2 libs
-            if (!$this->getLib('libxml2')) {
-                throw new WrongUsageException('FrankenPHP SAPI requires libxml2 library, please include `xml` extension in your build.');
+            if (PHP_OS_FAMILY === 'Darwin' && !$this->getLib('libxml2')) {
+                throw new WrongUsageException('FrankenPHP SAPI for macOS requires libxml2 library, please include `xml` extension in your build.');
             }
         }
     }
