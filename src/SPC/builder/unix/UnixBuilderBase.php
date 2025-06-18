@@ -289,7 +289,7 @@ abstract class UnixBuilderBase extends BuilderBase
         f_putenv("PATH={$path}");
 
         $brotliLibs = $this->getLib('brotli') !== null ? '-lbrotlienc -lbrotlidec -lbrotlicommon' : '';
-        $watcherLibs = $this->getLib('brotli') !== null ? '-lwatcher-c' : '';
+        $watcherLibs = $this->getLib('watcher') !== null ? '-lwatcher-c' : '';
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
 
