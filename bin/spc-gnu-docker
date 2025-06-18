@@ -94,7 +94,7 @@ ENV PATH="/app/bin:/cmake/bin:$PATH"
 ENV SPC_LIBC=glibc
 
 ADD ./config/env.ini /app/config/env.ini
-RUN bin/spc doctor --auto-fix --debug
+RUN CC=gcc bin/spc doctor --auto-fix --debug
 
 RUN curl -o make.tgz -fsSL https://ftp.gnu.org/gnu/make/make-4.4.tar.gz && \
     tar -zxvf make.tgz && \
