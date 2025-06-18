@@ -12,12 +12,8 @@
             "lib-base",
             "micro"
         ],
-        "lib-suggests-unix": [
-            "watcher"
-        ],
         "lib-suggests-linux": [
-            "libacl",
-            "watcher"
+            "libacl"
         ]
     },
     "micro": {
