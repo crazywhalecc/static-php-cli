@@ -404,6 +404,9 @@ abstract class BuilderBase
         if (($type & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
             $ls[] = 'embed';
         }
+        if (($type & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
+            $ls[] = 'frankenphp';
+        }
         return implode(', ', $ls);
     }
 
@@ -506,6 +509,26 @@ abstract class BuilderBase
                     logger()->critical('Please check with --debug option to see more details.');
                 }
                 throw $e;
+            }
+        }
+    }
+
+    public function checkBeforeBuildPHP(int $rule): void
+    {
+        if (($rule & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
+            // frankenphp only support linux and macOS
+            if (!in_array(PHP_OS_FAMILY, ['Linux', 'Darwin'])) {
+                throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
+            }
+            // frankenphp needs package go-mod-frankenphp installed
+            $pkg_dir = PKG_ROOT_PATH . '/go-mod-frankenphp-' . arch2gnu(php_uname('m')) . '-' . osfamily2shortname();
+            if (!file_exists("{$pkg_dir}/bin/go") || !file_exists("{$pkg_dir}/bin/xcaddy")) {
+                global $argv;
+                throw new WrongUsageException("FrankenPHP SAPI requires go-mod-frankenphp package, please install it first: {$argv[0]} install-pkg go-mod-frankenphp");
+            }
+            // frankenphp needs libxml2 libs
+            if (!$this->getLib('libxml2')) {
+                throw new WrongUsageException('FrankenPHP SAPI requires libxml2 library, please include `xml` extension in your build.');
             }
         }
     }
