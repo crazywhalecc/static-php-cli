@@ -227,7 +227,7 @@ abstract class UnixBuilderBase extends BuilderBase
             if (!file_exists($frankenphp)) {
                 throw new RuntimeException('FrankenPHP binary not found: ' . $frankenphp);
             }
-            [$ret, $output] = shell()->execWithResult($frankenphp . ' -v');
+            [$ret, $output] = shell()->execWithResult("{$frankenphp} version");
             if ($ret !== 0 || !str_contains(implode('', $output), 'FrankenPHP')) {
                 throw new RuntimeException('FrankenPHP failed sanity check: ret[' . $ret . ']. out[' . implode('', $output) . ']');
             }
