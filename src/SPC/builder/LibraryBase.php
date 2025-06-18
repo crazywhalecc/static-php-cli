@@ -10,6 +10,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use SPC\store\SourceManager;
 use SPC\util\GlobalValueTrait;
 
@@ -46,12 +47,11 @@ abstract class LibraryBase
      */
     public function setup(bool $force = false): int
     {
-        $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
         $source = Config::getLib(static::NAME, 'source');
         // if source is locked as pre-built, we just tryInstall it
         $pre_built_name = Downloader::getPreBuiltLockName($source);
-        if (isset($lock[$pre_built_name]) && ($lock[$pre_built_name]['lock_as'] ?? SPC_DOWNLOAD_SOURCE) === SPC_DOWNLOAD_PRE_BUILT) {
-            return $this->tryInstall($lock[$pre_built_name], $force);
+        if (($lock = LockFile::get($pre_built_name)) && $lock['lock_as'] === SPC_DOWNLOAD_PRE_BUILT) {
+            return $this->tryInstall($lock, $force);
         }
         return $this->tryBuild($force);
     }

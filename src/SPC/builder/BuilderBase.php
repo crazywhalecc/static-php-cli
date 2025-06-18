@@ -12,6 +12,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use SPC\store\SourceManager;
 use SPC\util\CustomExt;
 
@@ -350,15 +351,11 @@ abstract class BuilderBase
     public function getPHPVersionFromArchive(?string $file = null): false|string
     {
         if ($file === null) {
-            $lock = file_exists(DOWNLOAD_PATH . '/.lock.json') ? file_get_contents(DOWNLOAD_PATH . '/.lock.json') : false;
-            if ($lock === false) {
+            $lock = LockFile::get('php-src');
+            if ($lock === null) {
                 return false;
             }
-            $lock = json_decode($lock, true);
-            $file = $lock['php-src']['filename'] ?? null;
-            if ($file === null) {
-                return false;
-            }
+            $file = LockFile::getLockFullPath($lock);
         }
         if (preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+)?)\.tar\.(?:gz|bz2|xz)/', $file, $match)) {
             return $match[1];
