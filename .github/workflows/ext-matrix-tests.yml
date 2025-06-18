@@ -1,16 +1,27 @@
 name: "Extension matrix tests"
 
+
+# Only run if:
+# - the workflow is manually triggered
+# - or a pull request is made to the main branch that modifies this workflow file or commit message contains "fix" or "test"
 on:
-  workflow_dispatch:
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - '.github/workflows/ext-matrix-tests.yml'
+    workflow_dispatch:
+    pull_request:
+        branches: [ "main" ]
+        paths:
+        - '.github/workflows/ext-matrix-tests.yml'
+        - 'src/**'
+        - 'config/**'
+        - 'bin/**'
+        - 'composer.json'
+        - 'box.json'
+        - '.php-cs-fixer.php'
 
 jobs:
   test:
     name: "${{ matrix.extension }} (PHP ${{ matrix.php-version }} on ${{ matrix.operating-system }})"
     runs-on: ${{ matrix.operating-system }}
+    if: contains(github.event.head_commit.message, 'fix') || contains(github.event.head_commit.message, 'test')
     strategy:
       fail-fast: false
       matrix:
