@@ -12,6 +12,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\util\DependencyUtil;
 use SPC\util\SPCConfigUtil;
@@ -278,6 +279,10 @@ abstract class UnixBuilderBase extends BuilderBase
         }
     }
 
+    /**
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     */
     protected function buildFrankenphp(): void
     {
         $path = getenv('PATH');
@@ -302,12 +307,20 @@ abstract class UnixBuilderBase extends BuilderBase
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
         $lrt = PHP_OS_FAMILY === 'Linux' ? '-lrt' : '';
+        $releaseInfo = json_decode(Downloader::curlExec('https://api.github.com/repos/php/frankenphp/releases/latest'), true);
+        $frankenPhpVersion = $releaseInfo['tag_name'];
+        $libphpVersion = $this->getPHPVersion();
+        $debugFlags = $this->getOption('--with-debug') ?  "'-w -s' " : '';
 
         $env = [
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => '$(php-config --includes) -I$(php-config --include-dir)/..',
             'CGO_LDFLAGS' => '$(php-config --ldflags) -L' . BUILD_LIB_PATH . " $(php-config --libs) {$brotliLibs} {$watcherLibs} -lphp {$lrt}",
-            'XCADDY_GO_BUILD_FLAGS' => "-ldflags='-w -s' -tags=nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
+            'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
+                '-ldflags \\"-linkmode=external -extldflags \'-pie\' '. $debugFlags .
+                '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
+                "{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
+                "-tags=nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         shell()->cd(BUILD_BIN_PATH)
