@@ -219,6 +219,19 @@ abstract class UnixBuilderBase extends BuilderBase
                 throw new RuntimeException('embed failed sanity check: run failed. Error message: ' . implode("\n", $output));
             }
         }
+
+        // sanity check for frankenphp
+        if (($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
+            logger()->info('running frankenphp sanity check');
+            $frankenphp = BUILD_BIN_PATH . '/frankenphp';
+            if (!file_exists($frankenphp)) {
+                throw new RuntimeException('FrankenPHP binary not found: ' . $frankenphp);
+            }
+            [$ret, $output] = shell()->execWithResult($frankenphp . ' -v');
+            if ($ret !== 0 || !str_contains(implode('', $output), 'FrankenPHP')) {
+                throw new RuntimeException('FrankenPHP failed sanity check: ret[' . $ret . ']. out[' . implode('', $output) . ']');
+            }
+        }
     }
 
     /**
@@ -285,16 +298,19 @@ abstract class UnixBuilderBase extends BuilderBase
      */
     protected function buildFrankenphp(): void
     {
-        $path = getenv('PATH');
-        $xcaddyPath = getenv('GOBIN') ?: (getenv('HOME') . '/go/bin');
-        if (!str_contains($path, $xcaddyPath)) {
-            $path = $path . ':' . $xcaddyPath;
-        }
-        $path = BUILD_BIN_PATH . ':' . $path;
-        f_putenv("PATH={$path}");
+        $os = match (PHP_OS_FAMILY) {
+            'Linux' => 'linux',
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => throw new RuntimeException('Unsupported OS: ' . PHP_OS_FAMILY),
+        };
+        $arch = arch2gnu(php_uname('m'));
 
-        $brotliLibs = $this->getLib('brotli') !== null ? '-lbrotlienc -lbrotlidec -lbrotlicommon' : '';
-        $watcherLibs = $this->getLib('watcher') !== null ? '-lwatcher-c' : '';
+        // define executables for go and xcaddy
+        $go_exec = PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin/go";
+        $xcaddy_exec = PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin/xcaddy";
+
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
@@ -303,7 +319,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $xcaddyModules = '--with github.com/dunglas/frankenphp ' . $xcaddyModules;
         }
         if ($this->getLib('brotli') === null && str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
-            logger()->warning('caddy-cbrotli module is enabled, but broli library is not built. Disabling caddy-cbrotli.');
+            logger()->warning('caddy-cbrotli module is enabled, but brotli library is not built. Disabling caddy-cbrotli.');
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
         $lrt = PHP_OS_FAMILY === 'Linux' ? '-lrt' : '';
@@ -313,14 +329,20 @@ abstract class UnixBuilderBase extends BuilderBase
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
             $libphpVersion = preg_replace('/\.\d$/', '', $libphpVersion);
         }
-        $debugFlags = $this->getOption('--with-debug') ?  "'-w -s' " : '';
+        $debugFlags = $this->getOption('--with-debug') ? "'-w -s' " : '';
+
+        $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list, with_dependencies: true);
 
         $env = [
+            'PATH' => PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin:" . getenv('PATH'),
+            'GOROOT' => PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}",
+            'GOBIN' => PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin",
+            'GOPATH' => PKG_ROOT_PATH . '/go',
             'CGO_ENABLED' => '1',
-            'CGO_CFLAGS' => '$(php-config --includes) -I$(php-config --include-dir)/..',
-            'CGO_LDFLAGS' => '$(php-config --ldflags) -L' . BUILD_LIB_PATH . " $(php-config --libs) {$brotliLibs} {$watcherLibs} -lphp {$lrt}",
+            'CGO_CFLAGS' => $config['cflags'],
+            'CGO_LDFLAGS' => "{$config['ldflags']} {$config['libs']} {$lrt}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
-                '-ldflags \\"-linkmode=external -extldflags \'-pie\' '. $debugFlags .
+                '-ldflags \"-linkmode=external -extldflags \'-pie\' ' . $debugFlags .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
                 "{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
                 "-tags=nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
@@ -328,6 +350,6 @@ abstract class UnixBuilderBase extends BuilderBase
         ];
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
-            ->exec('xcaddy build --output frankenphp ' . $xcaddyModules);
+            ->exec("{$xcaddy_exec} build --output frankenphp {$xcaddyModules}");
     }
 }
