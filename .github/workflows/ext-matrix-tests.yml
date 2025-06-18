@@ -1,4 +1,4 @@
-name: "Extension matrix tests"
+name: "Extension Matrix Tests"
 
 on:
   workflow_dispatch:
