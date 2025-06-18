@@ -7,6 +7,7 @@ namespace SPC\Tests\store;
 use PHPUnit\Framework\TestCase;
 use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
+use SPC\store\LockFile;
 
 /**
  * @internal
@@ -57,7 +58,7 @@ class DownloaderTest extends TestCase
 
     public function testLockSource()
     {
-        Downloader::lockSource('fake-file', ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => 'fake-file-name', 'move_path' => 'fake-path', 'lock_as' => 'fake-lock-as']);
+        LockFile::lockSource('fake-file', ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => 'fake-file-name', 'move_path' => 'fake-path', 'lock_as' => 'fake-lock-as']);
         $this->assertFileExists(DOWNLOAD_PATH . '/.lock.json');
         $json = json_decode(file_get_contents(DOWNLOAD_PATH . '/.lock.json'), true);
         $this->assertIsArray($json);
