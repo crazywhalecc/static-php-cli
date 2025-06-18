@@ -34,9 +34,10 @@ class PackageManager
         Downloader::downloadPackage($pkg_name, $config, $force);
         // After download, read lock file name
         $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true);
+        $source_type = $lock[$pkg_name]['source_type'];
         $filename = DOWNLOAD_PATH . '/' . ($lock[$pkg_name]['filename'] ?? $lock[$pkg_name]['dirname']);
         $extract = $lock[$pkg_name]['move_path'] === null ? (PKG_ROOT_PATH . '/' . $pkg_name) : $lock[$pkg_name]['move_path'];
-        FileSystem::extractPackage($pkg_name, $filename, $extract);
+        FileSystem::extractPackage($pkg_name, $source_type, $filename, $extract);
 
         // if contains extract-files, we just move this file to destination, and remove extract dir
         if (is_array($config['extract-files'] ?? null) && is_assoc_array($config['extract-files'])) {

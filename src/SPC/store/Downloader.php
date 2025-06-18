@@ -208,7 +208,7 @@ class Downloader
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
             $name = self::getPreBuiltLockName($name);
         }
-        self::lockSource($name, ['source_type' => 'archive', 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
+        self::lockSource($name, ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
     }
 
     /**
@@ -231,6 +231,9 @@ class Downloader
         } else {
             $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
         }
+        // calculate hash
+        $hash = self::getLockSourceHash($data);
+        $data['hash'] = $hash;
         $lock[$name] = $data;
         FileSystem::writeFile(DOWNLOAD_PATH . '/.lock.json', json_encode($lock, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
@@ -278,7 +281,7 @@ class Downloader
         }
         // Lock
         logger()->debug("Locking git source {$name}");
-        self::lockSource($name, ['source_type' => 'dir', 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
+        self::lockSource($name, ['source_type' => SPC_SOURCE_GIT, 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
 
         /*
         // 复制目录过去
@@ -370,6 +373,16 @@ class Downloader
                         self::getRetryAttempts(),
                         SPC_DOWNLOAD_PRE_BUILT
                     );
+                    break;
+                case 'local':
+                    // Local directory, do nothing, just lock it
+                    logger()->debug("Locking local source {$name}");
+                    self::lockSource($name, [
+                        'source_type' => SPC_SOURCE_LOCAL,
+                        'dirname' => $pkg['dirname'],
+                        'move_path' => $pkg['extract'] ?? null,
+                        'lock_as' => SPC_DOWNLOAD_PACKAGE,
+                    ]);
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
@@ -477,6 +490,16 @@ class Downloader
                         $download_as
                     );
                     break;
+                case 'local':
+                    // Local directory, do nothing, just lock it
+                    logger()->debug("Locking local source {$name}");
+                    self::lockSource($name, [
+                        'source_type' => SPC_SOURCE_LOCAL,
+                        'dirname' => $source['dirname'],
+                        'move_path' => $source['extract'] ?? null,
+                        'lock_as' => $download_as,
+                    ]);
+                    break;
                 case 'custom':          // Custom download method, like API-based download or other
                     if (isset($source['func']) && is_callable($source['func'])) {
                         $source['name'] = $name;
@@ -537,10 +560,10 @@ class Downloader
             }
             f_exec($cmd, $output, $ret);
             if ($ret === 2 || $ret === -1073741510) {
-                throw new RuntimeException('failed http fetch');
+                throw new RuntimeException(sprintf('Failed to fetch "%s"', $url));
             }
             if ($ret !== 0) {
-                throw new DownloaderException('failed http fetch');
+                throw new DownloaderException(sprintf('Failed to fetch "%s"', $url));
             }
             $cache[$cmd]['cache'] = implode("\n", $output);
             $cache[$cmd]['expire'] = time() + 3600;
@@ -549,10 +572,10 @@ class Downloader
         }
         f_exec($cmd, $output, $ret);
         if ($ret === 2 || $ret === -1073741510) {
-            throw new RuntimeException('failed http fetch');
+            throw new RuntimeException(sprintf('Failed to fetch "%s"', $url));
         }
         if ($ret !== 0) {
-            throw new DownloaderException('failed http fetch');
+            throw new DownloaderException(sprintf('Failed to fetch "%s"', $url));
         }
         return implode("\n", $output);
     }
@@ -592,6 +615,43 @@ class Downloader
     public static function getPreBuiltLockName(string $source): string
     {
         return "{$source}-" . PHP_OS_FAMILY . '-' . getenv('GNU_ARCH') . '-' . (getenv('SPC_LIBC') ?: 'default') . '-' . (SystemUtil::getLibcVersionIfExists() ?? 'default');
+    }
+
+    /**
+     * Get the hash of the lock source based on the lock options.
+     *
+     * @param  array            $lock_options Lock options
+     * @return string           Hash of the lock source
+     * @throws RuntimeException
+     */
+    public static function getLockSourceHash(array $lock_options): string
+    {
+        $result = match ($lock_options['source_type']) {
+            SPC_SOURCE_ARCHIVE => sha1_file(DOWNLOAD_PATH . '/' . $lock_options['filename']),
+            SPC_SOURCE_GIT => exec('cd ' . escapeshellarg(DOWNLOAD_PATH . '/' . $lock_options['dirname']) . ' && ' . SPC_GIT_EXEC . ' rev-parse HEAD'),
+            SPC_SOURCE_LOCAL => 'LOCAL HASH IS ALWAYS DIFFERENT',
+            default => filter_var(getenv('SPC_IGNORE_BAD_HASH'), FILTER_VALIDATE_BOOLEAN) ? '' : throw new RuntimeException("Unknown source type: {$lock_options['source_type']}"),
+        };
+        if ($result === false && !filter_var(getenv('SPC_IGNORE_BAD_HASH'), FILTER_VALIDATE_BOOLEAN)) {
+            throw new RuntimeException("Failed to get hash for source: {$lock_options['source_type']}");
+        }
+        return $result ?: '';
+    }
+
+    /**
+     * @param  array               $lock_options Lock options
+     * @param  string              $destination  Target directory
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    public static function putLockSourceHash(array $lock_options, string $destination): void
+    {
+        $hash = self::getLockSourceHash($lock_options);
+        if ($lock_options['source_type'] === SPC_SOURCE_LOCAL) {
+            logger()->debug("Source [{$lock_options['dirname']}] is local, no hash will be written.");
+            return;
+        }
+        FileSystem::writeFile("{$destination}/.spc-hash", $hash);
     }
 
     /**
@@ -640,8 +700,8 @@ class Downloader
         // If lock file exists, skip downloading for source mode
         if (!$force && $download_as === SPC_DOWNLOAD_SOURCE && isset($lock[$name])) {
             if (
-                $lock[$name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename']) ||
-                $lock[$name]['source_type'] === 'dir' && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])
+                $lock[$name]['source_type'] === SPC_SOURCE_ARCHIVE && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename']) ||
+                $lock[$name]['source_type'] === SPC_SOURCE_GIT && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])
             ) {
                 logger()->notice("Source [{$name}] already downloaded: " . ($lock[$name]['filename'] ?? $lock[$name]['dirname']));
                 return true;
@@ -652,8 +712,8 @@ class Downloader
         if (!$force && $download_as === SPC_DOWNLOAD_PRE_BUILT && isset($lock[$lock_name = self::getPreBuiltLockName($name)])) {
             // lock name with env
             if (
-                $lock[$lock_name]['source_type'] === 'archive' && file_exists(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']) ||
-                $lock[$lock_name]['source_type'] === 'dir' && is_dir(DOWNLOAD_PATH . '/' . $lock[$lock_name]['dirname'])
+                $lock[$lock_name]['source_type'] === SPC_SOURCE_ARCHIVE && file_exists(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']) ||
+                $lock[$lock_name]['source_type'] === SPC_SOURCE_GIT && is_dir(DOWNLOAD_PATH . '/' . $lock[$lock_name]['dirname'])
             ) {
                 logger()->notice("Pre-built content [{$name}] already downloaded: " . ($lock[$lock_name]['filename'] ?? $lock[$lock_name]['dirname']));
                 return true;

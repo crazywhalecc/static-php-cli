@@ -78,7 +78,7 @@ class LinuxMuslCheck
             ];
             logger()->info('Downloading ' . $musl_source['url']);
             Downloader::downloadSource($musl_version_name, $musl_source);
-            FileSystem::extractSource($musl_version_name, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
+            FileSystem::extractSource($musl_version_name, SPC_SOURCE_ARCHIVE, DOWNLOAD_PATH . "/{$musl_version_name}.tar.gz");
 
             // Apply CVE-2025-26519 patch
             SourcePatcher::patchFile('musl-1.2.5_CVE-2025-26519_0001.patch', SOURCE_PATH . "/{$musl_version_name}");
