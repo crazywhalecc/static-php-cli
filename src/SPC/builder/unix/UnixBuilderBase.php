@@ -310,6 +310,9 @@ abstract class UnixBuilderBase extends BuilderBase
         $releaseInfo = json_decode(Downloader::curlExec('https://api.github.com/repos/php/frankenphp/releases/latest'), true);
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
+            $libphpVersion = preg_replace('/\.\d$/', '', $libphpVersion);
+        }
         $debugFlags = $this->getOption('--with-debug') ?  "'-w -s' " : '';
 
         $env = [
