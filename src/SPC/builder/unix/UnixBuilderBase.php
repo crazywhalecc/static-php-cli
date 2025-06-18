@@ -292,6 +292,10 @@ abstract class UnixBuilderBase extends BuilderBase
         $watcherLibs = $this->getLib('watcher') !== null ? '-lwatcher-c' : '';
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
+        $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
+        if ($this->getLib('brotli') !== null && !str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
+            $xcaddyModules .= ' --with github.com/dunglas/caddy-cbrotli';
+        }
 
         $env = [
             'CGO_ENABLED' => '1',
@@ -302,11 +306,6 @@ abstract class UnixBuilderBase extends BuilderBase
         ];
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
-            ->exec(
-                'xcaddy build ' .
-                '--output frankenphp ' .
-                '--with github.com/dunglas/frankenphp/caddy ' .
-                getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES')
-            );
+            ->exec('xcaddy build --output frankenphp --with github.com/dunglas/frankenphp/caddy ' . $xcaddyModules);
     }
 }
