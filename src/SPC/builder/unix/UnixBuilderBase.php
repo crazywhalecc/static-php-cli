@@ -293,8 +293,13 @@ abstract class UnixBuilderBase extends BuilderBase
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
-        if ($this->getLib('brotli') !== null && !str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
-            $xcaddyModules .= ' --with github.com/dunglas/caddy-cbrotli';
+        // make it possible to build from a different frankenphp directory!
+        if (!str_contains($xcaddyModules, '--with github.com/dunglas/frankenphp')) {
+            $xcaddyModules = '--with github.com/dunglas/frankenphp ' . $xcaddyModules;
+        }
+        if ($this->getLib('brotli') === null && str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
+            logger()->warning('caddy-cbrotli module is enabled, but broli library is not built. Disabling caddy-cbrotli.');
+            $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
         $lrt = PHP_OS_FAMILY === 'Linux' ? '-lrt' : '';
 
@@ -307,6 +312,6 @@ abstract class UnixBuilderBase extends BuilderBase
         ];
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
-            ->exec('xcaddy build --output frankenphp --with github.com/dunglas/frankenphp/caddy ' . $xcaddyModules);
+            ->exec('xcaddy build --output frankenphp ' . $xcaddyModules);
     }
 }
