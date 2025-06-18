@@ -300,7 +300,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $env = [
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => '$(php-config --includes) -I$(php-config --include-dir)/..',
-            'CGO_LDFLAGS' => "$(php-config --ldflags) $(php-config --libs) {$brotliLibs} {$watcherLibs} -lphp",
+            'CGO_LDFLAGS' => '$(php-config --ldflags) -L' . BUILD_LIB_PATH . " $(php-config --libs) {$brotliLibs} {$watcherLibs} -lphp -lrt",
             'XCADDY_GO_BUILD_FLAGS' => "-ldflags='-w -s' -tags=nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
