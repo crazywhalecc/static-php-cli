@@ -21,7 +21,7 @@ jobs:
   test:
     name: "${{ matrix.extension }} (PHP ${{ matrix.php-version }} on ${{ matrix.operating-system }})"
     runs-on: ${{ matrix.operating-system }}
-    if: ${{ contains(github.event.head_commit.message, 'fix') || contains(github.event.head_commit.message, 'test') }}
+    if: github.event_name == 'push' && (contains(github.event.head_commit.message, 'fix') || contains(github.event.head_commit.message, 'test'))
     strategy:
       fail-fast: false
       matrix:
