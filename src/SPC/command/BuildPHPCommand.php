@@ -32,7 +32,7 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('build-micro', null, null, 'Build micro SAPI');
         $this->addOption('build-cli', null, null, 'Build cli SAPI');
         $this->addOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
-        $this->addOption('build-embed', null, null, 'Build embed SAPI (not available on Windows)');
+        $this->addOption('build-embed', null, InputOption::VALUE_OPTIONAL, 'Build embed SAPI (not available on Windows)');
         $this->addOption('build-frankenphp', null, null, 'Build FrankenPHP SAPI (not available on Windows)');
         $this->addOption('build-all', null, null, 'Build all SAPI');
         $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
@@ -305,7 +305,17 @@ class BuildPHPCommand extends BuildCommand
         $rule |= ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-embed') || !empty($shared_extensions) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
+        $embed = $this->getOption('build-embed');
+        if (!$embed && !empty($shared_extensions)) {
+            $embed = true;
+        }
+        if ($embed) {
+            if ($embed === true) {
+                $embed = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+            }
+            $rule |= BUILD_TARGET_EMBED;
+            f_putenv('SPC_CMD_VAR_PHP_EMBED_TYPE=' . ($embed === 'static' ? 'static' : 'shared'));
+        }
         $rule |= ($this->getOption('build-frankenphp') ? BUILD_TARGET_FRANKENPHP : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;
