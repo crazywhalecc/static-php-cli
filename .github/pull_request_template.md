@@ -14,4 +14,4 @@
   - [ ] `bin/spc dev:sort-config`
 - If it's an extension or dependency update, please ensure the following:
   - [ ] Add your test combination to `src/globals/test-extensions.php`.
-  - [ ] If adding new or fixing bugs, add commit message containing `fix` or `test` to trigger full test suite.
+  - [ ] If adding new or fixing bugs, add commit message containing `extension test` to trigger full test suite.
