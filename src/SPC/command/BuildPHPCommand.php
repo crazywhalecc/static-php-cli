@@ -6,7 +6,6 @@ namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
 use SPC\exception\ExceptionHandler;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
