@@ -78,6 +78,7 @@ class LockFile
         }
 
         // Write the updated lock data back to the file
+        FileSystem::createDir(dirname(self::LOCK_FILE));
         file_put_contents(self::LOCK_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
