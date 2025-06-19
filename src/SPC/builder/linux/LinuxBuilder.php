@@ -110,10 +110,11 @@ class LinuxBuilder extends UnixBuilderBase
         $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
             ('--with-config-file-scan-dir=' . $this->getOption('with-config-file-scan-dir') . ' ') : '';
 
-        $enable_cli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
-        $enable_fpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
-        $enable_micro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
-        $enable_embed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
+        $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
+        $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
+        $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
         $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         // prepare build php envs
@@ -125,7 +126,7 @@ class LinuxBuilder extends UnixBuilderBase
         ]);
 
         // process micro upx patch if micro sapi enabled
-        if ($enable_micro) {
+        if ($enableMicro) {
             if (version_compare($this->getMicroVersion(), '0.2.0') < 0) {
                 // for phpmicro 0.1.x
                 $this->processMicroUPXLegacy();
@@ -137,10 +138,10 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
-                ($enable_cli ? '--enable-cli ' : '--disable-cli ') .
-                ($enable_fpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
-                ($enable_embed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
-                ($enable_micro ? '--enable-micro=all-static ' : '--disable-micro ') .
+                ($enableCli ? '--enable-cli ' : '--disable-cli ') .
+                ($enableFpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
+                ($enableEmbed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
+                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .
                 $disable_jit .
@@ -156,24 +157,28 @@ class LinuxBuilder extends UnixBuilderBase
 
         $this->cleanMake();
 
-        if ($enable_cli) {
+        if ($enableCli) {
             logger()->info('building cli');
             $this->buildCli();
         }
-        if ($enable_fpm) {
+        if ($enableFpm) {
             logger()->info('building fpm');
             $this->buildFpm();
         }
-        if ($enable_micro) {
+        if ($enableMicro) {
             logger()->info('building micro');
             $this->buildMicro();
         }
-        if ($enable_embed) {
+        if ($enableEmbed) {
             logger()->info('building embed');
-            if ($enable_micro) {
+            if ($enableMicro) {
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
+        }
+        if ($enableFrankenphp) {
+            logger()->info('building frankenphp');
+            $this->buildFrankenphp();
         }
     }
 

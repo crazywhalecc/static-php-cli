@@ -102,6 +102,17 @@ function osfamily2dir(): string
     };
 }
 
+function osfamily2shortname(): string
+{
+    return match (PHP_OS_FAMILY) {
+        'Windows' => 'win',
+        'Darwin' => 'macos',
+        'Linux' => 'linux',
+        'BSD' => 'bsd',
+        default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
+    };
+}
+
 function shell(?bool $debug = null): UnixShell
 {
     /* @noinspection PhpUnhandledExceptionInspection */

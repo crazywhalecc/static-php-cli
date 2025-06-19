@@ -9,6 +9,7 @@ use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\CustomPackage;
 use SPC\store\source\CustomSourceBase;
 
 /**
@@ -358,10 +359,13 @@ class Downloader
                     ]);
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
-                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
+                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg');
                     foreach ($classes as $class) {
-                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
-                            (new $class())->fetch($force);
+                        if (is_a($class, CustomPackage::class, true) && $class !== CustomPackage::class) {
+                            $cls = new $class();
+                            if (in_array($name, $cls->getSupportName())) {
+                                (new $class())->fetch($name, $force, $pkg);
+                            }
                             break;
                         }
                     }
@@ -643,6 +647,17 @@ class Downloader
             // lock name with env
             if (file_exists($path = LockFile::getLockFullPath($lock_item))) {
                 logger()->notice("Pre-built content [{$name}] already downloaded: {$path}");
+                return true;
+            }
+        }
+
+        // If lock file exists, skip downloading for source mode
+        if (!$force && $download_as === SPC_DOWNLOAD_PACKAGE && isset($lock[$name])) {
+            if (
+                $lock[$name]['source_type'] === SPC_SOURCE_ARCHIVE && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename']) ||
+                $lock[$name]['source_type'] === SPC_SOURCE_GIT && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])
+            ) {
+                logger()->notice("Package [{$name}] already downloaded: " . ($lock[$name]['filename'] ?? $lock[$name]['dirname']));
                 return true;
             }
         }

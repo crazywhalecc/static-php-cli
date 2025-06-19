@@ -7,7 +7,11 @@
 > If your PR involves the changes mentioned below and completed the action, please tick the corresponding option.
 > If a modification is not involved, please skip it directly.
 
-- [ ] If you modified `*.php`, run `composer cs-fix` at local machine.
-- [ ] If it's an extension or dependency update, make sure adding related extensions in `src/global/test-extensions.php`.
-- [ ] If you changed the behavior of static-php-cli, update docs in `./docs/`.
-- [ ] If you updated `config/xxx.json` content, run `bin/spc dev:sort-config xxx`.
+- If you modified `*.php` or `*.json`, run them locally to ensure your changes are valid:
+  - [ ] `PHP_CS_FIXER_IGNORE_ENV=1 composer cs-fix`
+  - [ ] `composer analyse`
+  - [ ] `composer test`
+  - [ ] `bin/spc dev:sort-config`
+- If it's an extension or dependency update, please ensure the following:
+  - [ ] Add your test combination to `src/globals/test-extensions.php`.
+  - [ ] If adding new or fixing bugs, add commit message containing `extension test` or `test extensions` to trigger full test suite.
