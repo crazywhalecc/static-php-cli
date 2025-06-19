@@ -43,9 +43,9 @@ class GlobalEnvManager
         }
 
         // Define env vars for linux
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+        if (PHP_OS_FAMILY === 'Linux') {
             $arch = getenv('GNU_ARCH');
-            if (SystemUtil::isMuslDist()) {
+            if (SystemUtil::isMuslDist() || getenv('SPC_LIBC') !== 'musl') {
                 self::putenv('SPC_LINUX_DEFAULT_CC=gcc');
                 self::putenv('SPC_LINUX_DEFAULT_CXX=g++');
                 self::putenv('SPC_LINUX_DEFAULT_AR=ar');
