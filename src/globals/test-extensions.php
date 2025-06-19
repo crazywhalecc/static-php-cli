@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    // '8.1',
-    // '8.2',
-    // '8.3',
+    '8.1',
+    '8.2',
+    '8.3',
     '8.4',
 ];
 
@@ -24,16 +24,16 @@ $test_os = [
     'macos-13',
     // 'macos-14',
     'macos-15',
-    'ubuntu-latest',
-    'ubuntu-22.04',
-    'ubuntu-24.04',
-    'ubuntu-22.04-arm',
-    'ubuntu-24.04-arm',
+    // 'ubuntu-latest',
+    // 'ubuntu-22.04',
+    // 'ubuntu-24.04',
+    // 'ubuntu-22.04-arm',
+    // 'ubuntu-24.04-arm',
     // 'windows-latest',
 ];
 
 // whether enable thread safe
-$zts = true;
+$zts = false;
 
 $no_strip = false;
 
@@ -41,10 +41,10 @@ $no_strip = false;
 $upx = false;
 
 // whether to test frankenphp build, only available for macos and linux
-$frankenphp = true;
+$frankenphp = false;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = false;
+$prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
