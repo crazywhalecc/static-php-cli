@@ -207,7 +207,7 @@ class MacOSBuilder extends UnixBuilderBase
         $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         $shell->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
         if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
+            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip -S sapi/cli/php');
         }
         $this->deployBinary(BUILD_TARGET_CLI);
     }
@@ -234,12 +234,15 @@ class MacOSBuilder extends UnixBuilderBase
 
         // patch fake cli for micro
         $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
-        if ($this->getOption('no-strip', false)) {
-            $vars['STRIP'] = 'dsymutil -f ';
-        }
         $vars = SystemUtil::makeEnvVarString($vars);
 
-        shell()->cd(SOURCE_PATH . '/php-src')->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} micro");
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        // build
+        $shell->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} micro");
+        // strip
+        if (!$this->getOption('no-strip', false)) {
+            $shell->exec('dsymutil -f sapi/micro/micro.sfx')->exec('strip -S sapi/micro/micro.sfx');
+        }
 
         $this->deployBinary(BUILD_TARGET_MICRO);
 
@@ -261,7 +264,7 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $shell->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} fpm");
         if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
+            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip -S sapi/fpm/php-fpm');
         }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
