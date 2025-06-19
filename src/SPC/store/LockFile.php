@@ -10,7 +10,7 @@ use SPC\exception\WrongUsageException;
 
 class LockFile
 {
-    private const string LOCK_FILE = DOWNLOAD_PATH . '/.lock.json';
+    public const string LOCK_FILE = DOWNLOAD_PATH . '/.lock.json';
 
     private static ?array $lock_file_content = null;
 

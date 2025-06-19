@@ -12,6 +12,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\Downloader;
+use SPC\store\LockFile;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -301,7 +302,7 @@ class DownloadCommand extends BaseCommand
                 throw new WrongUsageException('Windows currently does not support --from-zip !');
             }
 
-            if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
+            if (!file_exists(LockFile::LOCK_FILE)) {
                 throw new RuntimeException('.lock.json not exist in "downloads/"');
             }
         } catch (RuntimeException $e) {

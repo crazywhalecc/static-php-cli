@@ -59,8 +59,8 @@ class DownloaderTest extends TestCase
     public function testLockSource()
     {
         LockFile::lockSource('fake-file', ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => 'fake-file-name', 'move_path' => 'fake-path', 'lock_as' => 'fake-lock-as']);
-        $this->assertFileExists(DOWNLOAD_PATH . '/.lock.json');
-        $json = json_decode(file_get_contents(DOWNLOAD_PATH . '/.lock.json'), true);
+        $this->assertFileExists(LockFile::LOCK_FILE);
+        $json = json_decode(file_get_contents(LockFile::LOCK_FILE), true);
         $this->assertIsArray($json);
         $this->assertArrayHasKey('fake-file', $json);
         $this->assertArrayHasKey('source_type', $json['fake-file']);

@@ -6,6 +6,7 @@ namespace SPC\store\pkg;
 
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 
 class GoModFrankenphp extends CustomPackage
 {
@@ -42,7 +43,7 @@ class GoModFrankenphp extends CustomPackage
     public function extract(string $name): void
     {
         $pkgroot = PKG_ROOT_PATH;
-        $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true);
+        $lock = json_decode(FileSystem::readFile(LockFile::LOCK_FILE), true);
         $source_type = $lock[$name]['source_type'];
         $filename = DOWNLOAD_PATH . '/' . ($lock[$name]['filename'] ?? $lock[$name]['dirname']);
         $extract = $lock[$name]['move_path'] === null ? "{$pkgroot}/{$name}" : $lock[$name]['move_path'];
