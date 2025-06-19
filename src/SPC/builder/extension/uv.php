@@ -16,4 +16,11 @@ class uv extends Extension
             throw new \RuntimeException('The latest uv extension requires PHP 8.0 or later');
         }
     }
+
+    public function getStaticAndSharedLibs(): array
+    {
+        [$static, $shared] = parent::getStaticAndSharedLibs();
+        $shared .= ' -lpthread';
+        return [$static, $shared];
+    }
 }
