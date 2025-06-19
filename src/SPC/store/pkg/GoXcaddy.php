@@ -9,15 +9,15 @@ use SPC\store\FileSystem;
 use SPC\store\LockFile;
 use SPC\util\GlobalEnvManager;
 
-class GoModFrankenphp extends CustomPackage
+class GoXcaddy extends CustomPackage
 {
     public function getSupportName(): array
     {
         return [
-            'go-mod-frankenphp-x86_64-linux',
-            'go-mod-frankenphp-x86_64-macos',
-            'go-mod-frankenphp-aarch64-linux',
-            'go-mod-frankenphp-aarch64-macos',
+            'go-xcaddy-x86_64-linux',
+            'go-xcaddy-x86_64-macos',
+            'go-xcaddy-aarch64-linux',
+            'go-xcaddy-aarch64-macos',
         ];
     }
 

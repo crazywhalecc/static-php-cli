@@ -311,7 +311,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $arch = arch2gnu(php_uname('m'));
 
         // define executables for go and xcaddy
-        $xcaddy_exec = PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin/xcaddy";
+        $xcaddy_exec = PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin/xcaddy";
 
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
@@ -342,9 +342,9 @@ abstract class UnixBuilderBase extends BuilderBase
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list, with_dependencies: true);
 
         $env = [
-            'PATH' => PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin:" . getenv('PATH'),
-            'GOROOT' => PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}",
-            'GOBIN' => PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin",
+            'PATH' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin:" . getenv('PATH'),
+            'GOROOT' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}",
+            'GOBIN' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin",
             'GOPATH' => PKG_ROOT_PATH . '/go',
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => $config['cflags'],

@@ -212,7 +212,7 @@ switch ($argv[1] ?? null) {
         break;
     case 'build_embed_cmd':
         if ($frankenphp) {
-            passthru("{$prefix}install-pkg go-mod-frankenphp --debug", $retcode);
+            passthru("{$prefix}install-pkg go-xcaddy --debug", $retcode);
             if ($retcode !== 0) {
                 break;
             }

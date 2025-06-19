@@ -68,10 +68,10 @@ class CraftCommand extends BaseCommand
         }
         // install go and xcaddy for frankenphp
         if (in_array('frankenphp', $craft['sapi'])) {
-            $retcode = $this->runCommand('install-pkg', 'go-mod-frankenphp');
+            $retcode = $this->runCommand('install-pkg', 'go-xcaddy');
             if ($retcode !== 0) {
-                $this->output->writeln('<error>craft go-mod-frankenphp failed</error>');
-                $this->log("craft go-mod-frankenphp failed with code: {$retcode}", true);
+                $this->output->writeln('<error>craft go-xcaddy failed</error>');
+                $this->log("craft go-xcaddy failed with code: {$retcode}", true);
                 return static::FAILURE;
             }
         }

@@ -520,11 +520,11 @@ abstract class BuilderBase
             if (!in_array(PHP_OS_FAMILY, ['Linux', 'Darwin'])) {
                 throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
             }
-            // frankenphp needs package go-mod-frankenphp installed
-            $pkg_dir = PKG_ROOT_PATH . '/go-mod-frankenphp-' . arch2gnu(php_uname('m')) . '-' . osfamily2shortname();
+            // frankenphp needs package go-xcaddy installed
+            $pkg_dir = PKG_ROOT_PATH . '/go-xcaddy-' . arch2gnu(php_uname('m')) . '-' . osfamily2shortname();
             if (!file_exists("{$pkg_dir}/bin/go") || !file_exists("{$pkg_dir}/bin/xcaddy")) {
                 global $argv;
-                throw new WrongUsageException("FrankenPHP SAPI requires go-mod-frankenphp package, please install it first: {$argv[0]} install-pkg go-mod-frankenphp");
+                throw new WrongUsageException("FrankenPHP SAPI requires the go-xcaddy package, please install it first: {$argv[0]} install-pkg go-xcaddy");
             }
             // frankenphp needs libxml2 lib on macos, see: https://github.com/php/frankenphp/blob/main/frankenphp.go#L17
             if (PHP_OS_FAMILY === 'Darwin' && !$this->getLib('libxml2')) {
