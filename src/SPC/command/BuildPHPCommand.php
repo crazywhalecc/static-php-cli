@@ -202,6 +202,8 @@ class BuildPHPCommand extends BuildCommand
             // add static-php-cli.version to main.c, in order to debug php failure more easily
             SourcePatcher::patchSPCVersionToPHP($this->getApplication()->getVersion());
 
+            // clean old modules that may conflict with the new php build
+            FileSystem::removeDir(BUILD_MODULES_PATH);
             // start to build
             $builder->buildPHP($rule);
 
