@@ -650,6 +650,12 @@ class Downloader
                 return true;
             }
         }
+        if (!$force && $download_as === SPC_DOWNLOAD_PACKAGE && $lock_item !== null) {
+            if (file_exists($path = LockFile::getLockFullPath($lock_item))) {
+                logger()->notice("Source [{$name}] already downloaded: {$path}");
+                return true;
+            }
+        }
         return false;
     }
 }

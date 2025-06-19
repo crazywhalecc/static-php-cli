@@ -69,17 +69,16 @@ class LockFile
     {
         self::init();
 
-        $data = self::$lock_file_content;
-        if ($lock_content === null && isset($data[$lock_name])) {
-            self::removeLockFileIfExists($data[$lock_name]);
-            unset($data[$lock_name]);
+        if ($lock_content === null && isset(self::$lock_file_content[$lock_name])) {
+            self::removeLockFileIfExists(self::$lock_file_content[$lock_name]);
+            unset(self::$lock_file_content[$lock_name]);
         } else {
-            $data[$lock_name] = $lock_content;
+            self::$lock_file_content[$lock_name] = $lock_content;
         }
 
         // Write the updated lock data back to the file
         FileSystem::createDir(dirname(self::LOCK_FILE));
-        file_put_contents(self::LOCK_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        file_put_contents(self::LOCK_FILE, json_encode(self::$lock_file_content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
     /**
