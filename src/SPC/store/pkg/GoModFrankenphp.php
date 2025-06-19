@@ -7,6 +7,7 @@ namespace SPC\store\pkg;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
+use SPC\util\GlobalEnvManager;
 
 class GoModFrankenphp extends CustomPackage
 {
@@ -22,6 +23,12 @@ class GoModFrankenphp extends CustomPackage
 
     public function fetch(string $name, bool $force = false, ?array $config = null): void
     {
+        $pkgroot = PKG_ROOT_PATH;
+        $go_exec = "{$pkgroot}/{$name}/bin/go";
+        $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
+            return;
+        }
         $arch = match (explode('-', $name)[3]) {
             'x86_64' => 'amd64',
             'aarch64' => 'arm64',
@@ -43,6 +50,11 @@ class GoModFrankenphp extends CustomPackage
     public function extract(string $name): void
     {
         $pkgroot = PKG_ROOT_PATH;
+        $go_exec = "{$pkgroot}/{$name}/bin/go";
+        $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
+            return;
+        }
         $lock = json_decode(FileSystem::readFile(LockFile::LOCK_FILE), true);
         $source_type = $lock[$name]['source_type'];
         $filename = DOWNLOAD_PATH . '/' . ($lock[$name]['filename'] ?? $lock[$name]['dirname']);
@@ -50,9 +62,8 @@ class GoModFrankenphp extends CustomPackage
 
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
+        GlobalEnvManager::init();
         // install xcaddy
-        $go_exec = "{$pkgroot}/{$name}/bin/go";
-        // $xcaddy_exec = PKG_ROOT_PATH . "$pkgroot/$name/bin/xcaddy";
         shell()
             ->appendEnv([
                 'PATH' => "{$pkgroot}/{$name}/bin:" . getenv('PATH'),
