@@ -503,7 +503,7 @@ class Extension
                 continue;
             }
             $static_lib = 'lib' . $lib . '.a';
-            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib)) {
+            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib) && !str_contains($static_lib, 'libphp')) {
                 if (!str_contains($staticLibString, '-l' . $lib . ' ')) {
                     $staticLibString .= '-l' . $lib . ' ';
                 }
