@@ -161,7 +161,8 @@ class BuilderTest extends TestCase
             [BUILD_TARGET_FPM, 'fpm'],
             [BUILD_TARGET_MICRO, 'micro'],
             [BUILD_TARGET_EMBED, 'embed'],
-            [BUILD_TARGET_ALL, 'cli, micro, fpm, embed'],
+            [BUILD_TARGET_FRANKENPHP, 'embed, frankenphp'],
+            [BUILD_TARGET_ALL, 'cli, micro, fpm, embed, frankenphp'],
             [BUILD_TARGET_CLI | BUILD_TARGET_EMBED, 'cli, embed'],
         ];
     }
