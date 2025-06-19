@@ -29,12 +29,12 @@ class GoXcaddy extends CustomPackage
         if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
             return;
         }
-        $arch = match (explode('-', $name)[3]) {
+        $arch = match (explode('-', $name)[2]) {
             'x86_64' => 'amd64',
             'aarch64' => 'arm64',
             default => throw new \InvalidArgumentException('Unsupported architecture: ' . $name),
         };
-        $os = match (explode('-', $name)[4]) {
+        $os = match (explode('-', $name)[3]) {
             'linux' => 'linux',
             'macos' => 'darwin',
             default => throw new \InvalidArgumentException('Unsupported OS: ' . $name),
