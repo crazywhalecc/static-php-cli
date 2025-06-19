@@ -74,12 +74,12 @@ class BuildPHPCommand extends BuildCommand
 
         if ($rule === BUILD_TARGET_NONE) {
             $this->output->writeln('<error>Please add at least one build SAPI!</error>');
-            $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-embed\tBuild embed SAPI/libphp</comment>");
+            $this->output->writeln("<comment>\t--build-cli\t\tBuild php-cli SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-micro\t\tBuild phpmicro SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-fpm\t\tBuild php-fpm SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-embed\t\tBuild embed SAPI/libphp</comment>");
             $this->output->writeln("<comment>\t--build-frankenphp\tBuild FrankenPHP SAPI/libphp</comment>");
-            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm, embed, frankenphp</comment>");
+            $this->output->writeln("<comment>\t--build-all\t\tBuild all SAPI: cli, micro, fpm, embed, frankenphp</comment>");
             return static::FAILURE;
         }
         if ($rule === BUILD_TARGET_ALL) {
@@ -290,13 +290,14 @@ class BuildPHPCommand extends BuildCommand
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
         $embed = $this->getOption('build-embed');
-        if (!$embed && !empty($shared_extensions)) {
-            $embed = true;
-        }
+        $embed = match ($embed) {
+            null => getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static',
+            'static' => 'static',
+            'shared' => 'shared',
+            false => false,
+            default => throw new WrongUsageException('Invalid --build-embed option, please use --build-embed[=static|shared]'),
+        };
         if ($embed) {
-            if ($embed === true) {
-                $embed = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
-            }
             $rule |= BUILD_TARGET_EMBED;
             f_putenv('SPC_CMD_VAR_PHP_EMBED_TYPE=' . ($embed === 'static' ? 'static' : 'shared'));
         }
