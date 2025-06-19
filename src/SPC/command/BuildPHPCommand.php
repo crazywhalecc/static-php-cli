@@ -162,21 +162,6 @@ class BuildPHPCommand extends BuildCommand
                 $indent_texts['UPX Pack'] = 'enabled';
             }
 
-            try {
-                $cleanPhpSrc = $builder->getPHPVersion() !== $builder->getPHPVersionFromArchive();
-            } catch (RuntimeException|WrongUsageException) {
-                $cleanPhpSrc = true;
-            }
-            if ($cleanPhpSrc) {
-                logger()->info('Cleaning previous php build due to mismatching versions...');
-                FileSystem::removeDir(SOURCE_PATH . '/php-src');
-                FileSystem::removeDir(BUILD_MODULES_PATH);
-                $binFiles = glob(BUILD_BIN_PATH . '/php*');
-                $libFiles = glob(BUILD_LIB_PATH . '/libphp*');
-                foreach ([...$binFiles, ...$libFiles] as $file) {
-                    unlink($file);
-                }
-            }
             $ver = $builder->getPHPVersionFromArchive() ?: $builder->getPHPVersion();
             $indent_texts['PHP Version'] = $ver;
 
