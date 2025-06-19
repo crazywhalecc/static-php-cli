@@ -342,6 +342,9 @@ class Extension
                 return;
             }
         }
+        if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
+            logger()->info('Shared extension [' . $this->getName() . '] was already built, skipping (' . $this->getName() . '.so)');
+        }
         logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
         foreach ($this->dependencies as $dependency) {
             if (!$dependency instanceof Extension) {
