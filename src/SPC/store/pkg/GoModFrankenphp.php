@@ -45,7 +45,7 @@ class GoModFrankenphp extends CustomPackage
         $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true);
         $source_type = $lock[$name]['source_type'];
         $filename = DOWNLOAD_PATH . '/' . ($lock[$name]['filename'] ?? $lock[$name]['dirname']);
-        $extract = $lock[$name]['move_path'] === null ? (PKG_ROOT_PATH . "{$pkgroot}/{$name}") : $lock[$name]['move_path'];
+        $extract = $lock[$name]['move_path'] === null ? "{$pkgroot}/{$name}" : $lock[$name]['move_path'];
 
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
