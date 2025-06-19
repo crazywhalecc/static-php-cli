@@ -79,12 +79,12 @@ class BuildPHPCommand extends BuildCommand
 
         if ($rule === BUILD_TARGET_NONE) {
             $this->output->writeln('<error>Please add at least one build SAPI!</error>');
-            $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-embed\tBuild embed SAPI/libphp</comment>");
+            $this->output->writeln("<comment>\t--build-cli\t\tBuild php-cli SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-micro\t\tBuild phpmicro SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-fpm\t\tBuild php-fpm SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-embed\t\tBuild embed SAPI/libphp</comment>");
             $this->output->writeln("<comment>\t--build-frankenphp\tBuild FrankenPHP SAPI/libphp</comment>");
-            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm, embed, frankenphp</comment>");
+            $this->output->writeln("<comment>\t--build-all\t\tBuild all SAPI: cli, micro, fpm, embed, frankenphp</comment>");
             return static::FAILURE;
         }
         if ($rule === BUILD_TARGET_ALL) {
