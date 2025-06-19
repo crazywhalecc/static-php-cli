@@ -304,13 +304,6 @@ class BuildPHPCommand extends BuildCommand
             $rule |= BUILD_TARGET_EMBED;
             f_putenv('SPC_CMD_VAR_PHP_EMBED_TYPE=' . ($embed === 'static' ? 'static' : 'shared'));
         }
-        if ($this->getOption('build-frankenphp')) {
-            $rule |= BUILD_TARGET_FRANKENPHP;
-            if (!$this->getOption('enable-zts')) {
-                logger()->warning('FrankenPHP requires ZTS to work with multiple threads, the --enable-zts option will be enabled automatically!');
-                $this->input->setOption('enable-zts', true);
-            }
-        }
         $rule |= ($this->getOption('build-frankenphp') ? (BUILD_TARGET_FRANKENPHP | BUILD_TARGET_EMBED) : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;

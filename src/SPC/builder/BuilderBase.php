@@ -513,7 +513,10 @@ abstract class BuilderBase
     public function checkBeforeBuildPHP(int $rule): void
     {
         if (($rule & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
-            // frankenphp only support linux and macOS
+            if (!$this->getOption('enable-zts')) {
+                throw new WrongUsageException('FrankenPHP SAPI requires ZTS enabled PHP, build with `--enable-zts`!');
+            }
+            // frankenphp doesn't support windows, BSD is currently not supported by static-php-cli
             if (!in_array(PHP_OS_FAMILY, ['Linux', 'Darwin'])) {
                 throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
             }
@@ -523,9 +526,9 @@ abstract class BuilderBase
                 global $argv;
                 throw new WrongUsageException("FrankenPHP SAPI requires go-mod-frankenphp package, please install it first: {$argv[0]} install-pkg go-mod-frankenphp");
             }
-            // frankenphp needs libxml2 libs
+            // frankenphp needs libxml2 lib on macos, see: https://github.com/php/frankenphp/blob/main/frankenphp.go#L17
             if (PHP_OS_FAMILY === 'Darwin' && !$this->getLib('libxml2')) {
-                throw new WrongUsageException('FrankenPHP SAPI for macOS requires libxml2 library, please include `xml` extension in your build.');
+                throw new WrongUsageException('FrankenPHP SAPI for macOS requires libxml2 library, please include the `xml` extension in your build.');
             }
         }
     }
