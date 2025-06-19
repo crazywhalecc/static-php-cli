@@ -96,6 +96,7 @@ class BSDBuilder extends UnixBuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -142,6 +143,10 @@ class BSDBuilder extends UnixBuilderBase
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
+        }
+        if ($enableFrankenphp) {
+            logger()->info('building frankenphp');
+            $this->buildFrankenphp();
         }
     }
 

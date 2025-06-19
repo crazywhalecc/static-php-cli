@@ -24,7 +24,7 @@ $test_os = [
     'macos-13',
     // 'macos-14',
     'macos-15',
-    // 'ubuntu-latest',
+    'ubuntu-latest',
     'ubuntu-22.04',
     'ubuntu-24.04',
     'ubuntu-22.04-arm',
@@ -40,12 +40,15 @@ $no_strip = false;
 // compress with upx
 $upx = false;
 
+// whether to test frankenphp build, only available for macos and linux
+$frankenphp = true;
+
 // prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'dom,mongodb',
+    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
     'Windows' => 'xlswriter,openssl',
 };
 
@@ -208,7 +211,13 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
         break;
     case 'build_embed_cmd':
-        passthru($prefix . $build_cmd . (str_starts_with($argv[2], 'windows-') ? ' --build-cli' : ' --build-embed'), $retcode);
+        if ($frankenphp) {
+            passthru("{$prefix}install-pkg go-xcaddy --debug", $retcode);
+            if ($retcode !== 0) {
+                break;
+            }
+        }
+        passthru($prefix . $build_cmd . (str_starts_with($argv[2], 'windows-') ? ' --build-cli' : (' --build-embed' . ($frankenphp ? ' --build-frankenphp' : ''))), $retcode);
         break;
     case 'doctor_cmd':
         passthru($prefix . $doctor_cmd, $retcode);

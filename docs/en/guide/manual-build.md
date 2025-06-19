@@ -167,6 +167,7 @@ If the build is successful, you will see the `buildroot/bin` directory in the cu
 - fpm: The build result is `buildroot/bin/php-fpm`.
 - micro: The build result is `buildroot/bin/micro.sfx`. If you need to further package it with PHP code, please refer to [Packaging micro binary](./manual-build#command-micro-combine).
 - embed: See [Using embed](./manual-build#embed-usage).
+- frankenphp: The build result is `buildroot/bin/frankenphp`.
 
 If the build fails, you can use the `--debug` parameter to view detailed error information, 
 or use the `--with-clean` to clear the old compilation results and recompile.
@@ -290,6 +291,7 @@ You need to specify a compilation target, choose from the following parameters:
 - `--build-fpm`: Build a fpm sapi (php-fpm, used in conjunction with other traditional fpm architecture software such as nginx)
 - `--build-micro`: Build a micro sapi (used to build a standalone executable binary containing PHP code)
 - `--build-embed`: Build an embed sapi (used to embed into other C language programs)
+- `--build-frankenphp`: Build a [FrankenPHP](https://github.com/php/frankenphp) executable
 - `--build-all`: build all above sapi
 
 ```bash
@@ -509,6 +511,8 @@ When `bin/spc doctor` automatically repairs the Windows environment, tools such 
 Here is an example of installing the tool:
 
 - Download and install UPX (Linux and Windows only): `bin/spc install-pkg upx`
+- Download and install nasm (Windows only): `bin/spc install-pkg nasm`
+- Download and install go-xcaddy: `bin/spc install-pkg go-xcaddy`
 
 ## Command - del-download
 

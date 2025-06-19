@@ -13,6 +13,7 @@ use SPC\builder\LibraryBase;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use SPC\util\CustomExt;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -117,7 +118,7 @@ class BuilderTest extends TestCase
 
     public function testGetPHPVersionFromArchive()
     {
-        $lock = file_exists(DOWNLOAD_PATH . '/.lock.json') ? file_get_contents(DOWNLOAD_PATH . '/.lock.json') : false;
+        $lock = file_exists(LockFile::LOCK_FILE) ? file_get_contents(LockFile::LOCK_FILE) : false;
         if ($lock === false) {
             $this->assertFalse($this->builder->getPHPVersionFromArchive());
         } else {
@@ -161,7 +162,8 @@ class BuilderTest extends TestCase
             [BUILD_TARGET_FPM, 'fpm'],
             [BUILD_TARGET_MICRO, 'micro'],
             [BUILD_TARGET_EMBED, 'embed'],
-            [BUILD_TARGET_ALL, 'cli, micro, fpm, embed'],
+            [BUILD_TARGET_FRANKENPHP, 'frankenphp'],
+            [BUILD_TARGET_ALL, 'cli, micro, fpm, embed, frankenphp'],
             [BUILD_TARGET_CLI | BUILD_TARGET_EMBED, 'cli, embed'],
         ];
     }

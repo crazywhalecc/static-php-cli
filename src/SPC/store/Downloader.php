@@ -9,6 +9,7 @@ use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\CustomPackage;
 use SPC\store\source\CustomSourceBase;
 
 /**
@@ -208,34 +209,7 @@ class Downloader
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
             $name = self::getPreBuiltLockName($name);
         }
-        self::lockSource($name, ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
-    }
-
-    /**
-     * Try to lock source.
-     *
-     * @param string $name Source name
-     * @param array{
-     *     source_type: string,
-     *     dirname: ?string,
-     *     filename: ?string,
-     *     move_path: ?string,
-     *     lock_as: int
-     * } $data Source data
-     * @throws FileSystemException
-     */
-    public static function lockSource(string $name, array $data): void
-    {
-        if (!file_exists(FileSystem::convertPath(DOWNLOAD_PATH . '/.lock.json'))) {
-            $lock = [];
-        } else {
-            $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
-        }
-        // calculate hash
-        $hash = self::getLockSourceHash($data);
-        $data['hash'] = $hash;
-        $lock[$name] = $data;
-        FileSystem::writeFile(DOWNLOAD_PATH . '/.lock.json', json_encode($lock, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
     }
 
     /**
@@ -281,7 +255,7 @@ class Downloader
         }
         // Lock
         logger()->debug("Locking git source {$name}");
-        self::lockSource($name, ['source_type' => SPC_SOURCE_GIT, 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
+        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_GIT, 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
 
         /*
         // 复制目录过去
@@ -377,7 +351,7 @@ class Downloader
                 case 'local':
                     // Local directory, do nothing, just lock it
                     logger()->debug("Locking local source {$name}");
-                    self::lockSource($name, [
+                    LockFile::lockSource($name, [
                         'source_type' => SPC_SOURCE_LOCAL,
                         'dirname' => $pkg['dirname'],
                         'move_path' => $pkg['extract'] ?? null,
@@ -385,10 +359,13 @@ class Downloader
                     ]);
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
-                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
+                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg');
                     foreach ($classes as $class) {
-                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
-                            (new $class())->fetch($force);
+                        if (is_a($class, CustomPackage::class, true) && $class !== CustomPackage::class) {
+                            $cls = new $class();
+                            if (in_array($name, $cls->getSupportName())) {
+                                (new $class())->fetch($name, $force, $pkg);
+                            }
                             break;
                         }
                     }
@@ -493,7 +470,7 @@ class Downloader
                 case 'local':
                     // Local directory, do nothing, just lock it
                     logger()->debug("Locking local source {$name}");
-                    self::lockSource($name, [
+                    LockFile::lockSource($name, [
                         'source_type' => SPC_SOURCE_LOCAL,
                         'dirname' => $source['dirname'],
                         'move_path' => $source['extract'] ?? null,
@@ -618,43 +595,6 @@ class Downloader
     }
 
     /**
-     * Get the hash of the lock source based on the lock options.
-     *
-     * @param  array            $lock_options Lock options
-     * @return string           Hash of the lock source
-     * @throws RuntimeException
-     */
-    public static function getLockSourceHash(array $lock_options): string
-    {
-        $result = match ($lock_options['source_type']) {
-            SPC_SOURCE_ARCHIVE => sha1_file(DOWNLOAD_PATH . '/' . $lock_options['filename']),
-            SPC_SOURCE_GIT => exec('cd ' . escapeshellarg(DOWNLOAD_PATH . '/' . $lock_options['dirname']) . ' && ' . SPC_GIT_EXEC . ' rev-parse HEAD'),
-            SPC_SOURCE_LOCAL => 'LOCAL HASH IS ALWAYS DIFFERENT',
-            default => filter_var(getenv('SPC_IGNORE_BAD_HASH'), FILTER_VALIDATE_BOOLEAN) ? '' : throw new RuntimeException("Unknown source type: {$lock_options['source_type']}"),
-        };
-        if ($result === false && !filter_var(getenv('SPC_IGNORE_BAD_HASH'), FILTER_VALIDATE_BOOLEAN)) {
-            throw new RuntimeException("Failed to get hash for source: {$lock_options['source_type']}");
-        }
-        return $result ?: '';
-    }
-
-    /**
-     * @param  array               $lock_options Lock options
-     * @param  string              $destination  Target directory
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
-    public static function putLockSourceHash(array $lock_options, string $destination): void
-    {
-        $hash = self::getLockSourceHash($lock_options);
-        if ($lock_options['source_type'] === SPC_SOURCE_LOCAL) {
-            logger()->debug("Source [{$lock_options['dirname']}] is local, no hash will be written.");
-            return;
-        }
-        FileSystem::writeFile("{$destination}/.spc-hash", $hash);
-    }
-
-    /**
      * Register CTRL+C event for different OS.
      *
      * @param callable $callback callback function
@@ -689,33 +629,30 @@ class Downloader
 
     /**
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     private static function isAlreadyDownloaded(string $name, bool $force, int $download_as = SPC_DOWNLOAD_SOURCE): bool
     {
-        if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
-            $lock = [];
-        } else {
-            $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
-        }
-        // If lock file exists, skip downloading for source mode
-        if (!$force && $download_as === SPC_DOWNLOAD_SOURCE && isset($lock[$name])) {
-            if (
-                $lock[$name]['source_type'] === SPC_SOURCE_ARCHIVE && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename']) ||
-                $lock[$name]['source_type'] === SPC_SOURCE_GIT && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])
-            ) {
-                logger()->notice("Source [{$name}] already downloaded: " . ($lock[$name]['filename'] ?? $lock[$name]['dirname']));
+        // If the lock file exists, skip downloading for source mode
+        $lock_item = LockFile::get($name);
+        if (!$force && $download_as === SPC_DOWNLOAD_SOURCE && $lock_item !== null) {
+            if (file_exists($path = LockFile::getLockFullPath($lock_item))) {
+                logger()->notice("Source [{$name}] already downloaded: {$path}");
                 return true;
             }
         }
-        // If lock file exists for current arch and glibc target, skip downloading
-
-        if (!$force && $download_as === SPC_DOWNLOAD_PRE_BUILT && isset($lock[$lock_name = self::getPreBuiltLockName($name)])) {
+        $lock_name = self::getPreBuiltLockName($name);
+        $lock_item = LockFile::get($lock_name);
+        if (!$force && $download_as === SPC_DOWNLOAD_PRE_BUILT && $lock_item !== null) {
             // lock name with env
-            if (
-                $lock[$lock_name]['source_type'] === SPC_SOURCE_ARCHIVE && file_exists(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']) ||
-                $lock[$lock_name]['source_type'] === SPC_SOURCE_GIT && is_dir(DOWNLOAD_PATH . '/' . $lock[$lock_name]['dirname'])
-            ) {
-                logger()->notice("Pre-built content [{$name}] already downloaded: " . ($lock[$lock_name]['filename'] ?? $lock[$lock_name]['dirname']));
+            if (file_exists($path = LockFile::getLockFullPath($lock_item))) {
+                logger()->notice("Pre-built content [{$name}] already downloaded: {$path}");
+                return true;
+            }
+        }
+        if (!$force && $download_as === SPC_DOWNLOAD_PACKAGE && $lock_item !== null) {
+            if (file_exists($path = LockFile::getLockFullPath($lock_item))) {
+                logger()->notice("Source [{$name}] already downloaded: {$path}");
                 return true;
             }
         }

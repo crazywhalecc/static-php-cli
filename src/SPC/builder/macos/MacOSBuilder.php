@@ -122,6 +122,7 @@ class MacOSBuilder extends UnixBuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
         // prepare build php envs
         $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
@@ -180,9 +181,10 @@ class MacOSBuilder extends UnixBuilderBase
             }
             $this->buildEmbed();
         }
-
-        $this->emitPatchPoint('before-sanity-check');
-        $this->sanityCheck($build_target);
+        if ($enableFrankenphp) {
+            logger()->info('building frankenphp');
+            $this->buildFrankenphp();
+        }
     }
 
     public function testPHP(int $build_target = BUILD_TARGET_NONE)

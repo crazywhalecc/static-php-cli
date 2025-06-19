@@ -145,6 +145,7 @@ bin/spc craft --debug
 - fpm: 构建结果为 `buildroot/bin/php-fpm`。
 - micro: 构建结果为 `buildroot/bin/micro.sfx`，如需进一步与 PHP 代码打包，请查看 [打包 micro 二进制](./manual-build#命令-micro-combine-打包-micro-二进制)。
 - embed: 参见 [embed 使用](./manual-build#embed-使用)。
+- frankenphp: 构建结果为 `buildroot/bin/frankenphp`。
 
 如果中途构建出错，你可以使用 `--debug` 参数查看详细的错误信息，或者使用 `--with-clean` 参数清除旧的编译结果，重新编译。
 
@@ -250,6 +251,7 @@ bin/spc doctor --auto-fix
 - `--build-fpm`: 构建一个 fpm sapi（php-fpm，用于和其他传统的 fpm 架构的软件如 nginx 配合使用）
 - `--build-micro`: 构建一个 micro sapi（用于构建一个包含 PHP 代码的独立可执行二进制）
 - `--build-embed`: 构建一个 embed sapi（用于嵌入到其他 C 语言程序中）
+- `--build-frankenphp`: 构建一个 [frankenphp](https://github.com/php/frankenphp) 二进制
 - `--build-all`: 构建以上所有 sapi
 
 ```bash
@@ -457,6 +459,8 @@ bin/spc dev:sort-config ext
 下面是安装工具的示例：
 
 - 下载安装 UPX（仅限 Linux 和 Windows）: `bin/spc install-pkg upx`
+- 下载安装 nasm（仅限 Windows）: `bin/spc install-pkg nasm`
+- 下载安装 go-xcaddy: `bin/spc install-pkg go-xcaddy`
 
 ## 命令 del-download - 删除已下载的资源
 

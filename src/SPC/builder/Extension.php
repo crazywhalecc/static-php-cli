@@ -264,9 +264,12 @@ class Extension
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
         // If check failed, throw RuntimeException
         $sharedExtensions = $this->getSharedExtensionLoadString();
-        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         if ($ret !== 0) {
-            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+            throw new RuntimeException(
+                'extension ' . $this->getName() . ' failed runtime check: php-cli returned ' . $ret . "\n" .
+                join("\n", $out)
+            );
         }
 
         if (file_exists(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php')) {
@@ -328,6 +331,17 @@ class Extension
      */
     public function buildShared(): void
     {
+        if (Config::getExt($this->getName(), 'type') === 'builtin' || Config::getExt($this->getName(), 'build-with-php') === true) {
+            if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
+                logger()->info('Shared extension [' . $this->getName() . '] was already built by php-src/configure (' . $this->getName() . '.so)');
+                return;
+            }
+            if (Config::getExt($this->getName(), 'build-with-php') === true) {
+                logger()->warning('Shared extension [' . $this->getName() . '] did not build with php-src/configure (' . $this->getName() . '.so)');
+                logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
+                return;
+            }
+        }
         logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
         foreach ($this->dependencies as $dependency) {
             if (!$dependency instanceof Extension) {
@@ -357,11 +371,16 @@ class Extension
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
         [$staticLibString, $sharedLibString] = $this->getStaticAndSharedLibs();
+
+        // macOS ld64 doesn't understand these, while Linux and BSD do
+        // use them to make sure that all symbols are picked up, even if a library has already been visited before
+        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,-Bstatic -Wl,--start-group ' : '';
+        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group -Wl,-Bdynamic ' : ' ';
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => '-Wl,-Bstatic -Wl,--start-group ' . $staticLibString . ' -Wl,--end-group -Wl,-Bdynamic ' . $sharedLibString,
+            'LIBS' => $preStatic . $staticLibString . $postStatic . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
 
@@ -382,6 +401,7 @@ class Extension
                 '--enable-shared --disable-static'
             );
 
+        // some extensions don't define their dependencies well, this patch is only needed for a few
         FileSystem::replaceFileRegex(
             $this->source_dir . '/Makefile',
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
@@ -468,7 +488,7 @@ class Extension
      *
      * @return array [staticLibString, sharedLibString]
      */
-    private function getStaticAndSharedLibs(): array
+    protected function getStaticAndSharedLibs(): array
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
         $sharedLibString = '';
@@ -483,7 +503,7 @@ class Extension
                 continue;
             }
             $static_lib = 'lib' . $lib . '.a';
-            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib)) {
+            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib) && !str_contains($static_lib, 'libphp')) {
                 if (!str_contains($staticLibString, '-l' . $lib . ' ')) {
                     $staticLibString .= '-l' . $lib . ' ';
                 }

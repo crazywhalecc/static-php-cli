@@ -74,6 +74,11 @@ RUN echo "source scl_source enable devtoolset-10" >> /etc/bashrc
 RUN source /etc/bashrc
 RUN yum install -y which
 
+RUN curl -fsSL -o patchelf.tgz https://github.com/NixOS/patchelf/releases/download/0.18.0/patchelf-0.18.0-$BASE_ARCH.tar.gz && \
+    mkdir -p /patchelf && \
+    tar -xzf patchelf.tgz -C /patchelf --strip-components=1 && \
+    cp /patchelf/bin/patchelf /usr/bin/
+
 RUN curl -o cmake.tgz -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$BASE_ARCH.tar.gz && \
     mkdir /cmake && \
     tar -xzf cmake.tgz -C /cmake --strip-components 1
@@ -89,7 +94,7 @@ ENV PATH="/app/bin:/cmake/bin:$PATH"
 ENV SPC_LIBC=glibc
 
 ADD ./config/env.ini /app/config/env.ini
-RUN bin/spc doctor --auto-fix --debug
+RUN CC=gcc bin/spc doctor --auto-fix --debug
 
 RUN curl -o make.tgz -fsSL https://ftp.gnu.org/gnu/make/make-4.4.tar.gz && \
     tar -zxvf make.tgz && \
@@ -136,7 +141,7 @@ echo 'CC=/opt/rh/devtoolset-10/root/usr/bin/gcc' > /tmp/spc-gnu-docker.env
 echo 'CXX=/opt/rh/devtoolset-10/root/usr/bin/g++' >> /tmp/spc-gnu-docker.env
 echo 'AR=/opt/rh/devtoolset-10/root/usr/bin/ar' >> /tmp/spc-gnu-docker.env
 echo 'LD=/opt/rh/devtoolset-10/root/usr/bin/ld' >> /tmp/spc-gnu-docker.env
-echo 'SPC_DEFAULT_C_FLAGS=-fPIE -fPIC' >> /tmp/spc-gnu-docker.env
+echo 'SPC_DEFAULT_C_FLAGS=-fPIC' >> /tmp/spc-gnu-docker.env
 echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env

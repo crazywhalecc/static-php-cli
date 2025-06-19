@@ -12,6 +12,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use SPC\store\SourceManager;
 use SPC\util\CustomExt;
 
@@ -262,17 +263,6 @@ abstract class BuilderBase
                 if (!$ext->isBuildShared()) {
                     continue;
                 }
-                if (Config::getExt($ext->getName(), 'type') === 'builtin' || Config::getExt($ext->getName(), 'build-with-php') === true) {
-                    if (file_exists(BUILD_MODULES_PATH . '/' . $ext->getName() . '.so')) {
-                        logger()->info('Shared extension [' . $ext->getName() . '] was already built by php-src/configure (' . $ext->getName() . '.so)');
-                        continue;
-                    }
-                    if (Config::getExt($ext->getName(), 'build-with-php') === true) {
-                        logger()->warning('Shared extension [' . $ext->getName() . '] did not build with php-src/configure (' . $ext->getName() . '.so)');
-                        logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
-                        continue;
-                    }
-                }
                 $ext->buildShared();
             }
         } catch (RuntimeException $e) {
@@ -361,15 +351,11 @@ abstract class BuilderBase
     public function getPHPVersionFromArchive(?string $file = null): false|string
     {
         if ($file === null) {
-            $lock = file_exists(DOWNLOAD_PATH . '/.lock.json') ? file_get_contents(DOWNLOAD_PATH . '/.lock.json') : false;
-            if ($lock === false) {
+            $lock = LockFile::get('php-src');
+            if ($lock === null) {
                 return false;
             }
-            $lock = json_decode($lock, true);
-            $file = $lock['php-src']['filename'] ?? null;
-            if ($file === null) {
-                return false;
-            }
+            $file = LockFile::getLockFullPath($lock);
         }
         if (preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+)?)\.tar\.(?:gz|bz2|xz)/', $file, $match)) {
             return $match[1];
@@ -414,6 +400,9 @@ abstract class BuilderBase
         }
         if (($type & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
             $ls[] = 'embed';
+        }
+        if (($type & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
+            $ls[] = 'frankenphp';
         }
         return implode(', ', $ls);
     }
@@ -517,6 +506,29 @@ abstract class BuilderBase
                     logger()->critical('Please check with --debug option to see more details.');
                 }
                 throw $e;
+            }
+        }
+    }
+
+    public function checkBeforeBuildPHP(int $rule): void
+    {
+        if (($rule & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
+            if (!$this->getOption('enable-zts')) {
+                throw new WrongUsageException('FrankenPHP SAPI requires ZTS enabled PHP, build with `--enable-zts`!');
+            }
+            // frankenphp doesn't support windows, BSD is currently not supported by static-php-cli
+            if (!in_array(PHP_OS_FAMILY, ['Linux', 'Darwin'])) {
+                throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
+            }
+            // frankenphp needs package go-xcaddy installed
+            $pkg_dir = PKG_ROOT_PATH . '/go-xcaddy-' . arch2gnu(php_uname('m')) . '-' . osfamily2shortname();
+            if (!file_exists("{$pkg_dir}/bin/go") || !file_exists("{$pkg_dir}/bin/xcaddy")) {
+                global $argv;
+                throw new WrongUsageException("FrankenPHP SAPI requires the go-xcaddy package, please install it first: {$argv[0]} install-pkg go-xcaddy");
+            }
+            // frankenphp needs libxml2 lib on macos, see: https://github.com/php/frankenphp/blob/main/frankenphp.go#L17
+            if (PHP_OS_FAMILY === 'Darwin' && !$this->getLib('libxml2')) {
+                throw new WrongUsageException('FrankenPHP SAPI for macOS requires libxml2 library, please include the `xml` extension in your build.');
             }
         }
     }
