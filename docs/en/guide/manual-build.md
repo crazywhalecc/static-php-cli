@@ -512,7 +512,7 @@ Here is an example of installing the tool:
 
 - Download and install UPX (Linux and Windows only): `bin/spc install-pkg upx`
 - Download and install nasm (Windows only): `bin/spc install-pkg nasm`
-- Download and install go-mod-frankenphp: `bin/spc install-pkg go-mod-frankenphp`
+- Download and install go-xcaddy: `bin/spc install-pkg go-xcaddy`
 
 ## Command - del-download
 

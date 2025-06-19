@@ -460,7 +460,7 @@ bin/spc dev:sort-config ext
 
 - 下载安装 UPX（仅限 Linux 和 Windows）: `bin/spc install-pkg upx`
 - 下载安装 nasm（仅限 Windows）: `bin/spc install-pkg nasm`
-- 下载安装 go-mod-frankenphp: `bin/spc install-pkg go-mod-frankenphp`
+- 下载安装 go-xcaddy: `bin/spc install-pkg go-xcaddy`
 
 ## 命令 del-download - 删除已下载的资源
 

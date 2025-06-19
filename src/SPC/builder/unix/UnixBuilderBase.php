@@ -317,7 +317,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
         // make it possible to build from a different frankenphp directory!
-        if (!str_contains($xcaddyModules, '--with github.com/php/frankenphp')) {
+        if (!str_contains($xcaddyModules, '--with github.com/dunglas/frankenphp')) {
             $xcaddyModules = '--with github.com/dunglas/frankenphp ' . $xcaddyModules;
         }
         if ($this->getLib('brotli') === null && str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
