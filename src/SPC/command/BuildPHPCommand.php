@@ -295,6 +295,7 @@ class BuildPHPCommand extends BuildCommand
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
         $embed = $this->getOption('build-embed');
+        $embed = $embed === null ? true : $embed;
         if (!$embed && !empty($shared_extensions)) {
             $embed = true;
         }
