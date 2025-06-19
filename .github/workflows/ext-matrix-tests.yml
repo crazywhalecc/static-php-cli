@@ -1,16 +1,14 @@
-name: "Extension matrix tests"
+name: "Extension Matrix Tests"
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - '.github/workflows/ext-matrix-tests.yml'
+  push:
 
 jobs:
   test:
     name: "${{ matrix.extension }} (PHP ${{ matrix.php-version }} on ${{ matrix.operating-system }})"
     runs-on: ${{ matrix.operating-system }}
+    if: contains(github.event.head_commit.message, 'extension test') || contains(github.event.head_commit.message, 'test extensions')
     strategy:
       fail-fast: false
       matrix:
