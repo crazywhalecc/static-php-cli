@@ -196,6 +196,9 @@ class BuildPHPCommand extends BuildCommand
             // validate libs and extensions
             $builder->validateLibsAndExts();
 
+            // check some things before building all the things
+            $builder->checkBeforeBuildPHP($rule);
+
             // clean builds and sources
             if ($this->input->getOption('with-clean')) {
                 logger()->info('Cleaning source and previous build dir...');
@@ -316,7 +319,7 @@ class BuildPHPCommand extends BuildCommand
             $rule |= BUILD_TARGET_EMBED;
             f_putenv('SPC_CMD_VAR_PHP_EMBED_TYPE=' . ($embed === 'static' ? 'static' : 'shared'));
         }
-        $rule |= ($this->getOption('build-frankenphp') ? BUILD_TARGET_FRANKENPHP : BUILD_TARGET_NONE);
+        $rule |= ($this->getOption('build-frankenphp') ? (BUILD_TARGET_FRANKENPHP | BUILD_TARGET_EMBED) : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;
     }

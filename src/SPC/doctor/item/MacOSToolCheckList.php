@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\doctor\item;
 
-use SPC\builder\traits\UnixGoCheckTrait;
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
@@ -14,7 +13,6 @@ use SPC\exception\RuntimeException;
 class MacOSToolCheckList
 {
     use UnixSystemUtilTrait;
-    use UnixGoCheckTrait;
 
     /** @var string[] MacOS 环境下编译依赖的命令 */
     public const REQUIRED_COMMANDS = [
@@ -35,12 +33,6 @@ class MacOSToolCheckList
         'cmake',
         'glibtoolize',
     ];
-
-    #[AsCheckItem('if xcaddy is installed', limit_os: 'Darwin')]
-    public function checkXcaddy(): ?CheckResult
-    {
-        return $this->checkGoAndXcaddy();
-    }
 
     #[AsCheckItem('if homebrew has installed', limit_os: 'Darwin', level: 998)]
     public function checkBrew(): ?CheckResult

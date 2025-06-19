@@ -47,12 +47,6 @@ class BSDToolCheckList
         return CheckResult::ok();
     }
 
-    #[AsCheckItem('if xcaddy is installed', limit_os: 'BSD')]
-    public function checkXcaddy(): ?CheckResult
-    {
-        return $this->checkGoAndXcaddy();
-    }
-
     #[AsFixItem('build-tools-bsd')]
     public function fixBuildTools(array $missing): bool
     {

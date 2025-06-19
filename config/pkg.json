@@ -42,5 +42,17 @@
         "extract-files": {
             "upx-*-win64/upx.exe": "{pkg_root_path}/bin/upx.exe"
         }
+    },
+    "go-mod-frankenphp-x86_64-linux": {
+        "type": "custom"
+    },
+    "go-mod-frankenphp-aarch64-linux": {
+        "type": "custom"
+    },
+    "go-mod-frankenphp-x86_64-macos": {
+        "type": "custom"
+    },
+    "go-mod-frankenphp-aarch64-macos": {
+        "type": "custom"
     }
 }
