@@ -12,6 +12,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\CurlHook;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\util\DependencyUtil;
@@ -324,7 +325,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
         $lrt = PHP_OS_FAMILY === 'Linux' ? '-lrt' : '';
-        $releaseInfo = json_decode(Downloader::curlExec('https://api.github.com/repos/php/frankenphp/releases/latest', retries: 3), true);
+        $releaseInfo = json_decode(Downloader::curlExec('https://api.github.com/repos/php/frankenphp/releases/latest', retries: 3, hooks: [[CurlHook::class, 'setupGithubToken']]), true);
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
