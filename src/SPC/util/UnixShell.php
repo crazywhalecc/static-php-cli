@@ -117,10 +117,6 @@ class UnixShell
         return trim($str);
     }
 
-    /**
-     * @param string $cmd
-     * @return string
-     */
     private function getExecString(string $cmd): string
     {
         logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);

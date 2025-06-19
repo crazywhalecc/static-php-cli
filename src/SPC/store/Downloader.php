@@ -650,17 +650,6 @@ class Downloader
                 return true;
             }
         }
-
-        // If lock file exists, skip downloading for source mode
-        if (!$force && $download_as === SPC_DOWNLOAD_PACKAGE && isset($lock[$name])) {
-            if (
-                $lock[$name]['source_type'] === SPC_SOURCE_ARCHIVE && file_exists(DOWNLOAD_PATH . '/' . $lock[$name]['filename']) ||
-                $lock[$name]['source_type'] === SPC_SOURCE_GIT && is_dir(DOWNLOAD_PATH . '/' . $lock[$name]['dirname'])
-            ) {
-                logger()->notice("Package [{$name}] already downloaded: " . ($lock[$name]['filename'] ?? $lock[$name]['dirname']));
-                return true;
-            }
-        }
         return false;
     }
 }
