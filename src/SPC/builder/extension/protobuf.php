@@ -15,8 +15,9 @@ class protobuf extends Extension
         if ($this->builder->getPHPVersionID() < 80000 && getenv('SPC_SKIP_PHP_VERSION_CHECK') !== 'yes') {
             throw new \RuntimeException('The latest protobuf extension requires PHP 8.0 or later');
         }
+        $grpc = $this->builder->getExt('grpc');
         // protobuf conflicts with grpc
-        if ($this->builder->getExt('grpc') !== null) {
+        if ($grpc?->isBuildStatic()) {
             throw new \RuntimeException('protobuf conflicts with grpc, please remove grpc or protobuf extension');
         }
     }
