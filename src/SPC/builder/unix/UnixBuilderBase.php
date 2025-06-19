@@ -227,7 +227,9 @@ abstract class UnixBuilderBase extends BuilderBase
             if (!file_exists($frankenphp)) {
                 throw new RuntimeException('FrankenPHP binary not found: ' . $frankenphp);
             }
-            [$ret, $output] = shell()->execWithResult("{$frankenphp} version");
+            [$ret, $output] = shell()
+                ->setEnv(['LD_LIBRARY_PATH' => BUILD_LIB_PATH])
+                ->execWithResult("{$frankenphp} version");
             if ($ret !== 0 || !str_contains(implode('', $output), 'FrankenPHP')) {
                 throw new RuntimeException('FrankenPHP failed sanity check: ret[' . $ret . ']. out[' . implode('', $output) . ']');
             }
@@ -308,7 +310,6 @@ abstract class UnixBuilderBase extends BuilderBase
         $arch = arch2gnu(php_uname('m'));
 
         // define executables for go and xcaddy
-        $go_exec = PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin/go";
         $xcaddy_exec = PKG_ROOT_PATH . "/go-mod-frankenphp-{$arch}-{$os}/bin/xcaddy";
 
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
