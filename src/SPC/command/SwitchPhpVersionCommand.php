@@ -7,6 +7,7 @@ namespace SPC\command;
 use SPC\store\Config;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -40,16 +41,9 @@ class SwitchPhpVersionCommand extends BaseCommand
             }
         }
 
-        // detect if downloads/.lock.json exists
-        $lock_file = DOWNLOAD_PATH . '/.lock.json';
-        // parse php-src part of lock file
-        $lock_data = json_decode(file_get_contents($lock_file), true);
-        // get php-src downloaded file name
-        $php_src = $lock_data['php-src'];
-        $file = DOWNLOAD_PATH . '/' . ($php_src['filename'] ?? '.donot.delete.me');
-        if (file_exists($file)) {
+        if (LockFile::isLockFileExists('php-src')) {
             $this->output->writeln('<info>Removing old PHP source...</info>');
-            unlink($file);
+            LockFile::put('php-src', null);
         }
 
         // Download new PHP source

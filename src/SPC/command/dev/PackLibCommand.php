@@ -14,6 +14,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -47,9 +48,8 @@ class PackLibCommand extends BuildCommand
                     $lib->setup();
                 } else {
                     // Get lock info
-                    $lock = json_decode(file_get_contents(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
                     $source = Config::getLib($lib->getName(), 'source');
-                    if (!isset($lock[$source]) || ($lock[$source]['lock_as'] ?? SPC_DOWNLOAD_SOURCE) === SPC_DOWNLOAD_PRE_BUILT) {
+                    if (($lock = LockFile::get($source)) === null || ($lock['lock_as'] === SPC_DOWNLOAD_PRE_BUILT)) {
                         logger()->critical("The library {$lib->getName()} is downloaded as pre-built, we need to build it instead of installing pre-built.");
                         return static::FAILURE;
                     }
