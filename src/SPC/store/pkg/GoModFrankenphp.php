@@ -51,7 +51,7 @@ class GoModFrankenphp extends CustomPackage
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
         // install xcaddy
-        $go_exec = PKG_ROOT_PATH . "{$pkgroot}/{$name}/bin/go";
+        $go_exec = "{$pkgroot}/{$name}/bin/go";
         // $xcaddy_exec = PKG_ROOT_PATH . "$pkgroot/$name/bin/xcaddy";
         shell()
             ->appendEnv([
