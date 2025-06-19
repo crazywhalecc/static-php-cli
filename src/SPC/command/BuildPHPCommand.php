@@ -295,14 +295,14 @@ class BuildPHPCommand extends BuildCommand
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
         $embed = $this->getOption('build-embed');
-        $embed = $embed === null ? true : $embed;
-        if (!$embed && !empty($shared_extensions)) {
-            $embed = true;
-        }
+        $embed = match ($embed) {
+            null => getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static',
+            'static' => 'static',
+            'shared' => 'shared',
+            false => false,
+            default => throw new WrongUsageException('Invalid --build-embed option, please use --build-embed[=static|shared]'),
+        };
         if ($embed) {
-            if ($embed === true) {
-                $embed = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
-            }
             $rule |= BUILD_TARGET_EMBED;
             f_putenv('SPC_CMD_VAR_PHP_EMBED_TYPE=' . ($embed === 'static' ? 'static' : 'shared'));
         }
