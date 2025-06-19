@@ -38,17 +38,11 @@ buildroot/bin/php -d "zend_extension=/path/to/php{PHP_VER}-{ts/nts}/xdebug.so" -
 ```
 
 For macOS platform, almost all binaries under macOS cannot be truly purely statically linked, and almost all binaries will link macOS system libraries: `/usr/lib/libresolv.9.dylib` and `/usr/lib/libSystem.B.dylib`.
-So on macOS, you can use statically compiled PHP binaries under certain compilation conditions, and dynamically linked extensions:
+So on macOS, you can **directly** use SPC to build statically compiled PHP binaries with dynamically linked extensions:
 
-1. Using the `--no-strip` parameter will not strip information such as debugging symbols from the binary file for use with external Zend extensions such as `Xdebug`.
-2. If you want to compile some Zend extensions, use Homebrew, MacPorts, source code compilation, and install a normal version of PHP on your operating system.
-3. Use the `phpize && ./configure && make` command to compile the extensions you want to use.
-4. Copy the extension file `xxxx.so` to the outside, use the statically compiled PHP binary, for example to use the Xdebug extension: `cd buildroot/bin/ && ./php -d "zend_extension=/path/to/xdebug.so"`.
-
-```bash
-# build statically linked php-cli but not stripped
-bin/spc build ffi --build-cli --no-strip
-```
+1. Build shared extension `xxx.so` using: `--build-shared=XXX` option. e.g. `bin/spc build bcmath,zlib --build-shared=xdebug --build-cli`
+2. You will get `buildroot/modules/xdebug.so` and `buildroot/bin/php`.
+3. The `xdebug.so` file could be used for php that version and thread-safe are the same.
 
 ## Can it support Oracle database extension?
 

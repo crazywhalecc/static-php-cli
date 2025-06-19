@@ -296,7 +296,7 @@ bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
 - `--cxx=XXX`: 指定 C++ 语言编译器的执行命令（Linux 默认 `g++`，macOS 默认 `clang++`）
 - `--with-clean`: 编译 PHP 前先清理旧的 make 产生的文件
 - `--enable-zts`: 让编译的 PHP 为线程安全版本（默认为 NTS 版本）
-- `--no-strip`: 编译 PHP 库后不运行 `strip` 裁剪二进制文件缩小体积（不裁剪的 macOS 二进制文件可使用动态链接的第三方扩展）
+- `--no-strip`: 编译 PHP 库后不运行 `strip` 裁剪二进制文件缩小体积
 - `--with-libs=XXX,YYY`: 编译 PHP 前先编译指定的依赖库，激活部分扩展的可选功能（例如 gd 库的 libavif 等）
 - `--with-config-file-path=XXX`： 查找 `php.ini` 的路径（在 [这里](../faq/index.html#php-ini-的路径是什么) 查看默认路径）
 - `--with-config-file-scan-dir=XXX`： 读取 `php.ini` 后扫描 `.ini` 文件的目录（在 [这里](../faq/index.html#php-ini-的路径是什么) 查看默认路径）

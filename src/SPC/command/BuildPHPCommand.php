@@ -34,7 +34,7 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('build-embed', null, InputOption::VALUE_OPTIONAL, 'Build embed SAPI (not available on Windows)');
         $this->addOption('build-frankenphp', null, null, 'Build FrankenPHP SAPI (not available on Windows)');
         $this->addOption('build-all', null, null, 'Build all SAPI');
-        $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
+        $this->addOption('no-strip', null, null, 'build without strip, keep symbols to debug');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
         $this->addOption('with-config-file-path', null, InputOption::VALUE_REQUIRED, 'Set the path in which to look for php.ini', $isWindows ? null : '/usr/local/etc/php');
         $this->addOption('with-config-file-scan-dir', null, InputOption::VALUE_REQUIRED, 'Set the directory to scan for .ini files after reading php.ini', $isWindows ? null : '/usr/local/etc/php/conf.d');
@@ -62,11 +62,6 @@ class BuildPHPCommand extends BuildCommand
         $rule = $this->parseRules($shared_extensions);
 
         // check dynamic extension build env
-        // macOS must use --no-strip option
-        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Darwin' && !$this->getOption('no-strip')) {
-            $this->output->writeln('MacOS does not support dynamic extension loading with stripped binary, please use --no-strip option!');
-            return static::FAILURE;
-        }
         // linux must build with glibc
         if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc') {
             $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');

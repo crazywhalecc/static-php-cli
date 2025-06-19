@@ -35,17 +35,11 @@ buildroot/bin/php -d "zend_extension=/path/to/php{PHP_VER}-{ts/nts}/xdebug.so" -
 ```
 
 对于 macOS 平台来说，macOS 下的几乎所有二进制文件都无法真正纯静态链接，几乎所有二进制文件都会链接 macOS 的系统库：`/usr/lib/libresolv.9.dylib` 和 `/usr/lib/libSystem.B.dylib`。
-所以在 macOS 系统下，在特定的编译条件下可以使用静态编译的 php 二进制文件，可使用动态链接的扩展：
+因此，在 macOS 上，您可以直接构建出使用静态编译的 PHP 二进制文件和动态链接的扩展：
 
-1. 使用 `--no-strip` 参数，将不会对二进制文件去除调试符号等信息，以供使用 `Xdebug` 等外部 Zend 扩展。
-2. 如果要编译某些 Zend 扩展，使用 Homebrew、MacPorts、源码编译的形式，在所在的操作系统安装一个普通版本的 PHP。
-3. 使用 `phpize && ./configure && make` 命令编译想要使用的扩展。
-4. 将扩展文件 `xxxx.so` 拷贝到外部，使用静态编译的 PHP 二进制，例如使用 Xdebug 扩展：`cd buildroot/bin/ && ./php -d "zend_extension=/path/to/xdebug.so"`。
-
-```bash
-# 构建静态 php-cli
-bin/spc build ffi --build-cli --no-strip
-```
+1. 使用 `--build-shared=XXX` 选项构建共享扩展 `xxx.so`。例如：`bin/spc build bcmath,zlib --build-shared=xdebug --build-cli`
+2. 您将获得 `buildroot/modules/xdebug.so` 和 `buildroot/bin/php`。
+3. `xdebug.so` 文件可用于版本和线程安全相同的 php。
 
 ## 可以支持 Oracle 数据库扩展吗
 
