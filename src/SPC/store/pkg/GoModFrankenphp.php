@@ -52,13 +52,13 @@ class GoModFrankenphp extends CustomPackage
         // install xcaddy
         $go_exec = PKG_ROOT_PATH . "{$pkgroot}/{$name}/bin/go";
         // $xcaddy_exec = PKG_ROOT_PATH . "$pkgroot/$name/bin/xcaddy";
-        shell()->appendEnv([
-            'PATH' => "{$pkgroot}/{$name}/bin:" . getenv('PATH'),
-            'GOROOT' => "{$pkgroot}/{$name}",
-            'GOBIN' => "{$pkgroot}/{$name}/bin",
-            'GOPATH' => "{$pkgroot}/go",
-        ])
+        shell()
+            ->appendEnv([
+                'PATH' => "{$pkgroot}/{$name}/bin:" . getenv('PATH'),
+                'GOROOT' => "{$pkgroot}/{$name}",
+                'GOBIN' => "{$pkgroot}/{$name}/bin",
+                'GOPATH' => "{$pkgroot}/go",
+            ])
             ->exec("{$go_exec} install github.com/caddyserver/xcaddy/cmd/xcaddy@latest");
-        // TODO: Here to download dependencies for xcaddy and frankenphp first
     }
 }
