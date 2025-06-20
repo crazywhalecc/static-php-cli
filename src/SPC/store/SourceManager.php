@@ -85,6 +85,13 @@ class SourceManager
                 continue;
             }
 
+            // ext imap was embeded in php <= 8.3, if php version < 8.4, we should not extract
+            // but since it's not simple to compare php version, for now we just skip it
+            if ($source === 'ext-imap') {
+                logger()->debug('Source [imap] already extracted in ' . $check . ', skip !');
+                continue;
+            }
+
             // if not, remove the source dir and extract again
             logger()->notice("Source [{$source}] hash mismatch, removing old source dir and extracting again ...");
             FileSystem::removeDir($check);
