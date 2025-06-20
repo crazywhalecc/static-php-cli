@@ -22,7 +22,7 @@ class intl extends Extension
         return true;
     }
 
-    public function patchBeforeSharedBuild(): bool
+    public function patchBeforeSharedPhpize(): bool
     {
         return $this->patchBeforeBuildconf();
     }
