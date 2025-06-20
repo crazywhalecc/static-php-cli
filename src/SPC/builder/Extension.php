@@ -193,7 +193,7 @@ class Extension
      * If you need to patch some code, overwrite this
      * return true if you patched something, false if not
      */
-    public function patchBeforeSharedBuild(): bool
+    public function patchBeforeSharedPhpize(): bool
     {
         return false;
     }
@@ -204,6 +204,16 @@ class Extension
      * return true if you patched something, false if not
      */
     public function patchBeforeSharedConfigure(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Patch code before shared extension make
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeSharedMake(): bool
     {
         return false;
     }
@@ -387,13 +397,17 @@ class Extension
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
 
+        if ($this->patchBeforeSharedPhpize()) {
+            logger()->info("Extension [{$this->getName()}] patched before shared phpize");
+        }
+
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
             ->exec(BUILD_BIN_PATH . '/phpize');
 
         if ($this->patchBeforeSharedConfigure()) {
-            logger()->info('ext [ . ' . $this->getName() . '] patching before shared configure');
+            logger()->info("Extension [{$this->getName()}] patched before shared configure");
         }
 
         shell()->cd($this->source_dir)
@@ -410,6 +424,10 @@ class Extension
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
             '$1 ' . $staticLibString
         );
+
+        if ($this->patchBeforeSharedMake()) {
+            logger()->info("Extension [{$this->getName()}] patched before shared make");
+        }
 
         shell()->cd($this->source_dir)
             ->setEnv($env)

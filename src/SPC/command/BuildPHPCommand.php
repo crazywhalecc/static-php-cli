@@ -207,8 +207,6 @@ class BuildPHPCommand extends BuildCommand
             // start to build
             $builder->buildPHP($rule);
 
-            SourcePatcher::patchBeforeSharedBuild($builder);
-
             // build dynamic extensions if needed
             if (!empty($shared_extensions)) {
                 logger()->info('Building shared extensions ...');

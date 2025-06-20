@@ -46,12 +46,12 @@ class SourcePatcher
     {
         foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeBuildconf() === true) {
-                logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
+                logger()->info("Extension [{$ext->getName()}] patched before buildconf");
             }
         }
         foreach ($builder->getLibs() as $lib) {
             if ($lib->patchBeforeBuildconf() === true) {
-                logger()->info('Library [' . $lib->getName() . '] patched before buildconf');
+                logger()->info("Library [{$lib->getName()}]patched before buildconf");
             }
         }
         // patch windows php 8.1 bug
@@ -79,15 +79,6 @@ class SourcePatcher
         }
     }
 
-    public static function patchBeforeSharedBuild(BuilderBase $builder): void
-    {
-        foreach ($builder->getExts() as $ext) {
-            if ($ext->patchBeforeSharedBuild() === true) {
-                logger()->info('Extension [' . $ext->getName() . '] patched before shared build');
-            }
-        }
-    }
-
     /**
      * Source patcher runner before configure
      *
@@ -98,12 +89,12 @@ class SourcePatcher
     {
         foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeConfigure() === true) {
-                logger()->info('Extension [' . $ext->getName() . '] patched before configure');
+                logger()->info("Extension [{$ext->getName()}] patched before configure");
             }
         }
         foreach ($builder->getLibs() as $lib) {
             if ($lib->patchBeforeConfigure() === true) {
-                logger()->info('Library [' . $lib->getName() . '] patched before configure');
+                logger()->info("Library [{$lib->getName()}] patched before configure");
             }
         }
         // patch capstone
@@ -279,12 +270,12 @@ class SourcePatcher
         // call extension patch before make
         foreach ($builder->getExts(false) as $ext) {
             if ($ext->patchBeforeMake() === true) {
-                logger()->info('Extension [' . $ext->getName() . '] patched before make');
+                logger()->info("Extension [{$ext->getName()}] patched before make");
             }
         }
         foreach ($builder->getLibs() as $lib) {
             if ($lib->patchBeforeMake() === true) {
-                logger()->info('Library [' . $lib->getName() . '] patched before make');
+                logger()->info("Library [{$lib->getName()}] patched before make");
             }
         }
     }
