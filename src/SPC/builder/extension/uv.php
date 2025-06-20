@@ -21,7 +21,7 @@ class uv extends Extension
 
     public function patchBeforeSharedMake(): bool
     {
-        if (SystemUtil::getLibcVersionIfExists() >= '2.17') {
+        if (PHP_OS_FAMILY !== 'Linux' || php_uname('m') !== 'aarch64' || SystemUtil::getLibcVersionIfExists() > '2.17') {
             return false;
         }
         FileSystem::replaceFileRegex($this->source_dir . '/Makefile', '/^(LDFLAGS =.*)$/', '$1 -luv -ldl -lrt -pthread');
