@@ -21,10 +21,10 @@ class uv extends Extension
 
     public function patchBeforeSharedMake(): bool
     {
-        if (PHP_OS_FAMILY !== 'Linux' || php_uname('m') !== 'aarch64' || SystemUtil::getLibcVersionIfExists() > '2.17') {
+        if (PHP_OS_FAMILY !== 'Linux' || GNU_ARCH !== 'aarch64') {
             return false;
         }
-        FileSystem::replaceFileRegex($this->source_dir . '/Makefile', '/^(LDFLAGS =.*)$/', '$1 -luv -ldl -lrt -pthread');
+        FileSystem::replaceFileRegex($this->source_dir . '/Makefile', '/^(LDFLAGS =.*)$/m', '$1 -luv -ldl -lrt -pthread');
         return true;
     }
 }

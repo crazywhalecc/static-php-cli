@@ -400,7 +400,7 @@ class Extension
             ->exec(BUILD_BIN_PATH . '/phpize');
 
         if ($this->patchBeforeSharedConfigure()) {
-            logger()->info('ext [ . ' . $this->getName() . '] patching before shared configure');
+            logger()->info('ext [' . $this->getName() . '] patching before shared configure');
         }
 
         shell()->cd($this->source_dir)
@@ -419,7 +419,7 @@ class Extension
         );
 
         if ($this->patchBeforeSharedMake()) {
-            logger()->info('ext [ . ' . $this->getName() . '] patching before shared make');
+            logger()->info('ext [' . $this->getName() . '] patching before shared make');
         }
 
         shell()->cd($this->source_dir)
