@@ -215,19 +215,6 @@ abstract class LibraryBase
      */
     public function tryBuild(bool $force_build = false): int
     {
-        if (str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), '-release')) {
-            FileSystem::replaceFileLineContainsString(
-                SOURCE_PATH . '/php-src/ext/standard/info.c',
-                '#ifdef CONFIGURE_COMMAND',
-                '#ifdef NO_CONFIGURE_COMMAND',
-            );
-        } else {
-            FileSystem::replaceFileLineContainsString(
-                SOURCE_PATH . '/php-src/ext/standard/info.c',
-                '#ifdef NO_CONFIGURE_COMMAND',
-                '#ifdef CONFIGURE_COMMAND',
-            );
-        }
         if (file_exists($this->source_dir . '/.spc.patched')) {
             $this->patched = true;
         }
