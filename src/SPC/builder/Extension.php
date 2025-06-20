@@ -209,6 +209,16 @@ class Extension
     }
 
     /**
+     * Patch code before shared extension make
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeSharedMake(): bool
+    {
+        return false;
+    }
+
+    /**
      * @return string
      *                returns a command line string with all required shared extensions to load
      *                i.e.; pdo_pgsql would return:
@@ -407,6 +417,10 @@ class Extension
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
             '$1 ' . $staticLibString
         );
+
+        if ($this->patchBeforeSharedMake()) {
+            logger()->info('ext [ . ' . $this->getName() . '] patching before shared make');
+        }
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
