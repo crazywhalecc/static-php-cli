@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;

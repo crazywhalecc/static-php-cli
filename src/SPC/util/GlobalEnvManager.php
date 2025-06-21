@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\util;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
