@@ -21,12 +21,12 @@ $test_php_version = [
 
 // test os
 $test_os = [
-    // 'macos-14',
-    // 'macos-15',
-    // 'ubuntu-22.04',
-    // 'ubuntu-24.04',
+    'macos-14',
+    'macos-15',
+    'ubuntu-22.04',
+    'ubuntu-24.04',
     'ubuntu-22.04-arm',
-    // 'ubuntu-24.04-arm',
+    'ubuntu-24.04-arm',
     // 'windows-latest',
 ];
 
