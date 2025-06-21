@@ -19,12 +19,10 @@ $test_php_version = [
     '8.4',
 ];
 
-// test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
+// test os
 $test_os = [
-    // 'macos-13',
     // 'macos-14',
     // 'macos-15',
-    // 'ubuntu-latest',
     // 'ubuntu-22.04',
     // 'ubuntu-24.04',
     'ubuntu-22.04-arm',
@@ -143,8 +141,7 @@ if ($argv[1] === 'install_upx_cmd') {
 
 $prefix = match ($argv[2] ?? null) {
     'windows-latest', 'windows-2022', 'windows-2019', 'windows-2025' => 'powershell.exe -file .\bin\spc.ps1 ',
-    'ubuntu-latest' => 'bin/spc-alpine-docker ',
-    'ubuntu-24.04', 'ubuntu-24.04-arm' => './bin/spc ',
+    'ubuntu-24.04', 'ubuntu-24.04-arm' => 'bin/spc-alpine-docker ',
     'ubuntu-22.04', 'ubuntu-22.04-arm' => 'bin/spc-gnu-docker ',
     default => 'bin/spc ',
 };
@@ -154,13 +151,9 @@ if ($shared_extensions) {
     switch ($argv[2] ?? null) {
         case 'ubuntu-22.04':
         case 'ubuntu-22.04-arm':
-            $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
-            break;
-        case 'macos-13':
         case 'macos-14':
         case 'macos-15':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
-            $no_strip = true;
             break;
         default:
             $shared_cmd = '';
