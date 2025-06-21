@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -50,7 +51,7 @@ trait postgresql
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
         if (!empty($output[1][0])) {
             $ldflags = $output[1][0];
-            $envs .= !($this instanceof LinuxLibraryBase) || getenv('SPC_LIBC') === 'glibc' ? " LDFLAGS=\"{$ldflags}\" " : " LDFLAGS=\"{$ldflags} -static\" ";
+            $envs .= (SystemUtil::isMuslDist() ? " LDFLAGS=\"{$ldflags} -static\" " : " LDFLAGS=\"{$ldflags}\" ");
         }
         $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;

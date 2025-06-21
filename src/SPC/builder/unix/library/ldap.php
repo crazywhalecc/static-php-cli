@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
 
@@ -11,7 +12,7 @@ trait ldap
 {
     public function patchBeforeBuild(): bool
     {
-        $extra = getenv('SPC_LIBC') === 'glibc' ? '-ldl -lpthread -lm -lresolv -lutil' : '';
+        $extra = SystemUtil::isGlibcDist() ? '-ldl -lpthread -lm -lresolv -lutil' : '';
         FileSystem::replaceFileStr($this->source_dir . '/configure', '"-lssl -lcrypto', '"-lssl -lcrypto -lz ' . $extra);
         return true;
     }

@@ -7,6 +7,7 @@ namespace SPC\builder\unix;
 use SPC\builder\BuilderBase;
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -200,7 +201,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $util = new SPCConfigUtil($this);
             $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
-            if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+            if (SystemUtil::isMuslDist()) {
                 $lens .= ' -static';
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
@@ -334,7 +335,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? "'-w -s' " : '';
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+        if (SystemUtil::isMuslDist()) {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';
         }

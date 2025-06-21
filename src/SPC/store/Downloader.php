@@ -591,7 +591,7 @@ class Downloader
 
     public static function getPreBuiltLockName(string $source): string
     {
-        return "{$source}-" . PHP_OS_FAMILY . '-' . getenv('GNU_ARCH') . '-' . (getenv('SPC_LIBC') ?: 'default') . '-' . (SystemUtil::getLibcVersionIfExists() ?? 'default');
+        return "{$source}-" . PHP_OS_FAMILY . '-' . getenv('GNU_ARCH') . '-' . SystemUtil::getLibcName() . '-' . (SystemUtil::getLibcVersionIfExists() ?? 'default');
     }
 
     /**

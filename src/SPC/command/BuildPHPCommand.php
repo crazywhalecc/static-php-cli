@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
+use Co\System;
 use SPC\builder\BuilderProvider;
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
@@ -63,7 +65,7 @@ class BuildPHPCommand extends BuildCommand
 
         // check dynamic extension build env
         // linux must build with glibc
-        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc') {
+        if (!empty($shared_extensions) && SystemUtil::isMuslDist()) {
             $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');
             return static::FAILURE;
         }

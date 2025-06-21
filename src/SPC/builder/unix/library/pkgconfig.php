@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait pkgconfig
@@ -14,7 +15,7 @@ trait pkgconfig
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
                 'CFLAGS' => PHP_OS_FAMILY !== 'Linux' ? '-Wimplicit-function-declaration -Wno-int-conversion' : '',
-                'LDFLAGS' => !($this instanceof LinuxLibraryBase) || getenv('SPC_LIBC') === 'glibc' ? '' : '--static',
+                'LDFLAGS' => SystemUtil::isMuslDist() ? '--static' : '',
             ])
             ->configure(
                 '--with-internal-glib',

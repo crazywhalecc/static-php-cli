@@ -223,8 +223,8 @@ class DownloadCommand extends BaseCommand
                             '{name}' => $source,
                             '{arch}' => arch2gnu(php_uname('m')),
                             '{os}' => strtolower(PHP_OS_FAMILY),
-                            '{libc}' => getenv('SPC_LIBC') ?: 'default',
-                            '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
+                            '{libc}' => SystemUtil::getLibcName(),
+                            '{libcver}' => SystemUtil::getLibcVersionIfExists() ?? 'default',
                         ];
                         $find = str_replace(array_keys($replace), array_values($replace), Config::getPreBuilt('match-pattern'));
                         // find filename in asset list

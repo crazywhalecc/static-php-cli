@@ -76,7 +76,7 @@ class PackLibCommand extends BuildCommand
                         '{name}' => $lib->getName(),
                         '{arch}' => arch2gnu(php_uname('m')),
                         '{os}' => strtolower(PHP_OS_FAMILY),
-                        '{libc}' => getenv('SPC_LIBC') ?: 'default',
+                        '{libc}' => SystemUtil::getLibcName(),
                         '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
                     ];
                     // detect suffix, for proper tar option
