@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait mimalloc
@@ -15,7 +16,7 @@ trait mimalloc
                 '-DMI_BUILD_SHARED=OFF',
                 '-DMI_INSTALL_TOPLEVEL=ON'
             );
-        if (getenv('SPC_LIBC') === 'musl') {
+        if (SystemUtil::isMuslDist()) {
             $cmake->addConfigureArgs('-DMI_LIBC_MUSL=ON');
         }
         $cmake->build();

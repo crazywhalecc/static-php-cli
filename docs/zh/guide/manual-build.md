@@ -292,7 +292,7 @@ bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
 
 在编译过程中，有些特殊情况需要对编译器、编译目录的内容进行干预，可以尝试使用以下命令：
 
-- `--cc=XXX`: 指定 C 语言编译器的执行命令（Linux 默认 `musl-gcc` 或 `gcc`，macOS 默认 `clang`）
+- `--cc=XXX`: 指定 C 语言编译器的执行命令（Linux 默认 `gcc`，macOS 默认 `clang`）
 - `--cxx=XXX`: 指定 C++ 语言编译器的执行命令（Linux 默认 `g++`，macOS 默认 `clang++`）
 - `--with-clean`: 编译 PHP 前先清理旧的 make 产生的文件
 - `--enable-zts`: 让编译的 PHP 为线程安全版本（默认为 NTS 版本）
@@ -592,8 +592,7 @@ bin/spc spc-config curl,zlib,phar,openssl --includes
 
 - macOS: `clang`
 - Linux (Alpine Linux): `gcc`
-- Linux (glibc based distros, x86_64): `/usr/local/musl/bin/x86_64-linux-musl-gcc`
-- Linux (glibc based distros, aarch64): `/usr/local/musl/bin/aarch64-linux-musl-gcc`
+- Linux (glibc based distros): `gcc`
 - FreeBSD: `clang`
 
 下面是一个使用 embed SAPI 的例子：
@@ -627,8 +626,10 @@ echo "Hello world!\n";
 ```
 
 ```bash
-# compile in debian/ubuntu x86_64
-/usr/local/musl/bin/x86_64-linux-musl-gcc embed.c $(bin/spc spc-config bcmath,zlib) -static -o embed
+# compile in Alpine
+gcc embed.c $(bin/spc spc-config bcmath,zlib) -static -o embed
+# compile in glibc distros
+gcc embed.c $(bin/spc spc-config bcmath,zlib) -o embed
 # compile in macOS/FreeBSD
 clang embed.c $(bin/spc spc-config bcmath,zlib) -o embed
 

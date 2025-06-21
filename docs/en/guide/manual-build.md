@@ -335,7 +335,7 @@ During the compilation process, in some special cases,
 the compiler and the content of the compilation directory need to be intervened. 
 You can try to use the following commands:
 
-- `--cc=XXX`: Specifies the execution command of the C language compiler (Linux default `musl-gcc` or `gcc`, macOS default `clang`)
+- `--cc=XXX`: Specifies the execution command of the C language compiler (Linux default `gcc`, macOS default `clang`)
 - `--cxx=XXX`: Specifies the execution command of the C++ language compiler (Linux defaults to `g++`, macOS defaults to `clang++`)
 - `--with-clean`: clean up old make files before compiling PHP
 - `--enable-zts`: Make compiled PHP thread-safe version (default is NTS version)
@@ -657,8 +657,7 @@ By default, static-php uses the following compilers on different systems:
 
 - macOS: `clang`
 - Linux (Alpine Linux): `gcc`
-- Linux (glibc based distros, x86_64): `/usr/local/musl/bin/x86_64-linux-musl-gcc`
-- Linux (glibc based distros, aarch64): `/usr/local/musl/bin/aarch64-linux-musl-gcc`
+- Linux (glibc based distros): `gcc`
 - FreeBSD: `clang`
 
 Here is an example of using embed SAPI:
@@ -692,8 +691,10 @@ echo "Hello world!\n";
 ```
 
 ```bash
-# compile in debian/ubuntu x86_64
-/usr/local/musl/bin/x86_64-linux-musl-gcc embed.c $(bin/spc spc-config bcmath,zlib) -static -o embed
+# compile in Alpine
+gcc embed.c $(bin/spc spc-config bcmath,zlib) -static -o embed
+# compile in glibc distros
+gcc embed.c $(bin/spc spc-config bcmath,zlib) -o embed
 # compile in macOS/FreeBSD
 clang embed.c $(bin/spc spc-config bcmath,zlib) -o embed
 

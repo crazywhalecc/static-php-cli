@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\util;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
@@ -40,23 +39,6 @@ class GlobalEnvManager
             self::putenv('PATH=' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
             self::putenv('PKG_CONFIG=' . BUILD_BIN_PATH . '/pkg-config');
             self::putenv('PKG_CONFIG_PATH=' . BUILD_ROOT_PATH . '/lib/pkgconfig');
-        }
-
-        // Define env vars for linux
-        if (PHP_OS_FAMILY === 'Linux') {
-            $arch = getenv('GNU_ARCH');
-            if (SystemUtil::isMuslDist() || getenv('SPC_LIBC') === 'glibc') {
-                self::putenv('SPC_LINUX_DEFAULT_CC=gcc');
-                self::putenv('SPC_LINUX_DEFAULT_CXX=g++');
-                self::putenv('SPC_LINUX_DEFAULT_AR=ar');
-                self::putenv('SPC_LINUX_DEFAULT_LD=ld.gold');
-            } else {
-                self::putenv("SPC_LINUX_DEFAULT_CC={$arch}-linux-musl-gcc");
-                self::putenv("SPC_LINUX_DEFAULT_CXX={$arch}-linux-musl-g++");
-                self::putenv("SPC_LINUX_DEFAULT_AR={$arch}-linux-musl-ar");
-                self::putenv("SPC_LINUX_DEFAULT_LD={$arch}-linux-musl-ld");
-                GlobalEnvManager::putenv("PATH=/usr/local/musl/bin:/usr/local/musl/{$arch}-linux-musl/bin:" . getenv('PATH'));
-            }
         }
 
         // Init env.ini file, read order:

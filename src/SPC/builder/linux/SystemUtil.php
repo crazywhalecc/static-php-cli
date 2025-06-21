@@ -62,6 +62,11 @@ class SystemUtil
         return static::getOSRelease()['dist'] === 'alpine';
     }
 
+    public static function isGlibcDist(): bool
+    {
+        return PHP_OS_FAMILY === 'Linux' && static::getOSRelease()['dist'] !== 'alpine';
+    }
+
     public static function getCpuCount(): int
     {
         $ncpu = 1;
@@ -193,7 +198,7 @@ class SystemUtil
         if (self::$libc_version !== null) {
             return self::$libc_version;
         }
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'glibc') {
+        if (PHP_OS_FAMILY === 'Linux' && !SystemUtil::isMuslDist()) {
             $result = shell()->execWithResult('ldd --version', false);
             if ($result[0] !== 0) {
                 return null;
@@ -208,12 +213,8 @@ class SystemUtil
             }
             return null;
         }
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
-            if (self::isMuslDist()) {
-                $result = shell()->execWithResult('ldd 2>&1', false);
-            } else {
-                $result = shell()->execWithResult('/usr/local/musl/lib/libc.so 2>&1', false);
-            }
+        if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist()) {
+            $result = shell()->execWithResult('ldd 2>&1', false);
             // Match Version * line
             // match ldd version: "Version 1.2.3" match 1.2.3
             $pattern = '/Version\s+(\d+\.\d+\.\d+)/';
@@ -223,5 +224,16 @@ class SystemUtil
             }
         }
         return null;
+    }
+
+    public static function getLibcName()
+    {
+        if (PHP_OS_FAMILY === 'Darwin') {
+            return 'libSystem';
+        }
+        if (PHP_OS_FAMILY === 'Windows') {
+            return 'msvcrt';
+        }
+        return self::isMuslDist() ? 'musl' : 'glibc';
     }
 }

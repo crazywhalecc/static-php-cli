@@ -105,7 +105,7 @@ jobs:
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "Run PHPUnit Tests"
-        run: SPC_LIBC=glibc vendor/bin/phpunit tests/ --no-coverage
+        run: vendor/bin/phpunit tests/ --no-coverage
 
   define-matrix:
     name: "Define Matrix"
