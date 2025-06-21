@@ -52,6 +52,4 @@ class imap extends Extension
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
     }
-
-
 }
