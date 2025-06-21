@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
-use Co\System;
 use SPC\builder\BuilderProvider;
 use SPC\builder\linux\SystemUtil;
 use SPC\exception\ExceptionHandler;
