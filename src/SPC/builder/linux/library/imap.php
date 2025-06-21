@@ -35,6 +35,15 @@ class imap extends LinuxLibraryBase
         return true;
     }
 
+    public function patchPhpConfig(): bool
+    {
+        if (getenv('SPC_LIBC') === 'glibc') {
+            FileSystem::replaceFileRegex(BUILD_BIN_PATH . '/php-config', '/^libs="(.*)"$/m', 'libs="$1 -lcrypt"');
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @throws RuntimeException
      */
