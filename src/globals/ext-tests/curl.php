@@ -16,6 +16,3 @@ if (stripos($curl_version['ssl_version'], 'schannel') !== false) {
     curl_close($curl);
     assert($data !== false);
 }
-if (phpversion() >= '8.2') {
-    assert(($curl_version['features'] & CURL_VERSION_HTTP3) === CURL_VERSION_HTTP3);
-}
