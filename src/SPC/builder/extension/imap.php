@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
@@ -41,4 +42,16 @@ class imap extends Extension
         }
         return $arg;
     }
+
+    public function patchBeforeMake(): bool
+    {
+        if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::isMuslDist()) {
+            return false;
+        }
+        $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -lcrypt');
+        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
+        return true;
+    }
+
+
 }
