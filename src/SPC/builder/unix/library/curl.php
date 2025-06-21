@@ -31,7 +31,7 @@ trait curl
             ->optionalLib('psl', ...cmake_boolean_args('CURL_USE_LIBPSL'))
             ->optionalLib('libcares', '-DENABLE_ARES=ON')
             ->addConfigureArgs(
-                '-DBUILD_CURL_EXE=ON',
+                '-DBUILD_CURL_EXE=OFF',
                 '-DBUILD_LIBCURL_DOCS=OFF',
             )
             ->build();
