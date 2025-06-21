@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
@@ -44,6 +45,7 @@ class imap extends LinuxLibraryBase
         } else {
             $ssl_options = 'SSLTYPE=none';
         }
+        $ldl = SystemUtil::getLibcVersionIfExists() <= '2.17' ? 'EXTRALDFLAGS="-ldl -lrt -lpthread"' : '';
         shell()->cd($this->source_dir)
             ->exec('make clean')
             ->exec('touch ip6')
@@ -51,9 +53,7 @@ class imap extends LinuxLibraryBase
             ->exec('chmod +x tools/ua')
             ->exec('chmod +x src/osdep/unix/drivers')
             ->exec('chmod +x src/osdep/unix/mkauths')
-            ->exec(
-                "yes | make slx {$ssl_options} EXTRACFLAGS='-fPIC -fpermissive'"
-            );
+            ->exec("yes | make slx {$ssl_options} EXTRACFLAGS='-fPIC -fpermissive' $ldl");
         try {
             shell()
                 ->exec("cp -rf {$this->source_dir}/c-client/c-client.a " . BUILD_LIB_PATH . '/libc-client.a')
