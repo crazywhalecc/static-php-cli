@@ -66,7 +66,7 @@ class SourceManager
             $check = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $source);
             // $check = $lock[$lock_name]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (SOURCE_PATH . '/' . $lock[$lock_name]['move_path']);
             if (!is_dir($check)) {
-                logger()->debug('Extracting source [' . $source . '] to ' . $check . ' ...');
+                logger()->debug("Extracting source [{$source}] to {$check} ...");
                 $filename = LockFile::getLockFullPath($lock_content);
                 FileSystem::extractSource($source, $lock_content['source_type'], $filename, $check);
                 LockFile::putLockSourceHash($lock_content, $check);
@@ -81,7 +81,14 @@ class SourceManager
 
             // when source already extracted, detect if the extracted source hash is the same as the lock file one
             if (file_exists("{$check}/.spc-hash") && FileSystem::readFile("{$check}/.spc-hash") === $hash) {
-                logger()->debug('Source [' . $source . '] already extracted in ' . $check . ', skip !');
+                logger()->debug("Source [{$source}] already extracted in {$check}, skip !");
+                continue;
+            }
+
+            // ext imap was included in php < 8.4 which we should not extract,
+            // but since it's not simple to compare php version, for now we just skip it
+            if ($source === 'ext-imap') {
+                logger()->debug("Source [ext-imap] already extracted in {$check}, skip !");
                 continue;
             }
 
