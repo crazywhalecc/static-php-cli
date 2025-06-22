@@ -387,8 +387,8 @@ class Extension
 
         // macOS ld64 doesn't understand these, while Linux and BSD do
         // use them to make sure that all symbols are picked up, even if a library has already been visited before
-        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,-Bstatic -Wl,--start-group ' : '';
-        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group -Wl,-Bdynamic ' : ' ';
+        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,--start-group ' : '';
+        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group ' : ' ';
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],

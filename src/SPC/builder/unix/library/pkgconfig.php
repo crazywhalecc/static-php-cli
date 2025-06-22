@@ -13,7 +13,7 @@ trait pkgconfig
     {
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
-                'CFLAGS' => PHP_OS_FAMILY !== 'Linux' ? '-Wimplicit-function-declaration -Wno-int-conversion' : '',
+                'CFLAGS' => '-Wimplicit-function-declaration -Wno-int-conversion',
                 'LDFLAGS' => !($this instanceof LinuxLibraryBase) || getenv('SPC_LIBC') === 'glibc' ? '' : '--static',
             ])
             ->configure(
