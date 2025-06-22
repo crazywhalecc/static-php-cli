@@ -21,7 +21,7 @@ trait liblz4
             ->exec("make PREFIX='' clean")
             ->exec("make lib -j{$this->builder->concurrency} PREFIX=''");
 
-        FileSystem::replaceFileStr($this->source_dir . '/Makefile', '$(MAKE) -C \$(PRGDIR)', '');
+        FileSystem::replaceFileStr($this->source_dir . '/Makefile', '$(MAKE) -C $(PRGDIR) $@', '');
 
         shell()->cd($this->source_dir)
             ->exec("make install PREFIX='' DESTDIR=" . BUILD_ROOT_PATH);
