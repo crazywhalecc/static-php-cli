@@ -28,7 +28,7 @@ class MacOSBuilder extends UnixBuilderBase
         $this->options = $options;
 
         // apply global environment variables
-        GlobalEnvManager::init($this);
+        GlobalEnvManager::init();
 
         // ---------- set necessary compile vars ----------
         // concurrency
