@@ -26,7 +26,6 @@ trait ldap
                 '--disable-slapd',
                 '--without-systemd',
                 '--without-cyrus-sasl',
-                '--without-cyrus-sasl',
                 'ac_cv_func_pthread_kill_other_threads_np=no'
             )
             ->appendEnv([
