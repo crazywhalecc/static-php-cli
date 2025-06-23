@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait librdkafka
@@ -16,6 +17,7 @@ trait librdkafka
      */
     protected function build(): void
     {
+        FileSystem::replaceFileStr($this->source_dir . '/lds-gen.py', "funcs.append('rd_ut_coverage_check')", '');
         UnixAutoconfExecutor::create($this)
             ->optionalLib(
                 'zstd',
