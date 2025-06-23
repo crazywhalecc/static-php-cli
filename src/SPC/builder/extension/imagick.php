@@ -19,7 +19,7 @@ class imagick extends Extension
             return false;
         }
         // imagick with calls omp_pause_all, which requires openmp, on non-musl we build imagick without openmp
-        $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -L/usr/lib64 -lomp');
+        $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -lomp');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
     }
@@ -37,6 +37,9 @@ class imagick extends Extension
         if (getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10')) {
             $static .= ' -lstdc++';
             $shared = str_replace('-lstdc++', '', $shared);
+        }
+        if (str_contains(getenv('CC'), 'zig')) {
+            $shared = str_replace('-lomp', '/usr/lib64/libomp.so', $shared);
         }
         return [$static, $shared];
     }
