@@ -292,27 +292,31 @@ class LinuxBuilder extends UnixBuilderBase
         if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
             $release = $matches[1];
             $realLibName = 'libphp-' . $release . '.so';
-            $realLib = BUILD_LIB_PATH . '/' . $realLibName;
-            rename(BUILD_LIB_PATH . '/libphp.so', $realLib);
             $cwd = getcwd();
-            chdir(BUILD_LIB_PATH);
-            symlink($realLibName, 'libphp.so');
-            chdir(BUILD_MODULES_PATH);
-            foreach ($this->getExts() as $ext) {
-                if (!$ext->isBuildShared()) {
-                    continue;
-                }
-                $name = $ext->getName();
-                $versioned = "{$name}-{$release}.so";
-                $unversioned = "{$name}.so";
-                if (is_file(BUILD_MODULES_PATH . "/{$versioned}")) {
-                    rename(BUILD_MODULES_PATH . "/{$versioned}", BUILD_MODULES_PATH . "/{$unversioned}");
-                    shell()->cd(BUILD_MODULES_PATH)
-                        ->exec(sprintf(
-                            'patchelf --set-soname %s %s',
-                            escapeshellarg($unversioned),
-                            escapeshellarg($unversioned)
-                        ));
+            if (file_exists($realLibName)) {
+                $realLib = BUILD_LIB_PATH . '/' . $realLibName;
+                rename(BUILD_LIB_PATH . '/libphp.so', $realLib);
+                chdir(BUILD_LIB_PATH);
+                symlink($realLibName, 'libphp.so');
+            }
+            if (is_dir(BUILD_MODULES_PATH)) {
+                chdir(BUILD_MODULES_PATH);
+                foreach ($this->getExts() as $ext) {
+                    if (!$ext->isBuildShared()) {
+                        continue;
+                    }
+                    $name = $ext->getName();
+                    $versioned = "{$name}-{$release}.so";
+                    $unversioned = "{$name}.so";
+                    if (is_file(BUILD_MODULES_PATH . "/{$versioned}")) {
+                        rename(BUILD_MODULES_PATH . "/{$versioned}", BUILD_MODULES_PATH . "/{$unversioned}");
+                        shell()->cd(BUILD_MODULES_PATH)
+                            ->exec(sprintf(
+                                'patchelf --set-soname %s %s',
+                                escapeshellarg($unversioned),
+                                escapeshellarg($unversioned)
+                            ));
+                    }
                 }
             }
             chdir($cwd);

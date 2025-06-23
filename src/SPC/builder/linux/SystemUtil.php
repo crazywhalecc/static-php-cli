@@ -81,6 +81,7 @@ class SystemUtil
     public static function getCCType(string $cc): string
     {
         return match (true) {
+            str_contains($cc, 'zig') => 'clang',
             str_ends_with($cc, 'c++'), str_ends_with($cc, 'cc'), str_ends_with($cc, 'g++'), str_ends_with($cc, 'gcc') => 'gcc',
             $cc === 'clang++', $cc === 'clang', str_starts_with($cc, 'musl-clang') => 'clang',
             default => throw new RuntimeException("unknown cc type: {$cc}"),
