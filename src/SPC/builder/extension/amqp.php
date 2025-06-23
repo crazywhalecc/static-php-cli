@@ -25,7 +25,7 @@ class amqp extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--with-amqp' . ($sh<ared ? '=shared' : '') . ' --with-librabbitmq-dir=' . BUILD_ROOT_PATH;
+        return '--with-amqp' . ($shared ? '=shared' : '') . ' --with-librabbitmq-dir=' . BUILD_ROOT_PATH;
     }
 
     public function getWindowsConfigureArg($shared = false): string

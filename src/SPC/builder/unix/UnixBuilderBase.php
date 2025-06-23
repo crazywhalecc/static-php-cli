@@ -325,7 +325,10 @@ abstract class UnixBuilderBase extends BuilderBase
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
         $lrt = PHP_OS_FAMILY === 'Linux' ? '-lrt' : '';
-        $releaseInfo = json_decode(Downloader::curlExec('https://api.github.com/repos/php/frankenphp/releases/latest', retries: 3, hooks: [[CurlHook::class, 'setupGithubToken']]), true);
+        $releaseInfo = json_decode(Downloader::curlExec(
+            'https://api.github.com/repos/php/frankenphp/releases/latest',
+            hooks: [[CurlHook::class, 'setupGithubToken']],
+        ), true);
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
