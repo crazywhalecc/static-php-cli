@@ -338,16 +338,12 @@ class LinuxBuilder extends UnixBuilderBase
 
     private function getMakeExtraVars(): array
     {
-        $env = [
+        return [
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'),
         ];
-        if (str_contains(getenv('CC'), 'zig')) {
-            $env['LDFLAGS'] = getenv('LDFLAGS') . ' -L/usr/lib64';
-        }
-        return $env;
     }
 
     /**
