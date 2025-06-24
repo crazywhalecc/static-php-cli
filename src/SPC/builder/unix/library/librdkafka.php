@@ -17,8 +17,18 @@ trait librdkafka
      */
     protected function build(): void
     {
-        FileSystem::replaceFileStr($this->source_dir . '/lds-gen.py', "funcs.append('rd_ut_coverage_check')", '');
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/lds-gen.py',
+            "funcs.append('rd_ut_coverage_check')",
+            ''
+        );
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/src/rd.h',
+            '#error "IOV_MAX not defined"',
+            '#define IOV_MAX 1024' . "\n#define __GNU__"
+        );
         UnixAutoconfExecutor::create($this)
+            ->appendEnv(['CFLAGS' => '-Wno-int-conversion -Wno-unused-but-set-variable -Wno-unused-variable'])
             ->optionalLib(
                 'zstd',
                 function ($lib) {
