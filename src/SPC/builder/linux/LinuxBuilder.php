@@ -105,7 +105,7 @@ class LinuxBuilder extends UnixBuilderBase
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
         $cc = trim(getenv('CC'));
         if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
-            f_putenv("CC=$cc -fno-sanitize=undefined");
+            f_putenv("CC={$cc} -fno-sanitize=undefined");
         }
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
@@ -180,7 +180,7 @@ class LinuxBuilder extends UnixBuilderBase
             $this->buildEmbed();
         }
         if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
-            f_putenv("CC=$cc");
+            f_putenv("CC={$cc}");
         }
         if ($enableFrankenphp) {
             logger()->info('building frankenphp');
@@ -300,9 +300,13 @@ class LinuxBuilder extends UnixBuilderBase
             $release = $matches[1];
             $realLibName = 'libphp-' . $release . '.so';
             $cwd = getcwd();
-            if (file_exists($realLibName)) {
-                $realLib = BUILD_LIB_PATH . '/' . $realLibName;
-                rename(BUILD_LIB_PATH . '/libphp.so', $realLib);
+            $libphpPath = BUILD_LIB_PATH . '/libphp.so';
+            $libphpRelease = BUILD_LIB_PATH . '/' . $realLibName;
+            if (!file_exists($libphpRelease) && file_exists($libphpPath)) {
+                rename($libphpPath, $libphpRelease);
+            }
+            if (file_exists($libphpRelease)) {
+                rename(BUILD_LIB_PATH . '/libphp.so', $libphpRelease);
                 chdir(BUILD_LIB_PATH);
                 symlink($realLibName, 'libphp.so');
             }
