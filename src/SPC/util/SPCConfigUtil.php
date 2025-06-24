@@ -6,6 +6,7 @@ namespace SPC\util;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -69,6 +70,9 @@ class SPCConfigUtil
         // c++
         if ($this->builder->hasCpp()) {
             $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
+        }
+        if (SystemUtil::getCCType(getenv('CC')) === 'clang') {
+            $libs .= ' -lunwind';
         }
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {

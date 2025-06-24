@@ -80,6 +80,7 @@ class LinuxBuilder extends UnixBuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
+        $extra_libs .= (SystemUtil::getCCType(getenv('CC')) === 'clang' ? ' -lunwind' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
         f_putenv('CFLAGS=' . $cflags);
@@ -337,12 +338,16 @@ class LinuxBuilder extends UnixBuilderBase
 
     private function getMakeExtraVars(): array
     {
-        return [
+        $env = [
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'),
         ];
+        if (str_contains(getenv('CC'), 'zig')) {
+            $env['LDFLAGS'] = getenv('LDFLAGS') . ' -L/usr/lib64';
+        }
+        return $env;
     }
 
     /**
