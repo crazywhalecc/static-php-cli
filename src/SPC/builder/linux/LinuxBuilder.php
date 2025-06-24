@@ -103,6 +103,10 @@ class LinuxBuilder extends UnixBuilderBase
             $zts = '';
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
+        $cc = trim(getenv('CC'));
+        if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
+            f_putenv("CC=$cc -fno-sanitize=undefined");
+        }
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
@@ -174,6 +178,9 @@ class LinuxBuilder extends UnixBuilderBase
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
+        }
+        if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
+            f_putenv("CC=$cc");
         }
         if ($enableFrankenphp) {
             logger()->info('building frankenphp');
