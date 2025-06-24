@@ -25,7 +25,7 @@ trait librdkafka
         FileSystem::replaceFileStr(
             $this->source_dir . '/src/rd.h',
             '#error "IOV_MAX not defined"',
-            '#define IOV_MAX 1024' . "\n#define __GNU__"
+            "#define IOV_MAX 1024\n#define __GNU__"
         );
         UnixAutoconfExecutor::create($this)
             ->appendEnv(['CFLAGS' => '-Wno-int-conversion -Wno-unused-but-set-variable -Wno-unused-variable'])
