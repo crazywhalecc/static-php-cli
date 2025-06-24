@@ -38,9 +38,6 @@ class imagick extends Extension
             $static .= ' -lstdc++';
             $shared = str_replace('-lstdc++', '', $shared);
         }
-        if (str_contains(getenv('CC'), 'zig')) {
-            $shared = str_replace('-lomp', '/usr/lib64/libomp.so', $shared);
-        }
         return [$static, $shared];
     }
 }

@@ -71,7 +71,7 @@ class SPCConfigUtil
         if ($this->builder->hasCpp()) {
             $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
         }
-        if (SystemUtil::getCCType(getenv('CC')) === 'clang') {
+        if (SystemUtil::getCCType() === 'clang') {
             $libs .= ' -lunwind';
         }
         // mimalloc must come first

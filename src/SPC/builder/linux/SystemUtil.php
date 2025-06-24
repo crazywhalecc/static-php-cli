@@ -78,8 +78,9 @@ class SystemUtil
     /**
      * @throws RuntimeException
      */
-    public static function getCCType(string $cc): string
+    public static function getCCType(?string $cc = null): string
     {
+        $cc ??= getenv('CC');
         return match (true) {
             str_contains($cc, 'zig') => 'clang',
             str_ends_with($cc, 'c++'), str_ends_with($cc, 'cc'), str_ends_with($cc, 'g++'), str_ends_with($cc, 'gcc') => 'gcc',
