@@ -31,7 +31,7 @@ trait gettext
             $autoconf->addConfigureArgs('--disable-threads');
         }
 
-        $autoconf->configure()->make(with_clean: true);
+        $autoconf->configure()->make();
         $this->patchLaDependencyPrefix();
     }
 }
