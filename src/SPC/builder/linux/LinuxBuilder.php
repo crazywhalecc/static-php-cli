@@ -80,7 +80,7 @@ class LinuxBuilder extends UnixBuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
-        $extra_libs .= (SystemUtil::getCCType(getenv('CC')) === 'clang' ? ' -lunwind' : '');
+        $extra_libs .= (SystemUtil::getCCType() === 'clang' ? ' -lunwind' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
         f_putenv('CFLAGS=' . $cflags);
