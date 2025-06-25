@@ -215,7 +215,16 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        return false;
+        if (!str_contains(getenv('CC'), 'zig')) {
+            return false;
+        }
+        $extra = getenv('ZIG_SHARED_EXTENSION_EXTRA_OBJECTS');
+        FileSystem::replaceFileRegex(
+            $this->source_dir . '/Makefile',
+            "/^(shared_objects_{$this->getName()}\s*=.*)$/m",
+            "$1 {$extra}",
+        );
+        return true;
     }
 
     /**

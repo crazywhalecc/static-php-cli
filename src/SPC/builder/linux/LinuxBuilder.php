@@ -308,6 +308,9 @@ class LinuxBuilder extends UnixBuilderBase
             }
             if (file_exists($libphpRelease)) {
                 chdir(BUILD_LIB_PATH);
+                if (file_exists($libphpPath)) {
+                    unlink($libphpPath);
+                }
                 symlink($realLibName, 'libphp.so');
             }
             if (is_dir(BUILD_MODULES_PATH)) {
