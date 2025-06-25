@@ -23,8 +23,8 @@ $test_php_version = [
 $test_os = [
     // 'macos-13',
     // 'macos-14',
-    // 'macos-15',
-    // 'ubuntu-latest',
+    'macos-15',
+    'ubuntu-latest',
     // 'ubuntu-22.04',
     // 'ubuntu-24.04',
     'ubuntu-22.04-arm',
@@ -33,7 +33,7 @@ $test_os = [
 ];
 
 // whether enable thread safe
-$zts = true;
+$zts = false;
 
 $no_strip = false;
 
@@ -48,13 +48,13 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
+    'Linux', 'Darwin' => 'openssl',
     'Windows' => 'xlswriter,openssl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'uv',
+    'Linux' => '',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -72,7 +72,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'bulk',
     'Windows' => 'none',
 };
 
