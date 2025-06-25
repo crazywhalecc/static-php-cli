@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -215,13 +216,13 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        if (!str_contains(getenv('CC'), 'zig')) {
+        $extra = SystemUtil::getExtraRuntimeObjects();
+        if (!$extra) {
             return false;
         }
-        $extra = getenv('ZIG_SHARED_EXTENSION_EXTRA_OBJECTS');
         FileSystem::replaceFileRegex(
             $this->source_dir . '/Makefile',
-            "/^(shared_objects_{$this->getName()}\s*=.*)$/m",
+            "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
             "$1 {$extra}",
         );
         return true;

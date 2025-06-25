@@ -13,6 +13,8 @@ class SystemUtil
 
     public static ?string $libc_version = null;
 
+    private static ?string $extra_runtime_objects = null;
+
     /** @noinspection PhpMissingBreakStatementInspection */
     public static function getOSRelease(): array
     {
@@ -225,5 +227,39 @@ class SystemUtil
             }
         }
         return null;
+    }
+
+    public static function getExtraRuntimeObjects(): string
+    {
+        $cc = getenv('CC');
+        if (!$cc || !str_contains($cc, 'zig')) {
+            return '';
+        }
+
+        if (self::$extra_runtime_objects !== null) {
+            return self::$extra_runtime_objects;
+        }
+
+        $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
+        $objects = ['crtbeginS.o', 'crtendS.o'];
+        $found = [];
+
+        foreach ($objects as $obj) {
+            $located = null;
+            foreach ($paths as $base) {
+                $output = shell_exec("find {$base} -name {$obj} -print -quit 2>/dev/null");
+                $line = trim((string) $output);
+                if ($line !== '') {
+                    $located = $line;
+                    break;
+                }
+            }
+            if ($located) {
+                $found[] = escapeshellarg($located);
+            }
+        }
+
+        self::$extra_runtime_objects = implode(' ', $found);
+        return implode(' ', $found);
     }
 }
