@@ -22,7 +22,7 @@ trait postgresql
         $packages = 'zlib openssl readline libxml-2.0';
         $optional_packages = [
             'zstd' => 'libzstd',
-            // 'ldap' => 'ldap',
+            'ldap' => 'ldap',
             'libxslt' => 'libxslt',
             'icu' => 'icu-i18n',
         ];
@@ -39,10 +39,12 @@ trait postgresql
 
         $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
+        $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
+        $cflags = '';
         if (!empty($output[1][0])) {
-            $cppflags = $output[1][0];
-            $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
-            $envs .= " CPPFLAGS=\"{$cppflags} -fPIC -fPIE -fno-ident{$macos_15_bug_cflags}\"";
+            $cflags = $output[1][0];
+            $envs .= ' CPPFLAGS="-DPIC"';
+            $cflags = "{$cflags} -fno-ident{$macos_15_bug_cflags}";
         }
         $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
@@ -79,17 +81,19 @@ trait postgresql
         }
 
         // configure
-        shell()->cd($this->source_dir . '/build')
+        shell()->cd($this->source_dir . '/build')->initializeEnv($this)
+            ->appendEnv(['CFLAGS' => $cflags])
             ->exec(
                 "{$envs} ../configure " .
                 "--prefix={$builddir} " .
-                '--disable-thread-safety ' .
+                ($this->builder->getOption('enable-zts') ? '--enable-thread-safety ' : '--disable-thread-safety ') .
                 '--enable-coverage=no ' .
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
                 '--with-libxml ' .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
-                '--without-ldap ' .
+                ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
+                // '--without-ldap ' .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
                 ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
                 '--without-lz4 ' .
@@ -98,11 +102,7 @@ trait postgresql
                 '--without-pam ' .
                 '--without-bonjour ' .
                 '--without-tcl '
-            );
-        // ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
-
-        // build
-        shell()->cd($this->source_dir . '/build')
+            )
             ->exec($envs . ' make -C src/bin/pg_config install')
             ->exec($envs . ' make -C src/include install')
             ->exec($envs . ' make -C src/common install')
@@ -114,6 +114,8 @@ trait postgresql
             ->exec("rm -rf {$builddir}/lib/*.so.*")
             ->exec("rm -rf {$builddir}/lib/*.so")
             ->exec("rm -rf {$builddir}/lib/*.dylib");
+
+        FileSystem::replaceFileStr(BUILD_LIB_PATH . '/pkgconfig/libpq.pc', '-lldap', '-lldap -llber');
     }
 
     private function getVersion(): string

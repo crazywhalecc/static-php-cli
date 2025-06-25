@@ -2,4 +2,7 @@
 <phpunit
         bootstrap="tests/bootstrap.php"
 >
+    <php>
+        <env name="SPC_IGNORE_BAD_HASH" value="yes" force="true" />
+    </php>
 </phpunit>

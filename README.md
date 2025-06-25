@@ -302,7 +302,7 @@ If you know [embed SAPI](https://github.com/php/php-src/tree/master/sapi/embed),
 You may require the introduction of other libraries during compilation,
 you can use `buildroot/bin/php-config` to obtain the compile-time configuration.
 
-For an advanced example of how to use this feature, take a look at [how to use it to build a static version of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/static.md).
+For an advanced example of how to use this feature, take a look at [how to use it to build a static version of FrankenPHP](https://github.com/php/frankenphp/blob/main/docs/static.md).
 
 ## Contribution
 

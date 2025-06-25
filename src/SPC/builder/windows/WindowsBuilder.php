@@ -146,7 +146,10 @@ class WindowsBuilder extends BuilderBase
             // logger()->info('building embed');
             $this->buildEmbed();
         }
+    }
 
+    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    {
         $this->sanityCheck($build_target);
     }
 

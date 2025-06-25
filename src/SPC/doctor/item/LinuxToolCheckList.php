@@ -21,7 +21,8 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
         'g++', 'patch', 'binutils-gold',
-        'libtoolize',
+        'libtoolize', 'which',
+        'patchelf',
     ];
 
     public const TOOLS_DEBIAN = [
@@ -29,15 +30,17 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake', 'autopoint',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
-        'xz', 'libtoolize',
+        'xz', 'libtoolize', 'which',
+        'patchelf',
     ];
 
     public const TOOLS_RHEL = [
         'perl', 'make', 'bison', 'flex',
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc',
-        'bzip2', 'cmake', 'patch',
+        'bzip2', 'cmake', 'patch', 'which',
         'xz', 'libtool', 'gettext-devel',
+        'perl', 'patchelf',
     ];
 
     public const TOOLS_ARCH = [
@@ -47,7 +50,7 @@ class LinuxToolCheckList
     private const PROVIDED_COMMAND = [
         'binutils-gold' => 'ld.gold',
         'base-devel' => 'automake',
-        'gettext-devel' => 'gettext',
+        'gettext-devel' => 'gettextize',
     ];
 
     /** @noinspection PhpUnused */

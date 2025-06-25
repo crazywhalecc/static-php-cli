@@ -9,6 +9,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +22,8 @@ class DeleteDownloadCommand extends BaseCommand
     {
         $this->addArgument('sources', InputArgument::REQUIRED, 'The sources/packages will be deleted, comma separated');
         $this->addOption('all', 'A', null, 'Delete all downloaded and locked sources/packages');
+        $this->addOption('pre-built-only', 'W', null, 'Delete only pre-built sources/packages, not the original ones');
+        $this->addOption('source-only', 'S', null, 'Delete only sources, not the pre-built packages');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -46,29 +49,30 @@ class DeleteDownloadCommand extends BaseCommand
                 return static::SUCCESS;
             }
             $chosen_sources = $sources;
-            $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true) ?? [];
 
             $deleted_sources = [];
             foreach ($chosen_sources as $source) {
                 $source = trim($source);
-                foreach ([$source, Downloader::getPreBuiltLockName($source)] as $name) {
-                    if (isset($lock[$name])) {
-                        $deleted_sources[] = $name;
-                    }
+                if (LockFile::get($source) && !$this->getOption('pre-built-only')) {
+                    $deleted_sources[] = $source;
+                }
+                if (LockFile::get(Downloader::getPreBuiltLockName($source)) && !$this->getOption('source-only')) {
+                    $deleted_sources[] = Downloader::getPreBuiltLockName($source);
                 }
             }
 
             foreach ($deleted_sources as $lock_name) {
+                $lock = LockFile::get($lock_name);
                 // remove download file/dir if exists
-                if ($lock[$lock_name]['source_type'] === 'archive') {
-                    if (file_exists($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock[$lock_name]['filename']))) {
+                if ($lock['source_type'] === SPC_SOURCE_ARCHIVE) {
+                    if (file_exists($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock['filename']))) {
                         logger()->info('Deleting file ' . $path);
                         unlink($path);
                     } else {
                         logger()->warning("Source/Package [{$lock_name}] file not found, skip deleting file.");
                     }
                 } else {
-                    if (is_dir($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock[$lock_name]['dirname']))) {
+                    if (is_dir($path = FileSystem::convertPath(DOWNLOAD_PATH . '/' . $lock['dirname']))) {
                         logger()->info('Deleting dir ' . $path);
                         FileSystem::removeDir($path);
                     } else {
@@ -76,9 +80,8 @@ class DeleteDownloadCommand extends BaseCommand
                     }
                 }
                 // remove locked sources
-                unset($lock[$lock_name]);
+                LockFile::put($lock_name, null);
             }
-            FileSystem::writeFile(DOWNLOAD_PATH . '/.lock.json', json_encode($lock, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
             logger()->info('Delete success!');
             return static::SUCCESS;
         } catch (DownloaderException $e) {

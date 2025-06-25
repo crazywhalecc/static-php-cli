@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait onig
 {
@@ -15,13 +16,7 @@ trait onig
      */
     protected function build(): void
     {
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec('./configure --enable-static --disable-shared --prefix=')
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+        UnixAutoconfExecutor::create($this)->configure()->make();
         $this->patchPkgconfPrefix(['oniguruma.pc']);
     }
 }

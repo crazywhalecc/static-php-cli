@@ -6,6 +6,7 @@ namespace SPC\store;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\CustomPackage;
 
 class PackageManager
 {
@@ -32,11 +33,27 @@ class PackageManager
 
         // Download package
         Downloader::downloadPackage($pkg_name, $config, $force);
+        if (Config::getPkg($pkg_name)['type'] === 'custom') {
+            // Custom extract function
+            $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg');
+            foreach ($classes as $class) {
+                if (is_a($class, CustomPackage::class, true) && $class !== CustomPackage::class) {
+                    $cls = new $class();
+                    if (in_array($pkg_name, $cls->getSupportName())) {
+                        (new $class())->extract($pkg_name);
+                        break;
+                    }
+                }
+            }
+            return;
+        }
         // After download, read lock file name
-        $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true);
-        $filename = DOWNLOAD_PATH . '/' . ($lock[$pkg_name]['filename'] ?? $lock[$pkg_name]['dirname']);
-        $extract = $lock[$pkg_name]['move_path'] === null ? (PKG_ROOT_PATH . '/' . $pkg_name) : $lock[$pkg_name]['move_path'];
-        FileSystem::extractPackage($pkg_name, $filename, $extract);
+        $lock = LockFile::get($pkg_name);
+        $source_type = $lock['source_type'];
+        $filename = LockFile::getLockFullPath($lock);
+        $extract = LockFile::getExtractPath($pkg_name, PKG_ROOT_PATH . '/' . $pkg_name);
+
+        FileSystem::extractPackage($pkg_name, $source_type, $filename, $extract);
 
         // if contains extract-files, we just move this file to destination, and remove extract dir
         if (is_array($config['extract-files'] ?? null) && is_assoc_array($config['extract-files'])) {

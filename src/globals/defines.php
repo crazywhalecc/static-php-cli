@@ -40,7 +40,7 @@ const SPC_EXTENSION_ALIAS = [
     'zendopcache' => 'opcache',
 ];
 
-// spc lock type
+// spc download lock type
 const SPC_DOWNLOAD_SOURCE = 1;      // lock source
 const SPC_DOWNLOAD_PRE_BUILT = 2;   // lock pre-built
 const SPC_DOWNLOAD_PACKAGE = 3; // lock as package
@@ -62,7 +62,8 @@ const BUILD_TARGET_CLI = 1;     // build cli
 const BUILD_TARGET_MICRO = 2;   // build micro
 const BUILD_TARGET_FPM = 4;     // build fpm
 const BUILD_TARGET_EMBED = 8;   // build embed
-const BUILD_TARGET_ALL = 15;    // build all
+const BUILD_TARGET_FRANKENPHP = 16;   // build frankenphp
+const BUILD_TARGET_ALL = BUILD_TARGET_CLI | BUILD_TARGET_MICRO | BUILD_TARGET_FPM | BUILD_TARGET_EMBED | BUILD_TARGET_FRANKENPHP;    // build all
 
 // doctor error fix policy
 const FIX_POLICY_DIE = 1;       // die directly
@@ -83,6 +84,11 @@ const AUTOCONF_CFLAGS = 2;
 const AUTOCONF_CPPFLAGS = 4;
 const AUTOCONF_LDFLAGS = 8;
 const AUTOCONF_ALL = 15;
+
+// spc download source type
+const SPC_SOURCE_ARCHIVE = 'archive'; // download as archive
+const SPC_SOURCE_GIT = 'git'; // download as git repository
+const SPC_SOURCE_LOCAL = 'local'; // download as local directory
 
 ConsoleLogger::$date_format = 'H:i:s';
 ConsoleLogger::$format = '[%date%] [%level_short%] %body%';

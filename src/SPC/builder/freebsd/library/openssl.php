@@ -48,7 +48,7 @@ class openssl extends BSDLibraryBase
             $ex_lib = trim($zlib->getStaticLibFiles() . ' ' . $ex_lib);
         }
 
-        shell()->cd($this->source_dir)
+        shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 "./Configure no-shared {$extra} " .
                 '--prefix=/ ' . // use prefix=/

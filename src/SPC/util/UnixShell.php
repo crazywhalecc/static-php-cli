@@ -44,14 +44,7 @@ class UnixShell
     {
         /* @phpstan-ignore-next-line */
         logger()->info(ConsoleColor::yellow('[EXEC] ') . ConsoleColor::green($cmd));
-        logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
-        $env_str = $this->getEnvString();
-        if (!empty($env_str)) {
-            $cmd = "{$env_str} {$cmd}";
-        }
-        if ($this->cd !== null) {
-            $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
-        }
+        $cmd = $this->getExecString($cmd);
         if (!$this->debug) {
             $cmd .= ' 1>/dev/null 2>&1';
         }
@@ -99,10 +92,7 @@ class UnixShell
             /* @phpstan-ignore-next-line */
             logger()->debug(ConsoleColor::blue('[EXEC] ') . ConsoleColor::gray($cmd));
         }
-        logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
-        if ($this->cd !== null) {
-            $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
-        }
+        $cmd = $this->getExecString($cmd);
         exec($cmd, $out, $code);
         return [$code, $out];
     }
@@ -110,20 +100,33 @@ class UnixShell
     public function setEnv(array $env): UnixShell
     {
         foreach ($env as $k => $v) {
-            if ($v === '') {
+            if (trim($v) === '') {
                 continue;
             }
-            $this->env[$k] = $v;
+            $this->env[$k] = trim($v);
         }
         return $this;
     }
 
-    private function getEnvString(): string
+    public function getEnvString(): string
     {
         $str = '';
         foreach ($this->env as $k => $v) {
             $str .= ' ' . $k . '="' . $v . '"';
         }
         return trim($str);
+    }
+
+    private function getExecString(string $cmd): string
+    {
+        logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
+        $env_str = $this->getEnvString();
+        if (!empty($env_str)) {
+            $cmd = "{$env_str} {$cmd}";
+        }
+        if ($this->cd !== null) {
+            $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
+        }
+        return $cmd;
     }
 }

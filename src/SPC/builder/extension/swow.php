@@ -18,7 +18,7 @@ class swow extends Extension
         }
     }
 
-    public function getConfigureArg(): string
+    public function getConfigureArg(bool $shared = false): string
     {
         $arg = '--enable-swow';
         $arg .= $this->builder->getLib('openssl') ? ' --enable-swow-ssl' : ' --disable-swow-ssl';

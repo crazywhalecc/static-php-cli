@@ -42,5 +42,17 @@
         "extract-files": {
             "upx-*-win64/upx.exe": "{pkg_root_path}/bin/upx.exe"
         }
+    },
+    "go-xcaddy-x86_64-linux": {
+        "type": "custom"
+    },
+    "go-xcaddy-aarch64-linux": {
+        "type": "custom"
+    },
+    "go-xcaddy-x86_64-macos": {
+        "type": "custom"
+    },
+    "go-xcaddy-aarch64-macos": {
+        "type": "custom"
     }
 }

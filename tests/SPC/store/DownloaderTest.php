@@ -7,6 +7,7 @@ namespace SPC\Tests\store;
 use PHPUnit\Framework\TestCase;
 use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
+use SPC\store\LockFile;
 
 /**
  * @internal
@@ -57,16 +58,16 @@ class DownloaderTest extends TestCase
 
     public function testLockSource()
     {
-        Downloader::lockSource('fake-file', ['source_type' => 'archive', 'filename' => 'fake-file-name', 'move_path' => 'fake-path', 'lock_as' => 'fake-lock-as']);
-        $this->assertFileExists(DOWNLOAD_PATH . '/.lock.json');
-        $json = json_decode(file_get_contents(DOWNLOAD_PATH . '/.lock.json'), true);
+        LockFile::lockSource('fake-file', ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => 'fake-file-name', 'move_path' => 'fake-path', 'lock_as' => 'fake-lock-as']);
+        $this->assertFileExists(LockFile::LOCK_FILE);
+        $json = json_decode(file_get_contents(LockFile::LOCK_FILE), true);
         $this->assertIsArray($json);
         $this->assertArrayHasKey('fake-file', $json);
         $this->assertArrayHasKey('source_type', $json['fake-file']);
         $this->assertArrayHasKey('filename', $json['fake-file']);
         $this->assertArrayHasKey('move_path', $json['fake-file']);
         $this->assertArrayHasKey('lock_as', $json['fake-file']);
-        $this->assertEquals('archive', $json['fake-file']['source_type']);
+        $this->assertEquals(SPC_SOURCE_ARCHIVE, $json['fake-file']['source_type']);
         $this->assertEquals('fake-file-name', $json['fake-file']['filename']);
         $this->assertEquals('fake-path', $json['fake-file']['move_path']);
         $this->assertEquals('fake-lock-as', $json['fake-file']['lock_as']);

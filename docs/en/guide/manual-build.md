@@ -167,6 +167,7 @@ If the build is successful, you will see the `buildroot/bin` directory in the cu
 - fpm: The build result is `buildroot/bin/php-fpm`.
 - micro: The build result is `buildroot/bin/micro.sfx`. If you need to further package it with PHP code, please refer to [Packaging micro binary](./manual-build#command-micro-combine).
 - embed: See [Using embed](./manual-build#embed-usage).
+- frankenphp: The build result is `buildroot/bin/frankenphp`.
 
 If the build fails, you can use the `--debug` parameter to view detailed error information, 
 or use the `--with-clean` to clear the old compilation results and recompile.
@@ -290,6 +291,7 @@ You need to specify a compilation target, choose from the following parameters:
 - `--build-fpm`: Build a fpm sapi (php-fpm, used in conjunction with other traditional fpm architecture software such as nginx)
 - `--build-micro`: Build a micro sapi (used to build a standalone executable binary containing PHP code)
 - `--build-embed`: Build an embed sapi (used to embed into other C language programs)
+- `--build-frankenphp`: Build a [FrankenPHP](https://github.com/php/frankenphp) executable
 - `--build-all`: build all above sapi
 
 ```bash
@@ -337,7 +339,7 @@ You can try to use the following commands:
 - `--cxx=XXX`: Specifies the execution command of the C++ language compiler (Linux defaults to `g++`, macOS defaults to `clang++`)
 - `--with-clean`: clean up old make files before compiling PHP
 - `--enable-zts`: Make compiled PHP thread-safe version (default is NTS version)
-- `--no-strip`: Do not run `strip` after compiling the PHP library to trim the binary file to reduce its size (the macOS binary file without trim can use dynamically linked third-party extensions)
+- `--no-strip`: Do not run `strip` after compiling the PHP library to trim the binary file to reduce its size
 - `--with-libs=XXX,YYY`: Compile the specified dependent library before compiling PHP, and activate some extended optional functions (such as libavif of the gd library, etc.)
 - `--with-config-file-path=XXX`: Set the path in which to look for `php.ini` (Check [here](../faq/index.html#what-is-the-path-of-php-ini) for default paths)
 - `--with-config-file-scan-dir=XXX`: Set the directory to scan for `.ini` files after reading `php.ini` (Check [here](../faq/index.html#what-is-the-path-of-php-ini) for default paths)
@@ -509,6 +511,8 @@ When `bin/spc doctor` automatically repairs the Windows environment, tools such 
 Here is an example of installing the tool:
 
 - Download and install UPX (Linux and Windows only): `bin/spc install-pkg upx`
+- Download and install nasm (Windows only): `bin/spc install-pkg nasm`
+- Download and install go-xcaddy: `bin/spc install-pkg go-xcaddy`
 
 ## Command - del-download
 

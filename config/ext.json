@@ -24,6 +24,14 @@
     "bcmath": {
         "type": "builtin"
     },
+    "brotli": {
+        "type": "external",
+        "source": "ext-brotli",
+        "arg-type": "enable",
+        "lib-depends": [
+            "brotli"
+        ]
+    },
     "bz2": {
         "type": "builtin",
         "arg-type-unix": "with-prefix",
@@ -95,7 +103,10 @@
     "ev": {
         "type": "external",
         "source": "ev",
-        "arg-type-windows": "with"
+        "arg-type-windows": "with",
+        "ext-depends": [
+            "sockets"
+        ]
     },
     "event": {
         "support": {
@@ -124,10 +135,6 @@
             "Linux": "partial",
             "BSD": "wip"
         },
-        "target": [
-            "static",
-            "shared"
-        ],
         "notes": true,
         "arg-type": "custom",
         "type": "builtin",
@@ -334,6 +341,9 @@
         "ext-depends": [
             "xml"
         ]
+        "target": [
+            "static"
+        ]
     },
     "lz4": {
         "support": {
@@ -350,6 +360,9 @@
     "mbregex": {
         "type": "builtin",
         "arg-type": "custom",
+        "target": [
+            "static"
+        ],
         "ext-depends": [
             "mbstring"
         ],
@@ -382,13 +395,13 @@
         "ext-depends": [
             "zlib",
             "session"
-        ]
+        ],
+        "build-with-php": true
     },
     "memcached": {
         "support": {
             "Windows": "wip",
-            "BSD": "wip",
-            "Linux": "no"
+            "BSD": "wip"
         },
         "type": "external",
         "source": "memcached",
@@ -396,6 +409,10 @@
         "cpp-extension": true,
         "lib-depends": [
             "libmemcached"
+        ],
+        "lib-depends-unix": [
+            "libmemcached",
+            "fastlz"
         ],
         "ext-depends": [
             "session",
@@ -415,6 +432,10 @@
             "openssl",
             "zstd",
             "zlib"
+        ],
+        "frameworks": [
+            "CoreFoundation",
+            "Security"
         ]
     },
     "msgpack": {
@@ -424,7 +445,10 @@
         "type": "external",
         "source": "msgpack",
         "arg-type-unix": "with",
-        "arg-type-win": "enable"
+        "arg-type-win": "enable",
+        "ext-depends": [
+            "session"
+        ]
     },
     "mysqli": {
         "type": "builtin",
@@ -463,7 +487,8 @@
     },
     "opcache": {
         "type": "builtin",
-        "arg-type-unix": "custom"
+        "arg-type-unix": "custom",
+        "zend-extension": true
     },
     "openssl": {
         "notes": true,
@@ -652,6 +677,9 @@
         "arg-type": "with-prefix",
         "lib-depends": [
             "readline"
+        ],
+        "target": [
+            "static"
         ]
     },
     "redis": {
@@ -671,10 +699,12 @@
         ]
     },
     "session": {
-        "type": "builtin"
+        "type": "builtin",
+        "build-with-php": true
     },
     "shmop": {
-        "type": "builtin"
+        "type": "builtin",
+        "build-with-php": true
     },
     "simdjson": {
         "type": "external",
@@ -692,7 +722,8 @@
         ],
         "ext-depends-windows": [
             "xml"
-        ]
+        ],
+        "build-with-php": true
     },
     "snappy": {
         "support": {
@@ -785,7 +816,7 @@
         "lib-depends": [
             "libssh2"
         ],
-        "ext-depends-windows": [
+        "ext-depends": [
             "openssl",
             "zlib"
         ]
@@ -795,9 +826,6 @@
             "Windows": "no",
             "BSD": "wip"
         },
-        "target": [
-            "static"
-        ],
         "notes": true,
         "type": "external",
         "source": "swoole",
@@ -915,7 +943,8 @@
         ]
     },
     "tokenizer": {
-        "type": "builtin"
+        "type": "builtin",
+        "build-with-php": true
     },
     "uuid": {
         "support": {
@@ -956,7 +985,8 @@
             "Darwin": "partial",
             "Linux": "partial"
         },
-        "notes": true
+        "notes": true,
+        "zend-extension": true
     },
     "xhprof": {
         "support": {
@@ -968,7 +998,8 @@
         "source": "xhprof",
         "ext-depends": [
             "ctype"
-        ]
+        ],
+        "build-with-php": true
     },
     "xlswriter": {
         "support": {
@@ -998,7 +1029,8 @@
         ],
         "ext-depends-windows": [
             "iconv"
-        ]
+        ],
+        "build-with-php": true
     },
     "xmlreader": {
         "support": {
@@ -1012,7 +1044,8 @@
         "ext-depends-windows": [
             "xml",
             "dom"
-        ]
+        ],
+        "build-with-php": true
     },
     "xmlwriter": {
         "support": {
@@ -1025,7 +1058,8 @@
         ],
         "ext-depends-windows": [
             "xml"
-        ]
+        ],
+        "build-with-php": true
     },
     "xsl": {
         "support": {
@@ -1042,6 +1076,14 @@
             "dom"
         ]
     },
+    "xz": {
+        "type": "external",
+        "source": "ext-xz",
+        "arg-type": "with",
+        "lib-depends": [
+            "xz"
+        ]
+    },
     "yac": {
         "support": {
             "BSD": "wip"
@@ -1049,6 +1091,9 @@
         "type": "external",
         "source": "yac",
         "arg-type-unix": "custom",
+        "lib-depends-unix": [
+            "fastlz"
+        ],
         "ext-depends-unix": [
             "igbinary"
         ]
@@ -1069,9 +1114,6 @@
         "support": {
             "BSD": "wip"
         },
-        "target": [
-            "static"
-        ],
         "type": "builtin",
         "arg-type": "with-prefix",
         "arg-type-windows": "enable",
@@ -1095,6 +1137,9 @@
         "arg-type-windows": "enable",
         "lib-depends": [
             "zlib"
+        ],
+        "target": [
+            "static"
         ]
     },
     "zstd": {

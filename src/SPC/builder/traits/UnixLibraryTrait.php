@@ -17,9 +17,9 @@ trait UnixLibraryTrait
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
+    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true, bool $include_self = true): string
     {
-        $libs = [$this];
+        $libs = $include_self ? [$this] : [];
         if ($recursive) {
             array_unshift($libs, ...array_values($this->getDependencies(recursive: true)));
         }
@@ -84,19 +84,34 @@ trait UnixLibraryTrait
         }
     }
 
-    /**
-     * remove libtool archive files
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
-    public function cleanLaFiles(): void
+    public function patchLaDependencyPrefix(?array $files = null): void
     {
-        foreach ($this->getStaticLibs() as $lib) {
-            $filename = pathinfo($lib, PATHINFO_FILENAME) . '.la';
-            if (file_exists(BUILD_LIB_PATH . '/' . $filename)) {
-                unlink(BUILD_LIB_PATH . '/' . $filename);
+        logger()->info('Patching library [' . static::NAME . '] la files');
+        $throwOnMissing = true;
+        if ($files === null) {
+            $files = $this->getStaticLibs();
+            $files = array_map(fn ($name) => str_replace('.a', '.la', $name), $files);
+            $throwOnMissing = false;
+        }
+        foreach ($files as $name) {
+            $realpath = realpath(BUILD_LIB_PATH . '/' . $name);
+            if ($realpath === false) {
+                if ($throwOnMissing) {
+                    throw new RuntimeException('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+                }
+                logger()->warning('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+                continue;
             }
+            logger()->debug('Patching ' . $realpath);
+            // replace prefix
+            $file = FileSystem::readFile($realpath);
+            $file = str_replace(
+                ' /lib/',
+                ' ' . BUILD_LIB_PATH . '/',
+                $file
+            );
+            $file = preg_replace('/^libdir=.*$/m', "libdir='" . BUILD_LIB_PATH . "'", $file);
+            FileSystem::writeFile($realpath, $file);
         }
     }
 

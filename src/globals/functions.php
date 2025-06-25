@@ -102,6 +102,17 @@ function osfamily2dir(): string
     };
 }
 
+function osfamily2shortname(): string
+{
+    return match (PHP_OS_FAMILY) {
+        'Windows' => 'win',
+        'Darwin' => 'macos',
+        'Linux' => 'linux',
+        'BSD' => 'bsd',
+        default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
+    };
+}
+
 function shell(?bool $debug = null): UnixShell
 {
     /* @noinspection PhpUnhandledExceptionInspection */
@@ -215,4 +226,9 @@ function cmake_boolean_args(string $arg_name, bool $negative = false): array
 {
     $res = ["-D{$arg_name}=ON", "-D{$arg_name}=OFF"];
     return $negative ? array_reverse($res) : $res;
+}
+
+function ac_with_args(string $arg_name, bool $use_value = false): array
+{
+    return $use_value ? ["--with-{$arg_name}=yes", "--with-{$arg_name}=no"] : ["--with-{$arg_name}", "--without-{$arg_name}"];
 }

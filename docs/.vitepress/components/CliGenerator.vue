@@ -30,6 +30,7 @@
       </div>
     </div>
     <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectCommon">{{ I18N[lang].selectCommon }}</div>
+    <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectAll">{{ I18N[lang].selectAll }}</div>
     <div class="my-btn" @click="checkedExts = []">{{ I18N[lang].selectNone }}</div>
 
     <details class="details custom-block" open>
@@ -44,6 +45,7 @@
     <div class="tip custom-block">
       <p class="custom-block-title">TIP</p>
       <p>{{ I18N[lang].depTips }}</p>
+      <p>{{ I18N[lang].depTips2 }}</p>
     </div>
     <h2>{{ I18N[lang].buildTarget }}</h2>
     <div class="box">
@@ -252,6 +254,7 @@ const I18N = {
     no: '否',
     resultShow: '结果展示',
     selectCommon: '选择常用扩展',
+    selectAll: '选择全部',
     selectNone: '全部取消选择',
     useZTS: '是否编译线程安全版',
     hardcodedINI: '硬编码 INI 选项',
@@ -267,6 +270,7 @@ const I18N = {
     selectedSystem: '选择操作系统',
     buildLibs: '要构建的库',
     depTips: '选择扩展后，不可选中的项目为必需的依赖，编译的依赖库列表中可选的为现有扩展和依赖库的可选依赖。选择可选依赖后，将生成 --with-libs 参数。',
+    depTips2: '无法同时构建所有扩展，因为有些扩展之间相互冲突。请根据需要选择扩展。',
     microUnavailable: 'micro 不支持 PHP 7.4 及更早版本！',
     windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed 构建！',
     useUPX: '是否开启 UPX 压缩（减小二进制体积）',
@@ -286,6 +290,7 @@ const I18N = {
     no: 'No',
     resultShow: 'Result',
     selectCommon: 'Select common extensions',
+    selectAll: 'Select all',
     selectNone: 'Unselect all',
     useZTS: 'Enable ZTS',
     hardcodedINI: 'Hardcoded INI options',
@@ -301,6 +306,7 @@ const I18N = {
     selectedSystem: 'Select Build OS',
     buildLibs: 'Select Dependencies',
     depTips: 'After selecting the extensions, the unselectable items are essential dependencies. In the compiled dependencies list, optional dependencies consist of existing extensions and optional dependencies of libraries. Optional dependencies will be added in --with-libs parameter.',
+    depTips2: 'It is not possible to build all extensions at the same time, as some extensions conflict with each other. Please select the extensions you need.',
     microUnavailable: 'Micro does not support PHP 7.4 and earlier versions!',
     windowsSAPIUnavailable: 'Windows does not support fpm and embed build!',
     useUPX: 'Enable UPX compression (reduce binary size)',
@@ -337,6 +343,10 @@ const selectCommon = () => {
   ];
 };
 
+const selectAll = () => {
+    checkedExts.value = extFilter.value;
+};
+
 const extList = computed(() => {
   return checkedExts.value.join(',');
 });
@@ -364,7 +374,7 @@ const checkedTargets = ref(['cli']);
 const selectedEnv = ref('spc');
 
 // chosen php version
-const selectedPhpVersion = ref('8.2');
+const selectedPhpVersion = ref('8.4');
 
 // chosen debug
 const debug = ref(0);

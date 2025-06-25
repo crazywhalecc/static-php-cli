@@ -22,6 +22,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
         FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchGDWin32']);
+        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchFfiCentos7FixO3strncmp']);
         FileSystem::addSourceExtractHook('sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
@@ -43,14 +44,14 @@ class SourcePatcher
      */
     public static function patchBeforeBuildconf(BuilderBase $builder): void
     {
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeBuildconf() === true) {
-                logger()->info('Extension [' . $ext->getName() . '] patched before buildconf');
+                logger()->info("Extension [{$ext->getName()}] patched before buildconf");
             }
         }
         foreach ($builder->getLibs() as $lib) {
             if ($lib->patchBeforeBuildconf() === true) {
-                logger()->info('Library [' . $lib->getName() . '] patched before buildconf');
+                logger()->info("Library [{$lib->getName()}]patched before buildconf");
             }
         }
         // patch windows php 8.1 bug
@@ -86,21 +87,18 @@ class SourcePatcher
      */
     public static function patchBeforeConfigure(BuilderBase $builder): void
     {
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeConfigure() === true) {
-                logger()->info('Extension [' . $ext->getName() . '] patched before configure');
+                logger()->info("Extension [{$ext->getName()}] patched before configure");
             }
         }
         foreach ($builder->getLibs() as $lib) {
             if ($lib->patchBeforeConfigure() === true) {
-                logger()->info('Library [' . $lib->getName() . '] patched before configure');
+                logger()->info("Library [{$lib->getName()}] patched before configure");
             }
         }
         // patch capstone
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
-        if ($builder instanceof LinuxBuilder && getenv('SPC_LIBC') === 'glibc') {
-            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Zend/zend_operators.h', '# define ZEND_USE_ASM_ARITHMETIC 1', '# define ZEND_USE_ASM_ARITHMETIC 0');
-        }
     }
 
     /**
@@ -269,13 +267,27 @@ class SourcePatcher
         // call extension patch before make
         foreach ($builder->getExts(false) as $ext) {
             if ($ext->patchBeforeMake() === true) {
-                logger()->info('Extension [' . $ext->getName() . '] patched before make');
+                logger()->info("Extension [{$ext->getName()}] patched before make");
             }
         }
         foreach ($builder->getLibs() as $lib) {
             if ($lib->patchBeforeMake() === true) {
-                logger()->info('Library [' . $lib->getName() . '] patched before make');
+                logger()->info("Library [{$lib->getName()}] patched before make");
             }
+        }
+
+        if (str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), '-release')) {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef CONFIGURE_COMMAND',
+                '#ifdef NO_CONFIGURE_COMMAND',
+            );
+        } else {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef NO_CONFIGURE_COMMAND',
+                '#ifdef CONFIGURE_COMMAND',
+            );
         }
     }
 
@@ -440,6 +452,22 @@ class SourcePatcher
             return true;
         }
         return false;
+    }
+
+    public static function patchFfiCentos7FixO3strncmp(): bool
+    {
+        if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::getLibcVersionIfExists() > '2.17') {
+            return false;
+        }
+        if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            return false;
+        }
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0 && intval($match[1]) < 80316) {
+            return false;
+        }
+        SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
+        return true;
     }
 
     public static function patchLibaomForAlpine(): bool

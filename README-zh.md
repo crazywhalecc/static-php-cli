@@ -278,7 +278,7 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 如果你知道 [embed SAPI](https://github.com/php/php-src/tree/master/sapi/embed)，你应该知道如何使用它。对于有可能编译用到引入其他库的问题，你可以使用 `buildroot/bin/php-config` 来获取编译时的配置。
 
-另外，有关如何使用此功能的高级示例，请查看[如何使用它构建 FrankenPHP 的静态版本](https://github.com/dunglas/frankenphp/blob/main/docs/static.md)。
+另外，有关如何使用此功能的高级示例，请查看[如何使用它构建 FrankenPHP 的静态版本](https://github.com/php/frankenphp/blob/main/docs/static.md)。
 
 ## 贡献
 

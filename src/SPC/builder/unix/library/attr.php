@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait attr
 {
@@ -13,14 +14,11 @@ trait attr
      */
     protected function build(): void
     {
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->appendEnv(['CFLAGS' => "-I{$this->getIncludeDir()}", 'LDFLAGS' => "-L{$this->getLibDir()}"])
+        UnixAutoconfExecutor::create($this)
             ->exec('libtoolize --force --copy')
             ->exec('./autogen.sh || autoreconf -if')
-            ->exec('./configure --prefix= --enable-static --disable-shared --with-pic --disable-nls')
-            ->exec("make -j {$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
-
+            ->configure('--disable-nls')
+            ->make();
         $this->patchPkgconfPrefix(['libattr.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

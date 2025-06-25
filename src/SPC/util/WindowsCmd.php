@@ -75,24 +75,4 @@ class WindowsCmd
         $this->env = array_merge($this->env, $env);
         return $this;
     }
-
-    /**
-     * @throws RuntimeException
-     */
-    public function execWithEnv(string $cmd): WindowsCmd
-    {
-        if ($this->getEnvString() !== '') {
-            return $this->exec($this->getEnvString() . "call {$cmd}");
-        }
-        return $this->exec($cmd);
-    }
-
-    private function getEnvString(): string
-    {
-        $str = '';
-        foreach ($this->env as $k => $v) {
-            $str .= 'set ' . $k . '=' . $v . ' && ';
-        }
-        return $str;
-    }
 }

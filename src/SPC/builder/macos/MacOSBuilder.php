@@ -67,6 +67,10 @@ class MacOSBuilder extends UnixBuilderBase
             array_push($frameworks, ...$lib->getFrameworks());
         }
 
+        foreach ($this->exts as $ext) {
+            array_push($frameworks, ...$ext->getFrameworks());
+        }
+
         if ($asString) {
             return implode(' ', array_map(fn ($x) => "-framework {$x}", $frameworks));
         }
@@ -118,6 +122,7 @@ class MacOSBuilder extends UnixBuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
         // prepare build php envs
         $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
@@ -176,7 +181,14 @@ class MacOSBuilder extends UnixBuilderBase
             }
             $this->buildEmbed();
         }
+        if ($enableFrankenphp) {
+            logger()->info('building frankenphp');
+            $this->buildFrankenphp();
+        }
+    }
 
+    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    {
         $this->emitPatchPoint('before-sanity-check');
         $this->sanityCheck($build_target);
     }
@@ -192,9 +204,10 @@ class MacOSBuilder extends UnixBuilderBase
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        $shell->exec("\$SPC_CMD_PREFIX_PHP_MAKE {$vars} cli");
+        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
+        $shell->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
         if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip sapi/cli/php');
+            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip -S sapi/cli/php');
         }
         $this->deployBinary(BUILD_TARGET_CLI);
     }
@@ -221,12 +234,15 @@ class MacOSBuilder extends UnixBuilderBase
 
         // patch fake cli for micro
         $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
-        if ($this->getOption('no-strip', false)) {
-            $vars['STRIP'] = 'dsymutil -f ';
-        }
         $vars = SystemUtil::makeEnvVarString($vars);
 
-        shell()->cd(SOURCE_PATH . '/php-src')->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} micro");
+        $shell = shell()->cd(SOURCE_PATH . '/php-src');
+        // build
+        $shell->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} micro");
+        // strip
+        if (!$this->getOption('no-strip', false)) {
+            $shell->exec('dsymutil -f sapi/micro/micro.sfx')->exec('strip -S sapi/micro/micro.sfx');
+        }
 
         $this->deployBinary(BUILD_TARGET_MICRO);
 
@@ -248,7 +264,7 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $shell->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . " {$vars} fpm");
         if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip sapi/fpm/php-fpm');
+            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip -S sapi/fpm/php-fpm');
         }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
@@ -263,15 +279,12 @@ class MacOSBuilder extends UnixBuilderBase
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
 
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install")
-            // Workaround for https://github.com/php/php-src/issues/12082
-            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o')
-            ->exec('mkdir ' . BUILD_ROOT_PATH . '/lib/php-o')
-            ->cd(BUILD_ROOT_PATH . '/lib/php-o')
-            ->exec('ar x ' . BUILD_ROOT_PATH . '/lib/libphp.a')
-            ->exec('rm ' . BUILD_ROOT_PATH . '/lib/libphp.a')
-            ->exec('ar rcs ' . BUILD_ROOT_PATH . '/lib/libphp.a *.o')
-            ->exec('rm -Rf ' . BUILD_ROOT_PATH . '/lib/php-o');
+            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
+
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
+            shell()->cd(SOURCE_PATH . '/php-src')
+                ->exec('ar -t ' . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
+        }
         $this->patchPhpScripts();
     }
 

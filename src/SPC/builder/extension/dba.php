@@ -12,11 +12,11 @@ class dba extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        $qdbm = $this->builder->getLib('qdbm') ? (' --with-qdbm=' . BUILD_ROOT_PATH) : '';
-        return '--enable-dba' . $qdbm;
+        $qdbm = $this->builder->getLib('qdbm') ? (' --with-qdbm=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH) : '';
+        return '--enable-dba' . ($shared ? '=shared' : '') . $qdbm;
     }
 
-    public function getWindowsConfigureArg(): string
+    public function getWindowsConfigureArg(bool $shared = false): string
     {
         $qdbm = $this->builder->getLib('qdbm') ? ' --with-qdbm' : '';
         return '--with-dba' . $qdbm;

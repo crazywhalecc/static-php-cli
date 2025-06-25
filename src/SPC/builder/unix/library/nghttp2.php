@@ -7,6 +7,7 @@ namespace SPC\builder\unix\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait nghttp2
 {
@@ -17,42 +18,33 @@ trait nghttp2
      */
     protected function build(): void
     {
-        $args = $this->builder->makeAutoconfArgs(static::NAME, [
-            'zlib' => null,
-            'openssl' => null,
-            'libxml2' => null,
-            'libev' => null,
-            'libcares' => null,
-            'libngtcp2' => null,
-            'libnghttp3' => null,
-            'libbpf' => null,
-            'libevent-openssl' => null,
-            'jansson' => null,
-            'jemalloc' => null,
-            'systemd' => null,
-        ]);
-        if ($brotli = $this->builder->getLib('brotli')) {
-            /* @phpstan-ignore-next-line */
-            $args .= ' --with-libbrotlidec=yes LIBBROTLIDEC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIDEC_LIBS="' . $brotli->getStaticLibFiles() . '"';
-            /* @phpstan-ignore-next-line */
-            $args .= ' --with-libbrotlienc=yes LIBBROTLIENC_CFLAGS="-I' . BUILD_ROOT_PATH . '/include" LIBBROTLIENC_LIBS="' . $brotli->getStaticLibFiles() . '"';
-        }
-
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec(
-                './configure ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--with-pic ' .
-                '--enable-lib-only ' .
-                $args . ' ' .
-                '--prefix='
+        UnixAutoconfExecutor::create($this)
+            ->optionalLib('zlib', ...ac_with_args('zlib', true))
+            ->optionalLib('openssl', ...ac_with_args('openssl', true))
+            ->optionalLib('libxml2', ...ac_with_args('libxml2', true))
+            ->optionalLib('libev', ...ac_with_args('libev', true))
+            ->optionalLib('libcares', ...ac_with_args('libcares', true))
+            ->optionalLib('ngtcp2', ...ac_with_args('libngtcp2', true))
+            ->optionalLib('nghttp3', ...ac_with_args('libnghttp3', true))
+            // ->optionalLib('libbpf', ...ac_with_args('libbpf', true))
+            // ->optionalLib('libevent-openssl', ...ac_with_args('libevent-openssl', true))
+            // ->optionalLib('jansson', ...ac_with_args('jansson', true))
+            // ->optionalLib('jemalloc', ...ac_with_args('jemalloc', true))
+            // ->optionalLib('systemd', ...ac_with_args('systemd', true))
+            ->optionalLib(
+                'brotli',
+                fn ($lib) => implode(' ', [
+                    '--with-brotlidec=yes',
+                    "LIBBROTLIDEC_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
+                    "LIBBROTLIDEC_LIBS=\"{$lib->getStaticLibFiles()}\"",
+                    '--with-libbrotlienc=yes',
+                    "LIBBROTLIENC_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
+                    "LIBBROTLIENC_LIBS=\"{$lib->getStaticLibFiles()}\"",
+                ])
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+            ->configure('--enable-lib-only')
+            ->make();
         $this->patchPkgconfPrefix(['libnghttp2.pc']);
+        $this->patchLaDependencyPrefix();
     }
 }

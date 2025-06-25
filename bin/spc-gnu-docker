@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+set -e
+
+# This file is using docker to run commands
+SPC_DOCKER_VERSION=v4
+
 # Detect docker can run
 if ! which docker >/dev/null; then
   echo "Docker is not installed, please install docker first !"
@@ -19,35 +24,47 @@ if [ $(id -u) -ne 0 ]; then
     fi
 fi
 
-
-
-# to check if qemu-docker run
-if [ "$SPC_USE_ARCH" = "" ]; then
-    SPC_USE_ARCH=current
+# Convert uname to gnu arch
+CURRENT_ARCH=$(uname -m)
+if [ "$CURRENT_ARCH" = "arm64" ]; then
+    CURRENT_ARCH=aarch64
 fi
+if [ -z "$SPC_USE_ARCH" ]; then
+    SPC_USE_ARCH=$CURRENT_ARCH
+fi
+# parse SPC_USE_ARCH
 case $SPC_USE_ARCH in
-current)
-    BASE_ARCH=$(uname -m)
-    if [ "$BASE_ARCH" = "arm64" ]; then
-        BASE_ARCH=aarch64
+x86_64|amd64)
+    SPC_USE_ARCH=x86_64
+    SPC_USE_ARCH_DOCKER=amd64
+    if [ "$CURRENT_ARCH" != "x86_64" ]; then
+        PLATFORM_ARG="--platform linux/amd64"
     fi
     ;;
-aarch64)
-    BASE_ARCH=aarch64
-    # shellcheck disable=SC2039
-    echo -e "\e[033m* Using different arch needs to setup qemu-static for docker !\e[0m"
-    $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static:register --reset > /dev/null
+aarch64|arm64)
+    SPC_USE_ARCH=aarch64
+    SPC_USE_ARCH_DOCKER=arm64
+    if [ "$CURRENT_ARCH" != "aarch64" ]; then
+        PLATFORM_ARG="--platform linux/arm64"
+    fi
     ;;
 *)
     echo "Current arch is not supported to run in docker: $SPC_USE_ARCH"
     exit 1
     ;;
 esac
+# detect if we need to use qemu-static
+if [ "$SPC_USE_ARCH" != "$CURRENT_ARCH" ]; then
+    if [ "$(uname -s)" = "Linux" ]; then
+        echo "* Using different arch needs to setup qemu-static for docker !"
+        $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static --reset -p yes > /dev/null
+    fi
+fi
 
 # Detect docker env is setup
-if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-gnu-$SPC_USE_ARCH; then
+if ! $DOCKER_EXECUTABLE images | grep -q cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION; then
     echo "Docker container does not exist. Building docker image ..."
-    $DOCKER_EXECUTABLE build -t cwcc-spc-gnu-$SPC_USE_ARCH -f- . <<EOF
+    $DOCKER_EXECUTABLE buildx build $PLATFORM_ARG --no-cache -t cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION -f- . <<EOF
 FROM centos:7
 RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo && \
     sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
@@ -59,7 +76,7 @@ RUN yum clean all && \
 
 RUN yum install -y centos-release-scl
 
-RUN if [ "$BASE_ARCH" = "aarch64" ]; then \
+RUN if [ "$SPC_USE_ARCH" = "aarch64" ]; then \
         sed -i 's|mirror.centos.org/centos|vault.centos.org/altarch|g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo ; \
         sed -i 's|mirror.centos.org/centos|vault.centos.org/altarch|g' /etc/yum.repos.d/CentOS-SCLo-scl.repo ; \
     else \
@@ -72,8 +89,14 @@ RUN yum update -y && \
     yum install -y devtoolset-10-gcc-*
 RUN echo "source scl_source enable devtoolset-10" >> /etc/bashrc
 RUN source /etc/bashrc
+RUN yum install -y which
 
-RUN curl -o cmake.tgz -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$BASE_ARCH.tar.gz && \
+RUN curl -fsSL -o patchelf.tgz https://github.com/NixOS/patchelf/releases/download/0.18.0/patchelf-0.18.0-$SPC_USE_ARCH.tar.gz && \
+    mkdir -p /patchelf && \
+    tar -xzf patchelf.tgz -C /patchelf --strip-components=1 && \
+    cp /patchelf/bin/patchelf /usr/bin/
+
+RUN curl -o cmake.tgz -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$SPC_USE_ARCH.tar.gz && \
     mkdir /cmake && \
     tar -xzf cmake.tgz -C /cmake --strip-components 1
 
@@ -88,7 +111,7 @@ ENV PATH="/app/bin:/cmake/bin:$PATH"
 ENV SPC_LIBC=glibc
 
 ADD ./config/env.ini /app/config/env.ini
-RUN bin/spc doctor --auto-fix --debug
+RUN CC=gcc bin/spc doctor --auto-fix --debug
 
 RUN curl -o make.tgz -fsSL https://ftp.gnu.org/gnu/make/make-4.4.tar.gz && \
     tar -zxvf make.tgz && \
@@ -135,7 +158,7 @@ echo 'CC=/opt/rh/devtoolset-10/root/usr/bin/gcc' > /tmp/spc-gnu-docker.env
 echo 'CXX=/opt/rh/devtoolset-10/root/usr/bin/g++' >> /tmp/spc-gnu-docker.env
 echo 'AR=/opt/rh/devtoolset-10/root/usr/bin/ar' >> /tmp/spc-gnu-docker.env
 echo 'LD=/opt/rh/devtoolset-10/root/usr/bin/ld' >> /tmp/spc-gnu-docker.env
-echo 'SPC_DEFAULT_C_FLAGS=-fPIE -fPIC' >> /tmp/spc-gnu-docker.env
+echo 'SPC_DEFAULT_C_FLAGS=-fPIC' >> /tmp/spc-gnu-docker.env
 echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
@@ -167,7 +190,7 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     echo "*    ./pkgroot:   $(pwd)/pkgroot"
     echo "*"
     set -ex
-    $DOCKER_EXECUTABLE run --rm -it --privileged $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH
+    $DOCKER_EXECUTABLE run $PLATFORM_ARG --privileged --rm -it $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION /bin/bash
 else
-    $DOCKER_EXECUTABLE run --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH bin/spc $@
+    $DOCKER_EXECUTABLE run $PLATFORM_ARG --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION bin/spc $@
 fi

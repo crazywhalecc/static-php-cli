@@ -21,6 +21,6 @@ class yac extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--enable-yac --enable-igbinary --enable-json';
+        return '--enable-yac' . ($shared ? '=shared' : '') . ' --enable-igbinary --enable-json --with-system-fastlz';
     }
 }

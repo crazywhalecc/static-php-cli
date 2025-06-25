@@ -26,6 +26,5 @@ trait libjpeg
             ->build();
         // patch pkgconfig
         $this->patchPkgconfPrefix(['libjpeg.pc', 'libturbojpeg.pc']);
-        $this->cleanLaFiles();
     }
 }

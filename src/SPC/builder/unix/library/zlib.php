@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait zlib
 {
@@ -15,13 +16,7 @@ trait zlib
      */
     protected function build(): void
     {
-        [,,$destdir] = SEPARATED_PATH;
-
-        shell()->cd($this->source_dir)->initializeEnv($this)
-            ->exec('./configure --static --prefix=')
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec("make install DESTDIR={$destdir}");
+        UnixAutoconfExecutor::create($this)->exec("./configure --static --prefix={$this->getBuildRootPath()}")->make();
         $this->patchPkgconfPrefix(['zlib.pc']);
     }
 }

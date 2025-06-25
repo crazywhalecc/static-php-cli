@@ -17,11 +17,6 @@ class SourceManager
      */
     public static function initSource(?array $sources = null, ?array $libs = null, ?array $exts = null, bool $source_only = false): void
     {
-        if (!file_exists(DOWNLOAD_PATH . '/.lock.json')) {
-            throw new WrongUsageException('Download lock file "downloads/.lock.json" not found, maybe you need to download sources first ?');
-        }
-        $lock = json_decode(FileSystem::readFile(DOWNLOAD_PATH . '/.lock.json'), true);
-
         $sources_extracted = [];
         // source check exist
         if (is_array($sources)) {
@@ -56,8 +51,8 @@ class SourceManager
             }
             // check source downloaded
             $pre_built_name = Downloader::getPreBuiltLockName($source);
-            if ($source_only || !isset($lock[$pre_built_name])) {
-                if (!isset($lock[$source])) {
+            if ($source_only || LockFile::get($pre_built_name) === null) {
+                if (LockFile::get($source) === null) {
                     throw new WrongUsageException("Source [{$source}] not downloaded or not locked, you should download it first !");
                 }
                 $lock_name = $source;
@@ -65,14 +60,38 @@ class SourceManager
                 $lock_name = $pre_built_name;
             }
 
+            $lock_content = LockFile::get($lock_name);
+
             // check source dir exist
-            $check = $lock[$lock_name]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (SOURCE_PATH . '/' . $lock[$lock_name]['move_path']);
+            $check = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $source);
+            // $check = $lock[$lock_name]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (SOURCE_PATH . '/' . $lock[$lock_name]['move_path']);
             if (!is_dir($check)) {
                 logger()->debug('Extracting source [' . $source . '] to ' . $check . ' ...');
-                FileSystem::extractSource($source, DOWNLOAD_PATH . '/' . ($lock[$lock_name]['filename'] ?? $lock[$lock_name]['dirname']), $lock[$lock_name]['move_path']);
-            } else {
-                logger()->debug('Source [' . $source . '] already extracted in ' . $check . ', skip !');
+                $filename = LockFile::getLockFullPath($lock_content);
+                FileSystem::extractSource($source, $lock_content['source_type'], $filename, $check);
+                LockFile::putLockSourceHash($lock_content, $check);
+                continue;
             }
+            // if a lock file does not have hash, calculate with the current source (backward compatibility)
+            if (!isset($lock_content['hash'])) {
+                $hash = LockFile::getLockSourceHash($lock_content);
+            } else {
+                $hash = $lock_content['hash'];
+            }
+
+            // when source already extracted, detect if the extracted source hash is the same as the lock file one
+            if (file_exists("{$check}/.spc-hash") && FileSystem::readFile("{$check}/.spc-hash") === $hash) {
+                logger()->debug('Source [' . $source . '] already extracted in ' . $check . ', skip !');
+                continue;
+            }
+
+            // if not, remove the source dir and extract again
+            logger()->notice("Source [{$source}] hash mismatch, removing old source dir and extracting again ...");
+            FileSystem::removeDir($check);
+            $filename = LockFile::getLockFullPath($lock_content);
+            $move_path = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $source);
+            FileSystem::extractSource($source, $lock_content['source_type'], $filename, $move_path);
+            LockFile::putLockSourceHash($lock_content, $check);
         }
     }
 }

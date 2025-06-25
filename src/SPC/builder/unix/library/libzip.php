@@ -24,7 +24,6 @@ trait libzip
             ->addConfigureArgs(
                 '-DENABLE_GNUTLS=OFF',
                 '-DENABLE_MBEDTLS=OFF',
-                '-DBUILD_SHARED_LIBS=OFF',
                 '-DBUILD_DOC=OFF',
                 '-DBUILD_EXAMPLES=OFF',
                 '-DBUILD_REGRESS=OFF',

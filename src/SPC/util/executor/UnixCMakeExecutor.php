@@ -58,8 +58,10 @@ class UnixCMakeExecutor extends Executor
     public function optionalLib(string $name, \Closure|string $true_args, string $false_args = ''): static
     {
         if ($get = $this->library->getBuilder()->getLib($name)) {
+            logger()->info("Building library [{$this->library->getName()}] with {$name} support");
             $args = $true_args instanceof \Closure ? $true_args($get) : $true_args;
         } else {
+            logger()->info("Building library [{$this->library->getName()}] without {$name} support");
             $args = $false_args;
         }
         $this->addConfigureArgs($args);
@@ -137,6 +139,7 @@ class UnixCMakeExecutor extends Executor
             '-DCMAKE_INSTALL_BINDIR=bin',
             '-DCMAKE_INSTALL_LIBDIR=lib',
             '-DCMAKE_INSTALL_INCLUDEDIR=include',
+            '-DPOSITION_INDEPENDENT_CODE=ON',
             '-DBUILD_SHARED_LIBS=OFF',
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
         ]);
@@ -192,6 +195,7 @@ SET(CMAKE_INSTALL_PREFIX "{$root}")
 SET(CMAKE_INSTALL_LIBDIR "lib")
 
 set(PKG_CONFIG_EXECUTABLE "{$root}/bin/pkg-config")
+list(APPEND PKG_CONFIG_EXECUTABLE "--static")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

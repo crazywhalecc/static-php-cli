@@ -32,8 +32,9 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('build-cli', null, null, 'Build cli SAPI');
         $this->addOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
         $this->addOption('build-embed', null, null, 'Build embed SAPI (not available on Windows)');
+        $this->addOption('build-frankenphp', null, null, 'Build FrankenPHP SAPI (not available on Windows)');
         $this->addOption('build-all', null, null, 'Build all SAPI');
-        $this->addOption('no-strip', null, null, 'build without strip, in order to debug and load external extensions');
+        $this->addOption('no-strip', null, null, 'build without strip, keep symbols to debug');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
         $this->addOption('with-config-file-path', null, InputOption::VALUE_REQUIRED, 'Set the path in which to look for php.ini', $isWindows ? null : '/usr/local/etc/php');
         $this->addOption('with-config-file-scan-dir', null, InputOption::VALUE_REQUIRED, 'Set the directory to scan for .ini files after reading php.ini', $isWindows ? null : '/usr/local/etc/php/conf.d');
@@ -61,11 +62,6 @@ class BuildPHPCommand extends BuildCommand
         $rule = $this->parseRules($shared_extensions);
 
         // check dynamic extension build env
-        // macOS must use --no-strip option
-        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Darwin' && !$this->getOption('no-strip')) {
-            $this->output->writeln('MacOS does not support dynamic extension loading with stripped binary, please use --no-strip option!');
-            return static::FAILURE;
-        }
         // linux must build with glibc
         if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc') {
             $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');
@@ -73,16 +69,17 @@ class BuildPHPCommand extends BuildCommand
         }
         $static_and_shared = array_intersect($static_extensions, $shared_extensions);
         if (!empty($static_and_shared)) {
-            $this->output->writeln('<comment>Building extensions [' . implode(',', $static_and_shared) . '] as both static and shared\, tests may not be accurate or fail.</comment>');
+            $this->output->writeln('<comment>Building extensions [' . implode(',', $static_and_shared) . '] as both static and shared, tests may not be accurate or fail.</comment>');
         }
 
         if ($rule === BUILD_TARGET_NONE) {
             $this->output->writeln('<error>Please add at least one build SAPI!</error>');
-            $this->output->writeln("<comment>\t--build-cli\tBuild php-cli SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-micro\tBuild phpmicro SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-fpm\tBuild php-fpm SAPI</comment>");
-            $this->output->writeln("<comment>\t--build-embed\tBuild embed SAPI/libphp</comment>");
-            $this->output->writeln("<comment>\t--build-all\tBuild all SAPI: cli, micro, fpm, embed</comment>");
+            $this->output->writeln("<comment>\t--build-cli\t\tBuild php-cli SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-micro\t\tBuild phpmicro SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-fpm\t\tBuild php-fpm SAPI</comment>");
+            $this->output->writeln("<comment>\t--build-embed\t\tBuild embed SAPI/libphp</comment>");
+            $this->output->writeln("<comment>\t--build-frankenphp\tBuild FrankenPHP SAPI/libphp</comment>");
+            $this->output->writeln("<comment>\t--build-all\t\tBuild all SAPI: cli, micro, fpm, embed, frankenphp</comment>");
             return static::FAILURE;
         }
         if ($rule === BUILD_TARGET_ALL) {
@@ -128,7 +125,6 @@ class BuildPHPCommand extends BuildCommand
             $include_suggest_lib = $this->getOption('with-suggested-libs');
             [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs(array_merge($static_extensions, $shared_extensions), $libraries, $include_suggest_ext, $include_suggest_lib);
             $display_libs = array_filter($libraries, fn ($lib) => in_array(Config::getLib($lib, 'type', 'lib'), ['lib', 'package']));
-            $display_extensions = array_map(fn ($ext) => in_array($ext, $shared_extensions) ? "*{$ext}" : $ext, $extensions);
 
             // separate static and shared extensions from $extensions
             // filter rule: including shared extensions if they are in $static_extensions or $shared_extensions
@@ -138,7 +134,8 @@ class BuildPHPCommand extends BuildCommand
             $indent_texts = [
                 'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
                 'Build SAPI' => $builder->getBuildTypeName($rule),
-                'Extensions (' . count($extensions) . ')' => implode(',', $display_extensions),
+                'Static Extensions (' . count($static_extensions) . ')' => implode(',', $static_extensions),
+                'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
                 'Libraries (' . count($libraries) . ')' => implode(',', $display_libs),
                 'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
                 'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
@@ -158,14 +155,9 @@ class BuildPHPCommand extends BuildCommand
             if ($this->input->getOption('with-upx-pack') && in_array(PHP_OS_FAMILY, ['Linux', 'Windows'])) {
                 $indent_texts['UPX Pack'] = 'enabled';
             }
-            try {
-                $ver = $builder->getPHPVersion();
-                $indent_texts['PHP Version'] = $ver;
-            } catch (\Throwable) {
-                if (($ver = $builder->getPHPVersionFromArchive()) !== false) {
-                    $indent_texts['PHP Version'] = $ver;
-                }
-            }
+
+            $ver = $builder->getPHPVersionFromArchive() ?: $builder->getPHPVersion();
+            $indent_texts['PHP Version'] = $ver;
 
             if (!empty($not_included)) {
                 $indent_texts['Extra Exts (' . count($not_included) . ')'] = implode(', ', $not_included);
@@ -182,6 +174,9 @@ class BuildPHPCommand extends BuildCommand
             $builder->proveExts($static_extensions, $shared_extensions);
             // validate libs and extensions
             $builder->validateLibsAndExts();
+
+            // check some things before building all the things
+            $builder->checkBeforeBuildPHP($rule);
 
             // clean builds and sources
             if ($this->input->getOption('with-clean')) {
@@ -207,6 +202,8 @@ class BuildPHPCommand extends BuildCommand
             // add static-php-cli.version to main.c, in order to debug php failure more easily
             SourcePatcher::patchSPCVersionToPHP($this->getApplication()->getVersion());
 
+            // clean old modules that may conflict with the new php build
+            FileSystem::removeDir(BUILD_MODULES_PATH);
             // start to build
             $builder->buildPHP($rule);
 
@@ -215,6 +212,8 @@ class BuildPHPCommand extends BuildCommand
                 logger()->info('Building shared extensions ...');
                 $builder->buildSharedExts();
             }
+
+            $builder->testPHP($rule);
 
             // compile stopwatch :P
             $time = round(microtime(true) - START_TIME, 3);
@@ -246,8 +245,12 @@ class BuildPHPCommand extends BuildCommand
             }
             if (!empty($shared_extensions)) {
                 foreach ($shared_extensions as $ext) {
-                    $path = FileSystem::convertPath("{$build_root_path}/lib/{$ext}.so");
-                    logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                    $path = FileSystem::convertPath("{$build_root_path}/modules/{$ext}.so");
+                    if (file_exists(BUILD_MODULES_PATH . "/{$ext}.so")) {
+                        logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                    } else {
+                        logger()->warning("Shared extension [{$ext}] not found, please check!");
+                    }
                 }
             }
 
@@ -284,7 +287,8 @@ class BuildPHPCommand extends BuildCommand
         $rule |= ($this->getOption('build-cli') ? BUILD_TARGET_CLI : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-micro') ? BUILD_TARGET_MICRO : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-fpm') ? BUILD_TARGET_FPM : BUILD_TARGET_NONE);
-        $rule |= ($this->getOption('build-embed') || !empty($shared_extensions) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE);
+        $rule |= $this->getOption('build-embed') || !empty($shared_extensions) ? BUILD_TARGET_EMBED : BUILD_TARGET_NONE;
+        $rule |= ($this->getOption('build-frankenphp') ? (BUILD_TARGET_FRANKENPHP | BUILD_TARGET_EMBED) : BUILD_TARGET_NONE);
         $rule |= ($this->getOption('build-all') ? BUILD_TARGET_ALL : BUILD_TARGET_NONE);
         return $rule;
     }

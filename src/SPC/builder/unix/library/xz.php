@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\util\executor\UnixAutoconfExecutor;
 
 trait xz
 {
@@ -15,19 +16,14 @@ trait xz
      */
     public function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->exec(
-                './configure ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--disable-scripts ' .
-                '--disable-doc ' .
-                '--with-libiconv ' .
-                '--prefix='
+        UnixAutoconfExecutor::create($this)
+            ->configure(
+                '--disable-scripts',
+                '--disable-doc',
+                '--with-libiconv',
             )
-            ->exec('make clean')
-            ->exec("make -j{$this->builder->concurrency}")
-            ->exec('make install DESTDIR=' . BUILD_ROOT_PATH);
+            ->make();
         $this->patchPkgconfPrefix(['liblzma.pc']);
+        $this->patchLaDependencyPrefix();
     }
 }

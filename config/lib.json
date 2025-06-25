@@ -101,6 +101,15 @@
             "SystemConfiguration"
         ]
     },
+    "fastlz": {
+        "source": "fastlz",
+        "static-libs-unix": [
+            "libfastlz.a"
+        ],
+        "headers": [
+            "fastlz/fastlz.h"
+        ]
+    },
     "freetype": {
         "source": "freetype",
         "static-libs-unix": [
@@ -246,8 +255,8 @@
     "ldap": {
         "source": "ldap",
         "static-libs-unix": [
-            "liblber.a",
-            "libldap.a"
+            "libldap.a",
+            "liblber.a"
         ],
         "lib-depends": [
             "openssl",
@@ -401,7 +410,9 @@
         "source": "libmemcached",
         "static-libs-unix": [
             "libmemcached.a",
-            "libmemcachedutil.a"
+            "libmemcachedprotocol.a",
+            "libmemcachedutil.a",
+            "libhashkit.a"
         ]
     },
     "libpng": {
@@ -854,6 +865,15 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
+        ]
+    },
+    "watcher": {
+        "source": "watcher",
+        "static-libs-unix": [
+            "libwatcher-c.a"
+        ],
+        "headers": [
+            "wtr/watcher-c.h"
         ]
     }
 }

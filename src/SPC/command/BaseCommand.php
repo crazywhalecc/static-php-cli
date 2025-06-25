@@ -80,7 +80,7 @@ abstract class BaseCommand extends Command
         $this->output = $output;
 
         global $ob_logger;
-        if ($input->getOption('debug')) {
+        if ($input->getOption('debug') || $output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
             $ob_logger = new ConsoleLogger(LogLevel::DEBUG, decorated: !$input->getOption('no-ansi'));
             define('DEBUG_MODE', true);
         } else {

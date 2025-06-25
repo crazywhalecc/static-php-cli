@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use PharIo\FileSystem\File;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
 use SPC\exception\InterruptException;
@@ -11,6 +12,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\store\LockFile;
 use SPC\store\SourceManager;
 use SPC\util\CustomExt;
 
@@ -127,7 +129,7 @@ abstract class BuilderBase
         if ($including_shared) {
             return $this->exts;
         }
-        return array_filter($this->exts, fn ($ext) => !$ext->isBuildShared());
+        return array_filter($this->exts, fn ($ext) => $ext->isBuildStatic());
     }
 
     /**
@@ -233,15 +235,41 @@ abstract class BuilderBase
      */
     abstract public function buildPHP(int $build_target = BUILD_TARGET_NONE);
 
+    /**
+     * Test PHP
+     */
+    abstract public function testPHP(int $build_target = BUILD_TARGET_NONE);
+
+    /**
+     * @throws WrongUsageException
+     * @throws RuntimeException
+     * @throws FileSystemException
+     */
     public function buildSharedExts(): void
     {
-        foreach ($this->getExts() as $ext) {
-            if (!$ext->isBuildShared()) {
-                continue;
+        $lines = file(BUILD_BIN_PATH . '/php-config');
+        $extension_dir_line = null;
+        foreach ($lines as $key => $value) {
+            if (str_starts_with($value, 'extension_dir=')) {
+                $lines[$key] = 'extension_dir="' . BUILD_MODULES_PATH . '"' . PHP_EOL;
+                $extension_dir_line = $value;
+                break;
             }
-            logger()->info('Building extension [' . $ext->getName() . '] as shared extension (' . $ext->getName() . '.so)');
-            $ext->buildShared();
         }
+        file_put_contents(BUILD_BIN_PATH . '/php-config', implode('', $lines));
+        FileSystem::createDir(BUILD_MODULES_PATH);
+        try {
+            foreach ($this->getExts() as $ext) {
+                if (!$ext->isBuildShared()) {
+                    continue;
+                }
+                $ext->buildShared();
+            }
+        } catch (RuntimeException $e) {
+            FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
+            throw $e;
+        }
+        FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
     }
 
     /**
@@ -254,9 +282,21 @@ abstract class BuilderBase
     public function makeStaticExtensionArgs(): string
     {
         $ret = [];
-        foreach ($this->getExts(false) as $ext) {
-            logger()->info($ext->getName() . ' is using ' . $ext->getConfigureArg());
-            $ret[] = trim($ext->getConfigureArg());
+        foreach ($this->getExts() as $ext) {
+            $arg = $ext->getConfigureArg();
+            if ($ext->isBuildShared() && !$ext->isBuildStatic()) {
+                if (
+                    (Config::getExt($ext->getName(), 'type') === 'builtin' &&
+                    !file_exists(SOURCE_PATH . '/php-src/ext/' . $ext->getName() . '/config.m4')) ||
+                    Config::getExt($ext->getName(), 'build-with-php') === true
+                ) {
+                    $arg = $ext->getConfigureArg(true);
+                } else {
+                    continue;
+                }
+            }
+            logger()->info($ext->getName() . ' is using ' . $arg);
+            $ret[] = trim($arg);
         }
         logger()->debug('Using configure: ' . implode(' ', $ret));
         return implode(' ', $ret);
@@ -311,15 +351,11 @@ abstract class BuilderBase
     public function getPHPVersionFromArchive(?string $file = null): false|string
     {
         if ($file === null) {
-            $lock = file_exists(DOWNLOAD_PATH . '/.lock.json') ? file_get_contents(DOWNLOAD_PATH . '/.lock.json') : false;
-            if ($lock === false) {
+            $lock = LockFile::get('php-src');
+            if ($lock === null) {
                 return false;
             }
-            $lock = json_decode($lock, true);
-            $file = $lock['php-src']['filename'] ?? null;
-            if ($file === null) {
-                return false;
-            }
+            $file = LockFile::getLockFullPath($lock);
         }
         if (preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+)?)\.tar\.(?:gz|bz2|xz)/', $file, $match)) {
             return $match[1];
@@ -364,6 +400,9 @@ abstract class BuilderBase
         }
         if (($type & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
             $ls[] = 'embed';
+        }
+        if (($type & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
+            $ls[] = 'frankenphp';
         }
         return implode(', ', $ls);
     }
@@ -467,6 +506,29 @@ abstract class BuilderBase
                     logger()->critical('Please check with --debug option to see more details.');
                 }
                 throw $e;
+            }
+        }
+    }
+
+    public function checkBeforeBuildPHP(int $rule): void
+    {
+        if (($rule & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
+            if (!$this->getOption('enable-zts')) {
+                throw new WrongUsageException('FrankenPHP SAPI requires ZTS enabled PHP, build with `--enable-zts`!');
+            }
+            // frankenphp doesn't support windows, BSD is currently not supported by static-php-cli
+            if (!in_array(PHP_OS_FAMILY, ['Linux', 'Darwin'])) {
+                throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
+            }
+            // frankenphp needs package go-xcaddy installed
+            $pkg_dir = PKG_ROOT_PATH . '/go-xcaddy-' . arch2gnu(php_uname('m')) . '-' . osfamily2shortname();
+            if (!file_exists("{$pkg_dir}/bin/go") || !file_exists("{$pkg_dir}/bin/xcaddy")) {
+                global $argv;
+                throw new WrongUsageException("FrankenPHP SAPI requires the go-xcaddy package, please install it first: {$argv[0]} install-pkg go-xcaddy");
+            }
+            // frankenphp needs libxml2 lib on macos, see: https://github.com/php/frankenphp/blob/main/frankenphp.go#L17
+            if (PHP_OS_FAMILY === 'Darwin' && !$this->getLib('libxml2')) {
+                throw new WrongUsageException('FrankenPHP SAPI for macOS requires libxml2 library, please include the `xml` extension in your build.');
             }
         }
     }
