@@ -48,17 +48,17 @@ This extension contains an implementation of the coroutine environment for `pdo_
 
 ## swow
 
-1. Only PHP 8.0 ~ 8.4 is supported.
+1. Only PHP 8.0+ is supported.
 
 ## imagick
 
-1. The imagick extension currently only has openmp support on musl libc. This means that multithreading is disabled on glibc or other operating systems. The extension is still fully functional.
+1. Openmp support is disabled, this is recommended by the maintainers and also the case system packages.
 
 ## imap
 
 1. Kerberos is not supported
-2. ext-imap is not thread safe due to the underlying c-client. It's not possible to use it in --enable-zts builds.
-3. Because the extension may be dropped from php, we recommend you look for an alternative implementation, such as [Webklex/php-imap](https://github.com/Webklex/php-imap)
+2. ext-imap is not thread safe due to the underlying c-client. It's not possible to use it in `--enable-zts` builds.
+3. The extension was dropped from php 8.4, we recommend you look for an alternative implementation, such as [Webklex/php-imap](https://github.com/Webklex/php-imap)
 
 ## gd
 
