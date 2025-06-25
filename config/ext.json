@@ -340,7 +340,7 @@
         "arg-type": "none",
         "ext-depends": [
             "xml"
-        ]
+        ],
         "target": [
             "static"
         ]
