@@ -51,15 +51,4 @@ class opcache extends Extension
     {
         return 'Zend Opcache';
     }
-
-    public function patchBeforeMake(): bool
-    {
-        if (!str_contains(getenv('CC'), 'zig')) {
-            return false;
-        }
-        // opcache requires -lunwind, the equivalent to -lgcc_s that gcc automatically links
-        $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -lunwind');
-        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
-        return true;
-    }
 }
