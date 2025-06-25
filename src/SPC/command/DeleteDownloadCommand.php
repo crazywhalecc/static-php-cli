@@ -22,6 +22,8 @@ class DeleteDownloadCommand extends BaseCommand
     {
         $this->addArgument('sources', InputArgument::REQUIRED, 'The sources/packages will be deleted, comma separated');
         $this->addOption('all', 'A', null, 'Delete all downloaded and locked sources/packages');
+        $this->addOption('pre-built-only', 'W', null, 'Delete only pre-built sources/packages, not the original ones');
+        $this->addOption('source-only', 'S', null, 'Delete only sources, not the pre-built packages');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -51,10 +53,11 @@ class DeleteDownloadCommand extends BaseCommand
             $deleted_sources = [];
             foreach ($chosen_sources as $source) {
                 $source = trim($source);
-                foreach ([$source, Downloader::getPreBuiltLockName($source)] as $name) {
-                    if (LockFile::get($name)) {
-                        $deleted_sources[] = $name;
-                    }
+                if (LockFile::get($source) && !$this->getOption('pre-built-only')) {
+                    $deleted_sources[] = $source;
+                }
+                if (LockFile::get(Downloader::getPreBuiltLockName($source)) && !$this->getOption('source-only')) {
+                    $deleted_sources[] = Downloader::getPreBuiltLockName($source);
                 }
             }
 
