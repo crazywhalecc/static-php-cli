@@ -304,12 +304,14 @@
     },
     "intl": {
         "support": {
-            "Windows": "no",
             "BSD": "wip"
         },
         "type": "builtin",
-        "lib-depends": [
+        "lib-depends-unix": [
             "icu"
+        ],
+        "lib-depends-windows": [
+            "icu-static-win"
         ]
     },
     "ldap": {
@@ -336,6 +338,9 @@
         },
         "type": "builtin",
         "arg-type": "none",
+        "ext-depends": [
+            "xml"
+        ],
         "target": [
             "static"
         ]

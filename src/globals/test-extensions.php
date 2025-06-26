@@ -27,9 +27,9 @@ $test_os = [
     // 'ubuntu-latest',
     // 'ubuntu-22.04',
     // 'ubuntu-24.04',
-    'ubuntu-22.04-arm',
+    // 'ubuntu-22.04-arm',
     // 'ubuntu-24.04-arm',
-    // 'windows-latest',
+    'windows-latest',
 ];
 
 // whether enable thread safe
@@ -48,8 +48,8 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
-    'Windows' => 'xlswriter,openssl',
+    'Linux', 'Darwin' => 'curl',
+    'Windows' => 'intl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
