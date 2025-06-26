@@ -196,7 +196,7 @@ if ($argv[1] === 'build_cmd' || $argv[1] === 'build_embed_cmd') {
     $build_cmd .= $upx ? '--with-upx-pack ' : '';
     $build_cmd .= $final_libs === '' ? '' : ('--with-libs=' . quote2($final_libs) . ' ');
     $build_cmd .= str_starts_with($argv[2], 'windows-') ? '' : '--build-fpm ';
-    $build_cmd .= '--debug ';
+    $build_cmd .= '';
 }
 
 echo match ($argv[1]) {
