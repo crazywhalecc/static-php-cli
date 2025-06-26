@@ -63,7 +63,7 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => ' amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
+    'Linux' => 'amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
     'Darwin' => '',
     'Windows' => '',
 };
