@@ -117,7 +117,7 @@ class GlobalEnvManager
         self::$env_cache[] = $val;
     }
 
-    private static function addPathIfNotExists(string $path): void
+    public static function addPathIfNotExists(string $path): void
     {
         if (is_unix() && !str_contains(getenv('PATH'), $path)) {
             self::putenv("PATH={$path}:" . getenv('PATH'));
