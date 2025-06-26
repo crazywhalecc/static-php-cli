@@ -35,7 +35,7 @@ $test_os = [
 $zig = true;
 // temporary!
 if ($zig) {
-    putenv('SPC_LIBC=glibc');
+    putenv('SPC_LIBC=musl');
     putenv('SPC_LIBC_VERSION=2.17');
     putenv('CC=zig-cc');
     putenv('CXX=zig-c++');
@@ -63,7 +63,7 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'event,uv,intl,gettext',
+    'Linux' => '',
     'Darwin' => '',
     'Windows' => '',
 };

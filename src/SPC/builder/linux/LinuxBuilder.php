@@ -30,7 +30,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         GlobalEnvManager::init();
 
-        if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist() && !str_contains((string)getenv('CC'), 'zig')) {
+        if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist() && !str_contains((string) getenv('CC'), 'zig')) {
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
