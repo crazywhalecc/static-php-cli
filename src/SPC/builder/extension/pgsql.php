@@ -57,4 +57,11 @@ class pgsql extends Extension
         }
         return '--with-pgsql=' . BUILD_ROOT_PATH;
     }
+
+    protected function getExtraEnv(): array
+    {
+        return [
+            'CFLAGS' => '-Wno-int-conversion -Wno-implicit-function-declaration'
+        ];
+    }
 }

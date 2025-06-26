@@ -414,6 +414,7 @@ class Extension
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(BUILD_BIN_PATH . '/phpize');
 
         if ($this->patchBeforeSharedConfigure()) {
@@ -422,6 +423,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(
                 './configure ' . $this->getUnixConfigureArg(true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
@@ -441,6 +443,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec('make clean')
             ->exec('make -j' . $this->builder->concurrency)
             ->exec('make install');
@@ -576,5 +579,10 @@ class Extension
             return $zero + $deps;
         }
         return $deps;
+    }
+
+    protected function getExtraEnv(): array
+    {
+        return [];
     }
 }
