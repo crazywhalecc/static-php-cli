@@ -36,7 +36,7 @@ $zig = true;
 // temporary!
 if ($zig) {
     putenv('SPC_LIBC=musl');
-    // putenv('SPC_LIBC_VERSION=2.17');
+    putenv('SPC_LIBC_VERSION=2.17');
     putenv('CC=zig-cc');
     putenv('CXX=zig-c++');
 }
@@ -57,13 +57,13 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'curl,iconv',
+    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
     'Windows' => 'intl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => '',
+    'Linux' => ' amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -117,7 +117,8 @@ $final_libs = trim($with_libs, $trim_value);
 
 if (PHP_OS_FAMILY === 'Windows') {
     $final_extensions_cmd = '"' . $final_extensions . '"';
-} else {
+}
+else {
     $final_extensions_cmd = $final_extensions;
 }
 
@@ -175,7 +176,8 @@ if ($shared_extensions) {
             $shared_cmd = '';
             break;
     }
-} else {
+}
+else {
     $shared_cmd = '';
 }
 
