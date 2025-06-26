@@ -255,7 +255,7 @@ class SystemUtil
                 }
             }
             if ($located) {
-                $found[] = escapeshellarg($located);
+                $found[] = $located;
             }
         }
 
