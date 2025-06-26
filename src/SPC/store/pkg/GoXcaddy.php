@@ -94,5 +94,4 @@ class GoXcaddy extends CustomPackage
             'GOPATH' => "{$pkgroot}/go",
         ];
     }
-
 }

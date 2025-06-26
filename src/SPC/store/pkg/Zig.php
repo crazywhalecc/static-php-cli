@@ -104,15 +104,32 @@ class Zig extends CustomPackage
         $filename = DOWNLOAD_PATH . '/' . ($lock[$name]['filename'] ?? $lock[$name]['dirname']);
         $extract = "{$pkgroot}/{$name}";
 
-
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
         $this->createZigCcScript($zig_bin_dir);
     }
 
+    public static function getEnvironment(): array
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Linux' => 'linux',
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "zig-{$arch}-{$os}";
+        $path = PKG_ROOT_PATH . "/{$packageName}";
+
+        return [
+            'PATH' => $path,
+        ];
+    }
+
     private function createZigCcScript(string $bin_dir): void
     {
-
         $script_content = <<<'EOF'
 #!/usr/bin/env bash
 
@@ -201,24 +218,5 @@ EOF;
         $script_content = str_replace('zig cc', 'zig c++', $script_content);
         file_put_contents("{$bin_dir}/zig-c++", $script_content);
         chmod("{$bin_dir}/zig-c++", 0755);
-    }
-
-    public static function getEnvironment(): array
-    {
-        $arch = arch2gnu(php_uname('m'));
-        $os = match (PHP_OS_FAMILY) {
-            'Linux' => 'linux',
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => 'linux',
-        };
-
-        $packageName = "zig-{$arch}-{$os}";
-        $path = PKG_ROOT_PATH . "/{$packageName}";
-
-        return [
-            'PATH' => $path
-        ];
     }
 }
