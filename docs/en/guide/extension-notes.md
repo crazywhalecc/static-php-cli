@@ -52,7 +52,7 @@ This extension contains an implementation of the coroutine environment for `pdo_
 
 ## imagick
 
-1. Openmp support is disabled, this is recommended by the maintainers and also the case system packages.
+1. OpenMP support is disabled, this is recommended by the maintainers and also the case system packages.
 
 ## imap
 
