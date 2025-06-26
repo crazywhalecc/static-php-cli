@@ -36,7 +36,7 @@ $zig = true;
 // temporary!
 if ($zig) {
     putenv('SPC_LIBC=musl');
-    putenv('SPC_LIBC_VERSION=2.17');
+    // putenv('SPC_LIBC_VERSION=2.17');
     putenv('CC=zig-cc');
     putenv('CXX=zig-c++');
 }
