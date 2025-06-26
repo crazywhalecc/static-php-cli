@@ -28,7 +28,7 @@ class LinuxBuilder extends UnixBuilderBase
         // check musl-cross make installed if we use musl-cross-make
         $arch = arch2gnu(php_uname('m'));
 
-        GlobalEnvManager::init($this);
+        GlobalEnvManager::init();
 
         if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist()) {
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
