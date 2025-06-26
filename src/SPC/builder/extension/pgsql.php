@@ -61,7 +61,7 @@ class pgsql extends Extension
     protected function getExtraEnv(): array
     {
         return [
-            'CFLAGS' => '-Wno-int-conversion -Wno-implicit-function-declaration'
+            'CFLAGS' => '-Wno-int-conversion -Wno-implicit-function-declaration',
         ];
     }
 }

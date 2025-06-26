@@ -548,6 +548,11 @@ class Extension
         return [trim($staticLibString), trim($sharedLibString)];
     }
 
+    protected function getExtraEnv(): array
+    {
+        return [];
+    }
+
     private function getLibraryDependencies(bool $recursive = false): array
     {
         $ret = array_filter($this->dependencies, fn ($x) => $x instanceof LibraryBase);
@@ -579,10 +584,5 @@ class Extension
             return $zero + $deps;
         }
         return $deps;
-    }
-
-    protected function getExtraEnv(): array
-    {
-        return [];
     }
 }
