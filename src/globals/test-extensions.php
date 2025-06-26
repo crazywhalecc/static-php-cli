@@ -165,6 +165,12 @@ if ($shared_extensions) {
         case 'ubuntu-22.04-arm':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             break;
+        case 'ubuntu-24.04':
+        case 'ubuntu-24.04-arm':
+            if (getenv('SPC_LIBC') === 'glibc') {
+                $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            }
+            break;
         case 'macos-13':
         case 'macos-14':
         case 'macos-15':
