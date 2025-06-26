@@ -16,7 +16,6 @@ use SPC\store\CurlHook;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\pkg\GoXcaddy;
-use SPC\store\pkg\Zig;
 use SPC\util\DependencyUtil;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCConfigUtil;
@@ -54,7 +53,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 array_unshift($libFiles, ...$lib->getStaticLibs());
             }
         }
-        return array_map(fn($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
+        return array_map(fn ($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
     }
 
     /**
@@ -100,8 +99,7 @@ abstract class UnixBuilderBase extends BuilderBase
             if ($lib instanceof LinuxLibraryBase || $lib instanceof MacOSLibraryBase || $lib instanceof BSDLibraryBase) {
                 logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
                 $ret .= "--with-{$libName}=yes " . $lib->makeAutoconfEnv($prefix) . ' ';
-            }
-            else {
+            } else {
                 logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
                 $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
             }
@@ -215,8 +213,7 @@ abstract class UnixBuilderBase extends BuilderBase
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
                 $ext_path = 'LD_LIBRARY_PATH=' . BUILD_ROOT_PATH . '/lib:$LD_LIBRARY_PATH ';
                 FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.a');
-            }
-            else {
+            } else {
                 $ext_path = '';
                 FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.so');
             }
@@ -245,7 +242,7 @@ abstract class UnixBuilderBase extends BuilderBase
     /**
      * 将编译好的二进制文件发布到 buildroot
      *
-     * @param int $type 发布类型
+     * @param  int                 $type 发布类型
      * @throws RuntimeException
      * @throws FileSystemException
      */
