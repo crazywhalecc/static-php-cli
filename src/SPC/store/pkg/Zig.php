@@ -133,7 +133,8 @@ class Zig extends CustomPackage
         $script_content = <<<'EOF'
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIBDIR="$(realpath "$(dirname "$(gcc -print-file-name=libc.so)")")"
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 BUILDROOT_ABS="$(realpath "$SCRIPT_DIR/../../buildroot/include" 2>/dev/null || echo "")"
 PARSED_ARGS=()
 
@@ -188,8 +189,6 @@ case "$UNAME_S" in
 esac
 
 SPC_TARGET="${SPC_TARGET:-$ARCH-$OS}"
-SPC_LIBC="${SPC_LIBC}"
-SPC_LIBC_VERSION="${SPC_LIBC_VERSION}"
 
 if [ "$SPC_LIBC" = "glibc" ]; then
     SPC_LIBC="gnu"
@@ -199,17 +198,38 @@ if [ "$SPC_TARGET_WAS_SET" -eq 0 ] && [ -z "$SPC_LIBC" ] && [ -z "$SPC_LIBC_VERS
     exec zig cc "${PARSED_ARGS[@]}"
 elif [ -z "$SPC_LIBC" ] && [ -z "$SPC_LIBC_VERSION" ]; then
     exec zig cc -target ${SPC_TARGET} "${PARSED_ARGS[@]}"
-elif [ -z "$SPC_LIBC_VERSION" ]; then
-    exec zig cc -target ${SPC_TARGET}-${SPC_LIBC} -L/usr/lib64 -lstdc++ "${PARSED_ARGS[@]}"
 else
-    error_output=$(zig cc -target ${SPC_TARGET}-${SPC_LIBC}.${SPC_LIBC_VERSION} "${PARSED_ARGS[@]}" 2>&1 >/dev/null)
-    if echo "$error_output" | grep -q "zig: error: version '.*' in target triple '${SPC_TARGET}-${SPC_LIBC}\..*' is invalid"; then
-        exec zig cc -target ${SPC_TARGET}-${SPC_LIBC} -L/usr/lib64 -lstdc++ "${PARSED_ARGS[@]}"
+    TARGET="${SPC_TARGET}-${SPC_LIBC}"
+    [ -n "$SPC_LIBC_VERSION" ] && TARGET="${TARGET}.${SPC_LIBC_VERSION}"
+
+    output=$(zig cc -target "$TARGET" -L"$LIBDIR" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
+    status=$?
+
+    filtered_output=$(echo "$output" | grep -v "version '.*' in target triple")
+
+    if [ $status -eq 0 ]; then
+        echo "$filtered_output"
+        exit 0
+    fi
+
+    if echo "$output" | grep -q "version '.*' in target triple"; then
+        TARGET_FALLBACK="${SPC_TARGET}-${SPC_LIBC}"
+        output=$(zig cc -target "$TARGET_FALLBACK" -L"$LIBDIR" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
+        status=$?
+
+        filtered_output=$(echo "$output" | grep -v "version '.*' in target triple")
+
+        if [ $status -eq 0 ]; then
+            echo "$filtered_output"
+            exit 0
+        else
+            exec zig cc -target "$TARGET_FALLBACK" "${PARSED_ARGS[@]}"
+        fi
     else
-        exec zig cc -target ${SPC_TARGET}-${SPC_LIBC}.${SPC_LIBC_VERSION} -L/usr/lib64 -lstdc++ "${PARSED_ARGS[@]}"
+        echo "$filtered_output"
+        exec zig cc -target "$TARGET" "${PARSED_ARGS[@]}"
     fi
 fi
-
 EOF;
 
         file_put_contents("{$bin_dir}/zig-cc", $script_content);
