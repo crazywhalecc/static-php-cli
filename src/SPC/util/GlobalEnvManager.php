@@ -7,6 +7,7 @@ namespace SPC\util;
 use SPC\builder\linux\SystemUtil;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\Zig;
 
 /**
  * Environment variable manager
@@ -98,6 +99,14 @@ class GlobalEnvManager
         foreach ($os_ini2 as $k => $v) {
             if (isset($default_put_list[$k]) && $default_put_list[$k] !== $v) {
                 self::putenv("{$k}={$v}");
+            }
+        }
+        if (str_contains(getenv('CC'), 'zig') || str_contains(getenv('CXX'), 'zig')) {
+            $zigEnv = Zig::getEnvironment();
+            foreach ($zigEnv as $key => $value) {
+                if ($key === 'PATH') {
+                    self::addPathIfNotExists($value);
+                }
             }
         }
     }

@@ -112,12 +112,65 @@ class Zig extends CustomPackage
 
     private function createZigCcScript(string $bin_dir): void
     {
-        $zig_cc_path = "{$bin_dir}/zig-cc";
 
         $script_content = <<<'EOF'
 #!/usr/bin/env bash
 
-SPC_TARGET="${SPC_TARGET:-native-native}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILDROOT_ABS="$(realpath "$SCRIPT_DIR/../../buildroot/include" 2>/dev/null || echo "")"
+PARSED_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -isystem)
+            shift
+            ARG="$1"
+            [[ -n "$ARG" ]] && shift || break
+            ARG_ABS="$(realpath "$ARG" 2>/dev/null || echo "")"
+            if [[ -n "$ARG_ABS" && "$ARG_ABS" == "$BUILDROOT_ABS" ]]; then
+                PARSED_ARGS+=("-I$ARG")
+            else
+                PARSED_ARGS+=("-isystem" "$ARG")
+            fi
+            ;;
+        -isystem*)
+            ARG="${1#-isystem}"
+            shift
+            ARG_ABS="$(realpath "$ARG" 2>/dev/null || echo "")"
+            if [[ -n "$ARG_ABS" && "$ARG_ABS" == "$BUILDROOT_ABS" ]]; then
+                PARSED_ARGS+=("-I$ARG")
+            else
+                PARSED_ARGS+=("-isystem$ARG")
+            fi
+            ;;
+        *)
+            PARSED_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+SPC_TARGET_WAS_SET=1
+if [ -z "${SPC_TARGET+x}" ]; then
+    SPC_TARGET_WAS_SET=0
+fi
+
+UNAME_M="$(uname -m)"
+UNAME_S="$(uname -s)"
+
+case "$UNAME_M" in
+    x86_64) ARCH="x86_64" ;;
+    aarch64|arm64) ARCH="aarch64" ;;
+    *) echo "Unsupported architecture: $UNAME_M" >&2; exit 1 ;;
+esac
+
+case "$UNAME_S" in
+    Linux) OS="linux" ;;
+    Darwin) OS="macos" ;;
+    *) echo "Unsupported OS: $UNAME_S" >&2; exit 1 ;;
+esac
+
+SPC_TARGET="${SPC_TARGET:-$ARCH-$OS}"
 SPC_LIBC="${SPC_LIBC}"
 SPC_LIBC_VERSION="${SPC_LIBC_VERSION}"
 
@@ -125,24 +178,47 @@ if [ "$SPC_LIBC" = "glibc" ]; then
     SPC_LIBC="gnu"
 fi
 
-if [ "$SPC_TARGET" = "native-native" ] && [ -z "$SPC_LIBC" ] && [ -z "$SPC_LIBC_VERSION" ]; then
-    exec zig cc "$@"
+if [ "$SPC_TARGET_WAS_SET" -eq 0 ] && [ -z "$SPC_LIBC" ] && [ -z "$SPC_LIBC_VERSION" ]; then
+    exec zig cc "${PARSED_ARGS[@]}"
 elif [ -z "$SPC_LIBC" ] && [ -z "$SPC_LIBC_VERSION" ]; then
-    exec zig cc -target ${SPC_TARGET} "$@"
+    exec zig cc -target ${SPC_TARGET} "${PARSED_ARGS[@]}"
 elif [ -z "$SPC_LIBC_VERSION" ]; then
-    exec zig cc -target ${SPC_TARGET}-${SPC_LIBC} -L/usr/lib64 -lstdc++ "$@"
+    exec zig cc -target ${SPC_TARGET}-${SPC_LIBC} -L/usr/lib64 -lstdc++ "${PARSED_ARGS[@]}"
 else
-    error_output=$(zig cc -target ${SPC_TARGET}-${SPC_LIBC}.${SPC_LIBC_VERSION} "$@" 2>&1 >/dev/null)
+    error_output=$(zig cc -target ${SPC_TARGET}-${SPC_LIBC}.${SPC_LIBC_VERSION} "${PARSED_ARGS[@]}" 2>&1 >/dev/null)
     if echo "$error_output" | grep -q "zig: error: version '.*' in target triple '${SPC_TARGET}-${SPC_LIBC}\..*' is invalid"; then
-        exec zig cc -target ${SPC_TARGET}-${SPC_LIBC} -L/usr/lib64 -lstdc++ "$@"
+        exec zig cc -target ${SPC_TARGET}-${SPC_LIBC} -L/usr/lib64 -lstdc++ "${PARSED_ARGS[@]}"
     else
-        exec zig cc -target ${SPC_TARGET}-${SPC_LIBC}.${SPC_LIBC_VERSION} -L/usr/lib64 -lstdc++ "$@"
+        exec zig cc -target ${SPC_TARGET}-${SPC_LIBC}.${SPC_LIBC_VERSION} -L/usr/lib64 -lstdc++ "${PARSED_ARGS[@]}"
     fi
 fi
 
 EOF;
 
-        file_put_contents($zig_cc_path, $script_content);
-        chmod($zig_cc_path, 0755);
+        file_put_contents("{$bin_dir}/zig-cc", $script_content);
+        chmod("{$bin_dir}/zig-cc", 0755);
+
+        $script_content = str_replace('zig cc', 'zig c++', $script_content);
+        file_put_contents("{$bin_dir}/zig-c++", $script_content);
+        chmod("{$bin_dir}/zig-c++", 0755);
+    }
+
+    public static function getEnvironment(): array
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Linux' => 'linux',
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "zig-{$arch}-{$os}";
+        $path = PKG_ROOT_PATH . "/{$packageName}";
+
+        return [
+            'PATH' => $path
+        ];
     }
 }

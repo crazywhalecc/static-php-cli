@@ -10,8 +10,7 @@ abstract class CustomPackage
 
     abstract public function fetch(string $name, bool $force = false, ?array $config = null): void;
 
-    public function extract(string $name): void
-    {
-        throw new \RuntimeException("Extract method not implemented for package: {$name}");
-    }
+    abstract public function extract(string $name): void;
+
+    abstract public static function getEnvironment(): array;
 }

@@ -73,4 +73,26 @@ class GoXcaddy extends CustomPackage
             ])
             ->exec("{$go_exec} install github.com/caddyserver/xcaddy/cmd/xcaddy@latest");
     }
+
+    public static function getEnvironment(): array
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "go-xcaddy-{$arch}-{$os}";
+        $pkgroot = PKG_ROOT_PATH;
+
+        return [
+            'PATH' => "{$pkgroot}/{$packageName}/bin",
+            'GOROOT' => "{$pkgroot}/{$packageName}",
+            'GOBIN' => "{$pkgroot}/{$packageName}/bin",
+            'GOPATH' => "{$pkgroot}/go",
+        ];
+    }
+
 }

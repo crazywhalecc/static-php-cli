@@ -15,6 +15,7 @@ use SPC\store\Config;
 use SPC\store\CurlHook;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\pkg\GoXcaddy;
 use SPC\util\DependencyUtil;
 use SPC\util\SPCConfigUtil;
 
@@ -301,18 +302,6 @@ abstract class UnixBuilderBase extends BuilderBase
      */
     protected function buildFrankenphp(): void
     {
-        $os = match (PHP_OS_FAMILY) {
-            'Linux' => 'linux',
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => throw new RuntimeException('Unsupported OS: ' . PHP_OS_FAMILY),
-        };
-        $arch = arch2gnu(php_uname('m'));
-
-        // define executables for go and xcaddy
-        $xcaddy_exec = PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin/xcaddy";
-
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
@@ -344,11 +333,7 @@ abstract class UnixBuilderBase extends BuilderBase
 
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list, with_dependencies: true);
 
-        $env = [
-            'PATH' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin:" . getenv('PATH'),
-            'GOROOT' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}",
-            'GOBIN' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin",
-            'GOPATH' => PKG_ROOT_PATH . '/go',
+        $env = [...GoXcaddy::getEnvironment(), ...[
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => $config['cflags'],
             'CGO_LDFLAGS' => "{$config['ldflags']} {$config['libs']} {$lrt}",
@@ -358,9 +343,9 @@ abstract class UnixBuilderBase extends BuilderBase
                 "{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
-        ];
+        ]];
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
-            ->exec("{$xcaddy_exec} build --output frankenphp {$xcaddyModules}");
+            ->exec("xcaddy build --output frankenphp {$xcaddyModules}");
     }
 }
