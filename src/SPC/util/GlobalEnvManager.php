@@ -108,6 +108,10 @@ class GlobalEnvManager
             'BSD' => self::applyConfig($ini['freebsd']),
             default => null,
         };
+
+        if (str_contains(getenv('CC'), 'zig')) {
+            // add to path
+        }
     }
 
     public static function putenv(string $val): void
