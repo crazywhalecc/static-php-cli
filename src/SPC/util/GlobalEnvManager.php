@@ -101,7 +101,7 @@ class GlobalEnvManager
                 self::putenv("{$k}={$v}");
             }
         }
-        if (str_contains(getenv('CC'), 'zig') || str_contains(getenv('CXX'), 'zig')) {
+        if (str_contains((string)getenv('CC'), 'zig') || str_contains((string)getenv('CXX'), 'zig')) {
             $zigEnv = Zig::getEnvironment();
             foreach ($zigEnv as $key => $value) {
                 if ($key === 'PATH') {
