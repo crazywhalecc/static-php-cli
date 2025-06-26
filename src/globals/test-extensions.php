@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
@@ -26,11 +26,20 @@ $test_os = [
     // 'macos-15',
     // 'ubuntu-latest',
     // 'ubuntu-22.04',
-    // 'ubuntu-24.04',
     // 'ubuntu-22.04-arm',
-    // 'ubuntu-24.04-arm',
-    'windows-latest',
+    'ubuntu-24.04',
+    'ubuntu-24.04-arm',
+    // 'windows-latest',
 ];
+
+$zig = true;
+// temporary!
+if ($zig) {
+    putenv('SPC_LIBC=glibc');
+    putenv('SPC_LIBC_VERSION=2.17');
+    putenv('CC=zig-cc');
+    putenv('CXX=zig-c++');
+}
 
 // whether enable thread safe
 $zts = true;
@@ -48,13 +57,13 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'curl',
+    'Linux', 'Darwin' => 'curl,iconv',
     'Windows' => 'intl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'uv',
+    'Linux' => 'event,uv,intl,gettext',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -208,6 +217,9 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $down_cmd, $retcode);
         break;
     case 'build_cmd':
+        if ($zig) {
+            passthru("{$prefix}install-pkg zig --debug", $retcode);
+        }
         passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
         break;
     case 'build_embed_cmd':
