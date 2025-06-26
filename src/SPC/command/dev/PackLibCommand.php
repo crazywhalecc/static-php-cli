@@ -42,6 +42,15 @@ class PackLibCommand extends BuildCommand
 
             $builder->proveLibs($libraries);
             $builder->validateLibsAndExts();
+
+            // before pack, check if the dependency tree contains lib-suggests
+            foreach ($libraries as $lib) {
+                if (Config::getLib($lib, 'lib-suggests', []) !== []) {
+                    logger()->critical("The library {$lib} has lib-suggests, packing [{$lib_name}] is not safe, abort !");
+                    return static::FAILURE;
+                }
+            }
+
             foreach ($builder->getLibs() as $lib) {
                 if ($lib->getName() !== $lib_name) {
                     // other dependencies: install or build, both ok
