@@ -207,8 +207,8 @@ abstract class UnixBuilderBase extends BuilderBase
             }
             // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
-                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_ROOT_PATH . '/lib:$LD_LIBRARY_PATH ';
-                FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.a');
+                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$LD_LIBRARY_PATH ';
+                FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
             } else {
                 $ext_path = '';
                 foreach (glob(BUILD_LIB_PATH . '/libphp*.so') as $file) {

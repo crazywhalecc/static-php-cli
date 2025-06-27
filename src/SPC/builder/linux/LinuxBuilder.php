@@ -340,7 +340,7 @@ class LinuxBuilder extends UnixBuilderBase
             chdir($cwd);
         }
         if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
-            shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-all $realLibName");
+            shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-all {$realLibName}");
         }
         $this->patchPhpScripts();
     }
