@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-LIBDIR="$(realpath "$(dirname "$(gcc -print-file-name=libc.so)")")"
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 BUILDROOT_ABS="$(realpath "$SCRIPT_DIR/../../buildroot/include" 2>/dev/null || echo "")"
 PARSED_ARGS=()
@@ -69,7 +68,7 @@ else
     TARGET="${SPC_TARGET}-${SPC_LIBC}"
     [ -n "$SPC_LIBC_VERSION" ] && TARGET="${TARGET}.${SPC_LIBC_VERSION}"
 
-    output=$(zig cc -target "$TARGET" -L"$LIBDIR" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
+    output=$(zig cc -target "$TARGET" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
     status=$?
 
     filtered_output=$(echo "$output" | grep -v "version '.*' in target triple")
@@ -81,7 +80,7 @@ else
 
     if echo "$output" | grep -q "version '.*' in target triple"; then
         TARGET_FALLBACK="${SPC_TARGET}-${SPC_LIBC}"
-        output=$(zig cc -target "$TARGET_FALLBACK" -L"$LIBDIR" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
+        output=$(zig cc -target "$TARGET_FALLBACK" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
         status=$?
 
         filtered_output=$(echo "$output" | grep -v "version '.*' in target triple")
