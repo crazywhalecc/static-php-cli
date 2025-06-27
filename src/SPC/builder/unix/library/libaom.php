@@ -16,11 +16,20 @@ trait libaom
      */
     protected function build(): void
     {
-        putenv('libaom_CFLAGS=-D__PIE__');
+        $cc = getenv('CC');
+        $cxx = getenv('CXX');
+        if (str_contains($cc, 'zig') && getenv('SPC_LIBC') === 'musl') {
+            putenv('CC=' . $cc . ' -D_POSIX_SOURCE');
+            putenv('CXX=' . $cxx . ' -D_POSIX_SOURCE');
+        }
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")
             ->addConfigureArgs('-DAOM_TARGET_CPU=generic')
             ->build();
+        if (str_contains($cc, 'zig') && getenv('SPC_LIBC') === 'musl') {
+            putenv('CC=' . $cc);
+            putenv('CXX=' . $cxx);
+        }
         $this->patchPkgconfPrefix(['aom.pc']);
     }
 }
