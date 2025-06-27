@@ -140,7 +140,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         if ($embed_type !== 'static' && getenv('SPC_LIBC') === 'musl') {
-            throw new RuntimeException('Musl libc does not support dynamic linking of PHP embed!');
+            throw new WrongUsageException('Musl libc does not support dynamic linking of PHP embed!');
         }
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
@@ -300,6 +300,7 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
 
         $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
+        $realLibName = 'libphp.so';
         if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
             $release = $matches[1];
             $realLibName = 'libphp-' . $release . '.so';
@@ -338,8 +339,8 @@ class LinuxBuilder extends UnixBuilderBase
             }
             chdir($cwd);
         }
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
+        if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
+            shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-all $realLibName");
         }
         $this->patchPhpScripts();
     }

@@ -209,7 +209,7 @@ abstract class UnixBuilderBase extends BuilderBase
             if ($ret !== 0) {
                 throw new RuntimeException('embed failed sanity check: build failed. Error message: ' . implode("\n", $out));
             }
-            // if someone changed to --enable-embed=shared, we need to add LD_LIBRARY_PATH
+            // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
                 $ext_path = 'LD_LIBRARY_PATH=' . BUILD_ROOT_PATH . '/lib:$LD_LIBRARY_PATH ';
                 FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.a');
@@ -357,5 +357,9 @@ abstract class UnixBuilderBase extends BuilderBase
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
             ->exec("xcaddy build --output frankenphp {$xcaddyModules}");
+
+        if (!$this->getOption('no-strip', false) && file_exists(BUILD_BIN_PATH . '/frankenphp')) {
+            shell()->cd(BUILD_BIN_PATH)->exec('strip --strip-all frankenphp');
+        }
     }
 }
