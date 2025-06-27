@@ -45,7 +45,7 @@ class GlobalEnvManager
         if (PHP_OS_FAMILY === 'Linux') {
             $arch = getenv('GNU_ARCH');
 
-            if (str_contains(getenv('CC'), 'zig')) {
+            if (str_contains((string) getenv('CC'), 'zig')) {
                 self::putenv('SPC_LINUX_DEFAULT_CC=zig-cc');
                 self::putenv('SPC_LINUX_DEFAULT_CXX=zig-c++');
                 self::putenv('SPC_LINUX_DEFAULT_AR=ar');
