@@ -327,9 +327,11 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? "'-w -s' " : '';
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
+        $staticFlags = '';
         if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';
+            $staticFlags = '-static -static-pie';
         }
 
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list, with_dependencies: true);
@@ -337,7 +339,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $env = [
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => $config['cflags'],
-            'CGO_LDFLAGS' => "{$config['ldflags']} {$config['libs']} {$lrt}",
+            'CGO_LDFLAGS' => "$staticFlags {$config['ldflags']} {$config['libs']} {$lrt}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' . $debugFlags .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .

@@ -139,6 +139,9 @@ class LinuxBuilder extends UnixBuilderBase
         }
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+        if ($embed_type !== 'static' && getenv('SPC_LIBC') === 'musl') {
+            throw new RuntimeException('Musl libc does not support dynamic linking of PHP embed!');
+        }
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
@@ -334,6 +337,9 @@ class LinuxBuilder extends UnixBuilderBase
                 }
             }
             chdir($cwd);
+        }
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
         }
         $this->patchPhpScripts();
     }
