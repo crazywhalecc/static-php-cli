@@ -25,7 +25,6 @@ trait ncurses
                 '--disable-widec',
                 '--with-normal',
                 '--with-ticlib',
-                '--with-pthread',
                 '--without-tests',
                 '--without-dlsym',
                 '--without-debug',

@@ -16,6 +16,7 @@ trait libaom
      */
     protected function build(): void
     {
+        putenv('libaom_CFLAGS=-D__PIE__');
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")
             ->addConfigureArgs('-DAOM_TARGET_CPU=generic')
