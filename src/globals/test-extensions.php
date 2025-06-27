@@ -39,6 +39,8 @@ if ($zig) {
     // putenv('SPC_LIBC_VERSION=2.17');
     putenv('CC=zig-cc');
     putenv('CXX=zig-c++');
+    putenv('AR=ar');
+    putenv('LD=ld.lld');
     exec('ulimit -n 2048');
 }
 
