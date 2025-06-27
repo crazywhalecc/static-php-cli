@@ -119,7 +119,7 @@ trait UnixLibraryTrait
     {
         $env = getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
         if (!str_contains($env, $this->builder->arch_c_flags)) {
-            $env .= ' ' .$this->builder->arch_c_flags;
+            $env .= ' ' . $this->builder->arch_c_flags;
         }
         return trim($env);
     }

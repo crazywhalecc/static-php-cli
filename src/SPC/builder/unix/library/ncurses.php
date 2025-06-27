@@ -15,7 +15,7 @@ trait ncurses
 
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
-                'LDFLAGS' => getenv('SPC_LIBC') === 'musl' ? '-static' : ''
+                'LDFLAGS' => getenv('SPC_LIBC') === 'musl' ? '-static' : '',
             ])
             ->configure(
                 '--enable-overwrite',
