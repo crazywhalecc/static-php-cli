@@ -26,6 +26,9 @@ class GoXcaddy extends CustomPackage
         $pkgroot = PKG_ROOT_PATH;
         $go_exec = "{$pkgroot}/{$name}/bin/go";
         $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        if ($force) {
+            FileSystem::removeDir("{$pkgroot}/{$name}");
+        }
         if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
             return;
         }

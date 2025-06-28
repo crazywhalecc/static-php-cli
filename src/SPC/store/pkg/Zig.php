@@ -26,12 +26,12 @@ class Zig extends CustomPackage
     {
         $pkgroot = PKG_ROOT_PATH;
         $zig_exec = match (PHP_OS_FAMILY) {
-            'Windows' => "{$pkgroot}/{$name}/bin/zig.exe",
-            default => "{$pkgroot}/{$name}/bin/zig",
+            'Windows' => "{$pkgroot}/{$name}/zig.exe",
+            default => "{$pkgroot}/{$name}/zig",
         };
 
         if ($force) {
-            FileSystem::removeDir($pkgroot . '/' . $name);
+            FileSystem::removeDir("{$pkgroot}/{$name}");
         }
 
         if (file_exists($zig_exec)) {
