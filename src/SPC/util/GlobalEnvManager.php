@@ -40,24 +40,6 @@ class GlobalEnvManager
             self::putenv('PKG_CONFIG_PATH=' . BUILD_ROOT_PATH . '/lib/pkgconfig');
         }
 
-        // Define env vars for linux
-        if (PHP_OS_FAMILY === 'Linux') {
-            $arch = getenv('GNU_ARCH');
-            if (SystemUtil::isMuslDist() || getenv('SPC_LIBC') === 'glibc') {
-                self::putenv('SPC_LINUX_DEFAULT_CC=gcc');
-                self::putenv('SPC_LINUX_DEFAULT_CXX=g++');
-                self::putenv('SPC_LINUX_DEFAULT_AR=ar');
-                self::putenv('SPC_LINUX_DEFAULT_LD=ld.gold');
-            } else {
-                self::putenv("SPC_LINUX_DEFAULT_CC={$arch}-linux-musl-gcc");
-                self::putenv("SPC_LINUX_DEFAULT_CXX={$arch}-linux-musl-g++");
-                self::putenv("SPC_LINUX_DEFAULT_AR={$arch}-linux-musl-ar");
-                self::putenv("SPC_LINUX_DEFAULT_LD={$arch}-linux-musl-ld");
-                self::addPathIfNotExists('/usr/local/musl/bin');
-                self::addPathIfNotExists("/usr/local/musl/{$arch}-linux-musl/bin");
-            }
-        }
-
         $ini = self::readIniFile();
 
         $default_put_list = [];
@@ -80,6 +62,29 @@ class GlobalEnvManager
                 self::putenv("{$k}={$v}");
             }
         }
+
+        // deprecated: convert SPC_LIBC to SPC_TARGET
+        if (getenv('SPC_LIBC') !== false) {
+            logger()->warning('SPC_LIBC is deprecated, please use SPC_TARGET instead.');
+            $target = match (getenv('SPC_LIBC')) {
+                'musl' => SPCTarget::MUSL_STATIC,
+                default => SPCTarget::GLIBC,
+            };
+            self::putenv("SPC_TARGET={$target}");
+            self::putenv('SPC_LIBC');
+        }
+
+        // auto-select toolchain based on target and OS temporarily
+        // TODO: use 'zig' instead of 'gcc-native' when ZigToolchain is implemented
+        $toolchain = match (getenv('SPC_TARGET')) {
+            SPCTarget::MUSL_STATIC, SPCTarget::MUSL => SystemUtil::isMuslDist() ? 'gcc-native' : 'musl',
+            SPCTarget::MACHO => 'clang-native',
+            SPCTarget::MSVC_STATIC => 'msvc',
+            default => 'gcc-native',
+        };
+
+        SPCTarget::initTargetForToolchain($toolchain);
+
         // apply second time
         $ini2 = self::readIniFile();
 
@@ -108,11 +113,16 @@ class GlobalEnvManager
         self::$env_cache[] = $val;
     }
 
-    private static function addPathIfNotExists(string $path): void
+    public static function addPathIfNotExists(string $path): void
     {
         if (is_unix() && !str_contains(getenv('PATH'), $path)) {
             self::putenv("PATH={$path}:" . getenv('PATH'));
         }
+    }
+
+    public static function afterInit(): void
+    {
+        SPCTarget::afterInitTargetForToolchain();
     }
 
     /**

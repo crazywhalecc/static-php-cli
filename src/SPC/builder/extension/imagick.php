@@ -6,6 +6,7 @@ namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
 use SPC\util\CustomExt;
+use SPC\util\SPCTarget;
 
 #[CustomExt('imagick')]
 class imagick extends Extension
@@ -15,7 +16,7 @@ class imagick extends Extension
         if (PHP_OS_FAMILY !== 'Linux') {
             return false;
         }
-        if (getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10')) {
+        if (SPCTarget::isTarget(SPCTarget::GLIBC)) {
             return false;
         }
         // imagick with calls omp_pause_all, which requires openmp, on non-musl we build imagick without openmp
@@ -26,7 +27,7 @@ class imagick extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        $disable_omp = !(getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10')) ? '' : ' ac_cv_func_omp_pause_resource_all=no';
+        $disable_omp = SPCTarget::isTarget(SPCTarget::GLIBC) ? ' ac_cv_func_omp_pause_resource_all=no' : '';
         return '--with-imagick=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $disable_omp;
     }
 
@@ -34,7 +35,7 @@ class imagick extends Extension
     {
         // on centos 7, it will use the symbol _ZTINSt6thread6_StateE, which is not defined in system libstdc++.so.6
         [$static, $shared] = parent::getStaticAndSharedLibs();
-        if (getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10')) {
+        if (SPCTarget::isTarget(SPCTarget::GLIBC)) {
             $static .= ' -lstdc++';
             $shared = str_replace('-lstdc++', '', $shared);
         }

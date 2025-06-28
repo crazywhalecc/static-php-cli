@@ -108,7 +108,7 @@ ADD ./bin/spc /app/bin/spc
 RUN /app/bin/setup-runtime
 RUN /app/bin/php /app/bin/composer install --no-dev
 ENV PATH="/app/bin:/cmake/bin:$PATH"
-ENV SPC_LIBC=glibc
+ENV SPC_TARGET=glibc
 
 ADD ./config/env.ini /app/config/env.ini
 RUN CC=gcc bin/spc doctor --auto-fix --debug
@@ -159,7 +159,7 @@ echo 'CXX=/opt/rh/devtoolset-10/root/usr/bin/g++' >> /tmp/spc-gnu-docker.env
 echo 'AR=/opt/rh/devtoolset-10/root/usr/bin/ar' >> /tmp/spc-gnu-docker.env
 echo 'LD=/opt/rh/devtoolset-10/root/usr/bin/ld' >> /tmp/spc-gnu-docker.env
 echo 'SPC_DEFAULT_C_FLAGS=-fPIC' >> /tmp/spc-gnu-docker.env
-echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
+echo 'SPC_TARGET=glibc' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
 

@@ -6,6 +6,7 @@ namespace SPC\builder\linux;
 
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\RuntimeException;
+use SPC\util\SPCTarget;
 
 class SystemUtil
 {
@@ -193,7 +194,7 @@ class SystemUtil
         if (self::$libc_version !== null) {
             return self::$libc_version;
         }
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'glibc') {
+        if (SPCTarget::isTarget(SPCTarget::GLIBC)) {
             $result = shell()->execWithResult('ldd --version', false);
             if ($result[0] !== 0) {
                 return null;
@@ -208,7 +209,7 @@ class SystemUtil
             }
             return null;
         }
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+        if (SPCTarget::isTarget(SPCTarget::MUSL_STATIC)) {
             if (self::isMuslDist()) {
                 $result = shell()->execWithResult('ldd 2>&1', false);
             } else {

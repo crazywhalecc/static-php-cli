@@ -55,7 +55,7 @@ class SPCConfigUtil
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $libs = $this->getLibsString($libraries, $with_dependencies);
-        if (PHP_OS_FAMILY === 'Darwin') {
+        if (SPCTarget::isTarget(SPCTarget::MACHO)) {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
         $cflags = $this->getIncludesString();
@@ -146,7 +146,7 @@ class SPCConfigUtil
             }
         }
         // patch: imagick (imagemagick wrapper) for linux needs libgomp
-        if (in_array('imagemagick', $libraries) && PHP_OS_FAMILY === 'Linux' && !(getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10'))) {
+        if (in_array('imagemagick', $libraries) && !SPCTarget::isTarget(SPCTarget::GLIBC)) {
             $short_name[] = '-lgomp';
         }
         return implode(' ', $short_name);

@@ -72,6 +72,14 @@ final class CheckListHandler
     {
         foreach (FileSystem::getClassesPsr4(__DIR__ . '/item', 'SPC\doctor\item') as $class) {
             $ref = new \ReflectionClass($class);
+            $optional = $ref->getAttributes(OptionalCheck::class)[0] ?? null;
+            if ($optional !== null) {
+                /** @var OptionalCheck $instance */
+                $instance = $optional->newInstance();
+                if (is_callable($instance->check) && !call_user_func($instance->check)) {
+                    continue; // skip this class if optional check is false
+                }
+            }
             foreach ($ref->getMethods() as $method) {
                 foreach ($method->getAttributes() as $a) {
                     if (is_a($a->getName(), AsCheckItem::class, true)) {

@@ -14,6 +14,7 @@ use SPC\store\Config;
 use SPC\store\Downloader;
 use SPC\store\LockFile;
 use SPC\util\DependencyUtil;
+use SPC\util\SPCTarget;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -223,7 +224,11 @@ class DownloadCommand extends BaseCommand
                             '{name}' => $source,
                             '{arch}' => arch2gnu(php_uname('m')),
                             '{os}' => strtolower(PHP_OS_FAMILY),
-                            '{libc}' => getenv('SPC_LIBC') ?: 'default',
+                            '{libc}' => match (getenv('SPC_TARGET')) {
+                                SPCTarget::MUSL_STATIC, SPCTarget::MUSL => 'musl',
+                                SPCTarget::GLIBC => 'glibc',
+                                default => 'default',
+                            },
                             '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
                         ];
                         $find = str_replace(array_keys($replace), array_values($replace), Config::getPreBuilt('match-pattern'));

@@ -11,6 +11,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\pkg\CustomPackage;
 use SPC\store\source\CustomSourceBase;
+use SPC\util\SPCTarget;
 
 /**
  * Source Downloader.
@@ -591,7 +592,16 @@ class Downloader
 
     public static function getPreBuiltLockName(string $source): string
     {
-        return "{$source}-" . PHP_OS_FAMILY . '-' . getenv('GNU_ARCH') . '-' . (getenv('SPC_LIBC') ?: 'default') . '-' . (SystemUtil::getLibcVersionIfExists() ?? 'default');
+        $os_family = PHP_OS_FAMILY;
+        $gnu_arch = getenv('GNU_ARCH') ?: 'unknown';
+        $libc = match (getenv('SPC_TARGET')) {
+            SPCTarget::MUSL_STATIC, SPCTarget::MUSL => 'musl',
+            SPCTarget::GLIBC => 'glibc',
+            default => 'default',
+        };
+        $libc_version = SystemUtil::getLibcVersionIfExists() ?? 'default';
+
+        return "{$source}-{$os_family}-{$gnu_arch}-{$libc}-{$libc_version}";
     }
 
     /**
