@@ -68,7 +68,9 @@ class GlobalEnvManager
             logger()->warning('SPC_LIBC is deprecated, please use SPC_TARGET instead.');
             $target = match (getenv('SPC_LIBC')) {
                 'musl' => SPCTarget::MUSL_STATIC,
-                default => SPCTarget::GLIBC,
+                'musl-shared' => SPCTarget::MUSL,
+                'glibc' => SPCTarget::GLIBC,
+                default => throw new WrongUsageException('Unsupported SPC_LIBC value: ' . getenv('SPC_LIBC')),
             };
             self::putenv("SPC_TARGET={$target}");
             self::putenv('SPC_LIBC');
