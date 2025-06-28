@@ -21,15 +21,15 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13',
-    // 'macos-14',
-    'macos-15',
-    'ubuntu-latest',
-    'ubuntu-22.04',
-    'ubuntu-24.04',
-    // 'ubuntu-22.04-arm',
-    // 'ubuntu-24.04-arm',
-    // 'windows-latest',
+    // 'macos-13', // bin/spc for x86_64
+    // 'macos-14',  // bin/spc for arm64
+    'macos-15', // bin/spc for arm64
+    'ubuntu-latest', // bin/spc-alpine-docker for x86_64
+    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    'ubuntu-24.04', // bin/spc for x86_64
+    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    // 'ubuntu-24.04-arm', // bin/spc for arm64
+    // 'windows-latest', // .\bin\spc.ps1
 ];
 
 // whether enable thread safe
