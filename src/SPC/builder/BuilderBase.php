@@ -14,6 +14,7 @@ use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
 use SPC\store\SourceManager;
+use SPC\store\SourcePatcher;
 use SPC\util\CustomExt;
 
 abstract class BuilderBase
@@ -203,6 +204,8 @@ abstract class BuilderBase
             $this->emitPatchPoint('before-exts-extract');
             SourceManager::initSource(exts: [...$static_extensions, ...$shared_extensions]);
             $this->emitPatchPoint('after-exts-extract');
+            // patch micro
+            SourcePatcher::patchMicro();
         }
 
         foreach ([...$static_extensions, ...$shared_extensions] as $extension) {
