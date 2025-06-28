@@ -31,8 +31,7 @@ trait imagemagick
             ->optionalLib('freetype', ...ac_with_args('freetype'))
             ->optionalLib('bzip2', ...ac_with_args('bzlib'))
             ->addConfigureArgs(
-                // TODO: glibc rh 10 toolset's libgomp.a was built without -fPIC so we can't use openmp without depending on libgomp.so
-                SPCTarget::isTarget(SPCTarget::GLIBC) ? '--disable-openmp' : '--enable-openmp',
+                '--disable-openmp',
                 '--without-jxl',
                 '--without-x',
             );
