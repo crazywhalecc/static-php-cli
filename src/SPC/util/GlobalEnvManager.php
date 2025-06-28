@@ -80,7 +80,8 @@ class GlobalEnvManager
             SPCTarget::MUSL_STATIC, SPCTarget::MUSL => SystemUtil::isMuslDist() ? 'gcc-native' : 'musl',
             SPCTarget::MACHO => 'clang-native',
             SPCTarget::MSVC_STATIC => 'msvc',
-            default => 'gcc-native',
+            SPCTarget::GLIBC => !SystemUtil::isMuslDist() ? 'gcc-native' : throw new WrongUsageException('SPC_TARGET must be musl-static or musl for musl dist.'),
+            default => throw new WrongUsageException('Unknown SPC_TARGET: ' . getenv('SPC_TARGET')),
         };
 
         SPCTarget::initTargetForToolchain($toolchain);
