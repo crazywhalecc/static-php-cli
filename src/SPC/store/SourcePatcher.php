@@ -181,7 +181,7 @@ class SourcePatcher
         // Copy patch from phar
         if (str_starts_with($patch_str, 'phar://')) {
             $filename = pathinfo($patch_file, PATHINFO_BASENAME);
-            file_put_contents(SOURCE_PATH . "{$filename}", file_get_contents($patch_file));
+            file_put_contents(SOURCE_PATH . "/{$filename}", file_get_contents($patch_file));
             $patch_str = FileSystem::convertPath(SOURCE_PATH . "/{$filename}");
         }
 
