@@ -43,6 +43,8 @@ class SPCTarget
             return false;
         }
         $env = strtolower($env);
+        // ver
+        $env = explode('@', $env)[0];
         return $env === $target;
     }
 
@@ -53,7 +55,9 @@ class SPCTarget
             return false;
         }
         $env = strtolower($env);
-        return str_ends_with($env, '-static') || $env === self::MUSL_STATIC;
+        // ver
+        $env = explode('@', $env)[0];
+        return str_ends_with($env, '-static');
     }
 
     public static function initTargetForToolchain(string $toolchain): void
@@ -79,5 +83,13 @@ class SPCTarget
         }
         $toolchainClass = self::TOOLCHAIN_LIST[$toolchain];
         (new $toolchainClass())->afterInit(getenv('SPC_TARGET'));
+    }
+
+    public static function getTargetSuffix(): ?string
+    {
+        $target = getenv('SPC_TARGET');
+        $target = strtolower($target);
+        // ver
+        return explode('@', $target)[1] ?? null;
     }
 }

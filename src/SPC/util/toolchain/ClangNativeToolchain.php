@@ -9,11 +9,16 @@ use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
 use SPC\builder\macos\SystemUtil as MacOSSystemUtil;
 use SPC\exception\WrongUsageException;
 use SPC\util\GlobalEnvManager;
+use SPC\util\SPCTarget;
 
 class ClangNativeToolchain implements ToolchainInterface
 {
     public function initEnv(string $target): void
     {
+        // native toolchain does not support versioning
+        if (SPCTarget::getTargetSuffix() !== null) {
+            throw new WrongUsageException('Clang native toolchain does not support versioning.');
+        }
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CC=clang');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CXX=clang++');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=ar');
