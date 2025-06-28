@@ -145,10 +145,6 @@ class SPCConfigUtil
                 }
             }
         }
-        // patch: imagick (imagemagick wrapper) for linux needs libgomp
-        if (in_array('imagemagick', $libraries) && !SPCTarget::isTarget(SPCTarget::GLIBC)) {
-            $short_name[] = '-lgomp';
-        }
         return implode(' ', $short_name);
     }
 
