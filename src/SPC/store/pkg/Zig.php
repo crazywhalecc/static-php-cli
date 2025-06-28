@@ -30,7 +30,11 @@ class Zig extends CustomPackage
             default => "{$pkgroot}/{$name}/bin/zig",
         };
 
-        if (file_exists($zig_exec) && !$force) {
+        if ($force) {
+            FileSystem::removeDir($pkgroot . '/' . $name);
+        }
+
+        if (file_exists($zig_exec)) {
             return;
         }
 
@@ -73,13 +77,13 @@ class Zig extends CustomPackage
         $url = $download_info['tarball'];
         $filename = basename($url);
 
-        $config = [
+        $pkg = [
             'type' => 'url',
             'url' => $url,
             'filename' => $filename,
         ];
 
-        Downloader::downloadPackage($name, $config, $force);
+        Downloader::downloadPackage($name, $pkg, $force);
     }
 
     public function extract(string $name): void
@@ -91,11 +95,7 @@ class Zig extends CustomPackage
             default => "{$zig_bin_dir}/zig",
         };
 
-        if (file_exists($zig_exec)) {
-            if (!file_exists("{$zig_bin_dir}/zig-cc")) {
-                $this->createZigCcScript($zig_bin_dir);
-                return;
-            }
+        if (file_exists($zig_exec) && file_exists("{$zig_bin_dir}/zig-cc")) {
             return;
         }
 

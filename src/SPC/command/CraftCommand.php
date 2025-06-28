@@ -71,7 +71,16 @@ class CraftCommand extends BaseCommand
             $retcode = $this->runCommand('install-pkg', 'go-xcaddy');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft go-xcaddy failed</error>');
-                $this->log("craft go-xcaddy failed with code: {$retcode}", true);
+                $this->log("craft: spc install-pkg go-xcaddy failed with code: {$retcode}", true);
+                return static::FAILURE;
+            }
+        }
+        // install zig if requested
+        if (str_contains(getenv('CC'), 'zig')) {
+            $retcode = $this->runCommand('install-pkg', 'zig');
+            if ($retcode !== 0) {
+                $this->output->writeln('<error>craft zig failed</error>');
+                $this->log("craft: spc install-pkg zig failed with code: {$retcode}", true);
                 return static::FAILURE;
             }
         }
