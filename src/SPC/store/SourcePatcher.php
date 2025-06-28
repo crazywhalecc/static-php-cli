@@ -16,22 +16,22 @@ class SourcePatcher
 {
     public static function init(): void
     {
-        // FileSystem::addSourceExtractHook('swow', [SourcePatcher::class, 'patchSwow']);
-        FileSystem::addSourceExtractHook('micro', [SourcePatcher::class, 'patchMicro']);
-        FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl11Darwin']);
-        FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchGDWin32']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchFfiCentos7FixO3strncmp']);
-        FileSystem::addSourceExtractHook('sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
-        FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
-        FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
-        FileSystem::addSourceExtractHook('libyaml', [SourcePatcher::class, 'patchLibYaml']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchImapLicense']);
-        FileSystem::addSourceExtractHook('ext-imagick', [SourcePatcher::class, 'patchImagickWith84']);
-        FileSystem::addSourceExtractHook('libaom', [SourcePatcher::class, 'patchLibaomForAlpine']);
-        FileSystem::addSourceExtractHook('attr', [SourcePatcher::class, 'patchAttrForAlpine']);
-        FileSystem::addSourceExtractHook('gmssl', [SourcePatcher::class, 'patchGMSSL']);
+        // FileSystem::addSourceExtractHook('swow', [__CLASS__, 'patchSwow']);
+        FileSystem::addSourceExtractHook('micro', [__CLASS__, 'patchMicro']);
+        FileSystem::addSourceExtractHook('openssl', [__CLASS__, 'patchOpenssl11Darwin']);
+        FileSystem::addSourceExtractHook('swoole', [__CLASS__, 'patchSwoole']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
+        FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
+        FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
+        FileSystem::addSourceExtractHook('yaml', [__CLASS__, 'patchYamlWin32']);
+        FileSystem::addSourceExtractHook('libyaml', [__CLASS__, 'patchLibYaml']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchImapLicense']);
+        FileSystem::addSourceExtractHook('ext-imagick', [__CLASS__, 'patchImagickWith84']);
+        FileSystem::addSourceExtractHook('libaom', [__CLASS__, 'patchLibaomForAlpine']);
+        FileSystem::addSourceExtractHook('attr', [__CLASS__, 'patchAttrForAlpine']);
+        FileSystem::addSourceExtractHook('gmssl', [__CLASS__, 'patchGMSSL']);
     }
 
     /**
@@ -229,6 +229,7 @@ class SourcePatcher
             'PHP_ADD_INCLUDE([$ext_srcdir])',
             "PHP_ADD_INCLUDE( [\$ext_srcdir] )\n    PHP_ADD_INCLUDE([\$abs_srcdir/ext])"
         );
+
         // swoole 5.1.3 build fix
         // get swoole version first
         $file = SOURCE_PATH . '/php-src/ext/swoole/include/swoole_version.h';
@@ -242,6 +243,7 @@ class SourcePatcher
         if ($version === '5.1.3') {
             self::patchFile('spc_fix_swoole_50513.patch', SOURCE_PATH . '/php-src/ext/swoole');
         }
+        self::patchFile('swoole_fix_date_time.patch', SOURCE_PATH . '/php-src/ext/swoole');
         return true;
     }
 

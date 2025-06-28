@@ -7,7 +7,6 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\store\FileSystem;
-use SPC\store\SourcePatcher;
 use SPC\util\CustomExt;
 
 #[CustomExt('swoole')]
@@ -16,10 +15,6 @@ class swoole extends Extension
     public function patchBeforeMake(): bool
     {
         $patched = false;
-        if (PHP_OS_FAMILY === 'Linux') {
-            SourcePatcher::patchFile('swoole_fix_date_time.patch', $this->source_dir);
-            $patched = true;
-        }
         if ($this->builder instanceof MacOSBuilder) {
             // Fix swoole with event extension <util.h> conflict bug
             $util_path = shell()->execWithResult('xcrun --show-sdk-path', false)[1][0] . '/usr/include/util.h';
