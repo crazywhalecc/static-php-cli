@@ -78,7 +78,7 @@ class GlobalEnvManager
 
         // auto-select toolchain based on target and OS temporarily
         // TODO: use 'zig' instead of 'gcc-native' when ZigToolchain is implemented
-        $toolchain = match (getenv('SPC_TARGET')) {
+        $toolchain = match (SPCTarget::getTargetName()) {
             SPCTarget::MUSL_STATIC, SPCTarget::MUSL => SystemUtil::isMuslDist() ? 'gcc-native' : 'musl',
             SPCTarget::MACHO => 'clang-native',
             SPCTarget::MSVC_STATIC => 'msvc',

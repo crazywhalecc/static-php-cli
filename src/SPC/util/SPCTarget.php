@@ -85,6 +85,14 @@ class SPCTarget
         (new $toolchainClass())->afterInit(getenv('SPC_TARGET'));
     }
 
+    public static function getTargetName(): ?string
+    {
+        $target = getenv('SPC_TARGET');
+        $target = strtolower($target);
+        // ver
+        return explode('@', $target)[0];
+    }
+
     public static function getTargetSuffix(): ?string
     {
         $target = getenv('SPC_TARGET');
