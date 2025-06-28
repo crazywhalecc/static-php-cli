@@ -16,20 +16,14 @@ trait libaom
      */
     protected function build(): void
     {
-        $cc = getenv('CC');
-        $cxx = getenv('CXX');
-        if (str_contains($cc, 'zig') && getenv('SPC_LIBC') === 'musl') {
-            f_putenv('CC=' . $cc . ' -D_POSIX_SOURCE');
-            f_putenv('CXX=' . $cxx . ' -D_POSIX_SOURCE');
+        if (getenv('SPC_LIBC') === 'musl' && str_contains(getenv('CC'), 'zig')) {
+            f_putenv('COMPILER_EXTRA=-D_POSIX_SOURCE');
         }
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")
             ->addConfigureArgs('-DAOM_TARGET_CPU=generic')
             ->build();
-        if (str_contains($cc, 'zig') && getenv('SPC_LIBC') === 'musl') {
-            f_putenv('CC=' . $cc);
-            f_putenv('CXX=' . $cxx);
-        }
+        f_putenv('COMPILER_EXTRA');
         $this->patchPkgconfPrefix(['aom.pc']);
     }
 }

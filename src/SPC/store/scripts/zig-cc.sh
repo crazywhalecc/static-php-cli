@@ -61,38 +61,33 @@ if [ "$SPC_LIBC" = "glibc" ]; then
 fi
 
 if [ "$SPC_TARGET_WAS_SET" -eq 0 ] && [ -z "$SPC_LIBC" ] && [ -z "$SPC_LIBC_VERSION" ]; then
-    exec zig cc "${PARSED_ARGS[@]}"
+    exec zig cc "${COMPILER_EXTRA}" "${PARSED_ARGS[@]}"
 elif [ -z "$SPC_LIBC" ] && [ -z "$SPC_LIBC_VERSION" ]; then
-    exec zig cc -target ${SPC_TARGET} "${PARSED_ARGS[@]}"
+    exec zig cc -target "${SPC_TARGET}" "${COMPILER_EXTRA}" "${PARSED_ARGS[@]}"
 else
     TARGET="${SPC_TARGET}-${SPC_LIBC}"
     [ -n "$SPC_LIBC_VERSION" ] && TARGET="${TARGET}.${SPC_LIBC_VERSION}"
 
-    output=$(zig cc -target "$TARGET" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
+    output=$(zig cc -target "$TARGET" -lstdc++ "${COMPILER_EXTRA}" "${PARSED_ARGS[@]}" 2>&1)
     status=$?
 
-    filtered_output=$(echo "$output" | grep -v "version '.*' in target triple")
-
     if [ $status -eq 0 ]; then
-        echo "$filtered_output"
+        echo "$output" | grep -v "version '.*' in target triple"
         exit 0
     fi
 
     if echo "$output" | grep -q "version '.*' in target triple"; then
         TARGET_FALLBACK="${SPC_TARGET}-${SPC_LIBC}"
-        output=$(zig cc -target "$TARGET_FALLBACK" -lstdc++ "${PARSED_ARGS[@]}" 2>&1)
+        output=$(zig cc -target "$TARGET_FALLBACK" -lstdc++ "${COMPILER_EXTRA}" "${PARSED_ARGS[@]}" 2>&1)
         status=$?
 
-        filtered_output=$(echo "$output" | grep -v "version '.*' in target triple")
-
         if [ $status -eq 0 ]; then
-            echo "$filtered_output"
+            echo "$output"
             exit 0
         else
-            exec zig cc -target "$TARGET_FALLBACK" "${PARSED_ARGS[@]}"
+            exec zig cc -target "$TARGET_FALLBACK" "${COMPILER_EXTRA}" "${PARSED_ARGS[@]}"
         fi
     else
-        echo "$filtered_output"
-        exec zig cc -target "$TARGET" "${PARSED_ARGS[@]}"
+        exec zig cc -target "$TARGET" "${COMPILER_EXTRA}" "${PARSED_ARGS[@]}"
     fi
 fi
