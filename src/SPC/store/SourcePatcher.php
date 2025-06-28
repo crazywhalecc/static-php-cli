@@ -73,9 +73,9 @@ class SourcePatcher
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
 
         if ($builder->getOption('enable-micro-win32')) {
-            SourcePatcher::patchMicroWin32();
+            self::patchMicroWin32();
         } else {
-            SourcePatcher::unpatchMicroWin32();
+            self::unpatchMicroWin32();
         }
     }
 
@@ -450,7 +450,7 @@ class SourcePatcher
         }
         $extnum = intval($match[1]);
         if ($extnum < 30800) {
-            SourcePatcher::patchFile('imagick_php84_before_30800.patch', SOURCE_PATH . '/php-src/ext/imagick');
+            self::patchFile('imagick_php84_before_30800.patch', SOURCE_PATH . '/php-src/ext/imagick');
             return true;
         }
         return false;
@@ -468,14 +468,14 @@ class SourcePatcher
         if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0 && intval($match[1]) < 80316) {
             return false;
         }
-        SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
+        self::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
         return true;
     }
 
     public static function patchLibaomForAlpine(): bool
     {
         if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist()) {
-            SourcePatcher::patchFile('libaom_posix_implict.patch', SOURCE_PATH . '/libaom');
+            self::patchFile('libaom_posix_implict.patch', SOURCE_PATH . '/libaom');
             return true;
         }
         return false;
@@ -484,7 +484,7 @@ class SourcePatcher
     public static function patchAttrForAlpine(): bool
     {
         if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist() || PHP_OS_FAMILY === 'Darwin') {
-            SourcePatcher::patchFile('attr_alpine_gethostname.patch', SOURCE_PATH . '/attr');
+            self::patchFile('attr_alpine_gethostname.patch', SOURCE_PATH . '/attr');
             return true;
         }
         return false;
