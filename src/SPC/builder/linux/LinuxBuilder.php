@@ -139,7 +139,7 @@ class LinuxBuilder extends UnixBuilderBase
         }
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
-        if ($embed_type !== 'static' && getenv('SPC_LIBC') === 'musl') {
+        if ($embed_type !== 'static' && getenv('SPC_LIBC') === 'musl' && getenv('SPC_LIBC_LINKAGE') === '-static') {
             throw new WrongUsageException('Musl libc does not support dynamic linking of PHP embed!');
         }
         shell()->cd(SOURCE_PATH . '/php-src')

@@ -202,9 +202,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $util = new SPCConfigUtil($this);
             $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
-            if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
-                $lens .= ' -static';
-            }
+            $lens .= ' ' . getenv('SPC_LIBC_LINKAGE');
             // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
                 $ext_path = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$LD_LIBRARY_PATH ';
