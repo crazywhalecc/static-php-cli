@@ -72,21 +72,13 @@ else
     status=$?
 
     if [ $status -eq 0 ]; then
-        echo "$output" | grep -v "version '.*' in target triple"
+        echo "$output"
         exit 0
     fi
 
     if echo "$output" | grep -q "version '.*' in target triple"; then
-        TARGET_FALLBACK="${SPC_TARGET}-${SPC_LIBC}"
-        output=$(zig cc -target "$TARGET_FALLBACK" -lstdc++ ${COMPILER_EXTRA} "${PARSED_ARGS[@]}" 2>&1)
-        status=$?
-
-        if [ $status -eq 0 ]; then
-            echo "$output"
-            exit 0
-        else
-            exec zig cc -target "$TARGET_FALLBACK" ${COMPILER_EXTRA} "${PARSED_ARGS[@]}"
-        fi
+        echo "$output" | grep -v  "version '.*' in target triple"
+        exit 0
     else
         exec zig cc -target "$TARGET" ${COMPILER_EXTRA} "${PARSED_ARGS[@]}"
     fi
