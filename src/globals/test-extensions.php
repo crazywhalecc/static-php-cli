@@ -40,7 +40,7 @@ if ($zig) {
     putenv('CC=zig-cc');
     putenv('CXX=zig-c++');
     putenv('AR=ar');
-    putenv('LD=ld.lld');
+    putenv('LD=ld');
     exec('ulimit -n 2048');
 }
 
