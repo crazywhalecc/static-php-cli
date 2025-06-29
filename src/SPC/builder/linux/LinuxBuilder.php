@@ -30,7 +30,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         GlobalEnvManager::init();
 
-        if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist()) {
+        if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist() && !str_contains((string) getenv('CC'), 'zig')) {
             $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
             $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
@@ -80,6 +80,7 @@ class LinuxBuilder extends UnixBuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
+        $extra_libs .= (SystemUtil::getCCType() === 'clang' ? ' -lunwind' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
         f_putenv('CFLAGS=' . $cflags);
@@ -103,6 +104,10 @@ class LinuxBuilder extends UnixBuilderBase
             $zts = '';
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
+        $cc = trim(getenv('CC'));
+        if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
+            f_putenv("CC={$cc} -fno-sanitize=undefined");
+        }
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
@@ -134,6 +139,9 @@ class LinuxBuilder extends UnixBuilderBase
         }
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+        if ($embed_type !== 'static' && getenv('SPC_LIBC') === 'musl' && getenv('SPC_LIBC_LINKAGE') === '-static') {
+            throw new WrongUsageException('Musl libc does not support dynamic linking of PHP embed!');
+        }
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
@@ -174,6 +182,9 @@ class LinuxBuilder extends UnixBuilderBase
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
+        }
+        if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
+            f_putenv("CC={$cc}");
         }
         if ($enableFrankenphp) {
             logger()->info('building frankenphp');
@@ -289,33 +300,47 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
 
         $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
+        $realLibName = 'libphp.so';
         if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
             $release = $matches[1];
             $realLibName = 'libphp-' . $release . '.so';
-            $realLib = BUILD_LIB_PATH . '/' . $realLibName;
-            rename(BUILD_LIB_PATH . '/libphp.so', $realLib);
             $cwd = getcwd();
-            chdir(BUILD_LIB_PATH);
-            symlink($realLibName, 'libphp.so');
-            chdir(BUILD_MODULES_PATH);
-            foreach ($this->getExts() as $ext) {
-                if (!$ext->isBuildShared()) {
-                    continue;
+            $libphpPath = BUILD_LIB_PATH . '/libphp.so';
+            $libphpRelease = BUILD_LIB_PATH . '/' . $realLibName;
+            if (!file_exists($libphpRelease) && file_exists($libphpPath)) {
+                rename($libphpPath, $libphpRelease);
+            }
+            if (file_exists($libphpRelease)) {
+                chdir(BUILD_LIB_PATH);
+                if (file_exists($libphpPath)) {
+                    unlink($libphpPath);
                 }
-                $name = $ext->getName();
-                $versioned = "{$name}-{$release}.so";
-                $unversioned = "{$name}.so";
-                if (is_file(BUILD_MODULES_PATH . "/{$versioned}")) {
-                    rename(BUILD_MODULES_PATH . "/{$versioned}", BUILD_MODULES_PATH . "/{$unversioned}");
-                    shell()->cd(BUILD_MODULES_PATH)
-                        ->exec(sprintf(
-                            'patchelf --set-soname %s %s',
-                            escapeshellarg($unversioned),
-                            escapeshellarg($unversioned)
-                        ));
+                symlink($realLibName, 'libphp.so');
+            }
+            if (is_dir(BUILD_MODULES_PATH)) {
+                chdir(BUILD_MODULES_PATH);
+                foreach ($this->getExts() as $ext) {
+                    if (!$ext->isBuildShared()) {
+                        continue;
+                    }
+                    $name = $ext->getName();
+                    $versioned = "{$name}-{$release}.so";
+                    $unversioned = "{$name}.so";
+                    if (is_file(BUILD_MODULES_PATH . "/{$versioned}")) {
+                        rename(BUILD_MODULES_PATH . "/{$versioned}", BUILD_MODULES_PATH . "/{$unversioned}");
+                        shell()->cd(BUILD_MODULES_PATH)
+                            ->exec(sprintf(
+                                'patchelf --set-soname %s %s',
+                                escapeshellarg($unversioned),
+                                escapeshellarg($unversioned)
+                            ));
+                    }
                 }
             }
             chdir($cwd);
+        }
+        if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
+            shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-all {$realLibName}");
         }
         $this->patchPhpScripts();
     }

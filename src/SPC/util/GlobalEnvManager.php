@@ -7,6 +7,7 @@ namespace SPC\util;
 use SPC\builder\linux\SystemUtil;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\Zig;
 
 /**
  * Environment variable manager
@@ -43,7 +44,13 @@ class GlobalEnvManager
         // Define env vars for linux
         if (PHP_OS_FAMILY === 'Linux') {
             $arch = getenv('GNU_ARCH');
-            if (SystemUtil::isMuslDist() || getenv('SPC_LIBC') === 'glibc') {
+
+            if (str_contains((string) getenv('CC'), 'zig')) {
+                self::putenv('SPC_LINUX_DEFAULT_CC=zig-cc');
+                self::putenv('SPC_LINUX_DEFAULT_CXX=zig-c++');
+                self::putenv('SPC_LINUX_DEFAULT_AR=ar');
+                self::putenv('SPC_LINUX_DEFAULT_LD=ld.lld');
+            } elseif (SystemUtil::isMuslDist() || getenv('SPC_LIBC') === 'glibc') {
                 self::putenv('SPC_LINUX_DEFAULT_CC=gcc');
                 self::putenv('SPC_LINUX_DEFAULT_CXX=g++');
                 self::putenv('SPC_LINUX_DEFAULT_AR=ar');
@@ -100,6 +107,17 @@ class GlobalEnvManager
                 self::putenv("{$k}={$v}");
             }
         }
+        if (getenv('SPC_LIBC_LINKAGE') === '-static' && getenv('SPC_LIBC') === 'glibc') {
+            self::putenv('SPC_LIBC_LINKAGE=');
+        }
+        if (str_contains((string) getenv('CC'), 'zig') || str_contains((string) getenv('CXX'), 'zig')) {
+            $zigEnv = Zig::getEnvironment();
+            foreach ($zigEnv as $key => $value) {
+                if ($key === 'PATH') {
+                    self::addPathIfNotExists($value);
+                }
+            }
+        }
     }
 
     public static function putenv(string $val): void
@@ -108,7 +126,7 @@ class GlobalEnvManager
         self::$env_cache[] = $val;
     }
 
-    private static function addPathIfNotExists(string $path): void
+    public static function addPathIfNotExists(string $path): void
     {
         if (is_unix() && !str_contains(getenv('PATH'), $path)) {
             self::putenv("PATH={$path}:" . getenv('PATH'));

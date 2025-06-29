@@ -12,6 +12,8 @@ class libmemcached extends LinuxLibraryBase
 
     public function build(): void
     {
-        UnixCMakeExecutor::create($this)->build();
+        UnixCMakeExecutor::create($this)
+            ->addConfigureArgs('-DCMAKE_INSTALL_RPATH=""')
+            ->build();
     }
 }

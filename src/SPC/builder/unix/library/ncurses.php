@@ -14,6 +14,9 @@ trait ncurses
         $filelist = FileSystem::scanDirFiles(BUILD_BIN_PATH, relative: true);
 
         UnixAutoconfExecutor::create($this)
+            ->appendEnv([
+                'LDFLAGS' => getenv('SPC_LIBC') === 'musl' ? '-static' : '',
+            ])
             ->configure(
                 '--enable-overwrite',
                 '--with-curses-h',

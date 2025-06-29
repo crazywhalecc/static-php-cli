@@ -15,7 +15,9 @@ use SPC\store\Config;
 use SPC\store\CurlHook;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
+use SPC\store\pkg\GoXcaddy;
 use SPC\util\DependencyUtil;
+use SPC\util\GlobalEnvManager;
 use SPC\util\SPCConfigUtil;
 
 abstract class UnixBuilderBase extends BuilderBase
@@ -200,20 +202,20 @@ abstract class UnixBuilderBase extends BuilderBase
             $util = new SPCConfigUtil($this);
             $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
-            if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
-                $lens .= ' -static';
+            $lens .= ' ' . getenv('SPC_LIBC_LINKAGE');
+            // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
+            if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
+                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$LD_LIBRARY_PATH ';
+                FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
+            } else {
+                $ext_path = '';
+                foreach (glob(BUILD_LIB_PATH . '/libphp*.so') as $file) {
+                    unlink($file);
+                }
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
             if ($ret !== 0) {
                 throw new RuntimeException('embed failed sanity check: build failed. Error message: ' . implode("\n", $out));
-            }
-            // if someone changed to --enable-embed=shared, we need to add LD_LIBRARY_PATH
-            if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
-                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_ROOT_PATH . '/lib:$LD_LIBRARY_PATH ';
-                FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.a');
-            } else {
-                $ext_path = '';
-                FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.so');
             }
             [$ret, $output] = shell()->cd($sample_file_path)->execWithResult($ext_path . './embed');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
@@ -301,18 +303,6 @@ abstract class UnixBuilderBase extends BuilderBase
      */
     protected function buildFrankenphp(): void
     {
-        $os = match (PHP_OS_FAMILY) {
-            'Linux' => 'linux',
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => throw new RuntimeException('Unsupported OS: ' . PHP_OS_FAMILY),
-        };
-        $arch = arch2gnu(php_uname('m'));
-
-        // define executables for go and xcaddy
-        $xcaddy_exec = PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin/xcaddy";
-
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
@@ -325,7 +315,10 @@ abstract class UnixBuilderBase extends BuilderBase
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
         $lrt = PHP_OS_FAMILY === 'Linux' ? '-lrt' : '';
-        $releaseInfo = json_decode(Downloader::curlExec('https://api.github.com/repos/php/frankenphp/releases/latest', retries: 3, hooks: [[CurlHook::class, 'setupGithubToken']]), true);
+        $releaseInfo = json_decode(Downloader::curlExec(
+            'https://api.github.com/repos/php/frankenphp/releases/latest',
+            hooks: [[CurlHook::class, 'setupGithubToken']],
+        ), true);
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
@@ -334,21 +327,19 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? "'-w -s' " : '';
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+        $staticFlags = '';
+        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl' && getenv('SPC_LIBC_LINKAGE') === 'static') {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';
+            $staticFlags = '-static -static-pie';
         }
 
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list, with_dependencies: true);
 
         $env = [
-            'PATH' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin:" . getenv('PATH'),
-            'GOROOT' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}",
-            'GOBIN' => PKG_ROOT_PATH . "/go-xcaddy-{$arch}-{$os}/bin",
-            'GOPATH' => PKG_ROOT_PATH . '/go',
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => $config['cflags'],
-            'CGO_LDFLAGS' => "{$config['ldflags']} {$config['libs']} {$lrt}",
+            'CGO_LDFLAGS' => "{$staticFlags} {$config['ldflags']} {$config['libs']} {$lrt}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' . $debugFlags .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
@@ -356,8 +347,19 @@ abstract class UnixBuilderBase extends BuilderBase
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
+        foreach (GoXcaddy::getEnvironment() as $key => $value) {
+            if ($key === 'PATH') {
+                GlobalEnvManager::addPathIfNotExists($value);
+            } else {
+                $env[$key] = $value;
+            }
+        }
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
-            ->exec("{$xcaddy_exec} build --output frankenphp {$xcaddyModules}");
+            ->exec("xcaddy build --output frankenphp {$xcaddyModules}");
+
+        if (!$this->getOption('no-strip', false) && file_exists(BUILD_BIN_PATH . '/frankenphp')) {
+            shell()->cd(BUILD_BIN_PATH)->exec('strip --strip-all frankenphp');
+        }
     }
 }

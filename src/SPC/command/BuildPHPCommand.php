@@ -63,7 +63,7 @@ class BuildPHPCommand extends BuildCommand
 
         // check dynamic extension build env
         // linux must build with glibc
-        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc') {
+        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc' && getenv('SPC_LIBC_LINKAGE') === '-static') {
             $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');
             return static::FAILURE;
         }

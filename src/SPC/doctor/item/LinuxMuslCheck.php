@@ -29,6 +29,9 @@ class LinuxMuslCheck
         if (getenv('SPC_LIBC') === 'glibc') {
             return CheckResult::ok('Building with glibc, skipped');
         }
+        if (str_contains(getenv('CC'), 'zig')) {
+            return CheckResult::ok('Building with zig, skipped');
+        }
 
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         if (file_exists($musl_wrapper_lib) && file_exists('/usr/local/musl/lib/libc.a')) {
@@ -45,6 +48,9 @@ class LinuxMuslCheck
         }
         if (getenv('SPC_LIBC') === 'glibc') {
             return CheckResult::ok('Building with glibc, skipped');
+        }
+        if (str_contains(getenv('CC'), 'zig')) {
+            return CheckResult::ok('Building with zig, skipped');
         }
 
         $arch = arch2gnu(php_uname('m'));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -215,7 +216,16 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        return false;
+        $extra = SystemUtil::getExtraRuntimeObjects();
+        if (!$extra) {
+            return false;
+        }
+        FileSystem::replaceFileRegex(
+            $this->source_dir . '/Makefile',
+            "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
+            "$1 {$extra}",
+        );
+        return true;
     }
 
     /**
@@ -387,8 +397,8 @@ class Extension
 
         // macOS ld64 doesn't understand these, while Linux and BSD do
         // use them to make sure that all symbols are picked up, even if a library has already been visited before
-        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,-Bstatic -Wl,--start-group ' : '';
-        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group -Wl,-Bdynamic ' : ' ';
+        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,--start-group ' : '';
+        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group ' : ' ';
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
@@ -404,6 +414,7 @@ class Extension
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(BUILD_BIN_PATH . '/phpize');
 
         if ($this->patchBeforeSharedConfigure()) {
@@ -412,6 +423,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(
                 './configure ' . $this->getUnixConfigureArg(true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
@@ -431,6 +443,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec('make clean')
             ->exec('make -j' . $this->builder->concurrency)
             ->exec('make install');
@@ -533,6 +546,11 @@ class Extension
             }
         }
         return [trim($staticLibString), trim($sharedLibString)];
+    }
+
+    protected function getExtraEnv(): array
+    {
+        return [];
     }
 
     private function getLibraryDependencies(bool $recursive = false): array

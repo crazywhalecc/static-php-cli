@@ -26,6 +26,9 @@ class GoXcaddy extends CustomPackage
         $pkgroot = PKG_ROOT_PATH;
         $go_exec = "{$pkgroot}/{$name}/bin/go";
         $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        if ($force) {
+            FileSystem::removeDir("{$pkgroot}/{$name}");
+        }
         if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
             return;
         }
@@ -71,6 +74,27 @@ class GoXcaddy extends CustomPackage
                 'GOBIN' => "{$pkgroot}/{$name}/bin",
                 'GOPATH' => "{$pkgroot}/go",
             ])
-            ->exec("{$go_exec} install github.com/caddyserver/xcaddy/cmd/xcaddy@latest");
+            ->exec("CC=cc {$go_exec} install github.com/caddyserver/xcaddy/cmd/xcaddy@latest");
+    }
+
+    public static function getEnvironment(): array
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "go-xcaddy-{$arch}-{$os}";
+        $pkgroot = PKG_ROOT_PATH;
+
+        return [
+            'PATH' => "{$pkgroot}/{$packageName}/bin",
+            'GOROOT' => "{$pkgroot}/{$packageName}",
+            'GOBIN' => "{$pkgroot}/{$packageName}/bin",
+            'GOPATH' => "{$pkgroot}/go",
+        ];
     }
 }

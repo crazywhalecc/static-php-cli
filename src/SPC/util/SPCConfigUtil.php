@@ -6,6 +6,7 @@ namespace SPC\util;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -69,6 +70,9 @@ class SPCConfigUtil
         // c++
         if ($this->builder->hasCpp()) {
             $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
+        }
+        if (SystemUtil::getCCType() === 'clang') {
+            $libs .= ' -lunwind';
         }
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
@@ -144,10 +148,6 @@ class SPCConfigUtil
                     $short_name[] = $ks;
                 }
             }
-        }
-        // patch: imagick (imagemagick wrapper) for linux needs libgomp
-        if (in_array('imagemagick', $libraries) && PHP_OS_FAMILY === 'Linux' && !(getenv('SPC_LIBC') === 'glibc' && str_contains(getenv('CC'), 'devtoolset-10'))) {
-            $short_name[] = '-lgomp';
         }
         return implode(' ', $short_name);
     }

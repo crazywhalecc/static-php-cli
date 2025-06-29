@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
@@ -26,11 +26,23 @@ $test_os = [
     // 'macos-15',
     // 'ubuntu-latest',
     // 'ubuntu-22.04',
-    // 'ubuntu-24.04',
     // 'ubuntu-22.04-arm',
-    // 'ubuntu-24.04-arm',
-    'windows-latest',
+    'ubuntu-24.04',
+    'ubuntu-24.04-arm',
+    // 'windows-latest',
 ];
+
+$zig = true;
+// temporary!
+if ($zig) {
+    putenv('SPC_LIBC=glibc');
+    putenv('SPC_LIBC_VERSION=2.28');
+    putenv('CC=zig-cc');
+    putenv('CXX=zig-c++');
+    putenv('AR=ar');
+    putenv('LD=ld');
+    exec('ulimit -n 2048');
+}
 
 // whether enable thread safe
 $zts = true;
@@ -48,13 +60,13 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'curl',
+    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
     'Windows' => 'intl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'uv',
+    'Linux' => 'amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -156,6 +168,12 @@ if ($shared_extensions) {
         case 'ubuntu-22.04-arm':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             break;
+        case 'ubuntu-24.04':
+        case 'ubuntu-24.04-arm':
+            if (getenv('SPC_LIBC') === 'glibc') {
+                $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            }
+            break;
         case 'macos-13':
         case 'macos-14':
         case 'macos-15':
@@ -208,6 +226,9 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $down_cmd, $retcode);
         break;
     case 'build_cmd':
+        if ($zig) {
+            passthru("{$prefix}install-pkg zig --debug", $retcode);
+        }
         passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
         break;
     case 'build_embed_cmd':
