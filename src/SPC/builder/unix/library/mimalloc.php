@@ -14,9 +14,9 @@ trait mimalloc
         $cmake = UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DMI_BUILD_SHARED=OFF',
-                '-DMI_INSTALL_TOPLEVEL=ON'
+                '-DMI_INSTALL_TOPLEVEL=ON',
             );
-        if (SPCTarget::isTarget(SPCTarget::MUSL) || SPCTarget::isTarget(SPCTarget::MUSL_STATIC)) {
+        if (SPCTarget::getLibc() === 'musl') {
             $cmake->addConfigureArgs('-DMI_LIBC_MUSL=ON');
         }
         $cmake->build();

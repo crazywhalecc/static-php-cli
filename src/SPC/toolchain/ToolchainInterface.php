@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace SPC\util\toolchain;
+namespace SPC\toolchain;
 
 interface ToolchainInterface
 {
     /**
      * Initialize the environment for the given target.
      */
-    public function initEnv(string $target): void;
+    public function initEnv(): void;
 
     /**
      * Perform actions after the environment has been initialized for the given target.
      */
-    public function afterInit(string $target): void;
+    public function afterInit(): void;
 }

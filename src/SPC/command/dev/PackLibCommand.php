@@ -6,7 +6,6 @@ namespace SPC\command\dev;
 
 use SPC\builder\BuilderProvider;
 use SPC\builder\LibraryBase;
-use SPC\builder\linux\SystemUtil;
 use SPC\command\BuildCommand;
 use SPC\exception\ExceptionHandler;
 use SPC\exception\FileSystemException;
@@ -77,12 +76,8 @@ class PackLibCommand extends BuildCommand
                         '{name}' => $lib->getName(),
                         '{arch}' => arch2gnu(php_uname('m')),
                         '{os}' => strtolower(PHP_OS_FAMILY),
-                        '{libc}' => match (getenv('SPC_TARGET')) {
-                            SPCTarget::MUSL_STATIC, SPCTarget::MUSL => 'musl',
-                            SPCTarget::GLIBC => 'glibc',
-                            default => 'default',
-                        },
-                        '{libcver}' => SystemUtil::getLibcVersionIfExists() ?? 'default',
+                        '{libc}' => SPCTarget::getLibc() ?? 'default',
+                        '{libcver}' => SPCTarget::getLibcVersion() ?? 'default',
                     ];
                     // detect suffix, for proper tar option
                     $tar_option = $this->getTarOptionFromSuffix(Config::getPreBuilt('match-pattern'));

@@ -2,20 +2,15 @@
 
 declare(strict_types=1);
 
-namespace SPC\util\toolchain;
+namespace SPC\toolchain;
 
 use SPC\exception\WrongUsageException;
 use SPC\util\GlobalEnvManager;
-use SPC\util\SPCTarget;
 
 class MuslToolchain implements ToolchainInterface
 {
-    public function initEnv(string $target): void
+    public function initEnv(): void
     {
-        // Check if the target is musl-static (the musl(-shared) target is not supported yet)
-        if (!in_array($target, [SPCTarget::MUSL_STATIC/* , SPCTarget::MUSL */], true)) {
-            throw new WrongUsageException('MuslToolchain can only be used with the "musl-static" target.');
-        }
         $arch = getenv('GNU_ARCH');
         // Set environment variables for musl toolchain
         GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_CC={$arch}-linux-musl-gcc");
@@ -29,7 +24,7 @@ class MuslToolchain implements ToolchainInterface
         GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_LIBRARY_PATH=/usr/local/musl/lib:/usr/local/musl/{$arch}-linux-musl/lib");
     }
 
-    public function afterInit(string $target): void
+    public function afterInit(): void
     {
         $arch = getenv('GNU_ARCH');
         // append LD_LIBRARY_PATH to $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');

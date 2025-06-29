@@ -34,6 +34,7 @@ class WindowsBuilder extends BuilderBase
         $this->options = $options;
 
         GlobalEnvManager::init();
+        GlobalEnvManager::afterInit();
 
         // ---------- set necessary options ----------
         // set sdk (require visual studio 16 or 17)

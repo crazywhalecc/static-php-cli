@@ -4,13 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\exception\WrongUsageException;
-use SPC\util\toolchain\ClangNativeToolchain;
-use SPC\util\toolchain\GccNativeToolchain;
-use SPC\util\toolchain\MSVCToolchain;
-use SPC\util\toolchain\MuslToolchain;
-use SPC\util\toolchain\ToolchainInterface;
-use SPC\util\toolchain\ZigToolchain;
 
 /**
  * SPC build target constants and toolchain initialization.
@@ -18,86 +13,75 @@ use SPC\util\toolchain\ZigToolchain;
  */
 class SPCTarget
 {
-    public const MUSL = 'musl';
-
-    public const MUSL_STATIC = 'musl-static';
-
-    public const GLIBC = 'glibc';
-
-    public const MACHO = 'macho';
-
-    public const MSVC_STATIC = 'msvc-static';
-
-    public const TOOLCHAIN_LIST = [
-        'musl' => MuslToolchain::class,
-        'gcc-native' => GccNativeToolchain::class,
-        'clang-native' => ClangNativeToolchain::class,
-        'msvc' => MSVCToolchain::class,
-        'zig' => ZigToolchain::class,
+    public const array LIBC_LIST = [
+        'musl',
+        'glibc',
     ];
 
-    public static function isTarget(string $target): bool
-    {
-        $env = getenv('SPC_TARGET');
-        if ($env === false) {
-            return false;
-        }
-        $env = strtolower($env);
-        // ver
-        $env = explode('@', $env)[0];
-        return $env === $target;
-    }
-
+    /**
+     * Returns whether the target is a full-static target.
+     */
     public static function isStaticTarget(): bool
     {
         $env = getenv('SPC_TARGET');
-        if ($env === false) {
-            return false;
+        $libc = getenv('SPC_LIBC');
+        // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
+        if ($libc === 'musl') {
+            return true;
         }
-        $env = strtolower($env);
-        // ver
-        $env = explode('@', $env)[0];
-        return str_ends_with($env, '-static');
+        // TODO: add zig target parser here
+        return false;
     }
 
-    public static function initTargetForToolchain(string $toolchain): void
+    /**
+     * Returns the libc type if set, for other OS, it will always return null.
+     */
+    public static function getLibc(): ?string
+    {
+        $env = getenv('SPC_TARGET');
+        $libc = getenv('SPC_LIBC');
+        if ($libc !== false) {
+            return $libc;
+        }
+        // TODO: zig target parser
+        return null;
+    }
+
+    /**
+     * Returns the libc version if set, for other OS, it will always return null.
+     */
+    public static function getLibcVersion(): ?string
+    {
+        $env = getenv('SPC_TARGET');
+        $libc = getenv('SPC_LIBC');
+        if ($libc !== false) {
+            // legacy method: get a version from system
+            return SystemUtil::getLibcVersionIfExists($libc);
+        }
+        // TODO: zig target parser
+
+        return null;
+    }
+
+    /**
+     * Returns the target OS family, e.g. Linux, Darwin, Windows, BSD.
+     * Currently, we only support native building.
+     *
+     * @return 'BSD'|'Darwin'|'Linux'|'Windows'
+     * @throws WrongUsageException
+     */
+    public static function getTargetOS(): string
     {
         $target = getenv('SPC_TARGET');
-        $toolchain = strtolower($toolchain);
-        if (isset(self::TOOLCHAIN_LIST[$toolchain])) {
-            $toolchainClass = self::TOOLCHAIN_LIST[$toolchain];
-            /* @var ToolchainInterface $toolchainClass */
-            (new $toolchainClass())->initEnv($target);
+        if ($target === false) {
+            return PHP_OS_FAMILY;
         }
-        GlobalEnvManager::putenv("SPC_TOOLCHAIN={$toolchain}");
-    }
-
-    public static function afterInitTargetForToolchain()
-    {
-        if (!getenv('SPC_TOOLCHAIN')) {
-            throw new WrongUsageException('SPC_TOOLCHAIN not set');
-        }
-        $toolchain = getenv('SPC_TOOLCHAIN');
-        if (!isset(self::TOOLCHAIN_LIST[$toolchain])) {
-            throw new WrongUsageException("Unknown toolchain: {$toolchain}");
-        }
-        $toolchainClass = self::TOOLCHAIN_LIST[$toolchain];
-        (new $toolchainClass())->afterInit(getenv('SPC_TARGET'));
-    }
-
-    public static function getTargetName(): ?string
-    {
-        $target = getenv('SPC_TARGET');
-        $target = strtolower($target);
-        // ver
-        return explode('@', $target)[0];
-    }
-
-    public static function getTargetSuffix(): ?string
-    {
-        $target = getenv('SPC_TARGET');
-        $target = strtolower($target);
-        // ver
-        return explode('@', $target)[1] ?? null;
+        // TODO: zig target parser like below?
+        return match (true) {
+            str_contains($target, 'linux') => 'Linux',
+            str_contains($target, 'macos') => 'Darwin',
+            str_contains($target, 'windows') => 'Windows',
+            default => throw new WrongUsageException('Cannot parse target.'),
+        };
     }
 }

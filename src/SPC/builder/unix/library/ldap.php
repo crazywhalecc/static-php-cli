@@ -12,7 +12,7 @@ trait ldap
 {
     public function patchBeforeBuild(): bool
     {
-        $extra = SPCTarget::isTarget(SPCTarget::GLIBC) ? '-ldl -lpthread -lm -lresolv -lutil' : '';
+        $extra = SPCTarget::getLibc() === 'glibc' ? '-ldl -lpthread -lm -lresolv -lutil' : '';
         FileSystem::replaceFileStr($this->source_dir . '/configure', '"-lssl -lcrypto', '"-lssl -lcrypto -lz ' . $extra);
         return true;
     }

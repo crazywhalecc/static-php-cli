@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\toolchain\ToolchainManager;
 
 /**
  * Environment variable manager
@@ -63,30 +63,7 @@ class GlobalEnvManager
             }
         }
 
-        // deprecated: convert SPC_LIBC to SPC_TARGET
-        if (getenv('SPC_LIBC') !== false) {
-            logger()->warning('SPC_LIBC is deprecated, please use SPC_TARGET instead.');
-            $target = match (getenv('SPC_LIBC')) {
-                'musl' => SPCTarget::MUSL_STATIC,
-                'musl-shared' => SPCTarget::MUSL,
-                'glibc' => SPCTarget::GLIBC,
-                default => throw new WrongUsageException('Unsupported SPC_LIBC value: ' . getenv('SPC_LIBC')),
-            };
-            self::putenv("SPC_TARGET={$target}");
-            self::putenv('SPC_LIBC');
-        }
-
-        // auto-select toolchain based on target and OS temporarily
-        // TODO: use 'zig' instead of 'gcc-native' when ZigToolchain is implemented
-        $toolchain = match (SPCTarget::getTargetName()) {
-            SPCTarget::MUSL_STATIC, SPCTarget::MUSL => SystemUtil::isMuslDist() ? 'gcc-native' : 'musl',
-            SPCTarget::MACHO => 'clang-native',
-            SPCTarget::MSVC_STATIC => 'msvc',
-            SPCTarget::GLIBC => !SystemUtil::isMuslDist() ? 'gcc-native' : throw new WrongUsageException('SPC_TARGET must be musl-static or musl for musl dist.'),
-            default => throw new WrongUsageException('Unknown SPC_TARGET: ' . getenv('SPC_TARGET')),
-        };
-
-        SPCTarget::initTargetForToolchain($toolchain);
+        ToolchainManager::initToolchain();
 
         // apply second time
         $ini2 = self::readIniFile();
@@ -123,9 +100,15 @@ class GlobalEnvManager
         }
     }
 
+    /**
+     * Initialize the toolchain after the environment variables are set.
+     * The toolchain or environment availability check is done here.
+     *
+     * @throws WrongUsageException
+     */
     public static function afterInit(): void
     {
-        SPCTarget::afterInitTargetForToolchain();
+        ToolchainManager::afterInitToolchain();
     }
 
     /**

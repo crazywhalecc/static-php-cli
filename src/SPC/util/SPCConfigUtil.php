@@ -55,7 +55,7 @@ class SPCConfigUtil
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $libs = $this->getLibsString($libraries, $with_dependencies);
-        if (SPCTarget::isTarget(SPCTarget::MACHO)) {
+        if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
         $cflags = $this->getIncludesString();

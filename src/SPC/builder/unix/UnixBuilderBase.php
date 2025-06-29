@@ -201,7 +201,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $util = new SPCConfigUtil($this);
             $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
-            if (SPCTarget::isTarget(SPCTarget::MUSL_STATIC)) {
+            if (SPCTarget::isStaticTarget()) {
                 $lens .= ' -static';
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
@@ -335,7 +335,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? "'-w -s' " : '';
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
-        if (SPCTarget::isTarget(SPCTarget::MUSL_STATIC)) {
+        if (SPCTarget::isStaticTarget()) {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';
         }

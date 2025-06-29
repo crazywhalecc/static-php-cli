@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -594,12 +593,8 @@ class Downloader
     {
         $os_family = PHP_OS_FAMILY;
         $gnu_arch = getenv('GNU_ARCH') ?: 'unknown';
-        $libc = match (getenv('SPC_TARGET')) {
-            SPCTarget::MUSL_STATIC, SPCTarget::MUSL => 'musl',
-            SPCTarget::GLIBC => 'glibc',
-            default => 'default',
-        };
-        $libc_version = SystemUtil::getLibcVersionIfExists() ?? 'default';
+        $libc = SPCTarget::getLibc();
+        $libc_version = SPCTarget::getLibcVersion() ?? 'default';
 
         return "{$source}-{$os_family}-{$gnu_arch}-{$libc}-{$libc_version}";
     }

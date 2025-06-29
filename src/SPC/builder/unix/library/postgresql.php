@@ -51,7 +51,7 @@ trait postgresql
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
         if (!empty($output[1][0])) {
             $ldflags = $output[1][0];
-            $envs .= SPCTarget::isTarget(SPCTarget::MUSL_STATIC) ? " LDFLAGS=\"{$ldflags} -static\" " : " LDFLAGS=\"{$ldflags}\" ";
+            $envs .= SPCTarget::isStaticTarget() ? " LDFLAGS=\"{$ldflags} -static\" " : " LDFLAGS=\"{$ldflags}\" ";
         }
         $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
         $error_exec_cnt += $output[0] === 0 ? 0 : 1;
