@@ -32,6 +32,7 @@ abstract class BaseCommand extends Command
         parent::__construct($name);
         $this->addOption('debug', null, null, 'Enable debug mode');
         $this->addOption('no-motd', null, null, 'Disable motd');
+        $this->addOption('no-env-check', null, null, 'Disable env check for builder');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -99,6 +100,7 @@ abstract class BaseCommand extends Command
         // init GlobalEnv
         if (!$this instanceof BuildCommand) {
             GlobalEnvManager::init();
+            $this->input->setOption('no-env-check', true);
         }
         if ($this->shouldExecute()) {
             try {
