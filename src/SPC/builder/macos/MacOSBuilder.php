@@ -29,10 +29,7 @@ class MacOSBuilder extends UnixBuilderBase
 
         // apply global environment variables
         GlobalEnvManager::init();
-
-        if (!$this->getOption('no-env-check')) {
-            GlobalEnvManager::afterInit();
-        }
+        GlobalEnvManager::afterInit();
 
         // ---------- set necessary compile vars ----------
         // concurrency

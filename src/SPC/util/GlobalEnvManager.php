@@ -108,7 +108,9 @@ class GlobalEnvManager
      */
     public static function afterInit(): void
     {
-        ToolchainManager::afterInitToolchain();
+        if (!filter_var(getenv('SPC_SKIP_TOOLCHAIN_CHECK'), FILTER_VALIDATE_BOOL)) {
+            ToolchainManager::afterInitToolchain();
+        }
     }
 
     /**
