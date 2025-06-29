@@ -328,7 +328,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
         $staticFlags = '';
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl' && getenv('SPC_LIBC_LINKAGE') === 'static') {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';
             $staticFlags = '-static -static-pie';
