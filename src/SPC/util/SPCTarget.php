@@ -21,7 +21,7 @@ class SPCTarget
     /**
      * Returns whether the target is a full-static target.
      */
-    public static function isStaticTarget(): bool
+    public static function isStatic(): bool
     {
         $env = getenv('SPC_TARGET');
         $libc = getenv('SPC_LIBC');

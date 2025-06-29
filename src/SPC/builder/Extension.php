@@ -534,7 +534,7 @@ class Extension
             }
         }
         // move static libstdc++ to shared if we are on non-full-static build target
-        if (!SPCTarget::isStaticTarget() && in_array(SPCTarget::getLibc(), SPCTarget::LIBC_LIST)) {
+        if (!SPCTarget::isStatic() && in_array(SPCTarget::getLibc(), SPCTarget::LIBC_LIST)) {
             $staticLibString .= ' -lstdc++';
             $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
         }

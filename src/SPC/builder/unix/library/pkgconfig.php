@@ -14,7 +14,7 @@ trait pkgconfig
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
                 'CFLAGS' => PHP_OS_FAMILY !== 'Linux' ? '-Wimplicit-function-declaration -Wno-int-conversion' : '',
-                'LDFLAGS' => SPCTarget::isStaticTarget() ? '--static' : '',
+                'LDFLAGS' => SPCTarget::isStatic() ? '--static' : '',
             ])
             ->configure(
                 '--with-internal-glib',

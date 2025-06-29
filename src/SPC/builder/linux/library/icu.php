@@ -17,7 +17,7 @@ class icu extends LinuxLibraryBase
     {
         $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1 -DPIC -fPIC"';
         $cxxflags = 'CXXFLAGS="-std=c++17 -DPIC -fPIC -fno-ident"';
-        $ldflags = SPCTarget::isStaticTarget() ? 'LDFLAGS="-static"' : '';
+        $ldflags = SPCTarget::isStatic() ? 'LDFLAGS="-static"' : '';
         shell()->cd($this->source_dir . '/source')->initializeEnv($this)
             ->exec(
                 "{$cppflags} {$cxxflags} {$ldflags} " .
