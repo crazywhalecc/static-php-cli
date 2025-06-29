@@ -108,7 +108,7 @@ class GlobalEnvManager
             }
         }
         if (getenv('SPC_LIBC_LINKAGE') === '-static' && getenv('SPC_LIBC') === 'glibc') {
-            self::putenv('SPC_LIBC_LINKAGE_FLAG=');
+            self::putenv('SPC_LIBC_LINKAGE=');
         }
         if (str_contains((string) getenv('CC'), 'zig') || str_contains((string) getenv('CXX'), 'zig')) {
             $zigEnv = Zig::getEnvironment();
