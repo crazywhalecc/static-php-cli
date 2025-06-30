@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand('spc-config', 'Build dependencies')]
-class SPCConfigCommand extends BuildCommand
+class SPCConfigCommand extends BaseCommand
 {
     protected bool $no_motd = true;
 

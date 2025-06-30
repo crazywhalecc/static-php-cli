@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\util\executor\UnixCMakeExecutor;
+use SPC\util\SPCTarget;
 
 trait mimalloc
 {
@@ -13,9 +14,9 @@ trait mimalloc
         $cmake = UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DMI_BUILD_SHARED=OFF',
-                '-DMI_INSTALL_TOPLEVEL=ON'
+                '-DMI_INSTALL_TOPLEVEL=ON',
             );
-        if (getenv('SPC_LIBC') === 'musl') {
+        if (SPCTarget::getLibc() === 'musl') {
             $cmake->addConfigureArgs('-DMI_LIBC_MUSL=ON');
         }
         $cmake->build();

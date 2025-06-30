@@ -9,6 +9,7 @@ use SPC\command\BuildPHPCommand;
 use SPC\command\CraftCommand;
 use SPC\command\DeleteDownloadCommand;
 use SPC\command\dev\AllExtCommand;
+use SPC\command\dev\EnvCommand;
 use SPC\command\dev\ExtVerCommand;
 use SPC\command\dev\GenerateExtDepDocsCommand;
 use SPC\command\dev\GenerateExtDocCommand;
@@ -70,6 +71,7 @@ final class ConsoleApplication extends Application
                 new GenerateExtDepDocsCommand(),
                 new GenerateLibDepDocsCommand(),
                 new PackLibCommand(),
+                new EnvCommand(),
             ]
         );
     }

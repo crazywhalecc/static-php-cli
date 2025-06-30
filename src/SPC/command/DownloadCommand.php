@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
@@ -14,6 +13,7 @@ use SPC\store\Config;
 use SPC\store\Downloader;
 use SPC\store\LockFile;
 use SPC\util\DependencyUtil;
+use SPC\util\SPCTarget;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -223,8 +223,8 @@ class DownloadCommand extends BaseCommand
                             '{name}' => $source,
                             '{arch}' => arch2gnu(php_uname('m')),
                             '{os}' => strtolower(PHP_OS_FAMILY),
-                            '{libc}' => getenv('SPC_LIBC') ?: 'default',
-                            '{libcver}' => PHP_OS_FAMILY === 'Linux' ? (SystemUtil::getLibcVersionIfExists() ?? 'default') : 'default',
+                            '{libc}' => SPCTarget::getLibc() ?? 'default',
+                            '{libcver}' => SPCTarget::getLibcVersion() ?? 'default',
                         ];
                         $find = str_replace(array_keys($replace), array_values($replace), Config::getPreBuilt('match-pattern'));
                         // find filename in asset list

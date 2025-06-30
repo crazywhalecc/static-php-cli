@@ -76,7 +76,7 @@ bin/spc build gd --with-libs=freetype,libjpeg,libavif,libwebp --build-cli
 
 ## xdebug
 
-1. Xdebug 只能作为共享扩展进行构建。在 Linux 上，您需要使用 static-php-cli 并设置 SPC_LIBC=glibc。
+1. Xdebug 只能作为共享扩展进行构建。您需要使用除了 `musl-static` 外的其他 `SPC_TARGET` 构建目标。
 2. 使用 Linux/glibc 或 macOS 时，您可以使用 `--build-shared=xdebug` 将 Xdebug 编译为共享扩展。
    编译后的 `./php` 二进制文件可以通过指定 INI 文件进行配置和运行，例如 `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`。
 

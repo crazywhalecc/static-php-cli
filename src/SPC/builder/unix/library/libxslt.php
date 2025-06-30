@@ -33,7 +33,13 @@ trait libxslt
                 '--without-debugger',
                 "--with-libxml-prefix={$this->getBuildRootPath()}",
             );
-        $ac->exec("{$this->builder->getOption('library_path')} {$this->builder->getOption('ld_library_path')} ./configure {$ac->getConfigureArgsString()}")->make();
+        if (getenv('SPC_LINUX_DEFAULT_LD_LIBRARY_PATH') && getenv('SPC_LINUX_DEFAULT_LIBRARY_PATH')) {
+            $ac->appendEnv([
+                'LD_LIBRARY_PATH' => getenv('SPC_LINUX_DEFAULT_LD_LIBRARY_PATH'),
+                'LIBRARY_PATH' => getenv('SPC_LINUX_DEFAULT_LIBRARY_PATH'),
+            ]);
+        }
+        $ac->configure()->make();
 
         $this->patchPkgconfPrefix(['libexslt.pc']);
         $this->patchLaDependencyPrefix();
