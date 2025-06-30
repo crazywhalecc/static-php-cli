@@ -151,7 +151,7 @@ class SourcePatcher
 
         foreach ($patches as $patch) {
             logger()->info("Patching micro with {$patch}");
-            self::patchFile(SOURCE_PATH . "/php-src{$patch}", SOURCE_PATH . '/php-src');
+            self::patchFile(SOURCE_PATH . "/php-src/{$patch}", SOURCE_PATH . '/php-src');
         }
 
         return true;
