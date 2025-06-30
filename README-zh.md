@@ -9,7 +9,7 @@
 
 **static-php-cli**是一个用于静态编译、构建 PHP 解释器的工具，支持众多流行扩展。
 
-目前 static-php-cli 支持 `cli`、`fpm`、`embed` 和 `micro` SAPI。
+目前 static-php-cli 支持 `cli`、`fpm`、`embed`、`micro` 和 `frankenphp` SAPI。
 
 **static-php-cli**也支持将 PHP 代码和 PHP 运行时打包为一个文件并运行。
 
@@ -297,7 +297,6 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 <a href="https://beyondco.de/"><img src="/docs/public/images/beyondcode-seeklogo.png" width="300" alt="Beyond Code Logo" /></a>
 
 <a href="https://nativephp.com/"><img src="/docs/public/images/nativephp-logo.svg" width="300" alt="NativePHP Logo" /></a>
-
 
 ## 开源协议
 

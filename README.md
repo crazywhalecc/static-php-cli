@@ -10,7 +10,7 @@
 **static-php-cli** is a powerful tool designed for building static, standalone PHP runtime
 with popular extensions.
 
-Static PHP built by **static-php-cli** supports `cli`, `fpm`, `embed` and `micro` SAPI.
+Static PHP built by **static-php-cli** supports `cli`, `fpm`, `embed`, `micro` and `frankenphp` SAPI.
 
 **static-php-cli** also has the ability to package PHP projects
 along with the PHP interpreter into one single executable file.
