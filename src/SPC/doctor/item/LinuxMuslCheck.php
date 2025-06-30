@@ -16,13 +16,14 @@ use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\PackageManager;
 use SPC\store\SourcePatcher;
+use SPC\toolchain\MuslToolchain;
 
 #[OptionalCheck([self::class, 'optionalCheck'])]
 class LinuxMuslCheck
 {
     public static function optionalCheck(): bool
     {
-        return getenv('SPC_TOOLCHAIN') === 'musl';
+        return getenv('SPC_TOOLCHAIN') === MuslToolchain::class;
     }
 
     /** @noinspection PhpUnused */
