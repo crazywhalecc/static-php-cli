@@ -177,6 +177,9 @@ class SourcePatcher
         }
 
         $patch_str = FileSystem::convertPath($patch_file);
+        if (!file_exists($patch_str)) {
+            throw new RuntimeException("Patch file [{$patch_str}] does not exist");
+        }
 
         // Copy patch from phar
         if (str_starts_with($patch_str, 'phar://')) {
