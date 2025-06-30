@@ -108,10 +108,10 @@ ADD ./bin/spc /app/bin/spc
 RUN /app/bin/setup-runtime
 RUN /app/bin/php /app/bin/composer install --no-dev
 ENV SPC_LIBC=glibc
-ENV PATH="/app/bin:/cmake/bin:/opt/rh/devtoolset-10/root/usr/bin:\$PATH"
+ENV PATH="/app/bin:/cmake/bin:\$PATH"
 
 ADD ./config/env.ini /app/config/env.ini
-RUN CC=gcc bin/php bin/spc doctor --auto-fix --debug
+RUN CC=gcc bin/spc doctor --auto-fix --debug
 
 RUN curl -o make.tgz -fsSL https://ftp.gnu.org/gnu/make/make-4.4.tar.gz && \
     tar -zxvf make.tgz && \
