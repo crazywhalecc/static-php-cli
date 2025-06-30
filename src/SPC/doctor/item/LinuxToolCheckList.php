@@ -51,6 +51,7 @@ class LinuxToolCheckList
         'binutils-gold' => 'ld.gold',
         'base-devel' => 'automake',
         'gettext-devel' => 'gettextize',
+        'gettext-dev' => 'gettextize',
     ];
 
     /** @noinspection PhpUnused */
