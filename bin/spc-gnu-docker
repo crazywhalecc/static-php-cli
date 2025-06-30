@@ -187,5 +187,5 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     set -ex
     $DOCKER_EXECUTABLE run $PLATFORM_ARG --privileged --rm -it $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION /bin/bash
 else
-    $DOCKER_EXECUTABLE run $PLATFORM_ARG --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION /app/bin/php bin/spc $@
+    $DOCKER_EXECUTABLE run $PLATFORM_ARG --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION bin/spc $@
 fi
