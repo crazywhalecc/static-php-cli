@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace SPC\doctor\item;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
+use SPC\doctor\OptionalCheck;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
@@ -16,20 +16,20 @@ use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\PackageManager;
 use SPC\store\SourcePatcher;
+use SPC\toolchain\MuslToolchain;
 
+#[OptionalCheck([self::class, 'optionalCheck'])]
 class LinuxMuslCheck
 {
+    public static function optionalCheck(): bool
+    {
+        return getenv('SPC_TOOLCHAIN') === MuslToolchain::class;
+    }
+
     /** @noinspection PhpUnused */
     #[AsCheckItem('if musl-wrapper is installed', limit_os: 'Linux', level: 800)]
     public function checkMusl(): CheckResult
     {
-        if (SystemUtil::isMuslDist()) {
-            return CheckResult::ok('musl-based distro, skipped');
-        }
-        if (getenv('SPC_LIBC') === 'glibc') {
-            return CheckResult::ok('Building with glibc, skipped');
-        }
-
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         if (file_exists($musl_wrapper_lib) && file_exists('/usr/local/musl/lib/libc.a')) {
             return CheckResult::ok();
@@ -40,13 +40,6 @@ class LinuxMuslCheck
     #[AsCheckItem('if musl-cross-make is installed', limit_os: 'Linux', level: 799)]
     public function checkMuslCrossMake(): CheckResult
     {
-        if (SystemUtil::isMuslDist()) {
-            return CheckResult::ok('musl-based distro, skipped');
-        }
-        if (getenv('SPC_LIBC') === 'glibc') {
-            return CheckResult::ok('Building with glibc, skipped');
-        }
-
         $arch = arch2gnu(php_uname('m'));
         $cross_compile_lib = "/usr/local/musl/{$arch}-linux-musl/lib/libc.a";
         $cross_compile_gcc = "/usr/local/musl/bin/{$arch}-linux-musl-gcc";

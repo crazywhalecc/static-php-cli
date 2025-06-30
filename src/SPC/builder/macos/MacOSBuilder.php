@@ -29,6 +29,7 @@ class MacOSBuilder extends UnixBuilderBase
 
         // apply global environment variables
         GlobalEnvManager::init();
+        GlobalEnvManager::afterInit();
 
         // ---------- set necessary compile vars ----------
         // concurrency

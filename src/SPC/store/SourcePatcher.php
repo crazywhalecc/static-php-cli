@@ -11,6 +11,7 @@ use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\util\SPCTarget;
 
 class SourcePatcher
 {
@@ -459,7 +460,7 @@ class SourcePatcher
 
     public static function patchFfiCentos7FixO3strncmp(): bool
     {
-        if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::getLibcVersionIfExists() > '2.17') {
+        if (!($ver = SPCTarget::getLibcVersion()) || version_compare($ver, '2.17', '>')) {
             return false;
         }
         if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {

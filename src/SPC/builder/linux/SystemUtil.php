@@ -188,12 +188,12 @@ class SystemUtil
     /**
      * Get libc version string from ldd
      */
-    public static function getLibcVersionIfExists(): ?string
+    public static function getLibcVersionIfExists(string $libc): ?string
     {
         if (self::$libc_version !== null) {
             return self::$libc_version;
         }
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'glibc') {
+        if ($libc === 'glibc') {
             $result = shell()->execWithResult('ldd --version', false);
             if ($result[0] !== 0) {
                 return null;
@@ -208,7 +208,7 @@ class SystemUtil
             }
             return null;
         }
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl') {
+        if ($libc === 'musl') {
             if (self::isMuslDist()) {
                 $result = shell()->execWithResult('ldd 2>&1', false);
             } else {

@@ -25,22 +25,8 @@ class LinuxBuilder extends UnixBuilderBase
     {
         $this->options = $options;
 
-        // check musl-cross make installed if we use musl-cross-make
-        $arch = arch2gnu(php_uname('m'));
-
         GlobalEnvManager::init();
-
-        if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist()) {
-            $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
-            $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
-            $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
-            $configure = "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\" " . $configure;
-            GlobalEnvManager::putenv("SPC_CMD_PREFIX_PHP_CONFIGURE={$configure}");
-
-            if (!file_exists("/usr/local/musl/{$arch}-linux-musl/lib/libc.a")) {
-                throw new WrongUsageException('You are building with musl-libc target in glibc distro, but musl-toolchain is not installed, please install musl-toolchain first. (You can use `doctor` command to install it)');
-            }
-        }
+        GlobalEnvManager::afterInit();
 
         // concurrency
         $this->concurrency = intval(getenv('SPC_CONCURRENCY'));

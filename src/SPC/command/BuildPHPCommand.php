@@ -13,6 +13,7 @@ use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
 use SPC\util\GlobalEnvManager;
 use SPC\util\LicenseDumper;
+use SPC\util\SPCTarget;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -63,8 +64,8 @@ class BuildPHPCommand extends BuildCommand
 
         // check dynamic extension build env
         // linux must build with glibc
-        if (!empty($shared_extensions) && PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') !== 'glibc') {
-            $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with glibc!');
+        if (!empty($shared_extensions) && SPCTarget::isStatic()) {
+            $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with shared target!');
             return static::FAILURE;
         }
         $static_and_shared = array_intersect($static_extensions, $shared_extensions);
@@ -133,6 +134,8 @@ class BuildPHPCommand extends BuildCommand
             // print info
             $indent_texts = [
                 'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
+                'Build Target' => getenv('SPC_TARGET'),
+                'Build Toolchain' => getenv('SPC_TOOLCHAIN'),
                 'Build SAPI' => $builder->getBuildTypeName($rule),
                 'Static Extensions (' . count($static_extensions) . ')' => implode(',', $static_extensions),
                 'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
