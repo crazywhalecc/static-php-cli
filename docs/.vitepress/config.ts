@@ -47,6 +47,10 @@ export default {
     nav: [],
     socialLinks: [
       {icon: 'github', link: 'https://github.com/crazywhalecc/static-php-cli'}
-    ]
+    ],
+    footer: {
+      message: 'Released under the MIT License.',
+      copyright: 'Copyright © 2023-present crazywhalecc'
+    }
   }
 }
