@@ -21,3 +21,16 @@ features:
   - title: Dependency Management
     details: static-php-cli comes with dependency management and supports installation of different types of PHP extensions.
 ---
+
+<script setup>
+import {VPSponsors} from "vitepress/theme";
+const sponsors = [
+  { name: 'Beyond Code', img: '/images/beyondcode-seeklogo.png', url: 'https://beyondco.de/' },
+  { name: 'NativePHP', img: '/images/nativephp-logo.svg', url: 'https://nativephp.com/' },
+];
+</script>
+
+## Special Sponsors
+
+<VPSponsors :data="sponsors"/>
+

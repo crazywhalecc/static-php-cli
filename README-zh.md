@@ -292,6 +292,13 @@ bin/spc micro:combine my-app.phar -I "memory_limit=4G" -I "disable_functions=sys
 
 你可以在 [我的个人赞助页](https://github.com/crazywhalecc/crazywhalecc/blob/master/FUNDING.md) 支持我和我的项目。你捐赠的一部分将会被用于维护 **static-php.dev** 服务器。
 
+**特别赞助商**:
+
+<a href="https://beyondco.de/"><img src="/docs/public/images/beyondcode-seeklogo.png" width="300" alt="Beyond Code Logo" /></a>
+
+<a href="https://nativephp.com/"><img src="/docs/public/images/nativephp-logo.svg" width="300" alt="NativePHP Logo" /></a>
+
+
 ## 开源协议
 
 本项目采用 MIT License 许可开源，下面是类似的项目：

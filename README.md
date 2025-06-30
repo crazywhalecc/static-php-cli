@@ -317,6 +317,12 @@ Now there is a [static-php](https://github.com/static-php) organization, which i
 
 You can sponsor me or my project from [GitHub Sponsor](https://github.com/crazywhalecc). A portion of your donation will be used to maintain the **static-php.dev** server.
 
+**Special thanks to sponsors below**:
+
+<a href="https://beyondco.de/"><img src="/docs/public/images/beyondcode-seeklogo.png" width="300" alt="Beyond Code Logo" /></a>
+
+<a href="https://nativephp.com/"><img src="/docs/public/images/nativephp-logo.svg" width="300" alt="NativePHP Logo" /></a>
+
 ## Open-Source License
 
 This project itself is based on MIT License,
