@@ -8,6 +8,7 @@ use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\RuntimeException;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
+use SPC\util\SPCTarget;
 
 class SystemUtil
 {
@@ -215,10 +216,12 @@ class SystemUtil
             return null;
         }
         if ($libc === 'musl') {
-            if (self::isMuslDist()) {
+            if (SPCTarget::getLibc() === 'musl') {
                 $result = shell()->execWithResult('ldd 2>&1', false);
-            } else {
+            } elseif (is_file('/usr/local/musl/lib/libc.so')) {
                 $result = shell()->execWithResult('/usr/local/musl/lib/libc.so 2>&1', false);
+            } else {
+                $result = shell()->execWithResult('/lib/ld-musl-x86_64.so.1 2>&1', false);
             }
             // Match Version * line
             // match ldd version: "Version 1.2.3" match 1.2.3
