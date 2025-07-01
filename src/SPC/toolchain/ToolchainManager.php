@@ -55,7 +55,7 @@ class ToolchainManager
             throw new RuntimeException('You are linking against musl libc dynamically, but musl libc is not installed. Please install it with `sudo dnf install musl-libc` or `sudo apt install musl`');
         }
         if (SPCTarget::getLibc() === 'glibc' && SystemUtil::isMuslDist()) {
-            throw new RuntimeException('You are linking against glibc libc dynamically, which is only supported on glibc distros.');
+            throw new RuntimeException('You are linking against glibc dynamically, which is only supported on musl distros.');
         }
         $toolchain = getenv('SPC_TOOLCHAIN');
         /* @var ToolchainInterface $toolchain */
