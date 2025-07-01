@@ -6,6 +6,8 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait libaom
@@ -16,8 +18,8 @@ trait libaom
      */
     protected function build(): void
     {
-        if (getenv('SPC_LIBC') === 'musl' && str_contains(getenv('CC'), 'zig')) {
-            f_putenv('COMPILER_EXTRA=-D_POSIX_SOURCE');
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            f_putenv('COMPILER_EXTRA=-D_GNU_SOURCE');
         }
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")

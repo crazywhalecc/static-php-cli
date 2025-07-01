@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\exception\ValidationException;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\ConfigValidator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
@@ -76,7 +78,7 @@ class CraftCommand extends BuildCommand
             }
         }
         // install zig if requested
-        if (str_contains(getenv('CC'), 'zig')) {
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
             $retcode = $this->runCommand('install-pkg', 'zig');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft zig failed</error>');

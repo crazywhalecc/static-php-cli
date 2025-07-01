@@ -47,7 +47,7 @@ class ZigCheck
             'BSD' => 'freebsd',
             default => 'linux',
         };
-        PackageManager::installPackage("musl-toolchain-{$arch}-{$os}");
+        PackageManager::installPackage("zig-{$arch}-{$os}");
         return Zig::isInstalled();
     }
 }
