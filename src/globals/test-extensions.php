@@ -32,18 +32,6 @@ $test_os = [
     // 'windows-latest', // .\bin\spc.ps1
 ];
 
-$zig = true;
-// temporary!
-if ($zig) {
-    putenv('SPC_LIBC=glibc');
-    putenv('SPC_LIBC_VERSION=2.28');
-    putenv('CC=zig-cc');
-    putenv('CXX=zig-c++');
-    putenv('AR=ar');
-    putenv('LD=ld');
-    exec('ulimit -n 2048');
-}
-
 // whether enable thread safe
 $zts = true;
 
@@ -170,7 +158,7 @@ if ($shared_extensions) {
             break;
         case 'ubuntu-24.04':
         case 'ubuntu-24.04-arm':
-            if (getenv('SPC_LIBC') === 'glibc') {
+            if (str_contains((string) getenv('SPC_TARGET'), '-gnu')) {
                 $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             }
             break;
