@@ -23,9 +23,8 @@ class SPCTarget
      */
     public static function isStatic(): bool
     {
-        $libc = getenv('SPC_LIBC');
         // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
-        if ($libc === 'musl') {
+        if (getenv('SPC_LIBC') === 'musl') {
             return true;
         }
         if ($target = getenv('SPC_TARGET')) {
