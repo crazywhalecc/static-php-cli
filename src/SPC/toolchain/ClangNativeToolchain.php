@@ -22,12 +22,17 @@ class ClangNativeToolchain implements ToolchainInterface
 
     public function afterInit(): void
     {
-        // check clang exists
-        match (PHP_OS_FAMILY) {
-            'Linux' => LinuxSystemUtil::findCommand('clang++') ?? throw new WrongUsageException('Clang++ not found, please install it or manually set CC/CXX to a valid path.'),
-            'Darwin' => MacOSSystemUtil::findCommand('clang++') ?? throw new WrongUsageException('Clang++ not found, please install it or set CC/CXX to a valid path.'),
-            'BSD' => FreeBSDSystemUtil::findCommand('clang++') ?? throw new WrongUsageException('Clang++ not found, please install it or set CC/CXX to a valid path.'),
-            default => throw new WrongUsageException('Clang is not supported on ' . PHP_OS_FAMILY . '.'),
-        };
+        foreach (['CC', 'CXX', 'AR', 'LD'] as $env) {
+            $command = getenv($env);
+            if (is_file($command)) {
+                continue;
+            }
+            match (PHP_OS_FAMILY) {
+                'Linux' => LinuxSystemUtil::findCommand($command) ?? throw new WrongUsageException("{$command} not found, please install it or set {$env} to a valid path."),
+                'Darwin' => MacOSSystemUtil::findCommand($command) ?? throw new WrongUsageException("{$command} not found, please install it or set {$env} to a valid path."),
+                'BSD' => FreeBSDSystemUtil::findCommand($command) ?? throw new WrongUsageException("{$command} not found, please install it or set {$env} to a valid path."),
+                default => throw new \RuntimeException(__CLASS__ . ' is not supported on ' . PHP_OS_FAMILY . '.'),
+            };
+        }
     }
 }
