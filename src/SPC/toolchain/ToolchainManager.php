@@ -20,7 +20,7 @@ class ToolchainManager
     public static function getToolchainClass(): string
     {
         $libc = getenv('SPC_LIBC');
-        if ($libc !== false && !getenv('SPC_TARGET')) {
+        if ($libc && !getenv('SPC_TARGET')) {
             // TODO: @crazywhalecc this breaks tests
             // logger()->warning('SPC_LIBC is deprecated, please use SPC_TARGET instead.');
             return match ($libc) {

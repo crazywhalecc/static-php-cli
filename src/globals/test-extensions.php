@@ -27,8 +27,8 @@ $test_os = [
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
-    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
-    // 'ubuntu-24.04-arm', // bin/spc for arm64
+    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-latest', // .\bin\spc.ps1
 ];
 
@@ -158,6 +158,7 @@ if ($shared_extensions) {
             break;
         case 'ubuntu-24.04':
         case 'ubuntu-24.04-arm':
+            putenv('SPC_TARGET=native-linux-gnu');
             if (str_contains((string) getenv('SPC_TARGET'), '-gnu')) {
                 $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             }
