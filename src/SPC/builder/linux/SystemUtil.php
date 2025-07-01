@@ -194,7 +194,7 @@ class SystemUtil
     /**
      * Get libc version string from ldd
      */
-    public static function getLibcVersionIfExists(string $libc): ?string
+    public static function getLibcVersionIfExists(?string $libc = null): ?string
     {
         if (self::$libc_version !== null) {
             return self::$libc_version;
