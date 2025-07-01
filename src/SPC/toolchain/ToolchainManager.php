@@ -21,6 +21,9 @@ class ToolchainManager
 
     public static function getToolchainClass(): string
     {
+        if ($tc = getenv('SPC_TOOLCHAIN')) {
+            return $tc;
+        }
         $libc = getenv('SPC_LIBC');
         if ($libc && !getenv('SPC_TARGET')) {
             // TODO: @crazywhalecc this breaks tests
