@@ -10,6 +10,23 @@ use SPC\store\LockFile;
 
 class GoXcaddy extends CustomPackage
 {
+    public static function isInstalled(): bool
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "go-xcaddy-{$arch}-{$os}";
+        $pkgroot = PKG_ROOT_PATH;
+        $folder = "{$pkgroot}/{$packageName}";
+
+        return is_dir($folder) && is_file("{$folder}/bin/go") && is_file("{$folder}/bin/xcaddy");
+    }
+
     public function getSupportName(): array
     {
         return [
