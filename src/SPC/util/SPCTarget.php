@@ -96,11 +96,11 @@ class SPCTarget
         if ($target === false) {
             return PHP_OS_FAMILY;
         }
-        // TODO: zig target parser like below?
         return match (true) {
-            str_contains($target, 'linux') => 'Linux',
-            str_contains($target, 'macos') => 'Darwin',
-            str_contains($target, 'windows') => 'Windows',
+            str_contains($target, '-linux') => 'Linux',
+            str_contains($target, '-macos') => 'Darwin',
+            str_contains($target, '-windows') => 'Windows',
+            str_contains($target, '-native') => PHP_OS_FAMILY,
             default => throw new WrongUsageException('Cannot parse target.'),
         };
     }

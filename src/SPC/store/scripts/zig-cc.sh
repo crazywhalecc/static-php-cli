@@ -37,7 +37,7 @@ done
 TARGET=""
 if [ -n "$SPC_TARGET" ]; then
     TARGET="-target $SPC_TARGET"
-else
+fi
 
 output=$(zig cc $TARGET -lstdc++ $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
 status=$?

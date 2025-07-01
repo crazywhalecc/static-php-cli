@@ -30,5 +30,6 @@ class ZigToolchain implements ToolchainInterface
         if (!is_dir(Zig::getEnvironment()['PATH'])) {
             throw new WrongUsageException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
         }
+        GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
     }
 }
