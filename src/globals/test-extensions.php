@@ -72,7 +72,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'common',
+    'Linux', 'Darwin' => 'minimal',
     'Windows' => 'none',
 };
 
@@ -214,9 +214,6 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $down_cmd, $retcode);
         break;
     case 'build_cmd':
-        if ($zig) {
-            passthru("{$prefix}install-pkg zig --debug", $retcode);
-        }
         passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
         break;
     case 'build_embed_cmd':

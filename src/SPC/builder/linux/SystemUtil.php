@@ -6,6 +6,8 @@ namespace SPC\builder\linux;
 
 use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\exception\RuntimeException;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 
 class SystemUtil
 {
@@ -231,8 +233,7 @@ class SystemUtil
 
     public static function getExtraRuntimeObjects(): string
     {
-        $cc = getenv('CC');
-        if (!$cc || !str_contains($cc, 'zig')) {
+        if (ToolchainManager::getToolchainClass() !== ZigToolchain::class) {
             return '';
         }
 

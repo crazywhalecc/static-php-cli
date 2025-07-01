@@ -20,11 +20,11 @@ class ToolchainManager
     public static function getToolchainClass(): string
     {
         $libc = getenv('SPC_LIBC');
-        if ($libc !== false) {
+        if ($libc !== false && !getenv('SPC_TARGET')) {
             logger()->warning('SPC_LIBC is deprecated, please use SPC_TARGET instead.');
             return match ($libc) {
                 'musl' => SystemUtil::isMuslDist() ? GccNativeToolchain::class : MuslToolchain::class,
-                'glibc' => !SystemUtil::isMuslDist() ? GccNativeToolchain::class : throw new WrongUsageException('SPC_TARGET must be musl for musl dist.'),
+                'glibc' => !SystemUtil::isMuslDist() ? GccNativeToolchain::class : throw new WrongUsageException('SPC_LIBC must be musl for musl dist.'),
                 default => throw new WrongUsageException('Unsupported SPC_LIBC value: ' . $libc),
             };
         }

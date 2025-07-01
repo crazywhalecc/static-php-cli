@@ -6,12 +6,13 @@ namespace SPC\util;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
-use SPC\builder\linux\SystemUtil;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use Symfony\Component\Console\Input\ArgvInput;
 
 class SPCConfigUtil
@@ -71,7 +72,7 @@ class SPCConfigUtil
         if ($this->builder->hasCpp()) {
             $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
         }
-        if (SystemUtil::getCCType() === 'clang') {
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
             $libs .= ' -lunwind';
         }
         // mimalloc must come first
