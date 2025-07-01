@@ -24,7 +24,7 @@ class GccNativeToolchain implements ToolchainInterface
     {
         foreach (['CC', 'CXX', 'AR', 'LD'] as $env) {
             $command = getenv($env);
-            if (is_file($command)) {
+            if (!$command || is_file($command)) {
                 continue;
             }
             match (PHP_OS_FAMILY) {
