@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
+use SPC\util\SPCTarget;
 
 trait imagemagick
 {
     /**
      * @throws RuntimeException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     protected function build(): void
     {
@@ -37,11 +38,11 @@ trait imagemagick
                 '--without-x',
             );
 
-        // special: linux musl needs `-static`
-        $ldflags = ($this instanceof LinuxLibraryBase) && getenv('SPC_LIBC') !== 'glibc' ? ('-static -ldl') : '-ldl';
+        // special: linux-static target needs `-static`
+        $ldflags = SPCTarget::isStatic() ? ('-static -ldl') : '-ldl';
 
         // special: macOS needs -iconv
-        $libs = $this instanceof MacOSLibraryBase ? '-liconv' : '';
+        $libs = SPCTarget::getTargetOS() === 'Darwin' ? '-liconv' : '';
 
         $ac->appendEnv([
             'LDFLAGS' => $ldflags,

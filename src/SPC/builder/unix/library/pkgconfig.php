@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\util\executor\UnixAutoconfExecutor;
+use SPC\util\SPCTarget;
 
 trait pkgconfig
 {
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)
-            ->appendEnv([
+            ->appendEnv([[
                 'CFLAGS' => '-Wimplicit-function-declaration -Wno-int-conversion',
-                'LDFLAGS' => !($this instanceof LinuxLibraryBase) || getenv('SPC_LIBC') === 'glibc' ? '' : '--static',
+                'LDFLAGS' => SPCTarget::isStatic() ? '--static' : '',
             ])
             ->configure(
                 '--with-internal-glib',

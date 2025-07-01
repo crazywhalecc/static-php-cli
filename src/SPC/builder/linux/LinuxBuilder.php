@@ -25,22 +25,8 @@ class LinuxBuilder extends UnixBuilderBase
     {
         $this->options = $options;
 
-        // check musl-cross make installed if we use musl-cross-make
-        $arch = arch2gnu(php_uname('m'));
-
         GlobalEnvManager::init();
-
-        if (getenv('SPC_LIBC') === 'musl' && !SystemUtil::isMuslDist() && !str_contains((string) getenv('CC'), 'zig')) {
-            $this->setOptionIfNotExist('library_path', "LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
-            $this->setOptionIfNotExist('ld_library_path', "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\"");
-            $configure = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
-            $configure = "LD_LIBRARY_PATH=\"/usr/local/musl/{$arch}-linux-musl/lib\" " . $configure;
-            GlobalEnvManager::putenv("SPC_CMD_PREFIX_PHP_CONFIGURE={$configure}");
-
-            if (!file_exists("/usr/local/musl/{$arch}-linux-musl/lib/libc.a")) {
-                throw new WrongUsageException('You are building with musl-libc target in glibc distro, but musl-toolchain is not installed, please install musl-toolchain first. (You can use `doctor` command to install it)');
-            }
-        }
+        GlobalEnvManager::afterInit();
 
         // concurrency
         $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
@@ -104,10 +90,6 @@ class LinuxBuilder extends UnixBuilderBase
             $zts = '';
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
-        $cc = trim(getenv('CC'));
-        if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
-            f_putenv("CC={$cc} -fno-sanitize=undefined");
-        }
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
@@ -139,9 +121,6 @@ class LinuxBuilder extends UnixBuilderBase
         }
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
-        if ($embed_type !== 'static' && getenv('SPC_LIBC') === 'musl' && getenv('SPC_LIBC_LINKAGE') === '-static') {
-            throw new WrongUsageException('Musl libc does not support dynamic linking of PHP embed!');
-        }
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
@@ -182,9 +161,6 @@ class LinuxBuilder extends UnixBuilderBase
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
             }
             $this->buildEmbed();
-        }
-        if (!$disable_jit && $this->getExt('opcache') && str_contains($cc, 'zig')) {
-            f_putenv("CC={$cc}");
         }
         if ($enableFrankenphp) {
             logger()->info('building frankenphp');

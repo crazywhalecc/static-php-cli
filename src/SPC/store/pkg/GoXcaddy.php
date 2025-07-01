@@ -7,7 +7,6 @@ namespace SPC\store\pkg;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
-use SPC\util\GlobalEnvManager;
 
 class GoXcaddy extends CustomPackage
 {
@@ -65,7 +64,6 @@ class GoXcaddy extends CustomPackage
 
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
-        GlobalEnvManager::init();
         // install xcaddy
         shell()
             ->appendEnv([

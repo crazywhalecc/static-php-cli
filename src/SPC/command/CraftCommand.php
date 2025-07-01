@@ -10,7 +10,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
 
 #[AsCommand('craft', 'Build static-php from craft.yml')]
-class CraftCommand extends BaseCommand
+class CraftCommand extends BuildCommand
 {
     public function configure(): void
     {

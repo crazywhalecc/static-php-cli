@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\pkg\Zig;
+use SPC\toolchain\ToolchainManager;
 
 /**
  * Environment variable manager
@@ -41,30 +41,6 @@ class GlobalEnvManager
             self::putenv('PKG_CONFIG_PATH=' . BUILD_ROOT_PATH . '/lib/pkgconfig');
         }
 
-        // Define env vars for linux
-        if (PHP_OS_FAMILY === 'Linux') {
-            $arch = getenv('GNU_ARCH');
-
-            if (str_contains((string) getenv('CC'), 'zig')) {
-                self::putenv('SPC_LINUX_DEFAULT_CC=zig-cc');
-                self::putenv('SPC_LINUX_DEFAULT_CXX=zig-c++');
-                self::putenv('SPC_LINUX_DEFAULT_AR=ar');
-                self::putenv('SPC_LINUX_DEFAULT_LD=ld.lld');
-            } elseif (SystemUtil::isMuslDist() || getenv('SPC_LIBC') === 'glibc') {
-                self::putenv('SPC_LINUX_DEFAULT_CC=gcc');
-                self::putenv('SPC_LINUX_DEFAULT_CXX=g++');
-                self::putenv('SPC_LINUX_DEFAULT_AR=ar');
-                self::putenv('SPC_LINUX_DEFAULT_LD=ld.gold');
-            } else {
-                self::putenv("SPC_LINUX_DEFAULT_CC={$arch}-linux-musl-gcc");
-                self::putenv("SPC_LINUX_DEFAULT_CXX={$arch}-linux-musl-g++");
-                self::putenv("SPC_LINUX_DEFAULT_AR={$arch}-linux-musl-ar");
-                self::putenv("SPC_LINUX_DEFAULT_LD={$arch}-linux-musl-ld");
-                self::addPathIfNotExists('/usr/local/musl/bin');
-                self::addPathIfNotExists("/usr/local/musl/{$arch}-linux-musl/bin");
-            }
-        }
-
         $ini = self::readIniFile();
 
         $default_put_list = [];
@@ -87,6 +63,9 @@ class GlobalEnvManager
                 self::putenv("{$k}={$v}");
             }
         }
+
+        ToolchainManager::initToolchain();
+
         // apply second time
         $ini2 = self::readIniFile();
 
@@ -107,17 +86,6 @@ class GlobalEnvManager
                 self::putenv("{$k}={$v}");
             }
         }
-        if (getenv('SPC_LIBC_LINKAGE') === '-static' && getenv('SPC_LIBC') === 'glibc') {
-            self::putenv('SPC_LIBC_LINKAGE=');
-        }
-        if (str_contains((string) getenv('CC'), 'zig') || str_contains((string) getenv('CXX'), 'zig')) {
-            $zigEnv = Zig::getEnvironment();
-            foreach ($zigEnv as $key => $value) {
-                if ($key === 'PATH') {
-                    self::addPathIfNotExists($value);
-                }
-            }
-        }
     }
 
     public static function putenv(string $val): void
@@ -130,6 +98,19 @@ class GlobalEnvManager
     {
         if (is_unix() && !str_contains(getenv('PATH'), $path)) {
             self::putenv("PATH={$path}:" . getenv('PATH'));
+        }
+    }
+
+    /**
+     * Initialize the toolchain after the environment variables are set.
+     * The toolchain or environment availability check is done here.
+     *
+     * @throws WrongUsageException
+     */
+    public static function afterInit(): void
+    {
+        if (!filter_var(getenv('SPC_SKIP_TOOLCHAIN_CHECK'), FILTER_VALIDATE_BOOL)) {
+            ToolchainManager::afterInitToolchain();
         }
     }
 

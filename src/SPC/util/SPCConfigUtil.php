@@ -56,7 +56,7 @@ class SPCConfigUtil
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $libs = $this->getLibsString($libraries, $with_dependencies);
-        if (PHP_OS_FAMILY === 'Darwin') {
+        if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
         $cflags = $this->getIncludesString();

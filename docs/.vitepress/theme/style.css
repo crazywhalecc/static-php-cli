@@ -1,0 +1,6 @@
+/** override default styles */
+.vp-sponsor-grid-image {
+    max-height:36px !important;
+    max-width: 1000px !important;
+}
+

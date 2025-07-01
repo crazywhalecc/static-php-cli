@@ -11,6 +11,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\SPCConfigUtil;
+use SPC\util\SPCTarget;
 
 class Extension
 {
@@ -544,6 +545,11 @@ class Extension
             } elseif (!str_contains($sharedLibString, '-l' . $lib . ' ')) {
                 $sharedLibString .= '-l' . $lib . ' ';
             }
+        }
+        // move static libstdc++ to shared if we are on non-full-static build target
+        if (!SPCTarget::isStatic() && in_array(SPCTarget::getLibc(), SPCTarget::LIBC_LIST)) {
+            $staticLibString .= ' -lstdc++';
+            $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
         }
         return [trim($staticLibString), trim($sharedLibString)];
     }

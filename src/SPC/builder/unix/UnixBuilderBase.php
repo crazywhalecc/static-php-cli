@@ -19,6 +19,7 @@ use SPC\store\pkg\GoXcaddy;
 use SPC\util\DependencyUtil;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCConfigUtil;
+use SPC\util\SPCTarget;
 
 abstract class UnixBuilderBase extends BuilderBase
 {
@@ -202,16 +203,8 @@ abstract class UnixBuilderBase extends BuilderBase
             $util = new SPCConfigUtil($this);
             $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
-            $lens .= ' ' . getenv('SPC_LIBC_LINKAGE');
-            // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
-            if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
-                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$LD_LIBRARY_PATH ';
-                FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
-            } else {
-                $ext_path = '';
-                foreach (glob(BUILD_LIB_PATH . '/libphp*.so') as $file) {
-                    unlink($file);
-                }
+            if (SPCTarget::isStatic()) {
+                $lens .= ' -static';
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
             if ($ret !== 0) {
@@ -327,8 +320,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? "'-w -s' " : '';
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
-        $staticFlags = '';
-        if (PHP_OS_FAMILY === 'Linux' && getenv('SPC_LIBC') === 'musl' && getenv('SPC_LIBC_LINKAGE') === 'static') {
+        if (SPCTarget::isStatic()) {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';
             $staticFlags = '-static -static-pie';
