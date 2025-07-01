@@ -82,7 +82,7 @@ and this extension cannot be compiled into php by static linking, so it cannot b
 
 ## xdebug
 
-1. Xdebug is only buildable as a shared extension. You need to use a build target other than `musl-static` for SPC_TARGET.
+1. Xdebug is only buildable as a shared extension. On Linux, you'll need to use a SPC_TARGET like `native-native -dynamic` or `native-native-gnu`.
 2. When using Linux/glibc or macOS, you can compile Xdebug as a shared extension using --build-shared="xdebug". 
    The compiled `./php` binary can be configured and run by specifying the INI, eg `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
 

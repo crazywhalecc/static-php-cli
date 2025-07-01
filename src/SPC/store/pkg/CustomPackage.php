@@ -13,4 +13,6 @@ abstract class CustomPackage
     abstract public function extract(string $name): void;
 
     abstract public static function getEnvironment(): array;
+
+    abstract public static function isInstalled(): bool;
 }

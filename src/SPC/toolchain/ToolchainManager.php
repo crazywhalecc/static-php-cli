@@ -11,33 +11,36 @@ use SPC\util\GlobalEnvManager;
 class ToolchainManager
 {
     public const array OS_DEFAULT_TOOLCHAIN = [
-        'Linux' => MuslToolchain::class, // use musl toolchain by default, after zig pr merged, change this to ZigToolchain::class
+        'Linux' => ZigToolchain::class,
         'Windows' => MSVCToolchain::class,
         'Darwin' => ClangNativeToolchain::class,
         'BSD' => ClangNativeToolchain::class,
     ];
+
+    public static function getToolchainClass(): string
+    {
+        $libc = getenv('SPC_LIBC');
+        if ($libc !== false) {
+            logger()->warning('SPC_LIBC is deprecated, please use SPC_TARGET instead.');
+            return match ($libc) {
+                'musl' => SystemUtil::isMuslDist() ? GccNativeToolchain::class : MuslToolchain::class,
+                'glibc' => !SystemUtil::isMuslDist() ? GccNativeToolchain::class : throw new WrongUsageException('SPC_TARGET must be musl for musl dist.'),
+                default => throw new WrongUsageException('Unsupported SPC_LIBC value: ' . $libc),
+            };
+        }
+
+        return self::OS_DEFAULT_TOOLCHAIN[PHP_OS_FAMILY];
+    }
 
     /**
      * @throws WrongUsageException
      */
     public static function initToolchain(): void
     {
-        $libc = getenv('SPC_LIBC');
-        if ($libc !== false) {
-            // uncomment this when zig pr is merged
-            // logger()->warning('SPC_LIBC is deprecated, please use SPC_TARGET instead.');
-            $toolchain = match ($libc) {
-                'musl' => SystemUtil::isMuslDist() ? GccNativeToolchain::class : MuslToolchain::class,
-                'glibc' => !SystemUtil::isMuslDist() ? GccNativeToolchain::class : throw new WrongUsageException('SPC_TARGET must be musl-static or musl for musl dist.'),
-                default => throw new WrongUsageException('Unsupported SPC_LIBC value: ' . $libc),
-            };
-        } else {
-            $toolchain = self::OS_DEFAULT_TOOLCHAIN[PHP_OS_FAMILY];
-        }
-        $toolchainClass = $toolchain;
+        $toolchainClass = self::getToolchainClass();
         /* @var ToolchainInterface $toolchainClass */
         (new $toolchainClass())->initEnv();
-        GlobalEnvManager::putenv("SPC_TOOLCHAIN={$toolchain}");
+        GlobalEnvManager::putenv("SPC_TOOLCHAIN={$toolchainClass}");
     }
 
     public static function afterInitToolchain(): void
