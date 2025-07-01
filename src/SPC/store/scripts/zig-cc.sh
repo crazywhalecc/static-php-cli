@@ -39,7 +39,7 @@ if [ -n "$SPC_TARGET" ]; then
     TARGET="-target $SPC_TARGET"
 fi
 
-output=$(zig cc $TARGET -lstdc++ $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
+output=$(zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
 status=$?
 
 if [ $status -eq 0 ]; then
@@ -51,5 +51,6 @@ if echo "$output" | grep -q "version '.*' in target triple"; then
     echo "$output" | grep -v "version '.*' in target triple"
     exit 0
 else
-    exec zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}"
+    echo "$output"
+    exit $status
 fi
