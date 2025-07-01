@@ -206,6 +206,16 @@ abstract class UnixBuilderBase extends BuilderBase
             if (SPCTarget::isStatic()) {
                 $lens .= ' -static';
             }
+            // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
+            if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
+                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$LD_LIBRARY_PATH ';
+                FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
+            } else {
+                $ext_path = '';
+                foreach (glob(BUILD_LIB_PATH . '/libphp*.so') as $file) {
+                    unlink($file);
+                }
+            }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
             if ($ret !== 0) {
                 throw new RuntimeException('embed failed sanity check: build failed. Error message: ' . implode("\n", $out));
@@ -320,6 +330,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? "'-w -s' " : '';
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
+        $staticFlags = '';
         if (SPCTarget::isStatic()) {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';

@@ -11,7 +11,6 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\SPCConfigUtil;
-use SPC\util\SPCTarget;
 
 class Extension
 {

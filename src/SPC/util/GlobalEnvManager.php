@@ -6,7 +6,6 @@ namespace SPC\util;
 
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\store\pkg\Zig;
 use SPC\toolchain\ToolchainManager;
 
 /**
