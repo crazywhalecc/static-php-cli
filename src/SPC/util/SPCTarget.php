@@ -24,9 +24,6 @@ class SPCTarget
     public static function isStatic(): bool
     {
         // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
-        if (getenv('SPC_LIBC') === 'musl') {
-            return true;
-        }
         if ($target = getenv('SPC_TARGET')) {
             if (str_contains($target, '-macos') || str_contains($target, '-native') && PHP_OS_FAMILY === 'Darwin') {
                 return false;
@@ -39,6 +36,9 @@ class SPCTarget
             }
             return true;
         }
+        if (getenv('SPC_LIBC') === 'musl') {
+            return true;
+        }
         return false;
     }
 
@@ -47,10 +47,6 @@ class SPCTarget
      */
     public static function getLibc(): ?string
     {
-        $libc = getenv('SPC_LIBC');
-        if ($libc !== false) {
-            return $libc;
-        }
         $target = getenv('SPC_TARGET');
         if (str_contains($target, '-gnu')) {
             return 'glibc';
@@ -64,6 +60,10 @@ class SPCTarget
         if (PHP_OS_FAMILY === 'Linux' && str_contains($target, '-native')) {
             return 'musl';
         }
+        $libc = getenv('SPC_LIBC');
+        if ($libc !== false) {
+            return $libc;
+        }
         return null;
     }
 
@@ -72,15 +72,8 @@ class SPCTarget
      */
     public static function getLibcVersion(): ?string
     {
-        $env = getenv('SPC_TARGET');
-        $libc = getenv('SPC_LIBC');
-        if ($libc !== false) {
-            // legacy method: get a version from system
-            return SystemUtil::getLibcVersionIfExists($libc);
-        }
-        // TODO: zig target parser
-
-        return null;
+        $libc = self::getLibc();
+        return SystemUtil::getLibcVersionIfExists($libc);
     }
 
     /**
