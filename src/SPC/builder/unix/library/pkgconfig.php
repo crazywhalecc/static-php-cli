@@ -12,7 +12,7 @@ trait pkgconfig
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)
-            ->appendEnv([[
+            ->appendEnv([
                 'CFLAGS' => '-Wimplicit-function-declaration -Wno-int-conversion',
                 'LDFLAGS' => SPCTarget::isStatic() ? '--static' : '',
             ])
