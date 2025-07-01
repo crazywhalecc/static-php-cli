@@ -8,16 +8,10 @@ use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
 use SPC\doctor\OptionalCheck;
-use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\store\Downloader;
-use SPC\store\FileSystem;
 use SPC\store\PackageManager;
 use SPC\store\pkg\Zig;
-use SPC\store\SourcePatcher;
-use SPC\toolchain\MuslToolchain;
 use SPC\toolchain\ZigToolchain;
 
 #[OptionalCheck([self::class, 'optionalCheck'])]

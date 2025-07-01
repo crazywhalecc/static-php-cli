@@ -11,25 +11,10 @@ use SPC\store\LockFile;
 
 class Zig extends CustomPackage
 {
-    private static function getPath(): string
-    {
-        $arch = arch2gnu(php_uname('m'));
-        $os = match (PHP_OS_FAMILY) {
-            'Linux' => 'linux',
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => 'linux',
-        };
-
-        $packageName = "zig-{$arch}-{$os}";
-        return PKG_ROOT_PATH . "/{$packageName}";
-    }
-
     public static function isInstalled(): bool
     {
         $path = self::getPath();
-        return file_exists("$path/zig") && file_exists("$path/zig-cc") && file_exists("$path/zig-c++");
+        return file_exists("{$path}/zig") && file_exists("{$path}/zig-cc") && file_exists("{$path}/zig-c++");
     }
 
     public function getSupportName(): array
@@ -147,6 +132,21 @@ class Zig extends CustomPackage
         return [
             'PATH' => $path,
         ];
+    }
+
+    private static function getPath(): string
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Linux' => 'linux',
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "zig-{$arch}-{$os}";
+        return PKG_ROOT_PATH . "/{$packageName}";
     }
 
     private function createZigCcScript(string $bin_dir): void

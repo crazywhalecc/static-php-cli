@@ -14,10 +14,10 @@ class ZigToolchain implements ToolchainInterface
     {
         $arch = getenv('GNU_ARCH');
         // Set environment variables for musl toolchain
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_CC=zig-cc");
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_CXX=zig-c++");
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_AR=ar");
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_LD=ld");
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CC=zig-cc');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CXX=zig-c++');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=ar');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=ld');
         GlobalEnvManager::addPathIfNotExists('/usr/local/musl/bin');
         GlobalEnvManager::addPathIfNotExists("/usr/local/musl/{$arch}-linux-musl/bin");
 
