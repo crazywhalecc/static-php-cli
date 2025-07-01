@@ -86,16 +86,13 @@ class SPCTarget
      */
     public static function getTargetOS(): string
     {
-        $target = getenv('SPC_TARGET');
-        if ($target === false) {
-            return PHP_OS_FAMILY;
-        }
+        $target = (string) getenv('SPC_TARGET');
         return match (true) {
             str_contains($target, '-linux') => 'Linux',
             str_contains($target, '-macos') => 'Darwin',
             str_contains($target, '-windows') => 'Windows',
             str_contains($target, '-native') => PHP_OS_FAMILY,
-            default => throw new WrongUsageException('Cannot parse target.'),
+            default => PHP_OS_FAMILY,
         };
     }
 }
