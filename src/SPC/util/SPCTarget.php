@@ -19,17 +19,27 @@ class SPCTarget
     ];
 
     /**
-     * Returns whether the target is a full-static target.
+     * Returns whether we link the C runtime in statically.
      */
     public static function isStatic(): bool
     {
-        $env = getenv('SPC_TARGET');
         $libc = getenv('SPC_LIBC');
         // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
         if ($libc === 'musl') {
             return true;
         }
-        // TODO: add zig target parser here
+        if ($target = getenv('SPC_TARGET')) {
+            if (str_contains($target, '-macos') || str_contains($target, '-native') && PHP_OS_FAMILY === 'Darwin') {
+                return false;
+            }
+            if (str_contains($target, '-gnu')) {
+                return false;
+            }
+            if (str_contains($target, '-dynamic')) {
+                return false;
+            }
+            return true;
+        }
         return false;
     }
 
@@ -38,12 +48,23 @@ class SPCTarget
      */
     public static function getLibc(): ?string
     {
-        $env = getenv('SPC_TARGET');
         $libc = getenv('SPC_LIBC');
         if ($libc !== false) {
             return $libc;
         }
-        // TODO: zig target parser
+        $target = getenv('SPC_TARGET');
+        if (str_contains($target, '-gnu')) {
+            return 'glibc';
+        }
+        if (str_contains($target, '-musl')) {
+            return 'musl';
+        }
+        if (str_contains($target, '-linux')) {
+            return 'musl';
+        }
+        if (PHP_OS_FAMILY === 'Linux' && str_contains($target, '-native')) {
+            return 'musl';
+        }
         return null;
     }
 
