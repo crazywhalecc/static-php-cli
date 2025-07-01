@@ -13,6 +13,7 @@ use SPC\store\SourcePatcher;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\GlobalEnvManager;
+use SPC\util\SPCTarget;
 
 class LinuxBuilder extends UnixBuilderBase
 {
@@ -92,7 +93,9 @@ class LinuxBuilder extends UnixBuilderBase
             $zts = '';
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
-
+        if (!$disable_jit && $this->getExt('opcache')) {
+            f_putenv('COMPILER_EXTRA=-fno-sanitize=undefined');
+        }
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
         $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
@@ -123,6 +126,12 @@ class LinuxBuilder extends UnixBuilderBase
         }
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+        if ($embed_type !== 'static' && SPCTarget::isStatic()) {
+            throw new WrongUsageException(
+                'Linux does not support loading shared libraries when linking libc statically. ' .
+                'Change SPC_CMD_VAR_PHP_EMBED_TYPE to static.'
+            );
+        }
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
