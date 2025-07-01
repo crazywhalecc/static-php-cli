@@ -47,18 +47,19 @@ class SPCTarget
      */
     public static function getLibc(): ?string
     {
-        $target = getenv('SPC_TARGET');
-        if (str_contains($target, '-gnu')) {
-            return 'glibc';
-        }
-        if (str_contains($target, '-musl')) {
-            return 'musl';
-        }
-        if (str_contains($target, '-linux')) {
-            return 'musl';
-        }
-        if (PHP_OS_FAMILY === 'Linux' && str_contains($target, '-native')) {
-            return 'musl';
+        if ($target = getenv('SPC_TARGET')) {
+            if (str_contains($target, '-gnu')) {
+                return 'glibc';
+            }
+            if (str_contains($target, '-musl')) {
+                return 'musl';
+            }
+            if (str_contains($target, '-linux')) {
+                return 'musl';
+            }
+            if (PHP_OS_FAMILY === 'Linux' && str_contains($target, '-native')) {
+                return 'musl';
+            }
         }
         $libc = getenv('SPC_LIBC');
         if ($libc !== false) {
