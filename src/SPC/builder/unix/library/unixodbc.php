@@ -17,6 +17,7 @@ trait unixodbc
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)
+            ->removeConfigureArgs('--cache-file')
             ->configure(
                 '--disable-debug',
                 '--disable-dependency-tracking',
