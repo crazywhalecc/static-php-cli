@@ -405,7 +405,7 @@ class Extension
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => $preStatic . $staticLibString . $postStatic . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
-            'COMPILER_EXTRA' => '-lstdc++'
+            'COMPILER_EXTRA' => '-lstdc++',
         ];
 
         if ($this->patchBeforeSharedPhpize()) {
