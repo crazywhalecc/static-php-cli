@@ -31,10 +31,14 @@ done
 output=$(zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
 status=$?
 
-if [[ $status -ne 0 ]] && grep -q "version '.*' in target triple" <<< "$output"; then
-    output=$(grep -v "version '.*' in target triple" <<< "$output")
-    status=0
-fi
+if [[ $status -eq 0 ]]; then
+    echo "$output"
+    exit 0
+else
+    if grep -q "version '.*' in target triple" <<< "$output"; then
+        output=$(grep -v "version '.*' in target triple" <<< "$output")
+        status=0
+    fi
 
-echo "$output"
-exit $status
+    exec zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}"
+fi
