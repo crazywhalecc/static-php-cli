@@ -53,7 +53,7 @@ class UnixAutoconfExecutor extends Executor
     /**
      * Run make
      *
-     * @param string $target Build target
+     * @param  string           $target Build target
      * @throws RuntimeException
      */
     public function make(string $target = '', false|string $with_install = 'install', bool $with_clean = true, array $after_env_vars = []): static
@@ -79,9 +79,9 @@ class UnixAutoconfExecutor extends Executor
      * Add optional library configuration.
      * This method checks if a library is available and adds the corresponding arguments to the CMake configuration.
      *
-     * @param string $name library name to check
-     * @param \Closure|string $true_args arguments to use if the library is available (allow closure, returns string)
-     * @param string $false_args arguments to use if the library is not available
+     * @param  string          $name       library name to check
+     * @param  \Closure|string $true_args  arguments to use if the library is available (allow closure, returns string)
+     * @param  string          $false_args arguments to use if the library is not available
      * @return $this
      */
     public function optionalLib(string $name, \Closure|string $true_args, string $false_args = ''): static
