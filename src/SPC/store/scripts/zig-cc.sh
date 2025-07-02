@@ -42,15 +42,10 @@ fi
 output=$(zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
 status=$?
 
-if [ $status -eq 0 ]; then
-    echo "$output"
-    exit 0
+if [ $status -ne 0 ] && echo "$output" | grep -q "version '.*' in target triple"; then
+    output=$(echo "$output" | grep -v "version '.*' in target triple")
+    status=0
 fi
 
-if echo "$output" | grep -q "version '.*' in target triple"; then
-    echo "$output" | grep -v "version '.*' in target triple"
-    exit 0
-else
-    echo "$output"
-    exit $status
-fi
+echo "$output"
+exit $status
