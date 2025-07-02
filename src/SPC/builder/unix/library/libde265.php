@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait libde265
@@ -19,6 +20,11 @@ trait libde265
         UnixCMakeExecutor::create($this)
             ->addConfigureArgs('-DENABLE_SDL=OFF')
             ->build();
+
+        if (PHP_OS_FAMILY === 'Linux') {
+            $libheifpc = realpath(BUILD_LIB_PATH . '/pkgconfig/libheif.pc');
+            FileSystem::replaceFileStr($libheifpc, '-lc++', '-lstdc++');
+        }
         $this->patchPkgconfPrefix(['libde265.pc']);
     }
 }
