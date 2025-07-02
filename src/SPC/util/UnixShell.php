@@ -129,9 +129,4 @@ class UnixShell
         }
         return $cmd;
     }
-
-    public function getEnv(): array
-    {
-        return $this->env;
-    }
 }
