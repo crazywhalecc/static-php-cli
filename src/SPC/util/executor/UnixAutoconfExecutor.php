@@ -32,13 +32,6 @@ class UnixAutoconfExecutor extends Executor
         // remove all the ignored args
         $args = array_merge($args, $this->getDefaultConfigureArgs(), $this->configure_args);
         $args = array_diff($args, $this->ignore_args);
-        $args = array_filter(
-            $args,
-            fn ($arg) => !array_filter(
-                $this->ignore_args,
-                fn ($ignore) => str_starts_with($arg, $ignore . '=')
-            )
-        );
         $configure_args = implode(' ', $args);
 
         $this->shell->exec("./configure {$configure_args}");
@@ -126,23 +119,13 @@ class UnixAutoconfExecutor extends Executor
      */
     private function getDefaultConfigureArgs(): array
     {
-        $args = [
+        return [
             '--disable-shared',
             '--enable-static',
             "--prefix={$this->library->getBuildRootPath()}",
             '--with-pic',
             '--enable-pic',
         ];
-
-        // only add the cache file if CFLAGS and LDFLAGS are defaulted
-        $env = $this->shell->getEnv();
-        $expected_cflags = '-I' . BUILD_INCLUDE_PATH . ' ' . getenv('SPC_DEFAULT_C_FLAGS');
-        $expected_ldflags = '-L' . BUILD_LIB_PATH;
-
-        if (($env['CFLAGS'] ?? '') === $expected_cflags && ($env['LDFLAGS'] ?? '') === $expected_ldflags) {
-            $args[] = '--cache-file=' . BUILD_ROOT_PATH . '/config.cache';
-        }
-        return $args;
     }
 
     /**

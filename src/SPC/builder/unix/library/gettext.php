@@ -24,7 +24,7 @@ trait gettext
         if ($this->builder->getOption('enable-zts')) {
             $autoconf->addConfigureArgs('--enable-threads=isoc+posix')
                 ->appendEnv([
-                    'CFLAGS' => '-D_REENTRANT',
+                    'CFLAGS' => '-lpthread -D_REENTRANT',
                     'LDFLGAS' => '-lpthread',
                 ]);
         } else {
