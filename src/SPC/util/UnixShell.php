@@ -117,11 +117,6 @@ class UnixShell
         return trim($str);
     }
 
-    public function getEnv(): array
-    {
-        return $this->env;
-    }
-
     private function getExecString(string $cmd): string
     {
         logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
@@ -133,5 +128,10 @@ class UnixShell
             $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
         }
         return $cmd;
+    }
+
+    public function getEnv(): array
+    {
+        return $this->env;
     }
 }
