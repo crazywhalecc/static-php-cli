@@ -36,9 +36,10 @@ if [[ $status -eq 0 ]]; then
     exit 0
 fi
 
-if grep -q "version '.*' in target triple" <<< "$output"; then
-    output=$(grep -v "version '.*' in target triple" <<< "$output")
-    status=0
+if echo "$output" | grep -qE "version '.*' in target triple"; then
+    filtered_output=$(echo "$output" | grep -vE "version '.*' in target triple")
+    echo "$filtered_output"
+    exit 0
 fi
 
 exec zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}"
