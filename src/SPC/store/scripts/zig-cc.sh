@@ -28,18 +28,20 @@ done
 
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""
 
-output=$(zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
-status=$?
+if [[ "$SPC_TARGET" =~ \.[0-9]+\.[0-9]+ ]]; then
+    output=$(zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
+    status=$?
 
-if [[ $status -eq 0 ]]; then
-    echo "$output"
-    exit 0
-fi
+    if [[ $status -eq 0 ]]; then
+        echo "$output"
+        exit 0
+    fi
 
-if echo "$output" | grep -qE "version '.*' in target triple"; then
-    filtered_output=$(echo "$output" | grep -vE "version '.*' in target triple")
-    echo "$filtered_output"
-    exit 0
+    if echo "$output" | grep -qE "version '.*' in target triple"; then
+        filtered_output=$(echo "$output" | grep -vE "version '.*' in target triple")
+        echo "$filtered_output"
+        exit 0
+    fi
 fi
 
 exec zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}"
