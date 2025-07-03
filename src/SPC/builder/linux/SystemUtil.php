@@ -251,7 +251,7 @@ class SystemUtil
         foreach ($objects as $obj) {
             $located = null;
             foreach ($paths as $base) {
-                $output = shell_exec("find {$base} -name {$obj} -print -quit 2>/dev/null");
+                $output = shell_exec("find {$base} -name {$obj} 2>/dev/null | grep -v '/32/' | head -n 1");
                 $line = trim((string) $output);
                 if ($line !== '') {
                     $located = $line;
