@@ -34,6 +34,12 @@ class SPCTarget
             if (str_contains($target, '-dynamic')) {
                 return false;
             }
+            if (str_contains($target, '-musl')) {
+                return false;
+            }
+            if (PHP_OS_FAMILY === 'Linux') {
+                return SystemUtil::isMuslDist();
+            }
             return true;
         }
         if (getenv('SPC_LIBC') === 'musl') {
