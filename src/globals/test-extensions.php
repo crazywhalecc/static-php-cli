@@ -23,7 +23,7 @@ $test_php_version = [
 $test_os = [
     // 'macos-13', // bin/spc for x86_64
     // 'macos-14',  // bin/spc for arm64
-    'macos-15', // bin/spc for arm64
+    // 'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
@@ -158,8 +158,8 @@ if ($shared_extensions) {
             break;
         case 'ubuntu-24.04':
         case 'ubuntu-24.04-arm':
-            putenv('SPC_TARGET=native-linux-gnu');
-            if (str_contains((string) getenv('SPC_TARGET'), '-gnu')) {
+            putenv('SPC_TARGET=native-native');
+            if (!str_contains((string) getenv('SPC_TARGET'), '-musl')) {
                 $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             }
             break;
