@@ -200,7 +200,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
-set(CMAKE_EXE_LINKER_FLAGS "-ldl -lpthread -lm")
+set(CMAKE_EXE_LINKER_FLAGS "-ldl -lpthread -lm -lutil")
 CMAKE;
         // Whoops, linux may need CMAKE_AR sometimes
         if (PHP_OS_FAMILY === 'Linux') {
