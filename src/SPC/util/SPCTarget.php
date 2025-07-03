@@ -60,16 +60,16 @@ class SPCTarget
             if (str_contains($target, '-musl')) {
                 return 'musl';
             }
-            if (str_contains($target, '-linux')) {
-                return 'musl';
-            }
-            if (PHP_OS_FAMILY === 'Linux' && str_contains($target, '-native')) {
-                return 'musl';
+            if (PHP_OS_FAMILY === 'Linux') {
+                return SystemUtil::isMuslDist() ? 'musl' : 'glibc';
             }
         }
         $libc = getenv('SPC_LIBC');
         if ($libc !== false) {
             return $libc;
+        }
+        if (PHP_OS_FAMILY === 'Linux') {
+            return SystemUtil::isMuslDist() ? 'musl' : 'glibc';
         }
         return null;
     }
