@@ -159,7 +159,7 @@ if ($shared_extensions) {
         case 'ubuntu-24.04':
         case 'ubuntu-24.04-arm':
             putenv('SPC_TARGET=native-native');
-            if (!str_contains((string) getenv('SPC_TARGET'), '-musl')) {
+            if (getenv('SPC_TARGET') && !str_contains((string) getenv('SPC_TARGET'), '-musl')) {
                 $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             }
             break;
