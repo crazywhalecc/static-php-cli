@@ -20,11 +20,6 @@ trait libde265
         UnixCMakeExecutor::create($this)
             ->addConfigureArgs('-DENABLE_SDL=OFF')
             ->build();
-
-        if (PHP_OS_FAMILY === 'Linux') {
-            $libheifpc = realpath(BUILD_LIB_PATH . '/pkgconfig/libde265.pc');
-            FileSystem::replaceFileStr($libheifpc, '-lc++', '-lstdc++');
-        }
         $this->patchPkgconfPrefix(['libde265.pc']);
     }
 }

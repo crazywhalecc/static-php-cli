@@ -40,10 +40,6 @@ trait libheif
                 '-DENABLE_PLUGIN_LOADING=OFF',
             )
             ->build();
-        if (PHP_OS_FAMILY === 'Linux') {
-            $libheifpc = realpath(BUILD_LIB_PATH . '/pkgconfig/libheif.pc');
-            FileSystem::replaceFileStr($libheifpc, '-lc++', '-lstdc++');
-        }
         $this->patchPkgconfPrefix(['libheif.pc']);
     }
 }
