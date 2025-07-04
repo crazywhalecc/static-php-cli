@@ -74,6 +74,17 @@ class SPCTarget
         return null;
     }
 
+    public static function getRuntimeLibs(): string
+    {
+        if (PHP_OS_FAMILY === 'Linux') {
+            return self::getLibc() === 'musl' ? 'ldl -lpthread -lm' : '-ldl -lrt -lpthread -lm -lresolv -lutil';
+        }
+        if (PHP_OS_FAMILY === 'Darwin') {
+            return '-lresolv';
+        }
+        return '';
+    }
+
     /**
      * Returns the libc version if set, for other OS, it will always return null.
      */

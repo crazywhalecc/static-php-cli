@@ -12,6 +12,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\GlobalEnvManager;
+use SPC\util\SPCTarget;
 
 class MacOSBuilder extends UnixBuilderBase
 {
@@ -131,7 +132,7 @@ class MacOSBuilder extends UnixBuilderBase
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
-            'LIBS' => $mimallocLibs . getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
+            'LIBS' => $mimallocLibs . SPCTarget::getRuntimeLibs(),
         ]);
 
         if ($this->getLib('postgresql')) {
@@ -293,7 +294,7 @@ class MacOSBuilder extends UnixBuilderBase
     {
         return [
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
-            'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS'),
+            'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . SPCTarget::getRuntimeLibs(),
         ];
     }
 }

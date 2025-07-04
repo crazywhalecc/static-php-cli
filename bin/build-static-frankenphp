@@ -148,7 +148,6 @@ echo 'LD=/opt/rh/devtoolset-10/root/usr/bin/ld' >> /tmp/spc-gnu-docker.env
 echo 'SPC_DEFAULT_C_FLAGS=-fPIE -fPIC' >> /tmp/spc-gnu-docker.env
 echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
 echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
-echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
 
 # Run docker
 # shellcheck disable=SC2068

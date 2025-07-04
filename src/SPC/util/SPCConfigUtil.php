@@ -64,9 +64,8 @@ class SPCConfigUtil
 
         // embed
         $libs = trim("-lphp -lc {$libs}");
-        $extra_env = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS');
-        if (is_string($extra_env)) {
-            $libs .= ' ' . trim($extra_env, '"');
+        if ($extra_libs = SPCTarget::getRuntimeLibs()) {
+            $libs .= " {$extra_libs}";
         }
         // c++
         if ($this->builder->hasCpp()) {
