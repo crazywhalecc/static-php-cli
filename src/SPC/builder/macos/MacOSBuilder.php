@@ -34,7 +34,7 @@ class MacOSBuilder extends UnixBuilderBase
 
         // ---------- set necessary compile vars ----------
         // concurrency
-        $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
+        $this->concurrency = (int) getenv('SPC_CONCURRENCY');
         // cflags
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');

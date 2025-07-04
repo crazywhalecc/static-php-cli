@@ -29,7 +29,7 @@ done
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""
 
 if [[ "$SPC_TARGET" =~ \.[0-9]+\.[0-9]+ ]]; then
-    output=$(zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
+    output=$(zig cc $TARGET $SPC_COMPILER_EXTRA "${PARSED_ARGS[@]}" 2>&1)
     status=$?
 
     if [[ $status -eq 0 ]]; then
@@ -44,4 +44,4 @@ if [[ "$SPC_TARGET" =~ \.[0-9]+\.[0-9]+ ]]; then
     fi
 fi
 
-exec zig cc $TARGET $COMPILER_EXTRA "${PARSED_ARGS[@]}"
+exec zig cc $TARGET $SPC_COMPILER_EXTRA "${PARSED_ARGS[@]}"

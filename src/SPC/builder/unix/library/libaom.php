@@ -12,16 +12,16 @@ trait libaom
 {
     protected function build(): void
     {
-        $extra = getenv('COMPILER_EXTRA');
+        $extra = getenv('SPC_COMPILER_EXTRA');
         if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
             $new = trim($extra . ' -D_GNU_SOURCE');
-            f_putenv("COMPILER_EXTRA={$new}");
+            f_putenv("SPC_COMPILER_EXTRA={$new}");
         }
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")
             ->addConfigureArgs('-DAOM_TARGET_CPU=generic')
             ->build();
-        f_putenv("COMPILER_EXTRA={$extra}");
+        f_putenv("SPC_COMPILER_EXTRA={$extra}");
         $this->patchPkgconfPrefix(['aom.pc']);
     }
 }

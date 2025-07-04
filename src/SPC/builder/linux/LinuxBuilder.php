@@ -32,7 +32,7 @@ class LinuxBuilder extends UnixBuilderBase
         GlobalEnvManager::afterInit();
 
         // concurrency
-        $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
+        $this->concurrency = (int) getenv('SPC_CONCURRENCY');
         // cflags
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
@@ -94,7 +94,7 @@ class LinuxBuilder extends UnixBuilderBase
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
         if (!$disable_jit && $this->getExt('opcache')) {
-            f_putenv('COMPILER_EXTRA=-fno-sanitize=undefined');
+            f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
         }
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';

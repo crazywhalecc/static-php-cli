@@ -45,7 +45,7 @@ class WindowsBuilder extends BuilderBase
         $this->zts = $this->getOption('enable-zts', false);
 
         // set concurrency
-        $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
+        $this->concurrency = (int) getenv('SPC_CONCURRENCY');
 
         // make cmake toolchain
         $this->cmake_toolchain_file = SystemUtil::makeCmakeToolchainFile();
