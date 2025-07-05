@@ -6,6 +6,11 @@ namespace SPC\util;
 
 use SPC\builder\linux\SystemUtil;
 use SPC\exception\WrongUsageException;
+use SPC\toolchain\ClangNativeToolchain;
+use SPC\toolchain\GccNativeToolchain;
+use SPC\toolchain\MuslToolchain;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 
 /**
  * SPC build target constants and toolchain initialization.
@@ -18,6 +23,15 @@ class SPCTarget
      */
     public static function isStatic(): bool
     {
+        if (ToolchainManager::getToolchainClass() === MuslToolchain::class) {
+            return true;
+        }
+        if (ToolchainManager::getToolchainClass() === GccNativeToolchain::class) {
+            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist();
+        }
+        if (ToolchainManager::getToolchainClass() === ClangNativeToolchain::class) {
+            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist();
+        }
         // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
         if ($target = getenv('SPC_TARGET')) {
             if (str_contains($target, '-macos') || str_contains($target, '-native') && PHP_OS_FAMILY === 'Darwin') {
