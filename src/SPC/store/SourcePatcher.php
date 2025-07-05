@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\store;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\linux\SystemUtil;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;

@@ -39,7 +39,7 @@ jobs:
           tools: pecl, composer, php-cs-fixer
 
       - name: Run PHP-CS-Fixer fix
-        run: PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff --ansi
+        run: php-cs-fixer fix --dry-run --diff --ansi
 
   phpstan:
     runs-on: ubuntu-latest
