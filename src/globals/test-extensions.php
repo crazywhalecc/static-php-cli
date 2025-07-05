@@ -160,6 +160,7 @@ if ($shared_extensions) {
         case 'ubuntu-24.04-arm':
             putenv('SPC_TARGET=native-native-musl -dynamic');
             if (getenv('SPC_TARGET') && !str_contains(getenv('SPC_TARGET'), '-musl') || str_contains(getenv('SPC_TARGET'), '-dynamic')) {
+                exec('sudo apt install musl -y');
                 $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             }
             break;
