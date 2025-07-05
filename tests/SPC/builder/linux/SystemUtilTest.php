@@ -43,16 +43,6 @@ class SystemUtilTest extends TestCase
         $this->assertIsArray(SystemUtil::findHeader('elf.h'));
     }
 
-    public function testGetCrossCompilePrefix()
-    {
-        $this->assertIsString(SystemUtil::getCrossCompilePrefix('gcc', 'x86_64'));
-    }
-
-    public function testGetCCType()
-    {
-        $this->assertEquals('gcc', SystemUtil::getCCType('xjfoiewjfoewof-gcc'));
-    }
-
     public function testGetSupportedDistros()
     {
         $this->assertIsArray(SystemUtil::getSupportedDistros());

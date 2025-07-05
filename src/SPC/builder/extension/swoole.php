@@ -17,7 +17,11 @@ class swoole extends Extension
         if ($this->builder instanceof MacOSBuilder) {
             // Fix swoole with event extension <util.h> conflict bug
             $util_path = shell()->execWithResult('xcrun --show-sdk-path', false)[1][0] . '/usr/include/util.h';
-            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/swoole/thirdparty/php/standard/proc_open.cc', 'include <util.h>', 'include "' . $util_path . '"');
+            FileSystem::replaceFileStr(
+                "{$this->source_dir}/thirdparty/php/standard/proc_open.cc",
+                'include <util.h>',
+                'include "' . $util_path . '"',
+            );
             return true;
         }
         return false;

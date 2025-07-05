@@ -7,6 +7,7 @@ namespace SPC\store\source;
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
 
 class PhpSource extends CustomSourceBase
@@ -16,11 +17,12 @@ class PhpSource extends CustomSourceBase
     /**
      * @throws DownloaderException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.3';
-        Downloader::downloadSource('php-src', self::getLatestPHPInfo($major), $force);
+        Downloader::downloadSource('php-src', $this->getLatestPHPInfo($major), $force);
     }
 
     /**
@@ -34,7 +36,7 @@ class PhpSource extends CustomSourceBase
         // 查找最新的小版本号
         $info = json_decode(Downloader::curlExec(
             url: "https://www.php.net/releases/index.php?json&version={$major_version}",
-            retries: intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0)
+            retries: (int) getenv('SPC_DOWNLOAD_RETRIES')
         ), true);
         if (!isset($info['version'])) {
             throw new DownloaderException("Version {$major_version} not found.");
