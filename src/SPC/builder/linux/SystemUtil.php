@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\linux;
 
 use SPC\builder\traits\UnixSystemUtilTrait;
-use SPC\exception\RuntimeException;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCTarget;
 
 class SystemUtil
@@ -15,8 +12,6 @@ class SystemUtil
     use UnixSystemUtilTrait;
 
     public static ?string $libc_version = null;
-
-    private static ?string $extra_runtime_objects = null;
 
     /** @noinspection PhpMissingBreakStatementInspection */
     public static function getOSRelease(): array
@@ -78,39 +73,6 @@ class SystemUtil
         }
 
         return $ncpu;
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    public static function getCCType(?string $cc = null): string
-    {
-        $cc ??= getenv('CC');
-        return match (true) {
-            str_contains($cc, 'zig') => 'clang',
-            str_ends_with($cc, 'c++'), str_ends_with($cc, 'cc'), str_ends_with($cc, 'g++'), str_ends_with($cc, 'gcc') => 'gcc',
-            $cc === 'clang++', $cc === 'clang', str_starts_with($cc, 'musl-clang') => 'clang',
-            default => throw new RuntimeException("unknown cc type: {$cc}"),
-        };
-    }
-
-    /**
-     * @throws RuntimeException
-     * @noinspection PhpUnused
-     */
-    public static function getCrossCompilePrefix(string $cc, string $arch): string
-    {
-        return match (static::getCCType($cc)) {
-            // guessing clang toolchains
-            'clang' => match ($arch) {
-                'x86_64' => 'x86_64-linux-gnu-',
-                'arm64', 'aarch64' => 'aarch64-linux-gnu-',
-                default => throw new RuntimeException('unsupported arch: ' . $arch),
-            },
-            // remove gcc postfix
-            'gcc' => str_replace('-cc', '', str_replace('-gcc', '', $cc)) . '-',
-            default => throw new RuntimeException('unsupported cc'),
-        };
     }
 
     public static function findStaticLib(string $name): ?array
@@ -232,38 +194,5 @@ class SystemUtil
             }
         }
         return null;
-    }
-
-    public static function getExtraRuntimeObjects(): string
-    {
-        if (ToolchainManager::getToolchainClass() !== ZigToolchain::class) {
-            return '';
-        }
-
-        if (self::$extra_runtime_objects !== null) {
-            return self::$extra_runtime_objects;
-        }
-
-        $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
-        $objects = ['crtbeginS.o', 'crtendS.o'];
-        $found = [];
-
-        foreach ($objects as $obj) {
-            $located = null;
-            foreach ($paths as $base) {
-                $output = shell_exec("find {$base} -name {$obj} 2>/dev/null | grep -v '/32/' | head -n 1");
-                $line = trim((string) $output);
-                if ($line !== '') {
-                    $located = $line;
-                    break;
-                }
-            }
-            if ($located) {
-                $found[] = $located;
-            }
-        }
-
-        self::$extra_runtime_objects = implode(' ', $found);
-        return implode(' ', $found);
     }
 }

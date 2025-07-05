@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
 
 class Extension
@@ -216,16 +217,15 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        $extra = SystemUtil::getExtraRuntimeObjects();
-        if (!$extra) {
-            return false;
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class && ($extra = (new ZigToolchain())->getExtraRuntimeObjects())) {
+            FileSystem::replaceFileRegex(
+                $this->source_dir . '/Makefile',
+                "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
+                "$1 {$extra}",
+            );
+            return true;
         }
-        FileSystem::replaceFileRegex(
-            $this->source_dir . '/Makefile',
-            "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
-            "$1 {$extra}",
-        );
-        return true;
+        return false;
     }
 
     /**

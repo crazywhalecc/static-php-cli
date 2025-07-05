@@ -26,4 +26,38 @@ class ZigToolchain implements ToolchainInterface
         }
         GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
     }
+
+    /**
+     * Get the extra runtime objects needed for zig toolchain.
+     * This method searches for `crtbeginS.o` and `crtendS.o` in common GCC library paths.
+     */
+    public function getExtraRuntimeObjects(): string
+    {
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
+        $objects = ['crtbeginS.o', 'crtendS.o'];
+        $found = [];
+
+        foreach ($objects as $obj) {
+            $located = null;
+            foreach ($paths as $base) {
+                $output = shell_exec("find {$base} -name {$obj} 2>/dev/null | grep -v '/32/' | head -n 1");
+                $line = trim((string) $output);
+                if ($line !== '') {
+                    $located = $line;
+                    break;
+                }
+            }
+            if ($located) {
+                $found[] = $located;
+            }
+        }
+
+        $cache = implode(' ', $found);
+        return $cache;
+    }
 }
