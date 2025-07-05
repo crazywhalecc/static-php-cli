@@ -21,7 +21,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
-use SPC\builder\linux\SystemUtil;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -62,9 +61,6 @@ class openssl extends LinuxLibraryBase
 
         $ex_lib = trim($ex_lib);
 
-        /* @phpstan-ignore-next-line */
-        $clang_postfix = SystemUtil::getCCType() === 'clang' && (GNU_ARCH === 'x86_64' || PHP_OS_FAMILY === 'Darwin') ? '-clang' : '';
-
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 "{$env} ./Configure no-shared {$extra} " .
@@ -73,7 +69,7 @@ class openssl extends LinuxLibraryBase
                 '--openssldir=/etc/ssl ' .
                 "{$zlib_extra}" .
                 'no-legacy ' .
-                "linux-{$arch}{$clang_postfix}"
+                "linux-{$arch}"
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
