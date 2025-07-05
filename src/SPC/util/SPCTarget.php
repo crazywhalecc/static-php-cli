@@ -13,11 +13,6 @@ use SPC\exception\WrongUsageException;
  */
 class SPCTarget
 {
-    public const array LIBC_LIST = [
-        'musl',
-        'glibc',
-    ];
-
     /**
      * Returns whether we link the C runtime in statically.
      */
@@ -77,7 +72,7 @@ class SPCTarget
     public static function getRuntimeLibs(): string
     {
         if (PHP_OS_FAMILY === 'Linux') {
-            return self::getLibc() === 'musl' ? 'ldl -lpthread -lm' : '-ldl -lrt -lpthread -lm -lresolv -lutil';
+            return self::getLibc() === 'musl' ? '-ldl -lpthread -lm' : '-ldl -lrt -lpthread -lm -lresolv -lutil';
         }
         if (PHP_OS_FAMILY === 'Darwin') {
             return '-lresolv';
