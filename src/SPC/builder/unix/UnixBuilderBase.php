@@ -363,8 +363,8 @@ abstract class UnixBuilderBase extends BuilderBase
 
         if (!$this->getOption('no-strip', false) && file_exists(BUILD_BIN_PATH . '/frankenphp')) {
             if (PHP_OS_FAMILY === 'Linux') {
-                shell()->cd(BUILD_BIN_PATH)->exec('strip --strip-all frankenphp');
-            } else { // macOS doesn't understand strip-all
+                shell()->cd(BUILD_BIN_PATH)->exec('strip --strip-unneeded frankenphp');
+            } else { // macOS doesn't understand strip-unneeded
                 shell()->cd(BUILD_BIN_PATH)->exec('strip -S frankenphp');
             }
         }

@@ -193,7 +193,7 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
 
         if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-unneeded php');
         }
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
@@ -256,7 +256,7 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} fpm");
 
         if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-unneeded php-fpm');
         }
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
@@ -280,25 +280,32 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
 
         $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
+        $libDir = BUILD_LIB_PATH;
+        $modulesDir = BUILD_MODULES_PATH;
+        $libphpSo = "{$libDir}/libphp.so";
         $realLibName = 'libphp.so';
+
         if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
             $release = $matches[1];
-            $realLibName = 'libphp-' . $release . '.so';
-            $cwd = getcwd();
-            $libphpPath = BUILD_LIB_PATH . '/libphp.so';
-            $libphpRelease = BUILD_LIB_PATH . '/' . $realLibName;
-            if (!file_exists($libphpRelease) && file_exists($libphpPath)) {
-                rename($libphpPath, $libphpRelease);
+            $realLibName = "libphp-{$release}.so";
+            $libphpRelease = "{$libDir}/{$realLibName}";
+            if (!file_exists($libphpRelease) && file_exists($libphpSo)) {
+                rename($libphpSo, $libphpRelease);
             }
             if (file_exists($libphpRelease)) {
-                chdir(BUILD_LIB_PATH);
-                if (file_exists($libphpPath)) {
-                    unlink($libphpPath);
+                chdir($libDir);
+                if (file_exists($libphpSo)) {
+                    unlink($libphpSo);
                 }
                 symlink($realLibName, 'libphp.so');
+                shell()->exec(sprintf(
+                    'patchelf --set-soname %s %s',
+                    escapeshellarg($realLibName),
+                    escapeshellarg($libphpRelease)
+                ));
             }
-            if (is_dir(BUILD_MODULES_PATH)) {
-                chdir(BUILD_MODULES_PATH);
+            if (is_dir($modulesDir)) {
+                chdir($modulesDir);
                 foreach ($this->getExts() as $ext) {
                     if (!$ext->isBuildShared()) {
                         continue;
@@ -306,21 +313,39 @@ class LinuxBuilder extends UnixBuilderBase
                     $name = $ext->getName();
                     $versioned = "{$name}-{$release}.so";
                     $unversioned = "{$name}.so";
-                    if (is_file(BUILD_MODULES_PATH . "/{$versioned}")) {
-                        rename(BUILD_MODULES_PATH . "/{$versioned}", BUILD_MODULES_PATH . "/{$unversioned}");
-                        shell()->cd(BUILD_MODULES_PATH)
-                            ->exec(sprintf(
-                                'patchelf --set-soname %s %s',
-                                escapeshellarg($unversioned),
-                                escapeshellarg($unversioned)
-                            ));
+                    $src = "{$modulesDir}/{$versioned}";
+                    $dst = "{$modulesDir}/{$unversioned}";
+                    if (is_file($src)) {
+                        rename($src, $dst);
+                        shell()->exec(sprintf(
+                            'patchelf --set-soname %s %s',
+                            escapeshellarg($unversioned),
+                            escapeshellarg($dst)
+                        ));
                     }
                 }
             }
-            chdir($cwd);
+            chdir(getcwd());
         }
+
+        $target = "{$libDir}/{$realLibName}";
+        if (file_exists($target)) {
+            [, $output] = shell()->execWithResult("readelf -d " . escapeshellarg($target));
+            $output = join("\n", $output);
+            if (preg_match('/SONAME.*\[(.+)\]/', $output, $sonameMatch)) {
+                $currentSoname = $sonameMatch[1];
+                if ($currentSoname !== basename($target)) {
+                    shell()->exec(sprintf(
+                        'patchelf --set-soname %s %s',
+                        escapeshellarg(basename($target)),
+                        escapeshellarg($target)
+                    ));
+                }
+            }
+        }
+
         if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
-            shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-all {$realLibName}");
+            shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-unneeded {$realLibName}");
         }
         $this->patchPhpScripts();
     }
@@ -382,7 +407,7 @@ class LinuxBuilder extends UnixBuilderBase
     private function processMicroUPX(): void
     {
         if (version_compare($this->getMicroVersion(), '0.2.0') >= 0 && !$this->getOption('no-strip', false)) {
-            shell()->exec('strip --strip-all ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx');
+            shell()->exec('strip --strip-unneeded ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx');
 
             if ($this->getOption('with-upx-pack')) {
                 // strip first
