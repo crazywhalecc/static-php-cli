@@ -37,13 +37,6 @@ class LinuxBuilder extends UnixBuilderBase
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
 
-        // cross-compiling is not supported yet
-        /*if (php_uname('m') !== $this->arch) {
-            $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
-            logger()->info('using cross compile prefix: ' . $this->cross_compile_prefix);
-            $this->configure_env .= " CROSS_COMPILE='{$this->cross_compile_prefix}'";
-        }*/
-
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
         f_mkdir(BUILD_INCLUDE_PATH, recursive: true);

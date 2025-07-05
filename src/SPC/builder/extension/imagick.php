@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\builder\linux\SystemUtil;
 use SPC\util\CustomExt;
+use SPC\util\SPCTarget;
 
 #[CustomExt('imagick')]
 class imagick extends Extension
@@ -20,7 +20,7 @@ class imagick extends Extension
     protected function getStaticAndSharedLibs(): array
     {
         [$static, $shared] = parent::getStaticAndSharedLibs();
-        if (SystemUtil::getLibcVersionIfExists('glibc') && SystemUtil::getLibcVersionIfExists('glibc') <= '2.17') {
+        if (SPCTarget::getLibc() === 'glibc' && version_compare(SPCTarget::getLibcVersion(), '2.17', '<=')) {
             $static .= ' -lstdc++';
             $shared = str_replace('-lstdc++', '', $shared);
         }
