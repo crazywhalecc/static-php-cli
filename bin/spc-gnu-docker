@@ -155,7 +155,6 @@ fi
 # Apply env in temp env file
 echo 'SPC_DEFAULT_C_FLAGS=-fPIC' > /tmp/spc-gnu-docker.env
 echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
-echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
 
 # Environment variable passthrough
 ENV_LIST=""

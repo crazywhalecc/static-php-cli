@@ -331,7 +331,7 @@ class LinuxBuilder extends UnixBuilderBase
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . SPCTarget::getRuntimeLibs(),
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
-            'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'),
+            'EXTRA_LDFLAGS_PROGRAM' => SPCTarget::isStatic() ? '-all-static -pie' : '-pie',
         ];
     }
 

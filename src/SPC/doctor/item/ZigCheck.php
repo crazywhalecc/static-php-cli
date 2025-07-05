@@ -38,7 +38,7 @@ class ZigCheck
      * @throws WrongUsageException
      */
     #[AsFixItem('install-zig')]
-    public function fixMuslCrossMake(): bool
+    public function installZig(): bool
     {
         $arch = arch2gnu(php_uname('m'));
         $os = match (PHP_OS_FAMILY) {
