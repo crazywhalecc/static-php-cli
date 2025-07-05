@@ -192,12 +192,12 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
 
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
+        }
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
-                ->exec('strip --strip-all php')
                 ->exec(getenv('UPX_EXEC') . ' --best php');
-        } elseif (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
         }
 
         $this->deployBinary(BUILD_TARGET_CLI);
@@ -255,12 +255,12 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} fpm");
 
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
+        }
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
-                ->exec('strip --strip-all php-fpm')
                 ->exec(getenv('UPX_EXEC') . ' --best php-fpm');
-        } elseif (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
         }
         $this->deployBinary(BUILD_TARGET_FPM);
     }

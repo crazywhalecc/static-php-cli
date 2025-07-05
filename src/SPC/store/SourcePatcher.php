@@ -256,13 +256,22 @@ class SourcePatcher
      */
     public static function patchBeforeMake(BuilderBase $builder): void
     {
-        // Try to fix debian environment build lack HAVE_STRLCAT problem
-        if ($builder instanceof LinuxBuilder) {
-            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCPY 1$/m', '');
-            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCAT 1$/m', '');
-        }
         if ($builder instanceof UnixBuilderBase) {
             FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
+        }
+        if (!SPCTarget::isStatic() && SPCTarget::getLibc() === 'musl') {
+            // we need to patch the symbol to global visibility, otherwise extensions with `initial-exec` TLS model will fail to load
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        } else {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
         }
 
         // no asan
