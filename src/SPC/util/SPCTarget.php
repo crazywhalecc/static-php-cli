@@ -43,7 +43,7 @@ class SPCTarget
                 return false;
             }
             if (str_contains($target, '-musl')) {
-                return false;
+                return true;
             }
             if (PHP_OS_FAMILY === 'Linux') {
                 return SystemUtil::isMuslDist();

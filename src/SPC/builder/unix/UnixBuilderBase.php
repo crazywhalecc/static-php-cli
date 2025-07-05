@@ -338,6 +338,8 @@ abstract class UnixBuilderBase extends BuilderBase
         }
 
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list, with_dependencies: true);
+        $libphp = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared' ? 'libphp.so' : 'libphp.a';
+        $config['libs'] = str_replace('-lphp', BUILD_LIB_PATH . '/' . $libphp, $config['libs']);
 
         $env = [
             'CGO_ENABLED' => '1',
