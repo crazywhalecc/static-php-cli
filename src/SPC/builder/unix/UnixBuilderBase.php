@@ -327,7 +327,7 @@ abstract class UnixBuilderBase extends BuilderBase
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
             $libphpVersion = preg_replace('/\.\d$/', '', $libphpVersion);
         }
-        $debugFlags = $this->getOption('no-strip') ? "-w -s " : '';
+        $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
         $extLdFlags = "-extldflags '-pie'";
         $muslTags = '';
         $staticFlags = '';
