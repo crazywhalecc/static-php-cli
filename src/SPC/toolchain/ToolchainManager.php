@@ -54,7 +54,8 @@ class ToolchainManager
         if (!getenv('SPC_TOOLCHAIN')) {
             throw new WrongUsageException('SPC_TOOLCHAIN was not properly set. Please contact the developers.');
         }
-        if (SPCTarget::getLibc() === 'musl' && !SPCTarget::isStatic() && !file_exists('/lib/ld-musl-x86_64.so.1')) {
+        $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
+        if (SPCTarget::getLibc() === 'musl' && !SPCTarget::isStatic() && !file_exists($musl_wrapper_lib)) {
             throw new RuntimeException('You are linking against musl libc dynamically, but musl libc is not installed. Please install it with `sudo dnf install musl-libc` or `sudo apt install musl`');
         }
         if (SPCTarget::getLibc() === 'glibc' && SystemUtil::isMuslDist()) {
