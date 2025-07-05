@@ -55,6 +55,8 @@ jobs:
           extensions: curl, openssl, mbstring
           ini-values: memory_limit=-1
           tools: composer
+        env:
+          phpts: zts
 
       - name: "Cache Composer packages"
         id: composer-cache
