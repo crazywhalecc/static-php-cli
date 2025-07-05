@@ -330,7 +330,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         $target = "{$libDir}/{$realLibName}";
         if (file_exists($target)) {
-            [, $output] = shell()->execWithResult("readelf -d " . escapeshellarg($target));
+            [, $output] = shell()->execWithResult('readelf -d ' . escapeshellarg($target));
             $output = join("\n", $output);
             if (preg_match('/SONAME.*\[(.+)\]/', $output, $sonameMatch)) {
                 $currentSoname = $sonameMatch[1];
