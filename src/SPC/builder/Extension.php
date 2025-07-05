@@ -217,7 +217,11 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class && ($extra = (new ZigToolchain())->getExtraRuntimeObjects())) {
+        if (
+            PHP_OS_FAMILY === 'Linux' &&
+            ToolchainManager::getToolchainClass() === ZigToolchain::class &&
+            ($extra = (new ZigToolchain())->getExtraRuntimeObjects())
+        ) {
             FileSystem::replaceFileRegex(
                 $this->source_dir . '/Makefile',
                 "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
