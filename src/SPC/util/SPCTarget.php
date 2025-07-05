@@ -10,7 +10,6 @@ use SPC\toolchain\ClangNativeToolchain;
 use SPC\toolchain\GccNativeToolchain;
 use SPC\toolchain\MuslToolchain;
 use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 
 /**
  * SPC build target constants and toolchain initialization.
