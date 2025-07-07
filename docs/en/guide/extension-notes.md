@@ -122,8 +122,8 @@ For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use
 
 ## password-argon2
 
-1. password-argon2 is not a standard extension, it is an additional algorithm for the `password_hash` function.
-2. On Linux systems, `password-argon2` dependency `libargon2` conflicts with the `libsodium` library.
+1. password-argon2 is not a standard extension. The algorithm `PASSWORD_ARGON2ID` for the `password_hash` function needs libsodium or libargon2 to work.
+2. using password-argon2 enables multithread support for this.
 
 ## ffi
 

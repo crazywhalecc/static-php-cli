@@ -114,8 +114,8 @@ pgsql 16.2 修复了这个 Bug，现在正常工作了。
 
 ## password-argon2
 
-1. password-argon2不是一个标准的扩展，它是 `password_hash` 函数的额外算法。
-2. 在Linux系统，password-argon2 的依赖库 `libargon2` 与 `libsodium` 库冲突。
+1. password-argon2不是一个标准的扩展。`password_hash` 函数的 `PASSWORD_ARGON2ID` 算法需要 libsodium 或 libargon2 才能工作。
+2. 使用 password-argon2 可以为此启用多线程支持。
 
 ## ffi
 
