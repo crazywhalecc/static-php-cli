@@ -68,6 +68,7 @@ class openssl extends LinuxLibraryBase
                 '--libdir=lib ' .
                 '--openssldir=/etc/ssl ' .
                 "{$zlib_extra}" .
+                'enable-pie ' .
                 'no-legacy ' .
                 "linux-{$arch}"
             )
