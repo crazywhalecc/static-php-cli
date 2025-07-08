@@ -31,7 +31,7 @@ class password_argon2 extends Extension
             if ($extraLibs !== false) {
                 $extraLibs = str_replace(
                     [BUILD_LIB_PATH . '/libargon2.a', BUILD_LIB_PATH . '/libsodium.a'],
-                    ['', BUILD_LIB_PATH . '/libargon2.a' . ' ' . BUILD_LIB_PATH . '/libsodium.a'],
+                    ['', BUILD_LIB_PATH . '/libargon2.a ' . BUILD_LIB_PATH . '/libsodium.a'],
                     $extraLibs,
                 );
                 $extraLibs = trim(preg_replace('/\s+/', ' ', $extraLibs)); // normalize spacing
