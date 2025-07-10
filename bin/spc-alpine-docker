@@ -3,7 +3,7 @@
 set -e
 
 # This file is using docker to run commands
-SPC_DOCKER_VERSION=v4
+SPC_DOCKER_VERSION=v5
 
 # Detect docker can run
 if ! which docker >/dev/null; then
@@ -53,9 +53,9 @@ aarch64|arm64)
     exit 1
     ;;
 esac
-# if ALPINE_FROM is not set, use alpine:edge
+# if ALPINE_FROM is not set, use alpine:3.21
 if [ -z "$ALPINE_FROM" ]; then
-    ALPINE_FROM=alpine:edge
+    ALPINE_FROM=alpine:3.21
 fi
 if [ "$SPC_USE_ARCH" != "$CURRENT_ARCH" ]; then
     echo "* Using different arch needs to setup qemu-static for docker !"
@@ -64,7 +64,7 @@ if [ "$SPC_USE_ARCH" != "$CURRENT_ARCH" ]; then
         $DOCKER_EXECUTABLE run --rm --privileged multiarch/qemu-user-static:register --reset > /dev/null
     fi
 else
-    ALPINE_FROM=alpine:edge
+    ALPINE_FROM=alpine:3.21
 fi
 
 if [ "$SPC_USE_MIRROR" = "yes" ]; then

@@ -7,6 +7,7 @@ namespace SPC\builder\linux\library;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
+use SPC\util\SPCTarget;
 
 class imap extends LinuxLibraryBase
 {
@@ -34,6 +35,15 @@ class imap extends LinuxLibraryBase
         return true;
     }
 
+    public function patchPhpConfig(): bool
+    {
+        if (SPCTarget::getLibc() === 'glibc') {
+            FileSystem::replaceFileRegex(BUILD_BIN_PATH . '/php-config', '/^libs="(.*)"$/m', 'libs="$1 -lcrypt"');
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @throws RuntimeException
      */
@@ -44,6 +54,8 @@ class imap extends LinuxLibraryBase
         } else {
             $ssl_options = 'SSLTYPE=none';
         }
+        $libcVer = SPCTarget::getLibcVersion();
+        $extraLibs = $libcVer && version_compare($libcVer, '2.17', '<=') ? 'EXTRALDFLAGS="-ldl -lrt -lpthread"' : '';
         shell()->cd($this->source_dir)
             ->exec('make clean')
             ->exec('touch ip6')
@@ -51,9 +63,7 @@ class imap extends LinuxLibraryBase
             ->exec('chmod +x tools/ua')
             ->exec('chmod +x src/osdep/unix/drivers')
             ->exec('chmod +x src/osdep/unix/mkauths')
-            ->exec(
-                "yes | make slx {$ssl_options} EXTRACFLAGS='-fPIC -fpermissive'"
-            );
+            ->exec("yes | make slx {$ssl_options} EXTRACFLAGS='-fPIC -fpermissive' {$extraLibs}");
         try {
             shell()
                 ->exec("cp -rf {$this->source_dir}/c-client/c-client.a " . BUILD_LIB_PATH . '/libc-client.a')
