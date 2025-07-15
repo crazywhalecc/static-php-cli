@@ -32,7 +32,7 @@ Windows currently only supports the x86_64 architecture, and does not support 32
 
 ## Supported PHP Version
 
-Currently, static php cli supports PHP versions 8.1 to 8.4, and theoretically supports PHP 8.0 and earlier versions. 
+Currently, static php cli supports PHP versions 8.1 to 8.5, and theoretically supports PHP 8.0 and earlier versions. 
 Simply select the earlier version when downloading.
 However, due to some extensions and special components that have stopped supporting earlier versions of PHP, 
 static-php-cli will not explicitly support earlier versions.

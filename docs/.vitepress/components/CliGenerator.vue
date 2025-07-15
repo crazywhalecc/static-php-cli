@@ -238,6 +238,7 @@ const availablePhpVersions = [
   '8.2',
   '8.3',
   '8.4',
+  '8.5',
 ];
 
 const I18N = {
