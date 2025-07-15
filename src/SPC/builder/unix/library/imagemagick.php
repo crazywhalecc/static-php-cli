@@ -34,6 +34,7 @@ trait imagemagick
             ->optionalLib('bzip2', ...ac_with_args('bzlib'))
             ->addConfigureArgs(
                 '--disable-openmp',
+                '--without-jbig',
                 '--without-jxl',
                 '--without-x',
             );
