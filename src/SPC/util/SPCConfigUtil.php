@@ -145,6 +145,9 @@ class SPCConfigUtil
                 }
             }
         }
+        if (in_array('imap', $libraries) && SPCTarget::getLibc() === 'glibc') {
+            $short_name[] = '-lcrypt';
+        }
         return implode(' ', $short_name);
     }
 
