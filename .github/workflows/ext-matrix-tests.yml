@@ -82,9 +82,9 @@ jobs:
           - zlib
           - zstd
         php-version:
-          - "8.4"
+          - "8.5"
         operating-system:
-          - "ubuntu-latest"
+          - "ubuntu-24.04"
           #- "macos-13"
           #- "debian-arm64-self-hosted"
           - "macos-14"
