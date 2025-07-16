@@ -25,15 +25,15 @@ $test_os = [
     // 'macos-14',  // bin/spc for arm64
     // 'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
-    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
-    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
     'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-latest', // .\bin\spc.ps1
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
