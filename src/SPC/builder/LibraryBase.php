@@ -333,6 +333,15 @@ abstract class LibraryBase
     }
 
     /**
+     * Patch php-config after embed was built
+     * Example: imap requires -lcrypt
+     */
+    public function patchPhpConfig(): bool
+    {
+        return false;
+    }
+
+    /**
      * Build this library.
      *
      * @throws RuntimeException

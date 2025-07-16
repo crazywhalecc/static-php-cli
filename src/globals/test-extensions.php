@@ -33,7 +33,7 @@ $test_os = [
 ];
 
 // whether enable thread safe
-$zts = true;
+$zts = false;
 
 $no_strip = false;
 

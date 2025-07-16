@@ -298,6 +298,11 @@ abstract class UnixBuilderBase extends BuilderBase
             $php_config_str = preg_replace('/(libs=")(.*?)\s*(-lstdc\+\+)\s*(.*?)"/', '$1$2 $4 $3"', $php_config_str);
             FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
         }
+        foreach ($this->getLibs() as $lib) {
+            if ($lib->patchPhpConfig()) {
+                logger()->debug("Library {$lib->getName()} patched php-config");
+            }
+        }
     }
 
     /**
