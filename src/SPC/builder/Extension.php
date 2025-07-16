@@ -306,9 +306,7 @@ class Extension
 
             [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
             if ($ret !== 0) {
-                if ($this->builder->getOption('debug')) {
-                    var_dump($out);
-                }
+                var_dump($out);
                 throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
             }
         }
