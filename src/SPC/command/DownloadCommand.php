@@ -252,7 +252,7 @@ class DownloadCommand extends BaseCommand
                         } elseif ($alt_sources === false) {
                             logger()->warning("No alternative sources found for {$source}, skipping alternative download");
                             throw $e;
-                        } else{
+                        } else {
                             logger()->notice("Trying to download alternative sources for {$source}");
                             $alt_config = array_merge($config, $alt_sources);
                         }
