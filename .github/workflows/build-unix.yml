@@ -235,7 +235,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         name: "Upload Build Metadata"
         with:
-          name: build-meta
+          name: build-meta-${{ inputs.php-version }}-${{ inputs.os }}
           path: |
             buildroot/build-extensions.json
             buildroot/build-libraries.json
