@@ -162,8 +162,10 @@ class WindowsBuilder extends BuilderBase
     {
         SourcePatcher::patchWindowsCLITarget();
 
+        $extra_libs = getenv('SPC_WINDOWS_EXEC_LIBS') ?: '';
+
         // add nmake wrapper
-        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cli_wrapper.bat', "nmake /nologo LIBS_CLI=\"{$this->getOption('extra-libs')} ws2_32.lib shell32.lib\" EXTRA_LD_FLAGS_PROGRAM= %*");
+        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cli_wrapper.bat', "nmake /nologo LIBS_CLI=\"{$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cli_wrapper.bat --task-args php.exe");
 
@@ -197,9 +199,11 @@ class WindowsBuilder extends BuilderBase
         }
         FileSystem::writeFile(SOURCE_PATH . '\php-src\Makefile', $makefile);
 
+        $extra_libs = getenv('SPC_WINDOWS_EXEC_LIBS') ?: '';
+
         // add nmake wrapper
         $fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' /DPHP_MICRO_FAKE_CLI" ' : '';
-        $wrapper = "nmake /nologo LIBS_MICRO=\"{$this->getOption('extra-libs')} ws2_32.lib shell32.lib\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" %*";
+        $wrapper = "nmake /nologo LIBS_MICRO=\"{$extra_libs}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" %*";
         FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_micro_wrapper.bat', $wrapper);
 
         // phar patch for micro

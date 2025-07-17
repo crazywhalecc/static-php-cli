@@ -57,6 +57,17 @@ class curl extends Extension
         return true;
     }
 
+    public function patchBeforeMake(): bool
+    {
+        $extra_libs = getenv('SPC_WINDOWS_EXEC_LIBS');
+        if (!str_contains($extra_libs, 'secur32.lib')) {
+            $extra_libs .= ' secur32.lib';
+            putenv('SPC_WINDOWS_EXEC_LIBS=' . $extra_libs);
+            return true;
+        }
+        return false;
+    }
+
     public function patchBeforeSharedConfigure(): bool
     {
         $file = $this->source_dir . '/config.m4';
