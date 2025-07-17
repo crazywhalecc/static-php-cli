@@ -61,11 +61,6 @@ class WindowsBuilder extends BuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
-        // ---------- Update extra-libs ----------
-        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
-        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
-
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
@@ -162,8 +157,10 @@ class WindowsBuilder extends BuilderBase
     {
         SourcePatcher::patchWindowsCLITarget();
 
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+
         // add nmake wrapper
-        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cli_wrapper.bat', "nmake /nologo LIBS_CLI=\"{$this->getOption('extra-libs')} ws2_32.lib shell32.lib\" EXTRA_LD_FLAGS_PROGRAM= %*");
+        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cli_wrapper.bat', "nmake /nologo LIBS_CLI=\"ws2_32.lib shell32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cli_wrapper.bat --task-args php.exe");
 
@@ -197,9 +194,11 @@ class WindowsBuilder extends BuilderBase
         }
         FileSystem::writeFile(SOURCE_PATH . '\php-src\Makefile', $makefile);
 
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+
         // add nmake wrapper
         $fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' /DPHP_MICRO_FAKE_CLI" ' : '';
-        $wrapper = "nmake /nologo LIBS_MICRO=\"{$this->getOption('extra-libs')} ws2_32.lib shell32.lib\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" %*";
+        $wrapper = "nmake /nologo LIBS_MICRO=\"ws2_32.lib shell32.lib {$extra_libs}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" %*";
         FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_micro_wrapper.bat', $wrapper);
 
         // phar patch for micro
