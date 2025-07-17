@@ -59,10 +59,10 @@ class curl extends Extension
 
     public function patchBeforeMake(): bool
     {
-        $extra_libs = getenv('SPC_WINDOWS_EXEC_LIBS');
+        $extra_libs = getenv('SPC_EXTRA_LIBS');
         if (!str_contains($extra_libs, 'secur32.lib')) {
             $extra_libs .= ' secur32.lib';
-            putenv('SPC_WINDOWS_EXEC_LIBS=' . $extra_libs);
+            putenv('SPC_EXTRA_LIBS=' . trim($extra_libs));
             return true;
         }
         return false;
