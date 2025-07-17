@@ -230,7 +230,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         name: "Upload License Files"
         with:
-          name: license-files
+          name: license-files-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/license/
       - uses: actions/upload-artifact@v4
         name: "Upload Build Metadata"
