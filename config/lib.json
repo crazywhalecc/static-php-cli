@@ -265,6 +265,13 @@
             "libsodium"
         ]
     },
+    "lerc": {
+        "source": "lerc",
+        "static-libs-unix": [
+            "libLerc.a"
+        ],
+        "cpp-library": true
+    },
     "libacl": {
         "source": "libacl",
         "static-libs-unix": [
@@ -498,6 +505,9 @@
         "lib-depends": [
             "zlib",
             "libjpeg"
+        ],
+        "lib-suggests-unix": [
+            "lerc"
         ]
     },
     "libuuid": {
