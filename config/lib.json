@@ -272,6 +272,18 @@
         ],
         "cpp-library": true
     },
+    "jbig": {
+        "source": "jbig",
+        "static-libs-unix": [
+            "libjbig.a",
+            "libjbig85.a"
+        ],
+        "headers": [
+            "jbig.h",
+            "jbig85.h",
+            "jbig_ar.h"
+        ]
+    },
     "libacl": {
         "source": "libacl",
         "static-libs-unix": [
@@ -507,7 +519,8 @@
             "libjpeg"
         ],
         "lib-suggests-unix": [
-            "lerc"
+            "lerc",
+            "jbig"
         ]
     },
     "libuuid": {

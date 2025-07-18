@@ -38,6 +38,7 @@ trait libtiff
             ->optionalLib('zstd', '--enable-zstd', '--disable-zstd')
             ->optionalLib('webp', '--enable-webp', '--disable-webp')
             ->optionalLib('xz', '--enable-lzma', '--disable-lzma')
+            ->optionalLib('jbig', '--enable-jbig', '--disable-jbig')
             ->make();
         $this->patchPkgconfPrefix(['libtiff-4.pc']);
     }
