@@ -476,6 +476,15 @@
             "path": "LICENSE"
         }
     },
+    "jbig": {
+        "type": "url",
+        "url": "https://www.cl.cam.ac.uk/~mgk25/jbigkit/download/jbigkit-2.1.tar.gz",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libevent": {
         "type": "ghrel",
         "repo": "libevent/libevent",
