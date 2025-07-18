@@ -4,7 +4,8 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
+        },
+        "alt": false
     },
     "amqp": {
         "type": "url",

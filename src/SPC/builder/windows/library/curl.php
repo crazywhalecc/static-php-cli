@@ -37,6 +37,7 @@ class curl extends WindowsLibraryBase
                 '-DBUILD_EXAMPLES=OFF ' . // disable examples
                 '-DUSE_LIBIDN2=OFF ' . // disable libidn2
                 '-DCURL_USE_LIBPSL=OFF ' . // disable libpsl
+                '-DUSE_WINDOWS_SSPI=ON ' . // use Schannel instead of OpenSSL
                 '-DCURL_USE_SCHANNEL=ON ' . // use Schannel instead of OpenSSL
                 '-DCURL_USE_OPENSSL=OFF ' . // disable openssl due to certificate issue
                 '-DCURL_ENABLE_SSL=ON ' .
