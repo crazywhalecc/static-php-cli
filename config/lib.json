@@ -520,9 +520,9 @@
         ],
         "lib-suggests-unix": [
             "lerc",
+            "libwebp",
             "jbig",
             "xz",
-            "webp",
             "zstd"
         ]
     },
