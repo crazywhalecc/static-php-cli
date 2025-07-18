@@ -252,6 +252,18 @@
             "openssl"
         ]
     },
+    "jbig": {
+        "source": "jbig",
+        "static-libs-unix": [
+            "libjbig.a",
+            "libjbig85.a"
+        ],
+        "headers": [
+            "jbig.h",
+            "jbig85.h",
+            "jbig_ar.h"
+        ]
+    },
     "ldap": {
         "source": "ldap",
         "static-libs-unix": [
@@ -271,18 +283,6 @@
             "libLerc.a"
         ],
         "cpp-library": true
-    },
-    "jbig": {
-        "source": "jbig",
-        "static-libs-unix": [
-            "libjbig.a",
-            "libjbig85.a"
-        ],
-        "headers": [
-            "jbig.h",
-            "jbig85.h",
-            "jbig_ar.h"
-        ]
     },
     "libacl": {
         "source": "libacl",
@@ -836,6 +836,15 @@
             "libiconv"
         ]
     },
+    "watcher": {
+        "source": "watcher",
+        "static-libs-unix": [
+            "libwatcher-c.a"
+        ],
+        "headers": [
+            "wtr/watcher-c.h"
+        ]
+    },
     "xz": {
         "source": "xz",
         "static-libs-unix": [
@@ -888,15 +897,6 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
-        ]
-    },
-    "watcher": {
-        "source": "watcher",
-        "static-libs-unix": [
-            "libwatcher-c.a"
-        ],
-        "headers": [
-            "wtr/watcher-c.h"
         ]
     }
 }
