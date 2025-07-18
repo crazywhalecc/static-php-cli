@@ -8,6 +8,7 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
+use SPC\util\SPCTarget;
 
 trait libtiff
 {
@@ -17,7 +18,9 @@ trait libtiff
      */
     protected function build(): void
     {
+        $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
         FileSystem::replaceFileStr($this->source_dir . '/configure', '-lwebp', '-lwebp -lsharpyuv');
+        FileSystem::replaceFileStr($this->source_dir . '/configure', '-l"$lerc_lib_name"', '-l"$lerc_lib_name" ' . $libcpp);
         UnixAutoconfExecutor::create($this)
             ->configure(
                 // zlib deps
@@ -31,6 +34,8 @@ trait libtiff
                 '--disable-old-jpeg',
                 '--disable-jpeg12',
                 '--disable-libdeflate',
+                '--disable-tools',
+                '--disable-contrib',
                 '--disable-cxx',
                 '--without-x',
             )
