@@ -520,7 +520,10 @@
         ],
         "lib-suggests-unix": [
             "lerc",
-            "jbig"
+            "jbig",
+            "xz",
+            "webp",
+            "zstd"
         ]
     },
     "libuuid": {
