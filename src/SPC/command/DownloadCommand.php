@@ -245,11 +245,15 @@ class DownloadCommand extends BaseCommand
                         }
                         // if download failed, we will try to download alternative sources
                         logger()->warning("Download failed: {$e->getMessage()}");
-                        logger()->notice("Trying to download alternative sources for {$source}");
                         $alt_sources = Config::getSource($source)['alt'] ?? null;
                         if ($alt_sources === null) {
+                            logger()->warning("No alternative sources found for {$source}, using default alternative source");
                             $alt_config = array_merge($config, $this->getDefaultAlternativeSource($source));
+                        } elseif ($alt_sources === false) {
+                            logger()->warning("No alternative sources found for {$source}, skipping alternative download");
+                            throw $e;
                         } else {
+                            logger()->notice("Trying to download alternative sources for {$source}");
                             $alt_config = array_merge($config, $alt_sources);
                         }
                         Downloader::downloadSource($source, $alt_config, $force_all || in_array($source, $force_list));
