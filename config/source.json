@@ -976,9 +976,9 @@
         }
     },
     "tidy": {
-        "type": "url",
-        "url": "https://github.com/htacg/tidy-html5/archive/refs/tags/5.8.0.tar.gz",
-        "filename": "tidy-html5.tgz",
+        "type": "ghtar",
+        "repo": "htacg/tidy-html5",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "README/LICENSE.md"
