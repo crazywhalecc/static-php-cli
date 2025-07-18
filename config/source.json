@@ -957,24 +957,18 @@
     },
     "swoole": {
         "path": "php-src/ext/swoole",
-        "type": "git",
-        "rev": "master",
-        "url": "https://github.com/swoole/swoole-src.git",
+        "type": "ghtar",
+        "repo": "swoole/swoole-src",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
-        },
-        "alt": {
-            "type": "ghtar",
-            "repo": "swoole/swoole-src",
-            "prefer-stable": true
         }
     },
     "swow": {
-        "type": "git",
         "path": "php-src/ext/swow-src",
-        "rev": "ci",
-        "url": "https://github.com/swow/swow",
+        "type": "ghtar",
+        "repo": "swoole/swoole-src",
         "license": {
             "type": "file",
             "path": "LICENSE"

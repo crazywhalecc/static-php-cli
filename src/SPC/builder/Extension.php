@@ -263,7 +263,7 @@ class Extension
 
         $ret = '';
         foreach ($order as $ext) {
-            if ($ext instanceof Extension && $ext->isBuildShared()) {
+            if ($ext instanceof self && $ext->isBuildShared()) {
                 if (Config::getExt($ext->getName(), 'zend-extension', false) === true) {
                     $ret .= " -d \"zend_extension={$ext->getName()}\"";
                 } else {
