@@ -279,7 +279,7 @@ class SourcePatcher
         // }
 
         // call extension patch before make
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeMake() === true) {
                 logger()->info("Extension [{$ext->getName()}] patched before make");
             }
