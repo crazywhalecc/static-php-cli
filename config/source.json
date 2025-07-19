@@ -625,7 +625,6 @@
         "type": "filelist",
         "url": "https://download.osgeo.org/libtiff/",
         "regex": "/href=\"(?<file>tiff-(?<version>[^\"]+)\\.tar\\.xz)\"/",
-        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE.md"
