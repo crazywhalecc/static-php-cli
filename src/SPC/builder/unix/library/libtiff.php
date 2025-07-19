@@ -22,6 +22,11 @@ trait libtiff
         FileSystem::replaceFileStr($this->source_dir . '/configure', '-lwebp', '-lwebp -lsharpyuv');
         FileSystem::replaceFileStr($this->source_dir . '/configure', '-l"$lerc_lib_name"', '-l"$lerc_lib_name" ' . $libcpp);
         UnixAutoconfExecutor::create($this)
+            ->optionalLib('lerc', '--enable-lerc', '--disable-lerc')
+            ->optionalLib('zstd', '--enable-zstd', '--disable-zstd')
+            ->optionalLib('libwebp', '--enable-webp', '--disable-webp')
+            ->optionalLib('xz', '--enable-lzma', '--disable-lzma')
+            ->optionalLib('jbig', '--enable-jbig', '--disable-jbig')
             ->configure(
                 // zlib deps
                 '--enable-zlib',
@@ -39,11 +44,6 @@ trait libtiff
                 '--disable-cxx',
                 '--without-x',
             )
-            ->optionalLib('lerc', '--enable-lerc', '--disable-lerc')
-            ->optionalLib('zstd', '--enable-zstd', '--disable-zstd')
-            ->optionalLib('webp', '--enable-webp', '--disable-webp')
-            ->optionalLib('xz', '--enable-lzma', '--disable-lzma')
-            ->optionalLib('jbig', '--enable-jbig', '--disable-jbig')
             ->make();
         $this->patchPkgconfPrefix(['libtiff-4.pc']);
     }
