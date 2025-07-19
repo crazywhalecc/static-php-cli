@@ -210,7 +210,7 @@ class BSDBuilder extends UnixBuilderBase
             ->exec("make -j{$this->concurrency} {$vars} micro");
 
         if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec('strip --strip-all micro.sfx');
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec('strip --strip-unneeded micro.sfx');
         }
         $this->deployBinary(BUILD_TARGET_MICRO);
 

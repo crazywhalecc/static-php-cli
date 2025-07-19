@@ -13,8 +13,13 @@ class redis extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = '--enable-redis';
-        $arg .= $this->builder->getExt('session') ? ' --enable-redis-session' : ' --disable-redis-session';
-        $arg .= $this->builder->getExt('igbinary') ? ' --enable-redis-igbinary' : ' --disable-redis-igbinary';
+        if ($this->isBuildStatic()) {
+            $arg .= $this->builder->getExt('session')?->isBuildStatic() ? ' --enable-redis-session' : ' --disable-redis-session';
+            $arg .= $this->builder->getExt('igbinary')?->isBuildStatic() ? ' --enable-redis-igbinary' : ' --disable-redis-igbinary';
+        } else {
+            $arg .= $this->builder->getExt('session') ? ' --enable-redis-session' : ' --disable-redis-session';
+            $arg .= $this->builder->getExt('igbinary') ? ' --enable-redis-igbinary' : ' --disable-redis-igbinary';
+        }
         if ($this->builder->getLib('zstd')) {
             $arg .= ' --enable-redis-zstd --with-libzstd="' . BUILD_ROOT_PATH . '"';
         }

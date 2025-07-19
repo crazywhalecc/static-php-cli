@@ -365,8 +365,8 @@ class Downloader
                             $cls = new $class();
                             if (in_array($name, $cls->getSupportName())) {
                                 (new $class())->fetch($name, $force, $pkg);
+                                break;
                             }
-                            break;
                         }
                     }
                     break;

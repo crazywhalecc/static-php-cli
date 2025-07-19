@@ -9,8 +9,9 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
-use SPC\util\SPCTarget;
 
 class Extension
 {
@@ -186,6 +187,19 @@ class Extension
      */
     public function patchBeforeMake(): bool
     {
+        if (
+            PHP_OS_FAMILY === 'Linux' &&
+            $this->isBuildShared() &&
+            ToolchainManager::getToolchainClass() === ZigToolchain::class &&
+            ($extra = (new ZigToolchain())->getExtraRuntimeObjects())
+        ) {
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/Makefile',
+                "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
+                "$1 {$extra}",
+            );
+            return true;
+        }
         return false;
     }
 
@@ -216,6 +230,18 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
+        if (
+            PHP_OS_FAMILY === 'Linux' &&
+            ToolchainManager::getToolchainClass() === ZigToolchain::class &&
+            ($extra = (new ZigToolchain())->getExtraRuntimeObjects())
+        ) {
+            FileSystem::replaceFileRegex(
+                $this->source_dir . '/Makefile',
+                "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
+                "$1 {$extra}",
+            );
+            return true;
+        }
         return false;
     }
 
@@ -250,7 +276,7 @@ class Extension
 
         $ret = '';
         foreach ($order as $ext) {
-            if ($ext instanceof Extension && $ext->isBuildShared()) {
+            if ($ext instanceof self && $ext->isBuildShared()) {
                 if (Config::getExt($ext->getName(), 'zend-extension', false) === true) {
                     $ret .= " -d \"zend_extension={$ext->getName()}\"";
                 } else {
@@ -293,9 +319,7 @@ class Extension
 
             [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
             if ($ret !== 0) {
-                if ($this->builder->getOption('debug')) {
-                    var_dump($out);
-                }
+                var_dump($out);
                 throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
             }
         }
@@ -388,14 +412,15 @@ class Extension
 
         // macOS ld64 doesn't understand these, while Linux and BSD do
         // use them to make sure that all symbols are picked up, even if a library has already been visited before
-        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,-Bstatic -Wl,--start-group ' : '';
-        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group -Wl,-Bdynamic ' : ' ';
+        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,--start-group ' : '';
+        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group ' : ' ';
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => $preStatic . $staticLibString . $postStatic . $sharedLibString,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
+            'SPC_COMPILER_EXTRA' => '-lstdc++',
         ];
 
         if ($this->patchBeforeSharedPhpize()) {
@@ -405,6 +430,7 @@ class Extension
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(BUILD_BIN_PATH . '/phpize');
 
         if ($this->patchBeforeSharedConfigure()) {
@@ -413,6 +439,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(
                 './configure ' . $this->getUnixConfigureArg(true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
@@ -432,6 +459,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec('make clean')
             ->exec('make -j' . $this->builder->concurrency)
             ->exec('make install');
@@ -516,8 +544,7 @@ class Extension
         $sharedLibString = '';
         $staticLibString = '';
         $staticLibs = $this->getLibFilesString();
-        $staticLibs = str_replace(BUILD_LIB_PATH . '/lib', '-l', $staticLibs);
-        $staticLibs = str_replace('.a', '', $staticLibs);
+        $staticLibs = str_replace([BUILD_LIB_PATH . '/lib', '.a'], ['-l', ''], $staticLibs);
         $staticLibs = explode('-l', $staticLibs . ' ' . $config['libs']);
         foreach ($staticLibs as $lib) {
             $lib = trim($lib);
@@ -533,12 +560,12 @@ class Extension
                 $sharedLibString .= '-l' . $lib . ' ';
             }
         }
-        // move static libstdc++ to shared if we are on non-full-static build target
-        if (!SPCTarget::isStatic() && in_array(SPCTarget::getLibc(), SPCTarget::LIBC_LIST)) {
-            $staticLibString .= ' -lstdc++';
-            $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
-        }
         return [trim($staticLibString), trim($sharedLibString)];
+    }
+
+    protected function getExtraEnv(): array
+    {
+        return [];
     }
 
     private function getLibraryDependencies(bool $recursive = false): array

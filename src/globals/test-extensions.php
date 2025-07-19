@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
 ];
 
@@ -26,14 +26,14 @@ $test_os = [
     // 'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
-    // 'ubuntu-24.04', // bin/spc for x86_64
+    'ubuntu-24.04', // bin/spc for x86_64
     // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
-    // 'ubuntu-24.04-arm', // bin/spc for arm64
-    'windows-latest', // .\bin\spc.ps1
+    'ubuntu-24.04-arm', // bin/spc for arm64
+    // 'windows-latest', // .\bin\spc.ps1
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
@@ -41,20 +41,20 @@ $no_strip = false;
 $upx = false;
 
 // whether to test frankenphp build, only available for macos and linux
-$frankenphp = false;
+$frankenphp = true;
 
 // prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imap,swoole',
-    'Windows' => 'curl',
+    'Linux', 'Darwin' => 'apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
+    'Windows' => 'intl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => '',
+    'Linux' => 'amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -155,6 +155,14 @@ if ($shared_extensions) {
         case 'ubuntu-22.04':
         case 'ubuntu-22.04-arm':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            break;
+        case 'ubuntu-24.04':
+        case 'ubuntu-24.04-arm':
+            putenv('SPC_TARGET=native-native-musl -dynamic');
+            if (getenv('SPC_TARGET') && !str_contains(getenv('SPC_TARGET'), '-musl') || str_contains(getenv('SPC_TARGET'), '-dynamic')) {
+                exec('sudo apt install musl -y');
+                $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            }
             break;
         case 'macos-13':
         case 'macos-14':

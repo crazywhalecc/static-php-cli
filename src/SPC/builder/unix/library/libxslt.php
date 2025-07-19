@@ -33,10 +33,10 @@ trait libxslt
                 '--without-debugger',
                 "--with-libxml-prefix={$this->getBuildRootPath()}",
             );
-        if (getenv('SPC_LINUX_DEFAULT_LD_LIBRARY_PATH') && getenv('SPC_LINUX_DEFAULT_LIBRARY_PATH')) {
+        if (getenv('SPC_LD_LIBRARY_PATH') && getenv('SPC_LIBRARY_PATH')) {
             $ac->appendEnv([
-                'LD_LIBRARY_PATH' => getenv('SPC_LINUX_DEFAULT_LD_LIBRARY_PATH'),
-                'LIBRARY_PATH' => getenv('SPC_LINUX_DEFAULT_LIBRARY_PATH'),
+                'LD_LIBRARY_PATH' => getenv('SPC_LD_LIBRARY_PATH'),
+                'LIBRARY_PATH' => getenv('SPC_LIBRARY_PATH'),
             ]);
         }
         $ac->configure()->make();

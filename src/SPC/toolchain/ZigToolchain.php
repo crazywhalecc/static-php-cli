@@ -4,9 +4,60 @@ declare(strict_types=1);
 
 namespace SPC\toolchain;
 
+use SPC\exception\WrongUsageException;
+use SPC\store\pkg\Zig;
+use SPC\util\GlobalEnvManager;
+
 class ZigToolchain implements ToolchainInterface
 {
-    public function initEnv(): void {}
+    public function initEnv(): void
+    {
+        // Set environment variables for zig toolchain
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CC=zig-cc');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CXX=zig-c++');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=ar');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=ld');
+    }
 
-    public function afterInit(): void {}
+    public function afterInit(): void
+    {
+        if (!is_dir(Zig::getEnvironment()['PATH'])) {
+            throw new WrongUsageException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
+        }
+        GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
+    }
+
+    /**
+     * Get the extra runtime objects needed for zig toolchain.
+     * This method searches for `crtbeginS.o` and `crtendS.o` in common GCC library paths.
+     */
+    public function getExtraRuntimeObjects(): string
+    {
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
+        $objects = ['crtbeginS.o', 'crtendS.o'];
+        $found = [];
+
+        foreach ($objects as $obj) {
+            $located = null;
+            foreach ($paths as $base) {
+                $output = shell_exec("find {$base} -name {$obj} 2>/dev/null | grep -v '/32/' | head -n 1");
+                $line = trim((string) $output);
+                if ($line !== '') {
+                    $located = $line;
+                    break;
+                }
+            }
+            if ($located) {
+                $found[] = $located;
+            }
+        }
+
+        $cache = implode(' ', $found);
+        return $cache;
+    }
 }

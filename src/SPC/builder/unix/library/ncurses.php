@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
+use SPC\util\SPCTarget;
 
 trait ncurses
 {
@@ -14,6 +15,9 @@ trait ncurses
         $filelist = FileSystem::scanDirFiles(BUILD_BIN_PATH, relative: true);
 
         UnixAutoconfExecutor::create($this)
+            ->appendEnv([
+                'LDFLAGS' => SPCTarget::isStatic() ? '-static' : '',
+            ])
             ->configure(
                 '--enable-overwrite',
                 '--with-curses-h',
