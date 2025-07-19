@@ -18,8 +18,8 @@ trait libjxl
         }
         FileSystem::replaceFileStr(
             $this->source_dir . '/deps.sh',
-            'return 0',
-            '# return 0',
+            ['return 0', 'download_github third_party/brotli', 'download_github third_party/zlib', 'download_github third_party/libpng'],
+            ['# return 0', '# download_github third_party/brotli', '# download_github third_party/zlib', '# download_github third_party/libpng'],
         );
         shell()->cd($this->source_dir)
             ->exec('./deps.sh');

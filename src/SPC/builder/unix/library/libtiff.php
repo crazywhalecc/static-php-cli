@@ -18,7 +18,7 @@ trait libtiff
      */
     protected function build(): void
     {
-        $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
+        $libcpp = SPCTarget::getTargetOS() === 'Linux' ? '-lstdc++' : '-lc++';
         FileSystem::replaceFileStr($this->source_dir . '/configure', '-lwebp', '-lwebp -lsharpyuv');
         FileSystem::replaceFileStr($this->source_dir . '/configure', '-l"$lerc_lib_name"', '-l"$lerc_lib_name" ' . $libcpp);
         UnixAutoconfExecutor::create($this)
