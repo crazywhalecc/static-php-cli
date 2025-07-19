@@ -497,6 +497,7 @@
         "static-libs-windows": [
             "libssh2.lib"
         ],
+        "provide-pre-built": true,
         "headers": [
             "libssh2.h",
             "libssh2_publickey.h",
@@ -504,9 +505,6 @@
         ],
         "lib-depends": [
             "openssl"
-        ],
-        "lib-suggests": [
-            "zlib"
         ]
     },
     "libtiff": {

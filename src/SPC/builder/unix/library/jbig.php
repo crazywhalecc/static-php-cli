@@ -15,8 +15,8 @@ trait jbig
      */
     public function patchBeforeBuild(): bool
     {
-        // Patch Makefile to add -fPIC flag for position-independent code
         FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', 'CFLAGS = -O2 -W -Wno-unused-result -fPIC');
+        return true;
     }
 
     /**
@@ -24,7 +24,6 @@ trait jbig
      */
     protected function build(): void
     {
-        // Build the library
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec("make -j{$this->builder->concurrency} {$this->builder->getEnvString()} lib")
             ->exec('cp libjbig/libjbig.a ' . BUILD_LIB_PATH)
