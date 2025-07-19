@@ -195,7 +195,7 @@ class Extension
             ($extra = (new ZigToolchain())->getExtraRuntimeObjects())
         ) {
             FileSystem::replaceFileRegex(
-                $this->source_dir . '/Makefile',
+                SOURCE_PATH . '/php-src/Makefile',
                 "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
                 "$1 {$extra}",
             );
