@@ -27,6 +27,7 @@ class xlswriter extends Extension
 
     public function patchBeforeMake(): bool
     {
+        $patched = parent::patchBeforeMake();
         if (PHP_OS_FAMILY === 'Windows') {
             // fix windows build with openssl extension duplicate symbol bug
             SourcePatcher::patchFile('spc_fix_xlswriter_win32.patch', $this->source_dir);
@@ -37,6 +38,6 @@ class xlswriter extends Extension
             }
             return true;
         }
-        return false;
+        return $patched;
     }
 }

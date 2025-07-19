@@ -14,6 +14,7 @@ class swoole extends Extension
 {
     public function patchBeforeMake(): bool
     {
+        $patched = parent::patchBeforeMake();
         if ($this->builder instanceof MacOSBuilder) {
             // Fix swoole with event extension <util.h> conflict bug
             $util_path = shell()->execWithResult('xcrun --show-sdk-path', false)[1][0] . '/usr/include/util.h';
@@ -24,7 +25,7 @@ class swoole extends Extension
             );
             return true;
         }
-        return false;
+        return $patched;
     }
 
     public function getExtVersion(): ?string

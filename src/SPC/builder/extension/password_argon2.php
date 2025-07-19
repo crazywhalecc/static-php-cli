@@ -26,6 +26,7 @@ class password_argon2 extends Extension
 
     public function patchBeforeMake(): bool
     {
+        $patched = parent::patchBeforeMake();
         if ($this->builder->getLib('libsodium') !== null) {
             $extraLibs = getenv('SPC_EXTRA_LIBS');
             if ($extraLibs !== false) {
@@ -36,8 +37,9 @@ class password_argon2 extends Extension
                 );
                 $extraLibs = trim(preg_replace('/\s+/', ' ', $extraLibs)); // normalize spacing
                 f_putenv('SPC_EXTRA_LIBS=' . $extraLibs);
+                return true;
             }
         }
-        return false;
+        return $patched;
     }
 }
