@@ -10,3 +10,4 @@ assert(Imagick::queryFormats('WEBP') !== []);
 assert(Imagick::queryFormats('JPEG') !== []);
 assert(Imagick::queryFormats('PNG') !== []);
 assert(Imagick::queryFormats('TIFF') !== []);
+assert(Imagick::queryFormats('JXL') !== []);
