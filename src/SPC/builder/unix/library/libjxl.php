@@ -34,7 +34,7 @@ trait libjxl
             ->addConfigureArgs('-DJPEGXL_ENABLE_MANPAGES=OFF')
             ->addConfigureArgs('-DJPEGXL_ENABLE_BENCHMARK=OFF')
             ->addConfigureArgs('-DJPEGXL_ENABLE_PLUGINS=OFF')
-            ->addConfigureArgs('-DJPEGXL_ENABLE_SJPEG=OFF')
+            ->addConfigureArgs('-DJPEGXL_ENABLE_JNI=OFF')
             ->addConfigureArgs('-DJPEGXL_STATIC=' . (SPCTarget::isStatic() ? 'ON' : 'OFF'))
             ->addConfigureArgs('-DBUILD_TESTING=OFF')
             ->addConfigureArgs('-DJPEGXL_FORCE_SYSTEM_BROTLI=ON')
