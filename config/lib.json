@@ -240,7 +240,8 @@
             "zstd",
             "xz",
             "libzip",
-            "libxml2"
+            "libxml2",
+            "libjxl"
         ]
     },
     "imap": {
@@ -417,6 +418,20 @@
         ],
         "lib-suggests-windows": [
             "zlib"
+        ]
+    },
+    "libjxl": {
+        "source": "libjxl",
+        "static-libs-unix": [
+            "libjxl.a",
+            "libjxl_dec.a"
+        ],
+        "lib-depends": [
+            "brotli",
+            "libgif",
+            "libjpeg",
+            "libpng",
+            "libwebp"
         ]
     },
     "liblz4": {
