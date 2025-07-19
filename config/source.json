@@ -390,8 +390,12 @@
     },
     "jbig": {
         "type": "url",
-        "url": "https://www.cl.cam.ac.uk/~mgk25/jbigkit/download/jbigkit-2.1.tar.gz",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/jbig/jbigkit-2.1.tar.gz",
         "provide-pre-built": true,
+        "alt": {
+            "type": "url",
+            "url": "https://www.cl.cam.ac.uk/~mgk25/jbigkit/download/jbigkit-2.1.tar.gz"
+        },
         "license": {
             "type": "file",
             "path": "COPYING"

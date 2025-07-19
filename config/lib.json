@@ -228,8 +228,9 @@
         ],
         "lib-depends": [
             "zlib",
-            "libpng",
             "libjpeg",
+            "libjxl",
+            "libpng",
             "libwebp",
             "freetype",
             "libtiff",
@@ -240,8 +241,7 @@
             "zstd",
             "xz",
             "libzip",
-            "libxml2",
-            "libjxl"
+            "libxml2"
         ]
     },
     "imap": {
@@ -424,11 +424,12 @@
         "source": "libjxl",
         "static-libs-unix": [
             "libjxl.a",
-            "libjxl_dec.a"
+            "libjxl_dec.a",
+            "libjxl_threads.a",
+            "libhwy.a"
         ],
         "lib-depends": [
             "brotli",
-            "libgif",
             "libjpeg",
             "libpng",
             "libwebp"
