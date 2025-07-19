@@ -553,6 +553,14 @@
             "path": "LICENSE.md"
         }
     },
+    "libjxl": {
+        "type": "ghtar",
+        "repo": "libjxl/libjxl",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "liblz4": {
         "type": "ghrel",
         "repo": "lz4/lz4",
