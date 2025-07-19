@@ -12,13 +12,18 @@ trait jbig
 {
     /**
      * @throws FileSystemException
+     */
+    public function patchBeforeBuild(): bool
+    {
+        // Patch Makefile to add -fPIC flag for position-independent code
+        FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', 'CFLAGS = -O2 -W -Wno-unused-result -fPIC');
+    }
+
+    /**
      * @throws RuntimeException
      */
     protected function build(): void
     {
-        // Patch Makefile to add -fPIC flag for position-independent code
-        FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', 'CFLAGS = -O2 -W -Wno-unused-result -fPIC');
-
         // Build the library
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec("make -j{$this->builder->concurrency} {$this->builder->getEnvString()} lib")
