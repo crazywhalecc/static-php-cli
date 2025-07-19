@@ -12,7 +12,6 @@ use SPC\store\FileSystem;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
-use SPC\util\SPCTarget;
 
 class Extension
 {
