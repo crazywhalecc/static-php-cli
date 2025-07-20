@@ -186,12 +186,12 @@
     "grpc": {
         "source": "grpc",
         "static-libs-unix": [
-            "libgrpc.a",
-            "libcares.a"
+            "libgrpc.a"
         ],
         "lib-depends": [
             "zlib",
-            "openssl"
+            "openssl",
+            "libcares"
         ],
         "frameworks": [
             "CoreFoundation"
