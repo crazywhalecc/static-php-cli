@@ -36,9 +36,20 @@ class grpc extends Extension
         }
         return false;
     }
+    public function patchBeforeConfigure(): bool
+    {
+        $libs = ' -l' . join(' -l', $this->getLibraries());
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/configure', '-lgrpc', $libs);
+        return true;
+    }
 
     public function patchBeforeMake(): bool
     {
+        $extra_libs = trim(getenv('SPC_EXTRA_LIBS'));
+        $alibs = join('.a ', $this->getLibraries()) . '.a';
+        $libs = BUILD_LIB_PATH . '/lib' . str_replace(' ', ' ' . BUILD_LIB_PATH . '/lib', $alibs);
+        $extra_libs = str_replace(BUILD_LIB_PATH . '/libgrpc.a', $libs, $extra_libs);
+        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         // add -Wno-strict-prototypes
         GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -Wno-strict-prototypes');
         return true;
@@ -47,5 +58,13 @@ class grpc extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         return '--enable-grpc=' . BUILD_ROOT_PATH . '/grpc GRPC_LIB_SUBDIR=' . BUILD_LIB_PATH;
+    }
+
+    private function getLibraries(): array
+    {
+        [, $out] = shell()->execWithResult('$PKG_CONFIG --libs-only-l grpc');
+        $libs = join(' ', $out) . ' -lupb -lupb_message_lib -lupb_json_lib -lupb_textformat_lib -lupb_mini_descriptor_lib -lupb_wire_lib -lupb_mem_lib -lupb_base_lib -lutf8_range';
+        $libs = str_replace('-l', '', $libs);
+        return explode(' ', $libs);
     }
 }
