@@ -94,7 +94,7 @@ class SourceManager
 
             // if not, remove the source dir and extract again
             logger()->notice("Source [{$source}] hash mismatch, removing old source dir and extracting again ...");
-            if ($source === 'micro') {
+            if ($source === 'micro' || $source === 'grpc') {
                 return;
             }
             FileSystem::removeDir($check);
