@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    // '8.2',
+    // '8.1',
+    '8.2',
     // '8.3',
     '8.4',
 ];
