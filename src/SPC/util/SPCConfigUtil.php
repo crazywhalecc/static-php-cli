@@ -106,10 +106,33 @@ class SPCConfigUtil
         foreach (array_reverse($libraries) as $library) {
             $libs = Config::getLib($library, 'static-libs', []);
             foreach ($libs as $lib) {
-                if ($withDependencies) {
+                $noExt = str_replace('.a', '', $lib);
+                $noExtNoLib = str_replace('lib', '', $noExt);
+                $pkgconfFileNoExt = BUILD_LIB_PATH . "/pkgconfig/{$noExt}.pc";
+                $pkgconfFileNoExtNoLib = BUILD_LIB_PATH . "/pkgconfig/{$noExtNoLib}.pc";
+                $llibs = null;
+                if (file_exists($pkgconfFileNoExt)) {
+                    $llibs = shell()->execWithResult("pkg-config --libs --static {$noExt}")[1][0];
+                } elseif (file_exists($pkgconfFileNoExtNoLib)) {
+                    $llibs = shell()->execWithResult("pkg-config --libs --static {$noExtNoLib}")[1][0];
+                }
+
+                if (!empty($llibs)) {
+                    $filtered = str_replace('-pthread', '', $llibs);
+                    $filtered = preg_replace('/-L\S+/', '', $filtered);
+                    $filtered = preg_replace('/(?:\S*\/)?lib([a-zA-Z0-9_+-]+)\.a\b/', '-l$1', $filtered);
+                    $filtered = preg_replace('/\s+/', ' ', $filtered);
+                    foreach (explode(' ', $filtered) as $item) {
+                        $short_name[] = $item;
+                    }
+                } elseif ($withDependencies) {
                     $noExt = str_replace('.a', '', $lib);
                     $requiredLibs = [];
                     $pkgconfFile = BUILD_LIB_PATH . "/pkgconfig/{$noExt}.pc";
+                    if (!file_exists($pkgconfFile)) {
+                        $noExtNoLib = str_replace('lib', '', $noExt);
+                        $pkgconfFile = BUILD_LIB_PATH . "/pkgconfig/{$noExtNoLib}.pc";
+                    }
                     if (file_exists($pkgconfFile)) {
                         $lines = file($pkgconfFile);
                         foreach ($lines as $value) {
