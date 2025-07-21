@@ -230,7 +230,7 @@ class Downloader
         $quiet = !defined('DEBUG_MODE') ? '-q --quiet' : '';
         $git = SPC_GIT_EXEC;
         $shallow = defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '';
-        $recursive = !is_array($submodules) ? '--recursive' : '';
+        $recursive = ($submodules === null) ? '--recursive' : '';
 
         try {
             self::registerCancelEvent(function () use ($download_path) {
