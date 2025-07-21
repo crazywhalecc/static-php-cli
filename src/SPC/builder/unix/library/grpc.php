@@ -28,8 +28,8 @@ trait grpc
                 '-DgRPC_INSTALL_BINDIR=' . BUILD_BIN_PATH,
                 '-DgRPC_INSTALL_LIBDIR=' . BUILD_LIB_PATH,
                 '-DgRPC_INSTALL_SHAREDIR=' . BUILD_ROOT_PATH . '/share/grpc',
-                "-DCMAKE_C_FLAGS=\"-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L" . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"',
-                "-DCMAKE_CXX_FLAGS=\"-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L" . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"'
+                '-DCMAKE_C_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"',
+                '-DCMAKE_CXX_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"'
             );
 
         if (SPCTarget::isStatic()) {
