@@ -21,6 +21,8 @@ trait grpc
                 '-DCMAKE_CXX_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK"'
             )
             ->build();
+        copy($this->source_dir . '/third_party/re2/re2.pc', BUILD_LIB_PATH . '/pkgconfig/re2.pc');
+
         //shell()->cd($this->source_dir)
         //    ->exec('EXTRA_DEFINES=GRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK EMBED_OPENSSL=false CXXFLAGS="-L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '" make static -j' . $this->builder->concurrency);
         //copy($this->source_dir . '/libs/opt/libgrpc.a', BUILD_LIB_PATH . '/libgrpc.a');
