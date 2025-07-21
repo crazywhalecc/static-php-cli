@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 use SPC\util\SPCTarget;
@@ -32,7 +33,7 @@ trait grpc
                 '-DCMAKE_CXX_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"'
             );
 
-        if (SPCTarget::isStatic()) {
+        if (PHP_OS_FAMILY === 'Linux' && SPCTarget::isStatic() && !SystemUtil::isMuslDist()) {
             $cmake->addConfigureArgs(
                 '-DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++"',
                 '-DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++"',
