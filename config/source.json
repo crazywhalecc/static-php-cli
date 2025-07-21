@@ -628,6 +628,7 @@
         "repo": "libssh2/libssh2",
         "match": "libssh2.+\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
