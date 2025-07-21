@@ -13,8 +13,8 @@ trait grpc
     {
         FileSystem::replaceFileStr(
             $this->source_dir . '/third_party/re2/util/pcre.h',
-            ["#define UTIL_PCRE_H_\n#include <stdint.h>", "#define UTIL_PCRE_H_"],
-            ["#define UTIL_PCRE_H_", "#define UTIL_PCRE_H_\n#include <stdint.h>"],
+            ["#define UTIL_PCRE_H_\n#include <stdint.h>", '#define UTIL_PCRE_H_'],
+            ['#define UTIL_PCRE_H_', "#define UTIL_PCRE_H_\n#include <stdint.h>"],
         );
         return true;
     }
