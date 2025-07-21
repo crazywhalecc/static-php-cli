@@ -12,10 +12,6 @@ trait libjxl
 {
     public function patchBeforeBuild(): bool
     {
-        $depsContent = file_get_contents($this->source_dir . '/deps.sh');
-        if (str_contains($depsContent, '# return 0')) {
-            return false;
-        }
         FileSystem::replaceFileStr(
             $this->source_dir . '/deps.sh',
             ['return 0', 'download_github third_party/brotli', 'download_github third_party/zlib', 'download_github third_party/libpng'],
