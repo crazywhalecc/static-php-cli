@@ -24,6 +24,7 @@ trait grpc
     protected function build(): void
     {
         $cmake = UnixCMakeExecutor::create($this)
+            ->setBuildDir('fix_BUILD_file_conflict')
             ->addConfigureArgs(
                 '-DgRPC_SSL_PROVIDER=package',
                 '-DgRPC_INSTALL_BINDIR=' . BUILD_BIN_PATH,
