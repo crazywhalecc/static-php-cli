@@ -24,6 +24,8 @@ class UnixCMakeExecutor extends Executor
 
     protected bool $reset = true;
 
+    protected array $extra_env = [];
+
     public function build(string $build_pos = '..'): void
     {
         // set cmake dir
@@ -34,7 +36,7 @@ class UnixCMakeExecutor extends Executor
         }
 
         // prepare shell
-        $shell = shell()->cd($this->build_dir)->initializeEnv($this->library);
+        $shell = shell()->cd($this->build_dir)->initializeEnv($this->library)->appendEnv($this->extra_env);
 
         // config
         $this->steps >= 1 && $shell->exec("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
@@ -74,6 +76,15 @@ class UnixCMakeExecutor extends Executor
     public function addConfigureArgs(...$args): static
     {
         $this->configure_args = [...$this->configure_args, ...$args];
+        return $this;
+    }
+
+    /**
+     * Add extra environment flags
+     */
+    public function addExtraEnv(array $env): static
+    {
+        $this->extra_env = [...$this->extra_env, ...$env];
         return $this;
     }
 

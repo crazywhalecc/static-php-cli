@@ -61,8 +61,7 @@ class grpc extends Extension
 
     private function getLibraries(): array
     {
-        [, $out] = shell()->execWithResult('$PKG_CONFIG --libs --static grpc');
-        $libs = join(' ', $out) . ' -lupb -lupb_message_lib -lupb_json_lib -lupb_textformat_lib -lupb_mini_descriptor_lib -lupb_wire_lib -lupb_mem_lib -lupb_base_lib -lutf8_range';
+        $libs = shell()->execWithResult('$PKG_CONFIG --libs --static grpc')[1][0];
         $filtered = str_replace('-pthread', '', $libs);
         $filtered = preg_replace('/-L\S+/', '', $filtered);
         $filtered = preg_replace('/(?:\S*\/)?lib([a-zA-Z0-9_+-]+)\.a\b/', '-l$1', $filtered);

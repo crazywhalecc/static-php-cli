@@ -4,10 +4,21 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait grpc
 {
+    public function patchBeforeBuild(): bool
+    {
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/third_party/re2/util/pcre.h',
+            ["#define UTIL_PCRE_H_\n#include <stdint.h>", "#define UTIL_PCRE_H_"],
+            ["#define UTIL_PCRE_H_", "#define UTIL_PCRE_H_\n#include <stdint.h>"],
+        );
+        return true;
+    }
+
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
