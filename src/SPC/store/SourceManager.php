@@ -94,9 +94,6 @@ class SourceManager
 
             // if not, remove the source dir and extract again
             logger()->notice("Source [{$source}] hash mismatch, removing old source dir and extracting again ...");
-            if ($source === 'micro' || $source === 'grpc') {
-                return;
-            }
             FileSystem::removeDir($check);
             $filename = LockFile::getLockFullPath($lock_content);
             $move_path = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $source);
