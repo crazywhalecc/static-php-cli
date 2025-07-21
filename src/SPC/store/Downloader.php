@@ -219,34 +219,41 @@ class Downloader
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retries = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
+    public static function downloadGit(string $name, string $url, string $branch, ?array $submodules = null, ?string $move_path = null, int $retries = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
         $download_path = FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}");
         if (file_exists($download_path)) {
             FileSystem::removeDir($download_path);
         }
         logger()->debug("cloning {$name} source");
-        $check = !defined('DEBUG_MODE') ? ' -q' : '';
-        $cancel_func = function () use ($download_path) {
+
+        $quiet = !defined('DEBUG_MODE') ? '-q --quiet' : '';
+        $git = SPC_GIT_EXEC;
+        $shallow = defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '';
+        $recursive = !is_array($submodules) ? '--recursive' : '';
+
+        try {
+            self::registerCancelEvent(function () use ($download_path) {
+                if (is_dir($download_path)) {
+                    logger()->warning('Removing path ' . $download_path);
+                    FileSystem::removeDir($download_path);
+                }
+            });
+            f_passthru("{$git} clone {$quiet} --config core.autocrlf=false --branch \"{$branch}\" {$shallow} {$recursive} \"{$url}\" \"{$download_path}\"");
+            if ($submodules !== null) {
+                foreach ($submodules as $submodule) {
+                    f_passthru("cd \"{$download_path}\" && {$git} submodule update --init {$submodule}");
+                }
+            }
+        } catch (RuntimeException $e) {
             if (is_dir($download_path)) {
-                logger()->warning('Removing path ' . $download_path);
                 FileSystem::removeDir($download_path);
             }
-        };
-        try {
-            self::registerCancelEvent($cancel_func);
-            f_passthru(
-                SPC_GIT_EXEC . ' clone' . $check .
-                (defined('DEBUG_MODE') ? '' : ' --quiet') .
-                ' --config core.autocrlf=false ' .
-                "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
-            );
-        } catch (RuntimeException $e) {
             if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
                 throw new WrongUsageException('Keyboard interrupted, download failed !');
             }
             if ($retries > 0) {
-                self::downloadGit($name, $url, $branch, $move_path, $retries - 1);
+                self::downloadGit($name, $url, $branch, $submodules, $move_path, $retries - 1, $lock_as);
                 return;
             }
             throw $e;
@@ -343,6 +350,7 @@ class Downloader
                         $name,
                         $pkg['url'],
                         $pkg['rev'],
+                        $pkg['submodules'] ?? null,
                         $pkg['extract'] ?? null,
                         self::getRetryAttempts(),
                         SPC_DOWNLOAD_PRE_BUILT
@@ -462,6 +470,7 @@ class Downloader
                         $name,
                         $source['url'],
                         $source['rev'],
+                        $source['submodules'] ?? null,
                         $source['path'] ?? null,
                         self::getRetryAttempts(),
                         $download_as
