@@ -242,7 +242,7 @@ class Downloader
             f_passthru("{$git} clone {$quiet} --config core.autocrlf=false --branch \"{$branch}\" {$shallow} {$recursive} \"{$url}\" \"{$download_path}\"");
             if ($submodules !== null) {
                 foreach ($submodules as $submodule) {
-                    f_passthru("cd \"{$download_path}\" && {$git} submodule update --init {$submodule}");
+                    f_passthru("cd \"{$download_path}\" && {$git} submodule update --init " . escapeshellarg($submodule));
                 }
             }
         } catch (RuntimeException $e) {
