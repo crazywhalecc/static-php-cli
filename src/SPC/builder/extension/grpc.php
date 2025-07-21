@@ -24,8 +24,6 @@ class grpc extends Extension
         if (!is_link(SOURCE_PATH . '/php-src/ext/grpc')) {
             if (is_dir($this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc')) {
                 shell()->exec('ln -s ' . $this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
-            } elseif (is_dir(BUILD_ROOT_PATH . '/grpc_php_ext_src')) {
-                shell()->exec('ln -s ' . BUILD_ROOT_PATH . '/grpc_php_ext_src ' . SOURCE_PATH . '/php-src/ext/grpc');
             } else {
                 throw new \RuntimeException('Cannot find grpc source code');
             }
@@ -36,6 +34,7 @@ class grpc extends Extension
         }
         return false;
     }
+
     public function patchBeforeConfigure(): bool
     {
         $libs = ' -l' . join(' -l', $this->getLibraries());
