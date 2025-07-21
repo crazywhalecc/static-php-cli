@@ -6,6 +6,7 @@ namespace SPC\builder\unix\library;
 
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
+use SPC\util\SPCTarget;
 
 trait grpc
 {
@@ -21,16 +22,25 @@ trait grpc
 
     protected function build(): void
     {
-        UnixCMakeExecutor::create($this)
+        $cmake = UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DgRPC_SSL_PROVIDER=package',
                 '-DgRPC_INSTALL_BINDIR=' . BUILD_BIN_PATH,
                 '-DgRPC_INSTALL_LIBDIR=' . BUILD_LIB_PATH,
                 '-DgRPC_INSTALL_SHAREDIR=' . BUILD_ROOT_PATH . '/share/grpc',
-                '-DCMAKE_C_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"',
-                '-DCMAKE_CXX_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"'
-            )
-            ->build();
+                "-DCMAKE_C_FLAGS=\"-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L" . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"',
+                "-DCMAKE_CXX_FLAGS=\"-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L" . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"'
+            );
+
+        if (SPCTarget::isStatic()) {
+            $cmake->addConfigureArgs(
+                '-DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++"',
+                '-DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++"',
+                '-DCMAKE_CXX_STANDARD_LIBRARIES="-static-libgcc -static-libstdc++"',
+            );
+        }
+
+        $cmake->build();
         copy($this->source_dir . '/third_party/re2/re2.pc', BUILD_LIB_PATH . '/pkgconfig/re2.pc');
 
         // shell()->cd($this->source_dir)
