@@ -220,10 +220,10 @@
     },
     "imagemagick": {
         "source": "imagemagick",
-        "static-libs-unix": [
-            "libMagick++-7.Q16HDRI.a",
-            "libMagickWand-7.Q16HDRI.a",
-            "libMagickCore-7.Q16HDRI.a"
+        "pkg-configs": [
+            "Magick++-7.Q16HDRI",
+            "MagickCore-7.Q16HDRI",
+            "MagickWand-7.Q16HDRI"
         ],
         "lib-depends": [
             "zlib",
@@ -266,9 +266,9 @@
     },
     "ldap": {
         "source": "ldap",
-        "static-libs-unix": [
-            "libldap.a",
-            "liblber.a"
+        "pkg-configs": [
+            "ldap",
+            "lber"
         ],
         "lib-depends": [
             "openssl",
@@ -421,11 +421,11 @@
     },
     "libjxl": {
         "source": "libjxl",
-        "static-libs-unix": [
-            "libjxl.a",
-            "libjxl_cms.a",
-            "libjxl_threads.a",
-            "libhwy.a"
+        "pkg-configs": [
+            "libjxl",
+            "libjxl_cms",
+            "libjxl_threads",
+            "libhwy"
         ],
         "lib-depends": [
             "brotli",
