@@ -563,6 +563,7 @@
         "rev": "main",
         "submodules": [
             "third_party/highway",
+            "third_party/libjpeg-turbo",
             "third_party/sjpeg",
             "third_party/skcms"
         ],

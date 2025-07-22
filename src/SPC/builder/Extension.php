@@ -516,8 +516,7 @@ class Extension
         $sharedLibString = '';
         $staticLibString = '';
         $staticLibs = $this->getLibFilesString();
-        $staticLibs = str_replace(BUILD_LIB_PATH . '/lib', '-l', $staticLibs);
-        $staticLibs = str_replace('.a', '', $staticLibs);
+        $staticLibs = str_replace([BUILD_LIB_PATH . '/lib', '.a'], ['-l', ''], $staticLibs);
         $staticLibs = explode('-l', $staticLibs . ' ' . $config['libs']);
         foreach ($staticLibs as $lib) {
             $lib = trim($lib);
@@ -534,7 +533,7 @@ class Extension
             }
         }
         // move static libstdc++ to shared if we are on non-full-static build target
-        if (!SPCTarget::isStatic() && in_array(SPCTarget::getLibc(), SPCTarget::LIBC_LIST)) {
+        if (SPCTarget::isStatic()) {
             $staticLibString .= ' -lstdc++';
             $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
         }
