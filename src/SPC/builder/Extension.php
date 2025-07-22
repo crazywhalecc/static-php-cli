@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use PharIo\Version\BuildMetaData;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -83,7 +84,7 @@ class Extension
      */
     public function getEnableArg(bool $shared = false): string
     {
-        $escapedPath = str_replace("'", '', escapeshellarg(BUILD_ROOT_PATH)) !== BUILD_ROOT_PATH ? '"' . BUILD_ROOT_PATH . '"' : BUILD_ROOT_PATH;
+        $escapedPath = str_contains(BUILD_ROOT_PATH, ' ') ? '"' . BUILD_ROOT_PATH . '"' : BUILD_ROOT_PATH;
         $_name = str_replace('_', '-', $this->name);
         return match ($arg_type = Config::getExt($this->name, 'arg-type', 'enable')) {
             'enable' => '--enable-' . $_name . ($shared ? '=shared' : '') . ' ',
