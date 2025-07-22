@@ -10,6 +10,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\SPCConfigUtil;
+use SPC\util\SPCTarget;
 
 class Extension
 {
@@ -223,7 +224,7 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        if (SPCTarget::getTargetOS() === 'Linux' && ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS'))) {
+        if ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS')) {
             FileSystem::replaceFileRegex(
                 $this->source_dir . '/Makefile',
                 "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
