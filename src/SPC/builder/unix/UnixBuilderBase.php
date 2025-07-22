@@ -210,11 +210,22 @@ abstract class UnixBuilderBase extends BuilderBase
             }
             // if someone changed to --enable-embed=shared, we need to add LD_LIBRARY_PATH
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
-                $ext_path = 'LD_LIBRARY_PATH=' . BUILD_ROOT_PATH . '/lib:$LD_LIBRARY_PATH ';
-                FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.a');
+                if (PHP_OS_FAMILY === 'Darwin') {
+                    $ext_path = 'DYLD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$DYLD_LIBRARY_PATH ';
+                } else {
+                    $ext_path = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$LD_LIBRARY_PATH ';
+                }
+                FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
             } else {
                 $ext_path = '';
-                FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '/lib/libphp.so');
+                $suffix = PHP_OS_FAMILY === 'Darwin' ? 'dylib' : 'so';
+                foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
+                    unlink($file);
+                }
+            }
+            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
+            if ($ret !== 0) {
+                throw new RuntimeException('embed failed sanity check: build failed. Error message: ' . implode("\n", $out));
             }
             [$ret, $output] = shell()->cd($sample_file_path)->execWithResult($ext_path . './embed');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
@@ -229,8 +240,9 @@ abstract class UnixBuilderBase extends BuilderBase
             if (!file_exists($frankenphp)) {
                 throw new RuntimeException('FrankenPHP binary not found: ' . $frankenphp);
             }
+            $prefix = PHP_OS_FAMILY === 'Darwin' ? 'DYLD_' : 'LD_';
             [$ret, $output] = shell()
-                ->setEnv(['LD_LIBRARY_PATH' => BUILD_LIB_PATH])
+                ->setEnv(["{$prefix}LIBRARY_PATH" => BUILD_LIB_PATH])
                 ->execWithResult("{$frankenphp} version");
             if ($ret !== 0 || !str_contains(implode('', $output), 'FrankenPHP')) {
                 throw new RuntimeException('FrankenPHP failed sanity check: ret[' . $ret . ']. out[' . implode('', $output) . ']');
