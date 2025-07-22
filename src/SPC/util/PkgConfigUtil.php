@@ -55,7 +55,8 @@ class PkgConfigUtil
             }
         }
 
-        return array_unique($libs);
+        // enhancement for linker
+        return array_reverse(array_unique(array_reverse($libs)));
     }
 
     private static function execWithResult(string $cmd): string
