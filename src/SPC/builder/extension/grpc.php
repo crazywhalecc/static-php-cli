@@ -16,23 +16,20 @@ class grpc extends Extension
 {
     public function patchBeforeBuildconf(): bool
     {
-        // soft link to the grpc source code
         if ($this->builder instanceof WindowsBuilder) {
-            // not support windows yet
             throw new \RuntimeException('grpc extension does not support windows yet');
         }
-        if (!is_link(SOURCE_PATH . '/php-src/ext/grpc')) {
-            if (is_dir($this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc')) {
-                shell()->exec('ln -s ' . $this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
-            } else {
-                throw new \RuntimeException('Cannot find grpc source code');
-            }
-            $macos = $this->builder instanceof MacOSBuilder ? "\n" . '  LDFLAGS="$LDFLAGS -framework CoreFoundation"' : '';
-            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/ext/grpc/config.m4', '/GRPC_LIBDIR=.*$/m', 'GRPC_LIBDIR=' . BUILD_LIB_PATH . $macos);
-            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/ext/grpc/config.m4', '/SEARCH_PATH=.*$/m', 'SEARCH_PATH="' . BUILD_ROOT_PATH . '"');
-            return true;
+        if (file_exists(SOURCE_PATH . '/php-src/ext/grpc')) {
+            return false;
         }
-        return false;
+        // soft link to the grpc source code
+        if (is_dir($this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc')) {
+            shell()->exec('ln -s ' . $this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
+        } else {
+            throw new \RuntimeException('Cannot find grpc source code');
+        }
+        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/grpc/config.m4', 'PHP_ARG_ENABLE(grpc,', 'PHP_ARG_WITH(grpc,');
+        return true;
     }
 
     public function patchBeforeConfigure(): bool
@@ -60,11 +57,6 @@ class grpc extends Extension
         // add -Wno-strict-prototypes
         GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -Wno-strict-prototypes');
         return true;
-    }
-
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        return '--enable-grpc=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . '/grpc GRPC_LIB_SUBDIR=' . BUILD_LIB_PATH;
     }
 
     private function getLibraries(): array
