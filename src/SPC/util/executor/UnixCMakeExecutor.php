@@ -5,18 +5,24 @@ declare(strict_types=1);
 namespace SPC\util\executor;
 
 use Closure;
+use SPC\builder\freebsd\library\BSDLibraryBase;
+use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
+use SPC\util\UnixShell;
 
 /**
  * Unix-like OS cmake command executor.
  */
 class UnixCMakeExecutor extends Executor
 {
-    protected ?string $build_dir = null;
+    protected UnixShell $shell;
 
     protected array $configure_args = [];
+
+    protected ?string $build_dir = null;
 
     protected ?array $custom_default_args = null;
 
@@ -24,7 +30,11 @@ class UnixCMakeExecutor extends Executor
 
     protected bool $reset = true;
 
-    protected array $extra_env = [];
+    public function __construct(protected BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library)
+    {
+        parent::__construct($library);
+        $this->initShell();
+    }
 
     public function build(string $build_pos = '..'): void
     {
@@ -35,17 +45,14 @@ class UnixCMakeExecutor extends Executor
             FileSystem::resetDir($this->build_dir);
         }
 
-        // prepare shell
-        $shell = shell()->cd($this->build_dir)->initializeEnv($this->library)->appendEnv($this->extra_env);
-
         // config
-        $this->steps >= 1 && $shell->exec("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
+        $this->steps >= 1 && $this->shell->exec("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
 
         // make
-        $this->steps >= 2 && $shell->exec("cmake --build . -j {$this->library->getBuilder()->concurrency}");
+        $this->steps >= 2 && $this->shell->exec("cmake --build . -j {$this->library->getBuilder()->concurrency}");
 
         // install
-        $this->steps >= 3 && $shell->exec('make install');
+        $this->steps >= 3 && $this->shell->exec('make install');
     }
 
     /**
@@ -79,12 +86,9 @@ class UnixCMakeExecutor extends Executor
         return $this;
     }
 
-    /**
-     * Add extra environment flags
-     */
-    public function addExtraEnv(array $env): static
+    public function appendEnv(array $env): static
     {
-        $this->extra_env = [...$this->extra_env, ...$env];
+        $this->shell->appendEnv($env);
         return $this;
     }
 
@@ -219,5 +223,10 @@ CMAKE;
         }
         FileSystem::writeFile(SOURCE_PATH . '/toolchain.cmake', $toolchain);
         return $created = realpath(SOURCE_PATH . '/toolchain.cmake');
+    }
+
+    private function initShell(): void
+    {
+        $this->shell = shell()->cd($this->build_dir)->initializeEnv($this->library);
     }
 }
