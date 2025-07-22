@@ -45,11 +45,6 @@ class grpc extends Extension
         return true;
     }
 
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        return '--enable-grpc=' . ($shared ? 'shared' : '') . BUILD_ROOT_PATH;
-    }
-
     public function patchBeforeMake(): bool
     {
         $extra_libs = trim(getenv('SPC_EXTRA_LIBS'));
