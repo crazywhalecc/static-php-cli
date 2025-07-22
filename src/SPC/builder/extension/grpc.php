@@ -55,7 +55,7 @@ class grpc extends Extension
             }
             return $lib;
         }, $this->getLibraries());
-        $extra_libs = str_replace(BUILD_LIB_PATH . '/libgrpc.a', $libs, $extra_libs);
+        $extra_libs = str_replace(BUILD_LIB_PATH . '/libgrpc.a', join(' ', $libs), $extra_libs);
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         // add -Wno-strict-prototypes
         GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -Wno-strict-prototypes');
