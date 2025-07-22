@@ -83,7 +83,8 @@ RUN if [ "$SPC_USE_ARCH" = "aarch64" ]; then \
         sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo ; \
     fi
 RUN sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
-    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's|http://|https://|g' /etc/yum.repos.d/*.repo
 
 RUN yum update -y && \
     yum install -y devtoolset-10-gcc-*

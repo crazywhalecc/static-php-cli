@@ -17,27 +17,8 @@ class ZigToolchain implements ToolchainInterface
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CXX=zig-c++');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=ar');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=ld');
-    }
 
-    public function afterInit(): void
-    {
-        if (!is_dir(Zig::getEnvironment()['PATH'])) {
-            throw new WrongUsageException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
-        }
-        GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
-    }
-
-    /**
-     * Get the extra runtime objects needed for zig toolchain.
-     * This method searches for `crtbeginS.o` and `crtendS.o` in common GCC library paths.
-     */
-    public function getExtraRuntimeObjects(): string
-    {
-        static $cache = null;
-        if ($cache !== null) {
-            return $cache;
-        }
-
+        // Generate additional object needed for zig toolchain
         $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
         $objects = ['crtbeginS.o', 'crtendS.o'];
         $found = [];
@@ -56,8 +37,24 @@ class ZigToolchain implements ToolchainInterface
                 $found[] = $located;
             }
         }
+        GlobalEnvManager::putenv('SPC_EXTRA_RUNTIME_OBJECTS=' . implode(' ', $found));
 
-        $cache = implode(' ', $found);
-        return $cache;
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+        if (!str_contains($extra_libs, '-lunwind')) {
+            // Add unwind library if not already present
+            $extra_libs = trim($extra_libs . ' -lunwind');
+            GlobalEnvManager::putenv("SPC_EXTRA_LIBS={$extra_libs}");
+        }
+    }
+
+    /**
+     * @throws WrongUsageException
+     */
+    public function afterInit(): void
+    {
+        if (!is_dir(Zig::getEnvironment()['PATH'])) {
+            throw new WrongUsageException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
+        }
+        GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
     }
 }

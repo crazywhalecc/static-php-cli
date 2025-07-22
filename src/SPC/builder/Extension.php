@@ -9,9 +9,8 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
+use SPC\util\SPCTarget;
 
 class Extension
 {
@@ -187,16 +186,11 @@ class Extension
      */
     public function patchBeforeMake(): bool
     {
-        if (
-            PHP_OS_FAMILY === 'Linux' &&
-            $this->isBuildShared() &&
-            ToolchainManager::getToolchainClass() === ZigToolchain::class &&
-            ($extra = (new ZigToolchain())->getExtraRuntimeObjects())
-        ) {
+        if (SPCTarget::getTargetOS() === 'Linux' && $this->isBuildShared() && ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS'))) {
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/Makefile',
                 "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
-                "$1 {$extra}",
+                "$1 {$objs}",
             );
             return true;
         }
@@ -230,15 +224,11 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        if (
-            PHP_OS_FAMILY === 'Linux' &&
-            ToolchainManager::getToolchainClass() === ZigToolchain::class &&
-            ($extra = (new ZigToolchain())->getExtraRuntimeObjects())
-        ) {
+        if (SPCTarget::getTargetOS() === 'Linux' && ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS'))) {
             FileSystem::replaceFileRegex(
                 $this->source_dir . '/Makefile',
                 "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
-                "$1 {$extra}",
+                "$1 {$objs}",
             );
             return true;
         }

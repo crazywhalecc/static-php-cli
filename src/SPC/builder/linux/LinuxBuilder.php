@@ -10,8 +10,6 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCTarget;
 
@@ -62,7 +60,6 @@ class LinuxBuilder extends UnixBuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
-        $extra_libs .= (ToolchainManager::getToolchainClass() === ZigToolchain::class ? ' -lunwind' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
         f_putenv('CFLAGS=' . $cflags);
@@ -108,15 +105,6 @@ class LinuxBuilder extends UnixBuilderBase
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
             'LIBS' => $mimallocLibs . SPCTarget::getRuntimeLibs(),
         ]);
-
-        // process micro upx patch if micro sapi enabled
-        if ($enableMicro) {
-            if (version_compare($this->getMicroVersion(), '0.2.0') < 0) {
-                // for phpmicro 0.1.x
-                $this->processMicroUPXLegacy();
-            }
-            // micro latest needs do strip and upx pack later (strip, upx, cut binary manually supported)
-        }
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         if ($embed_type !== 'static' && SPCTarget::isStatic()) {
@@ -284,6 +272,7 @@ class LinuxBuilder extends UnixBuilderBase
         $modulesDir = BUILD_MODULES_PATH;
         $libphpSo = "{$libDir}/libphp.so";
         $realLibName = 'libphp.so';
+        $cwd = getcwd();
 
         if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
             $release = $matches[1];
@@ -325,14 +314,14 @@ class LinuxBuilder extends UnixBuilderBase
                     }
                 }
             }
-            chdir(getcwd());
+            chdir($cwd);
         }
 
         $target = "{$libDir}/{$realLibName}";
         if (file_exists($target)) {
             [, $output] = shell()->execWithResult('readelf -d ' . escapeshellarg($target));
             $output = join("\n", $output);
-            if (preg_match('/SONAME.*\[(.+)\]/', $output, $sonameMatch)) {
+            if (preg_match('/SONAME.*\[(.+)]/', $output, $sonameMatch)) {
                 $currentSoname = $sonameMatch[1];
                 if ($currentSoname !== basename($target)) {
                     shell()->exec(sprintf(
@@ -361,49 +350,12 @@ class LinuxBuilder extends UnixBuilderBase
     }
 
     /**
-     * Apply option --no-strip and --with-upx-pack for micro sapi (only for phpmicro 0.1.x)
+     * Strip micro.sfx for Linux.
+     * The micro.sfx does not support UPX directly, but we can remove UPX-info segment to adapt.
+     * This will also make micro.sfx with upx-packed more like a malware fore antivirus :(
      *
-     * @throws FileSystemException
+     * @throws RuntimeException
      */
-    private function processMicroUPXLegacy(): void
-    {
-        // upx pack and strip for micro
-        // but always restore Makefile.frag.bak first
-        if (file_exists(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak')) {
-            copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag');
-        }
-        if ($this->getOption('with-upx-pack', false)) {
-            // judge $(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)` count
-            // if 2, replace src/globals/extra/micro-triple-Makefile.frag file content
-            if (substr_count(FileSystem::readFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag'), '$(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)`') === 2) {
-                // bak first
-                copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak');
-                // replace Makefile.frag content
-                FileSystem::writeFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', FileSystem::readFile(ROOT_DIR . '/src/globals/extra/micro-triple-Makefile.frag'));
-            }
-            // with upx pack always need strip
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH) && ' . getenv('UPX_EXEC') . ' --best \$(SAPI_MICRO_PATH)',
-            );
-        } elseif (!$this->getOption('no-strip', false)) {
-            // not-no-strip means strip (default behavior)
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
-            );
-        } else {
-            // just no strip
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=true',
-            );
-        }
-    }
-
     private function processMicroUPX(): void
     {
         if (version_compare($this->getMicroVersion(), '0.2.0') >= 0 && !$this->getOption('no-strip', false)) {
