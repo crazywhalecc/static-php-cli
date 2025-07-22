@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\linux;
 
 use SPC\builder\traits\UnixSystemUtilTrait;
-use SPC\util\SPCTarget;
 
 class SystemUtil
 {
