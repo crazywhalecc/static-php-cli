@@ -45,6 +45,8 @@ class UnixCMakeExecutor extends Executor
             FileSystem::resetDir($this->build_dir);
         }
 
+        $this->shell = $this->shell->cd($this->build_dir);
+
         // config
         $this->steps >= 1 && $this->shell->exec("cmake {$this->getConfigureArgs()} {$this->getDefaultCMakeArgs()} {$build_pos}");
 
@@ -227,6 +229,6 @@ CMAKE;
 
     private function initShell(): void
     {
-        $this->shell = shell()->cd($this->build_dir)->initializeEnv($this->library);
+        $this->shell = shell()->initializeEnv($this->library);
     }
 }
