@@ -178,7 +178,7 @@ class SystemUtil
             return null;
         }
         if ($libc === 'musl') {
-            if (SPCTarget::getLibc() === 'musl') {
+            if (self::isMuslDist()) {
                 $result = shell()->execWithResult('ldd 2>&1', false);
             } elseif (is_file('/usr/local/musl/lib/libc.so')) {
                 $result = shell()->execWithResult('/usr/local/musl/lib/libc.so 2>&1', false);
