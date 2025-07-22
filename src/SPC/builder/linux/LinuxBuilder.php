@@ -284,6 +284,7 @@ class LinuxBuilder extends UnixBuilderBase
         $modulesDir = BUILD_MODULES_PATH;
         $libphpSo = "{$libDir}/libphp.so";
         $realLibName = 'libphp.so';
+        $cwd = getcwd();
 
         if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
             $release = $matches[1];
@@ -325,7 +326,7 @@ class LinuxBuilder extends UnixBuilderBase
                     }
                 }
             }
-            chdir(getcwd());
+            chdir($cwd);
         }
 
         $target = "{$libDir}/{$realLibName}";
