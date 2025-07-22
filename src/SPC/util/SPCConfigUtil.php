@@ -86,8 +86,9 @@ class SPCConfigUtil
         if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
-        $libs .= $this->builder->hasCpp() && $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
-
+        if ($this->builder->hasCpp()) {
+            $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
+        }
         if ($this->libs_only_deps) {
             return [
                 'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
@@ -130,7 +131,13 @@ class SPCConfigUtil
 
         // parse pkg-configs
         foreach ($libraries as $library) {
-            $pc_cflags = implode(' ', Config::getLib($library, 'pkg-configs', []));
+            $pc = Config::getLib($library, 'pkg-configs', []);
+            foreach ($pc as $file) {
+                if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$file}.pc")) {
+                    throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "/pkgconfig'. Please build it first.");
+                }
+            }
+            $pc_cflags = implode(' ', $pc);
             if ($pc_cflags !== '') {
                 $pc_cflags = PkgConfigUtil::getCflags($pc_cflags);
                 $includes[] = $pc_cflags;
