@@ -226,28 +226,8 @@ abstract class LibraryBase
             return LIB_STATUS_OK;
         }
 
-        // check if these libraries exist, if not, invoke compilation and return the result status
-        foreach ($this->getStaticLibs() as $name) {
-            if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
-                $this->tryBuild(true);
-                return LIB_STATUS_OK;
-            }
-        }
-        // header files the same
-        foreach ($this->getHeaders() as $name) {
-            if (!file_exists(BUILD_INCLUDE_PATH . "/{$name}")) {
-                $this->tryBuild(true);
-                return LIB_STATUS_OK;
-            }
-        }
-        // current library is package and binary file is not exists
-        if (Config::getLib(static::NAME, 'type', 'lib') === 'package') {
-            foreach ($this->getBinaryFiles() as $name) {
-                if (!file_exists(BUILD_BIN_PATH . "/{$name}")) {
-                    $this->tryBuild(true);
-                    return LIB_STATUS_OK;
-                }
-            }
+        if (!$this->isLibraryInstalled()) {
+            return $this->tryBuild(true);
         }
         // if all the files exist at this point, skip the compilation process
         return LIB_STATUS_ALREADY;

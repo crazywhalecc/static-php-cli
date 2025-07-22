@@ -35,10 +35,10 @@
     },
     "brotli": {
         "source": "brotli",
-        "static-libs-unix": [
-            "libbrotlicommon.a",
-            "libbrotlidec.a",
-            "libbrotlienc.a"
+        "pkg-configs": [
+            "libbrotlicommon",
+            "libbrotlidec",
+            "libbrotlienc"
         ],
         "static-libs-windows": [
             "brotlicommon.lib",
