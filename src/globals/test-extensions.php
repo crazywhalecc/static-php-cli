@@ -24,7 +24,7 @@ $test_os = [
     // 'macos-13', // bin/spc for x86_64
     // 'macos-14',  // bin/spc for arm64
     // 'macos-15', // bin/spc for arm64
-    // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
+    'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
     // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
@@ -48,7 +48,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'bcmath',
+    'Linux', 'Darwin' => 'pgsql,pdo_pgsql',
     'Windows' => 'intl',
 };
 

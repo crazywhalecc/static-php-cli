@@ -752,10 +752,8 @@
     },
     "postgresql": {
         "source": "postgresql",
-        "static-libs-unix": [
-            "libpq.a",
-            "libpgport.a",
-            "libpgcommon.a"
+        "pkg-configs": [
+            "libpq"
         ],
         "lib-depends": [
             "libiconv",
