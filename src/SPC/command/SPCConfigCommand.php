@@ -23,6 +23,7 @@ class SPCConfigCommand extends BaseCommand
         $this->addOption('with-suggested-exts', 'E', null, 'Build with suggested extensions for selected exts');
         $this->addOption('includes', null, null, 'Add additional include path');
         $this->addOption('libs', null, null, 'Add additional libs path');
+        $this->addOption('no-php', null, null, 'Do not link to PHP library');
     }
 
     /**
@@ -37,7 +38,7 @@ class SPCConfigCommand extends BaseCommand
         $include_suggest_ext = $this->getOption('with-suggested-exts');
         $include_suggest_lib = $this->getOption('with-suggested-libs');
 
-        $util = new SPCConfigUtil();
+        $util = new SPCConfigUtil(link_php: !$this->getOption('no-php'));
         $config = $util->config($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
         if ($this->getOption('includes')) {
