@@ -233,7 +233,7 @@
         },
         "type": "external",
         "source": "grpc",
-        "arg-type-unix": "with-prefix",
+        "arg-type-unix": "custom",
         "cpp-extension": true,
         "lib-depends": [
             "grpc"

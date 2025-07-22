@@ -193,6 +193,7 @@
             "openssl",
             "libcares"
         ],
+        "provide-pre-built": true,
         "frameworks": [
             "CoreFoundation"
         ]

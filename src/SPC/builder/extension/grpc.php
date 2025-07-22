@@ -28,7 +28,6 @@ class grpc extends Extension
         } else {
             throw new \RuntimeException('Cannot find grpc source code');
         }
-        FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/grpc/config.m4', 'PHP_ARG_ENABLE(grpc,', 'PHP_ARG_WITH(grpc,');
         if (SPCTarget::getTargetOS() === 'Darwin') {
             FileSystem::replaceFileRegex(
                 SOURCE_PATH . '/php-src/ext/grpc/config.m4',
@@ -44,6 +43,11 @@ class grpc extends Extension
         $libs = join(' ', $this->getLibraries());
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/configure', '-lgrpc', $libs);
         return true;
+    }
+
+    public function getUnixConfigureArg(bool $shared = false): string
+    {
+        return '--enable-grpc=' . ($shared ? 'shared' : '') . BUILD_ROOT_PATH;
     }
 
     public function patchBeforeMake(): bool
