@@ -532,7 +532,7 @@ class Extension
                 $sharedLibString .= '-l' . $lib . ' ';
             }
         }
-        // move static libstdc++ to shared if we are on non-full-static build target
+        // move -lstdc++ to static libraries because centos 7 the shared libstdc++ is incomplete
         if (str_contains((string) getenv('PATH'), 'rh/devtoolset-10')) {
             $staticLibString .= ' -lstdc++';
             $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
