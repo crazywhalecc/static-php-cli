@@ -182,20 +182,7 @@ abstract class LibraryBase
                 return LIB_STATUS_INSTALL_FAILED;
             }
         }
-        foreach ($this->getStaticLibs() as $name) {
-            if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
-                $this->tryInstall($lock, true);
-                return LIB_STATUS_OK;
-            }
-        }
-        foreach ($this->getHeaders() as $name) {
-            if (!file_exists(BUILD_INCLUDE_PATH . "/{$name}")) {
-                $this->tryInstall($lock, true);
-                return LIB_STATUS_OK;
-            }
-        }
-        // pkg-config is treated specially. If it is pkg-config, check if the pkg-config binary exists
-        if (static::NAME === 'pkg-config' && !file_exists(BUILD_ROOT_PATH . '/bin/pkg-config')) {
+        if (!$this->isLibraryInstalled()) {
             $this->tryInstall($lock, true);
             return LIB_STATUS_OK;
         }
@@ -396,5 +383,30 @@ abstract class LibraryBase
                 copy($this->source_dir . '/' . $license['path'], BUILD_ROOT_PATH . '/source-licenses/' . $this->getName() . "/{$index}.txt");
             }
         }
+    }
+
+    protected function isLibraryInstalled(): bool
+    {
+        foreach (Config::getLib(static::NAME, 'static-libs', []) as $name) {
+            if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
+                return false;
+            }
+        }
+        foreach (Config::getLib(static::NAME, 'headers', []) as $name) {
+            if (!file_exists(BUILD_INCLUDE_PATH . "/{$name}")) {
+                return false;
+            }
+        }
+        foreach (Config::getLib(static::NAME, 'pkg-configs', []) as $name) {
+            if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$name}.pc")) {
+                return false;
+            }
+        }
+        foreach (Config::getLib(static::NAME, 'bin', []) as $name) {
+            if (!file_exists(BUILD_BIN_PATH . "/{$name}")) {
+                return false;
+            }
+        }
+        return true;
     }
 }

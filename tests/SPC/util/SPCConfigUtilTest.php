@@ -54,7 +54,7 @@ class SPCConfigUtilTest extends TestCase
         $this->assertStringContainsString('-lphp', $result['libs']);
 
         // has cpp
-        $result = (new SPCConfigUtil())->config(['swoole']);
+        $result = (new SPCConfigUtil())->config(['rar']);
         $this->assertStringContainsString(PHP_OS_FAMILY === 'Darwin' ? '-lc++' : '-lstdc++', $result['libs']);
 
         // has mimalloc.o in lib dir
