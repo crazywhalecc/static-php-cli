@@ -11,8 +11,6 @@ use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use Symfony\Component\Console\Input\ArgvInput;
 
 class SPCConfigUtil
@@ -71,9 +69,7 @@ class SPCConfigUtil
         if ($this->builder->hasCpp()) {
             $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
         }
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            $libs .= ' -lunwind';
-        }
+        $libs .= ' ' . (getenv('SPC_EXTRA_LIBS') ?: '');
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
             $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);

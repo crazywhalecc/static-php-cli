@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\store\pkg;
 
+use SPC\exception\RuntimeException;
+use SPC\exception\WrongUsageException;
 use SPC\store\CurlHook;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
@@ -50,14 +52,14 @@ class Zig extends CustomPackage
 
         $zig_arch = match ($arch) {
             'x86_64', 'aarch64' => $arch,
-            default => throw new \InvalidArgumentException('Unsupported architecture: ' . $arch),
+            default => throw new WrongUsageException('Unsupported architecture: ' . $arch),
         };
 
         $zig_os = match ($os) {
             'linux' => 'linux',
             'macos' => 'macos',
             'win' => 'windows',
-            default => throw new \InvalidArgumentException('Unsupported OS: ' . $os),
+            default => throw new WrongUsageException('Unsupported OS: ' . $os),
         };
 
         $index_json = json_decode(Downloader::curlExec('https://ziglang.org/download/index.json', hooks: [[CurlHook::class, 'setupGithubToken']]), true);
@@ -69,14 +71,14 @@ class Zig extends CustomPackage
         }
 
         if (!$latest_version) {
-            throw new \RuntimeException('Could not determine latest Zig version');
+            throw new RuntimeException('Could not determine latest Zig version');
         }
 
         logger()->info("Installing Zig version {$latest_version}");
 
         $platform_key = "{$zig_arch}-{$zig_os}";
         if (!isset($index_json[$latest_version][$platform_key])) {
-            throw new \RuntimeException("No download available for {$platform_key} in Zig version {$latest_version}");
+            throw new RuntimeException("No download available for {$platform_key} in Zig version {$latest_version}");
         }
 
         $download_info = $index_json[$latest_version][$platform_key];
@@ -119,7 +121,6 @@ class Zig extends CustomPackage
     {
         $arch = arch2gnu(php_uname('m'));
         $os = match (PHP_OS_FAMILY) {
-            'Linux' => 'linux',
             'Windows' => 'win',
             'Darwin' => 'macos',
             'BSD' => 'freebsd',
@@ -134,11 +135,13 @@ class Zig extends CustomPackage
         ];
     }
 
+    /**
+     * @throws WrongUsageException
+     */
     private static function getPath(): string
     {
         $arch = arch2gnu(php_uname('m'));
         $os = match (PHP_OS_FAMILY) {
-            'Linux' => 'linux',
             'Windows' => 'win',
             'Darwin' => 'macos',
             'BSD' => 'freebsd',

@@ -10,8 +10,6 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCTarget;
 
@@ -62,7 +60,6 @@ class LinuxBuilder extends UnixBuilderBase
         }
         // add libstdc++, some extensions or libraries need it
         $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
-        $extra_libs .= (ToolchainManager::getToolchainClass() === ZigToolchain::class ? ' -lunwind' : '');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
         f_putenv('CFLAGS=' . $cflags);
