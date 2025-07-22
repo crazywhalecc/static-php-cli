@@ -10,7 +10,6 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\SPCConfigUtil;
-use SPC\util\SPCTarget;
 
 class Extension
 {
@@ -549,6 +548,11 @@ class Extension
             } elseif (!str_contains($sharedLibString, '-l' . $lib . ' ')) {
                 $sharedLibString .= '-l' . $lib . ' ';
             }
+        }
+        // move -lstdc++ to static libraries because centos 7 the shared libstdc++ is incomplete
+        if (str_contains((string) getenv('PATH'), 'rh/devtoolset-10')) {
+            $staticLibString .= ' -lstdc++';
+            $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
         }
         return [trim($staticLibString), trim($sharedLibString)];
     }
