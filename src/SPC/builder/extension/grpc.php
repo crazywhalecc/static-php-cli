@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\builder\LibraryBase;
 use SPC\builder\windows\WindowsBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
@@ -23,8 +24,8 @@ class grpc extends Extension
             return false;
         }
         // soft link to the grpc source code
-        if (is_dir($this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc')) {
-            shell()->exec('ln -s ' . $this->builder->getLib('grpc')->getSourceDir() . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
+        if (is_dir($this->source_dir . '/src/php/ext/grpc')) {
+            shell()->exec('ln -s ' . $this->source_dir . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
         } else {
             throw new \RuntimeException('Cannot find grpc source code');
         }
