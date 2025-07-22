@@ -86,7 +86,7 @@ class SPCConfigUtil
         if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
-        $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
+        $libs .= $this->builder->hasCpp() && $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
 
         if ($this->libs_only_deps) {
             return [
