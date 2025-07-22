@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-# get parent dir, and run the php-cs-fixer
-"$(dirname "$0")/../vendor/bin/php-cs-fixer" "$@"
