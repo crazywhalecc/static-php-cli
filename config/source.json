@@ -558,8 +558,14 @@
         }
     },
     "libjxl": {
-        "type": "ghtar",
-        "repo": "libjxl/libjxl",
+        "type": "git",
+        "url": "https://github.com/libjxl/libjxl",
+        "rev": "main",
+        "submodules": [
+            "third_party/highway",
+            "third_party/sjpeg",
+            "third_party/skcms"
+        ],
         "license": {
             "type": "file",
             "path": "LICENSE"
