@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 use SPC\util\SPCTarget;
 
