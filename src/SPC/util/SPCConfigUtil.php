@@ -179,7 +179,7 @@ class SPCConfigUtil
         }
 
         // post-process
-        $lib_names = array_unique(array_reverse($lib_names));
+        $lib_names = array_reverse(array_unique($lib_names));
         $frameworks = array_unique($frameworks);
 
         // process frameworks to short_name
