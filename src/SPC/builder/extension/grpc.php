@@ -9,6 +9,7 @@ use SPC\builder\windows\WindowsBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 use SPC\util\GlobalEnvManager;
+use SPC\util\SPCTarget;
 
 #[CustomExt('grpc')]
 class grpc extends Extension
@@ -28,6 +29,13 @@ class grpc extends Extension
             throw new \RuntimeException('Cannot find grpc source code');
         }
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/grpc/config.m4', 'PHP_ARG_ENABLE(grpc,', 'PHP_ARG_WITH(grpc,');
+        if (SPCTarget::getTargetOS() === 'Darwin') {
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/ext/grpc/config.m4',
+                '/GRPC_LIBDIR=.*$/m',
+                'GRPC_LIBDIR=' . BUILD_LIB_PATH . "\n" . 'LDFLAGS="$LDFLAGS -framework CoreFoundation"'
+            );
+        }
         return true;
     }
 
