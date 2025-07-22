@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\WindowsBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
