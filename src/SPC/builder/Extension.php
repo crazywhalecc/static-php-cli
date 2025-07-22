@@ -533,7 +533,7 @@ class Extension
             }
         }
         // move static libstdc++ to shared if we are on non-full-static build target
-        if (SPCTarget::isStatic()) {
+        if (str_contains((string) getenv('PATH'), 'rh/devtoolset-10')) {
             $staticLibString .= ' -lstdc++';
             $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
         }
