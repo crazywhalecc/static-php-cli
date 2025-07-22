@@ -183,8 +183,7 @@ abstract class LibraryBase
             }
         }
         if (!$this->isLibraryInstalled()) {
-            $this->tryInstall($lock, true);
-            return LIB_STATUS_OK;
+            return $this->tryInstall($lock, true);
         }
         return LIB_STATUS_ALREADY;
     }

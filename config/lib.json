@@ -36,9 +36,9 @@
     "brotli": {
         "source": "brotli",
         "static-libs-unix": [
+            "libbrotlicommon.a",
             "libbrotlidec.a",
-            "libbrotlienc.a",
-            "libbrotlicommon.a"
+            "libbrotlienc.a"
         ],
         "static-libs-windows": [
             "brotlicommon.lib",
@@ -200,11 +200,10 @@
     "icu": {
         "source": "icu",
         "cpp-library": true,
-        "static-libs-unix": [
-            "libicui18n.a",
-            "libicuio.a",
-            "libicuuc.a",
-            "libicudata.a"
+        "pkg-configs": [
+            "icu-uc",
+            "icu-i18n",
+            "icu-io"
         ]
     },
     "icu-static-win": {

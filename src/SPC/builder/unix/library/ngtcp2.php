@@ -21,8 +21,6 @@ trait ngtcp2
         UnixAutoconfExecutor::create($this)
             ->optionalLib('openssl', fn ($lib) => implode(' ', [
                 '--with-openssl=yes',
-                "OPENSSL_LIBS=\"{$lib->getStaticLibFiles()}\"",
-                "OPENSSL_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
             ]), '--with-openssl=no')
             ->optionalLib('libev', ...ac_with_args('libev', true))
             ->optionalLib('nghttp3', ...ac_with_args('libnghttp3', true))
@@ -30,12 +28,8 @@ trait ngtcp2
             ->optionalLib(
                 'brotli',
                 fn ($lib) => implode(' ', [
-                    '--with-brotlidec=yes',
-                    "LIBBROTLIDEC_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
-                    "LIBBROTLIDEC_LIBS=\"{$lib->getStaticLibFiles()}\"",
+                    '--with-libbrotlidec=yes',
                     '--with-libbrotlienc=yes',
-                    "LIBBROTLIENC_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
-                    "LIBBROTLIENC_LIBS=\"{$lib->getStaticLibFiles()}\"",
                 ])
             )
             ->appendEnv(['PKG_CONFIG' => '$PKG_CONFIG --static'])

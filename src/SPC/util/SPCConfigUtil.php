@@ -6,6 +6,7 @@ namespace SPC\util;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
+use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -78,13 +79,14 @@ class SPCConfigUtil
             $libs .= ' ' . trim($extra_env, '"');
         }
         $extra_env = getenv('SPC_EXTRA_LIBS');
-        if (is_string($extra_env)) {
+        if (is_string($extra_env) && !empty($extra_env)) {
             $libs .= " {$extra_env}";
         }
         // extension frameworks
         if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
+        $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
 
         if ($this->libs_only_deps) {
             return [
@@ -94,10 +96,9 @@ class SPCConfigUtil
             ];
         }
 
-        $libs = trim("-lc {$libs}");
         // embed
         if (!$this->no_php) {
-            $libs = "-lphp {$libs}";
+            $libs = "-lphp -lc {$libs}";
         }
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {

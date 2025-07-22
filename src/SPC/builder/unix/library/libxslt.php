@@ -24,7 +24,7 @@ trait libxslt
             ->appendEnv([
                 'CFLAGS' => "-I{$this->getIncludeDir()}",
                 'LDFLAGS' => "-L{$this->getLibDir()}",
-                'LIBS' => "{$static_libs} -lstdc++",
+                'LIBS' => "{$static_libs}",
             ])
             ->addConfigureArgs(
                 '--without-python',
@@ -41,7 +41,7 @@ trait libxslt
         }
         $ac->configure()->make();
 
-        $this->patchPkgconfPrefix(['libexslt.pc']);
+        $this->patchPkgconfPrefix(['libxslt.pc']);
         $this->patchLaDependencyPrefix();
         shell()->cd(BUILD_LIB_PATH)
             ->exec("ar -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")
