@@ -183,7 +183,8 @@ class SystemUtil
             } elseif (is_file('/usr/local/musl/lib/libc.so')) {
                 $result = shell()->execWithResult('/usr/local/musl/lib/libc.so 2>&1', false);
             } else {
-                $result = shell()->execWithResult('/lib/ld-musl-x86_64.so.1 2>&1', false);
+                $arch = php_uname('m');
+                $result = shell()->execWithResult("/lib/ld-musl-{$arch}.so.1 2>&1", false);
             }
             // Match Version * line
             // match ldd version: "Version 1.2.3" match 1.2.3
