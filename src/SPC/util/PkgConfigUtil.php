@@ -32,7 +32,7 @@ class PkgConfigUtil
      * @return array            Unique libs array, e.g. [-lz, -lxml, ...]
      * @throws RuntimeException
      */
-    public static function getLibsArray(string $pkg_config_str): array
+    public static function getLibsArray(string $pkg_config_str, bool $force_short_name = true): array
     {
         // Use this instead of shell() to avoid unnecessary outputs
         $result = self::execWithResult("pkg-config --static --libs-only-l {$pkg_config_str}");
@@ -44,7 +44,7 @@ class PkgConfigUtil
         $exp = explode(' ', trim($result));
         foreach ($exp as $item) {
             // if item ends with .a, convert it to -lxxx
-            if (str_ends_with($item, '.a') && str_starts_with($item, 'lib')) {
+            if (str_ends_with($item, '.a') && str_starts_with($item, 'lib') && $force_short_name) {
                 $name = pathinfo($item, PATHINFO_BASENAME);
                 $name = substr($name, 3, -2); // remove 'lib' prefix and '.a' suffix
                 $libs[] = "-l{$name}";

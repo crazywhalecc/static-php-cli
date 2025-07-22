@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
+    // '8.1',
     // '8.2',
     // '8.3',
     '8.4',
@@ -24,16 +24,16 @@ $test_os = [
     'macos-13', // bin/spc for x86_64
     // 'macos-14',  // bin/spc for arm64
     'macos-15', // bin/spc for arm64
-    // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
+    'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
-    // 'ubuntu-24.04', // bin/spc for x86_64
-    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    'ubuntu-24.04', // bin/spc for x86_64
+    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
     // 'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-latest', // .\bin\spc.ps1
 ];
 
 // whether enable thread safe
-$zts = true;
+$zts = false;
 
 $no_strip = false;
 
@@ -54,7 +54,7 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'imagick',
+    'Linux' => '',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -72,7 +72,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'bulk',
     'Windows' => 'none',
 };
 

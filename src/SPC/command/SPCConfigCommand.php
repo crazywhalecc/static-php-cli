@@ -23,6 +23,8 @@ class SPCConfigCommand extends BaseCommand
         $this->addOption('with-suggested-exts', 'E', null, 'Build with suggested extensions for selected exts');
         $this->addOption('includes', null, null, 'Add additional include path');
         $this->addOption('libs', null, null, 'Add additional libs path');
+        $this->addOption('libs-only-deps', null, null, 'Output dependent libraries with -l prefix');
+        $this->addOption('absolute-libs', null, null, 'Output absolute paths for libraries');
         $this->addOption('no-php', null, null, 'Do not link to PHP library');
     }
 
@@ -38,16 +40,19 @@ class SPCConfigCommand extends BaseCommand
         $include_suggest_ext = $this->getOption('with-suggested-exts');
         $include_suggest_lib = $this->getOption('with-suggested-libs');
 
-        $util = new SPCConfigUtil(link_php: !$this->getOption('no-php'));
+        $util = new SPCConfigUtil(options: [
+            'no_php' => $this->getOption('no-php'),
+            'libs_only_deps' => $this->getOption('libs-only-deps'),
+            'absolute_libs' => $this->getOption('absolute-libs'),
+        ]);
         $config = $util->config($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
-        if ($this->getOption('includes')) {
-            $this->output->writeln($config['cflags']);
-        } elseif ($this->getOption('libs')) {
-            $this->output->writeln("{$config['ldflags']} {$config['libs']}");
-        } else {
-            $this->output->writeln("{$config['cflags']} {$config['ldflags']} {$config['libs']}");
-        }
+        $this->output->writeln(match (true) {
+            $this->getOption('includes') => $config['cflags'],
+            $this->getOption('libs-only-deps') => $config['libs'],
+            $this->getOption('libs') => "{$config['ldflags']} {$config['libs']}",
+            default => "{$config['cflags']} {$config['ldflags']} {$config['libs']}",
+        });
 
         return 0;
     }

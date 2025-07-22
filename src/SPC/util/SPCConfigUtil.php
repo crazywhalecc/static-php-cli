@@ -6,7 +6,6 @@ namespace SPC\util;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
-use SPC\builder\macos\MacOSBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -17,11 +16,27 @@ class SPCConfigUtil
 {
     private ?BuilderBase $builder = null;
 
-    public function __construct(?BuilderBase $builder = null, private bool $link_php = true)
+    private bool $no_php;
+
+    private bool $libs_only_deps;
+
+    private bool $absolute_libs;
+
+    /**
+     * @param array{
+     *     no_php?: bool,
+     *     libs_only_deps?: bool,
+     *     absolute_libs?: bool
+     * } $options Options pass to spc-config
+     */
+    public function __construct(?BuilderBase $builder = null, array $options = [])
     {
         if ($builder !== null) {
             $this->builder = $builder; // BuilderProvider::makeBuilderByInput($input ?? new ArgvInput());
         }
+        $this->no_php = $options['no_php'] ?? false;
+        $this->libs_only_deps = $options['libs_only_deps'] ?? false;
+        $this->absolute_libs = $options['absolute_libs'] ?? false;
     }
 
     /**
@@ -54,24 +69,35 @@ class SPCConfigUtil
         }
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
-        $libs = $this->getLibsString($libraries);
-        if (SPCTarget::getTargetOS() === 'Darwin') {
-            $libs .= " {$this->getFrameworksString($extensions)}";
-        }
         $cflags = $this->getIncludesString($libraries);
+        $libs = $this->getLibsString($libraries, !$this->absolute_libs);
 
-        $libs = trim("-lc {$libs}");
-        // embed
-        if ($this->link_php) {
-            $libs = "-lphp {$libs}";
-        }
+        // additional OS-specific libraries (e.g. macOS -lresolv)
         $extra_env = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS');
         if (is_string($extra_env)) {
             $libs .= ' ' . trim($extra_env, '"');
         }
-        // c++
-        if ($this->builder->hasCpp()) {
-            $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
+        $extra_env = getenv('SPC_EXTRA_LIBS');
+        if (is_string($extra_env)) {
+            $libs .= " {$extra_env}";
+        }
+        // extension frameworks
+        if (SPCTarget::getTargetOS() === 'Darwin') {
+            $libs .= " {$this->getFrameworksString($extensions)}";
+        }
+
+        if ($this->libs_only_deps) {
+            return [
+                'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
+                'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
+                'libs' => trim(getenv('LIBS') . ' ' . $libs),
+            ];
+        }
+
+        $libs = trim("-lc {$libs}");
+        // embed
+        if (!$this->no_php) {
+            $libs = "-lphp {$libs}";
         }
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
@@ -90,7 +116,7 @@ class SPCConfigUtil
         $includes = ["-I{$base}"];
 
         // link with libphp
-        if ($this->link_php) {
+        if (!$this->no_php) {
             $includes = [
                 ...$includes,
                 "-I{$base}/php",
@@ -118,9 +144,9 @@ class SPCConfigUtil
         return '-L' . BUILD_LIB_PATH;
     }
 
-    private function getLibsString(array $libraries): string
+    private function getLibsString(array $libraries, bool $use_short_libs = true): string
     {
-        $short_name = [];
+        $lib_names = [];
         $frameworks = [];
 
         foreach ($libraries as $library) {
@@ -131,7 +157,7 @@ class SPCConfigUtil
                 if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
                     throw new WrongUsageException("Library file '{$lib}' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
                 }
-                $short_name[] = $this->getShortLibName($lib);
+                $lib_names[] = $use_short_libs ? $this->getShortLibName($lib) : (BUILD_LIB_PATH . "/{$lib}");
             }
             // add frameworks for macOS
             if (SPCTarget::getTargetOS() === 'Darwin') {
@@ -146,29 +172,29 @@ class SPCConfigUtil
             }
             $pkg_configs = implode(' ', $pkg_configs);
             if ($pkg_configs !== '') {
-                $pc_libs = PkgConfigUtil::getLibsArray($pkg_configs);
-                $short_name = [...$short_name, ...$pc_libs];
+                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs, $use_short_libs));
+                $lib_names = [...$lib_names, ...$pc_libs];
             }
         }
 
         // post-process
-        $short_name = array_unique(array_reverse($short_name));
-        $frameworks = array_unique(array_reverse($frameworks));
+        $lib_names = array_unique(array_reverse($lib_names));
+        $frameworks = array_unique($frameworks);
 
         // process frameworks to short_name
         if (SPCTarget::getTargetOS() === 'Darwin') {
             foreach ($frameworks as $fw) {
                 $ks = '-framework ' . $fw;
-                if (!in_array($ks, $short_name)) {
-                    $short_name[] = $ks;
+                if (!in_array($ks, $lib_names)) {
+                    $lib_names[] = $ks;
                 }
             }
         }
 
         if (in_array('imap', $libraries) && SPCTarget::getLibc() === 'glibc') {
-            $short_name[] = '-lcrypt';
+            $lib_names[] = '-lcrypt';
         }
-        return implode(' ', $short_name);
+        return implode(' ', $lib_names);
     }
 
     private function getShortLibName(string $lib): string
