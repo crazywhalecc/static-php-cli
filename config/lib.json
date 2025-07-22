@@ -228,8 +228,9 @@
         ],
         "lib-depends": [
             "zlib",
-            "libpng",
             "libjpeg",
+            "libjxl",
+            "libpng",
             "libwebp",
             "freetype",
             "libtiff",
@@ -252,6 +253,18 @@
             "openssl"
         ]
     },
+    "jbig": {
+        "source": "jbig",
+        "static-libs-unix": [
+            "libjbig.a",
+            "libjbig85.a"
+        ],
+        "headers": [
+            "jbig.h",
+            "jbig85.h",
+            "jbig_ar.h"
+        ]
+    },
     "ldap": {
         "source": "ldap",
         "static-libs-unix": [
@@ -264,6 +277,13 @@
             "gmp",
             "libsodium"
         ]
+    },
+    "lerc": {
+        "source": "lerc",
+        "static-libs-unix": [
+            "libLerc.a"
+        ],
+        "cpp-library": true
     },
     "libacl": {
         "source": "libacl",
@@ -400,6 +420,21 @@
             "zlib"
         ]
     },
+    "libjxl": {
+        "source": "libjxl",
+        "static-libs-unix": [
+            "libjxl.a",
+            "libjxl_cms.a",
+            "libjxl_threads.a",
+            "libhwy.a"
+        ],
+        "lib-depends": [
+            "brotli",
+            "libjpeg",
+            "libpng",
+            "libwebp"
+        ]
+    },
     "liblz4": {
         "source": "liblz4",
         "static-libs-unix": [
@@ -485,9 +520,6 @@
         ],
         "lib-depends": [
             "openssl"
-        ],
-        "lib-suggests": [
-            "zlib"
         ]
     },
     "libtiff": {
@@ -498,6 +530,13 @@
         "lib-depends": [
             "zlib",
             "libjpeg"
+        ],
+        "lib-suggests-unix": [
+            "lerc",
+            "libwebp",
+            "jbig",
+            "xz",
+            "zstd"
         ]
     },
     "libuuid": {
@@ -813,6 +852,15 @@
             "libiconv"
         ]
     },
+    "watcher": {
+        "source": "watcher",
+        "static-libs-unix": [
+            "libwatcher-c.a"
+        ],
+        "headers": [
+            "wtr/watcher-c.h"
+        ]
+    },
     "xz": {
         "source": "xz",
         "static-libs-unix": [
@@ -865,15 +913,6 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
-        ]
-    },
-    "watcher": {
-        "source": "watcher",
-        "static-libs-unix": [
-            "libwatcher-c.a"
-        ],
-        "headers": [
-            "wtr/watcher-c.h"
         ]
     }
 }

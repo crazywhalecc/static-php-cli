@@ -32,9 +32,9 @@ trait imagemagick
             ->optionalLib('zstd', ...ac_with_args('zstd'))
             ->optionalLib('freetype', ...ac_with_args('freetype'))
             ->optionalLib('bzip2', ...ac_with_args('bzlib'))
+            ->optionalLib('libjxl', ...ac_with_args('jxl'))
             ->addConfigureArgs(
                 '--disable-openmp',
-                '--without-jxl',
                 '--without-x',
             );
 

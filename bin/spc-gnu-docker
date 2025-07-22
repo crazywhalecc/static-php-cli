@@ -86,7 +86,7 @@ RUN sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
     sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
 
 RUN yum update -y && \
-    yum install -y devtoolset-10-gcc-*
+    yum install -y devtoolset-10-gcc-* devtoolset-10-libatomic-devel
 RUN echo "source scl_source enable devtoolset-10" >> /etc/bashrc
 RUN source /etc/bashrc
 RUN yum install -y which
