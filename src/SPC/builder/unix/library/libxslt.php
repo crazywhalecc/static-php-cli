@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\LinuxBuilder;
-use SPC\builder\macos\MacOSBuilder;
+use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -20,8 +20,8 @@ trait libxslt
      */
     protected function build(): void
     {
-        $static_libs = $this->builder instanceof LinuxBuilder ? $this->getStaticLibFiles(include_self: false) : '';
-        $cpp = $this->builder instanceof MacOSBuilder ? '-lc++' : '-lstdc++';
+        $static_libs = $this instanceof LinuxLibraryBase ? $this->getStaticLibFiles(include_self: false) : '';
+        $cpp = $this instanceof MacOSLibraryBase ? '-lc++' : '-lstdc++';
         $ac = UnixAutoconfExecutor::create($this)
             ->appendEnv([
                 'CFLAGS' => "-I{$this->getIncludeDir()}",
