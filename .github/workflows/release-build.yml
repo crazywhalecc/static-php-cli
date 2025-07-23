@@ -10,7 +10,7 @@ on:
 
 env:
   PHP_VERSION: 8.4
-  MICRO_VERSION: 8.4.4
+  MICRO_VERSION: 8.4.10
 
 jobs:
   build-release-artifacts:
