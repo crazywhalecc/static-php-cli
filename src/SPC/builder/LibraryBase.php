@@ -317,26 +317,26 @@ abstract class LibraryBase
     protected function install(): void
     {
         // replace placeholders if BUILD_ROOT_PATH/.spc-extract-placeholder.json exists
-        $placeholder_file = BUILD_ROOT_PATH . '/.spc-extract-placeholder.json';
-        if (!file_exists($placeholder_file)) {
+        $replace_item_file = BUILD_ROOT_PATH . '/.spc-extract-placeholder.json';
+        if (!file_exists($replace_item_file)) {
             return;
         }
-        $placeholder = json_decode(file_get_contents($placeholder_file), true);
-        if (!is_array($placeholder)) {
-            throw new RuntimeException('Invalid placeholder file: ' . $placeholder_file);
+        $replace_items = json_decode(file_get_contents($replace_item_file), true);
+        if (!is_array($replace_items)) {
+            throw new RuntimeException('Invalid placeholder file: ' . $replace_item_file);
         }
-        $placeholder = get_pack_placehoder();
+        $placeholders = get_pack_replace();
         // replace placeholders in BUILD_ROOT_PATH
-        foreach ($placeholder as $item) {
+        foreach ($replace_items as $item) {
             $filepath = BUILD_ROOT_PATH . "/{$item}";
             FileSystem::replaceFileStr(
                 $filepath,
-                array_values($placeholder),
-                array_keys($placeholder),
+                array_values($placeholders),
+                array_keys($placeholders),
             );
         }
         // remove placeholder file
-        unlink($placeholder_file);
+        unlink($replace_item_file);
     }
 
     /**

@@ -53,7 +53,7 @@ class PackLibCommand extends BuildCommand
 
             $origin_files = [];
             // get pack placehoder defines
-            $placehoder = get_pack_placehoder();
+            $placehoder = get_pack_replace();
 
             foreach ($builder->getLibs() as $lib) {
                 if ($lib->getName() !== $lib_name) {

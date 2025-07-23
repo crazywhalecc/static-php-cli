@@ -233,7 +233,7 @@ function ac_with_args(string $arg_name, bool $use_value = false): array
     return $use_value ? ["--with-{$arg_name}=yes", "--with-{$arg_name}=no"] : ["--with-{$arg_name}", "--without-{$arg_name}"];
 }
 
-function get_pack_placehoder(): array
+function get_pack_replace(): array
 {
     return [
         BUILD_LIB_PATH => '@build_lib_path@',
