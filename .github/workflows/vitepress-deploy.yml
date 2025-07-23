@@ -32,12 +32,13 @@ jobs:
           cp -r config/* docs/.vitepress/config/
 
       - name: "Install PHP for official runners"
-        uses: "shivammathur/setup-php@v2"
+        uses: shivammathur/setup-php@v2
         with:
           coverage: none
           tools: composer:v2
           php-version: 8.4
           ini-values: memory_limit=-1
+          extensions: curl, openssl, mbstring
 
       - name: "Get Composer Cache Directory"
         id: composer-cache
