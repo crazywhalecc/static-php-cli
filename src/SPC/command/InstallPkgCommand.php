@@ -24,6 +24,8 @@ class InstallPkgCommand extends BaseCommand
         $this->addArgument('packages', InputArgument::REQUIRED, 'The packages will be installed, comma separated');
         $this->addOption('shallow-clone', null, null, 'Clone shallow');
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
+        $this->addOption('no-alt', null, null, 'Do not download alternative packages');
+        $this->addOption('skip-extract', null, null, 'Skip package extraction, just download the package archive');
     }
 
     /**
@@ -66,10 +68,20 @@ class InstallPkgCommand extends BaseCommand
                         $new_config['filename'] = $config['filename'];
                     }
                     logger()->info("Installing source {$pkg} from custom url [{$ni}/{$cnt}]");
-                    PackageManager::installPackage($pkg, $new_config);
+                    PackageManager::installPackage(
+                        $pkg,
+                        $new_config,
+                        allow_alt: false,
+                        extract: !$this->getOption('skip-extract')
+                    );
                 } else {
                     logger()->info("Fetching package {$pkg} [{$ni}/{$cnt}]");
-                    PackageManager::installPackage($pkg, Config::getPkg($pkg));
+                    PackageManager::installPackage(
+                        $pkg,
+                        Config::getPkg($pkg),
+                        allow_alt: !$this->getOption('no-alt'),
+                        extract: !$this->getOption('skip-extract')
+                    );
                 }
             }
             $time = round(microtime(true) - START_TIME, 3);
