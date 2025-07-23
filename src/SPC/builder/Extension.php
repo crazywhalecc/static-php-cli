@@ -83,13 +83,15 @@ class Extension
      */
     public function getEnableArg(bool $shared = false): string
     {
+        $escapedPath = str_replace("'", '', escapeshellarg(BUILD_ROOT_PATH)) !== BUILD_ROOT_PATH || str_contains(BUILD_ROOT_PATH, ' ') ? escapeshellarg(BUILD_ROOT_PATH) : BUILD_ROOT_PATH;
         $_name = str_replace('_', '-', $this->name);
         return match ($arg_type = Config::getExt($this->name, 'arg-type', 'enable')) {
             'enable' => '--enable-' . $_name . ($shared ? '=shared' : '') . ' ',
+            'enable-path' => '--enable-' . $_name . '=' . ($shared ? 'shared,' : '') . $escapedPath . ' ',
             'with' => '--with-' . $_name . ($shared ? '=shared' : '') . ' ',
-            'with-prefix' => '--with-' . $_name . '=' . ($shared ? 'shared,' : '') . '"' . BUILD_ROOT_PATH . '" ',
+            'with-path' => '--with-' . $_name . '=' . ($shared ? 'shared,' : '') . $escapedPath . ' ',
             'none', 'custom' => '',
-            default => throw new WrongUsageException("argType does not accept {$arg_type}, use [enable/with/with-prefix] ."),
+            default => throw new WrongUsageException("argType does not accept {$arg_type}, use [enable/with/with-path] ."),
         };
     }
 

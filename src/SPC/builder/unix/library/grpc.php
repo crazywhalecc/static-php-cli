@@ -4,22 +4,55 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\store\FileSystem;
+use SPC\util\executor\UnixCMakeExecutor;
+use SPC\util\SPCTarget;
 
 trait grpc
 {
+    public function patchBeforeBuild(): bool
+    {
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/third_party/re2/util/pcre.h',
+            ["#define UTIL_PCRE_H_\n#include <stdint.h>", '#define UTIL_PCRE_H_'],
+            ['#define UTIL_PCRE_H_', "#define UTIL_PCRE_H_\n#include <stdint.h>"],
+        );
+        return true;
+    }
+
     protected function build(): void
     {
-        shell()->cd($this->source_dir)
-            ->exec('EXTRA_DEFINES=GRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK EMBED_OPENSSL=false CXXFLAGS="-L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '" make static -j' . $this->builder->concurrency);
-        copy($this->source_dir . '/libs/opt/libgrpc.a', BUILD_LIB_PATH . '/libgrpc.a');
-        copy($this->source_dir . '/libs/opt/libboringssl.a', BUILD_LIB_PATH . '/libboringssl.a');
-        if (!file_exists(BUILD_LIB_PATH . '/libcares.a')) {
-            copy($this->source_dir . '/libs/opt/libcares.a', BUILD_LIB_PATH . '/libcares.a');
+        $cmake = UnixCMakeExecutor::create($this)
+            ->setBuildDir("{$this->source_dir}/avoid_BUILD_file_conflict")
+            ->addConfigureArgs(
+                '-DgRPC_INSTALL_BINDIR=' . BUILD_BIN_PATH,
+                '-DgRPC_INSTALL_LIBDIR=' . BUILD_LIB_PATH,
+                '-DgRPC_INSTALL_SHAREDIR=' . BUILD_ROOT_PATH . '/share/grpc',
+                '-DCMAKE_C_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"',
+                '-DCMAKE_CXX_FLAGS="-DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK -L' . BUILD_LIB_PATH . ' -I' . BUILD_INCLUDE_PATH . '"',
+                '-DgRPC_BUILD_CODEGEN=OFF',
+                '-DgRPC_DOWNLOAD_ARCHIVES=OFF',
+                '-DgRPC_BUILD_TESTS=OFF',
+                // providers
+                '-DgRPC_ZLIB_PROVIDER=package',
+                '-DgRPC_CARES_PROVIDER=package',
+                '-DgRPC_SSL_PROVIDER=package',
+            );
+
+        if (PHP_OS_FAMILY === 'Linux' && SPCTarget::isStatic() && !SystemUtil::isMuslDist()) {
+            $cmake->addConfigureArgs(
+                '-DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++"',
+                '-DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++"',
+                '-DCMAKE_CXX_STANDARD_LIBRARIES="-static-libgcc -static-libstdc++"',
+            );
         }
-        FileSystem::copyDir($this->source_dir . '/include/grpc', BUILD_INCLUDE_PATH . '/grpc');
-        FileSystem::copyDir($this->source_dir . '/include/grpc++', BUILD_INCLUDE_PATH . '/grpc++');
-        FileSystem::copyDir($this->source_dir . '/include/grpcpp', BUILD_INCLUDE_PATH . '/grpcpp');
-        FileSystem::copyDir($this->source_dir . '/src/php/ext/grpc', BUILD_ROOT_PATH . '/grpc_php_ext_src');
+
+        $cmake->build();
+
+        $re2Content = file_get_contents($this->source_dir . '/third_party/re2/re2.pc');
+        $re2Content = 'prefix=' . BUILD_ROOT_PATH . "\nexec_prefix=\${prefix}\n" . $re2Content;
+        file_put_contents(BUILD_LIB_PATH . '/pkgconfig/re2.pc', $re2Content);
+        $this->patchPkgconfPrefix(['grpc++.pc', 'grpc.pc', 'grpc++_unsecure.pc', 'grpc_unsecure.pc', 're2.pc']);
     }
 }

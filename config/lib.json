@@ -186,14 +186,15 @@
     },
     "grpc": {
         "source": "grpc",
-        "static-libs-unix": [
-            "libgrpc.a",
-            "libcares.a"
+        "pkg-configs": [
+            "grpc"
         ],
         "lib-depends": [
             "zlib",
-            "openssl"
+            "openssl",
+            "libcares"
         ],
+        "provide-pre-built": true,
         "frameworks": [
             "CoreFoundation"
         ]

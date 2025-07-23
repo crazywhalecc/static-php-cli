@@ -10,7 +10,7 @@ on:
 
 env:
   PHP_VERSION: 8.4
-  MICRO_VERSION: 8.4.4
+  MICRO_VERSION: 8.4.10
 
 jobs:
   build-release-artifacts:
@@ -42,12 +42,13 @@ jobs:
         run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
 
       - name: "Install PHP for official runners"
-        uses: "shivammathur/setup-php@v2"
+        uses: shivammathur/setup-php@v2
         with:
           coverage: none
           tools: composer:v2
           php-version: "${{ env.PHP_VERSION }}"
           ini-values: memory_limit=-1
+          extensions: curl, openssl, mbstring
 
       - name: "Get Composer Cache Directory"
         id: composer-cache
