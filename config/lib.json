@@ -189,6 +189,9 @@
         "static-libs-unix": [
             "libgrpc.a"
         ],
+        "pkg-configs": [
+            "grpc"
+        ],
         "lib-depends": [
             "zlib",
             "openssl",

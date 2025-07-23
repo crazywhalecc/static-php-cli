@@ -9,6 +9,7 @@ use SPC\builder\windows\WindowsBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 use SPC\util\GlobalEnvManager;
+use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
 #[CustomExt('grpc')]
@@ -40,37 +41,17 @@ class grpc extends Extension
 
     public function patchBeforeConfigure(): bool
     {
-        $libs = join(' ', $this->getLibraries());
+        $util = new SPCConfigUtil($this->builder);
+        $config = $util->config(['grpc']);
+        $libs = $config['libs'];
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/configure', '-lgrpc', $libs);
         return true;
     }
 
     public function patchBeforeMake(): bool
     {
-        $extra_libs = trim(getenv('SPC_EXTRA_LIBS'));
-        $libs = array_map(function (string $lib) {
-            if (str_starts_with($lib, '-l')) {
-                $staticLib = substr($lib, 2);
-                $staticLib = BUILD_LIB_PATH . '/lib' . $staticLib . '.a';
-                if (file_exists($staticLib)) {
-                    return $staticLib;
-                }
-            }
-            return $lib;
-        }, $this->getLibraries());
-        $extra_libs = str_replace(BUILD_LIB_PATH . '/libgrpc.a', join(' ', $libs), $extra_libs);
-        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         // add -Wno-strict-prototypes
         GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -Wno-strict-prototypes');
         return true;
-    }
-
-    private function getLibraries(): array
-    {
-        $libs = shell()->execWithResult('$PKG_CONFIG --libs --static grpc')[1][0];
-        $filtered = preg_replace('/-L\S+/', '', $libs);
-        $filtered = preg_replace('/(?:\S*\/)?lib([a-zA-Z0-9_+-]+)\.a\b/', '-l$1', $filtered);
-        $out = preg_replace('/\s+/', ' ', $filtered);
-        return explode(' ', trim($out));
     }
 }
