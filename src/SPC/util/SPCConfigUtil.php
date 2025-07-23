@@ -161,19 +161,6 @@ class SPCConfigUtil
         $frameworks = [];
 
         foreach ($libraries as $library) {
-            // convert all static-libs to short names
-            $libs = Config::getLib($library, 'static-libs', []);
-            foreach ($libs as $lib) {
-                // check file existence
-                if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
-                    throw new WrongUsageException("Library file '{$lib}' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
-                }
-                $lib_names[] = $this->getShortLibName($lib);
-            }
-            // add frameworks for macOS
-            if (SPCTarget::getTargetOS() === 'Darwin') {
-                $frameworks = array_merge($frameworks, Config::getLib($library, 'frameworks', []));
-            }
             // add pkg-configs libs
             $pkg_configs = Config::getLib($library, 'pkg-configs', []);
             foreach ($pkg_configs as $pkg_config) {
@@ -187,10 +174,24 @@ class SPCConfigUtil
                 $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs));
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
+            // convert all static-libs to short names
+            $libs = Config::getLib($library, 'static-libs', []);
+            foreach ($libs as $lib) {
+                // check file existence
+                if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
+                    throw new WrongUsageException("Library file '{$lib}' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
+                }
+                $lib_names[] = $this->getShortLibName($lib);
+            }
+            // add frameworks for macOS
+            if (SPCTarget::getTargetOS() === 'Darwin') {
+                $frameworks = array_merge($frameworks, Config::getLib($library, 'frameworks', []));
+            }
         }
 
         // post-process
-        $lib_names = array_reverse(array_unique(array_filter($lib_names, fn ($x) => $x !== '')));
+        $lib_names = array_filter($lib_names, fn ($x) => $x !== '');
+        $lib_names = array_reverse(array_unique($lib_names));
         $frameworks = array_unique($frameworks);
 
         // process frameworks to short_name
