@@ -73,7 +73,7 @@ class SPCTarget
     public static function getTargetOS(): string
     {
         $target = getenv('SPC_TARGET');
-        if ($target === false) {
+        if ($target === false || $target === '') {
             return PHP_OS_FAMILY;
         }
         // TODO: zig target parser like below?
