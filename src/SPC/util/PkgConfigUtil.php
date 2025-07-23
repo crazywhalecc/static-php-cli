@@ -32,7 +32,7 @@ class PkgConfigUtil
      * @return array            Unique libs array, e.g. [-lz, -lxml, ...]
      * @throws RuntimeException
      */
-    public static function getLibsArray(string $pkg_config_str, bool $force_short_name = true): array
+    public static function getLibsArray(string $pkg_config_str): array
     {
         // Use this instead of shell() to avoid unnecessary outputs
         $result = self::execWithResult("pkg-config --static --libs-only-l {$pkg_config_str}");
