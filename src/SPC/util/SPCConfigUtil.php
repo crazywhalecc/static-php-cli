@@ -88,24 +88,25 @@ class SPCConfigUtil
         if ($this->builder->hasCpp()) {
             $libs .= SPCTarget::getTargetOS() === 'Darwin' ? ' -lc++' : ' -lstdc++';
         }
+
         if ($this->libs_only_deps) {
-            $libs = '-L' . BUILD_LIB_PATH . ' ' . $libs;
             return [
                 'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
                 'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
-                'libs' =>  trim(getenv('LIBS') . ' ' . $libs),
+                'libs' => trim(getenv('LIBS') . ' ' . $libs),
             ];
         }
 
         // embed
         if (!$this->no_php) {
-            $libs = "-lphp -lc {$libs}";
+            $libs = "-lphp {$libs} -lc";
         }
-        $libs = '-L' . BUILD_LIB_PATH . ' ' . $libs;
+
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
             $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
         }
+
         return [
             'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
             'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
@@ -202,6 +203,9 @@ class SPCConfigUtil
         if (in_array('imap', $libraries) && SPCTarget::getLibc() === 'glibc') {
             $lib_names[] = '-lcrypt';
         }
+        if (!$use_short_libs) {
+            $lib_names = array_map(fn ($l) => $this->getFullLibName($l), $lib_names);
+        }
         return implode(' ', $lib_names);
     }
 
@@ -212,6 +216,19 @@ class SPCConfigUtil
         }
         // get short name
         return '-l' . substr($lib, 3, -2);
+    }
+
+    private function getFullLibName(string $lib)
+    {
+        if (!str_starts_with($lib, '-l')) {
+            return $lib;
+        }
+        $libname = substr($lib, 2);
+        $staticLib = BUILD_LIB_PATH . '/' . "lib{$libname}.a";
+        if (file_exists($staticLib)) {
+            return $staticLib;
+        }
+        return $lib;
     }
 
     private function getFrameworksString(array $extensions): string
