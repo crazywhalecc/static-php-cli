@@ -321,18 +321,18 @@ abstract class LibraryBase
         if (!file_exists($placeholder_file)) {
             return;
         }
-        $placeholder = json_decode(file_get_contents($placeholder_file), true);
-        if (!is_array($placeholder)) {
+        $placeholders = json_decode(file_get_contents($placeholder_file), true);
+        if (!is_array($placeholders)) {
             throw new RuntimeException('Invalid placeholder file: ' . $placeholder_file);
         }
-        $placeholder = get_pack_placehoder();
+        $placeholder_mark = get_pack_placehoder();
         // replace placeholders in BUILD_ROOT_PATH
-        foreach ($placeholder as $item) {
+        foreach ($placeholders as $item) {
             $filepath = BUILD_ROOT_PATH . "/{$item}";
             FileSystem::replaceFileStr(
                 $filepath,
-                array_values($placeholder),
-                array_keys($placeholder),
+                array_values($placeholder_mark),
+                array_keys($placeholder_mark),
             );
         }
         // remove placeholder file
