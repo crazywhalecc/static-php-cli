@@ -52,7 +52,7 @@ trait grpc
 
         $re2Content = file_get_contents($this->source_dir . '/third_party/re2/re2.pc');
         $re2Content = 'prefix=' . BUILD_ROOT_PATH . "\nexec_prefix=\${prefix}\n" . $re2Content;
-        file_put_contents(BUILD_LIB_PATH. '/pkgconfig/re2.pc', $re2Content);
+        file_put_contents(BUILD_LIB_PATH . '/pkgconfig/re2.pc', $re2Content);
         $this->patchPkgconfPrefix(['grpc++.pc', 'grpc.pc', 'grpc++_unsecure.pc', 'grpc_unsecure.pc', 're2.pc']);
     }
 }
