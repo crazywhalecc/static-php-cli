@@ -43,7 +43,7 @@ trait libxslt
         }
         $ac->configure()->make();
 
-        $this->patchPkgconfPrefix(['libxslt.pc']);
+        $this->patchPkgconfPrefix(['libexslt.pc', 'libxslt.pc']);
         $this->patchLaDependencyPrefix();
         shell()->cd(BUILD_LIB_PATH)
             ->exec("ar -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")
