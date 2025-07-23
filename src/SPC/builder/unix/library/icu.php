@@ -17,6 +17,7 @@ trait icu
 
     protected function install(): void
     {
+        parent::install();
         $icu_config = BUILD_ROOT_PATH . '/bin/icu-config';
         FileSystem::replaceFileStr($icu_config, '{BUILD_ROOT_PATH}', BUILD_ROOT_PATH);
     }

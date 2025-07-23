@@ -350,7 +350,27 @@ abstract class LibraryBase
 
     protected function install(): void
     {
-        // do something after extracting pre-built files, default do nothing. overwrite this method to do something
+        // replace placeholders if BUILD_ROOT_PATH/.spc-extract-placeholder.json exists
+        $placeholder_file = BUILD_ROOT_PATH . '/.spc-extract-placeholder.json';
+        if (!file_exists($placeholder_file)) {
+            return;
+        }
+        $placeholder = json_decode(file_get_contents($placeholder_file), true);
+        if (!is_array($placeholder)) {
+            throw new RuntimeException('Invalid placeholder file: ' . $placeholder_file);
+        }
+        $placeholder = get_pack_placehoder();
+        // replace placeholders in BUILD_ROOT_PATH
+        foreach ($placeholder as $item) {
+            $filepath = BUILD_ROOT_PATH . "/{$item}";
+            FileSystem::replaceFileStr(
+                $filepath,
+                array_values($placeholder),
+                array_keys($placeholder),
+            );
+        }
+        // remove placeholder file
+        unlink($placeholder_file);
     }
 
     /**
