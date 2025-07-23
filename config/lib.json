@@ -89,7 +89,8 @@
             "nghttp3",
             "ngtcp2",
             "zstd",
-            "libcares"
+            "libcares",
+            "ldap"
         ],
         "lib-suggests-windows": [
             "brotli",

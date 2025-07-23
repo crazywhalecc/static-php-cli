@@ -183,13 +183,14 @@ class SPCConfigUtil
             }
             $pkg_configs = implode(' ', $pkg_configs);
             if ($pkg_configs !== '') {
+                // static libs with dependencies come in reverse order, so reverse this too
                 $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs));
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
         }
 
         // post-process
-        $lib_names = array_unique(array_reverse(array_filter($lib_names, fn ($x) => $x !== '')));
+        $lib_names = array_reverse(array_unique(array_filter($lib_names, fn ($x) => $x !== '')));
         $frameworks = array_unique($frameworks);
 
         // process frameworks to short_name
