@@ -35,10 +35,10 @@
     },
     "brotli": {
         "source": "brotli",
-        "static-libs-unix": [
-            "libbrotlidec.a",
-            "libbrotlienc.a",
-            "libbrotlicommon.a"
+        "pkg-configs": [
+            "libbrotlicommon",
+            "libbrotlidec",
+            "libbrotlienc"
         ],
         "static-libs-windows": [
             "brotlicommon.lib",
@@ -89,7 +89,8 @@
             "nghttp3",
             "ngtcp2",
             "zstd",
-            "libcares"
+            "libcares",
+            "ldap"
         ],
         "lib-suggests-windows": [
             "brotli",
@@ -201,11 +202,10 @@
     "icu": {
         "source": "icu",
         "cpp-library": true,
-        "static-libs-unix": [
-            "libicui18n.a",
-            "libicuio.a",
-            "libicuuc.a",
-            "libicudata.a"
+        "pkg-configs": [
+            "icu-uc",
+            "icu-i18n",
+            "icu-io"
         ]
     },
     "icu-static-win": {
@@ -222,10 +222,10 @@
     },
     "imagemagick": {
         "source": "imagemagick",
-        "static-libs-unix": [
-            "libMagick++-7.Q16HDRI.a",
-            "libMagickWand-7.Q16HDRI.a",
-            "libMagickCore-7.Q16HDRI.a"
+        "pkg-configs": [
+            "Magick++-7.Q16HDRI",
+            "MagickCore-7.Q16HDRI",
+            "MagickWand-7.Q16HDRI"
         ],
         "lib-depends": [
             "zlib",
@@ -268,9 +268,9 @@
     },
     "ldap": {
         "source": "ldap",
-        "static-libs-unix": [
-            "libldap.a",
-            "liblber.a"
+        "pkg-configs": [
+            "ldap",
+            "lber"
         ],
         "lib-depends": [
             "openssl",
@@ -423,11 +423,11 @@
     },
     "libjxl": {
         "source": "libjxl",
-        "static-libs-unix": [
-            "libjxl.a",
-            "libjxl_cms.a",
-            "libjxl_threads.a",
-            "libhwy.a"
+        "pkg-configs": [
+            "libjxl",
+            "libjxl_cms",
+            "libjxl_threads",
+            "libhwy"
         ],
         "lib-depends": [
             "brotli",
@@ -557,12 +557,12 @@
     },
     "libwebp": {
         "source": "libwebp",
-        "static-libs-unix": [
-            "libwebp.a",
-            "libwebpdecoder.a",
-            "libwebpdemux.a",
-            "libwebpmux.a",
-            "libsharpyuv.a"
+        "pkg-configs": [
+            "libwebp",
+            "libwebpdecoder",
+            "libwebpdemux",
+            "libwebpmux",
+            "libsharpyuv"
         ],
         "static-libs-windows": [
             "libwebp.lib",
@@ -738,8 +738,8 @@
     "openssl": {
         "source": "openssl",
         "static-libs-unix": [
-            "libssl.a",
-            "libcrypto.a"
+            "libcrypto.a",
+            "libssl.a"
         ],
         "static-libs-windows": [
             "libssl.lib",
@@ -754,10 +754,8 @@
     },
     "postgresql": {
         "source": "postgresql",
-        "static-libs-unix": [
-            "libpq.a",
-            "libpgport.a",
-            "libpgcommon.a"
+        "pkg-configs": [
+            "libpq"
         ],
         "lib-depends": [
             "libiconv",

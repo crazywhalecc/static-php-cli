@@ -21,7 +21,7 @@ class icu extends MacOSLibraryBase
             ->exec("make -j{$this->builder->concurrency}")
             ->exec('make install');
 
-        $this->patchPkgconfPrefix(['icu-i18n.pc', 'icu-io.pc', 'icu-uc.pc'], PKGCONF_PATCH_PREFIX);
+        $this->patchPkgconfPrefix(patch_option: PKGCONF_PATCH_PREFIX);
         FileSystem::removeDir(BUILD_LIB_PATH . '/icu');
     }
 }

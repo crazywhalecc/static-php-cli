@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -20,11 +21,12 @@ trait libxslt
     protected function build(): void
     {
         $static_libs = $this instanceof LinuxLibraryBase ? $this->getStaticLibFiles(include_self: false) : '';
+        $cpp = $this instanceof MacOSLibraryBase ? '-lc++' : '-lstdc++';
         $ac = UnixAutoconfExecutor::create($this)
             ->appendEnv([
                 'CFLAGS' => "-I{$this->getIncludeDir()}",
                 'LDFLAGS' => "-L{$this->getLibDir()}",
-                'LIBS' => "{$static_libs} -lstdc++",
+                'LIBS' => "{$static_libs} {$cpp}",
             ])
             ->addConfigureArgs(
                 '--without-python',
@@ -41,7 +43,7 @@ trait libxslt
         }
         $ac->configure()->make();
 
-        $this->patchPkgconfPrefix(['libexslt.pc']);
+        $this->patchPkgconfPrefix(['libexslt.pc', 'libxslt.pc']);
         $this->patchLaDependencyPrefix();
         shell()->cd(BUILD_LIB_PATH)
             ->exec("ar -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")

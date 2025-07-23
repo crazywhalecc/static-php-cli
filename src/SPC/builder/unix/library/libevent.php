@@ -68,6 +68,7 @@ trait libevent
 
     protected function install(): void
     {
+        parent::install();
         FileSystem::replaceFileStr(
             BUILD_LIB_PATH . '/cmake/libevent/LibeventTargets-static.cmake',
             '{BUILD_ROOT_PATH}',

@@ -66,13 +66,17 @@ abstract class BuilderBase
         // build all libs
         foreach ($this->libs as $lib) {
             $starttime = microtime(true);
-            match ($lib->setup($this->getOption('rebuild', false))) {
+            $status = $lib->setup($this->getOption('rebuild', false));
+            match ($status) {
                 LIB_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] setup success, took ' . round(microtime(true) - $starttime, 2) . ' s'),
                 LIB_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
                 LIB_STATUS_BUILD_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
                 LIB_STATUS_INSTALL_FAILED => logger()->error('lib [' . $lib::NAME . '] install failed'),
                 default => logger()->warning('lib [' . $lib::NAME . '] build status unknown'),
             };
+            if (in_array($status, [LIB_STATUS_BUILD_FAILED, LIB_STATUS_INSTALL_FAILED])) {
+                throw new RuntimeException('Library [' . $lib::NAME . '] setup failed.');
+            }
         }
     }
 
