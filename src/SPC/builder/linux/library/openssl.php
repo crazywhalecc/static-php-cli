@@ -68,6 +68,7 @@ class openssl extends LinuxLibraryBase
             ->exec(
                 "{$env} ./Configure no-shared {$extra} " .
                 '--prefix=' . BUILD_ROOT_PATH . ' ' .
+                '--libdir=' . BUILD_LIB_PATH . ' ' .
                 '--openssldir=/etc/ssl ' .
                 "{$zlib_extra}" .
                 'no-legacy ' .
