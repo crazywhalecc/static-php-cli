@@ -143,6 +143,10 @@ class SPCConfigUtil
             }
             $pc_cflags = implode(' ', $pc);
             if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags)) !== '') {
+                $arr = explode(' ', $pc_cflags);
+                $arr = array_unique($arr);
+                $arr = array_filter($arr, fn ($x) => !str_starts_with($x, 'SHELL:-Xarch_'));
+                $pc_cflags = implode(' ', $arr);
                 $includes[] = $pc_cflags;
             }
         }
