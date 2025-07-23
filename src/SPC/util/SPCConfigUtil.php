@@ -102,15 +102,17 @@ class SPCConfigUtil
             $libs = "-lphp {$libs} -lc";
         }
 
+        $allLibs = getenv('LIBS') . ' ' . $libs;
+
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
-            $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
+            $allLibs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $allLibs);
         }
 
         return [
             'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
             'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
-            'libs' => trim(getenv('LIBS') . ' ' . $libs),
+            'libs' => trim($allLibs),
         ];
     }
 
