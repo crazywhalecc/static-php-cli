@@ -93,7 +93,7 @@ class SPCConfigUtil
             return [
                 'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
                 'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
-                'libs' => trim(getenv('LIBS') . ' ' . $libs),
+                'libs' =>  trim(getenv('LIBS') . ' ' . $libs),
             ];
         }
 
@@ -101,11 +101,11 @@ class SPCConfigUtil
         if (!$this->no_php) {
             $libs = "-lphp -lc {$libs}";
         }
+        $libs = '-L' . BUILD_LIB_PATH . ' ' . $libs;
         // mimalloc must come first
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
             $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
         }
-        $libs = '-L' . BUILD_LIB_PATH . ' ' . $libs;
         return [
             'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
             'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
@@ -180,13 +180,13 @@ class SPCConfigUtil
             }
             $pkg_configs = implode(' ', $pkg_configs);
             if ($pkg_configs !== '') {
-                $pc_libs = PkgConfigUtil::getLibsArray($pkg_configs);
+                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs));
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
         }
 
         // post-process
-        $lib_names = array_reverse(array_unique(array_reverse($lib_names)));
+        $lib_names = array_unique(array_reverse(array_filter($lib_names, fn ($x) => $x !== '')));
         $frameworks = array_unique($frameworks);
 
         // process frameworks to short_name
