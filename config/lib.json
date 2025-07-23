@@ -186,9 +186,6 @@
     },
     "grpc": {
         "source": "grpc",
-        "static-libs-unix": [
-            "libgrpc.a"
-        ],
         "pkg-configs": [
             "grpc"
         ],
