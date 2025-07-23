@@ -39,18 +39,23 @@ class PkgConfigUtil
         $libs = explode(' ', trim($result));
 
         // get other things
-        $result = self::execWithResult("pkg-config --static --libs --libs-only-other {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config --static --libs-only-other {$pkg_config_str}");
         // convert libxxx.a to -L{path} -lxxx
         $exp = explode(' ', trim($result));
         foreach ($exp as $item) {
+            if (str_starts_with($item, '-L')) {
+                $libs[] = $item;
+                continue;
+            }
             // if item ends with .a, convert it to -lxxx
-            if (str_ends_with($item, '.a') && str_starts_with($item, 'lib') && $force_short_name) {
+            if (str_ends_with($item, '.a') && (str_starts_with($item, 'lib') || str_starts_with($item, BUILD_LIB_PATH))) {
                 $name = pathinfo($item, PATHINFO_BASENAME);
                 $name = substr($name, 3, -2); // remove 'lib' prefix and '.a' suffix
-                $libs[] = "-l{$name}";
-            } else {
-                // if item starts with -L, keep it as is
-                // if item starts with -l, keep it as is
+                $shortlib = "-l{$name}";
+                if (!in_array($shortlib, $libs)) {
+                    $libs[] = $shortlib;
+                }
+            } elseif (!in_array($item, $libs)) {
                 $libs[] = $item;
             }
         }

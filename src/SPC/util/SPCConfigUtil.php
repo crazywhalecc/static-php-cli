@@ -87,9 +87,10 @@ class SPCConfigUtil
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
         if ($this->builder->hasCpp()) {
-            $libs .= $this->builder instanceof MacOSBuilder ? ' -lc++' : ' -lstdc++';
+            $libs .= SPCTarget::getTargetOS() === 'Darwin' ? ' -lc++' : ' -lstdc++';
         }
         if ($this->libs_only_deps) {
+            $libs = '-L' . BUILD_LIB_PATH . ' ' . $libs;
             return [
                 'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
                 'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
@@ -105,6 +106,7 @@ class SPCConfigUtil
         if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
             $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
         }
+        $libs = '-L' . BUILD_LIB_PATH . ' ' . $libs;
         return [
             'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
             'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
@@ -138,8 +140,7 @@ class SPCConfigUtil
                 }
             }
             $pc_cflags = implode(' ', $pc);
-            if ($pc_cflags !== '') {
-                $pc_cflags = PkgConfigUtil::getCflags($pc_cflags);
+            if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags)) !== '') {
                 $includes[] = $pc_cflags;
             }
         }
@@ -165,7 +166,7 @@ class SPCConfigUtil
                 if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
                     throw new WrongUsageException("Library file '{$lib}' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
                 }
-                $lib_names[] = $use_short_libs ? $this->getShortLibName($lib) : (BUILD_LIB_PATH . "/{$lib}");
+                $lib_names[] = $this->getShortLibName($lib);
             }
             // add frameworks for macOS
             if (SPCTarget::getTargetOS() === 'Darwin') {
@@ -180,13 +181,13 @@ class SPCConfigUtil
             }
             $pkg_configs = implode(' ', $pkg_configs);
             if ($pkg_configs !== '') {
-                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs, $use_short_libs));
+                $pc_libs = PkgConfigUtil::getLibsArray($pkg_configs);
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
         }
 
         // post-process
-        $lib_names = array_reverse(array_unique($lib_names));
+        $lib_names = array_reverse(array_unique(array_reverse($lib_names)));
         $frameworks = array_unique($frameworks);
 
         // process frameworks to short_name
