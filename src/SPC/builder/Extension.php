@@ -402,11 +402,12 @@ class Extension
     public function buildUnixShared(): void
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()]);
+        [$staticLibs, $sharedLibs] = $this->getStaticAndSharedLibs($config['libs']);
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => $config['libs'],
+            'LIBS' => "-Wl,--start-group {$staticLibs} -Wl,--end-group {$sharedLibs}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
@@ -436,20 +437,11 @@ class Extension
                 '--enable-shared --disable-static'
             );
 
-        $staticLibString = '';
-        $libs = explode(' ', $config['libs']);
-        foreach ($libs as $lib) {
-            $staticLib = BUILD_LIB_PATH . '/' . str_replace('-l', '', $lib) . '.a';
-            if (file_exists($staticLib)) {
-                $staticLibString .= " {$lib}";
-            }
-        }
-
         // some extensions don't define their dependencies well, this patch is only needed for a few
         FileSystem::replaceFileRegex(
             $this->source_dir . '/Makefile',
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
-            '$1 ' . trim($staticLibString)
+            '$1 ' . trim($staticLibs)
         );
 
         if ($this->patchBeforeSharedMake()) {
@@ -535,6 +527,22 @@ class Extension
     protected function getExtraEnv(): array
     {
         return [];
+    }
+
+    private function getStaticAndSharedLibs(string $allLibs): array
+    {
+        $staticLibString = '';
+        $sharedLibString = '';
+        $libs = explode(' ', $allLibs);
+        foreach ($libs as $lib) {
+            $staticLib = BUILD_LIB_PATH . '/lib' . str_replace('-l', '', $lib) . '.a';
+            if (file_exists($staticLib)) {
+                $staticLibString .= " {$lib}";
+            } else {
+                $sharedLibString .= " {$lib}";
+            }
+        }
+        return [$staticLibString, $sharedLibString];
     }
 
     private function getLibraryDependencies(bool $recursive = false): array
