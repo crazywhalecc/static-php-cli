@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\executor\UnixCMakeExecutor;
 use SPC\util\SPCTarget;
 
@@ -13,13 +11,6 @@ trait libjxl
 {
     protected function build(): void
     {
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            if (str_contains(getenv('SPC_TARGET'), '.2.')) {
-                throw new \RuntimeException('Zig toolchain does not support libjxl with target version.');
-            }
-            putenv('CC=gcc');
-            putenv('CXX=g++');
-        }
         UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DJPEGXL_ENABLE_TOOLS=OFF',
@@ -35,9 +26,5 @@ trait libjxl
                 '-DBUILD_TESTING=OFF'
             )
             ->build();
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            putenv('CC=zig-cc');
-            putenv('CXX=zig-c++');
-        }
     }
 }
