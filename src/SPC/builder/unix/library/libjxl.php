@@ -20,7 +20,7 @@ trait libjxl
                 '-DJPEGXL_ENABLE_MANPAGES=OFF',
                 '-DJPEGXL_ENABLE_BENCHMARK=OFF',
                 '-DJPEGXL_ENABLE_PLUGINS=OFF',
-                '-DJPEGXL_ENABLE_SJPOEG=ON',
+                '-DJPEGXL_ENABLE_SJPEG=ON',
                 '-DJPEGXL_ENABLE_JNI=OFF',
                 '-DJPEGXL_ENABLE_TRANSCODE_JPEG=ON',
                 '-DJPEGXL_STATIC=' . (SPCTarget::isStatic() ? 'ON' : 'OFF'),
