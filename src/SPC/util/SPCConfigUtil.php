@@ -57,7 +57,7 @@ class SPCConfigUtil
      * @throws WrongUsageException
      * @throws \Throwable
      */
-    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false, bool $with_dependencies = false): array
+    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
     {
         [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
@@ -90,7 +90,7 @@ class SPCConfigUtil
             if (!str_contains($libs, $libcpp)) {
                 $libs .= " {$libcpp}";
             }
-            if (str_contains(getenv('OATH'), 'rh/devtoolset-10')) {
+            if (str_contains(getenv('PATH'), 'rh/devtoolset-10')) {
                 str_replace('-lstdc++', '-l:stdc++.a', $libs);
             }
         }

@@ -9,6 +9,8 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
@@ -399,16 +401,17 @@ class Extension
      */
     public function buildUnixShared(): void
     {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
-
+        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()]);
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => $config['libs'],
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
-            'SPC_COMPILER_EXTRA' => '-lstdc++',
         ];
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $env['SPC_COMPILER_EXTRA'] = '-lstdc++';
+        }
 
         if ($this->patchBeforeSharedPhpize()) {
             logger()->info("Extension [{$this->getName()}] patched before shared phpize");
@@ -433,11 +436,20 @@ class Extension
                 '--enable-shared --disable-static'
             );
 
+        $staticLibString = '';
+        $libs = explode(' ', $config['libs']);
+        foreach ($libs as $lib) {
+            $staticLib = BUILD_LIB_PATH . '/' . str_replace('-l', '', $lib) . '.a';
+            if (file_exists($staticLib)) {
+                $staticLibString .= " {$lib}";
+            }
+        }
+
         // some extensions don't define their dependencies well, this patch is only needed for a few
         FileSystem::replaceFileRegex(
             $this->source_dir . '/Makefile',
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
-            '$1 ' . $staticLibString
+            '$1 ' . trim($staticLibString)
         );
 
         if ($this->patchBeforeSharedMake()) {
