@@ -536,13 +536,13 @@ class Extension
         $libs = explode(' ', $allLibs);
         foreach ($libs as $lib) {
             $staticLib = BUILD_LIB_PATH . '/lib' . str_replace('-l', '', $lib) . '.a';
-            if (file_exists($staticLib)) {
-                $staticLibString .= " {$lib}";
-            } else {
+            if (!file_exists($staticLib) || $lib === '-lphp') {
                 $sharedLibString .= " {$lib}";
+            } else {
+                $staticLibString .= " {$lib}";
             }
         }
-        return [$staticLibString, $sharedLibString];
+        return [trim($staticLibString), trim($sharedLibString)];
     }
 
     private function getLibraryDependencies(bool $recursive = false): array
