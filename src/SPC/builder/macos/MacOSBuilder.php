@@ -89,21 +89,6 @@ class MacOSBuilder extends UnixBuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
-        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
-        // ---------- Update extra-libs ----------
-        // add macOS frameworks
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . $this->getFrameworks(true);
-        // add libc++, some extensions or libraries need it (C++ cannot be linked statically)
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lc++ ' : '');
-        // bloat means force-load all static libraries, even if they are not used
-        if (!$this->getOption('bloat', false)) {
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
-        } else {
-            logger()->info('bloat linking');
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Wl,-force_load,{$x}", array_filter($this->getAllStaticLibFiles())));
-        }
-        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
-
         $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
 
