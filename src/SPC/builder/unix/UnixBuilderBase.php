@@ -260,8 +260,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $staticFlags = '-static -static-pie';
         }
 
-        $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list, with_dependencies: true);
-
+        $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list);
         $env = [
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => $config['cflags'],
