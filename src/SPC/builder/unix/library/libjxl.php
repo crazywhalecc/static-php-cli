@@ -13,7 +13,6 @@ trait libjxl
 {
     protected function build(): void
     {
-
         $cmake = UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DJPEGXL_ENABLE_TOOLS=OFF',
