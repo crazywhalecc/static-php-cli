@@ -37,7 +37,6 @@ class PackageManager
             Downloader::downloadPackage($pkg_name, $config, $force);
         } catch (\Throwable $e) {
             if (!$allow_alt) {
-                logger()->error("Download package {$pkg_name} failed: " . $e->getMessage());
                 throw new DownloaderException("Download package {$pkg_name} failed: " . $e->getMessage());
             }
             // if download failed, we will try to download alternative packages

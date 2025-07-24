@@ -250,8 +250,7 @@ class DownloadCommand extends BaseCommand
                             logger()->warning("No alternative sources found for {$source}, using default alternative source");
                             $alt_config = array_merge($config, Downloader::getDefaultAlternativeSource($source));
                         } elseif ($alt_sources === false) {
-                            logger()->error("No alternative sources found for {$source}, skipping alternative download");
-                            throw $e;
+                            throw new DownloaderException("No alternative sources found for {$source}, skipping alternative download");
                         } else {
                             logger()->notice("Trying to download alternative sources for {$source}");
                             $alt_config = array_merge($config, $alt_sources);
