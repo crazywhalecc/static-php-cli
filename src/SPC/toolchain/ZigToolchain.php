@@ -56,8 +56,8 @@ class ZigToolchain implements ToolchainInterface
         $cflags = trim($cflags . ' -Wno-date-time');
         $cxxflags = trim($cxxflags . ' -Wno-date-time');
         $extraCflags = trim($extraCflags . ' -Wno-date-time');
-        GlobalEnvManager::putenv("SPC_EXTRA_CFLAGS={$cflags}");
-        GlobalEnvManager::putenv("SPC_EXTRA_CXXFLAGS={$cxxflags}");
+        GlobalEnvManager::putenv("SPC_DEFAULT_C_FLAGS={$cflags}");
+        GlobalEnvManager::putenv("SPC_DEFAULT_CXX_FLAGS={$cxxflags}");
         GlobalEnvManager::putenv("SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS={$extraCflags}");
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if (!str_contains($extra_libs, '-lunwind')) {
