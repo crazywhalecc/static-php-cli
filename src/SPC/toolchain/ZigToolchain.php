@@ -38,13 +38,6 @@ class ZigToolchain implements ToolchainInterface
             }
         }
         GlobalEnvManager::putenv('SPC_EXTRA_RUNTIME_OBJECTS=' . implode(' ', $found));
-
-        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
-        if (!str_contains($extra_libs, '-lunwind')) {
-            // Add unwind library if not already present
-            $extra_libs = trim($extra_libs . ' -lunwind');
-            GlobalEnvManager::putenv("SPC_EXTRA_LIBS={$extra_libs}");
-        }
     }
 
     /**
@@ -56,5 +49,20 @@ class ZigToolchain implements ToolchainInterface
             throw new WrongUsageException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
         }
         GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
+        $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: '';
+        $cxxflags = getenv('SPC_DEFAULT_CXX_FLAGS') ?: '';
+        $extraCflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
+        $cflags = trim($cflags . ' -Wno-date-time');
+        $cxxflags = trim($cxxflags . ' -Wno-date-time');
+        $extraCflags = trim($extraCflags . ' -Wno-date-time');
+        GlobalEnvManager::putenv("SPC_EXTRA_CFLAGS={$cflags}");
+        GlobalEnvManager::putenv("SPC_EXTRA_CXXFLAGS={$cxxflags}");
+        GlobalEnvManager::putenv("SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS={$extraCflags}");
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+        if (!str_contains($extra_libs, '-lunwind')) {
+            // Add unwind library if not already present
+            $extra_libs = trim($extra_libs . ' -lunwind');
+            GlobalEnvManager::putenv("SPC_EXTRA_LIBS={$extra_libs}");
+        }
     }
 }
