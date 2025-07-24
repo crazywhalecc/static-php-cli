@@ -90,6 +90,9 @@ class ConfigValidator
                 if (isset($lib['static-libs' . $suffix]) && !is_list_array($lib['static-libs' . $suffix])) {
                     throw new ValidationException("lib {$name} static-libs must be a list");
                 }
+                if (isset($lib['pkg-configs' . $suffix]) && !is_list_array($lib['pkg-configs' . $suffix])) {
+                    throw new ValidationException("lib {$name} pkg-configs must be a list");
+                }
             }
             // check if frameworks is a list array
             if (isset($lib['frameworks']) && !is_list_array($lib['frameworks'])) {

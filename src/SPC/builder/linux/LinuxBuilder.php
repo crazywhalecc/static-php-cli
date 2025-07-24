@@ -11,6 +11,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\GlobalEnvManager;
+use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
 class LinuxBuilder extends UnixBuilderBase
@@ -50,17 +51,6 @@ class LinuxBuilder extends UnixBuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
-        // ---------- Update extra-libs ----------
-        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
-        // bloat means force-load all static libraries, even if they are not used
-        if (!$this->getOption('bloat', false)) {
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
-        } else {
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Xcompiler {$x}", array_filter($this->getAllStaticLibFiles())));
-        }
-        // add libstdc++, some extensions or libraries need it
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lstdc++ ' : '');
-        f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         $cflags = $this->arch_c_flags;
         f_putenv('CFLAGS=' . $cflags);
 
@@ -97,13 +87,13 @@ class LinuxBuilder extends UnixBuilderBase
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
         $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
-        $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         // prepare build php envs
+        $config = (new SPCConfigUtil($this, ['libs_only_deps' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
             'LDFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_LDFLAGS'),
-            'LIBS' => $mimallocLibs . SPCTarget::getRuntimeLibs(),
+            'LIBS' => $config['libs'],
         ]);
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
@@ -341,9 +331,10 @@ class LinuxBuilder extends UnixBuilderBase
 
     private function getMakeExtraVars(): array
     {
+        $config = (new SPCConfigUtil($this, ['libs_only_deps' => true, 'absolute_libs' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
         return [
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
-            'EXTRA_LIBS' => getenv('SPC_EXTRA_LIBS') . ' ' . SPCTarget::getRuntimeLibs(),
+            'EXTRA_LIBS' => $config['libs'] . ' ' . SPCTarget::getRuntimeLibs(),
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => SPCTarget::isStatic() ? '-all-static -pie' : '-pie',
         ];

@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\freebsd\library\BSDLibraryBase;
-use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -28,85 +25,6 @@ abstract class UnixBuilderBase extends BuilderBase
 
     /** @var string C++ flags */
     public string $arch_cxx_flags;
-
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
-    public function getAllStaticLibFiles(): array
-    {
-        $libs = [];
-
-        // reorder libs
-        foreach ($this->libs as $lib) {
-            foreach ($lib->getDependencies() as $dep) {
-                $libs[] = $dep;
-            }
-            $libs[] = $lib;
-        }
-
-        $libFiles = [];
-        $libNames = [];
-        // merge libs
-        foreach ($libs as $lib) {
-            if (!in_array($lib::NAME, $libNames, true)) {
-                $libNames[] = $lib::NAME;
-                array_unshift($libFiles, ...$lib->getStaticLibs());
-            }
-        }
-        return array_map(fn ($x) => realpath(BUILD_LIB_PATH . "/{$x}"), $libFiles);
-    }
-
-    /**
-     * Generate configure flags
-     */
-    public function makeAutoconfFlags(int $flag = AUTOCONF_ALL): string
-    {
-        $extra = '';
-        // TODO: add auto pkg-config support
-        if (($flag & AUTOCONF_LIBS) === AUTOCONF_LIBS) {
-            $extra .= 'LIBS="' . BUILD_LIB_PATH . '" ';
-        }
-        if (($flag & AUTOCONF_CFLAGS) === AUTOCONF_CFLAGS) {
-            $extra .= 'CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
-        }
-        if (($flag & AUTOCONF_CPPFLAGS) === AUTOCONF_CPPFLAGS) {
-            $extra .= 'CPPFLAGS="-I' . BUILD_INCLUDE_PATH . '" ';
-        }
-        if (($flag & AUTOCONF_LDFLAGS) === AUTOCONF_LDFLAGS) {
-            $extra .= 'LDFLAGS="-L' . BUILD_LIB_PATH . '" ';
-        }
-        return $extra;
-    }
-
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
-    public function makeAutoconfArgs(string $name, array $libSpecs): string
-    {
-        $ret = '';
-        foreach ($libSpecs as $libName => $arr) {
-            $lib = $this->getLib($libName);
-            if ($lib === null && str_starts_with($libName, 'lib')) {
-                $lib = $this->getLib(substr($libName, 3));
-            }
-
-            $arr = $arr ?? [];
-
-            $disableArgs = $arr[0] ?? null;
-            $prefix = $arr[1] ?? null;
-            if ($lib instanceof LinuxLibraryBase || $lib instanceof MacOSLibraryBase || $lib instanceof BSDLibraryBase) {
-                logger()->info("{$name} \033[32;1mwith\033[0;1m {$libName} support");
-                $ret .= "--with-{$libName}=yes " . $lib->makeAutoconfEnv($prefix) . ' ';
-            } else {
-                logger()->info("{$name} \033[31;1mwithout\033[0;1m {$libName} support");
-                $ret .= ($disableArgs ?? "--with-{$libName}=no") . ' ';
-            }
-        }
-        return rtrim($ret);
-    }
 
     public function proveLibs(array $sorted_libraries): void
     {
@@ -233,8 +151,9 @@ abstract class UnixBuilderBase extends BuilderBase
             if (!file_exists($frankenphp)) {
                 throw new RuntimeException('FrankenPHP binary not found: ' . $frankenphp);
             }
+            $prefix = PHP_OS_FAMILY === 'Darwin' ? 'DYLD_' : 'LD_';
             [$ret, $output] = shell()
-                ->setEnv(['LD_LIBRARY_PATH' => BUILD_LIB_PATH])
+                ->setEnv(["{$prefix}LIBRARY_PATH" => BUILD_LIB_PATH])
                 ->execWithResult("{$frankenphp} version");
             if ($ret !== 0 || !str_contains(implode('', $output), 'FrankenPHP')) {
                 throw new RuntimeException('FrankenPHP failed sanity check: ret[' . $ret . ']. out[' . implode('', $output) . ']');

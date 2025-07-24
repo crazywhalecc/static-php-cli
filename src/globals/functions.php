@@ -232,3 +232,13 @@ function ac_with_args(string $arg_name, bool $use_value = false): array
 {
     return $use_value ? ["--with-{$arg_name}=yes", "--with-{$arg_name}=no"] : ["--with-{$arg_name}", "--without-{$arg_name}"];
 }
+
+function get_pack_replace(): array
+{
+    return [
+        BUILD_LIB_PATH => '@build_lib_path@',
+        BUILD_BIN_PATH => '@build_bin_path@',
+        BUILD_INCLUDE_PATH => '@build_include_path@',
+        BUILD_ROOT_PATH => '@build_root_path@',
+    ];
+}

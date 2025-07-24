@@ -63,18 +63,6 @@ class BSDBuilder extends UnixBuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
-        // ---------- Update extra-libs ----------
-        $extra_libs = $this->getOption('extra-libs', '');
-        // add libc++, some extensions or libraries need it (C++ cannot be linked statically)
-        $extra_libs .= (empty($extra_libs) ? '' : ' ') . ($this->hasCpp() ? '-lc++ ' : '');
-        if (!$this->getOption('bloat', false)) {
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', $this->getAllStaticLibFiles());
-        } else {
-            logger()->info('bloat linking');
-            $extra_libs .= (empty($extra_libs) ? '' : ' ') . implode(' ', array_map(fn ($x) => "-Wl,-force_load,{$x}", array_filter($this->getAllStaticLibFiles())));
-        }
-        $this->setOption('extra-libs', $extra_libs);
-
         $this->emitPatchPoint('before-php-buildconf');
         SourcePatcher::patchBeforeBuildconf($this);
 

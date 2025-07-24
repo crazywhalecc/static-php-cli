@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace SPC\builder\traits;
 
-use SPC\builder\LibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
+use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\util\SPCConfigUtil;
 
 trait UnixLibraryTrait
 {
@@ -17,44 +18,13 @@ trait UnixLibraryTrait
      * @throws FileSystemException
      * @throws WrongUsageException
      */
-    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true, bool $include_self = true): string
+    public function getStaticLibFiles(bool $include_self = true): string
     {
         $libs = $include_self ? [$this] : [];
-        if ($recursive) {
-            array_unshift($libs, ...array_values($this->getDependencies(recursive: true)));
-        }
-
-        $sep = match ($style) {
-            'autoconf' => ' ',
-            'cmake' => ';',
-            default => throw new RuntimeException('style only support autoconf and cmake'),
-        };
-        $ret = [];
-        /** @var LibraryBase $lib */
-        foreach ($libs as $lib) {
-            $libFiles = [];
-            foreach ($lib->getStaticLibs() as $name) {
-                $name = str_replace(' ', '\ ', FileSystem::convertPath(BUILD_LIB_PATH . "/{$name}"));
-                $name = str_replace('"', '\"', $name);
-                $libFiles[] = $name;
-            }
-            array_unshift($ret, implode($sep, $libFiles));
-        }
-        return implode($sep, $ret);
-    }
-
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
-    public function makeAutoconfEnv(?string $prefix = null): string
-    {
-        if ($prefix === null) {
-            $prefix = str_replace('-', '_', strtoupper(static::NAME));
-        }
-        return $prefix . '_CFLAGS="-I' . BUILD_INCLUDE_PATH . '" ' .
-            $prefix . '_LIBS="' . $this->getStaticLibFiles() . '"';
+        array_unshift($libs, ...array_values($this->getDependencies(recursive: true)));
+        $config = new SPCConfigUtil($this->builder, options: ['libs_only_deps' => true, 'absolute_libs' => true]);
+        $res = $config->config(libraries: array_map(fn ($x) => $x->getName(), $libs));
+        return $res['libs'];
     }
 
     /**
@@ -64,9 +34,12 @@ trait UnixLibraryTrait
      * @throws FileSystemException
      * @throws RuntimeException
      */
-    public function patchPkgconfPrefix(array $files, int $patch_option = PKGCONF_PATCH_ALL, ?array $custom_replace = null): void
+    public function patchPkgconfPrefix(array $files = [], int $patch_option = PKGCONF_PATCH_ALL, ?array $custom_replace = null): void
     {
         logger()->info('Patching library [' . static::NAME . '] pkgconfig');
+        if ($files === [] && ($conf_pc = Config::getLib(static::NAME, 'pkg-configs', [])) !== []) {
+            $files = array_map(fn ($x) => "{$x}.pc", $conf_pc);
+        }
         foreach ($files as $name) {
             $realpath = realpath(BUILD_ROOT_PATH . '/lib/pkgconfig/' . $name);
             if ($realpath === false) {
@@ -75,7 +48,7 @@ trait UnixLibraryTrait
             logger()->debug('Patching ' . $realpath);
             // replace prefix
             $file = FileSystem::readFile($realpath);
-            $file = ($patch_option & PKGCONF_PATCH_PREFIX) === PKGCONF_PATCH_PREFIX ? preg_replace('/^prefix\s*=.*$/m', 'prefix=${pcfiledir}/../..', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_PREFIX) === PKGCONF_PATCH_PREFIX ? preg_replace('/^prefix\s*=.*$/m', 'prefix=' . BUILD_ROOT_PATH, $file) : $file;
             $file = ($patch_option & PKGCONF_PATCH_EXEC_PREFIX) === PKGCONF_PATCH_EXEC_PREFIX ? preg_replace('/^exec_prefix\s*=.*$/m', 'exec_prefix=${prefix}', $file) : $file;
             $file = ($patch_option & PKGCONF_PATCH_LIBDIR) === PKGCONF_PATCH_LIBDIR ? preg_replace('/^libdir\s*=.*$/m', 'libdir=${prefix}/lib', $file) : $file;
             $file = ($patch_option & PKGCONF_PATCH_INCLUDEDIR) === PKGCONF_PATCH_INCLUDEDIR ? preg_replace('/^includedir\s*=.*$/m', 'includedir=${prefix}/include', $file) : $file;

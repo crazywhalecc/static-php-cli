@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\library\LinuxLibraryBase;
+use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -19,7 +21,7 @@ trait ngtcp2
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)
-            ->optionalLib('openssl', fn ($lib) => implode(' ', [
+            ->optionalLib('openssl', fn (LinuxLibraryBase|MacOSLibraryBase $lib) => implode(' ', [
                 '--with-openssl=yes',
                 "OPENSSL_LIBS=\"{$lib->getStaticLibFiles()}\"",
                 "OPENSSL_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
@@ -29,7 +31,7 @@ trait ngtcp2
             ->optionalLib('jemalloc', ...ac_with_args('jemalloc', true))
             ->optionalLib(
                 'brotli',
-                fn ($lib) => implode(' ', [
+                fn (LinuxLibraryBase|MacOSLibraryBase $lib) => implode(' ', [
                     '--with-brotlidec=yes',
                     "LIBBROTLIDEC_CFLAGS=\"-I{$lib->getIncludeDir()}\"",
                     "LIBBROTLIDEC_LIBS=\"{$lib->getStaticLibFiles()}\"",
