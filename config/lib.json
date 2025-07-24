@@ -738,8 +738,8 @@
     "openssl": {
         "source": "openssl",
         "static-libs-unix": [
-            "libcrypto.a",
-            "libssl.a"
+            "libssl.a",
+            "libcrypto.a"
         ],
         "static-libs-windows": [
             "libssl.lib",

@@ -183,7 +183,7 @@ class SPCConfigUtil
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
             // convert all static-libs to short names
-            $libs = Config::getLib($library, 'static-libs', []);
+            $libs = array_reverse(Config::getLib($library, 'static-libs', []));
             foreach ($libs as $lib) {
                 // check file existence
                 if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
