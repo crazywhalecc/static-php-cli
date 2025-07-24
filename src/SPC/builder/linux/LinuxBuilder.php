@@ -89,6 +89,10 @@ class LinuxBuilder extends UnixBuilderBase
 
         // prepare build php envs
         $config = (new SPCConfigUtil($this, ['libs_only_deps' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
+        if (str_contains($config['libs'], ' -lpgport') && !$this->getExt('pgsql')?->isBuildStatic()) {
+            // -lpgport defines many glibc functions if they are missing, which leads to feature tests succeeding that aren't meant to succeed
+            $config['libs'] = str_replace(' -lpgport', '', $config['libs']);
+        }
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
