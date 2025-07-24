@@ -400,17 +400,12 @@ class Extension
     public function buildUnixShared(): void
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
-        [$staticLibString, $sharedLibString] = $this->getStaticAndSharedLibs();
 
-        // macOS ld64 doesn't understand these, while Linux and BSD do
-        // use them to make sure that all symbols are picked up, even if a library has already been visited before
-        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,--start-group ' : '';
-        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group ' : ' ';
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => $preStatic . $staticLibString . $postStatic . $sharedLibString,
+            'LIBS' => $config['libs'],
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
             'SPC_COMPILER_EXTRA' => '-lstdc++',
         ];
@@ -523,41 +518,6 @@ class Extension
         } else {
             $this->dependencies[] = $depExt;
         }
-    }
-
-    /**
-     * Get required static and shared libraries as a pair of strings in format -l{libname} -l{libname2}
-     *
-     * @return array [staticLibString, sharedLibString]
-     */
-    protected function getStaticAndSharedLibs(): array
-    {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
-        $sharedLibString = '';
-        $staticLibString = '';
-        $staticLibs = $this->getLibFilesString();
-        $staticLibs = str_replace([BUILD_LIB_PATH . '/lib', '.a'], ['-l', ''], $staticLibs);
-        $staticLibs = explode('-l', $staticLibs . ' ' . $config['libs']);
-        foreach ($staticLibs as $lib) {
-            $lib = trim($lib);
-            if ($lib === '') {
-                continue;
-            }
-            $static_lib = 'lib' . $lib . '.a';
-            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib) && !str_contains($static_lib, 'libphp')) {
-                if (!str_contains($staticLibString, '-l' . $lib . ' ')) {
-                    $staticLibString .= '-l' . $lib . ' ';
-                }
-            } elseif (!str_contains($sharedLibString, '-l' . $lib . ' ')) {
-                $sharedLibString .= '-l' . $lib . ' ';
-            }
-        }
-        // move -lstdc++ to static libraries because centos 7 the shared libstdc++ is incomplete
-        if (str_contains((string) getenv('PATH'), 'rh/devtoolset-10')) {
-            $staticLibString .= ' -lstdc++';
-            $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
-        }
-        return [trim($staticLibString), trim($sharedLibString)];
     }
 
     protected function getExtraEnv(): array

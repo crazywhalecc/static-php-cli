@@ -86,7 +86,13 @@ class SPCConfigUtil
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
         if ($this->builder->hasCpp()) {
-            $libs .= SPCTarget::getTargetOS() === 'Darwin' ? ' -lc++' : ' -lstdc++';
+            $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
+            if (!str_contains($libs, $libcpp)) {
+                $libs .= " {$libcpp}";
+            }
+            if (str_contains(getenv('OATH'), 'rh/devtoolset-10')) {
+                str_replace('-lstdc++', '-l:stdc++.a', $libs);
+            }
         }
 
         if ($this->libs_only_deps) {
