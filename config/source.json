@@ -1007,7 +1007,7 @@
     "swow": {
         "path": "php-src/ext/swow-src",
         "type": "ghtar",
-        "repo": "swoole/swoole-src",
+        "repo": "swow/swow",
         "prefer-stable": true,
         "license": {
             "type": "file",
