@@ -531,10 +531,10 @@ class Extension
     /**
      * Splits a given string of library flags into static and shared libraries.
      *
-     * @param string $allLibs A space-separated string of library flags (e.g., -lxyz).
-     * @return array An array containing two elements: the first is a space-separated string
-     *               of static library flags, and the second is a space-separated string
-     *               of shared library flags.
+     * @param  string $allLibs A space-separated string of library flags (e.g., -lxyz).
+     * @return array  an array containing two elements: the first is a space-separated string
+     *                of static library flags, and the second is a space-separated string
+     *                of shared library flags
      */
     protected function splitLibsIntoStaticAndShared(string $allLibs): array
     {
