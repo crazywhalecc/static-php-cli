@@ -158,7 +158,7 @@ if ($shared_extensions) {
             break;
         case 'ubuntu-24.04':
         case 'ubuntu-24.04-arm':
-            putenv('SPC_TARGET=native-native-gnu');
+            putenv('SPC_TARGET=native-native-musl -dynamic');
             if (getenv('SPC_TARGET') && !str_contains(getenv('SPC_TARGET'), '-musl')) {
                 exec('sudo apt install musl -y');
             }
