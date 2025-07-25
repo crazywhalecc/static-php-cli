@@ -98,9 +98,9 @@ class SPCConfigUtil
                 $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
             }
             return [
-                'cflags' => deduplicate_spaces(getenv('CFLAGS') . ' ' . $cflags),
-                'ldflags' => deduplicate_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
-                'libs' => deduplicate_spaces(getenv('LIBS') . ' ' . $libs),
+                'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
+                'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+                'libs' => clean_spaces(getenv('LIBS') . ' ' . $libs),
             ];
         }
 
@@ -117,9 +117,9 @@ class SPCConfigUtil
         }
 
         return [
-            'cflags' => deduplicate_spaces(getenv('CFLAGS') . ' ' . $cflags),
-            'ldflags' => deduplicate_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
-            'libs' => deduplicate_spaces($allLibs),
+            'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
+            'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+            'libs' => clean_spaces($allLibs),
         ];
     }
 

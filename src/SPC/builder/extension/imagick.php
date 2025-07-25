@@ -23,6 +23,6 @@ class imagick extends Extension
             $static .= ' -l:libstdc++.a';
             $shared = str_replace('-lstdc++', '', $shared);
         }
-        return [deduplicate_spaces($static), deduplicate_spaces($shared)];
+        return [clean_spaces($static), clean_spaces($shared)];
     }
 }

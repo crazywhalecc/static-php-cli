@@ -244,10 +244,12 @@ function get_pack_replace(): array
 }
 
 /**
- * @param $string
- * @return string without double spaces
+ * Remove duplicate spaces from a string.
+ *
+ * @param  string $string Input string that may contain unnecessary spaces (e.g., " -la  -lb").
+ * @return string The trimmed string with only single spaces (e.g., "-la -lb").
  */
-function deduplicate_spaces($string): string
+function clean_spaces(string $string): string
 {
     return trim(preg_replace('/\s+/', ' ', $string));
 }
