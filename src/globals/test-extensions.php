@@ -205,7 +205,6 @@ echo match ($argv[1]) {
 
 switch ($argv[1] ?? null) {
     case 'download_cmd':
-        passthru("{$prefix}install-pkg go-xcaddy --debug", $retcode); # test
         passthru($prefix . $down_cmd, $retcode);
         break;
     case 'build_cmd':
