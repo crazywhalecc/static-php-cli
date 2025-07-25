@@ -49,7 +49,7 @@ class ZigToolchain implements ToolchainInterface
             throw new WrongUsageException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
         }
         GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
-        exec('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
+        f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
         $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: '';
         $cxxflags = getenv('SPC_DEFAULT_CXX_FLAGS') ?: '';
         $extraCflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
