@@ -91,7 +91,7 @@ class SPCConfigUtil
                 $libs .= " {$libcpp}";
             }
             if (str_contains(getenv('PATH'), 'rh/devtoolset-10')) {
-                str_replace('-lstdc++', '-l:stdc++.a', $libs);
+                str_replace('-lstdc++', '-l:libstdc++.a', $libs);
             }
         }
 
