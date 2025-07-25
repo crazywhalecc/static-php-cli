@@ -248,10 +248,9 @@ class DownloadCommand extends BaseCommand
                         $alt_sources = Config::getSource($source)['alt'] ?? null;
                         if ($alt_sources === null) {
                             logger()->warning("No alternative sources found for {$source}, using default alternative source");
-                            $alt_config = array_merge($config, $this->getDefaultAlternativeSource($source));
+                            $alt_config = array_merge($config, Downloader::getDefaultAlternativeSource($source));
                         } elseif ($alt_sources === false) {
-                            logger()->warning("No alternative sources found for {$source}, skipping alternative download");
-                            throw $e;
+                            throw new DownloaderException("No alternative sources found for {$source}, skipping alternative download");
                         } else {
                             logger()->notice("Trying to download alternative sources for {$source}");
                             $alt_config = array_merge($config, $alt_sources);
@@ -398,28 +397,5 @@ class DownloadCommand extends BaseCommand
             f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
         }
         return static::FAILURE;
-    }
-
-    private function getDefaultAlternativeSource(string $source_name): array
-    {
-        return [
-            'type' => 'custom',
-            'func' => function (bool $force, array $source, int $download_as) use ($source_name) {
-                logger()->debug("Fetching alternative source for {$source_name}");
-                // get from dl.static-php.dev
-                $url = "https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/{$source_name}/?format=json";
-                $json = json_decode(Downloader::curlExec(url: $url, retries: intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0)), true);
-                if (!is_array($json)) {
-                    throw new RuntimeException('failed http fetch');
-                }
-                $item = $json[0] ?? null;
-                if ($item === null) {
-                    throw new RuntimeException('failed to parse json');
-                }
-                $full_url = 'https://dl.static-php.dev' . $item['full_path'];
-                $filename = basename($item['full_path']);
-                Downloader::downloadFile($source_name, $full_url, $filename, $source['path'] ?? null, $download_as);
-            },
-        ];
     }
 }
