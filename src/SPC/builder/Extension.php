@@ -228,15 +228,21 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
+        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], $this->builder->getOption('with-suggested-exts'), $this->builder->getOption('with-suggested-libs'));
+        [$staticLibs] = $this->getStaticAndSharedLibs($config['libs']);
+        FileSystem::replaceFileRegex(
+            $this->source_dir . '/Makefile',
+            '/^(.*_SHARED_LIBADD\s*=.*)$/m',
+            '$1 ' . trim($staticLibs)
+        );
         if ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS')) {
             FileSystem::replaceFileRegex(
                 $this->source_dir . '/Makefile',
                 "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
                 "$1 {$objs}",
             );
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -401,7 +407,7 @@ class Extension
      */
     public function buildUnixShared(): void
     {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()]);
+        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], $this->builder->getOption('with-suggested-exts'), $this->builder->getOption('with-suggested-libs'));
         [$staticLibs, $sharedLibs] = $this->getStaticAndSharedLibs($config['libs']);
         $env = [
             'CFLAGS' => $config['cflags'],
@@ -436,13 +442,6 @@ class Extension
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
                 '--enable-shared --disable-static'
             );
-
-        // some extensions don't define their dependencies well, this patch is only needed for a few
-        FileSystem::replaceFileRegex(
-            $this->source_dir . '/Makefile',
-            '/^(.*_SHARED_LIBADD\s*=.*)$/m',
-            '$1 ' . trim($staticLibs)
-        );
 
         if ($this->patchBeforeSharedMake()) {
             logger()->info("Extension [{$this->getName()}] patched before shared make");
