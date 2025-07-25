@@ -229,7 +229,7 @@ class Extension
     public function patchBeforeSharedMake(): bool
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
-        [$staticLibs] = $this->getStaticAndSharedLibs($config['libs']);
+        [$staticLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         FileSystem::replaceFileRegex(
             $this->source_dir . '/Makefile',
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
@@ -408,7 +408,7 @@ class Extension
     public function buildUnixShared(): void
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
-        [$staticLibs, $sharedLibs] = $this->getStaticAndSharedLibs($config['libs']);
+        [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
@@ -528,7 +528,7 @@ class Extension
         return [];
     }
 
-    protected function getStaticAndSharedLibs(string $allLibs): array
+    protected function splitLibsIntoStaticAndShared(string $allLibs): array
     {
         $staticLibString = '';
         $sharedLibString = '';
