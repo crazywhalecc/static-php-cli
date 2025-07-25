@@ -156,16 +156,6 @@ if ($shared_extensions) {
         case 'ubuntu-22.04-arm':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             break;
-        case 'ubuntu-24.04':
-        case 'ubuntu-24.04-arm':
-            putenv('SPC_TARGET=native-native-musl -dynamic');
-            if (getenv('SPC_TARGET') && str_contains(getenv('SPC_TARGET'), '-musl')) {
-                exec('sudo apt install musl -y');
-            }
-            if (getenv('SPC_TARGET')) {
-                $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
-            }
-            break;
         case 'macos-13':
         case 'macos-14':
         case 'macos-15':

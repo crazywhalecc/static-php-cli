@@ -31,7 +31,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
         'xz', 'libtoolize', 'which',
-        'patchelf',
+        'patchelf', 'musl'
     ];
 
     public const TOOLS_RHEL = [
@@ -40,7 +40,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch', 'which',
         'xz', 'libtool', 'gettext-devel',
-        'perl', 'patchelf',
+        'perl', 'patchelf', 'musl-libc'
     ];
 
     public const TOOLS_ARCH = [
@@ -69,7 +69,7 @@ class LinuxToolCheckList
         };
         $missing = [];
         foreach ($required as $package) {
-            if ($this->findCommand(self::PROVIDED_COMMAND[$package] ?? $package) === null) {
+            if (self::findCommand(self::PROVIDED_COMMAND[$package] ?? $package) === null) {
                 $missing[] = $package;
             }
         }
