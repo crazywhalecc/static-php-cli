@@ -416,7 +416,7 @@ class Extension
             'LIBS' => "-Wl,--start-group {$staticLibs} -Wl,--end-group {$sharedLibs}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class && SPCTarget::getTargetOS() === 'Linux') {
             $env['SPC_COMPILER_EXTRA'] = '-lstdc++';
         }
 
