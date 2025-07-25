@@ -157,11 +157,12 @@ if ($shared_extensions) {
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             break;
         case 'ubuntu-24.04':
-            putenv('SPC_TARGET=native-native-musl -dynamic');
+            putenv('SPC_TARGET=native-native-gnu.2.17');
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             break;
         case 'ubuntu-24.04-arm':
-            putenv('SPC_TARGET=native-native-musl');
+            putenv('SPC_TARGET=native-native-gnu.2.28');
+            $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             break;
         case 'macos-13':
         case 'macos-14':
