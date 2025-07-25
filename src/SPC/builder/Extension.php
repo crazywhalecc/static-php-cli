@@ -528,6 +528,14 @@ class Extension
         return [];
     }
 
+    /**
+     * Splits a given string of library flags into static and shared libraries.
+     *
+     * @param string $allLibs A space-separated string of library flags (e.g., -lxyz).
+     * @return array An array containing two elements: the first is a space-separated string
+     *               of static library flags, and the second is a space-separated string
+     *               of shared library flags.
+     */
     protected function splitLibsIntoStaticAndShared(string $allLibs): array
     {
         $staticLibString = '';
@@ -535,7 +543,7 @@ class Extension
         $libs = explode(' ', $allLibs);
         foreach ($libs as $lib) {
             $staticLib = BUILD_LIB_PATH . '/lib' . str_replace('-l', '', $lib) . '.a';
-            if (!file_exists($staticLib) || $lib === '-lphp') {
+            if ($lib === '-lphp' || !file_exists($staticLib)) {
                 $sharedLibString .= " {$lib}";
             } else {
                 $staticLibString .= " {$lib}";
