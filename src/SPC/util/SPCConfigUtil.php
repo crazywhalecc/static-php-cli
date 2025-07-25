@@ -90,9 +90,6 @@ class SPCConfigUtil
             if (!str_contains($libs, $libcpp)) {
                 $libs .= " {$libcpp}";
             }
-            if (str_contains(getenv('PATH'), 'rh/devtoolset-10')) {
-                str_replace('-lstdc++', '-l:libstdc++.a', $libs);
-            }
         }
 
         if ($this->libs_only_deps) {
@@ -101,9 +98,9 @@ class SPCConfigUtil
                 $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
             }
             return [
-                'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
-                'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
-                'libs' => trim(getenv('LIBS') . ' ' . $libs),
+                'cflags' => deduplicate_spaces(getenv('CFLAGS') . ' ' . $cflags),
+                'ldflags' => deduplicate_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+                'libs' => deduplicate_spaces(getenv('LIBS') . ' ' . $libs),
             ];
         }
 
@@ -120,9 +117,9 @@ class SPCConfigUtil
         }
 
         return [
-            'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
-            'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
-            'libs' => trim($allLibs),
+            'cflags' => deduplicate_spaces(getenv('CFLAGS') . ' ' . $cflags),
+            'ldflags' => deduplicate_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+            'libs' => deduplicate_spaces($allLibs),
         ];
     }
 

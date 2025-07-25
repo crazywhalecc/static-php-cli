@@ -529,7 +529,7 @@ class Extension
         return [];
     }
 
-    private function getStaticAndSharedLibs(string $allLibs): array
+    protected function getStaticAndSharedLibs(string $allLibs): array
     {
         $staticLibString = '';
         $sharedLibString = '';

@@ -15,4 +15,14 @@ class imagick extends Extension
         $disable_omp = ' ac_cv_func_omp_pause_resource_all=no';
         return '--with-imagick=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $disable_omp;
     }
+
+    protected function getStaticAndSharedLibs(string $allLibs): array
+    {
+        [$static, $shared] = parent::getStaticAndSharedLibs($allLibs);
+        if (str_contains(getenv('PATH'), 'rh/devtoolset-10')) {
+            $static .= ' -l:libstdc++.a';
+            $shared = str_replace('-lstdc++', '', $shared);
+        }
+        return [deduplicate_spaces($static), deduplicate_spaces($shared)];
+    }
 }

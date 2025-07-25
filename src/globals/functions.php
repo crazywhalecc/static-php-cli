@@ -242,3 +242,12 @@ function get_pack_replace(): array
         BUILD_ROOT_PATH => '@build_root_path@',
     ];
 }
+
+/**
+ * @param $string
+ * @return string without double spaces
+ */
+function deduplicate_spaces($string): string
+{
+    return trim(preg_replace('/\s+/', ' ', $string));
+}
