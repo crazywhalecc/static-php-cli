@@ -21,9 +21,9 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13', // bin/spc for x86_64
+    'macos-13', // bin/spc for x86_64
     // 'macos-14',  // bin/spc for arm64
-    // 'macos-15', // bin/spc for arm64
+    'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
