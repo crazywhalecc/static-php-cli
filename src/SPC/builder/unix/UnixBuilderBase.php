@@ -134,7 +134,8 @@ abstract class UnixBuilderBase extends BuilderBase
                 FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
             } else {
                 $ext_path = '';
-                foreach (glob(BUILD_LIB_PATH . '/libphp*.so') as $file) {
+                $suffix = PHP_OS_FAMILY === 'Darwin' ? 'dylib' : 'so';
+                foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
             }
