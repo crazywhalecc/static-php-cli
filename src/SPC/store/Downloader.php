@@ -368,6 +368,11 @@ class Downloader
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg');
+                    if (isset($pkg['func']) && is_callable($pkg['func'])) {
+                        $pkg['name'] = $name;
+                        $pkg['func']($force, $pkg, SPC_DOWNLOAD_PACKAGE);
+                        break;
+                    }
                     foreach ($classes as $class) {
                         if (is_a($class, CustomPackage::class, true) && $class !== CustomPackage::class) {
                             $cls = new $class();
