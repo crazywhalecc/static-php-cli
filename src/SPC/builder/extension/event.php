@@ -41,10 +41,12 @@ class event extends Extension
      */
     public function patchBeforeMake(): bool
     {
+        $patched = parent::patchBeforeMake();
         // Prevent event extension compile error on macOS
         if ($this->builder instanceof MacOSBuilder) {
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
+            return true;
         }
-        return true;
+        return $patched;
     }
 }

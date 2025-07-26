@@ -264,6 +264,7 @@ abstract class BuilderBase
             }
         }
         file_put_contents(BUILD_BIN_PATH . '/php-config', implode('', $lines));
+        FileSystem::replaceFileStr(BUILD_LIB_PATH . '/php/build/phpize.m4', 'test "[$]$1" = "no" && $1=yes', '# test "[$]$1" = "no" && $1=yes');
         FileSystem::createDir(BUILD_MODULES_PATH);
         try {
             foreach ($this->getExts() as $ext) {
@@ -277,6 +278,7 @@ abstract class BuilderBase
             throw $e;
         }
         FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
+        FileSystem::replaceFileStr(BUILD_LIB_PATH . '/php/build/phpize.m4', '# test "[$]$1" = "no" && $1=yes', 'test "[$]$1" = "no" && $1=yes');
     }
 
     /**

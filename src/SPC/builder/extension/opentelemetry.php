@@ -34,6 +34,7 @@ class opentelemetry extends Extension
 
     public function patchBeforeMake(): bool
     {
+        parent::patchBeforeMake();
         // add -Wno-strict-prototypes
         GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -Wno-strict-prototypes');
         return true;

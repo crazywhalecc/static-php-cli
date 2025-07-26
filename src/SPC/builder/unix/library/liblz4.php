@@ -19,7 +19,11 @@ trait liblz4
     {
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec("make PREFIX='' clean")
-            ->exec("make -j{$this->builder->concurrency} PREFIX=''")
+            ->exec("make lib -j{$this->builder->concurrency} PREFIX=''");
+
+        FileSystem::replaceFileStr($this->source_dir . '/Makefile', '$(MAKE) -C $(PRGDIR) $@', '');
+
+        shell()->cd($this->source_dir)
             ->exec("make install PREFIX='' DESTDIR=" . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['liblz4.pc']);

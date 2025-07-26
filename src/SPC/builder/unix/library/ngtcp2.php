@@ -48,6 +48,7 @@ trait ngtcp2
 
         // on macOS, the static library may contain other static libraries?
         // ld: archive member 'libssl.a' not a mach-o file in libngtcp2_crypto_ossl.a
-        shell()->cd(BUILD_LIB_PATH)->exec("ar -t libngtcp2_crypto_ossl.a | grep '\\.a$' | xargs -n1 ar d libngtcp2_crypto_ossl.a");
+        $AR = getenv('AR') ?: 'ar';
+        shell()->cd(BUILD_LIB_PATH)->exec("{$AR} -t libngtcp2_crypto_ossl.a | grep '\\.a$' | xargs -n1 {$AR} d libngtcp2_crypto_ossl.a");
     }
 }

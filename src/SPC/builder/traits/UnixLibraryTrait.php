@@ -92,9 +92,9 @@ trait UnixLibraryTrait
     {
         $env = getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
         if (!str_contains($env, $this->builder->arch_c_flags)) {
-            $env .= $this->builder->arch_c_flags;
+            $env .= ' ' . $this->builder->arch_c_flags;
         }
-        return $env;
+        return trim($env);
     }
 
     public function getLibExtraLdFlags(): string
@@ -111,8 +111,8 @@ trait UnixLibraryTrait
     {
         $env = getenv($this->getSnakeCaseName() . '_CXXFLAGS') ?: '';
         if (!str_contains($env, $this->builder->arch_cxx_flags)) {
-            $env .= $this->builder->arch_cxx_flags;
+            $env .= ' ' . $this->builder->arch_cxx_flags;
         }
-        return $env;
+        return trim($env);
     }
 }

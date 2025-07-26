@@ -54,5 +54,20 @@
     },
     "go-xcaddy-aarch64-macos": {
         "type": "custom"
+    },
+    "zig-x86_64-linux": {
+        "type": "custom"
+    },
+    "zig-aarch64-linux": {
+        "type": "custom"
+    },
+    "zig-x86_64-macos": {
+        "type": "custom"
+    },
+    "zig-aarch64-macos": {
+        "type": "custom"
+    },
+    "zig-x86_64-win": {
+        "type": "custom"
     }
 }

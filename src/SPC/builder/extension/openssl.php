@@ -12,6 +12,7 @@ class openssl extends Extension
 {
     public function patchBeforeMake(): bool
     {
+        $patched = parent::patchBeforeMake();
         // patch openssl3 with php8.0 bug
         if ($this->builder->getPHPVersionID() < 80100) {
             $openssl_c = file_get_contents(SOURCE_PATH . '/php-src/ext/openssl/openssl.c');
@@ -20,7 +21,7 @@ class openssl extends Extension
             return true;
         }
 
-        return false;
+        return $patched;
     }
 
     public function getUnixConfigureArg(bool $shared = false): string

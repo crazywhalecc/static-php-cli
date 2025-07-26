@@ -45,8 +45,9 @@ class imap extends Extension
 
     public function patchBeforeMake(): bool
     {
+        $patched = parent::patchBeforeMake();
         if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::isMuslDist()) {
-            return false;
+            return $patched;
         }
         $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -lcrypt');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);

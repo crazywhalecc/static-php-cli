@@ -4,12 +4,30 @@ declare(strict_types=1);
 
 namespace SPC\store\pkg;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
 
 class GoXcaddy extends CustomPackage
 {
+    public static function isInstalled(): bool
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "go-xcaddy-{$arch}-{$os}";
+        $pkgroot = PKG_ROOT_PATH;
+        $folder = "{$pkgroot}/{$packageName}";
+
+        return is_dir($folder) && is_file("{$folder}/bin/go") && is_file("{$folder}/bin/xcaddy");
+    }
+
     public function getSupportName(): array
     {
         return [
@@ -25,6 +43,9 @@ class GoXcaddy extends CustomPackage
         $pkgroot = PKG_ROOT_PATH;
         $go_exec = "{$pkgroot}/{$name}/bin/go";
         $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        if ($force) {
+            FileSystem::removeDir("{$pkgroot}/{$name}");
+        }
         if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
             return;
         }
@@ -57,18 +78,45 @@ class GoXcaddy extends CustomPackage
         $lock = json_decode(FileSystem::readFile(LockFile::LOCK_FILE), true);
         $source_type = $lock[$name]['source_type'];
         $filename = DOWNLOAD_PATH . '/' . ($lock[$name]['filename'] ?? $lock[$name]['dirname']);
-        $extract = $lock[$name]['move_path'] === null ? "{$pkgroot}/{$name}" : $lock[$name]['move_path'];
+        $extract = $lock[$name]['move_path'] ?? "{$pkgroot}/{$name}";
 
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
-        // install xcaddy
+        $sanitizedPath = getenv('PATH');
+        if (PHP_OS_FAMILY === 'Linux' && !SystemUtil::isMuslDist()) {
+            $sanitizedPath = preg_replace('#(:?/?[^:]*musl[^:]*)#', '', $sanitizedPath);
+            $sanitizedPath = preg_replace('#^:|:$|::#', ':', $sanitizedPath); // clean up colons
+        }
+
+        // install xcaddy without using musl tools, xcaddy build requires dynamic linking
         shell()
             ->appendEnv([
-                'PATH' => "{$pkgroot}/{$name}/bin:" . getenv('PATH'),
+                'PATH' => "{$pkgroot}/{$name}/bin:" . $sanitizedPath,
                 'GOROOT' => "{$pkgroot}/{$name}",
                 'GOBIN' => "{$pkgroot}/{$name}/bin",
                 'GOPATH' => "{$pkgroot}/go",
             ])
-            ->exec("{$go_exec} install github.com/caddyserver/xcaddy/cmd/xcaddy@latest");
+            ->exec('CC=cc go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest');
+    }
+
+    public static function getEnvironment(): array
+    {
+        $arch = arch2gnu(php_uname('m'));
+        $os = match (PHP_OS_FAMILY) {
+            'Windows' => 'win',
+            'Darwin' => 'macos',
+            'BSD' => 'freebsd',
+            default => 'linux',
+        };
+
+        $packageName = "go-xcaddy-{$arch}-{$os}";
+        $pkgroot = PKG_ROOT_PATH;
+
+        return [
+            'PATH' => "{$pkgroot}/{$packageName}/bin",
+            'GOROOT' => "{$pkgroot}/{$packageName}",
+            'GOBIN' => "{$pkgroot}/{$packageName}/bin",
+            'GOPATH' => "{$pkgroot}/go",
+        ];
     }
 }
