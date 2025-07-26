@@ -192,6 +192,11 @@ jobs:
           php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
 
+      - name: "Prepare Zig for Linux"
+        if: ${{ startsWith(matrix.os, 'ubuntu-24') }}
+        run: |
+          php bin/spc install-pkg zig
+
       - name: "Run Build Tests (download)"
         run: php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }}
 
@@ -202,6 +207,6 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'windows-') }}
         run: php src/globals/test-extensions.php build_embed_cmd ${{ matrix.os }} ${{ matrix.php }}
 
-#      - name: Setup tmate session
-#        if: ${{ failure() }}
-#        uses: mxschmitt/action-tmate@v3
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
