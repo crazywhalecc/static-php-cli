@@ -407,7 +407,12 @@ class Extension
      */
     public function buildUnixShared(): void
     {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
+        $config = (new SPCConfigUtil($this->builder))->config(
+            [$this->getName()],
+            array_map(fn ($l) => $l->getName(), $this->getLibraryDependencies(recursive: true)),
+            $this->builder->getOption('with-suggested-exts'),
+            $this->builder->getOption('with-suggested-libs'),
+        );
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $env = [
             'CFLAGS' => $config['cflags'],

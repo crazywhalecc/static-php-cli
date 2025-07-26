@@ -88,16 +88,12 @@ class LinuxBuilder extends UnixBuilderBase
         $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
         // prepare build php envs
-        $config = (new SPCConfigUtil($this, ['libs_only_deps' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
-        if (str_contains($config['libs'], ' -lpgport') && !$this->getExt('pgsql')?->isBuildStatic()) {
-            // -lpgport defines many glibc functions if they are missing, which leads to feature tests succeeding that aren't meant to succeed
-            $config['libs'] = str_replace(' -lpgport', '', $config['libs']);
-        }
-        $envs_build_php = SystemUtil::makeEnvVarString([
+        $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
+        $php_configure_env = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
-            'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
-            'LIBS' => $config['libs'],
+            'LIBS' => $mimallocLibs . SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
@@ -121,7 +117,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $zts .
                 $maxExecutionTimers .
                 $this->makeStaticExtensionArgs() .
-                ' ' . $envs_build_php . ' '
+                ' ' . $php_configure_env . ' '
             );
 
         $this->emitPatchPoint('before-php-make');

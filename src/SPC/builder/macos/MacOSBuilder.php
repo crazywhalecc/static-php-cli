@@ -115,7 +115,7 @@ class MacOSBuilder extends UnixBuilderBase
         $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         $envs_build_php = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
-            'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
             'LIBS' => $mimallocLibs . getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
         ]);
