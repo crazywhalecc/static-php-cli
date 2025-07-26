@@ -177,6 +177,11 @@ jobs:
       - name: "Install Dependencies"
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+      - name: "Prepare Zig for Linux"
+        if: ${{ startsWith(matrix.os, 'ubuntu-24') }}
+        run: |
+          php bin/spc install-pkg zig
+
       - name: "Run Build Tests (doctor)"
         run: php src/globals/test-extensions.php doctor_cmd ${{ matrix.os }} ${{ matrix.php }}
 
@@ -191,11 +196,6 @@ jobs:
         run: |
           php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
           echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
-
-      - name: "Prepare Zig for Linux"
-        if: ${{ startsWith(matrix.os, 'ubuntu-24') }}
-        run: |
-          php bin/spc install-pkg zig
 
       - name: "Run Build Tests (download)"
         run: php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }}
