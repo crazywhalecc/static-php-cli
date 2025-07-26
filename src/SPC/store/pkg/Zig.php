@@ -16,7 +16,13 @@ class Zig extends CustomPackage
     public static function isInstalled(): bool
     {
         $path = self::getPath();
-        return file_exists("{$path}/zig") && file_exists("{$path}/zig-cc") && file_exists("{$path}/zig-c++");
+        $files = ['zig', 'zig-cc', 'zig-c++', 'zig-ar', 'zig-ranlib', 'zig-objcopy'];
+        foreach ($files as $file) {
+            if (!file_exists("{$path}/{$file}")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function getSupportName(): array
