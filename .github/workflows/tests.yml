@@ -177,11 +177,6 @@ jobs:
       - name: "Install Dependencies"
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: "Prepare Zig for Linux"
-        if: ${{ startsWith(matrix.os, 'ubuntu-24') }}
-        run: |
-          SPC_TARGET=native-native php bin/spc install-pkg zig
-
       - name: "Run Build Tests (doctor)"
         run: php src/globals/test-extensions.php doctor_cmd ${{ matrix.os }} ${{ matrix.php }}
 
@@ -207,6 +202,6 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'windows-') }}
         run: php src/globals/test-extensions.php build_embed_cmd ${{ matrix.os }} ${{ matrix.php }}
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        if: ${{ failure() }}
+#        uses: mxschmitt/action-tmate@v3

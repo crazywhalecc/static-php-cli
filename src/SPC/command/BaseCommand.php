@@ -99,7 +99,6 @@ abstract class BaseCommand extends Command
         // init GlobalEnv
         if (!$this instanceof BuildCommand) {
             GlobalEnvManager::init();
-            GlobalEnvManager::afterInit();
             f_putenv('SPC_SKIP_TOOLCHAIN_CHECK=yes');
         }
         if ($this->shouldExecute()) {
