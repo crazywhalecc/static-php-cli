@@ -228,6 +228,7 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $build_cmd . (str_starts_with($argv[2], 'windows-') ? ' --build-cli' : (' --build-embed' . ($frankenphp ? ' --build-frankenphp' : ''))), $retcode);
         break;
     case 'doctor_cmd':
+        passthru($prefix . 'install-pkg zig', $retcode);
         passthru($prefix . $doctor_cmd, $retcode);
         break;
     case 'install_upx_cmd':
