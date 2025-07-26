@@ -174,6 +174,7 @@ class Zig extends CustomPackage
         file_put_contents("{$bin_dir}/zig-objcopy", "#!/usr/bin/env bash\nexec zig objcopy $@");
         chmod("{$bin_dir}/zig-c++", 0755);
         chmod("{$bin_dir}/zig-ar", 0755);
+        chmod("{$bin_dir}/zig-ld.lld", 0755);
         chmod("{$bin_dir}/zig-ranlib", 0755);
         chmod("{$bin_dir}/zig-objcopy", 0755);
     }
