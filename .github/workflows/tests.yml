@@ -180,7 +180,7 @@ jobs:
       - name: "Prepare Zig for Linux"
         if: ${{ startsWith(matrix.os, 'ubuntu-24') }}
         run: |
-          php bin/spc install-pkg zig
+          SPC_TARGET=native-native php bin/spc install-pkg zig
 
       - name: "Run Build Tests (doctor)"
         run: php src/globals/test-extensions.php doctor_cmd ${{ matrix.os }} ${{ matrix.php }}
