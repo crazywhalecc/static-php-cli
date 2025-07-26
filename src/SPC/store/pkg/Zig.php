@@ -16,7 +16,7 @@ class Zig extends CustomPackage
     public static function isInstalled(): bool
     {
         $path = self::getPath();
-        $files = ['zig', 'zig-cc', 'zig-c++', 'zig-ar', 'zig-ranlib', 'zig-objcopy'];
+        $files = ['zig', 'zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
         foreach ($files as $file) {
             if (!file_exists("{$path}/{$file}")) {
                 return false;
@@ -169,6 +169,7 @@ class Zig extends CustomPackage
         $script_content = str_replace('zig cc', 'zig c++', $script_content);
         file_put_contents("{$bin_dir}/zig-c++", $script_content);
         file_put_contents("{$bin_dir}/zig-ar", "#!/usr/bin/env bash\nexec zig ar $@");
+        file_put_contents("{$bin_dir}/zig-ld.lld", "#!/usr/bin/env bash\nexec zig ld.lld $@");
         file_put_contents("{$bin_dir}/zig-ranlib", "#!/usr/bin/env bash\nexec zig ranlib $@");
         file_put_contents("{$bin_dir}/zig-objcopy", "#!/usr/bin/env bash\nexec zig objcopy $@");
         chmod("{$bin_dir}/zig-c++", 0755);
