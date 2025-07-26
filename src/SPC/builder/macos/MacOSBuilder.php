@@ -267,7 +267,8 @@ class MacOSBuilder extends UnixBuilderBase
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
 
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
-            f_passthru('ar -t ' . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
+            $AR = getenv('AR') ?: 'ar';
+            f_passthru("{$AR} -t " . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
         }
         $this->patchPhpScripts();
     }

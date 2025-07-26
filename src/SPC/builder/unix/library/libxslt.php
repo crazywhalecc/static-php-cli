@@ -45,8 +45,9 @@ trait libxslt
 
         $this->patchPkgconfPrefix(['libexslt.pc', 'libxslt.pc']);
         $this->patchLaDependencyPrefix();
+        $AR = getenv('AR') ?: 'ar';
         shell()->cd(BUILD_LIB_PATH)
-            ->exec("ar -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")
-            ->exec("ar -t libexslt.a | grep '\\.a$' | xargs -n1 ar d libexslt.a");
+            ->exec("{$AR} -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")
+            ->exec("{$AR} -t libexslt.a | grep '\\.a$' | xargs -n1 ar d libexslt.a");
     }
 }

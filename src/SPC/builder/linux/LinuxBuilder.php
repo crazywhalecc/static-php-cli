@@ -102,6 +102,11 @@ class LinuxBuilder extends UnixBuilderBase
                 'Change SPC_CMD_VAR_PHP_EMBED_TYPE to static.'
             );
         }
+
+        $extra = '';
+        if ($this->getPHPVersionID() < 84000 && $this->getExt('readline') && $this->getLib('libreadline') !== null) {
+            $extra = 'ac_cv_lib_readline_rl_pending_input=yes';
+        }
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 $php_configure_env . ' ' .
@@ -116,8 +121,8 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                $this->makeStaticExtensionArgs() . ' '
-                // 'ac_cv_lib_readline_rl_pending_input=yes'
+                $this->makeStaticExtensionArgs() . ' ' .
+                $extra
             );
 
         $this->emitPatchPoint('before-php-make');
@@ -324,7 +329,8 @@ class LinuxBuilder extends UnixBuilderBase
         }
 
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
-            f_passthru('ar -t ' . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
+            $AR = getenv('AR') ?: 'ar';
+            f_passthru("{$AR} -t " . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
         }
 
         if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
