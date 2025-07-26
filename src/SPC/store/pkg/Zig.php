@@ -104,12 +104,16 @@ class Zig extends CustomPackage
     {
         $pkgroot = PKG_ROOT_PATH;
         $zig_bin_dir = "{$pkgroot}/{$name}";
-        $zig_exec = match (PHP_OS_FAMILY) {
-            'Windows' => "{$zig_bin_dir}/zig.exe",
-            default => "{$zig_bin_dir}/zig",
-        };
 
-        if (file_exists($zig_exec) && file_exists("{$zig_bin_dir}/zig-cc")) {
+        $files = ['zig', 'zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
+        $all_exist = true;
+        foreach ($files as $file) {
+            if (!file_exists("{$zig_bin_dir}/{$file}")) {
+                $all_exist = false;
+                break;
+            }
+        }
+        if ($all_exist) {
             return;
         }
 
