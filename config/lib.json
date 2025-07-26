@@ -655,7 +655,7 @@
     "mimalloc": {
         "source": "mimalloc",
         "static-libs-unix": [
-            "mimalloc.o"
+            "libmimalloc.a"
         ]
     },
     "ncurses": {

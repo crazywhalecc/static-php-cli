@@ -94,8 +94,8 @@ class SPCConfigUtil
 
         if ($this->libs_only_deps) {
             // mimalloc must come first
-            if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
-                $libs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $libs);
+            if ($this->builder->getLib('mimalloc') && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+                $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
             }
             return [
                 'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
@@ -112,8 +112,8 @@ class SPCConfigUtil
         $allLibs = getenv('LIBS') . ' ' . $libs;
 
         // mimalloc must come first
-        if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
-            $allLibs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $allLibs);
+        if ($this->builder->getLib('mimalloc') && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+            $allLibs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $allLibs);
         }
 
         return [

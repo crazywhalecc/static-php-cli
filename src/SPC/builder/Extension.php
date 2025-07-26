@@ -548,6 +548,9 @@ class Extension
         $libs = explode(' ', $allLibs);
         foreach ($libs as $lib) {
             $staticLib = BUILD_LIB_PATH . '/lib' . str_replace('-l', '', $lib) . '.a';
+            if (str_starts_with($lib, BUILD_LIB_PATH . '/lib') && str_ends_with($lib, '.a')) {
+                $staticLib = $lib;
+            }
             if ($lib === '-lphp' || !file_exists($staticLib)) {
                 $sharedLibString .= " {$lib}";
             } else {
