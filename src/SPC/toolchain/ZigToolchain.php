@@ -15,10 +15,12 @@ class ZigToolchain implements ToolchainInterface
         // Set environment variables for zig toolchain
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CC=zig-cc');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CXX=zig-c++');
-        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=zig ar');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=zig-ar');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=zig-cc');
+        GlobalEnvManager::putenv('RANLIB=zig-ranlib');
+        GlobalEnvManager::putenv('OBJCOPY=zig-objcopy');
 
-        // Generate additional object needed for zig toolchain
+        // Generate additional objects needed for zig toolchain
         $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
         $objects = ['crtbeginS.o', 'crtendS.o'];
         $found = [];

@@ -162,6 +162,12 @@ class Zig extends CustomPackage
 
         $script_content = str_replace('zig cc', 'zig c++', $script_content);
         file_put_contents("{$bin_dir}/zig-c++", $script_content);
+        file_put_contents("{$bin_dir}/zig-ar", "#!/usr/bin/env bash\nexec zig ar $@");
+        file_put_contents("{$bin_dir}/zig-ranlib", "#!/usr/bin/env bash\nexec zig ranlib $@");
+        file_put_contents("{$bin_dir}/zig-objcopy", "#!/usr/bin/env bash\nexec zig objcopy $@");
         chmod("{$bin_dir}/zig-c++", 0755);
+        chmod("{$bin_dir}/zig-ar", 0755);
+        chmod("{$bin_dir}/zig-ranlib", 0755);
+        chmod("{$bin_dir}/zig-objcopy", 0755);
     }
 }

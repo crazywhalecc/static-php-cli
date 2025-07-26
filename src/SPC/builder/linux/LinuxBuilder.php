@@ -92,7 +92,7 @@ class LinuxBuilder extends UnixBuilderBase
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
-            'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
+            //'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
@@ -103,7 +103,7 @@ class LinuxBuilder extends UnixBuilderBase
             );
         }
         shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec(
+            ->exec($php_configure_env . ' ' .
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
@@ -115,8 +115,8 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                $this->makeStaticExtensionArgs() .
-                ' ' . $php_configure_env . ' '
+                $this->makeStaticExtensionArgs() . ' '
+                //'ac_cv_lib_readline_rl_pending_input=yes'
             );
 
         $this->emitPatchPoint('before-php-make');
