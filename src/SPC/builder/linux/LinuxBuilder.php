@@ -323,6 +323,10 @@ class LinuxBuilder extends UnixBuilderBase
             }
         }
 
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
+            f_passthru('ar -t ' . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 ar d " . BUILD_LIB_PATH . '/libphp.a');
+        }
+
         if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
             shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-unneeded {$realLibName}");
         }
