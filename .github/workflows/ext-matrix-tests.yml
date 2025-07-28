@@ -82,7 +82,7 @@ jobs:
           - zlib
           - zstd
         php-version:
-          - "8.5"
+          - "git"
         operating-system:
           - "ubuntu-24.04"
           #- "macos-13"
