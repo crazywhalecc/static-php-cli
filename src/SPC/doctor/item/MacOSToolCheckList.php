@@ -19,6 +19,7 @@ class MacOSToolCheckList
         'curl',
         'make',
         'bison',
+        're2c',
         'flex',
         'pkg-config',
         'git',

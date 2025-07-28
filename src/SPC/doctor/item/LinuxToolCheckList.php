@@ -16,7 +16,7 @@ class LinuxToolCheckList
     use UnixSystemUtilTrait;
 
     public const TOOLS_ALPINE = [
-        'make', 'bison', 'flex',
+        'make', 'bison', 're2c', 'flex',
         'git', 'autoconf', 'automake', 'gettext-dev',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
@@ -26,7 +26,7 @@ class LinuxToolCheckList
     ];
 
     public const TOOLS_DEBIAN = [
-        'make', 'bison', 'flex',
+        'make', 'bison', 're2c', 'flex',
         'git', 'autoconf', 'automake', 'autopoint',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'patch',
@@ -35,7 +35,7 @@ class LinuxToolCheckList
     ];
 
     public const TOOLS_RHEL = [
-        'perl', 'make', 'bison', 'flex',
+        'perl', 'make', 'bison', 're2c', 'flex',
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch', 'which',

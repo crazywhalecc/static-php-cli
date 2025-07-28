@@ -104,6 +104,7 @@ RUN apk update; \
         m4 \
         make \
         pkgconfig \
+        re2c \
         wget \
         xz \
         gettext-dev \

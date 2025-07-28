@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
+use SPC\builder\macos\SystemUtil;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\toolchain\ToolchainManager;
@@ -110,6 +111,15 @@ class GlobalEnvManager
     {
         if (!filter_var(getenv('SPC_SKIP_TOOLCHAIN_CHECK'), FILTER_VALIDATE_BOOL)) {
             ToolchainManager::afterInitToolchain();
+        }
+        // test bison
+        if (PHP_OS_FAMILY === 'Darwin') {
+            if ($bison = SystemUtil::findCommand('bison', ['/opt/homebrew/opt/bison/bin', '/usr/local/homebrew/opt/bison/bin'])) {
+                self::putenv("BISON={$bison}");
+            }
+            if ($yacc = SystemUtil::findCommand('yacc', ['/opt/homebrew/opt/bison/bin', '/usr/local/homebrew/opt/bison/bin'])) {
+                self::putenv("YACC={$yacc}");
+            }
         }
     }
 
