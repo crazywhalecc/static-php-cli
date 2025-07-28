@@ -16,7 +16,8 @@ $test_php_version = [
     // '8.1',
     // '8.2',
     // '8.3',
-    '8.4',
+    // '8.4',
+    '8.5',
 ];
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
@@ -48,7 +49,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'grpc',
+    'Linux', 'Darwin' => 'bcmath',
     'Windows' => 'curl',
 };
 
@@ -72,7 +73,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'none',
+    'Linux', 'Darwin' => 'common',
     'Windows' => 'none',
 };
 

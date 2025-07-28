@@ -210,7 +210,7 @@ bin/spc download --from-zip=/path/to/your/download.zip
 
 ```bash
 # 例如：指定下载 Alpha 版的 PHP8.5
-bin/spc download --all -U "php-src:https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
+bin/spc download --all -U "php-src:https://downloads.php.net/~edorian/php-8.5.0alpha2.tar.xz"
 
 # 指定下载旧版本的 curl 库
 bin/spc download --all -U "curl:https://curl.se/download/curl-7.88.1.tar.gz"
