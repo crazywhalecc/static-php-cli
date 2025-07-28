@@ -78,11 +78,6 @@ class ExtensionTest extends TestCase
         }
     }
 
-    public function testGetLibFilesString()
-    {
-        $this->assertStringEndsWith('libonig.a', $this->extension->getLibFilesString());
-    }
-
     public function testGetName()
     {
         $this->assertEquals('mbregex', $this->extension->getName());

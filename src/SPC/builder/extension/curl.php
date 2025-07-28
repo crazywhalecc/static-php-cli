@@ -7,6 +7,7 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
+use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
@@ -55,6 +56,17 @@ class curl extends Extension
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/-lcurl/', $this->getLibFilesString() . $frameworks);
         $this->patchBeforeSharedConfigure();
         return true;
+    }
+
+    public function patchBeforeMake(): bool
+    {
+        $extra_libs = getenv('SPC_EXTRA_LIBS');
+        if ($this->builder instanceof WindowsBuilder && !str_contains($extra_libs, 'secur32.lib')) {
+            $extra_libs .= ' secur32.lib';
+            putenv('SPC_EXTRA_LIBS=' . trim($extra_libs));
+            return true;
+        }
+        return false;
     }
 
     public function patchBeforeSharedConfigure(): bool

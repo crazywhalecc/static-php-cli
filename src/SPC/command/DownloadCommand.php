@@ -245,11 +245,14 @@ class DownloadCommand extends BaseCommand
                         }
                         // if download failed, we will try to download alternative sources
                         logger()->warning("Download failed: {$e->getMessage()}");
-                        logger()->notice("Trying to download alternative sources for {$source}");
                         $alt_sources = Config::getSource($source)['alt'] ?? null;
                         if ($alt_sources === null) {
-                            $alt_config = array_merge($config, $this->getDefaultAlternativeSource($source));
+                            logger()->warning("No alternative sources found for {$source}, using default alternative source");
+                            $alt_config = array_merge($config, Downloader::getDefaultAlternativeSource($source));
+                        } elseif ($alt_sources === false) {
+                            throw new DownloaderException("No alternative sources found for {$source}, skipping alternative download");
                         } else {
+                            logger()->notice("Trying to download alternative sources for {$source}");
                             $alt_config = array_merge($config, $alt_sources);
                         }
                         Downloader::downloadSource($source, $alt_config, $force_all || in_array($source, $force_list));
@@ -394,28 +397,5 @@ class DownloadCommand extends BaseCommand
             f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
         }
         return static::FAILURE;
-    }
-
-    private function getDefaultAlternativeSource(string $source_name): array
-    {
-        return [
-            'type' => 'custom',
-            'func' => function (bool $force, array $source, int $download_as) use ($source_name) {
-                logger()->debug("Fetching alternative source for {$source_name}");
-                // get from dl.static-php.dev
-                $url = "https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/{$source_name}/?format=json";
-                $json = json_decode(Downloader::curlExec(url: $url, retries: intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0)), true);
-                if (!is_array($json)) {
-                    throw new RuntimeException('failed http fetch');
-                }
-                $item = $json[0] ?? null;
-                if ($item === null) {
-                    throw new RuntimeException('failed to parse json');
-                }
-                $full_url = 'https://dl.static-php.dev' . $item['full_path'];
-                $filename = basename($item['full_path']);
-                Downloader::downloadFile($source_name, $full_url, $filename, $source['path'] ?? null, $download_as);
-            },
-        ];
     }
 }

@@ -136,11 +136,4 @@ jobs:
       - name: "Build library: ${{ matrix.library }}"
         run: |
           SPC_USE_SUDO=yes ./bin/spc doctor --auto-fix
-          if [ "${{ env.OS }}" = "linux-x86_64" ]; then
-            ./bin/spc install-pkg upx
-            UPX=--with-upx-pack
-          elif [ "${{ env.OS }}" = "linux-aarch64" ]; then
-            ./bin/spc install-pkg upx
-            UPX=--with-upx-pack
-          fi
-          ./bin/spc build --build-cli --build-micro --build-fpm ${{ matrix.extension }} --debug $UPX --with-suggested-libs --with-suggested-exts
+          ./bin/spc build --build-cli --build-micro --build-fpm ${{ matrix.extension }} --debug --with-suggested-libs --with-suggested-exts

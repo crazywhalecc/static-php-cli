@@ -34,7 +34,7 @@
     },
     "bz2": {
         "type": "builtin",
-        "arg-type-unix": "with-prefix",
+        "arg-type-unix": "with-path",
         "arg-type-windows": "with",
         "lib-depends": [
             "bzip2"
@@ -185,7 +185,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "gettext"
         ]
@@ -211,7 +211,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "gmp"
         ]
@@ -233,7 +233,7 @@
         },
         "type": "external",
         "source": "grpc",
-        "arg-type-unix": "custom",
+        "arg-type-unix": "enable-path",
         "cpp-extension": true,
         "lib-depends": [
             "grpc"
@@ -244,7 +244,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "arg-type-windows": "with",
         "lib-depends-unix": [
             "libiconv"
@@ -320,7 +320,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "ldap"
         ],
@@ -529,7 +529,7 @@
         },
         "notes": true,
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "libargon2"
         ]
@@ -571,7 +571,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "arg-type-windows": "custom",
         "ext-depends": [
             "pdo",
@@ -674,7 +674,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "readline"
         ],
@@ -785,7 +785,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "arg-type-windows": "with",
         "lib-depends": [
             "sqlite"
@@ -811,7 +811,7 @@
         },
         "type": "external",
         "source": "ext-ssh2",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "arg-type-windows": "with",
         "lib-depends": [
             "libssh2"
@@ -937,7 +937,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "tidy"
         ]
@@ -953,7 +953,7 @@
         },
         "type": "external",
         "source": "ext-uuid",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "libuuid"
         ]
@@ -965,7 +965,7 @@
         },
         "type": "external",
         "source": "ext-uv",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "libuv"
         ],
@@ -1067,7 +1067,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "lib-depends": [
             "libxslt"
         ],
@@ -1104,7 +1104,7 @@
         },
         "type": "external",
         "source": "yaml",
-        "arg-type-unix": "with-prefix",
+        "arg-type-unix": "with-path",
         "arg-type-windows": "with",
         "lib-depends": [
             "libyaml"
@@ -1115,7 +1115,7 @@
             "BSD": "wip"
         },
         "type": "builtin",
-        "arg-type": "with-prefix",
+        "arg-type": "with-path",
         "arg-type-windows": "enable",
         "lib-depends-unix": [
             "libzip"

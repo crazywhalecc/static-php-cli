@@ -35,10 +35,10 @@
     },
     "brotli": {
         "source": "brotli",
-        "static-libs-unix": [
-            "libbrotlidec.a",
-            "libbrotlienc.a",
-            "libbrotlicommon.a"
+        "pkg-configs": [
+            "libbrotlicommon",
+            "libbrotlidec",
+            "libbrotlienc"
         ],
         "static-libs-windows": [
             "brotlicommon.lib",
@@ -89,7 +89,8 @@
             "nghttp3",
             "ngtcp2",
             "zstd",
-            "libcares"
+            "libcares",
+            "ldap"
         ],
         "lib-suggests-windows": [
             "brotli",
@@ -185,14 +186,15 @@
     },
     "grpc": {
         "source": "grpc",
-        "static-libs-unix": [
-            "libgrpc.a",
-            "libcares.a"
+        "pkg-configs": [
+            "grpc"
         ],
         "lib-depends": [
             "zlib",
-            "openssl"
+            "openssl",
+            "libcares"
         ],
+        "provide-pre-built": true,
         "frameworks": [
             "CoreFoundation"
         ]
@@ -200,11 +202,10 @@
     "icu": {
         "source": "icu",
         "cpp-library": true,
-        "static-libs-unix": [
-            "libicui18n.a",
-            "libicuio.a",
-            "libicuuc.a",
-            "libicudata.a"
+        "pkg-configs": [
+            "icu-uc",
+            "icu-i18n",
+            "icu-io"
         ]
     },
     "icu-static-win": {
@@ -221,15 +222,16 @@
     },
     "imagemagick": {
         "source": "imagemagick",
-        "static-libs-unix": [
-            "libMagick++-7.Q16HDRI.a",
-            "libMagickWand-7.Q16HDRI.a",
-            "libMagickCore-7.Q16HDRI.a"
+        "pkg-configs": [
+            "Magick++-7.Q16HDRI",
+            "MagickCore-7.Q16HDRI",
+            "MagickWand-7.Q16HDRI"
         ],
         "lib-depends": [
             "zlib",
-            "libpng",
             "libjpeg",
+            "libjxl",
+            "libpng",
             "libwebp",
             "freetype",
             "libtiff",
@@ -252,11 +254,23 @@
             "openssl"
         ]
     },
+    "jbig": {
+        "source": "jbig",
+        "static-libs-unix": [
+            "libjbig.a",
+            "libjbig85.a"
+        ],
+        "headers": [
+            "jbig.h",
+            "jbig85.h",
+            "jbig_ar.h"
+        ]
+    },
     "ldap": {
         "source": "ldap",
-        "static-libs-unix": [
-            "libldap.a",
-            "liblber.a"
+        "pkg-configs": [
+            "ldap",
+            "lber"
         ],
         "lib-depends": [
             "openssl",
@@ -264,6 +278,13 @@
             "gmp",
             "libsodium"
         ]
+    },
+    "lerc": {
+        "source": "lerc",
+        "static-libs-unix": [
+            "libLerc.a"
+        ],
+        "cpp-library": true
     },
     "libacl": {
         "source": "libacl",
@@ -400,6 +421,21 @@
             "zlib"
         ]
     },
+    "libjxl": {
+        "source": "libjxl",
+        "pkg-configs": [
+            "libjxl",
+            "libjxl_cms",
+            "libjxl_threads",
+            "libhwy"
+        ],
+        "lib-depends": [
+            "brotli",
+            "libjpeg",
+            "libpng",
+            "libwebp"
+        ]
+    },
     "liblz4": {
         "source": "liblz4",
         "static-libs-unix": [
@@ -485,9 +521,6 @@
         ],
         "lib-depends": [
             "openssl"
-        ],
-        "lib-suggests": [
-            "zlib"
         ]
     },
     "libtiff": {
@@ -498,6 +531,13 @@
         "lib-depends": [
             "zlib",
             "libjpeg"
+        ],
+        "lib-suggests-unix": [
+            "lerc",
+            "libwebp",
+            "jbig",
+            "xz",
+            "zstd"
         ]
     },
     "libuuid": {
@@ -517,12 +557,12 @@
     },
     "libwebp": {
         "source": "libwebp",
-        "static-libs-unix": [
-            "libwebp.a",
-            "libwebpdecoder.a",
-            "libwebpdemux.a",
-            "libwebpmux.a",
-            "libsharpyuv.a"
+        "pkg-configs": [
+            "libwebp",
+            "libwebpdecoder",
+            "libwebpdemux",
+            "libwebpmux",
+            "libsharpyuv"
         ],
         "static-libs-windows": [
             "libwebp.lib",
@@ -698,8 +738,8 @@
     "openssl": {
         "source": "openssl",
         "static-libs-unix": [
-            "libssl.a",
-            "libcrypto.a"
+            "libcrypto.a",
+            "libssl.a"
         ],
         "static-libs-windows": [
             "libssl.lib",
@@ -714,10 +754,8 @@
     },
     "postgresql": {
         "source": "postgresql",
-        "static-libs-unix": [
-            "libpq.a",
-            "libpgport.a",
-            "libpgcommon.a"
+        "pkg-configs": [
+            "libpq"
         ],
         "lib-depends": [
             "libiconv",
@@ -813,6 +851,15 @@
             "libiconv"
         ]
     },
+    "watcher": {
+        "source": "watcher",
+        "static-libs-unix": [
+            "libwatcher-c.a"
+        ],
+        "headers": [
+            "wtr/watcher-c.h"
+        ]
+    },
     "xz": {
         "source": "xz",
         "static-libs-unix": [
@@ -865,15 +912,6 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
-        ]
-    },
-    "watcher": {
-        "source": "watcher",
-        "static-libs-unix": [
-            "libwatcher-c.a"
-        ],
-        "headers": [
-            "wtr/watcher-c.h"
         ]
     }
 }

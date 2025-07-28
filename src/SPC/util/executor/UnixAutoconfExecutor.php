@@ -12,7 +12,7 @@ use SPC\util\UnixShell;
 
 class UnixAutoconfExecutor extends Executor
 {
-    protected ?UnixShell $shell = null;
+    protected UnixShell $shell;
 
     protected array $configure_args = [];
 

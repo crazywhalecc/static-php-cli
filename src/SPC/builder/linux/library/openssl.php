@@ -67,8 +67,8 @@ class openssl extends LinuxLibraryBase
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 "{$env} ./Configure no-shared {$extra} " .
-                '--prefix=/ ' .
-                '--libdir=lib ' .
+                '--prefix=' . BUILD_ROOT_PATH . ' ' .
+                '--libdir=' . BUILD_LIB_PATH . ' ' .
                 '--openssldir=/etc/ssl ' .
                 "{$zlib_extra}" .
                 'no-legacy ' .
@@ -76,28 +76,19 @@ class openssl extends LinuxLibraryBase
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
-            ->exec("make install_sw DESTDIR={$destdir}");
+            ->exec('make install_sw');
         $this->patchPkgconfPrefix(['libssl.pc', 'openssl.pc', 'libcrypto.pc']);
         // patch for openssl 3.3.0+
         if (!str_contains($file = FileSystem::readFile(BUILD_LIB_PATH . '/pkgconfig/libssl.pc'), 'prefix=')) {
-            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/libssl.pc', 'prefix=${pcfiledir}/../..' . "\n" . $file);
+            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/libssl.pc', 'prefix=' . BUILD_ROOT_PATH . "\n" . $file);
         }
         if (!str_contains($file = FileSystem::readFile(BUILD_LIB_PATH . '/pkgconfig/openssl.pc'), 'prefix=')) {
-            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/openssl.pc', 'prefix=${pcfiledir}/../..' . "\n" . $file);
+            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/openssl.pc', 'prefix=' . BUILD_ROOT_PATH . "\n" . $file);
         }
         if (!str_contains($file = FileSystem::readFile(BUILD_LIB_PATH . '/pkgconfig/libcrypto.pc'), 'prefix=')) {
-            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/libcrypto.pc', 'prefix=${pcfiledir}/../..' . "\n" . $file);
+            FileSystem::writeFile(BUILD_LIB_PATH . '/pkgconfig/libcrypto.pc', 'prefix=' . BUILD_ROOT_PATH . "\n" . $file);
         }
         FileSystem::replaceFileRegex(BUILD_LIB_PATH . '/pkgconfig/libcrypto.pc', '/Libs.private:.*/m', 'Libs.private: ${libdir}/libz.a');
         FileSystem::replaceFileRegex(BUILD_LIB_PATH . '/cmake/OpenSSL/OpenSSLConfig.cmake', '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m', 'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}/libz.a")');
-    }
-
-    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true, bool $include_self = true): string
-    {
-        $libFiles = parent::getStaticLibFiles($style, $recursive, $include_self);
-        if (!str_contains('-ldl -lpthread', $libFiles)) {
-            $libFiles .= ' -ldl -lpthread';
-        }
-        return $libFiles;
     }
 }

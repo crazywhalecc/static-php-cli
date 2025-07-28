@@ -219,34 +219,41 @@ class Downloader
      * @throws RuntimeException
      * @throws WrongUsageException
      */
-    public static function downloadGit(string $name, string $url, string $branch, ?string $move_path = null, int $retries = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
+    public static function downloadGit(string $name, string $url, string $branch, ?array $submodules = null, ?string $move_path = null, int $retries = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
         $download_path = FileSystem::convertPath(DOWNLOAD_PATH . "/{$name}");
         if (file_exists($download_path)) {
             FileSystem::removeDir($download_path);
         }
         logger()->debug("cloning {$name} source");
-        $check = !defined('DEBUG_MODE') ? ' -q' : '';
-        $cancel_func = function () use ($download_path) {
+
+        $quiet = !defined('DEBUG_MODE') ? '-q --quiet' : '';
+        $git = SPC_GIT_EXEC;
+        $shallow = defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '';
+        $recursive = ($submodules === null) ? '--recursive' : '';
+
+        try {
+            self::registerCancelEvent(function () use ($download_path) {
+                if (is_dir($download_path)) {
+                    logger()->warning('Removing path ' . $download_path);
+                    FileSystem::removeDir($download_path);
+                }
+            });
+            f_passthru("{$git} clone {$quiet} --config core.autocrlf=false --branch \"{$branch}\" {$shallow} {$recursive} \"{$url}\" \"{$download_path}\"");
+            if ($submodules !== null) {
+                foreach ($submodules as $submodule) {
+                    f_passthru("cd \"{$download_path}\" && {$git} submodule update --init " . escapeshellarg($submodule));
+                }
+            }
+        } catch (RuntimeException $e) {
             if (is_dir($download_path)) {
-                logger()->warning('Removing path ' . $download_path);
                 FileSystem::removeDir($download_path);
             }
-        };
-        try {
-            self::registerCancelEvent($cancel_func);
-            f_passthru(
-                SPC_GIT_EXEC . ' clone' . $check .
-                (defined('DEBUG_MODE') ? '' : ' --quiet') .
-                ' --config core.autocrlf=false ' .
-                "--branch \"{$branch}\" " . (defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '') . " --recursive \"{$url}\" \"{$download_path}\""
-            );
-        } catch (RuntimeException $e) {
             if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
                 throw new WrongUsageException('Keyboard interrupted, download failed !');
             }
             if ($retries > 0) {
-                self::downloadGit($name, $url, $branch, $move_path, $retries - 1);
+                self::downloadGit($name, $url, $branch, $submodules, $move_path, $retries - 1, $lock_as);
                 return;
             }
             throw $e;
@@ -343,6 +350,7 @@ class Downloader
                         $name,
                         $pkg['url'],
                         $pkg['rev'],
+                        $pkg['submodules'] ?? null,
                         $pkg['extract'] ?? null,
                         self::getRetryAttempts(),
                         SPC_DOWNLOAD_PRE_BUILT
@@ -360,6 +368,11 @@ class Downloader
                     break;
                 case 'custom':          // Custom download method, like API-based download or other
                     $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg');
+                    if (isset($pkg['func']) && is_callable($pkg['func'])) {
+                        $pkg['name'] = $name;
+                        $pkg['func']($force, $pkg, SPC_DOWNLOAD_PACKAGE);
+                        break;
+                    }
                     foreach ($classes as $class) {
                         if (is_a($class, CustomPackage::class, true) && $class !== CustomPackage::class) {
                             $cls = new $class();
@@ -462,6 +475,7 @@ class Downloader
                         $name,
                         $source['url'],
                         $source['rev'],
+                        $source['submodules'] ?? null,
                         $source['path'] ?? null,
                         self::getRetryAttempts(),
                         $download_as
@@ -597,6 +611,29 @@ class Downloader
         $libc_version = SPCTarget::getLibcVersion() ?? 'default';
 
         return "{$source}-{$os_family}-{$gnu_arch}-{$libc}-{$libc_version}";
+    }
+
+    public static function getDefaultAlternativeSource(string $source_name): array
+    {
+        return [
+            'type' => 'custom',
+            'func' => function (bool $force, array $source, int $download_as) use ($source_name) {
+                logger()->debug("Fetching alternative source for {$source_name}");
+                // get from dl.static-php.dev
+                $url = "https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/{$source_name}/?format=json";
+                $json = json_decode(Downloader::curlExec(url: $url, retries: intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0)), true);
+                if (!is_array($json)) {
+                    throw new RuntimeException('failed http fetch');
+                }
+                $item = $json[0] ?? null;
+                if ($item === null) {
+                    throw new RuntimeException('failed to parse json');
+                }
+                $full_url = 'https://dl.static-php.dev' . $item['full_path'];
+                $filename = basename($item['full_path']);
+                Downloader::downloadFile($source_name, $full_url, $filename, $source['path'] ?? null, $download_as);
+            },
+        ];
     }
 
     /**

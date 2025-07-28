@@ -4,7 +4,8 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
+        },
+        "alt": false
     },
     "amqp": {
         "type": "url",
@@ -387,10 +388,33 @@
             "path": "LICENSE"
         }
     },
+    "jbig": {
+        "type": "url",
+        "url": "https://dl.static-php.dev/static-php-cli/deps/jbig/jbigkit-2.1.tar.gz",
+        "provide-pre-built": true,
+        "alt": {
+            "type": "url",
+            "url": "https://www.cl.cam.ac.uk/~mgk25/jbigkit/download/jbigkit-2.1.tar.gz"
+        },
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "ldap": {
         "type": "filelist",
         "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
         "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "lerc": {
+        "type": "ghtar",
+        "repo": "Esri/lerc",
+        "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -533,6 +557,21 @@
             "path": "LICENSE.md"
         }
     },
+    "libjxl": {
+        "type": "git",
+        "url": "https://github.com/libjxl/libjxl",
+        "rev": "main",
+        "submodules": [
+            "third_party/highway",
+            "third_party/libjpeg-turbo",
+            "third_party/sjpeg",
+            "third_party/skcms"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "liblz4": {
         "type": "ghrel",
         "repo": "lz4/lz4",
@@ -596,6 +635,7 @@
         "repo": "libssh2/libssh2",
         "match": "libssh2.+\\.tar\\.gz",
         "prefer-stable": true,
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -605,7 +645,6 @@
         "type": "filelist",
         "url": "https://download.osgeo.org/libtiff/",
         "regex": "/href=\"(?<file>tiff-(?<version>[^\"]+)\\.tar\\.xz)\"/",
-        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "LICENSE.md"
@@ -998,6 +1037,15 @@
             "path": "COPYING"
         }
     },
+    "watcher": {
+        "type": "ghtar",
+        "repo": "e-dant/watcher",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "license"
+        }
+    },
     "xdebug": {
         "type": "url",
         "url": "https://pecl.php.net/get/xdebug",
@@ -1077,15 +1125,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "watcher": {
-        "type": "ghtar",
-        "repo": "e-dant/watcher",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "license"
         }
     }
 }
