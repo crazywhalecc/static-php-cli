@@ -26,7 +26,7 @@ class ToolchainManager
         }
         $libc = getenv('SPC_LIBC');
         if ($libc && !getenv('SPC_TARGET')) {
-            trigger_error('Setting SPC_LIBC is deprecated, please use SPC_TARGET instead.', E_USER_DEPRECATED);
+            // trigger_error('Setting SPC_LIBC is deprecated, please use SPC_TARGET instead.', E_USER_DEPRECATED);
             return match ($libc) {
                 'musl' => SystemUtil::isMuslDist() ? GccNativeToolchain::class : MuslToolchain::class,
                 'glibc' => !SystemUtil::isMuslDist() ? GccNativeToolchain::class : throw new WrongUsageException('SPC_LIBC must be musl for musl dist.'),
