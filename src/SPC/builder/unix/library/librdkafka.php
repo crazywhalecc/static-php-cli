@@ -17,14 +17,6 @@ trait librdkafka
      */
     protected function build(): void
     {
-        $cflags = $this->builder->arch_c_flags;
-        $cxxflags = $this->builder->arch_cxx_flags;
-        $patched_cflags = preg_replace('/\s*-flto(=\S*)?\s*/', ' ', $cflags);
-        $patched_cxxflags = preg_replace('/\s*-flto(=\S*)?\s*/', ' ', $cxxflags);
-
-        $this->builder->arch_c_flags = $patched_cflags;
-        $this->builder->arch_cxx_flags = $patched_cxxflags;
-
         FileSystem::replaceFileStr(
             $this->source_dir . '/lds-gen.py',
             "funcs.append('rd_ut_coverage_check')",
@@ -64,8 +56,5 @@ trait librdkafka
             ->exec("rm -rf {$this->getLibDir()}/*.so.*")
             ->exec("rm -rf {$this->getLibDir()}/*.so")
             ->exec("rm -rf {$this->getLibDir()}/*.dylib");
-
-        $this->builder->arch_c_flags = $cflags;
-        $this->builder->arch_cxx_flags = $cxxflags;
     }
 }

@@ -38,6 +38,7 @@ class MacOSBuilder extends UnixBuilderBase
         // cflags
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
+        $this->arch_ld_flags = getenv('SPC_DEFAULT_LD_FLAGS');
 
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);

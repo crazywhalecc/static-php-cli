@@ -97,16 +97,6 @@ trait UnixLibraryTrait
         return trim($env);
     }
 
-    public function getLibExtraLdFlags(): string
-    {
-        return getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
-    }
-
-    public function getLibExtraLibs(): string
-    {
-        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
-    }
-
     public function getLibExtraCXXFlags(): string
     {
         $env = getenv($this->getSnakeCaseName() . '_CXXFLAGS') ?: '';
@@ -114,5 +104,19 @@ trait UnixLibraryTrait
             $env .= ' ' . $this->builder->arch_cxx_flags;
         }
         return trim($env);
+    }
+
+    public function getLibExtraLdFlags(): string
+    {
+        $env = getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
+        if (!str_contains($env, $this->builder->arch_ld_flags)) {
+            $env .= ' ' . $this->builder->arch_ld_flags;
+        }
+        return trim($env);
+    }
+
+    public function getLibExtraLibs(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
     }
 }

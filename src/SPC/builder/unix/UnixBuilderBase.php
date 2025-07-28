@@ -26,6 +26,9 @@ abstract class UnixBuilderBase extends BuilderBase
     /** @var string C++ flags */
     public string $arch_cxx_flags;
 
+    /** @var string LD flags */
+    public string $arch_ld_flags;
+
     public function proveLibs(array $sorted_libraries): void
     {
         // search all supported libs
