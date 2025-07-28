@@ -108,12 +108,9 @@ class DownloadCommand extends BaseCommand
             // Define PHP major version
             $ver = $this->php_major_ver = $this->getOption('with-php');
             define('SPC_BUILD_PHP_VERSION', $ver);
-            // match x.y
-            preg_match('/^\d+\.\d+$/', $ver, $matches);
-            if (!$matches) {
-                // match x.y.z
-                preg_match('/^\d+\.\d+\.\d+$/', $ver, $matches);
-                if (!$matches) {
+            if ($ver !== 'git' && !preg_match('/^\d+\.\d+$/', $ver)) {
+                // If not git, we need to check the version format
+                if (!preg_match('/^\d+\.\d+(\.\d+)?$/', $ver)) {
                     logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
                     return static::FAILURE;
                 }
