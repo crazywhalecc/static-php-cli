@@ -17,6 +17,8 @@ use SPC\toolchain\ToolchainManager;
  */
 class SPCTarget
 {
+    const array LIBC_LIST = ['musl', 'glibc'];
+
     /**
      * Returns whether we link the C runtime in statically.
      */
@@ -107,7 +109,6 @@ class SPCTarget
      * Currently, we only support native building.
      *
      * @return 'BSD'|'Darwin'|'Linux'|'Windows'
-     * @throws WrongUsageException
      */
     public static function getTargetOS(): string
     {
