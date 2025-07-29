@@ -80,13 +80,6 @@ class LinuxBuilder extends UnixBuilderBase
             $zts = '';
         }
 
-        $opcache_jit = !$this->getOption('disable-opcache-jit', false);
-        if ($opcache_jit) {
-            $opcache_jit = $phpVersionID >= 80500 ? '--enable-opcache-jit ' : '';
-        } else {
-            $opcache_jit = '--disable-opcache-jit ';
-        }
-
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
         $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
