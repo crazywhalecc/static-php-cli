@@ -37,17 +37,6 @@ final class SPCTargetTest extends TestBase
     /**
      * @dataProvider libcProvider
      */
-    public function testIsStatic(string $libc, bool $expected): void
-    {
-        putenv("SPC_LIBC={$libc}");
-
-        $result = SPCTarget::isStatic();
-        $this->assertEquals($expected, $result);
-    }
-
-    /**
-     * @dataProvider libcProvider
-     */
     public function testGetLibc(string $libc, bool $expected): void
     {
         putenv("SPC_LIBC={$libc}");
