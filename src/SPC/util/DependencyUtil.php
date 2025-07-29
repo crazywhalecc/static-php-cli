@@ -9,13 +9,25 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 
 /**
- * Dependency processing tool class, including processing extensions, library dependency list order, etc.
+ * Dependency processing tool class
+ *
+ * This class handles processing extensions, library dependency list ordering, etc.
+ * It provides utilities for managing dependencies between extensions and libraries.
  */
 class DependencyUtil
 {
     /**
-     * Convert platform extensions to library dependencies and suggestions.
+     * Convert platform extensions to library dependencies and suggestions
      *
+     * This method processes all extensions and libraries to create a comprehensive
+     * dependency map that can be used for build ordering.
+     *
+     * Returns an associative array where the key is the extension or library name (string),
+     * and the value is an array with two keys:
+     * - 'depends': array of dependency names (string)
+     * - 'suggests': array of suggested dependency names (string)
+     *
+     * @return array<string, array{depends: array<int, string>, suggests: array<int, string>}>
      * @throws WrongUsageException
      * @throws FileSystemException
      */
@@ -53,6 +65,10 @@ class DependencyUtil
     }
 
     /**
+     * Get library dependencies in correct order
+     *
+     * @param  array               $libs Array of library names
+     * @return array               Ordered array of library names
      * @throws WrongUsageException
      * @throws FileSystemException
      */
@@ -88,7 +104,13 @@ class DependencyUtil
     }
 
     /**
-     * @throws FileSystemException|WrongUsageException
+     * Get extension dependencies in correct order
+     *
+     * @param  array               $exts            Array of extension names
+     * @param  array               $additional_libs Array of additional libraries
+     * @return array               Ordered array of extension names
+     * @throws WrongUsageException
+     * @throws FileSystemException
      */
     public static function getExtsAndLibs(array $exts, array $additional_libs = [], bool $include_suggested_exts = false, bool $include_suggested_libs = false): array
     {
@@ -155,9 +177,6 @@ class DependencyUtil
         return [$exts_final, $libs_final, $not_included_final];
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     private static function doVisitPlat(array $deps, array $dep_list): array
     {
         // default: get extension exts and libs sorted by dep_list

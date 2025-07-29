@@ -14,15 +14,29 @@ use SPC\util\DependencyUtil;
  */
 final class DependencyUtilTest extends TestCase
 {
-    public function testGetExtLibsByDeps(): void
+    private array $originalConfig;
+
+    protected function setUp(): void
     {
-        // setup
-        $bak = [
+        // Save original configuration
+        $this->originalConfig = [
             'source' => Config::$source,
             'lib' => Config::$lib,
             'ext' => Config::$ext,
         ];
-        // example
+    }
+
+    protected function tearDown(): void
+    {
+        // Restore original configuration
+        Config::$source = $this->originalConfig['source'];
+        Config::$lib = $this->originalConfig['lib'];
+        Config::$ext = $this->originalConfig['ext'];
+    }
+
+    public function testGetExtLibsByDeps(): void
+    {
+        // Set up test data
         Config::$source = [
             'test1' => [
                 'type' => 'url',
@@ -73,14 +87,15 @@ final class DependencyUtilTest extends TestCase
                 'lib-depends' => ['libeee'],
             ],
         ];
-        // test getExtLibsByDeps (notmal test with ext-depends and lib-depends)
 
+        // Test dependency resolution
         [$exts, $libs, $not_included] = DependencyUtil::getExtsAndLibs(['ext-a'], include_suggested_exts: true);
         $this->assertContains('libbbb', $libs);
         $this->assertContains('libccc', $libs);
         $this->assertContains('ext-b', $exts);
         $this->assertContains('ext-b', $not_included);
-        // test dep order
+
+        // Test dependency order
         $this->assertIsInt($b = array_search('libbbb', $libs));
         $this->assertIsInt($c = array_search('libccc', $libs));
         $this->assertIsInt($a = array_search('libaaa', $libs));
@@ -88,10 +103,6 @@ final class DependencyUtilTest extends TestCase
         $this->assertTrue($b < $a);
         $this->assertTrue($c < $a);
         $this->assertTrue($c < $b);
-        // restore
-        Config::$source = $bak['source'];
-        Config::$lib = $bak['lib'];
-        Config::$ext = $bak['ext'];
     }
 
     public function testNotExistExtException(): void
