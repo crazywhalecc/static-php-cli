@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\Tests\util;
 
-use SPC\exception\WrongUsageException;
 use SPC\util\SPCTarget;
 
 /**

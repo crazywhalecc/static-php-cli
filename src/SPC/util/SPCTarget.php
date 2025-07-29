@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\util;
 
 use SPC\builder\linux\SystemUtil;
-use SPC\exception\WrongUsageException;
 use SPC\toolchain\ClangNativeToolchain;
 use SPC\toolchain\GccNativeToolchain;
 use SPC\toolchain\MuslToolchain;
@@ -17,7 +16,7 @@ use SPC\toolchain\ToolchainManager;
  */
 class SPCTarget
 {
-    const array LIBC_LIST = ['musl', 'glibc'];
+    public const array LIBC_LIST = ['musl', 'glibc'];
 
     /**
      * Returns whether we link the C runtime in statically.
