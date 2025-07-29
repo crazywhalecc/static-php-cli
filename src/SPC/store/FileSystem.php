@@ -12,6 +12,11 @@ class FileSystem
     private static array $_extract_hook = [];
 
     /**
+     * Load configuration array from JSON file
+     *
+     * @param  string              $config     The configuration name (ext, lib, source, pkg, pre-built)
+     * @param  null|string         $config_dir Optional custom config directory
+     * @return array               The loaded configuration array
      * @throws FileSystemException
      */
     public static function loadConfigArray(string $config, ?string $config_dir = null): array
@@ -37,9 +42,10 @@ class FileSystem
     }
 
     /**
-     * 读取文件，读不出来直接抛出异常
+     * Read file contents and throw exception on failure
      *
-     * @param  string              $filename 文件路径
+     * @param  string              $filename The file path to read
+     * @return string              The file contents
      * @throws FileSystemException
      */
     public static function readFile(string $filename): string
@@ -53,6 +59,12 @@ class FileSystem
     }
 
     /**
+     * Replace string content in file
+     *
+     * @param  string              $filename The file path
+     * @param  mixed               $search   The search string
+     * @param  mixed               $replace  The replacement string
+     * @return false|int           Number of replacements or false on failure
      * @throws FileSystemException
      */
     public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): false|int
@@ -61,6 +73,12 @@ class FileSystem
     }
 
     /**
+     * Replace content in file using regex
+     *
+     * @param  string              $filename The file path
+     * @param  mixed               $search   The regex pattern
+     * @param  mixed               $replace  The replacement string
+     * @return false|int           Number of replacements or false on failure
      * @throws FileSystemException
      */
     public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): false|int
@@ -69,6 +87,11 @@ class FileSystem
     }
 
     /**
+     * Replace content in file using custom callback
+     *
+     * @param  string              $filename The file path
+     * @param  mixed               $callback The callback function
+     * @return false|int           Number of replacements or false on failure
      * @throws FileSystemException
      */
     public static function replaceFileUser(string $filename, mixed $callback = null): false|int
@@ -77,9 +100,10 @@ class FileSystem
     }
 
     /**
-     * 获取文件后缀
+     * Get file extension from filename
      *
-     * @param string $fn 文件名
+     * @param  string $fn The filename
+     * @return string The file extension (without dot)
      */
     public static function extname(string $fn): string
     {
@@ -91,10 +115,11 @@ class FileSystem
     }
 
     /**
-     * 寻找命令的真实路径，效果类似 which
+     * Find command path in system PATH (similar to which command)
      *
-     * @param string $name  命令名称
-     * @param array  $paths 路径列表，如果为空则默认从 PATH 系统变量搜索
+     * @param  string      $name  The command name
+     * @param  array       $paths Optional array of paths to search
+     * @return null|string The full path to the command or null if not found
      */
     public static function findCommandPath(string $name, array $paths = []): ?string
     {
@@ -120,6 +145,10 @@ class FileSystem
     }
 
     /**
+     * Copy directory recursively
+     *
+     * @param  string           $from Source directory path
+     * @param  string           $to   Destination directory path
      * @throws RuntimeException
      */
     public static function copyDir(string $from, string $to): void
@@ -139,6 +168,12 @@ class FileSystem
     }
 
     /**
+     * Extract package archive to specified directory
+     *
+     * @param  string              $name         Package name
+     * @param  string              $source_type  Archive type (tar.gz, zip, etc.)
+     * @param  string              $filename     Archive filename
+     * @param  null|string         $extract_path Optional extraction path
      * @throws RuntimeException
      * @throws FileSystemException
      */
@@ -171,10 +206,12 @@ class FileSystem
     }
 
     /**
-     * 解压缩下载的资源包到 source 目录
+     * Extract source archive to source directory
      *
-     * @param  string              $name     资源名
-     * @param  string              $filename 文件名
+     * @param  string              $name        Source name
+     * @param  string              $source_type Archive type (tar.gz, zip, etc.)
+     * @param  string              $filename    Archive filename
+     * @param  null|string         $move_path   Optional move path
      * @throws FileSystemException
      * @throws RuntimeException
      */
@@ -207,9 +244,10 @@ class FileSystem
     }
 
     /**
-     * 根据系统环境的不同，自动转换路径的分隔符
+     * Convert path to system-specific format
      *
-     * @param string $path 路径
+     * @param  string $path The path to convert
+     * @return string The converted path
      */
     public static function convertPath(string $path): string
     {
@@ -219,6 +257,12 @@ class FileSystem
         return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
 
+    /**
+     * Convert Windows path to MinGW format
+     *
+     * @param  string $path The Windows path
+     * @return string The MinGW format path
+     */
     public static function convertWinPathToMinGW(string $path): string
     {
         if (preg_match('/^[A-Za-z]:/', $path)) {
@@ -228,28 +272,21 @@ class FileSystem
     }
 
     /**
-     * 递归或非递归扫描目录，可返回相对目录的文件列表或绝对目录的文件列表
+     * Scan directory files recursively
      *
-     * @param string      $dir         目录
-     * @param bool        $recursive   是否递归扫描子目录
-     * @param bool|string $relative    是否返回相对目录，如果为true则返回相对目录，如果为false则返回绝对目录
-     * @param bool        $include_dir 非递归模式下，是否包含目录
-     * @since 2.5
+     * @param  string      $dir         Directory to scan
+     * @param  bool        $recursive   Whether to scan recursively
+     * @param  bool|string $relative    Whether to return relative paths
+     * @param  bool        $include_dir Whether to include directories in result
+     * @return array|false Array of files or false on failure
      */
     public static function scanDirFiles(string $dir, bool $recursive = true, bool|string $relative = false, bool $include_dir = false): array|false
     {
         $dir = self::convertPath($dir);
-        // 不是目录不扫，直接 false 处理
-        if (!file_exists($dir)) {
-            logger()->debug('Scan dir failed, no such file or directory.');
-            return false;
-        }
         if (!is_dir($dir)) {
-            logger()->warning('Scan dir failed, not directory.');
             return false;
         }
         logger()->debug('scanning directory ' . $dir);
-        // 套上 zm_dir
         $scan_list = scandir($dir);
         if ($scan_list === false) {
             logger()->warning('Scan dir failed, cannot scan directory: ' . $dir);
@@ -283,18 +320,17 @@ class FileSystem
     }
 
     /**
-     * 获取该路径下的所有类名，根据 psr-4 方式
+     * Get PSR-4 classes from directory
      *
-     * @param  string              $dir               目录
-     * @param  string              $base_namespace    基类命名空间
-     * @param  null|mixed          $rule              规则回调
-     * @param  bool|string         $return_path_value 是否返回路径对应的数组，默认只返回类名列表
-     * @throws FileSystemException
+     * @param  string      $dir               Directory to scan
+     * @param  string      $base_namespace    Base namespace
+     * @param  mixed       $rule              Optional filtering rule
+     * @param  bool|string $return_path_value Whether to return path as value
+     * @return array       Array of class names or class=>path pairs
      */
     public static function getClassesPsr4(string $dir, string $base_namespace, mixed $rule = null, bool|string $return_path_value = false): array
     {
         $classes = [];
-        // 扫描目录，使用递归模式，相对路径模式，因为下面此路径要用作转换成namespace
         $files = FileSystem::scanDirFiles($dir, true, true);
         if ($files === false) {
             throw new FileSystemException('Cannot scan dir files during get classes psr-4 from dir: ' . $dir);
@@ -325,15 +361,15 @@ class FileSystem
     }
 
     /**
-     * 删除目录及目录下的所有文件（危险操作）
+     * Remove directory recursively
      *
-     * @throws FileSystemException
+     * @param  string $dir Directory to remove
+     * @return bool   Success status
      */
     public static function removeDir(string $dir): bool
     {
         $dir = FileSystem::convertPath($dir);
         logger()->debug('Removing path recursively: "' . $dir . '"');
-        // 不是目录不扫，直接 false 处理
         if (!file_exists($dir)) {
             logger()->debug('Scan dir failed, no such file or directory.');
             return false;
@@ -374,6 +410,9 @@ class FileSystem
     }
 
     /**
+     * Create directory recursively
+     *
+     * @param  string              $path Directory path to create
      * @throws FileSystemException
      */
     public static function createDir(string $path): void
@@ -384,7 +423,12 @@ class FileSystem
     }
 
     /**
-     * @param  mixed               ...$args Arguments passed to file_put_contents
+     * Write content to file
+     *
+     * @param  string              $path    File path
+     * @param  mixed               $content Content to write
+     * @param  mixed               ...$args Additional arguments passed to file_put_contents
+     * @return bool|int|string     Result of file writing operation
      * @throws FileSystemException
      */
     public static function writeFile(string $path, mixed $content, ...$args): bool|int|string
@@ -397,27 +441,36 @@ class FileSystem
     }
 
     /**
-     * Reset (remove recursively and create again) dir
+     * Reset directory by removing and recreating it
      *
+     * @param  string              $dir_name Directory name
      * @throws FileSystemException
      */
     public static function resetDir(string $dir_name): void
     {
+        $dir_name = self::convertPath($dir_name);
         if (is_dir($dir_name)) {
             self::removeDir($dir_name);
         }
         self::createDir($dir_name);
     }
 
+    /**
+     * Add source extraction hook
+     *
+     * @param string   $name     Source name
+     * @param callable $callback Callback function
+     */
     public static function addSourceExtractHook(string $name, callable $callback): void
     {
         self::$_extract_hook[$name][] = $callback;
     }
 
     /**
-     * Check whether the path is a relative path (judging according to whether the first character is "/")
+     * Check if path is relative
      *
-     * @param string $path Path
+     * @param  string $path Path to check
+     * @return bool   True if path is relative
      */
     public static function isRelativePath(string $path): bool
     {
@@ -427,6 +480,12 @@ class FileSystem
         return strlen($path) > 0 && $path[0] !== '/';
     }
 
+    /**
+     * Replace path variables with actual values
+     *
+     * @param  string $path Path with variables
+     * @return string Path with replaced variables
+     */
     public static function replacePathVariable(string $path): string
     {
         $replacement = [
@@ -439,12 +498,23 @@ class FileSystem
         return str_replace(array_keys($replacement), array_values($replacement), $path);
     }
 
+    /**
+     * Create backup of file
+     *
+     * @param  string $path File path
+     * @return string Backup file path
+     */
     public static function backupFile(string $path): string
     {
         copy($path, $path . '.bak');
         return $path . '.bak';
     }
 
+    /**
+     * Restore file from backup
+     *
+     * @param string $path Original file path
+     */
     public static function restoreBackupFile(string $path): void
     {
         if (!file_exists($path . '.bak')) {
@@ -454,14 +524,26 @@ class FileSystem
         unlink($path . '.bak');
     }
 
+    /**
+     * Remove file if it exists
+     *
+     * @param string $string File path
+     */
     public static function removeFileIfExists(string $string): void
     {
+        $string = self::convertPath($string);
         if (file_exists($string)) {
             unlink($string);
         }
     }
 
     /**
+     * Replace line in file that contains specific string
+     *
+     * @param  string              $file File path
+     * @param  string              $find String to find in line
+     * @param  string              $line New line content
+     * @return false|int           Number of replacements or false on failure
      * @throws FileSystemException
      */
     public static function replaceFileLineContainsString(string $file, string $find, string $line): false|int

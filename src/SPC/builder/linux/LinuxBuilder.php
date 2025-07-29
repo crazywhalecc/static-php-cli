@@ -263,7 +263,7 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
 
-        $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
+        $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '';
         $libDir = BUILD_LIB_PATH;
         $modulesDir = BUILD_MODULES_PATH;
         $libphpSo = "{$libDir}/libphp.so";
