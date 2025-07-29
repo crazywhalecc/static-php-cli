@@ -265,7 +265,7 @@ abstract class UnixBuilderBase extends BuilderBase
         if (SPCTarget::isStatic()) {
             $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
             $muslTags = 'static_build,';
-            $staticFlags = '-static -static-pie';
+            $staticFlags = '-static-pie';
         }
 
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list);
