@@ -119,7 +119,6 @@ class LinuxBuilder extends UnixBuilderBase
                 ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .
-                $opcache_jit .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
