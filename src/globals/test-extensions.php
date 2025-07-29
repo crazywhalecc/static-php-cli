@@ -48,13 +48,13 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'grpc',
+    'Linux', 'Darwin' => 'ast,bcmath,calendar,ctype,dba,dom,exif,fileinfo,filter,libxml,mbregex,mbstring,pcntl,phar,posix,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib,pcntl,posix,mbstring,tokenizer,phar',
     'Windows' => 'curl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'ast,bcmath,calendar,ctype,dba,dom,exif,fileinfo,filter,libxml,mbregex,mbstring,pcntl,phar,posix,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib,pcntl,posix,mbstring,tokenizer,phar',
+    'Linux' => '',
     'Darwin' => '',
     'Windows' => '',
 };
