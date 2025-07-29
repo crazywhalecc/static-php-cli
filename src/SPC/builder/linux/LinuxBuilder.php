@@ -79,7 +79,13 @@ class LinuxBuilder extends UnixBuilderBase
             $maxExecutionTimers = '';
             $zts = '';
         }
-        $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
+
+        $opcache_jit = !$this->getOption('disable-opcache-jit', false);
+        if ($opcache_jit) {
+            $opcache_jit = $phpVersionID >= 80500 ? '--enable-opcache-jit ' : '';
+        } else {
+            $opcache_jit = '--disable-opcache-jit ';
+        }
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
@@ -120,7 +126,7 @@ class LinuxBuilder extends UnixBuilderBase
                 ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .
-                $disable_jit .
+                $opcache_jit .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .

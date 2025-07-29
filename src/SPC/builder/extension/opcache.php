@@ -26,25 +26,36 @@ class opcache extends Extension
 
     public function patchBeforeBuildconf(): bool
     {
+        $version = $this->builder->getPHPVersion();
         if (file_exists(SOURCE_PATH . '/php-src/.opcache_patched')) {
             return false;
         }
         // if 8.2.0 <= PHP_VERSION < 8.2.23, we need to patch from legacy patch file
-        if (version_compare($this->builder->getPHPVersion(), '8.2.0', '>=') && version_compare($this->builder->getPHPVersion(), '8.2.23', '<')) {
+        if (version_compare($version, '8.2.0', '>=') && version_compare($version, '8.2.23', '<')) {
             SourcePatcher::patchFile('spc_fix_static_opcache_before_80222.patch', SOURCE_PATH . '/php-src');
         }
         // if 8.3.0 <= PHP_VERSION < 8.3.11, we need to patch from legacy patch file
-        elseif (version_compare($this->builder->getPHPVersion(), '8.3.0', '>=') && version_compare($this->builder->getPHPVersion(), '8.3.11', '<')) {
+        elseif (version_compare($version, '8.3.0', '>=') && version_compare($version, '8.3.11', '<')) {
             SourcePatcher::patchFile('spc_fix_static_opcache_before_80310.patch', SOURCE_PATH . '/php-src');
-        } else {
+        }
+        // if 8.3.12 <= PHP_VERSION < 8.5.0-dev, we need to patch from legacy patch file
+        elseif (version_compare($version, '8.5.0-dev', '<')) {
             SourcePatcher::patchMicro(items: ['static_opcache']);
+        }
+        // PHP 8.5.0-dev and later supports static opcache without patching
+        else {
+            return false;
         }
         return file_put_contents(SOURCE_PATH . '/php-src/.opcache_patched', '1') !== false;
     }
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--enable-opcache';
+        $version = $this->builder->getPHPVersion();
+        if (version_compare($version, '8.5.0-dev', '<')) {
+            return '--enable-opcache';
+        }
+        return '';
     }
 
     public function getDistName(): string

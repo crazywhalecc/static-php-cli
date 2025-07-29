@@ -97,8 +97,16 @@ class MacOSBuilder extends UnixBuilderBase
         $this->emitPatchPoint('before-php-configure');
         SourcePatcher::patchBeforeConfigure($this);
 
-        $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
+        $phpVersionID = $this->getPHPVersionID();
+        $json_74 = $phpVersionID < 80000 ? '--enable-json ' : '';
         $zts = $this->getOption('enable-zts', false) ? '--enable-zts --disable-zend-signals ' : '';
+
+        $opcache_jit = !$this->getOption('disable-opcache-jit', false);
+        if ($opcache_jit) {
+            $opcache_jit = $phpVersionID >= 80500 ? '--enable-opcache-jit ' : '';
+        } else {
+            $opcache_jit = '--disable-opcache-jit ';
+        }
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
@@ -138,6 +146,7 @@ class MacOSBuilder extends UnixBuilderBase
                 ($enableMicro ? '--enable-micro ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .
+                $opcache_jit .
                 $json_74 .
                 $zts .
                 $this->makeStaticExtensionArgs() . ' ' .
