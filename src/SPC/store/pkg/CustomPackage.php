@@ -31,16 +31,15 @@ abstract class CustomPackage
     /**
      * Get the environment variables this package needs to be usable.
      * PATH needs to be appended, rather than replaced.
-     *
-     * @return array
      */
     abstract public static function getEnvironment(): array;
 
     abstract public static function isInstalled(): bool;
+
     /**
      * Extract the downloaded package
      *
-     * @param  string            $name Package name
+     * @param string $name Package name
      */
     abstract public function extract(string $name): void;
 }
