@@ -29,7 +29,7 @@ use SPC\store\FileSystem;
 
 class openssl extends LinuxLibraryBase
 {
-    use \SPC\builder\unix\library\openssl;
+    use \SPC\builder\traits\openssl;
 
     public const NAME = 'openssl';
 

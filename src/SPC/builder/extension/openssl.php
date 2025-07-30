@@ -36,4 +36,17 @@ class openssl extends Extension
         }
         return $args;
     }
+
+    public function getWindowsConfigureArg(bool $shared = false): string
+    {
+        $args = '--with-openssl';
+        if (
+            $this->builder->getPHPVersionID() >= 80500 &&
+            ($ver = $this->builder->getLib('openssl')->getLibVersion()) &&
+            version_compare($ver, '3.2.0', '>=')
+        ) {
+            $args .= ' --with-openssl-argon2';
+        }
+        return $args;
+    }
 }
