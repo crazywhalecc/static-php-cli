@@ -101,17 +101,20 @@ RUN curl -o cmake.tgz -#fSL https://github.com/Kitware/CMake/releases/download/v
     tar -xzf cmake.tgz -C /cmake --strip-components 1
 
 WORKDIR /app
-ADD ./src /app/src
 COPY ./composer.* /app/
 ADD ./bin/setup-runtime /app/bin/setup-runtime
 ADD ./bin/spc /app/bin/spc
 RUN /app/bin/setup-runtime
+ADD ./src /app/src
 RUN /app/bin/php /app/bin/composer install --no-dev
 ENV SPC_LIBC=glibc
 ENV PATH="/app/bin:/cmake/bin:/opt/rh/devtoolset-10/root/usr/bin:\$PATH"
 
-ADD ./config/env.ini /app/config/env.ini
+ADD ./config /app/config
 RUN CC=gcc bin/spc doctor --auto-fix --debug
+RUN if [ -f /app/buildroot/bin/re2c ]; then \
+        cp /app/buildroot/bin/re2c /usr/local/bin/re2c ;\
+    fi
 
 RUN curl -o make.tgz -fsSL https://ftp.gnu.org/gnu/make/make-4.4.tar.gz && \
     tar -zxvf make.tgz && \
@@ -128,9 +131,6 @@ RUN curl -o automake.tgz -fsSL https://ftp.gnu.org/gnu/automake/automake-1.17.ta
     make && \
     make install && \
     ln -sf /usr/local/bin/automake /usr/bin/automake
-
-RUN bin/spc download re2c && \
-    bin/spc build:libs re2c
 EOF
 fi
 
