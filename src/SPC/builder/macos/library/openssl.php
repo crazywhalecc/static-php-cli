@@ -28,6 +28,8 @@ use SPC\store\FileSystem;
 
 class openssl extends MacOSLibraryBase
 {
+    use \SPC\builder\unix\library\openssl;
+
     public const NAME = 'openssl';
 
     /**
