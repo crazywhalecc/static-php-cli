@@ -27,7 +27,12 @@ class readline extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--without-libedit --with-readline=' . BUILD_ROOT_PATH;
+        $enable = '--without-libedit --with-readline=' . BUILD_ROOT_PATH;
+        if ($this->builder->getPHPVersionID() < 84000) {
+            // the check uses `char rl_pending_input()` instead of `extern int rl_pending_input`, which makes LTO fail
+            $enable .= ' ac_cv_lib_readline_rl_pending_input=yes';
+        }
+        return $enable;
     }
 
     public function buildUnixShared(): void

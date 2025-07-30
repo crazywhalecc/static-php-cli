@@ -104,10 +104,6 @@ class LinuxBuilder extends UnixBuilderBase
             );
         }
 
-        $extra = '';
-        if ($this->getPHPVersionID() < 84000 && $this->getExt('readline') && $this->getLib('libreadline') !== null) {
-            $extra = 'ac_cv_lib_readline_rl_pending_input=yes';
-        }
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
                 $php_configure_env . ' ' .
@@ -122,8 +118,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                $this->makeStaticExtensionArgs() . ' ' .
-                $extra
+                $this->makeStaticExtensionArgs() . ' '
             );
 
         $this->emitPatchPoint('before-php-make');

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\toolchain;
 
 use SPC\builder\linux\SystemUtil;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCTarget;
@@ -55,10 +54,10 @@ class ToolchainManager
         }
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         if (SPCTarget::getLibc() === 'musl' && !SPCTarget::isStatic() && !file_exists($musl_wrapper_lib)) {
-            throw new RuntimeException('You are linking against musl libc dynamically, but musl libc is not installed. Please install it with `sudo dnf install musl-libc` or `sudo apt install musl`');
+            throw new WrongUsageException('You are linking against musl libc dynamically, but musl libc is not installed. Please use `bin/spc doctor` to install it.');
         }
         if (SPCTarget::getLibc() === 'glibc' && SystemUtil::isMuslDist()) {
-            throw new RuntimeException('You are linking against glibc dynamically, which is only supported on musl distros.');
+            throw new WrongUsageException('You are linking against glibc dynamically, which is only supported on glibc distros.');
         }
         $toolchain = getenv('SPC_TOOLCHAIN');
         /* @var ToolchainInterface $toolchain */

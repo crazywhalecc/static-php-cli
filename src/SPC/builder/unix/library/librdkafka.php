@@ -11,11 +11,7 @@ use SPC\util\executor\UnixAutoconfExecutor;
 
 trait librdkafka
 {
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
-    protected function build(): void
+    public function patchBeforeBuild(): bool
     {
         FileSystem::replaceFileStr(
             $this->source_dir . '/lds-gen.py',
@@ -27,6 +23,15 @@ trait librdkafka
             '#error "IOV_MAX not defined"',
             "#define IOV_MAX 1024\n#define __GNU__"
         );
+        return true;
+    }
+
+    /**
+     * @throws FileSystemException
+     * @throws RuntimeException
+     */
+    protected function build(): void
+    {
         UnixAutoconfExecutor::create($this)
             ->appendEnv(['CFLAGS' => '-Wno-int-conversion -Wno-unused-but-set-variable -Wno-unused-variable'])
             ->optionalLib(
