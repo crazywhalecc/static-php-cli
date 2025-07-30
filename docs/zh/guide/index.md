@@ -4,8 +4,8 @@ static-php-cli 是一个用于构建静态编译的 PHP 二进制的工具，目
 
 在指南章节中，你将了解到如何使用 static-php-cli 构建独立的 php 程序。
 
-- [Action 构建](./action-build)
 - [本地构建](./manual-build)
+- [Action 构建](./action-build)
 - [扩展列表](./extensions)
 
 ## 编译环境

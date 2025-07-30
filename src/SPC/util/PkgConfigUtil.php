@@ -6,6 +6,12 @@ namespace SPC\util;
 
 use SPC\exception\RuntimeException;
 
+/**
+ * Utility class for pkg-config operations
+ *
+ * This class provides methods to interact with pkg-config to get
+ * compilation flags and library information for building extensions.
+ */
 class PkgConfigUtil
 {
     /**
@@ -24,12 +30,14 @@ class PkgConfigUtil
     }
 
     /**
-     * Returns --cflags-only-other output.
+     * Get CFLAGS from pkg-config
+     *
+     * Returns --cflags-only-other output from pkg-config.
      * The reason we return the string is we cannot use array_unique() on cflags,
      * some cflags may contains spaces.
      *
-     * @param  string           $pkg_config_str .pc file str, accepts multiple files
-     * @return string           cflags string, e.g. "-Wno-implicit-int-float-conversion ..."
+     * @param  string           $pkg_config_str .pc file string, accepts multiple files
+     * @return string           CFLAGS string, e.g. "-Wno-implicit-int-float-conversion ..."
      * @throws RuntimeException
      */
     public static function getCflags(string $pkg_config_str): string
@@ -40,10 +48,12 @@ class PkgConfigUtil
     }
 
     /**
+     * Get library flags from pkg-config
+     *
      * Returns --libs-only-l and --libs-only-other output.
      * The reason we return the array is to avoid duplicate lib defines.
      *
-     * @param  string           $pkg_config_str .pc file str, accepts multiple files
+     * @param  string           $pkg_config_str .pc file string, accepts multiple files
      * @return array            Unique libs array, e.g. [-lz, -lxml, ...]
      * @throws RuntimeException
      */
@@ -79,6 +89,13 @@ class PkgConfigUtil
         return array_reverse(array_unique(array_reverse($libs)));
     }
 
+    /**
+     * Execute pkg-config command and return result
+     *
+     * @param  string           $cmd The pkg-config command to execute
+     * @return string           The command output
+     * @throws RuntimeException If command fails
+     */
     private static function execWithResult(string $cmd): string
     {
         f_exec($cmd, $output, $result_code);
