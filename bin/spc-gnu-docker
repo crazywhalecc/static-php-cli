@@ -129,8 +129,8 @@ RUN curl -o automake.tgz -fsSL https://ftp.gnu.org/gnu/automake/automake-1.17.ta
     make install && \
     ln -sf /usr/local/bin/automake /usr/bin/automake
 
-RUN curl -o re2c.rpm https://archives.fedoraproject.org/pub/archive/epel/7/$SPC_USE_ARCH/Packages/r/re2c-0.14.3-2.el7.$SPC_USE_ARCH.rpm && \
-    rpm -Uvh re2c.rpm
+RUN bin/spc download re2c && \
+    bin/spc build:libs re2c
 EOF
 fi
 

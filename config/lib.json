@@ -555,6 +555,12 @@
             "libuv.a"
         ]
     },
+    "re2c": {
+        "source": "re2c",
+        "bin-unix": [
+            "re2c"
+        ]
+    },
     "libwebp": {
         "source": "libwebp",
         "pkg-configs": [
