@@ -79,7 +79,7 @@ class MacOSToolCheckList
                 if ($command_path !== []) {
                     return CheckResult::fail("Current {$bison} version is too old: " . $matches[0]);
                 }
-                return $this->checkBisonVersion(['/opt/homebrew/opt/bison/bin', '/usr/local/homebrew/opt/bison/bin']);
+                return $this->checkBisonVersion(['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin']);
             }
             return CheckResult::ok($matches[0]);
         }
