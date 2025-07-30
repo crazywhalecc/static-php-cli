@@ -1122,6 +1122,10 @@
         "repo": "skvadrik/re2c",
         "match": "re2c.+\\.tar\\.xz",
         "prefer-stable": true,
+        "alt": {
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/re2c/re2c-4.3.tar.xz"
+        },
         "license": {
             "type": "file",
             "path": "LICENSE"

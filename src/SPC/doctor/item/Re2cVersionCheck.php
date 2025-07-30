@@ -9,6 +9,8 @@ use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
+use SPC\exception\DownloaderException;
+use SPC\store\Config;
 use SPC\store\Downloader;
 use Symfony\Component\Console\Input\ArgvInput;
 
@@ -35,7 +37,14 @@ class Re2cVersionCheck
     #[AsFixItem('build-re2c')]
     public function buildRe2c(): bool
     {
-        Downloader::downloadSource('re2c');
+        try {
+            Downloader::downloadSource('re2c');
+        } catch (DownloaderException) {
+            logger()->warning('Failed to download re2c version, trying alternative');
+            $alt = Config::getSource('re2c');
+            $alt = [...$alt, ...$alt['alt'] ?? []];
+            Downloader::downloadSource('re2c', $alt);
+        }
         $builder = BuilderProvider::makeBuilderByInput(new ArgvInput([]));
         $builder->proveLibs(['re2c']);
         $builder->setupLibs();
