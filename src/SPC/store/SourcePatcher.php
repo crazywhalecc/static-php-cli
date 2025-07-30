@@ -98,7 +98,9 @@ class SourcePatcher
             }
         }
         // patch capstone
-        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
+        if (is_unix()) {
+            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
+        }
     }
 
     /**

@@ -20,6 +20,9 @@ class bz2 extends Extension
      */
     public function patchBeforeConfigure(): bool
     {
+        if (!is_unix()) {
+            return false;
+        }
         $frameworks = $this->builder instanceof MacOSBuilder ? ' ' . $this->builder->getFrameworks(true) . ' ' : '';
         FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/-lbz2/', $this->getLibFilesString() . $frameworks);
         return true;
