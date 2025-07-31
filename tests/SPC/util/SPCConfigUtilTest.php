@@ -57,18 +57,18 @@ class SPCConfigUtilTest extends TestCase
         $result = (new SPCConfigUtil())->config(['rar']);
         $this->assertStringContainsString(PHP_OS_FAMILY === 'Darwin' ? '-lc++' : '-lstdc++', $result['libs']);
 
-        // has mimalloc.o in lib dir
+        // has libmimalloc.a in lib dir
         // backup first
-        if (file_exists(BUILD_LIB_PATH . '/mimalloc.o')) {
-            $bak = file_get_contents(BUILD_LIB_PATH . '/mimalloc.o');
-            @unlink(BUILD_LIB_PATH . '/mimalloc.o');
+        if (file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+            $bak = file_get_contents(BUILD_LIB_PATH . '/libmimalloc.a');
+            @unlink(BUILD_LIB_PATH . '/libmimalloc.a');
         }
-        file_put_contents(BUILD_LIB_PATH . '/mimalloc.o', '');
+        file_put_contents(BUILD_LIB_PATH . '/libmimalloc.a', '');
         $result = (new SPCConfigUtil())->config(['bcmath'], ['mimalloc']);
-        $this->assertStringStartsWith(BUILD_LIB_PATH . '/mimalloc.o', $result['libs']);
-        @unlink(BUILD_LIB_PATH . '/mimalloc.o');
+        $this->assertStringStartsWith(BUILD_LIB_PATH . '/libmimalloc.a', $result['libs']);
+        @unlink(BUILD_LIB_PATH . '/libmimalloc.a');
         if (isset($bak)) {
-            file_put_contents(BUILD_LIB_PATH . '/mimalloc.o', $bak);
+            file_put_contents(BUILD_LIB_PATH . '/libmimalloc.a', $bak);
         }
     }
 }

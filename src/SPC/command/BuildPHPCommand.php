@@ -65,7 +65,7 @@ class BuildPHPCommand extends BuildCommand
         // check dynamic extension build env
         // linux must build with glibc
         if (!empty($shared_extensions) && SPCTarget::isStatic()) {
-            $this->output->writeln('Linux does not support dynamic extension loading with musl-libc full-static build, please build with shared target!');
+            $this->output->writeln('Linux does not support dynamic extension loading with fully static builds, please build with a shared C runtime target!');
             return static::FAILURE;
         }
         $static_and_shared = array_intersect($static_extensions, $shared_extensions);

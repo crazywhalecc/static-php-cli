@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\store;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\linux\SystemUtil;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\FileSystemException;
@@ -17,21 +16,21 @@ class SourcePatcher
 {
     public static function init(): void
     {
-        // FileSystem::addSourceExtractHook('swow', [SourcePatcher::class, 'patchSwow']);
-        FileSystem::addSourceExtractHook('openssl', [SourcePatcher::class, 'patchOpenssl11Darwin']);
-        FileSystem::addSourceExtractHook('swoole', [SourcePatcher::class, 'patchSwoole']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchPhpLibxml212']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchGDWin32']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchFfiCentos7FixO3strncmp']);
-        FileSystem::addSourceExtractHook('sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
-        FileSystem::addSourceExtractHook('pdo_sqlsrv', [SourcePatcher::class, 'patchSQLSRVWin32']);
-        FileSystem::addSourceExtractHook('yaml', [SourcePatcher::class, 'patchYamlWin32']);
-        FileSystem::addSourceExtractHook('libyaml', [SourcePatcher::class, 'patchLibYaml']);
-        FileSystem::addSourceExtractHook('php-src', [SourcePatcher::class, 'patchImapLicense']);
-        FileSystem::addSourceExtractHook('ext-imagick', [SourcePatcher::class, 'patchImagickWith84']);
-        FileSystem::addSourceExtractHook('libaom', [SourcePatcher::class, 'patchLibaomForAlpine']);
-        FileSystem::addSourceExtractHook('attr', [SourcePatcher::class, 'patchAttrForAlpine']);
-        FileSystem::addSourceExtractHook('gmssl', [SourcePatcher::class, 'patchGMSSL']);
+        // FileSystem::addSourceExtractHook('swow', [__CLASS__, 'patchSwow']);
+        FileSystem::addSourceExtractHook('openssl', [__CLASS__, 'patchOpenssl11Darwin']);
+        FileSystem::addSourceExtractHook('swoole', [__CLASS__, 'patchSwoole']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
+        FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
+        FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
+        FileSystem::addSourceExtractHook('yaml', [__CLASS__, 'patchYamlWin32']);
+        FileSystem::addSourceExtractHook('libyaml', [__CLASS__, 'patchLibYaml']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchImapLicense']);
+        FileSystem::addSourceExtractHook('ext-imagick', [__CLASS__, 'patchImagickWith84']);
+        FileSystem::addSourceExtractHook('libaom', [__CLASS__, 'patchLibaomForAlpine']);
+        FileSystem::addSourceExtractHook('attr', [__CLASS__, 'patchAttrForAlpine']);
+        FileSystem::addSourceExtractHook('gmssl', [__CLASS__, 'patchGMSSL']);
     }
 
     /**
@@ -73,9 +72,9 @@ class SourcePatcher
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
 
         if ($builder->getOption('enable-micro-win32')) {
-            SourcePatcher::patchMicroWin32();
+            self::patchMicroWin32();
         } else {
-            SourcePatcher::unpatchMicroWin32();
+            self::unpatchMicroWin32();
         }
     }
 
@@ -233,6 +232,7 @@ class SourcePatcher
             'PHP_ADD_INCLUDE([$ext_srcdir])',
             "PHP_ADD_INCLUDE( [\$ext_srcdir] )\n    PHP_ADD_INCLUDE([\$abs_srcdir/ext])"
         );
+
         // swoole 5.1.3 build fix
         // get swoole version first
         $file = SOURCE_PATH . '/php-src/ext/swoole/include/swoole_version.h';
@@ -246,6 +246,7 @@ class SourcePatcher
         if ($version === '5.1.3') {
             self::patchFile('spc_fix_swoole_50513.patch', SOURCE_PATH . '/php-src/ext/swoole');
         }
+        self::patchFile('swoole_fix_date_time.patch', SOURCE_PATH . '/php-src/ext/swoole');
         return true;
     }
 
@@ -254,13 +255,22 @@ class SourcePatcher
      */
     public static function patchBeforeMake(BuilderBase $builder): void
     {
-        // Try to fix debian environment build lack HAVE_STRLCAT problem
-        if ($builder instanceof LinuxBuilder) {
-            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCPY 1$/m', '');
-            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_STRLCAT 1$/m', '');
-        }
         if ($builder instanceof UnixBuilderBase) {
             FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
+        }
+        if (!SPCTarget::isStatic() && SPCTarget::getLibc() === 'musl') {
+            // we need to patch the symbol to global visibility, otherwise extensions with `initial-exec` TLS model will fail to load
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        } else {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
         }
 
         // no asan
@@ -269,7 +279,7 @@ class SourcePatcher
         // }
 
         // call extension patch before make
-        foreach ($builder->getExts(false) as $ext) {
+        foreach ($builder->getExts() as $ext) {
             if ($ext->patchBeforeMake() === true) {
                 logger()->info("Extension [{$ext->getName()}] patched before make");
             }
@@ -452,7 +462,7 @@ class SourcePatcher
         }
         $extnum = intval($match[1]);
         if ($extnum < 30800) {
-            SourcePatcher::patchFile('imagick_php84_before_30800.patch', SOURCE_PATH . '/php-src/ext/imagick');
+            self::patchFile('imagick_php84_before_30800.patch', SOURCE_PATH . '/php-src/ext/imagick');
             return true;
         }
         return false;
@@ -470,14 +480,14 @@ class SourcePatcher
         if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0 && intval($match[1]) < 80316) {
             return false;
         }
-        SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
+        self::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
         return true;
     }
 
     public static function patchLibaomForAlpine(): bool
     {
         if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist()) {
-            SourcePatcher::patchFile('libaom_posix_implict.patch', SOURCE_PATH . '/libaom');
+            self::patchFile('libaom_posix_implict.patch', SOURCE_PATH . '/libaom');
             return true;
         }
         return false;
@@ -486,7 +496,7 @@ class SourcePatcher
     public static function patchAttrForAlpine(): bool
     {
         if (PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist() || PHP_OS_FAMILY === 'Darwin') {
-            SourcePatcher::patchFile('attr_alpine_gethostname.patch', SOURCE_PATH . '/attr');
+            self::patchFile('attr_alpine_gethostname.patch', SOURCE_PATH . '/attr');
             return true;
         }
         return false;

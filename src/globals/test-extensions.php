@@ -21,19 +21,19 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13', // bin/spc for x86_64
+    'macos-13', // bin/spc for x86_64
     // 'macos-14',  // bin/spc for arm64
     'macos-15', // bin/spc for arm64
-    'ubuntu-latest', // bin/spc-alpine-docker for x86_64
-    // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
-    // 'ubuntu-24.04', // bin/spc for x86_64
+    // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
+    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    'ubuntu-24.04', // bin/spc for x86_64
     'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
     'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-latest', // .\bin\spc.ps1
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
@@ -41,15 +41,15 @@ $no_strip = false;
 $upx = false;
 
 // whether to test frankenphp build, only available for macos and linux
-$frankenphp = false;
+$frankenphp = true;
 
 // prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'grpc',
-    'Windows' => 'curl',
+    'Linux', 'Darwin' => 'ast,bcmath,calendar,ctype,dba,dom,exif,fileinfo,filter,libxml,mbregex,mbstring,pcntl,phar,posix,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib',
+    'Windows' => 'intl',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
@@ -60,7 +60,7 @@ $shared_extensions = match (PHP_OS_FAMILY) {
 };
 
 // If you want to test lib-suggests for all extensions and libraries, set it to true.
-$with_suggested_libs = false;
+$with_suggested_libs = true;
 
 // If you want to test extra libs for extensions, add them below (comma separated, example `libwebp,libavif`). Unnecessary, when $with_suggested_libs is true.
 $with_libs = match (PHP_OS_FAMILY) {
@@ -72,7 +72,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'none',
+    'Linux', 'Darwin' => 'minimal',
     'Windows' => 'none',
 };
 
@@ -155,6 +155,9 @@ if ($shared_extensions) {
         case 'ubuntu-22.04':
         case 'ubuntu-22.04-arm':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            break;
+        case 'ubuntu-24.04':
+        case 'ubuntu-24.04-arm':
             break;
         case 'macos-13':
         case 'macos-14':

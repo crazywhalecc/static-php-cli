@@ -61,9 +61,9 @@ class UnixShell
     {
         $this->setEnv([
             'CFLAGS' => $library->getLibExtraCFlags(),
+            'CXXFLAGS' => $library->getLibExtraCXXFlags(),
             'LDFLAGS' => $library->getLibExtraLdFlags(),
             'LIBS' => $library->getLibExtraLibs(),
-            'CXXFLAGS' => $library->getLibExtraCXXFlags(),
         ]);
         return $this;
     }

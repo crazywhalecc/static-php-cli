@@ -20,6 +20,7 @@ class uv extends Extension
 
     public function patchBeforeSharedMake(): bool
     {
+        parent::patchBeforeSharedMake();
         if (PHP_OS_FAMILY !== 'Linux' || arch2gnu(php_uname('m')) !== 'aarch64') {
             return false;
         }

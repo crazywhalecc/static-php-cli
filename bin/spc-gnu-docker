@@ -83,7 +83,8 @@ RUN if [ "$SPC_USE_ARCH" = "aarch64" ]; then \
         sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo ; \
     fi
 RUN sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo && \
-    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+    sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo && \
+    sed -i 's|http://|https://|g' /etc/yum.repos.d/*.repo
 
 RUN yum update -y && \
     yum install -y devtoolset-10-gcc-* devtoolset-10-libatomic-devel
@@ -155,8 +156,6 @@ fi
 # Apply env in temp env file
 echo 'SPC_DEFAULT_C_FLAGS=-fPIC' > /tmp/spc-gnu-docker.env
 echo 'SPC_LIBC=glibc' >> /tmp/spc-gnu-docker.env
-echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM="-Wl,-O1 -pie"' >> /tmp/spc-gnu-docker.env
-echo 'SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS="-ldl -lpthread -lm -lresolv -lutil -lrt"' >> /tmp/spc-gnu-docker.env
 
 # Environment variable passthrough
 ENV_LIST=""

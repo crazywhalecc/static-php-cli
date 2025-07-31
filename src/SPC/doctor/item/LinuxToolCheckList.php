@@ -69,7 +69,7 @@ class LinuxToolCheckList
         };
         $missing = [];
         foreach ($required as $package) {
-            if ($this->findCommand(self::PROVIDED_COMMAND[$package] ?? $package) === null) {
+            if (self::findCommand(self::PROVIDED_COMMAND[$package] ?? $package) === null) {
                 $missing[] = $package;
             }
         }

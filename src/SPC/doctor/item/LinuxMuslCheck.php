@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\doctor\item;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
@@ -17,13 +18,15 @@ use SPC\store\FileSystem;
 use SPC\store\PackageManager;
 use SPC\store\SourcePatcher;
 use SPC\toolchain\MuslToolchain;
+use SPC\toolchain\ZigToolchain;
 
 #[OptionalCheck([self::class, 'optionalCheck'])]
 class LinuxMuslCheck
 {
     public static function optionalCheck(): bool
     {
-        return getenv('SPC_TOOLCHAIN') === MuslToolchain::class;
+        return getenv('SPC_TOOLCHAIN') === MuslToolchain::class ||
+            (getenv('SPC_TOOLCHAIN') === ZigToolchain::class && !SystemUtil::isMuslDist());
     }
 
     /** @noinspection PhpUnused */
@@ -31,7 +34,7 @@ class LinuxMuslCheck
     public function checkMusl(): CheckResult
     {
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
-        if (file_exists($musl_wrapper_lib) && file_exists('/usr/local/musl/lib/libc.a')) {
+        if (file_exists($musl_wrapper_lib) && (file_exists('/usr/local/musl/lib/libc.a') || getenv('SPC_TOOLCHAIN') === ZigToolchain::class)) {
             return CheckResult::ok();
         }
         return CheckResult::fail('musl-wrapper is not installed on your system', 'fix-musl-wrapper');
@@ -40,6 +43,9 @@ class LinuxMuslCheck
     #[AsCheckItem('if musl-cross-make is installed', limit_os: 'Linux', level: 799)]
     public function checkMuslCrossMake(): CheckResult
     {
+        if (getenv('SPC_TOOLCHAIN') === ZigToolchain::class && !SystemUtil::isMuslDist()) {
+            return CheckResult::ok();
+        }
         $arch = arch2gnu(php_uname('m'));
         $cross_compile_lib = "/usr/local/musl/{$arch}-linux-musl/lib/libc.a";
         $cross_compile_gcc = "/usr/local/musl/bin/{$arch}-linux-musl-gcc";

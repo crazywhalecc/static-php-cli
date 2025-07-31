@@ -8,7 +8,7 @@
 > If a modification is not involved, please skip it directly.
 
 - If you modified `*.php` or `*.json`, run them locally to ensure your changes are valid:
-  - [ ] `PHP_CS_FIXER_IGNORE_ENV=1 composer cs-fix`
+  - [ ] `composer cs-fix`
   - [ ] `composer analyse`
   - [ ] `composer test`
   - [ ] `bin/spc dev:sort-config`

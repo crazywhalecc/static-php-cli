@@ -20,6 +20,7 @@ class rdkafka extends Extension
 
     public function patchBeforeMake(): bool
     {
+        parent::patchBeforeMake();
         // when compiling rdkafka with inline builds, it shows some errors, I don't know why.
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/ext/rdkafka/rdkafka.c',

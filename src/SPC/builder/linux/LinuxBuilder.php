@@ -31,17 +31,11 @@ class LinuxBuilder extends UnixBuilderBase
         GlobalEnvManager::afterInit();
 
         // concurrency
-        $this->concurrency = intval(getenv('SPC_CONCURRENCY'));
+        $this->concurrency = (int) getenv('SPC_CONCURRENCY');
         // cflags
         $this->arch_c_flags = getenv('SPC_DEFAULT_C_FLAGS');
         $this->arch_cxx_flags = getenv('SPC_DEFAULT_CXX_FLAGS');
-
-        // cross-compiling is not supported yet
-        /*if (php_uname('m') !== $this->arch) {
-            $this->cross_compile_prefix = SystemUtil::getCrossCompilePrefix($this->cc, $this->arch);
-            logger()->info('using cross compile prefix: ' . $this->cross_compile_prefix);
-            $this->configure_env .= " CROSS_COMPILE='{$this->cross_compile_prefix}'";
-        }*/
+        $this->arch_ld_flags = getenv('SPC_DEFAULT_LD_FLAGS');
 
         // create pkgconfig and include dir (some libs cannot create them automatically)
         f_mkdir(BUILD_LIB_PATH . '/pkgconfig', recursive: true);
@@ -80,7 +74,9 @@ class LinuxBuilder extends UnixBuilderBase
             $zts = '';
         }
         $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
-
+        if (!$disable_jit && $this->getExt('opcache')) {
+            f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
+        }
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
         $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
@@ -92,27 +88,25 @@ class LinuxBuilder extends UnixBuilderBase
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
         $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
-        $mimallocLibs = $this->getLib('mimalloc') !== null ? BUILD_LIB_PATH . '/mimalloc.o ' : '';
         // prepare build php envs
-        $envs_build_php = SystemUtil::makeEnvVarString([
+        $php_configure_env = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
-            'CPPFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CPPFLAGS'),
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
-            'LIBS' => $mimallocLibs . getenv('SPC_CMD_VAR_PHP_CONFIGURE_LIBS'),
+            // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
 
-        // process micro upx patch if micro sapi enabled
-        if ($enableMicro) {
-            if (version_compare($this->getMicroVersion(), '0.2.0') < 0) {
-                // for phpmicro 0.1.x
-                $this->processMicroUPXLegacy();
-            }
-            // micro latest needs do strip and upx pack later (strip, upx, cut binary manually supported)
+        $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+        if ($embed_type !== 'static' && SPCTarget::isStatic()) {
+            throw new WrongUsageException(
+                'Linux does not support loading shared libraries when linking libc statically. ' .
+                'Change SPC_CMD_VAR_PHP_EMBED_TYPE to static.'
+            );
         }
 
-        $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec(
+                $php_configure_env . ' ' .
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
@@ -124,8 +118,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                $this->makeStaticExtensionArgs() .
-                ' ' . $envs_build_php . ' '
+                $this->makeStaticExtensionArgs() . ' '
             );
 
         $this->emitPatchPoint('before-php-make');
@@ -178,12 +171,12 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
 
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-unneeded php');
+        }
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
-                ->exec('strip --strip-all php')
                 ->exec(getenv('UPX_EXEC') . ' --best php');
-        } elseif (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-all php');
         }
 
         $this->deployBinary(BUILD_TARGET_CLI);
@@ -241,12 +234,12 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} fpm");
 
+        if (!$this->getOption('no-strip', false)) {
+            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-unneeded php-fpm');
+        }
         if ($this->getOption('with-upx-pack')) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
-                ->exec('strip --strip-all php-fpm')
                 ->exec(getenv('UPX_EXEC') . ' --best php-fpm');
-        } elseif (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-all php-fpm');
         }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
@@ -266,33 +259,78 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
 
         $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '';
+        $libDir = BUILD_LIB_PATH;
+        $modulesDir = BUILD_MODULES_PATH;
+        $libphpSo = "{$libDir}/libphp.so";
+        $realLibName = 'libphp.so';
+        $cwd = getcwd();
+
         if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
             $release = $matches[1];
-            $realLibName = 'libphp-' . $release . '.so';
-            $realLib = BUILD_LIB_PATH . '/' . $realLibName;
-            rename(BUILD_LIB_PATH . '/libphp.so', $realLib);
-            $cwd = getcwd();
-            chdir(BUILD_LIB_PATH);
-            symlink($realLibName, 'libphp.so');
-            chdir(BUILD_MODULES_PATH);
-            foreach ($this->getExts() as $ext) {
-                if (!$ext->isBuildShared()) {
-                    continue;
+            $realLibName = "libphp-{$release}.so";
+            $libphpRelease = "{$libDir}/{$realLibName}";
+            if (!file_exists($libphpRelease) && file_exists($libphpSo)) {
+                rename($libphpSo, $libphpRelease);
+            }
+            if (file_exists($libphpRelease)) {
+                chdir($libDir);
+                if (file_exists($libphpSo)) {
+                    unlink($libphpSo);
                 }
-                $name = $ext->getName();
-                $versioned = "{$name}-{$release}.so";
-                $unversioned = "{$name}.so";
-                if (is_file(BUILD_MODULES_PATH . "/{$versioned}")) {
-                    rename(BUILD_MODULES_PATH . "/{$versioned}", BUILD_MODULES_PATH . "/{$unversioned}");
-                    shell()->cd(BUILD_MODULES_PATH)
-                        ->exec(sprintf(
+                symlink($realLibName, 'libphp.so');
+                shell()->exec(sprintf(
+                    'patchelf --set-soname %s %s',
+                    escapeshellarg($realLibName),
+                    escapeshellarg($libphpRelease)
+                ));
+            }
+            if (is_dir($modulesDir)) {
+                chdir($modulesDir);
+                foreach ($this->getExts() as $ext) {
+                    if (!$ext->isBuildShared()) {
+                        continue;
+                    }
+                    $name = $ext->getName();
+                    $versioned = "{$name}-{$release}.so";
+                    $unversioned = "{$name}.so";
+                    $src = "{$modulesDir}/{$versioned}";
+                    $dst = "{$modulesDir}/{$unversioned}";
+                    if (is_file($src)) {
+                        rename($src, $dst);
+                        shell()->exec(sprintf(
                             'patchelf --set-soname %s %s',
                             escapeshellarg($unversioned),
-                            escapeshellarg($unversioned)
+                            escapeshellarg($dst)
                         ));
+                    }
                 }
             }
             chdir($cwd);
+        }
+
+        $target = "{$libDir}/{$realLibName}";
+        if (file_exists($target)) {
+            [, $output] = shell()->execWithResult('readelf -d ' . escapeshellarg($target));
+            $output = join("\n", $output);
+            if (preg_match('/SONAME.*\[(.+)]/', $output, $sonameMatch)) {
+                $currentSoname = $sonameMatch[1];
+                if ($currentSoname !== basename($target)) {
+                    shell()->exec(sprintf(
+                        'patchelf --set-soname %s %s',
+                        escapeshellarg(basename($target)),
+                        escapeshellarg($target)
+                    ));
+                }
+            }
+        }
+
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
+            $AR = getenv('AR') ?: 'ar';
+            f_passthru("{$AR} -t " . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 {$AR} d " . BUILD_LIB_PATH . '/libphp.a');
+        }
+
+        if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
+            shell()->cd(BUILD_LIB_PATH)->exec("strip --strip-unneeded {$realLibName}");
         }
         $this->patchPhpScripts();
     }
@@ -305,58 +343,22 @@ class LinuxBuilder extends UnixBuilderBase
         return [
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => $config['libs'],
+            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => "-L{$lib} {$static} -pie",
         ];
     }
 
     /**
-     * Apply option --no-strip and --with-upx-pack for micro sapi (only for phpmicro 0.1.x)
+     * Strip micro.sfx for Linux.
+     * The micro.sfx does not support UPX directly, but we can remove UPX-info segment to adapt.
+     * This will also make micro.sfx with upx-packed more like a malware fore antivirus :(
      *
-     * @throws FileSystemException
+     * @throws RuntimeException
      */
-    private function processMicroUPXLegacy(): void
-    {
-        // upx pack and strip for micro
-        // but always restore Makefile.frag.bak first
-        if (file_exists(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak')) {
-            copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag');
-        }
-        if ($this->getOption('with-upx-pack', false)) {
-            // judge $(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)` count
-            // if 2, replace src/globals/extra/micro-triple-Makefile.frag file content
-            if (substr_count(FileSystem::readFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag'), '$(MAKE) micro_2s_objs SFX_FILESIZE=`$(STAT_SIZE) $(SAPI_MICRO_PATH)`') === 2) {
-                // bak first
-                copy(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.bak');
-                // replace Makefile.frag content
-                FileSystem::writeFile(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag', FileSystem::readFile(ROOT_DIR . '/src/globals/extra/micro-triple-Makefile.frag'));
-            }
-            // with upx pack always need strip
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH) && ' . getenv('UPX_EXEC') . ' --best \$(SAPI_MICRO_PATH)',
-            );
-        } elseif (!$this->getOption('no-strip', false)) {
-            // not-no-strip means strip (default behavior)
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=\$(STRIP) \$(MICRO_STRIP_FLAGS) \$(SAPI_MICRO_PATH)',
-            );
-        } else {
-            // just no strip
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag',
-                '/POST_MICRO_BUILD_COMMANDS=.*/',
-                'POST_MICRO_BUILD_COMMANDS=true',
-            );
-        }
-    }
-
     private function processMicroUPX(): void
     {
         if (version_compare($this->getMicroVersion(), '0.2.0') >= 0 && !$this->getOption('no-strip', false)) {
-            shell()->exec('strip --strip-all ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx');
+            shell()->exec('strip --strip-unneeded ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx');
 
             if ($this->getOption('with-upx-pack')) {
                 // strip first

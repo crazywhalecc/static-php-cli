@@ -92,27 +92,31 @@ trait UnixLibraryTrait
     {
         $env = getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
         if (!str_contains($env, $this->builder->arch_c_flags)) {
-            $env .= $this->builder->arch_c_flags;
+            $env .= ' ' . $this->builder->arch_c_flags;
         }
-        return $env;
-    }
-
-    public function getLibExtraLdFlags(): string
-    {
-        return getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
-    }
-
-    public function getLibExtraLibs(): string
-    {
-        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
+        return trim($env);
     }
 
     public function getLibExtraCXXFlags(): string
     {
         $env = getenv($this->getSnakeCaseName() . '_CXXFLAGS') ?: '';
         if (!str_contains($env, $this->builder->arch_cxx_flags)) {
-            $env .= $this->builder->arch_cxx_flags;
+            $env .= ' ' . $this->builder->arch_cxx_flags;
         }
-        return $env;
+        return trim($env);
+    }
+
+    public function getLibExtraLdFlags(): string
+    {
+        $env = getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
+        if (!str_contains($env, $this->builder->arch_ld_flags)) {
+            $env .= ' ' . $this->builder->arch_ld_flags;
+        }
+        return trim($env);
+    }
+
+    public function getLibExtraLibs(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
     }
 }

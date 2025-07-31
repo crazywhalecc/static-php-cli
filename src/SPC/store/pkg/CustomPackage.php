@@ -29,13 +29,17 @@ abstract class CustomPackage
     abstract public function fetch(string $name, bool $force = false, ?array $config = null): void;
 
     /**
+     * Get the environment variables this package needs to be usable.
+     * PATH needs to be appended, rather than replaced.
+     */
+    abstract public static function getEnvironment(): array;
+
+    abstract public static function isInstalled(): bool;
+
+    /**
      * Extract the downloaded package
      *
-     * @param  string            $name Package name
-     * @throws \RuntimeException If extraction is not implemented
+     * @param string $name Package name
      */
-    public function extract(string $name): void
-    {
-        throw new \RuntimeException("Extract method not implemented for package: {$name}");
-    }
+    abstract public function extract(string $name): void;
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\exception\ValidationException;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\ConfigValidator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
@@ -71,7 +73,16 @@ class CraftCommand extends BuildCommand
             $retcode = $this->runCommand('install-pkg', 'go-xcaddy');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft go-xcaddy failed</error>');
-                $this->log("craft go-xcaddy failed with code: {$retcode}", true);
+                $this->log("craft: spc install-pkg go-xcaddy failed with code: {$retcode}", true);
+                return static::FAILURE;
+            }
+        }
+        // install zig if requested
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $retcode = $this->runCommand('install-pkg', 'zig');
+            if ($retcode !== 0) {
+                $this->output->writeln('<error>craft zig failed</error>');
+                $this->log("craft: spc install-pkg zig failed with code: {$retcode}", true);
                 return static::FAILURE;
             }
         }

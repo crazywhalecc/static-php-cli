@@ -242,3 +242,14 @@ function get_pack_replace(): array
         BUILD_ROOT_PATH => '@build_root_path@',
     ];
 }
+
+/**
+ * Remove duplicate spaces from a string.
+ *
+ * @param  string $string Input string that may contain unnecessary spaces (e.g., " -la  -lb").
+ * @return string The trimmed string with only single spaces (e.g., "-la -lb").
+ */
+function clean_spaces(string $string): string
+{
+    return trim(preg_replace('/\s+/', ' ', $string));
+}
