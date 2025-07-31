@@ -76,7 +76,7 @@ static-php-cli（简称 `spc`）有许多特性：
 
 当前支持编译的 PHP 版本：
 
-> :warning: 支持，但 static-php-cli 作者可能不再提供补丁修复
+> :warning: 部分支持，对于新的测试版和旧版本可能存在问题。
 > 
 > :heavy_check_mark: 支持
 > 
@@ -92,7 +92,7 @@ static-php-cli（简称 `spc`）有许多特性：
 | 8.2         | :heavy_check_mark: |                                                         |
 | 8.3         | :heavy_check_mark: |                                                         |
 | 8.4         | :heavy_check_mark: |                                                         |
-| 8.5         | :heavy_check_mark: |                                                         |
+| 8.5 (alpha) | :warning:          | PHP 8.5 目前处于 alpha 阶段                                   |
 
 > 这个表格的支持状态是 static-php-cli 对构建对应版本的支持情况，不是 PHP 官方对该版本的支持情况。
 
