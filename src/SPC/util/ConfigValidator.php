@@ -69,31 +69,6 @@ class ConfigValidator
     /**
      * @throws ValidationException
      */
-    private static function checkSingleLicense(array $license, string $name): void
-    {
-        if (!is_assoc_array($license)) {
-            throw new ValidationException("source {$name} license must be an object");
-        }
-        if (!isset($license['type'])) {
-            throw new ValidationException("source {$name} license must have type");
-        }
-        if (!in_array($license['type'], ['file', 'text'])) {
-            throw new ValidationException("source {$name} license type is invalid");
-        }
-        if (!in_array($license['type'], ['file', 'text'])) {
-            throw new ValidationException("source {$name} license type is invalid");
-        }
-        if ($license['type'] === 'file' && !isset($license['path'])) {
-            throw new ValidationException("source {$name} license file must have path");
-        }
-        if ($license['type'] === 'text' && !isset($license['text'])) {
-            throw new ValidationException("source {$name} license text must have text");
-        }
-    }
-
-    /**
-     * @throws ValidationException
-     */
     public static function validateLibs(mixed $data, array $source_data = []): void
     {
         // check if it is an array
@@ -438,6 +413,31 @@ class ConfigValidator
         $craft['craft-options']['download'] ??= true;
         $craft['craft-options']['build'] ??= true;
         return $craft;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private static function checkSingleLicense(array $license, string $name): void
+    {
+        if (!is_assoc_array($license)) {
+            throw new ValidationException("source {$name} license must be an object");
+        }
+        if (!isset($license['type'])) {
+            throw new ValidationException("source {$name} license must have type");
+        }
+        if (!in_array($license['type'], ['file', 'text'])) {
+            throw new ValidationException("source {$name} license type is invalid");
+        }
+        if (!in_array($license['type'], ['file', 'text'])) {
+            throw new ValidationException("source {$name} license type is invalid");
+        }
+        if ($license['type'] === 'file' && !isset($license['path'])) {
+            throw new ValidationException("source {$name} license file must have path");
+        }
+        if ($license['type'] === 'text' && !isset($license['text'])) {
+            throw new ValidationException("source {$name} license text must have text");
+        }
     }
 
     /**
