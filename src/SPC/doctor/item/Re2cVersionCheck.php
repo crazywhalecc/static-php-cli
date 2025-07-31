@@ -22,7 +22,7 @@ class Re2cVersionCheck
     #[AsCheckItem('if re2c version >= 1.0.3', limit_os: 'Darwin', level: 20)]
     public function checkRe2cVersion(): ?CheckResult
     {
-        $ver = shell()->execWithResult('re2c --version', false);
+        $ver = shell(false)->execWithResult('re2c --version', false);
         // match version: re2c X.X(.X)
         if ($ver[0] !== 0 || !preg_match('/re2c\s+(\d+\.\d+(\.\d+)?)/', $ver[1][0], $matches)) {
             return CheckResult::fail('Failed to get re2c version', 'build-re2c');
