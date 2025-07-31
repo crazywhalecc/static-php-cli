@@ -135,6 +135,7 @@ class UnixAutoconfExecutor extends Executor
     {
         $this->shell = shell()->cd($this->library->getSourceDir())->initializeEnv($this->library)->appendEnv([
             'CFLAGS' => "-I{$this->library->getIncludeDir()}",
+            'CXXFLAGS' => "-I{$this->library->getIncludeDir()}",
             'LDFLAGS' => "-L{$this->library->getLibDir()}",
         ]);
     }

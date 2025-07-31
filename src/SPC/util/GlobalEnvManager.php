@@ -16,6 +16,8 @@ class GlobalEnvManager
 {
     private static array $env_cache = [];
 
+    private static bool $initialized = false;
+
     public static function getInitializedEnv(): array
     {
         return self::$env_cache;
@@ -29,6 +31,9 @@ class GlobalEnvManager
      */
     public static function init(): void
     {
+        if (self::$initialized) {
+            return;
+        }
         // Check pre-defined env vars exists
         if (getenv('BUILD_ROOT_PATH') === false) {
             throw new RuntimeException('You must include src/globals/internal-env.php before using GlobalEnvManager');
@@ -86,6 +91,7 @@ class GlobalEnvManager
                 self::putenv("{$k}={$v}");
             }
         }
+        self::$initialized = true;
     }
 
     public static function putenv(string $val): void

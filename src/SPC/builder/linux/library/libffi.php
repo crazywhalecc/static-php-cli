@@ -18,14 +18,8 @@ class libffi extends LinuxLibraryBase
      */
     public function build(): void
     {
-        $arch = getenv('SPC_ARCH');
         UnixAutoconfExecutor::create($this)
-            ->configure(
-                "--host={$arch}-unknown-linux",
-                "--target={$arch}-unknown-linux",
-                "--libdir={$this->getLibDir()}"
-            )
-            ->make();
+            ->configure()->make();
 
         if (is_file(BUILD_ROOT_PATH . '/lib64/libffi.a')) {
             copy(BUILD_ROOT_PATH . '/lib64/libffi.a', BUILD_ROOT_PATH . '/lib/libffi.a');

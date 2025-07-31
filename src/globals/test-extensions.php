@@ -73,7 +73,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // You can use `common`, `bulk`, `minimal` or `none`.
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'minimal',
+    'Linux', 'Darwin' => 'none',
     'Windows' => 'none',
 };
 
@@ -156,6 +156,9 @@ if ($shared_extensions) {
         case 'ubuntu-22.04':
         case 'ubuntu-22.04-arm':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
+            break;
+        case 'ubuntu-24.04':
+        case 'ubuntu-24.04-arm':
             break;
         case 'macos-13':
         case 'macos-14':

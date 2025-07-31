@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace SPC\util;
 
 use SPC\builder\linux\SystemUtil;
-use SPC\exception\WrongUsageException;
+use SPC\toolchain\ClangNativeToolchain;
+use SPC\toolchain\GccNativeToolchain;
+use SPC\toolchain\MuslToolchain;
+use SPC\toolchain\ToolchainManager;
 
 /**
  * SPC build target constants and toolchain initialization.
@@ -13,23 +16,44 @@ use SPC\exception\WrongUsageException;
  */
 class SPCTarget
 {
-    public const array LIBC_LIST = [
-        'musl',
-        'glibc',
-    ];
+    public const array LIBC_LIST = ['musl', 'glibc'];
 
     /**
-     * Returns whether the target is a full-static target.
+     * Returns whether we link the C runtime in statically.
      */
     public static function isStatic(): bool
     {
-        $env = getenv('SPC_TARGET');
-        $libc = getenv('SPC_LIBC');
-        // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
-        if ($libc === 'musl') {
+        if (ToolchainManager::getToolchainClass() === MuslToolchain::class) {
             return true;
         }
-        // TODO: add zig target parser here
+        if (ToolchainManager::getToolchainClass() === GccNativeToolchain::class) {
+            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist();
+        }
+        if (ToolchainManager::getToolchainClass() === ClangNativeToolchain::class) {
+            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist();
+        }
+        // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
+        if ($target = getenv('SPC_TARGET')) {
+            if (str_contains($target, '-macos') || str_contains($target, '-native') && PHP_OS_FAMILY === 'Darwin') {
+                return false;
+            }
+            if (str_contains($target, '-gnu')) {
+                return false;
+            }
+            if (str_contains($target, '-dynamic')) {
+                return false;
+            }
+            if (str_contains($target, '-musl')) {
+                return true;
+            }
+            if (PHP_OS_FAMILY === 'Linux') {
+                return SystemUtil::isMuslDist();
+            }
+            return true;
+        }
+        if (getenv('SPC_LIBC') === 'musl') {
+            return true;
+        }
         return false;
     }
 
@@ -38,13 +62,36 @@ class SPCTarget
      */
     public static function getLibc(): ?string
     {
-        $env = getenv('SPC_TARGET');
+        if ($target = getenv('SPC_TARGET')) {
+            if (str_contains($target, '-gnu')) {
+                return 'glibc';
+            }
+            if (str_contains($target, '-musl')) {
+                return 'musl';
+            }
+            if (PHP_OS_FAMILY === 'Linux') {
+                return SystemUtil::isMuslDist() ? 'musl' : 'glibc';
+            }
+        }
         $libc = getenv('SPC_LIBC');
         if ($libc !== false) {
             return $libc;
         }
-        // TODO: zig target parser
+        if (PHP_OS_FAMILY === 'Linux') {
+            return SystemUtil::isMuslDist() ? 'musl' : 'glibc';
+        }
         return null;
+    }
+
+    public static function getRuntimeLibs(): string
+    {
+        if (PHP_OS_FAMILY === 'Linux') {
+            return self::getLibc() === 'musl' ? '-ldl -lpthread -lm' : '-ldl -lrt -lpthread -lm -lresolv -lutil';
+        }
+        if (PHP_OS_FAMILY === 'Darwin') {
+            return '-lresolv';
+        }
+        return '';
     }
 
     /**
@@ -52,15 +99,8 @@ class SPCTarget
      */
     public static function getLibcVersion(): ?string
     {
-        $env = getenv('SPC_TARGET');
-        $libc = getenv('SPC_LIBC');
-        if ($libc !== false) {
-            // legacy method: get a version from system
-            return SystemUtil::getLibcVersionIfExists($libc);
-        }
-        // TODO: zig target parser
-
-        return null;
+        $libc = self::getLibc();
+        return SystemUtil::getLibcVersionIfExists($libc);
     }
 
     /**
@@ -68,20 +108,16 @@ class SPCTarget
      * Currently, we only support native building.
      *
      * @return 'BSD'|'Darwin'|'Linux'|'Windows'
-     * @throws WrongUsageException
      */
     public static function getTargetOS(): string
     {
-        $target = getenv('SPC_TARGET');
-        if ($target === false || $target === '') {
-            return PHP_OS_FAMILY;
-        }
-        // TODO: zig target parser like below?
+        $target = (string) getenv('SPC_TARGET');
         return match (true) {
-            str_contains($target, 'linux') => 'Linux',
-            str_contains($target, 'macos') => 'Darwin',
-            str_contains($target, 'windows') => 'Windows',
-            default => throw new WrongUsageException('Cannot parse target.'),
+            str_contains($target, '-linux') => 'Linux',
+            str_contains($target, '-macos') => 'Darwin',
+            str_contains($target, '-windows') => 'Windows',
+            str_contains($target, '-native') => PHP_OS_FAMILY,
+            default => PHP_OS_FAMILY,
         };
     }
 }

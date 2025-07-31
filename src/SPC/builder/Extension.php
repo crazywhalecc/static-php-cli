@@ -9,7 +9,10 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
+use SPC\util\SPCTarget;
 
 class Extension
 {
@@ -187,6 +190,14 @@ class Extension
      */
     public function patchBeforeMake(): bool
     {
+        if (SPCTarget::getTargetOS() === 'Linux' && $this->isBuildShared() && ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS'))) {
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/Makefile',
+                "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
+                "$1 {$objs}",
+            );
+            return true;
+        }
         return false;
     }
 
@@ -217,7 +228,21 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        return false;
+        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
+        [$staticLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
+        FileSystem::replaceFileRegex(
+            $this->source_dir . '/Makefile',
+            '/^(.*_SHARED_LIBADD\s*=.*)$/m',
+            '$1 ' . trim($staticLibs)
+        );
+        if ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS')) {
+            FileSystem::replaceFileRegex(
+                $this->source_dir . '/Makefile',
+                "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
+                "$1 {$objs}",
+            );
+        }
+        return true;
     }
 
     /**
@@ -251,7 +276,7 @@ class Extension
 
         $ret = '';
         foreach ($order as $ext) {
-            if ($ext instanceof Extension && $ext->isBuildShared()) {
+            if ($ext instanceof self && $ext->isBuildShared()) {
                 if (Config::getExt($ext->getName(), 'zend-extension', false) === true) {
                     $ret .= " -d \"zend_extension={$ext->getName()}\"";
                 } else {
@@ -294,9 +319,7 @@ class Extension
 
             [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
             if ($ret !== 0) {
-                if ($this->builder->getOption('debug')) {
-                    var_dump($out);
-                }
+                var_dump($out);
                 throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
             }
         }
@@ -384,20 +407,25 @@ class Extension
      */
     public function buildUnixShared(): void
     {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
-        [$staticLibString, $sharedLibString] = $this->getStaticAndSharedLibs();
-
-        // macOS ld64 doesn't understand these, while Linux and BSD do
-        // use them to make sure that all symbols are picked up, even if a library has already been visited before
-        $preStatic = PHP_OS_FAMILY !== 'Darwin' ? '-Wl,-Bstatic -Wl,--start-group ' : '';
-        $postStatic = PHP_OS_FAMILY !== 'Darwin' ? ' -Wl,--end-group -Wl,-Bdynamic ' : ' ';
+        $config = (new SPCConfigUtil($this->builder))->config(
+            [$this->getName()],
+            array_map(fn ($l) => $l->getName(), $this->getLibraryDependencies(recursive: true)),
+            $this->builder->getOption('with-suggested-exts'),
+            $this->builder->getOption('with-suggested-libs'),
+        );
+        [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
+        $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
+        $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';
         $env = [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'LIBS' => $preStatic . $staticLibString . $postStatic . $sharedLibString,
+            'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class && SPCTarget::getTargetOS() === 'Linux') {
+            $env['SPC_COMPILER_EXTRA'] = '-lstdc++';
+        }
 
         if ($this->patchBeforeSharedPhpize()) {
             logger()->info("Extension [{$this->getName()}] patched before shared phpize");
@@ -406,6 +434,7 @@ class Extension
         // prepare configure args
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(BUILD_BIN_PATH . '/phpize');
 
         if ($this->patchBeforeSharedConfigure()) {
@@ -414,18 +443,12 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec(
                 './configure ' . $this->getUnixConfigureArg(true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
                 '--enable-shared --disable-static'
             );
-
-        // some extensions don't define their dependencies well, this patch is only needed for a few
-        FileSystem::replaceFileRegex(
-            $this->source_dir . '/Makefile',
-            '/^(.*_SHARED_LIBADD\s*=.*)$/m',
-            '$1 ' . $staticLibString
-        );
 
         if ($this->patchBeforeSharedMake()) {
             logger()->info("Extension [{$this->getName()}] patched before shared make");
@@ -433,6 +456,7 @@ class Extension
 
         shell()->cd($this->source_dir)
             ->setEnv($env)
+            ->appendEnv($this->getExtraEnv())
             ->exec('make clean')
             ->exec('make -j' . $this->builder->concurrency)
             ->exec('make install');
@@ -506,37 +530,34 @@ class Extension
         }
     }
 
-    /**
-     * Get required static and shared libraries as a pair of strings in format -l{libname} -l{libname2}
-     *
-     * @return array [staticLibString, sharedLibString]
-     */
-    protected function getStaticAndSharedLibs(): array
+    protected function getExtraEnv(): array
     {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], with_dependencies: true);
-        $sharedLibString = '';
+        return [];
+    }
+
+    /**
+     * Splits a given string of library flags into static and shared libraries.
+     *
+     * @param  string $allLibs A space-separated string of library flags (e.g., -lxyz).
+     * @return array  an array containing two elements: the first is a space-separated string
+     *                of static library flags, and the second is a space-separated string
+     *                of shared library flags
+     */
+    protected function splitLibsIntoStaticAndShared(string $allLibs): array
+    {
         $staticLibString = '';
-        $staticLibs = $this->getLibFilesString();
-        $staticLibs = str_replace([BUILD_LIB_PATH . '/lib', '.a'], ['-l', ''], $staticLibs);
-        $staticLibs = explode('-l', $staticLibs . ' ' . $config['libs']);
-        foreach ($staticLibs as $lib) {
-            $lib = trim($lib);
-            if ($lib === '') {
-                continue;
+        $sharedLibString = '';
+        $libs = explode(' ', $allLibs);
+        foreach ($libs as $lib) {
+            $staticLib = BUILD_LIB_PATH . '/lib' . str_replace('-l', '', $lib) . '.a';
+            if (str_starts_with($lib, BUILD_LIB_PATH . '/lib') && str_ends_with($lib, '.a')) {
+                $staticLib = $lib;
             }
-            $static_lib = 'lib' . $lib . '.a';
-            if (file_exists(BUILD_LIB_PATH . '/' . $static_lib) && !str_contains($static_lib, 'libphp')) {
-                if (!str_contains($staticLibString, '-l' . $lib . ' ')) {
-                    $staticLibString .= '-l' . $lib . ' ';
-                }
-            } elseif (!str_contains($sharedLibString, '-l' . $lib . ' ')) {
-                $sharedLibString .= '-l' . $lib . ' ';
+            if ($lib === '-lphp' || !file_exists($staticLib)) {
+                $sharedLibString .= " {$lib}";
+            } else {
+                $staticLibString .= " {$lib}";
             }
-        }
-        // move -lstdc++ to static libraries because centos 7 the shared libstdc++ is incomplete
-        if (str_contains((string) getenv('PATH'), 'rh/devtoolset-10')) {
-            $staticLibString .= ' -lstdc++';
-            $sharedLibString = str_replace('-lstdc++', '', $sharedLibString);
         }
         return [trim($staticLibString), trim($sharedLibString)];
     }

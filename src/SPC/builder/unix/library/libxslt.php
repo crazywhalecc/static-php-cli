@@ -35,18 +35,19 @@ trait libxslt
                 '--without-debugger',
                 "--with-libxml-prefix={$this->getBuildRootPath()}",
             );
-        if (getenv('SPC_LINUX_DEFAULT_LD_LIBRARY_PATH') && getenv('SPC_LINUX_DEFAULT_LIBRARY_PATH')) {
+        if (getenv('SPC_LD_LIBRARY_PATH') && getenv('SPC_LIBRARY_PATH')) {
             $ac->appendEnv([
-                'LD_LIBRARY_PATH' => getenv('SPC_LINUX_DEFAULT_LD_LIBRARY_PATH'),
-                'LIBRARY_PATH' => getenv('SPC_LINUX_DEFAULT_LIBRARY_PATH'),
+                'LD_LIBRARY_PATH' => getenv('SPC_LD_LIBRARY_PATH'),
+                'LIBRARY_PATH' => getenv('SPC_LIBRARY_PATH'),
             ]);
         }
         $ac->configure()->make();
 
         $this->patchPkgconfPrefix(['libexslt.pc', 'libxslt.pc']);
         $this->patchLaDependencyPrefix();
+        $AR = getenv('AR') ?: 'ar';
         shell()->cd(BUILD_LIB_PATH)
-            ->exec("ar -t libxslt.a | grep '\\.a$' | xargs -n1 ar d libxslt.a")
-            ->exec("ar -t libexslt.a | grep '\\.a$' | xargs -n1 ar d libexslt.a");
+            ->exec("{$AR} -t libxslt.a | grep '\\.a$' | xargs -n1 {$AR} d libxslt.a")
+            ->exec("{$AR} -t libexslt.a | grep '\\.a$' | xargs -n1 {$AR} d libexslt.a");
     }
 }

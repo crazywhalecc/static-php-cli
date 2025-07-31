@@ -57,7 +57,7 @@ class SPCConfigUtil
      * @throws WrongUsageException
      * @throws \Throwable
      */
-    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false, bool $with_dependencies = false): array
+    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
     {
         [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
@@ -73,9 +73,9 @@ class SPCConfigUtil
         $libs = $this->getLibsString($libraries, !$this->absolute_libs);
 
         // additional OS-specific libraries (e.g. macOS -lresolv)
-        $extra_env = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LIBS');
-        if (is_string($extra_env)) {
-            $libs .= ' ' . trim($extra_env, '"');
+        // embed
+        if ($extra_libs = SPCTarget::getRuntimeLibs()) {
+            $libs .= " {$extra_libs}";
         }
         $extra_env = getenv('SPC_EXTRA_LIBS');
         if (is_string($extra_env) && !empty($extra_env)) {
@@ -86,14 +86,21 @@ class SPCConfigUtil
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
         if ($this->builder->hasCpp()) {
-            $libs .= SPCTarget::getTargetOS() === 'Darwin' ? ' -lc++' : ' -lstdc++';
+            $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
+            if (!str_contains($libs, $libcpp)) {
+                $libs .= " {$libcpp}";
+            }
         }
 
         if ($this->libs_only_deps) {
+            // mimalloc must come first
+            if ($this->builder->getLib('mimalloc') && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+                $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
+            }
             return [
-                'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
-                'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
-                'libs' => trim(getenv('LIBS') . ' ' . $libs),
+                'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
+                'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+                'libs' => clean_spaces(getenv('LIBS') . ' ' . $libs),
             ];
         }
 
@@ -105,14 +112,14 @@ class SPCConfigUtil
         $allLibs = getenv('LIBS') . ' ' . $libs;
 
         // mimalloc must come first
-        if (str_contains($libs, BUILD_LIB_PATH . '/mimalloc.o')) {
-            $allLibs = BUILD_LIB_PATH . '/mimalloc.o ' . str_replace(BUILD_LIB_PATH . '/mimalloc.o', '', $allLibs);
+        if ($this->builder->getLib('mimalloc') && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+            $allLibs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $allLibs);
         }
 
         return [
-            'cflags' => trim(getenv('CFLAGS') . ' ' . $cflags),
-            'ldflags' => trim(getenv('LDFLAGS') . ' ' . $ldflags),
-            'libs' => trim($allLibs),
+            'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
+            'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+            'libs' => clean_spaces($allLibs),
         ];
     }
 
@@ -179,7 +186,7 @@ class SPCConfigUtil
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
             // convert all static-libs to short names
-            $libs = Config::getLib($library, 'static-libs', []);
+            $libs = array_reverse(Config::getLib($library, 'static-libs', []));
             foreach ($libs as $lib) {
                 // check file existence
                 if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {

@@ -48,17 +48,17 @@ This extension contains an implementation of the coroutine environment for `pdo_
 
 ## swow
 
-1. Only PHP 8.0 ~ 8.4 is supported.
+1. Only PHP 8.0+ is supported.
 
 ## imagick
 
-1. The imagick extension currently only has openmp support on musl libc. This means that multithreading is disabled on glibc or other operating systems. The extension is still fully functional.
+1. OpenMP support is disabled, this is recommended by the maintainers and also the case system packages.
 
 ## imap
 
 1. Kerberos is not supported
-2. ext-imap is not thread safe due to the underlying c-client. It's not possible to use it in --enable-zts builds.
-3. Because the extension may be dropped from php, we recommend you look for an alternative implementation, such as [Webklex/php-imap](https://github.com/Webklex/php-imap)
+2. ext-imap is not thread safe due to the underlying c-client. It's not possible to use it in `--enable-zts` builds.
+3. The extension was dropped from php 8.4, we recommend you look for an alternative implementation, such as [Webklex/php-imap](https://github.com/Webklex/php-imap)
 
 ## gd
 
@@ -82,7 +82,7 @@ and this extension cannot be compiled into php by static linking, so it cannot b
 
 ## xdebug
 
-1. Xdebug is only buildable as a shared extension. You need to use a build target other than `musl-static` for SPC_TARGET.
+1. Xdebug is only buildable as a shared extension. On Linux, you'll need to use a SPC_TARGET like `native-native -dynamic` or `native-native-gnu`.
 2. When using Linux/glibc or macOS, you can compile Xdebug as a shared extension using --build-shared="xdebug". 
    The compiled `./php` binary can be configured and run by specifying the INI, eg `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
 
@@ -122,8 +122,8 @@ For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use
 
 ## password-argon2
 
-1. password-argon2 is not a standard extension, it is an additional algorithm for the `password_hash` function.
-2. On Linux systems, `password-argon2` dependency `libargon2` conflicts with the `libsodium` library.
+1. password-argon2 is not a standard extension. The algorithm `PASSWORD_ARGON2ID` for the `password_hash` function needs libsodium or libargon2 to work.
+2. using password-argon2 enables multithread support for this.
 
 ## ffi
 

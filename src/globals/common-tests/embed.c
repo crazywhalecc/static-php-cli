@@ -8,7 +8,7 @@ int main(int argc,char **argv){
 
     zend_stream_init_filename(&file_handle,"embed.php");
 
-    if(php_execute_script(&file_handle) == FAILURE){
+    if(!php_execute_script(&file_handle)){
         php_printf("Failed to execute PHP script.\n");
     }
 

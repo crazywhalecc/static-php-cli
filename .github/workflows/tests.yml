@@ -39,7 +39,7 @@ jobs:
           tools: pecl, composer, php-cs-fixer
 
       - name: Run PHP-CS-Fixer fix
-        run: PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff --ansi
+        run: php-cs-fixer fix --dry-run --diff --ansi
 
   phpstan:
     runs-on: ubuntu-latest
@@ -55,6 +55,8 @@ jobs:
           extensions: curl, openssl, mbstring
           ini-values: memory_limit=-1
           tools: composer
+        env:
+          phpts: zts
 
       - name: "Cache Composer packages"
         id: composer-cache
@@ -135,7 +137,7 @@ jobs:
   build:
     name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
-    needs: define-matrix
+    needs: [define-matrix, php-cs-fixer, phpstan, phpunit]
     timeout-minutes: 120
     strategy:
       matrix:

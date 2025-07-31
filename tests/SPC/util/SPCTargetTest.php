@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\Tests\util;
 
-use SPC\exception\WrongUsageException;
 use SPC\util\SPCTarget;
 
 /**
@@ -33,17 +32,6 @@ final class SPCTargetTest extends TestBase
                 putenv("{$key}={$value}");
             }
         }
-    }
-
-    /**
-     * @dataProvider libcProvider
-     */
-    public function testIsStatic(string $libc, bool $expected): void
-    {
-        putenv("SPC_LIBC={$libc}");
-
-        $result = SPCTarget::isStatic();
-        $this->assertEquals($expected, $result);
     }
 
     /**
@@ -85,19 +73,6 @@ final class SPCTargetTest extends TestBase
         $this->assertEquals($expected, $result);
     }
 
-    /**
-     * @dataProvider invalidTargetProvider
-     */
-    public function testGetTargetOSWithInvalidTarget(string $target): void
-    {
-        putenv("SPC_TARGET={$target}");
-
-        $this->expectException(WrongUsageException::class);
-        $this->expectExceptionMessage('Cannot parse target.');
-
-        SPCTarget::getTargetOS();
-    }
-
     public function testLibcListConstant(): void
     {
         $this->assertIsArray(SPCTarget::LIBC_LIST);
@@ -117,19 +92,10 @@ final class SPCTargetTest extends TestBase
     public function targetOSProvider(): array
     {
         return [
-            'linux-target' => ['linux-x86_64', 'Linux'],
-            'macos-target' => ['macos-x86_64', 'Darwin'],
-            'windows-target' => ['windows-x86_64', 'Windows'],
+            'linux-target' => ['native-linux', 'Linux'],
+            'macos-target' => ['native-macos', 'Darwin'],
+            'windows-target' => ['native-windows', 'Windows'],
             'empty-target' => ['', PHP_OS_FAMILY],
-        ];
-    }
-
-    public function invalidTargetProvider(): array
-    {
-        return [
-            'invalid-target' => ['invalid-target'],
-            'unknown-target' => ['unknown-target'],
-            'mixed-target' => ['mixed-target'],
         ];
     }
 

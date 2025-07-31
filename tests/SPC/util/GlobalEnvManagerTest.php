@@ -23,6 +23,10 @@ final class GlobalEnvManagerTest extends TestCase
             'SPC_TARGET' => getenv('SPC_TARGET'),
             'SPC_LIBC' => getenv('SPC_LIBC'),
         ];
+        // Temporarily set private GlobalEnvManager::$initialized to false (use reflection)
+        $reflection = new \ReflectionClass(GlobalEnvManager::class);
+        $property = $reflection->getProperty('initialized');
+        $property->setValue(null, false);
     }
 
     protected function tearDown(): void
@@ -35,6 +39,10 @@ final class GlobalEnvManagerTest extends TestCase
                 putenv("{$key}={$value}");
             }
         }
+        // Temporarily set private GlobalEnvManager::$initialized to false (use reflection)
+        $reflection = new \ReflectionClass(GlobalEnvManager::class);
+        $property = $reflection->getProperty('initialized');
+        $property->setValue(null, true);
     }
 
     public function testGetInitializedEnv(): void

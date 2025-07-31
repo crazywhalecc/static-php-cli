@@ -7,6 +7,7 @@ namespace SPC\store\source;
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\exception\FileSystemException;
+use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
 
 class PhpSource extends CustomSourceBase
@@ -16,6 +17,7 @@ class PhpSource extends CustomSourceBase
     /**
      * @throws DownloaderException
      * @throws FileSystemException
+     * @throws WrongUsageException
      */
     public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {

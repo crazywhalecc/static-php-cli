@@ -10,6 +10,9 @@ use SPC\builder\macos\SystemUtil as MacOSSystemUtil;
 use SPC\exception\WrongUsageException;
 use SPC\util\GlobalEnvManager;
 
+/**
+ * Toolchain implementation for system clang compiler.
+ */
 class ClangNativeToolchain implements ToolchainInterface
 {
     public function initEnv(): void
@@ -20,6 +23,9 @@ class ClangNativeToolchain implements ToolchainInterface
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=ld');
     }
 
+    /**
+     * @throws WrongUsageException
+     */
     public function afterInit(): void
     {
         foreach (['CC', 'CXX', 'AR', 'LD'] as $env) {

@@ -33,6 +33,7 @@ trait imagemagick
             ->optionalLib('freetype', ...ac_with_args('freetype'))
             ->optionalLib('bzip2', ...ac_with_args('bzlib'))
             ->optionalLib('libjxl', ...ac_with_args('jxl'))
+            ->optionalLib('jbig', ...ac_with_args('jbig'))
             ->addConfigureArgs(
                 '--disable-openmp',
                 '--without-x',
