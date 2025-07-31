@@ -47,22 +47,47 @@ class ConfigValidator
 
             // check if license is valid
             if (isset($src['license'])) {
-                if (!is_assoc_array($src['license'])) {
-                    throw new ValidationException("source {$name} license must be object");
+                if (!is_array($src['license'])) {
+                    throw new ValidationException("source {$name} license must be an object or array");
                 }
-                if (!isset($src['license']['type'])) {
-                    throw new ValidationException("source {$name} license must have type");
-                }
-                if (!in_array($src['license']['type'], ['file', 'text'])) {
-                    throw new ValidationException("source {$name} license type is invalid");
-                }
-                if ($src['license']['type'] === 'file' && !isset($src['license']['path'])) {
-                    throw new ValidationException("source {$name} license file must have path");
-                }
-                if ($src['license']['type'] === 'text' && !isset($src['license']['text'])) {
-                    throw new ValidationException("source {$name} license text must have text");
+                if (is_assoc_array($src['license'])) {
+                    self::checkSingleLicense($src['license'], $name);
+                } elseif (is_list_array($src['license'])) {
+                    foreach ($src['license'] as $license) {
+                        if (!is_assoc_array($license)) {
+                            throw new ValidationException("source {$name} license must be an object or array");
+                        }
+                        self::checkSingleLicense($license, $name);
+                    }
+                } else {
+                    throw new ValidationException("source {$name} license must be an object or array");
                 }
             }
+        }
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private static function checkSingleLicense(array $license, string $name): void
+    {
+        if (!is_assoc_array($license)) {
+            throw new ValidationException("source {$name} license must be an object");
+        }
+        if (!isset($license['type'])) {
+            throw new ValidationException("source {$name} license must have type");
+        }
+        if (!in_array($license['type'], ['file', 'text'])) {
+            throw new ValidationException("source {$name} license type is invalid");
+        }
+        if (!in_array($license['type'], ['file', 'text'])) {
+            throw new ValidationException("source {$name} license type is invalid");
+        }
+        if ($license['type'] === 'file' && !isset($license['path'])) {
+            throw new ValidationException("source {$name} license file must have path");
+        }
+        if ($license['type'] === 'text' && !isset($license['text'])) {
+            throw new ValidationException("source {$name} license text must have text");
         }
     }
 
