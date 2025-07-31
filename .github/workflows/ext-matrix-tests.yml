@@ -84,7 +84,7 @@ jobs:
         php-version:
           - "git"
         operating-system:
-          - "ubuntu-24.04"
+          - "ubuntu-latest"
           #- "macos-13"
           #- "debian-arm64-self-hosted"
           - "macos-14"
