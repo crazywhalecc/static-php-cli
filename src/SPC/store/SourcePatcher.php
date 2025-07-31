@@ -7,6 +7,7 @@ namespace SPC\store;
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\SystemUtil;
 use SPC\builder\unix\UnixBuilderBase;
+use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -87,7 +88,8 @@ class SourcePatcher
     public static function patchBeforeConfigure(BuilderBase $builder): void
     {
         foreach ($builder->getExts() as $ext) {
-            if ($ext->patchBeforeConfigure() === true) {
+            $patch = $builder instanceof WindowsBuilder ? $ext->patchBeforeWindowsConfigure() : $ext->patchBeforeConfigure();
+            if ($patch === true) {
                 logger()->info("Extension [{$ext->getName()}] patched before configure");
             }
         }
