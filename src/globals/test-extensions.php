@@ -18,6 +18,7 @@ $test_php_version = [
     // '8.3',
     // '8.4',
     '8.5',
+    'git',
 ];
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
