@@ -595,11 +595,6 @@ class SourcePatcher
             $file = str_replace('PHP_INI_BEGIN()', "PHP_INI_BEGIN()\n\tPHP_INI_ENTRY(\"static-php-cli.version\",\t\"{$version}\",\tPHP_INI_ALL,\tNULL)", $file);
             FileSystem::writeFile(SOURCE_PATH . '/php-src/main/main.c', $file);
         }
-
-        // add PHP_BUILD_PROVIDER
-        if (getenv('PHP_BUILD_PROVIDER') === false) {
-            putenv("PHP_BUILD_PROVIDER=static-php-cli {$version}");
-        }
     }
 
     /**
