@@ -107,7 +107,7 @@ class MacOSBuilder extends UnixBuilderBase
         if ($opcache_jit && $phpVersionID < 80500 && !$this->getExt('opcache')) {
             $opcache_jit = false;
         }
-        $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit' : '--disable-opcache-jit';
+        $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit ' : '--disable-opcache-jit ';
 
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';

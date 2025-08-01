@@ -75,7 +75,7 @@ class LinuxBuilder extends UnixBuilderBase
         } elseif ($opcache_jit) {
             $opcache_jit = false;
         }
-        $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit' : '--disable-opcache-jit';
+        $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit ' : '--disable-opcache-jit ';
 
         if ($this->getOption('enable-zts', false)) {
             $maxExecutionTimers = $phpVersionID >= 80100 ? '--enable-zend-max-execution-timers ' : '';
