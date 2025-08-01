@@ -51,13 +51,7 @@ class opcache extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        $version = $this->builder->getPHPVersion();
-        $opcache_jit = !$this->builder->getOption('disable-opcache-jit', false);
-        $opcache_jit = $opcache_jit ? '--enable-opcache-jit' : '--disable-opcache-jit';
-        if (version_compare($version, '8.5.0-dev', '<')) {
-            return "--enable-opcache {$opcache_jit}";
-        }
-        return $opcache_jit;
+        return '--enable-opcache';
     }
 
     public function getDistName(): string

@@ -69,6 +69,23 @@ class SourcePatcher
             );
         }
 
+        // Fix PHP VS version
+        if ($builder instanceof WindowsBuilder) {
+            // get vs version
+            $vc = \SPC\builder\windows\SystemUtil::findVisualStudio();
+            $vc_matches = match ($vc['version']) {
+                'vs17' => ['VS17', 'Visual C++ 2022'],
+                'vs16' => ['VS16', 'Visual C++ 2019'],
+                default => ['unknown', 'unknown'],
+            };
+            // patch php-src/win32/build/confutils.js
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '\php-src\win32\build\confutils.js',
+                'var name = "unknown";',
+                "var name = short ? \"{$vc_matches[0]}\" : \"{$vc_matches[1]}\";return name;"
+            );
+        }
+
         // patch php-src/build/php.m4 PKG_CHECK_MODULES -> PKG_CHECK_MODULES_STATIC
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
 

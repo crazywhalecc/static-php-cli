@@ -66,6 +66,17 @@ class LinuxBuilder extends UnixBuilderBase
         $phpVersionID = $this->getPHPVersionID();
         $json_74 = $phpVersionID < 80000 ? '--enable-json ' : '';
 
+        $opcache_jit = !$this->getOption('disable-opcache-jit', false);
+        if ($opcache_jit && ($phpVersionID >= 80500 || $this->getExt('opcache'))) {
+            // php 8.5 contains opcache extension by default,
+            // if opcache_jit is enabled for 8.5 or opcache enabled,
+            // we need to disable undefined behavior sanitizer.
+            f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
+        } elseif ($opcache_jit) {
+            $opcache_jit = false;
+        }
+        $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit' : '--disable-opcache-jit';
+
         if ($this->getOption('enable-zts', false)) {
             $maxExecutionTimers = $phpVersionID >= 80100 ? '--enable-zend-max-execution-timers ' : '';
             $zts = '--enable-zts --disable-zend-signals ';
@@ -73,10 +84,7 @@ class LinuxBuilder extends UnixBuilderBase
             $maxExecutionTimers = '';
             $zts = '';
         }
-        $disable_jit = $this->getOption('disable-opcache-jit', false) ? '--disable-opcache-jit ' : '';
-        if (!$disable_jit && $this->getExt('opcache')) {
-            f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
-        }
+
         $config_file_path = $this->getOption('with-config-file-path', false) ?
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
         $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
@@ -114,7 +122,7 @@ class LinuxBuilder extends UnixBuilderBase
                 ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .
-                $disable_jit .
+                $opcache_jit_arg .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
