@@ -998,6 +998,7 @@
         "path": "php-src/ext/swoole",
         "type": "ghtar",
         "repo": "swoole/swoole-src",
+        "match": "v6\\.+",
         "prefer-stable": true,
         "license": {
             "type": "file",
