@@ -87,6 +87,7 @@ class SourcePatcher
         }
 
         // patch configure.ac
+        /*
         $musl = SPCTarget::getLibc() === 'musl';
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/configure.ac',
@@ -96,6 +97,7 @@ class SourcePatcher
         if (getenv('SPC_LIBC') === false && ($libc = SPCTarget::getLibc()) !== null) {
             putenv("SPC_LIBC={$libc}");
         }
+        */
 
         // patch php-src/build/php.m4 PKG_CHECK_MODULES -> PKG_CHECK_MODULES_STATIC
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
