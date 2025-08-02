@@ -87,8 +87,8 @@ class SourcePatcher
         }
 
         // patch configure.ac
-        /*
         $musl = SPCTarget::getLibc() === 'musl';
+        FileSystem::backupFile(SOURCE_PATH . '/php-src/configure.ac');
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/configure.ac',
             'if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1',
@@ -97,7 +97,6 @@ class SourcePatcher
         if (getenv('SPC_LIBC') === false && ($libc = SPCTarget::getLibc()) !== null) {
             putenv("SPC_LIBC={$libc}");
         }
-        */
 
         // patch php-src/build/php.m4 PKG_CHECK_MODULES -> PKG_CHECK_MODULES_STATIC
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
@@ -131,6 +130,11 @@ class SourcePatcher
         // patch capstone
         if (is_unix()) {
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
+        }
+
+        if (file_exists(SOURCE_PATH . '/php-src/configure.ac.bak')) {
+            // restore configure.ac
+            FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/configure.ac');
         }
     }
 
