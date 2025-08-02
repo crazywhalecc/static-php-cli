@@ -27,4 +27,12 @@ interface ToolchainInterface
      * post-initialization setup or validation.
      */
     public function afterInit(): void;
+
+    /**
+     * Returns the compiler name and version for toolchains.
+     *
+     * If the toolchain does not support compiler information,
+     * this method can return null.
+     */
+    public function getCompilerInfo(): ?string;
 }

@@ -159,7 +159,7 @@ class BuildPHPCommand extends BuildCommand
                 $indent_texts['UPX Pack'] = 'enabled';
             }
 
-            $ver = $builder->getPHPVersionFromArchive() ?: $builder->getPHPVersion();
+            $ver = $builder->getPHPVersionFromArchive() ?: $builder->getPHPVersion(false);
             $indent_texts['PHP Version'] = $ver;
 
             if (!empty($not_included)) {
@@ -269,6 +269,7 @@ class BuildPHPCommand extends BuildCommand
         } catch (WrongUsageException $e) {
             // WrongUsageException is not an exception, it's a user error, so we just print the error message
             logger()->critical($e->getMessage());
+            logger()->error($e->getTraceAsString());
             return static::FAILURE;
         } catch (\Throwable $e) {
             if ($this->getOption('debug')) {

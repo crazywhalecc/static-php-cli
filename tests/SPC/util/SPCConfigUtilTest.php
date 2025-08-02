@@ -21,6 +21,10 @@ class SPCConfigUtilTest extends TestCase
      */
     public static function setUpBeforeClass(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            // Skip tests on Windows as SPCConfigUtil is not applicable
+            self::markTestSkipped('SPCConfigUtil tests are not applicable on Windows.');
+        }
         $testdir = WORKING_DIR . '/.configtest';
         FileSystem::createDir($testdir);
         FileSystem::writeFile($testdir . '/lib.json', file_get_contents(ROOT_DIR . '/config/lib.json'));

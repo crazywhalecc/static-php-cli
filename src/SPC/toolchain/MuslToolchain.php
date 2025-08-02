@@ -36,4 +36,15 @@ class MuslToolchain implements ToolchainInterface
             throw new WrongUsageException('You are building with musl-libc target in glibc distro, but musl-toolchain is not installed, please install musl-toolchain first. (You can use `doctor` command to install it)');
         }
     }
+
+    public function getCompilerInfo(): ?string
+    {
+        $compiler = getenv('CC') ?: getenv('SPC_LINUX_DEFAULT_CC');
+        $version = shell(false)->execWithResult("{$compiler} --version", false);
+        $head = pathinfo($compiler, PATHINFO_BASENAME);
+        if ($version[0] === 0 && preg_match('/linux-musl-cc.*(\d+.\d+.\d+)/', $version[1][0], $match)) {
+            return "{$head} {$match[1]}";
+        }
+        return $head;
+    }
 }

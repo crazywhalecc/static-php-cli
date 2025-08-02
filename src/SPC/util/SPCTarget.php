@@ -99,8 +99,11 @@ class SPCTarget
      */
     public static function getLibcVersion(): ?string
     {
-        $libc = self::getLibc();
-        return SystemUtil::getLibcVersionIfExists($libc);
+        if (PHP_OS_FAMILY === 'Linux') {
+            $libc = self::getLibc();
+            return SystemUtil::getLibcVersionIfExists($libc);
+        }
+        return null;
     }
 
     /**

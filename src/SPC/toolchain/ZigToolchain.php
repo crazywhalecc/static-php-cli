@@ -68,4 +68,10 @@ class ZigToolchain implements ToolchainInterface
             GlobalEnvManager::putenv("SPC_EXTRA_LIBS={$extra_libs}");
         }
     }
+
+    public function getCompilerInfo(): ?string
+    {
+        $version = shell(false)->execWithResult('zig version', false)[1][0] ?? '';
+        return trim("zig {$version}");
+    }
 }

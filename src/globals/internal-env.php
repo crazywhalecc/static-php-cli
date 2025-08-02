@@ -6,9 +6,12 @@ use SPC\builder\freebsd\SystemUtil as BSDSystemUtil;
 use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
 use SPC\builder\macos\SystemUtil as MacOSSystemUtil;
 use SPC\builder\windows\SystemUtil as WindowsSystemUtil;
+use SPC\ConsoleApplication;
 use SPC\store\FileSystem;
 use SPC\util\GlobalEnvManager;
 
+// static-php-cli version string
+const SPC_VERSION = ConsoleApplication::VERSION;
 // output path for everything, other paths are defined relative to this by default
 define('BUILD_ROOT_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_ROOT_PATH')) ? $a : (WORKING_DIR . '/buildroot')));
 // output path for header files for development
@@ -44,6 +47,7 @@ define('SEPARATED_PATH', [
 ]);
 
 // add these to env vars with same name
+GlobalEnvManager::putenv('SPC_VERSION=' . SPC_VERSION);
 GlobalEnvManager::putenv('BUILD_ROOT_PATH=' . BUILD_ROOT_PATH);
 GlobalEnvManager::putenv('BUILD_INCLUDE_PATH=' . BUILD_INCLUDE_PATH);
 GlobalEnvManager::putenv('BUILD_LIB_PATH=' . BUILD_LIB_PATH);

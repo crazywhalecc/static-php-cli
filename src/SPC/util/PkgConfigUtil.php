@@ -15,6 +15,21 @@ use SPC\exception\RuntimeException;
 class PkgConfigUtil
 {
     /**
+     * Returns the version of a module.
+     * This method uses `pkg-config --modversion` to get the version of the specified module.
+     * If the module is not found, it will throw a RuntimeException.
+     *
+     * @param  string           $pkg_config_str .pc file str, accepts multiple files
+     * @return string           version string, e.g. "1.2.3"
+     * @throws RuntimeException
+     */
+    public static function getModuleVersion(string $pkg_config_str): string
+    {
+        $result = self::execWithResult("pkg-config --modversion {$pkg_config_str}");
+        return trim($result);
+    }
+
+    /**
      * Get CFLAGS from pkg-config
      *
      * Returns --cflags-only-other output from pkg-config.

@@ -9,4 +9,9 @@ class MSVCToolchain implements ToolchainInterface
     public function initEnv(): void {}
 
     public function afterInit(): void {}
+
+    public function getCompilerInfo(): ?string
+    {
+        return null;
+    }
 }

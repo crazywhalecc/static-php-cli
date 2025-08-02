@@ -7,6 +7,7 @@ namespace SPC\store;
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\SystemUtil;
 use SPC\builder\unix\UnixBuilderBase;
+use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\FileSystemException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
@@ -68,6 +69,35 @@ class SourcePatcher
             );
         }
 
+        // Fix PHP VS version
+        if ($builder instanceof WindowsBuilder) {
+            // get vs version
+            $vc = \SPC\builder\windows\SystemUtil::findVisualStudio();
+            $vc_matches = match ($vc['version']) {
+                'vs17' => ['VS17', 'Visual C++ 2022'],
+                'vs16' => ['VS16', 'Visual C++ 2019'],
+                default => ['unknown', 'unknown'],
+            };
+            // patch php-src/win32/build/confutils.js
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '\php-src\win32\build\confutils.js',
+                'var name = "unknown";',
+                "var name = short ? \"{$vc_matches[0]}\" : \"{$vc_matches[1]}\";return name;"
+            );
+        }
+
+        // patch configure.ac
+        $musl = SPCTarget::getLibc() === 'musl';
+        FileSystem::backupFile(SOURCE_PATH . '/php-src/configure.ac');
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/configure.ac',
+            'if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1',
+            'if ' . ($musl ? 'true' : 'false')
+        );
+        if (getenv('SPC_LIBC') === false && ($libc = SPCTarget::getLibc()) !== null) {
+            putenv("SPC_LIBC={$libc}");
+        }
+
         // patch php-src/build/php.m4 PKG_CHECK_MODULES -> PKG_CHECK_MODULES_STATIC
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
 
@@ -87,7 +117,8 @@ class SourcePatcher
     public static function patchBeforeConfigure(BuilderBase $builder): void
     {
         foreach ($builder->getExts() as $ext) {
-            if ($ext->patchBeforeConfigure() === true) {
+            $patch = $builder instanceof WindowsBuilder ? $ext->patchBeforeWindowsConfigure() : $ext->patchBeforeConfigure();
+            if ($patch === true) {
                 logger()->info("Extension [{$ext->getName()}] patched before configure");
             }
         }
@@ -97,7 +128,14 @@ class SourcePatcher
             }
         }
         // patch capstone
-        FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
+        if (is_unix()) {
+            FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
+        }
+
+        if (file_exists(SOURCE_PATH . '/php-src/configure.ac.bak')) {
+            // restore configure.ac
+            FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/configure.ac');
+        }
     }
 
     /**
@@ -132,7 +170,7 @@ class SourcePatcher
         }
         $patch_list = $spc_micro_patches;
         $patches = [];
-        $serial = ['80', '81', '82', '83', '84'];
+        $serial = ['80', '81', '82', '83', '84', '85'];
         foreach ($patch_list as $patchName) {
             if (file_exists(SOURCE_PATH . "/php-src/sapi/micro/patches/{$patchName}.patch")) {
                 $patches[] = "sapi/micro/patches/{$patchName}.patch";
@@ -584,7 +622,7 @@ class SourcePatcher
      */
     public static function patchSPCVersionToPHP(string $version = 'unknown'): void
     {
-        // detect patch
+        // detect patch (remove this when 8.3 deprecated)
         $file = FileSystem::readFile(SOURCE_PATH . '/php-src/main/main.c');
         if (!str_contains($file, 'static-php-cli.version')) {
             logger()->debug('Inserting static-php-cli.version to php-src');

@@ -19,6 +19,10 @@ final class PkgConfigUtilTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            // Skip tests on Windows as pkg-config is not typically available
+            self::markTestSkipped('PkgConfigUtil tests are not applicable on Windows.');
+        }
         parent::setUpBeforeClass();
 
         // Save original PATH

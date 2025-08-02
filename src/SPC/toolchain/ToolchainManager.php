@@ -61,6 +61,10 @@ class ToolchainManager
         }
         $toolchain = getenv('SPC_TOOLCHAIN');
         /* @var ToolchainInterface $toolchain */
-        (new $toolchain())->afterInit();
+        $instance = new $toolchain();
+        $instance->afterInit();
+        if (getenv('PHP_BUILD_COMPILER') === false && ($compiler_info = $instance->getCompilerInfo())) {
+            GlobalEnvManager::putenv("PHP_BUILD_COMPILER={$compiler_info}");
+        }
     }
 }

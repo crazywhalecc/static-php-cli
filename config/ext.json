@@ -488,6 +488,7 @@
     "opcache": {
         "type": "builtin",
         "arg-type-unix": "custom",
+        "arg-type-windows": "enable",
         "zend-extension": true
     },
     "openssl": {

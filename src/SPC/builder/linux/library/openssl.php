@@ -28,6 +28,8 @@ use SPC\store\FileSystem;
 
 class openssl extends LinuxLibraryBase
 {
+    use \SPC\builder\traits\openssl;
+
     public const NAME = 'openssl';
 
     /**
@@ -37,8 +39,6 @@ class openssl extends LinuxLibraryBase
      */
     public function build(): void
     {
-        [,,$destdir] = SEPARATED_PATH;
-
         $extra = '';
         $ex_lib = '-ldl -pthread';
         $arch = getenv('SPC_ARCH');

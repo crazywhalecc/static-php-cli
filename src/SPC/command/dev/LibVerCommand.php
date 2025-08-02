@@ -8,6 +8,7 @@ use SPC\builder\BuilderProvider;
 use SPC\command\BaseCommand;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,7 +42,10 @@ class LibVerCommand extends BaseCommand
             return static::FAILURE;
         }
 
-        $builder->proveLibs([$this->getArgument('library')]);
+        // parse the dependencies
+        [, $libs] = DependencyUtil::getExtsAndLibs([], [$this->getArgument('library')]);
+
+        $builder->proveLibs($libs);
 
         // Check whether lib is extracted
         if (!is_dir(SOURCE_PATH . '/' . $this->getArgument('library'))) {
@@ -51,7 +55,7 @@ class LibVerCommand extends BaseCommand
 
         $version = $builder->getLib($this->getArgument('library'))->getLibVersion();
         if ($version === null) {
-            $this->output->writeln("<error>Failed to get version of library {$this->getArgument('library')}</error>");
+            $this->output->writeln("<error>Failed to get version of library {$this->getArgument('library')}. The version getter for [{$this->getArgument('library')}] is not implemented.</error>");
             return static::FAILURE;
         }
         $this->output->writeln("<info>{$version}</info>");

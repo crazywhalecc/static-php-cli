@@ -209,8 +209,8 @@ bin/spc download --from-zip=/path/to/your/download.zip
 让下载器强制使用你指定的链接下载此 source 的包。使用方法为 `{source-name}:{url}` 即可，可同时重写多个库的下载地址。在使用 `--for-extensions` 选项下载时同样可用。
 
 ```bash
-# 例如：指定下载测试版的 PHP8.3
-bin/spc download --all -U "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"
+# 例如：指定下载 Alpha 版的 PHP8.5
+bin/spc download --all -U "php-src:https://downloads.php.net/~edorian/php-8.5.0alpha2.tar.xz"
 
 # 指定下载旧版本的 curl 库
 bin/spc download --all -U "curl:https://curl.se/download/curl-7.88.1.tar.gz"

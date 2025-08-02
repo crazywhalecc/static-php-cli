@@ -19,6 +19,7 @@ class MacOSToolCheckList
         'curl',
         'make',
         'bison',
+        're2c',
         'flex',
         'pkg-config',
         'git',
@@ -59,6 +60,30 @@ class MacOSToolCheckList
             return CheckResult::fail('missing system commands: ' . implode(', ', $missing), 'build-tools', [$missing]);
         }
         return CheckResult::ok();
+    }
+
+    #[AsCheckItem('if bison version is 3.0 or later', limit_os: 'Darwin')]
+    public function checkBisonVersion(array $command_path = []): ?CheckResult
+    {
+        // if the bison command is /usr/bin/bison, it is the system bison that may be too old
+        if (($bison = $this->findCommand('bison', $command_path)) === null) {
+            return CheckResult::fail('bison is not installed or too old', 'build-tools', [['bison']]);
+        }
+        // check version: bison (GNU Bison) x.y(.z)
+        $version = shell()->execWithResult("{$bison} --version", false);
+        if (preg_match('/bison \(GNU Bison\) (\d+)\.(\d+)(?:\.(\d+))?/', $version[1][0], $matches)) {
+            $major = (int) $matches[1];
+            // major should be 3 or later
+            if ($major < 3) {
+                // find homebrew keg-only bison
+                if ($command_path !== []) {
+                    return CheckResult::fail("Current {$bison} version is too old: " . $matches[0]);
+                }
+                return $this->checkBisonVersion(['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin']);
+            }
+            return CheckResult::ok($matches[0]);
+        }
+        return CheckResult::fail('bison version cannot be determined');
     }
 
     #[AsFixItem('brew')]

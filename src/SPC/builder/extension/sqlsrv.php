@@ -24,7 +24,7 @@ class sqlsrv extends Extension
         return false;
     }
 
-    public function patchBeforeConfigure(): bool
+    public function patchBeforeWindowsConfigure(): bool
     {
         if ($this->pdo_sqlsrv_patched) {
             // revert pdo_sqlsrv patch
