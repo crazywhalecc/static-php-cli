@@ -97,9 +97,10 @@ class LinuxBuilder extends UnixBuilderBase
         $enableFrankenphp = ($build_target & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP;
 
         // prepare build php envs
+        $musl_flag = SPCTarget::getLibc() === 'musl' ? ' -D__MUSL__' : ' -U__MUSL__';
         $php_configure_env = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
-            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . $musl_flag,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
             // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
@@ -343,12 +344,22 @@ class LinuxBuilder extends UnixBuilderBase
         $this->patchPhpScripts();
     }
 
+    /**
+     * Return extra variables for php make command.
+     *
+     * @throws FileSystemException
+     * @throws RuntimeException
+     * @throws WrongUsageException
+     * @throws \ReflectionException
+     * @throws \Throwable
+     */
     private function getMakeExtraVars(): array
     {
         $config = (new SPCConfigUtil($this, ['libs_only_deps' => true, 'absolute_libs' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
         $static = SPCTarget::isStatic() ? '-all-static' : '';
         $lib = BUILD_LIB_PATH;
         return [
+            'CPPFLAGS' => SPCTarget::getLibc() === 'musl' ? '-D__MUSL__' : '-U__MUSL__',
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => $config['libs'],
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
