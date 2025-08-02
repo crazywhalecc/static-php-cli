@@ -87,10 +87,11 @@ class SourcePatcher
         }
 
         // patch configure.ac
+        $musl = SPCTarget::getLibc() === 'musl';
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/configure.ac',
             'if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1',
-            'if [ "$SPC_LIBC" = "musl" ];'
+            'if ' . ($musl ? 'true' : 'false')
         );
         if (getenv('SPC_LIBC') === false && ($libc = SPCTarget::getLibc()) !== null) {
             putenv("SPC_LIBC={$libc}");

@@ -6,14 +6,25 @@ assert(function_exists('openssl_digest'));
 assert(openssl_digest('123456', 'md5') === 'e10adc3949ba59abbe56e057f20f883e');
 if (file_exists('/etc/ssl/openssl.cnf')) {
     $domain_list = [
-        'https://captive.apple.com/',
-        'https://detectportal.firefox.com/',
-        'https://static-php.dev/',
-        'https://www.example.com/',
+        'captive.apple.com',
+        'detectportal.firefox.com',
+        'static-php.dev',
+        'www.example.com',
     ];
     $valid = false;
     foreach ($domain_list as $domain) {
-        if (file_get_contents($domain) !== false) {
+        $ssloptions = [
+            'capture_peer_cert' => true,
+            'capture_peer_cert_chain' => true,
+            'allow_self_signed' => false,
+            'CN_match' => $domain,
+            'verify_peer' => true,
+            'SNI_enabled' => true,
+            'SNI_server_name' => $domain,
+        ];
+        $context = stream_context_create(['ssl' => $ssloptions]);
+        $result = stream_socket_client("ssl://{$domain}:443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
+        if ($result !== false) {
             $valid = true;
             break;
         }
