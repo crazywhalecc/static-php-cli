@@ -100,7 +100,7 @@ class LinuxBuilder extends UnixBuilderBase
         // $musl_flag = SPCTarget::getLibc() === 'musl' ? ' -D__MUSL__' : ' -U__MUSL__';
         $php_configure_env = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
-            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH . ' -Dsomethinghere', // . $musl_flag,
+            'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH, // . ' -Dsomethinghere', // . $musl_flag,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
             // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
@@ -359,7 +359,7 @@ class LinuxBuilder extends UnixBuilderBase
         $static = SPCTarget::isStatic() ? '-all-static' : '';
         $lib = BUILD_LIB_PATH;
         return [
-            'CPPFLAGS' => '-Dsomethinghere',
+            // 'CPPFLAGS' => '-Dsomethinghere',
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => $config['libs'],
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
