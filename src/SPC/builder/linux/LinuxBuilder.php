@@ -359,7 +359,6 @@ class LinuxBuilder extends UnixBuilderBase
         $static = SPCTarget::isStatic() ? '-all-static' : '';
         $lib = BUILD_LIB_PATH;
         return [
-            // 'CPPFLAGS' => '-Dsomethinghere',
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => $config['libs'],
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
