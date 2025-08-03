@@ -98,7 +98,6 @@ class MacOSBuilder extends UnixBuilderBase
         $this->emitPatchPoint('before-php-configure');
         SourcePatcher::patchBeforeConfigure($this);
 
-        $phpVersionID = $this->getPHPVersionID();
         $json_74 = $this->getPHPVersionID() < 80000 ? '--enable-json ' : '';
         $zts = $this->getOption('enable-zts', false) ? '--enable-zts --disable-zend-signals ' : '';
 
