@@ -30,6 +30,8 @@ class openssl extends Extension
         $args = '--with-openssl=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $openssl_dir;
         if ($this->builder->getPHPVersionID() >= 80500 || !$this->builder->getOption('enable-zts')) {
             $args .= ' --with-openssl-argon2 OPENSSL_LIBS="-lz"';
+        } else {
+            $args .= ' --without-openssl-argon2';
         }
         return $args;
     }
