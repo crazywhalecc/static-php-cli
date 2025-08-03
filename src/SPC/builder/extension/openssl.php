@@ -5,23 +5,11 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('openssl')]
 class openssl extends Extension
 {
-    public function patchBeforeBuildconf(): bool
-    {
-        // Fix php 8.5 alpha1~4 zts openssl build bug
-        FileSystem::replaceFileStr(
-            SOURCE_PATH . '/php-src/ext/openssl/config.w32',
-            'WARNING("OpenSSL argon2 hashing not supported in ZTS mode for now");',
-            'AC_DEFINE("HAVE_OPENSSL_ARGON2", 1, "Define to 1 to enable OpenSSL argon2 password hashing.");'
-        );
-        return true;
-    }
-
     public function patchBeforeMake(): bool
     {
         $patched = parent::patchBeforeMake();
