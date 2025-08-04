@@ -28,7 +28,7 @@ class openssl extends Extension
     {
         $openssl_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : ' --with-openssl-dir=' . BUILD_ROOT_PATH;
         $args = '--with-openssl=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $openssl_dir;
-        if ($this->builder->getPHPVersionID() >= 80500 || !$this->builder->getOption('enable-zts')) {
+        if ($this->builder->getPHPVersionID() >= 80500 || ($this->builder->getPHPVersionID() >= 80400 && !$this->builder->getOption('enable-zts'))) {
             $args .= ' --with-openssl-argon2 OPENSSL_LIBS="-lz"';
         }
         return $args;
@@ -37,7 +37,7 @@ class openssl extends Extension
     public function getWindowsConfigureArg(bool $shared = false): string
     {
         $args = '--with-openssl';
-        if ($this->builder->getPHPVersionID() >= 80500) {
+        if ($this->builder->getPHPVersionID() >= 80500 || ($this->builder->getPHPVersionID() >= 80400 && !$this->builder->getOption('enable-zts'))) {
             $args .= ' --with-openssl-argon2';
         }
         return $args;
