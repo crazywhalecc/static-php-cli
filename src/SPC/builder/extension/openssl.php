@@ -27,6 +27,19 @@ class openssl extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         $openssl_dir = $this->builder->getPHPVersionID() >= 80400 ? '' : ' --with-openssl-dir=' . BUILD_ROOT_PATH;
-        return '--with-openssl=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $openssl_dir;
+        $args = '--with-openssl=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $openssl_dir;
+        if ($this->builder->getPHPVersionID() >= 80500 || ($this->builder->getPHPVersionID() >= 80400 && !$this->builder->getOption('enable-zts'))) {
+            $args .= ' --with-openssl-argon2 OPENSSL_LIBS="-lz"';
+        }
+        return $args;
+    }
+
+    public function getWindowsConfigureArg(bool $shared = false): string
+    {
+        $args = '--with-openssl';
+        if ($this->builder->getPHPVersionID() >= 80500 || ($this->builder->getPHPVersionID() >= 80400 && !$this->builder->getOption('enable-zts'))) {
+            $args .= ' --with-openssl-argon2';
+        }
+        return $args;
     }
 }

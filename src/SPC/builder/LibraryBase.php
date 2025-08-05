@@ -289,6 +289,16 @@ abstract class LibraryBase
     }
 
     /**
+     * Patch code before windows configure.bat
+     * If you need to patch some code, overwrite this
+     * return true if you patched something, false if not
+     */
+    public function patchBeforeWindowsConfigure(): bool
+    {
+        return false;
+    }
+
+    /**
      * Patch code before make
      * If you need to patch some code, overwrite this
      * return true if you patched something, false if not

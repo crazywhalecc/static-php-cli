@@ -488,6 +488,7 @@
     "opcache": {
         "type": "builtin",
         "arg-type-unix": "custom",
+        "arg-type-windows": "enable",
         "zend-extension": true
     },
     "openssl": {
@@ -530,9 +531,10 @@
         },
         "notes": true,
         "type": "builtin",
-        "arg-type": "with-path",
+        "arg-type": "custom",
         "lib-depends": [
-            "libargon2"
+            "libargon2",
+            "openssl"
         ]
     },
     "pcntl": {

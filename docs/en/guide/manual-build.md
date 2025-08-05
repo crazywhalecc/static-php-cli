@@ -242,8 +242,8 @@ Also, it is available when downloading with the `--for-extensions` option.
 
 
 ```bash
-# Specifying to download a beta version of PHP8.3
-bin/spc download --all -U "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"
+# Specifying to download a alpha version of PHP 8.5
+bin/spc download --all -U "php-src:https://downloads.php.net/~edorian/php-8.5.0alpha2.tar.xz"
 
 # Specifying to download an older version of the curl library
 bin/spc download --all -U "curl:https://curl.se/download/curl-7.88.1.tar.gz"

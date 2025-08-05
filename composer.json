@@ -23,7 +23,6 @@
         "captainhook/hook-installer": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.60",
         "humbug/box": "^4.5.0 || ^4.6.0",
-        "nunomaduro/collision": "^7.8",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.3 || ^9.5"
     },

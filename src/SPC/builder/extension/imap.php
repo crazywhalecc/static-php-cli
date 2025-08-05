@@ -49,7 +49,7 @@ class imap extends Extension
         if (PHP_OS_FAMILY !== 'Linux' || SystemUtil::isMuslDist()) {
             return $patched;
         }
-        $extra_libs = trim(getenv('SPC_EXTRA_LIBS') . ' -lcrypt');
+        $extra_libs = trim((getenv('SPC_EXTRA_LIBS') ?: '') . ' -lcrypt');
         f_putenv('SPC_EXTRA_LIBS=' . $extra_libs);
         return true;
     }

@@ -733,7 +733,7 @@
     "micro": {
         "type": "git",
         "path": "php-src/sapi/micro",
-        "rev": "84beta",
+        "rev": "php-85-win",
         "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
@@ -927,6 +927,20 @@
         "url": "https://github.com/static-php/php-rar.git",
         "path": "php-src/ext/rar",
         "rev": "issue-php82",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "re2c": {
+        "type": "ghrel",
+        "repo": "skvadrik/re2c",
+        "match": "re2c.+\\.tar\\.xz",
+        "prefer-stable": true,
+        "alt": {
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/re2c/re2c-4.3.tar.xz"
+        },
         "license": {
             "type": "file",
             "path": "LICENSE"

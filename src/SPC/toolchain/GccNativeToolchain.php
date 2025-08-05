@@ -35,4 +35,15 @@ class GccNativeToolchain implements ToolchainInterface
             };
         }
     }
+
+    public function getCompilerInfo(): ?string
+    {
+        $compiler = getenv('CC') ?: 'gcc';
+        $version = shell(false)->execWithResult("{$compiler} --version", false);
+        $head = pathinfo($compiler, PATHINFO_BASENAME);
+        if ($version[0] === 0 && preg_match('/gcc.*(\d+.\d+.\d+)/', $version[1][0], $match)) {
+            return "{$head} {$match[1]}";
+        }
+        return $head;
+    }
 }

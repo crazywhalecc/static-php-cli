@@ -89,6 +89,9 @@ class WindowsBuilder extends BuilderBase
             }
         }
 
+        $opcache_jit = !$this->getOption('disable-opcache-jit', false);
+        $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit=yes ' : '--enable-opcache-jit=no ';
+
         if (($logo = $this->getOption('with-micro-logo')) !== null) {
             // realpath
             // $logo = realpath($logo);
@@ -115,6 +118,7 @@ class WindowsBuilder extends BuilderBase
                 ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
                 ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
                 $config_file_scan_dir .
+                $opcache_jit_arg .
                 "{$this->makeStaticExtensionArgs()} " .
                 $zts .
                 '"'

@@ -797,6 +797,12 @@
             "depot.h"
         ]
     },
+    "re2c": {
+        "source": "re2c",
+        "bin-unix": [
+            "re2c"
+        ]
+    },
     "readline": {
         "source": "readline",
         "static-libs-unix": [

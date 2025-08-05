@@ -339,16 +339,21 @@ abstract class BuilderBase
         throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
     }
 
-    public function getPHPVersion(): string
+    public function getPHPVersion(bool $exception_on_failure = true): string
     {
         if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            if (!$exception_on_failure) {
+                return 'unknown';
+            }
             throw new WrongUsageException('PHP source files are not available, you need to download them first');
         }
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
         if (preg_match('/PHP_VERSION "(.*)"/', $file, $match) !== 0) {
             return $match[1];
         }
-
+        if (!$exception_on_failure) {
+            return 'unknown';
+        }
         throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
     }
 
@@ -366,7 +371,7 @@ abstract class BuilderBase
             }
             $file = LockFile::getLockFullPath($lock);
         }
-        if (preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+)?)\.tar\.(?:gz|bz2|xz)/', $file, $match)) {
+        if (preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+|alpha\d+|beta\d+)?)\.tar\.(?:gz|bz2|xz)/', $file, $match)) {
             return $match[1];
         }
         return false;
