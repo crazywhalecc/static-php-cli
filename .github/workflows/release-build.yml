@@ -165,6 +165,10 @@ jobs:
         with:
           name: spc-${{ matrix.operating-system.name }}${{ env.SUFFIX }}
 
+      - name: "Chmod"
+        if: matrix.operating-system.name != 'windows-x64'
+        run: chmod +x spc
+
       - name: "Run SPC Tests"
         env:
           SUFFIX: ${{ matrix.operating-system.name == 'windows-x64' && '.exe' || '' }}
