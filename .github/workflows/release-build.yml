@@ -3,6 +3,10 @@ name: Build SPC Binary
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/release-build.yml'
   release:
     types:
       - published
@@ -10,7 +14,7 @@ on:
 
 env:
   PHP_VERSION: 8.4
-  MICRO_VERSION: 8.4.10
+  MICRO_VERSION: 8.4.11
 
 jobs:
   build-release-artifacts:
@@ -117,7 +121,8 @@ jobs:
           files: dist/${{ matrix.operating-system.filename }}
 
       - name: "Deploy to self-hosted OSS"
-        if: github.repository == 'crazywhalecc/static-php-cli'
+        # only run this step if the repository is static-php-cli and the branch is main
+        if: github.repository == 'crazywhalecc/static-php-cli' && github.ref == 'refs/heads/main'
         uses: static-php/upload-s3-action@v1.0.0
         with:
           aws_key_id: ${{ secrets.AWS_KEY_ID }}
@@ -132,3 +137,39 @@ jobs:
         with:
           path: spc${{ env.SUFFIX }}
           name: spc-${{ matrix.operating-system.name }}${{ env.SUFFIX }}
+  test-spc:
+    name: "Test SPC Binary for ${{ matrix.operating-system.name }}"
+    runs-on: ${{ matrix.operating-system.os }}
+    needs: [build-release-artifacts]
+    strategy:
+      matrix:
+        operating-system:
+          - name: "linux-x86_64"
+            os: "ubuntu-latest"
+          - name: "macos-x86_64"
+            os: "macos-13"
+          - name: "linux-aarch64"
+            os: "ubuntu-24.04-arm"
+          - name: "macos-aarch64"
+            os: "macos-latest"
+          - name: "windows-x64"
+            os: "windows-latest"
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Download Artifact"
+        uses: actions/download-artifact@v4
+        env:
+          SUFFIX: ${{ matrix.operating-system.name == 'windows-x64' && '.exe' || '' }}
+        with:
+          name: spc-${{ matrix.operating-system.name }}${{ env.SUFFIX }}
+
+      - name: "Chmod"
+        if: matrix.operating-system.name != 'windows-x64'
+        run: chmod +x spc
+
+      - name: "Run SPC Tests"
+        env:
+          SUFFIX: ${{ matrix.operating-system.name == 'windows-x64' && '.exe' || '' }}
+        run: ./spc${{ env.SUFFIX }} dev:extensions
