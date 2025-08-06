@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
-use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
 
 class Config
@@ -22,10 +21,8 @@ class Config
     /**
      * Get pre-built configuration by name
      *
-     * @param  string              $name The name of the pre-built configuration
-     * @return mixed               The pre-built configuration or null if not found
-     * @throws WrongUsageException
-     * @throws FileSystemException
+     * @param  string $name The name of the pre-built configuration
+     * @return mixed  The pre-built configuration or null if not found
      */
     public static function getPreBuilt(string $name): mixed
     {
@@ -53,9 +50,8 @@ class Config
     /**
      * Get source configuration by name
      *
-     * @param  string              $name The name of the source
-     * @return null|array          The source configuration or null if not found
-     * @throws FileSystemException
+     * @param  string     $name The name of the source
+     * @return null|array The source configuration or null if not found
      */
     public static function getSource(string $name): ?array
     {
@@ -68,9 +64,8 @@ class Config
     /**
      * Get package configuration by name
      *
-     * @param  string              $name The name of the package
-     * @return null|array          The package configuration or null if not found
-     * @throws FileSystemException
+     * @param  string     $name The name of the package
+     * @return null|array The package configuration or null if not found
      */
     public static function getPkg(string $name): ?array
     {
@@ -84,12 +79,10 @@ class Config
      * Get library configuration by name and optional key
      * Supports platform-specific configurations for different operating systems
      *
-     * @param  string              $name    The name of the library
-     * @param  null|string         $key     The configuration key (static-libs, headers, lib-depends, lib-suggests, frameworks, bin)
-     * @param  mixed               $default Default value if key not found
-     * @return mixed               The library configuration or default value
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param  string      $name    The name of the library
+     * @param  null|string $key     The configuration key (static-libs, headers, lib-depends, lib-suggests, frameworks, bin)
+     * @param  mixed       $default Default value if key not found
+     * @return mixed       The library configuration or default value
      */
     public static function getLib(string $name, ?string $key = null, mixed $default = null)
     {
@@ -124,8 +117,7 @@ class Config
     /**
      * Get all library configurations
      *
-     * @return array               All library configurations
-     * @throws FileSystemException
+     * @return array All library configurations
      */
     public static function getLibs(): array
     {
@@ -138,10 +130,8 @@ class Config
     /**
      * Get extension target configuration by name
      *
-     * @param  string              $name The name of the extension
-     * @return null|array          The extension target configuration or default ['static', 'shared']
-     * @throws WrongUsageException
-     * @throws FileSystemException
+     * @param  string     $name The name of the extension
+     * @return null|array The extension target configuration or default ['static', 'shared']
      */
     public static function getExtTarget(string $name): ?array
     {
@@ -158,12 +148,10 @@ class Config
      * Get extension configuration by name and optional key
      * Supports platform-specific configurations for different operating systems
      *
-     * @param  string              $name    The name of the extension
-     * @param  null|string         $key     The configuration key (lib-depends, lib-suggests, ext-depends, ext-suggests, arg-type)
-     * @param  mixed               $default Default value if key not found
-     * @return mixed               The extension configuration or default value
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param  string      $name    The name of the extension
+     * @param  null|string $key     The configuration key (lib-depends, lib-suggests, ext-depends, ext-suggests, arg-type)
+     * @param  mixed       $default Default value if key not found
+     * @return mixed       The extension configuration or default value
      */
     public static function getExt(string $name, ?string $key = null, mixed $default = null)
     {
@@ -198,8 +186,7 @@ class Config
     /**
      * Get all extension configurations
      *
-     * @return array               All extension configurations
-     * @throws FileSystemException
+     * @return array All extension configurations
      */
     public static function getExts(): array
     {
@@ -212,8 +199,7 @@ class Config
     /**
      * Get all source configurations
      *
-     * @return array               All source configurations
-     * @throws FileSystemException
+     * @return array All source configurations
      */
     public static function getSources(): array
     {

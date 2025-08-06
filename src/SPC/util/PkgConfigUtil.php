@@ -17,11 +17,9 @@ class PkgConfigUtil
     /**
      * Returns the version of a module.
      * This method uses `pkg-config --modversion` to get the version of the specified module.
-     * If the module is not found, it will throw a RuntimeException.
      *
-     * @param  string           $pkg_config_str .pc file str, accepts multiple files
-     * @return string           version string, e.g. "1.2.3"
-     * @throws RuntimeException
+     * @param  string $pkg_config_str .pc file str, accepts multiple files
+     * @return string version string, e.g. "1.2.3"
      */
     public static function getModuleVersion(string $pkg_config_str): string
     {
@@ -36,9 +34,8 @@ class PkgConfigUtil
      * The reason we return the string is we cannot use array_unique() on cflags,
      * some cflags may contains spaces.
      *
-     * @param  string           $pkg_config_str .pc file string, accepts multiple files
-     * @return string           CFLAGS string, e.g. "-Wno-implicit-int-float-conversion ..."
-     * @throws RuntimeException
+     * @param  string $pkg_config_str .pc file string, accepts multiple files
+     * @return string CFLAGS string, e.g. "-Wno-implicit-int-float-conversion ..."
      */
     public static function getCflags(string $pkg_config_str): string
     {
@@ -53,9 +50,8 @@ class PkgConfigUtil
      * Returns --libs-only-l and --libs-only-other output.
      * The reason we return the array is to avoid duplicate lib defines.
      *
-     * @param  string           $pkg_config_str .pc file string, accepts multiple files
-     * @return array            Unique libs array, e.g. [-lz, -lxml, ...]
-     * @throws RuntimeException
+     * @param  string $pkg_config_str .pc file string, accepts multiple files
+     * @return array  Unique libs array, e.g. [-lz, -lxml, ...]
      */
     public static function getLibsArray(string $pkg_config_str): array
     {
@@ -92,9 +88,8 @@ class PkgConfigUtil
     /**
      * Execute pkg-config command and return result
      *
-     * @param  string           $cmd The pkg-config command to execute
-     * @return string           The command output
-     * @throws RuntimeException If command fails
+     * @param  string $cmd The pkg-config command to execute
+     * @return string The command output
      */
     private static function execWithResult(string $cmd): string
     {

@@ -21,20 +21,12 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 class libpng extends MacOSLibraryBase
 {
     public const NAME = 'libpng';
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     protected function build(): void
     {
         $arch = arch2gnu(php_uname('m'));

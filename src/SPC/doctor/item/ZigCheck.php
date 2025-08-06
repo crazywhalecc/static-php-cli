@@ -8,8 +8,6 @@ use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
 use SPC\doctor\OptionalCheck;
-use SPC\exception\FileSystemException;
-use SPC\exception\WrongUsageException;
 use SPC\store\PackageManager;
 use SPC\store\pkg\Zig;
 use SPC\toolchain\ZigToolchain;
@@ -32,11 +30,6 @@ class ZigCheck
         return CheckResult::fail('zig is not installed', 'install-zig');
     }
 
-    /** @noinspection PhpUnused */
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     #[AsFixItem('install-zig')]
     public function installZig(): bool
     {

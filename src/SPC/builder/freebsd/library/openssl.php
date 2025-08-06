@@ -22,19 +22,11 @@ declare(strict_types=1);
 namespace SPC\builder\freebsd\library;
 
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 
 class openssl extends BSDLibraryBase
 {
     public const NAME = 'openssl';
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     protected function build(): void
     {
         [$lib,,$destdir] = SEPARATED_PATH;

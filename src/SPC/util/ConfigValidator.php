@@ -12,10 +12,9 @@ use Symfony\Component\Yaml\Yaml;
 class ConfigValidator
 {
     /**
-     * 验证 source.json
+     * Validate source.json
      *
-     * @param  array               $data source.json 加载后的数据
-     * @throws ValidationException
+     * @param array $data source.json data array
      */
     public static function validateSource(array $data): void
     {
@@ -66,9 +65,6 @@ class ConfigValidator
         }
     }
 
-    /**
-     * @throws ValidationException
-     */
     public static function validateLibs(mixed $data, array $source_data = []): void
     {
         // check if it is an array
@@ -126,9 +122,6 @@ class ConfigValidator
         }
     }
 
-    /**
-     * @throws ValidationException
-     */
     public static function validateExts(mixed $data): void
     {
         if (!is_array($data)) {
@@ -192,9 +185,6 @@ class ConfigValidator
         }
     }
 
-    /**
-     * @throws ValidationException
-     */
     public static function validatePkgs(mixed $data): void
     {
         if (!is_array($data)) {
@@ -229,8 +219,7 @@ class ConfigValidator
     /**
      * Validate pre-built.json configuration
      *
-     * @param  mixed               $data pre-built.json loaded data
-     * @throws ValidationException
+     * @param mixed $data pre-built.json loaded data
      */
     public static function validatePreBuilt(mixed $data): void
     {
@@ -309,7 +298,6 @@ class ConfigValidator
      *         build?: bool
      *     }
      * }
-     * @throws ValidationException
      */
     public static function validateAndParseCraftFile(mixed $craft_file, Command $command): array
     {
@@ -415,9 +403,6 @@ class ConfigValidator
         return $craft;
     }
 
-    /**
-     * @throws ValidationException
-     */
     private static function checkSingleLicense(array $license, string $name): void
     {
         if (!is_assoc_array($license)) {
@@ -443,10 +428,9 @@ class ConfigValidator
     /**
      * Validate source type configuration (shared between source.json and pkg.json)
      *
-     * @param  array               $item        The source/package item to validate
-     * @param  string              $name        The name of the item for error messages
-     * @param  string              $config_type The type of config file ("source" or "pkg")
-     * @throws ValidationException
+     * @param array  $item        The source/package item to validate
+     * @param string $name        The name of the item for error messages
+     * @param string $config_type The type of config file ("source" or "pkg")
      */
     private static function validateSourceTypeConfig(array $item, string $name, string $config_type): void
     {

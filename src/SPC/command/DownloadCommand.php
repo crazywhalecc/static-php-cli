@@ -47,10 +47,6 @@ class DownloadCommand extends BaseCommand
         $this->addOption('no-alt', null, null, 'Do not download alternative sources');
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     public function initialize(InputInterface $input, OutputInterface $output): void
     {
         // mode: --all
@@ -89,10 +85,6 @@ class DownloadCommand extends BaseCommand
         parent::initialize($input, $output);
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
     public function handle(): int
     {
         try {
@@ -268,10 +260,6 @@ class DownloadCommand extends BaseCommand
         }
     }
 
-    /**
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     private function downloadFromZip(string $path): int
     {
         if (!file_exists($path)) {
@@ -316,10 +304,8 @@ class DownloadCommand extends BaseCommand
     /**
      * Calculate the sources by extensions
      *
-     * @param  array               $extensions       extension list
-     * @param  bool                $include_suggests include suggested libs and extensions (default: true)
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param array $extensions       extension list
+     * @param bool  $include_suggests include suggested libs and extensions (default: true)
      */
     private function calculateSourcesByExt(array $extensions, bool $include_suggests = true): array
     {
@@ -342,10 +328,8 @@ class DownloadCommand extends BaseCommand
     /**
      * Calculate the sources by libraries
      *
-     * @param  array               $libs             library list
-     * @param  bool                $include_suggests include suggested libs (default: true)
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param array $libs             library list
+     * @param bool  $include_suggests include suggested libs (default: true)
      */
     private function calculateSourcesByLib(array $libs, bool $include_suggests = true): array
     {
@@ -373,9 +357,6 @@ class DownloadCommand extends BaseCommand
         return null;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     private function _clean(): int
     {
         logger()->warning('You are doing some operations that not recoverable: removing directories below');

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\freebsd;
 
 use SPC\builder\unix\UnixBuilderBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
@@ -16,11 +14,6 @@ class BSDBuilder extends UnixBuilderBase
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
-    /**
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
     public function __construct(array $options = [])
     {
         $this->options = $options;
@@ -56,10 +49,7 @@ class BSDBuilder extends UnixBuilderBase
     /**
      * Just start to build statically linked php binary
      *
-     * @param  int                 $build_target build target
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
+     * @param int $build_target build target
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
@@ -148,9 +138,6 @@ class BSDBuilder extends UnixBuilderBase
 
     /**
      * Build cli sapi
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
      */
     protected function buildCli(): void
     {
@@ -170,10 +157,6 @@ class BSDBuilder extends UnixBuilderBase
 
     /**
      * Build phpmicro sapi
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
      */
     protected function buildMicro(): void
     {
@@ -209,9 +192,6 @@ class BSDBuilder extends UnixBuilderBase
 
     /**
      * Build fpm sapi
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
      */
     protected function buildFpm(): void
     {
@@ -230,8 +210,6 @@ class BSDBuilder extends UnixBuilderBase
 
     /**
      * Build embed sapi
-     *
-     * @throws RuntimeException
      */
     protected function buildEmbed(): void
     {

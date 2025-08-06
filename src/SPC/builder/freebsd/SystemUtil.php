@@ -15,8 +15,6 @@ class SystemUtil
 
     /**
      * Get Logic CPU Count for macOS
-     *
-     * @throws RuntimeException
      */
     public static function getCpuCount(): int
     {
@@ -31,9 +29,8 @@ class SystemUtil
     /**
      * Get Target Arch CFlags
      *
-     * @param  string              $arch Arch Name
-     * @return string              return Arch CFlags string
-     * @throws WrongUsageException
+     * @param  string $arch Arch Name
+     * @return string return Arch CFlags string
      */
     public static function getArchCFlags(string $arch): string
     {

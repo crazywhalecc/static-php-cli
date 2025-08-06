@@ -14,10 +14,9 @@ class FileSystem
     /**
      * Load configuration array from JSON file
      *
-     * @param  string              $config     The configuration name (ext, lib, source, pkg, pre-built)
-     * @param  null|string         $config_dir Optional custom config directory
-     * @return array               The loaded configuration array
-     * @throws FileSystemException
+     * @param  string      $config     The configuration name (ext, lib, source, pkg, pre-built)
+     * @param  null|string $config_dir Optional custom config directory
+     * @return array       The loaded configuration array
      */
     public static function loadConfigArray(string $config, ?string $config_dir = null): array
     {
@@ -44,9 +43,8 @@ class FileSystem
     /**
      * Read file contents and throw exception on failure
      *
-     * @param  string              $filename The file path to read
-     * @return string              The file contents
-     * @throws FileSystemException
+     * @param  string $filename The file path to read
+     * @return string The file contents
      */
     public static function readFile(string $filename): string
     {
@@ -61,11 +59,10 @@ class FileSystem
     /**
      * Replace string content in file
      *
-     * @param  string              $filename The file path
-     * @param  mixed               $search   The search string
-     * @param  mixed               $replace  The replacement string
-     * @return false|int           Number of replacements or false on failure
-     * @throws FileSystemException
+     * @param  string    $filename The file path
+     * @param  mixed     $search   The search string
+     * @param  mixed     $replace  The replacement string
+     * @return false|int Number of replacements or false on failure
      */
     public static function replaceFileStr(string $filename, mixed $search = null, mixed $replace = null): false|int
     {
@@ -75,11 +72,10 @@ class FileSystem
     /**
      * Replace content in file using regex
      *
-     * @param  string              $filename The file path
-     * @param  mixed               $search   The regex pattern
-     * @param  mixed               $replace  The replacement string
-     * @return false|int           Number of replacements or false on failure
-     * @throws FileSystemException
+     * @param  string    $filename The file path
+     * @param  mixed     $search   The regex pattern
+     * @param  mixed     $replace  The replacement string
+     * @return false|int Number of replacements or false on failure
      */
     public static function replaceFileRegex(string $filename, mixed $search = null, mixed $replace = null): false|int
     {
@@ -89,10 +85,9 @@ class FileSystem
     /**
      * Replace content in file using custom callback
      *
-     * @param  string              $filename The file path
-     * @param  mixed               $callback The callback function
-     * @return false|int           Number of replacements or false on failure
-     * @throws FileSystemException
+     * @param  string    $filename The file path
+     * @param  mixed     $callback The callback function
+     * @return false|int Number of replacements or false on failure
      */
     public static function replaceFileUser(string $filename, mixed $callback = null): false|int
     {
@@ -147,9 +142,8 @@ class FileSystem
     /**
      * Copy directory recursively
      *
-     * @param  string           $from Source directory path
-     * @param  string           $to   Destination directory path
-     * @throws RuntimeException
+     * @param string $from Source directory path
+     * @param string $to   Destination directory path
      */
     public static function copyDir(string $from, string $to): void
     {
@@ -170,12 +164,10 @@ class FileSystem
     /**
      * Extract package archive to specified directory
      *
-     * @param  string              $name         Package name
-     * @param  string              $source_type  Archive type (tar.gz, zip, etc.)
-     * @param  string              $filename     Archive filename
-     * @param  null|string         $extract_path Optional extraction path
-     * @throws RuntimeException
-     * @throws FileSystemException
+     * @param string      $name         Package name
+     * @param string      $source_type  Archive type (tar.gz, zip, etc.)
+     * @param string      $filename     Archive filename
+     * @param null|string $extract_path Optional extraction path
      */
     public static function extractPackage(string $name, string $source_type, string $filename, ?string $extract_path = null): void
     {
@@ -208,12 +200,10 @@ class FileSystem
     /**
      * Extract source archive to source directory
      *
-     * @param  string              $name        Source name
-     * @param  string              $source_type Archive type (tar.gz, zip, etc.)
-     * @param  string              $filename    Archive filename
-     * @param  null|string         $move_path   Optional move path
-     * @throws FileSystemException
-     * @throws RuntimeException
+     * @param string      $name        Source name
+     * @param string      $source_type Archive type (tar.gz, zip, etc.)
+     * @param string      $filename    Archive filename
+     * @param null|string $move_path   Optional move path
      */
     public static function extractSource(string $name, string $source_type, string $filename, ?string $move_path = null): void
     {
@@ -412,8 +402,7 @@ class FileSystem
     /**
      * Create directory recursively
      *
-     * @param  string              $path Directory path to create
-     * @throws FileSystemException
+     * @param string $path Directory path to create
      */
     public static function createDir(string $path): void
     {
@@ -425,11 +414,10 @@ class FileSystem
     /**
      * Write content to file
      *
-     * @param  string              $path    File path
-     * @param  mixed               $content Content to write
-     * @param  mixed               ...$args Additional arguments passed to file_put_contents
-     * @return bool|int|string     Result of file writing operation
-     * @throws FileSystemException
+     * @param  string          $path    File path
+     * @param  mixed           $content Content to write
+     * @param  mixed           ...$args Additional arguments passed to file_put_contents
+     * @return bool|int|string Result of file writing operation
      */
     public static function writeFile(string $path, mixed $content, ...$args): bool|int|string
     {
@@ -443,8 +431,7 @@ class FileSystem
     /**
      * Reset directory by removing and recreating it
      *
-     * @param  string              $dir_name Directory name
-     * @throws FileSystemException
+     * @param string $dir_name Directory name
      */
     public static function resetDir(string $dir_name): void
     {
@@ -540,11 +527,10 @@ class FileSystem
     /**
      * Replace line in file that contains specific string
      *
-     * @param  string              $file File path
-     * @param  string              $find String to find in line
-     * @param  string              $line New line content
-     * @return false|int           Number of replacements or false on failure
-     * @throws FileSystemException
+     * @param  string    $file File path
+     * @param  string    $find String to find in line
+     * @param  string    $line New line content
+     * @return false|int Number of replacements or false on failure
      */
     public static function replaceFileLineContainsString(string $file, string $find, string $line): false|int
     {
@@ -560,10 +546,6 @@ class FileSystem
         return file_put_contents($file, implode('', $lines));
     }
 
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     private static function extractArchive(string $filename, string $target): void
     {
         // Create base dir
@@ -600,9 +582,6 @@ class FileSystem
         }
     }
 
-    /**
-     * @throws FileSystemException
-     */
     private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): false|int
     {
         logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);

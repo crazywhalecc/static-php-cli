@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
-use SPC\exception\RuntimeException;
 use SPC\util\SPCConfigUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -28,9 +27,6 @@ class SPCConfigCommand extends BaseCommand
         $this->addOption('no-php', null, null, 'Do not link to PHP library');
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function handle(): int
     {
         // transform string to array

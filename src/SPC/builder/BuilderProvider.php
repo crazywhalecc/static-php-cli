@@ -8,8 +8,6 @@ use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\WindowsBuilder;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -20,11 +18,6 @@ class BuilderProvider
 {
     private static ?BuilderBase $builder = null;
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     public static function makeBuilderByInput(InputInterface $input): BuilderBase
     {
         ini_set('memory_limit', '4G');
@@ -39,9 +32,6 @@ class BuilderProvider
         return self::$builder;
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     public static function getBuilder(): BuilderBase
     {
         if (self::$builder === null) {

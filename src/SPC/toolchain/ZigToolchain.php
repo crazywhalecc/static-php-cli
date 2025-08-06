@@ -40,9 +40,6 @@ class ZigToolchain implements ToolchainInterface
         GlobalEnvManager::putenv('SPC_EXTRA_RUNTIME_OBJECTS=' . implode(' ', $found));
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     public function afterInit(): void
     {
         if (!is_dir(Zig::getEnvironment()['PATH'])) {

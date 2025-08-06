@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
@@ -17,9 +16,6 @@ class memcache extends Extension
         return '--enable-memcache' . ($shared ? '=shared' : '') . ' --with-zlib-dir=' . BUILD_ROOT_PATH;
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeBuildconf(): bool
     {
         FileSystem::replaceFileStr(

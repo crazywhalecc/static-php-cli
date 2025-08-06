@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait libxml2
 {
-    /**
-     * @throws FileSystemException
-     */
     public function build(): void
     {
         $cmake = UnixCMakeExecutor::create($this)

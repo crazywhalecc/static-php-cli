@@ -4,19 +4,11 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait freetype
 {
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     protected function build(): void
     {
         $cmake = UnixCMakeExecutor::create($this)

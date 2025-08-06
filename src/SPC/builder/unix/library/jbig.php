@@ -4,24 +4,16 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 trait jbig
 {
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeBuild(): bool
     {
         FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', 'CFLAGS = -O2 -W -Wno-unused-result -fPIC');
         return true;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     protected function build(): void
     {
         shell()->cd($this->source_dir)->initializeEnv($this)

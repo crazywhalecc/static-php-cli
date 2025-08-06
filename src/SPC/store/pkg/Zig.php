@@ -145,9 +145,6 @@ class Zig extends CustomPackage
         ];
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     private static function getPath(): string
     {
         $arch = arch2gnu(php_uname('m'));

@@ -6,7 +6,6 @@ namespace SPC\Tests\util;
 
 use PHPUnit\Framework\TestCase;
 use SPC\builder\BuilderProvider;
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\SPCConfigUtil;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -16,9 +15,6 @@ use Symfony\Component\Console\Input\ArgvInput;
  */
 class SPCConfigUtilTest extends TestCase
 {
-    /**
-     * @throws FileSystemException
-     */
     public static function setUpBeforeClass(): void
     {
         if (PHP_OS_FAMILY === 'Windows') {
@@ -35,9 +31,6 @@ class SPCConfigUtilTest extends TestCase
         FileSystem::loadConfigArray('source', $testdir);
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function tearDownAfterClass(): void
     {
         FileSystem::removeDir(WORKING_DIR . '/.configtest');

@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\RuntimeException;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait attr
 {
-    /**
-     * @throws RuntimeException
-     */
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)

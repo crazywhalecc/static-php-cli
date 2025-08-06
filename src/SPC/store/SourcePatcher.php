@@ -34,14 +34,6 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('gmssl', [__CLASS__, 'patchGMSSL']);
     }
 
-    /**
-     * Source patcher runner before buildconf
-     *
-     * @param  BuilderBase         $builder Builder
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     public static function patchBeforeBuildconf(BuilderBase $builder): void
     {
         foreach ($builder->getExts() as $ext) {
@@ -111,8 +103,7 @@ class SourcePatcher
     /**
      * Source patcher runner before configure
      *
-     * @param  BuilderBase         $builder Builder
-     * @throws FileSystemException
+     * @param BuilderBase $builder Builder
      */
     public static function patchBeforeConfigure(BuilderBase $builder): void
     {
@@ -138,10 +129,6 @@ class SourcePatcher
         }
     }
 
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     public static function patchMicro(?array $items = null): bool
     {
         if (!file_exists(SOURCE_PATH . '/php-src/sapi/micro/php_micro.c')) {
@@ -198,10 +185,9 @@ class SourcePatcher
     /**
      * Use existing patch file for patching
      *
-     * @param  string           $patch_name Patch file name in src/globals/patch/ or absolute path
-     * @param  string           $cwd        Working directory for patch command
-     * @param  bool             $reverse    Reverse patches (default: False)
-     * @throws RuntimeException
+     * @param string $patch_name Patch file name in src/globals/patch/ or absolute path
+     * @param string $cwd        Working directory for patch command
+     * @param bool   $reverse    Reverse patches (default: False)
      */
     public static function patchFile(string $patch_name, string $cwd, bool $reverse = false): bool
     {
@@ -247,9 +233,6 @@ class SourcePatcher
         return true;
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchOpenssl11Darwin(): bool
     {
         if (PHP_OS_FAMILY === 'Darwin' && !file_exists(SOURCE_PATH . '/openssl/VERSION.dat') && file_exists(SOURCE_PATH . '/openssl/test/v3ext.c')) {
@@ -259,9 +242,6 @@ class SourcePatcher
         return false;
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchSwoole(): bool
     {
         // swoole hook needs pdo/pdo.h
@@ -288,9 +268,6 @@ class SourcePatcher
         return true;
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchBeforeMake(BuilderBase $builder): void
     {
         if ($builder instanceof UnixBuilderBase) {
@@ -343,9 +320,6 @@ class SourcePatcher
         }
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchHardcodedINI(array $ini = []): bool
     {
         $cli_c = SOURCE_PATH . '/php-src/sapi/cli/php_cli.c';
@@ -403,9 +377,6 @@ class SourcePatcher
         return $result;
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchMicroPhar(int $version_id): void
     {
         FileSystem::backupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
@@ -431,9 +402,6 @@ class SourcePatcher
         }
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public static function unpatchMicroPhar(): void
     {
         FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
@@ -441,8 +409,6 @@ class SourcePatcher
 
     /**
      * Fix the compilation issue of sqlsrv and pdo_sqlsrv on Windows (/sdl check is too strict and will cause Zend compilation to fail)
-     *
-     * @throws FileSystemException
      */
     public static function patchSQLSRVWin32(string $source_name): bool
     {
@@ -542,9 +508,6 @@ class SourcePatcher
 
     /**
      * Patch cli SAPI Makefile for Windows.
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
      */
     public static function patchWindowsCLITarget(): void
     {
@@ -568,9 +531,6 @@ class SourcePatcher
         FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public static function patchPhpLibxml212(): bool
     {
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
@@ -595,9 +555,6 @@ class SourcePatcher
         return false;
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchGDWin32(): bool
     {
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
@@ -617,8 +574,6 @@ class SourcePatcher
 
     /**
      * Add additional `static-php-cli.version` ini value for PHP source.
-     *
-     * @throws FileSystemException
      */
     public static function patchSPCVersionToPHP(string $version = 'unknown'): void
     {
@@ -631,9 +586,6 @@ class SourcePatcher
         }
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function patchMicroWin32(): void
     {
         // patch micro win32

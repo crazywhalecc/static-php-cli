@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 use SPC\util\DependencyUtil;
 use SPC\util\LicenseDumper;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,11 +24,6 @@ class DumpLicenseCommand extends BaseCommand
         $this->addOption('dump-dir', null, InputOption::VALUE_REQUIRED, 'Change dump directory', BUILD_ROOT_PATH . '/license');
     }
 
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
     public function handle(): int
     {
         $dumper = new LicenseDumper();

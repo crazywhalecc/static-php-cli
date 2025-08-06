@@ -24,11 +24,6 @@ class Extension
 
     protected string $source_dir;
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     public function __construct(protected string $name, protected BuilderBase $builder)
     {
         $ext_type = Config::getExt($this->name, 'type');
@@ -63,9 +58,6 @@ class Extension
 
     /**
      * 获取开启该扩展的 PHP 编译添加的参数
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function getConfigureArg(bool $shared = false): string
     {
@@ -80,9 +72,6 @@ class Extension
 
     /**
      * 根据 ext 的 arg-type 获取对应开启的参数，一般都是 --enable-xxx 和 --with-xxx
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function getEnableArg(bool $shared = false): string
     {
@@ -112,10 +101,6 @@ class Extension
 
     /**
      * 检查下依赖就行了，作用是导入依赖给 Extension 对象，今后可以对库依赖进行选择性处理
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function checkDependency(): static
     {
@@ -259,8 +244,6 @@ class Extension
      *                i.e.; pdo_pgsql would return:
      *
      * `-d "extension=pgsql" -d "extension=pdo_pgsql"`
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function getSharedExtensionLoadString(): string
     {
@@ -300,9 +283,6 @@ class Extension
         return $ret;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function runCliCheckUnix(): void
     {
         // Run compile check if build target is cli
@@ -333,9 +313,6 @@ class Extension
         }
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function runCliCheckWindows(): void
     {
         // Run compile check if build target is cli
@@ -368,9 +345,6 @@ class Extension
 
     /**
      * Build shared extension
-     *
-     * @throws WrongUsageException
-     * @throws RuntimeException
      */
     public function buildShared(): void
     {
@@ -406,12 +380,6 @@ class Extension
 
     /**
      * Build shared extension for Unix
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     * @throws \ReflectionException
-     * @throws \Throwable
      */
     public function buildUnixShared(): void
     {
@@ -506,9 +474,6 @@ class Extension
         return $this->build_static;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     protected function addLibraryDependency(string $name, bool $optional = false): void
     {
         $depLib = $this->builder->getLib($name);
@@ -522,9 +487,6 @@ class Extension
         }
     }
 
-    /**
-     * @throws RuntimeException
-     */
     protected function addExtensionDependency(string $name, bool $optional = false): void
     {
         $depExt = $this->builder->getExt($name);

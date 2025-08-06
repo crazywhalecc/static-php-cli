@@ -16,9 +16,6 @@ use SPC\util\CustomExt;
 #[CustomExt('simplexml')]
 class xml extends Extension
 {
-    /**
-     * @throws RuntimeException
-     */
     public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = match ($this->name) {

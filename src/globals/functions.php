@@ -47,8 +47,6 @@ function is_unix(): bool
 
 /**
  * Transfer architecture name to gnu triplet
- *
- * @throws WrongUsageException
  */
 function arch2gnu(string $arch): string
 {
@@ -87,8 +85,7 @@ function quote(string $str, string $quote = '"'): string
 }
 
 /**
- * Get Family name of current OS
- * @throws WrongUsageException
+ * Get Family name of current OS.
  */
 function osfamily2dir(): string
 {
@@ -127,8 +124,6 @@ function cmd(?bool $debug = null): WindowsCmd
 
 /**
  * Get current builder.
- *
- * @throws WrongUsageException
  */
 function builder(): BuilderBase
 {
@@ -137,8 +132,6 @@ function builder(): BuilderBase
 
 /**
  * Get current patch point.
- *
- * @throws WrongUsageException
  */
 function patch_point(): string
 {
@@ -155,8 +148,6 @@ function patch_point_interrupt(int $retcode, string $msg = ''): InterruptExcepti
 
 /**
  * Execute the shell command, and the output will be directly printed in the terminal. If there is an error, an exception will be thrown
- *
- * @throws RuntimeException
  */
 function f_passthru(string $cmd): ?bool
 {

@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\util\executor\UnixCMakeExecutor;
 
 class glfw extends MacOSLibraryBase
 {
     public const NAME = 'glfw';
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)

@@ -70,9 +70,7 @@ abstract class UnixBuilderBase extends BuilderBase
     }
 
     /**
-     * Sanity check after build complete
-     *
-     * @throws RuntimeException
+     * Sanity check after build complete.
      */
     protected function sanityCheck(int $build_target): void
     {
@@ -170,11 +168,9 @@ abstract class UnixBuilderBase extends BuilderBase
     }
 
     /**
-     * 将编译好的二进制文件发布到 buildroot
+     * Deploy the binary file to the build bin path.
      *
-     * @param  int                 $type 发布类型
-     * @throws RuntimeException
-     * @throws FileSystemException
+     * @param int $type Type integer, one of BUILD_TARGET_CLI, BUILD_TARGET_MICRO, BUILD_TARGET_FPM
      */
     protected function deployBinary(int $type): bool
     {
@@ -192,8 +188,6 @@ abstract class UnixBuilderBase extends BuilderBase
 
     /**
      * Run php clean
-     *
-     * @throws RuntimeException
      */
     protected function cleanMake(): void
     {
@@ -203,7 +197,6 @@ abstract class UnixBuilderBase extends BuilderBase
 
     /**
      * Patch phpize and php-config if needed
-     * @throws FileSystemException
      */
     protected function patchPhpScripts(): void
     {
@@ -231,10 +224,6 @@ abstract class UnixBuilderBase extends BuilderBase
         }
     }
 
-    /**
-     * @throws WrongUsageException
-     * @throws RuntimeException
-     */
     protected function buildFrankenphp(): void
     {
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';

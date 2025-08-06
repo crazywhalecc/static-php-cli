@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait libuuid
 {
-    /**
-     * @throws FileSystemException
-     */
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)->toStep(2)->build();

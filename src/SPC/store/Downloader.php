@@ -20,11 +20,9 @@ class Downloader
     /**
      * Get latest version from BitBucket tag
      *
-     * @param  string              $name   Source name
-     * @param  array               $source Source meta info: [repo]
-     * @return array<int, string>  [url, filename]
-     * @throws DownloaderException
-     * @throws RuntimeException
+     * @param  string             $name   Source name
+     * @param  array              $source Source meta info: [repo]
+     * @return array<int, string> [url, filename]
      */
     public static function getLatestBitbucketTag(string $name, array $source): array
     {
@@ -56,11 +54,10 @@ class Downloader
     /**
      * Get latest version from GitHub tarball
      *
-     * @param  string              $name   Source name
-     * @param  array               $source Source meta info: [repo]
-     * @param  string              $type   Type of tarball, default is 'releases'
-     * @return array<int, string>  [url, filename]
-     * @throws DownloaderException
+     * @param  string             $name   Source name
+     * @param  array              $source Source meta info: [repo]
+     * @param  string             $type   Type of tarball, default is 'releases'
+     * @return array<int, string> [url, filename]
      */
     public static function getLatestGithubTarball(string $name, array $source, string $type = 'releases'): array
     {
@@ -107,11 +104,10 @@ class Downloader
     /**
      * Get latest version from GitHub release (uploaded archive)
      *
-     * @param  string              $name         Source name
-     * @param  array               $source       Source meta info: [repo, match]
-     * @param  bool                $match_result Whether to return matched result by `match` param (default: true)
-     * @return array<int, string>  When $match_result = true, and we matched, [url, filename]. Otherwise, [{asset object}. ...]
-     * @throws DownloaderException
+     * @param  string             $name         Source name
+     * @param  array              $source       Source meta info: [repo, match]
+     * @param  bool               $match_result Whether to return matched result by `match` param (default: true)
+     * @return array<int, string> When $match_result = true, and we matched, [url, filename]. Otherwise, [{asset object}. ...]
      */
     public static function getLatestGithubRelease(string $name, array $source, bool $match_result = true): array
     {
@@ -150,10 +146,9 @@ class Downloader
     /**
      * Get latest version from file list (regex based crawler)
      *
-     * @param  string              $name   Source name
-     * @param  array               $source Source meta info: [filelist]
-     * @return array<int, string>  [url, filename]
-     * @throws DownloaderException
+     * @param  string             $name   Source name
+     * @param  array              $source Source meta info: [filelist]
+     * @return array<int, string> [url, filename]
      */
     public static function getFromFileList(string $name, array $source): array
     {
@@ -189,15 +184,13 @@ class Downloader
     /**
      * Download file from URL
      *
-     * @param  string              $name        Download name
-     * @param  string              $url         Download URL
-     * @param  string              $filename    Target filename
-     * @param  null|string         $move_path   Optional move path after download
-     * @param  int                 $download_as Download type constant
-     * @param  array               $headers     Optional HTTP headers
-     * @param  array               $hooks       Optional curl hooks
-     * @throws DownloaderException
-     * @throws RuntimeException
+     * @param string      $name        Download name
+     * @param string      $url         Download URL
+     * @param string      $filename    Target filename
+     * @param null|string $move_path   Optional move path after download
+     * @param int         $download_as Download type constant
+     * @param array       $headers     Optional HTTP headers
+     * @param array       $hooks       Optional curl hooks
      */
     public static function downloadFile(string $name, string $url, string $filename, ?string $move_path = null, int $download_as = SPC_DOWNLOAD_SOURCE, array $headers = [], array $hooks = []): void
     {
@@ -221,15 +214,13 @@ class Downloader
     /**
      * Download Git repository
      *
-     * @param  string              $name       Repository name
-     * @param  string              $url        Git repository URL
-     * @param  string              $branch     Branch to checkout
-     * @param  null|array          $submodules Optional submodules to initialize
-     * @param  null|string         $move_path  Optional move path after download
-     * @param  int                 $retries    Number of retry attempts
-     * @param  int                 $lock_as    Lock type constant
-     * @throws DownloaderException
-     * @throws RuntimeException
+     * @param string      $name       Repository name
+     * @param string      $url        Git repository URL
+     * @param string      $branch     Branch to checkout
+     * @param null|array  $submodules Optional submodules to initialize
+     * @param null|string $move_path  Optional move path after download
+     * @param int         $retries    Number of retry attempts
+     * @param int         $lock_as    Lock type constant
      */
     public static function downloadGit(string $name, string $url, string $branch, ?array $submodules = null, ?string $move_path = null, int $retries = 0, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
@@ -306,10 +297,7 @@ class Downloader
      *     prefer-stable: ?bool,
      *     extract-files: ?array<string, string>
      * } $pkg Package config
-     * @param  bool                $force Download all the time even if it exists
-     * @throws DownloaderException
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param bool $force Download all the time even if it exists
      */
     public static function downloadPackage(string $name, ?array $pkg = null, bool $force = false): void
     {
@@ -428,11 +416,8 @@ class Downloader
      *         text: ?string
      *     }
      * }          $source  source meta info: [type, path, rev, url, filename, regex, license]
-     * @param  bool                $force       Whether to force download (default: false)
-     * @param  int                 $download_as Lock source type (default: SPC_LOCK_SOURCE)
-     * @throws DownloaderException
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param bool $force       Whether to force download (default: false)
+     * @param int  $download_as Lock source type (default: SPC_LOCK_SOURCE)
      */
     public static function downloadSource(string $name, ?array $source = null, bool $force = false, int $download_as = SPC_DOWNLOAD_SOURCE): void
     {
@@ -532,14 +517,12 @@ class Downloader
     /**
      * Use curl command to get http response
      *
-     * @param  string              $url     Target URL
-     * @param  string              $method  HTTP method (GET, POST, etc.)
-     * @param  array               $headers HTTP headers
-     * @param  array               $hooks   Curl hooks
-     * @param  int                 $retries Number of retry attempts
-     * @return string              Response body
-     * @throws DownloaderException
-     * @throws RuntimeException
+     * @param  string $url     Target URL
+     * @param  string $method  HTTP method (GET, POST, etc.)
+     * @param  array  $headers HTTP headers
+     * @param  array  $hooks   Curl hooks
+     * @param  int    $retries Number of retry attempts
+     * @return string Response body
      */
     public static function curlExec(string $url, string $method = 'GET', array $headers = [], array $hooks = [], int $retries = 0): string
     {
@@ -591,15 +574,12 @@ class Downloader
     /**
      * Use curl to download sources from url
      *
-     * @param  string              $url     Download URL
-     * @param  string              $path    Target file path
-     * @param  string              $method  HTTP method
-     * @param  array               $headers HTTP headers
-     * @param  array               $hooks   Curl hooks
-     * @param  int                 $retries Number of retry attempts
-     * @throws DownloaderException
-     * @throws RuntimeException
-     * @throws WrongUsageException
+     * @param string $url     Download URL
+     * @param string $path    Target file path
+     * @param string $method  HTTP method
+     * @param array  $headers HTTP headers
+     * @param array  $hooks   Curl hooks
+     * @param int    $retries Number of retry attempts
      */
     public static function curlDown(string $url, string $path, string $method = 'GET', array $headers = [], array $hooks = [], int $retries = 0): void
     {
@@ -705,10 +685,6 @@ class Downloader
         return intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0);
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     private static function isAlreadyDownloaded(string $name, bool $force, int $download_as = SPC_DOWNLOAD_SOURCE): bool
     {
         // If the lock file exists, skip downloading for source mode

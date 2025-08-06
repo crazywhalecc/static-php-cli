@@ -146,11 +146,6 @@ class PackLibCommand extends BuildCommand
         }
     }
 
-    /**
-     * @throws WrongUsageException
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     private function sanityCheckLib(LibraryBase $lib): void
     {
         logger()->info('Sanity check for library ' . $lib->getName());

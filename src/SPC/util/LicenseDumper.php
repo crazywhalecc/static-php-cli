@@ -42,11 +42,8 @@ class LicenseDumper
     /**
      * Dump source licenses to target directory
      *
-     * @param  string              $target_dir Target directory
-     * @return bool                Success or not
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     * @throws RuntimeException
+     * @param  string $target_dir Target directory
+     * @return bool   Success or not
      */
     public function dump(string $target_dir): bool
     {
@@ -94,9 +91,10 @@ class LicenseDumper
     }
 
     /**
-     * @return string[]
-     * @throws FileSystemException
-     * @throws RuntimeException
+     * Returns an iterable of source licenses for a given source name.
+     *
+     * @param  string   $source_name Source name
+     * @return string[] String iterable of source licenses
      */
     private function getSourceLicenses(string $source_name): iterable
     {
@@ -119,7 +117,7 @@ class LicenseDumper
     }
 
     /**
-     * @throws RuntimeException
+     * Loads a source license file from the specified path.
      */
     private function loadSourceFile(string $source_name, int $index, null|array|string $in_path, ?string $custom_base_path = null): string
     {

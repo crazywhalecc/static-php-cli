@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('ev')]
 class ev extends Extension
 {
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeBuildconf(): bool
     {
         /*

@@ -34,9 +34,6 @@ class DeleteDownloadCommand extends BaseCommand
         parent::initialize($input, $output);
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public function handle(): int
     {
         try {

@@ -27,9 +27,6 @@ abstract class LibraryBase
 
     protected bool $patched = false;
 
-    /**
-     * @throws RuntimeException
-     */
     public function __construct(?string $source_dir = null)
     {
         if (static::NAME === 'unknown') {
@@ -40,10 +37,7 @@ abstract class LibraryBase
 
     /**
      * Try to install or build this library.
-     * @param  bool                $force If true, force install or build
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
+     * @param bool $force If true, force install or build
      */
     public function setup(bool $force = false): int
     {
@@ -107,10 +101,6 @@ abstract class LibraryBase
 
     /**
      * Calculate dependencies for current library.
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function calcDependency(): void
     {
@@ -131,9 +121,6 @@ abstract class LibraryBase
 
     /**
      * Get config static libs.
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function getStaticLibs(): array
     {
@@ -142,9 +129,6 @@ abstract class LibraryBase
 
     /**
      * Get config headers.
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function getHeaders(): array
     {
@@ -153,19 +137,12 @@ abstract class LibraryBase
 
     /**
      * Get binary files.
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function getBinaryFiles(): array
     {
         return Config::getLib(static::NAME, 'bin', []);
     }
 
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
     public function tryInstall(array $lock, bool $force_install = false): int
     {
         $install_file = $lock['filename'];
@@ -194,10 +171,6 @@ abstract class LibraryBase
      * BUILD_STATUS_OK if build success
      * BUILD_STATUS_ALREADY if already built
      * BUILD_STATUS_FAILED if build failed
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function tryBuild(bool $force_build = false): int
     {
@@ -319,8 +292,6 @@ abstract class LibraryBase
 
     /**
      * Build this library.
-     *
-     * @throws RuntimeException
      */
     abstract protected function build();
 
@@ -351,8 +322,6 @@ abstract class LibraryBase
 
     /**
      * Add lib dependency
-     *
-     * @throws RuntimeException
      */
     protected function addLibraryDependency(string $name, bool $optional = false): void
     {

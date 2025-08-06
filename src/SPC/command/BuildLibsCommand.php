@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
-use SPC\exception\ExceptionHandler;
-use SPC\exception\RuntimeException;
 use SPC\store\Config;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -33,9 +31,6 @@ class BuildLibsCommand extends BuildCommand
         parent::initialize($input, $output);
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function handle(): int
     {
         // 从参数中获取要编译的 libraries，并转换为数组

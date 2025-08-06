@@ -46,8 +46,10 @@ class UnixAutoconfExecutor extends Executor
     /**
      * Run make
      *
-     * @param  string           $target Build target
-     * @throws RuntimeException
+     * @param string       $target         Build target
+     * @param false|string $with_install   Run `make install` after building, or false to skip
+     * @param bool         $with_clean     Whether to clean before building
+     * @param array        $after_env_vars Environment variables postfix
      */
     public function make(string $target = '', false|string $with_install = 'install', bool $with_clean = true, array $after_env_vars = []): static
     {

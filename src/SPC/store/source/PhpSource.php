@@ -6,19 +6,12 @@ namespace SPC\store\source;
 
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
-use SPC\exception\FileSystemException;
-use SPC\exception\WrongUsageException;
 use SPC\store\Downloader;
 
 class PhpSource extends CustomSourceBase
 {
     public const NAME = 'php-src';
 
-    /**
-     * @throws DownloaderException
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
         $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.4';
@@ -33,8 +26,6 @@ class PhpSource extends CustomSourceBase
 
     /**
      * 获取 PHP x.y 的具体版本号，例如通过 8.1 来获取 8.1.10
-     *
-     * @throws DownloaderException
      */
     #[ArrayShape(['type' => 'string', 'path' => 'string', 'rev' => 'string', 'url' => 'string'])]
     public function getLatestPHPInfo(string $major_version): array

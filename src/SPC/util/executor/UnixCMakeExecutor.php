@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\util\executor;
 
-use Closure;
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\util\UnixShell;
 
@@ -144,10 +141,6 @@ class UnixCMakeExecutor extends Executor
         return implode(' ', $this->configure_args);
     }
 
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
     private function getDefaultCMakeArgs(): string
     {
         return implode(' ', $this->custom_default_args ?? [
@@ -176,9 +169,7 @@ class UnixCMakeExecutor extends Executor
     /**
      * Generate cmake toolchain file for current spc instance, and return the file path.
      *
-     * @return string              CMake toolchain file path
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @return string CMake toolchain file path
      */
     private function makeCmakeToolchainFile(): string
     {

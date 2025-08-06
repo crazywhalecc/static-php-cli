@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SPC\command\dev;
 
 use SPC\command\BaseCommand;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\util\DependencyUtil;
@@ -30,11 +28,6 @@ class AllExtCommand extends BaseCommand
         );
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     * @throws RuntimeException
-     */
     public function handle(): int
     {
         $extensions = array_map('trim', array_filter(explode(',', $this->getArgument('extensions') ?? '')));

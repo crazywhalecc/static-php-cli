@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 class libffi extends LinuxLibraryBase
 {
     public const NAME = 'libffi';
 
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     public function build(): void
     {
         UnixAutoconfExecutor::create($this)
