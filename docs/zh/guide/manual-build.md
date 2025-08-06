@@ -149,7 +149,7 @@ bin/spc craft --debug
 
 如果中途构建出错，你可以使用 `--debug` 参数查看详细的错误信息，或者使用 `--with-clean` 参数清除旧的编译结果，重新编译。
 
-如使用以上方式仍构建失败，请提交一个 issue，附上你的 `craft.yml`、`craft.log`。
+如使用以上方式仍构建失败，请提交一个 issue，附上你的 `craft.yml` 文件、`log/` 目录的压缩包。
 
 ## 分步构建命令
 
