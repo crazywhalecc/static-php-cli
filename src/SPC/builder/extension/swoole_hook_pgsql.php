@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\RuntimeException;
+use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\util\CustomExt;
 
@@ -41,10 +41,16 @@ class swoole_hook_pgsql extends Extension
         [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         $out = implode('', $out);
         if ($ret !== 0) {
-            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+            throw new ValidationException(
+                "extension {$this->getName()} failed sanity check: php-cli returned {$ret}",
+                validation_module: 'Extension swoole-hook-pgsql sanity check'
+            );
         }
         if (!str_contains($out, 'coroutine_pgsql')) {
-            throw new RuntimeException('swoole pgsql hook is not enabled correctly.');
+            throw new ValidationException(
+                'swoole pgsql hook is not enabled correctly.',
+                validation_module: 'Extension swoole pgsql hook availability check'
+            );
         }
     }
 }

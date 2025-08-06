@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\toolchain;
 
-use SPC\exception\WrongUsageException;
+use SPC\exception\EnvironmentException;
 use SPC\util\GlobalEnvManager;
 
 class MuslToolchain implements ToolchainInterface
@@ -33,7 +33,7 @@ class MuslToolchain implements ToolchainInterface
         GlobalEnvManager::putenv("SPC_CMD_PREFIX_PHP_CONFIGURE=LD_LIBRARY_PATH=\"{$ld_library_path}\" {$configure}");
 
         if (!file_exists("/usr/local/musl/{$arch}-linux-musl/lib/libc.a")) {
-            throw new WrongUsageException('You are building with musl-libc target in glibc distro, but musl-toolchain is not installed, please install musl-toolchain first. (You can use `doctor` command to install it)');
+            throw new EnvironmentException('You are building with musl-libc target in glibc distro, but musl-toolchain is not installed, please install musl-toolchain first. (You can use `doctor` command to install it)');
         }
     }
 

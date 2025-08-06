@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SPC\builder\windows;
 
 use SPC\builder\BuilderBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCInternalException;
+use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
@@ -267,7 +267,7 @@ class WindowsBuilder extends BuilderBase
             logger()->info('running cli sanity check');
             [$ret, $output] = cmd()->execWithResult(BUILD_ROOT_PATH . '\bin\php.exe -n -r "echo \"hello\";"');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
-                throw new RuntimeException('cli failed sanity check');
+                throw new ValidationException('cli failed sanity check', validation_module: 'php-cli function check');
             }
 
             foreach ($this->getExts(false) as $ext) {
@@ -290,7 +290,10 @@ class WindowsBuilder extends BuilderBase
                 foreach ($task['conditions'] as $condition => $closure) {
                     if (!$closure($ret, $out)) {
                         $raw_out = trim(implode('', $out));
-                        throw new RuntimeException("micro failed sanity check: {$task_name}, condition [{$condition}], ret[{$ret}], out[{$raw_out}]");
+                        throw new ValidationException(
+                            "failure info: {$condition}, code: {$ret}, output: {$raw_out}",
+                            validation_module: "phpmicro sanity check item [{$task_name}]"
+                        );
                     }
                 }
             }
@@ -308,7 +311,7 @@ class WindowsBuilder extends BuilderBase
         $src = match ($type) {
             BUILD_TARGET_CLI => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\php.exe",
             BUILD_TARGET_MICRO => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\micro.sfx",
-            default => throw new RuntimeException('Deployment does not accept type ' . $type),
+            default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
 
         // with-upx-pack for cli and micro

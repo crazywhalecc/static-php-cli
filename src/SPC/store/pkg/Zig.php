@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\store\pkg;
 
-use SPC\exception\RuntimeException;
+use SPC\exception\DownloaderException;
 use SPC\exception\WrongUsageException;
 use SPC\store\CurlHook;
 use SPC\store\Downloader;
@@ -77,14 +77,14 @@ class Zig extends CustomPackage
         }
 
         if (!$latest_version) {
-            throw new RuntimeException('Could not determine latest Zig version');
+            throw new DownloaderException('Could not determine latest Zig version');
         }
 
         logger()->info("Installing Zig version {$latest_version}");
 
         $platform_key = "{$zig_arch}-{$zig_os}";
         if (!isset($index_json[$latest_version][$platform_key])) {
-            throw new RuntimeException("No download available for {$platform_key} in Zig version {$latest_version}");
+            throw new DownloaderException("No download available for {$platform_key} in Zig version {$latest_version}");
         }
 
         $download_info = $index_json[$latest_version][$platform_key];

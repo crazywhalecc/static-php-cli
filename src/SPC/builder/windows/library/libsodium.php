@@ -5,24 +5,35 @@ declare(strict_types=1);
 namespace SPC\builder\windows\library;
 
 use SPC\builder\windows\SystemUtil;
-use SPC\exception\RuntimeException;
+use SPC\exception\BuildFailureException;
+use SPC\exception\EnvironmentException;
 use SPC\store\FileSystem;
 
 class libsodium extends WindowsLibraryBase
 {
     public const NAME = 'libsodium';
 
-    protected function build()
+    private string $vs_ver_dir;
+
+    public function validate(): void
     {
-        FileSystem::replaceFileStr($this->source_dir . '\src\libsodium\include\sodium\export.h', '#ifdef SODIUM_STATIC', '#if 1');
-        $vs_ver_dir = match (SystemUtil::findVisualStudio()['version']) {
+        $this->vs_ver_dir = match ($ver = SystemUtil::findVisualStudio()['version']) {
             'vs17' => '\vs2022',
             'vs16' => '\vs2019',
-            default => throw new RuntimeException('Current VS version is not supported yet!'),
+            default => throw new EnvironmentException("Current VS version {$ver} is not supported yet!"),
         };
+    }
 
+    public function patchBeforeBuild(): bool
+    {
+        FileSystem::replaceFileStr($this->source_dir . '\src\libsodium\include\sodium\export.h', '#ifdef SODIUM_STATIC', '#if 1');
+        return true;
+    }
+
+    protected function build(): void
+    {
         // start build
-        cmd()->cd($this->source_dir . '\builds\msvc\\' . $vs_ver_dir)
+        cmd()->cd($this->source_dir . '\builds\msvc' . $this->vs_ver_dir)
             ->execWithWrapper(
                 $this->builder->makeSimpleWrapper('msbuild'),
                 'libsodium.sln /t:Rebuild /p:Configuration=StaticRelease /p:Platform=x64 /p:PreprocessorDefinitions="SODIUM_STATIC=1"'
@@ -46,7 +57,7 @@ class libsodium extends WindowsLibraryBase
             }
         }
         if (!$find) {
-            throw new RuntimeException('libsodium.lib not found');
+            throw new BuildFailureException("Build libsodium success, but cannot find libsodium.lib in {$this->source_dir}\\bin .");
         }
     }
 }

@@ -5,23 +5,33 @@ declare(strict_types=1);
 namespace SPC\builder\windows\library;
 
 use SPC\builder\windows\SystemUtil;
-use SPC\exception\RuntimeException;
+use SPC\exception\EnvironmentException;
 use SPC\store\FileSystem;
 
 class openssl extends WindowsLibraryBase
 {
     public const NAME = 'openssl';
 
+    private ?string $perl;
+
+    public function validate(): void
+    {
+        global $argv;
+        $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl-' . arch2gnu(php_uname('m')) . '-win\perl\bin\perl.exe';
+        $this->perl = file_exists($perl_path_native) ? ($perl_path_native) : SystemUtil::findCommand('perl.exe');
+        if ($this->perl === null) {
+            throw new EnvironmentException(
+                'You need to install perl first!',
+                "Please run \"{$argv[0]} doctor\" to fix the environment.",
+            );
+        }
+    }
+
     protected function build(): void
     {
-        $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl-' . arch2gnu(php_uname('m')) . '-win\perl\bin\perl.exe';
-        $perl = file_exists($perl_path_native) ? ($perl_path_native) : SystemUtil::findCommand('perl.exe');
-        if ($perl === null) {
-            throw new RuntimeException('You need to install perl first! (easiest way is using static-php-cli command "doctor")');
-        }
         cmd()->cd($this->source_dir)
             ->execWithWrapper(
-                $this->builder->makeSimpleWrapper($perl),
+                $this->builder->makeSimpleWrapper($this->perl),
                 'Configure zlib VC-WIN64A ' .
                 'no-shared ' .
                 '--prefix=' . quote(BUILD_ROOT_PATH) . ' ' .

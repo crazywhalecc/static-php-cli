@@ -6,7 +6,8 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
-use SPC\exception\RuntimeException;
+use SPC\exception\InterruptException;
+use SPC\exception\SPCInternalException;
 
 function f_exec(string $command, mixed &$output, mixed &$result_code): bool
 {
@@ -52,13 +53,13 @@ function f_passthru(string $cmd): bool
 {
     if (str_starts_with($cmd, 'git')) {
         if (str_contains($cmd, '--branch "SIGINT"')) {
-            throw new RuntimeException('Interrupt', 2);
+            throw new InterruptException('interrupted', 2);
         }
         return true;
     }
     if (str_contains($cmd, 'https://fakecmd.com/curlDown')) {
         if (str_contains($cmd, 'SIGINT')) {
-            throw new RuntimeException('Interrupt', 2);
+            throw new InterruptException('interrupted', 2);
         }
         return true;
     }
@@ -71,5 +72,5 @@ function f_passthru(string $cmd): bool
             return true;
         }
     }
-    throw new RuntimeException('Invalid tests');
+    throw new SPCInternalException('Invalid tests');
 }

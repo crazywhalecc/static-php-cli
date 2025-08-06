@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\RuntimeException;
+use SPC\exception\ValidationException;
 use SPC\util\CustomExt;
 
 #[CustomExt('swow')]
@@ -14,7 +14,7 @@ class swow extends Extension
     public function validate(): void
     {
         if ($this->builder->getPHPVersionID() < 80000 && getenv('SPC_SKIP_PHP_VERSION_CHECK') !== 'yes') {
-            throw new RuntimeException('The latest swow extension requires PHP 8.0 or later');
+            throw new ValidationException('The latest swow extension requires PHP 8.0 or later');
         }
     }
 

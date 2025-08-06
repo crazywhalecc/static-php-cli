@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace SPC\store;
 
 use SPC\exception\DownloaderException;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
+use SPC\exception\InterruptException;
+use SPC\exception\SPCException;
 use SPC\store\pkg\CustomPackage;
 use SPC\store\source\CustomSourceBase;
 use SPC\util\SPCTarget;
@@ -201,9 +200,9 @@ class Downloader
                 unlink(FileSystem::convertPath(DOWNLOAD_PATH . '/' . $filename));
             }
         };
-        self::registerCancelEvent($cancel_func);
+        keyboard_interrupt_register($cancel_func);
         self::curlDown(url: $url, path: FileSystem::convertPath(DOWNLOAD_PATH . "/{$filename}"), headers: $headers, hooks: $hooks, retries: self::getRetryAttempts());
-        self::unregisterCancelEvent();
+        keyboard_interrupt_unregister();
         logger()->debug("Locking {$filename}");
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
             $name = self::getPreBuiltLockName($name);
@@ -248,12 +247,12 @@ class Downloader
                     f_passthru("cd \"{$download_path}\" && {$git} submodule update --init " . escapeshellarg($submodule));
                 }
             }
-        } catch (RuntimeException $e) {
+        } catch (SPCException $e) {
             if (is_dir($download_path)) {
                 FileSystem::removeDir($download_path);
             }
             if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
-                throw new WrongUsageException('Keyboard interrupted, download failed !');
+                throw new InterruptException('Keyboard interrupted, download failed !');
             }
             if ($retries > 0) {
                 self::downloadGit($name, $url, $branch, $submodules, $move_path, $retries - 1, $lock_as);
@@ -385,7 +384,7 @@ class Downloader
                 default:
                     throw new DownloaderException('unknown source type: ' . $pkg['type']);
             }
-        } catch (RuntimeException $e) {
+        } catch (\Throwable $e) {
             // Because sometimes files downloaded through the command line are not automatically deleted after a failure.
             // Here we need to manually delete the file if it is detected to exist.
             if (isset($filename) && file_exists(DOWNLOAD_PATH . '/' . $filename)) {
@@ -503,7 +502,7 @@ class Downloader
                 default:
                     throw new DownloaderException('unknown source type: ' . $source['type']);
             }
-        } catch (RuntimeException $e) {
+        } catch (\Throwable $e) {
             // Because sometimes files downloaded through the command line are not automatically deleted after a failure.
             // Here we need to manually delete the file if it is detected to exist.
             if (isset($filename) && file_exists(DOWNLOAD_PATH . '/' . $filename)) {
@@ -551,7 +550,7 @@ class Downloader
             }
             f_exec($cmd, $output, $ret);
             if ($ret === 2 || $ret === -1073741510) {
-                throw new RuntimeException(sprintf('Failed to fetch "%s"', $url));
+                throw new InterruptException(sprintf('Canceled fetching "%s"', $url));
             }
             if ($ret !== 0) {
                 throw new DownloaderException(sprintf('Failed to fetch "%s"', $url));
@@ -563,7 +562,7 @@ class Downloader
         }
         f_exec($cmd, $output, $ret);
         if ($ret === 2 || $ret === -1073741510) {
-            throw new RuntimeException(sprintf('Failed to fetch "%s"', $url));
+            throw new InterruptException(sprintf('Canceled fetching "%s"', $url));
         }
         if ($ret !== 0) {
             throw new DownloaderException(sprintf('Failed to fetch "%s"', $url));
@@ -599,9 +598,9 @@ class Downloader
         $cmd = SPC_CURL_EXEC . " -{$check}fSL {$retry} -o \"{$path}\" {$methodArg} {$headerArg} \"{$url}\"";
         try {
             f_passthru($cmd);
-        } catch (RuntimeException $e) {
+        } catch (\Throwable $e) {
             if ($e->getCode() === 2 || $e->getCode() === -1073741510) {
-                throw new WrongUsageException('Keyboard interrupted, download failed !');
+                throw new InterruptException('Keyboard interrupted, download failed !');
             }
             throw $e;
         }
@@ -639,11 +638,11 @@ class Downloader
                 $url = "https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/{$source_name}/?format=json";
                 $json = json_decode(Downloader::curlExec(url: $url, retries: intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0)), true);
                 if (!is_array($json)) {
-                    throw new RuntimeException('failed http fetch');
+                    throw new DownloaderException('failed http fetch');
                 }
                 $item = $json[0] ?? null;
                 if ($item === null) {
-                    throw new RuntimeException('failed to parse json');
+                    throw new DownloaderException('failed to parse json');
                 }
                 $full_url = 'https://dl.static-php.dev' . $item['full_path'];
                 $filename = basename($item['full_path']);

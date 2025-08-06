@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\exception\EnvironmentException;
+use SPC\exception\SPCException;
+use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
@@ -30,10 +31,10 @@ class Extension
         $unix_only = Config::getExt($this->name, 'unix-only', false);
         $windows_only = Config::getExt($this->name, 'windows-only', false);
         if (PHP_OS_FAMILY !== 'Windows' && $windows_only) {
-            throw new RuntimeException("{$ext_type} extension {$name} is not supported on Linux and macOS platform");
+            throw new EnvironmentException("{$ext_type} extension {$name} is not supported on Linux and macOS platform");
         }
         if (PHP_OS_FAMILY === 'Windows' && $unix_only) {
-            throw new RuntimeException("{$ext_type} extension {$name} is not supported on Windows platform");
+            throw new EnvironmentException("{$ext_type} extension {$name} is not supported on Windows platform");
         }
         // set source_dir for builtin
         if ($ext_type === 'builtin') {
@@ -41,7 +42,7 @@ class Extension
         } elseif ($ext_type === 'external') {
             $source = Config::getExt($this->name, 'source');
             if ($source === null) {
-                throw new RuntimeException("{$ext_type} extension {$name} source not found");
+                throw new ValidationException("{$ext_type} extension {$name} source not found", validation_module: "Extension [{$name}] loader");
             }
             $source_path = Config::getSource($source)['path'] ?? null;
             $source_path = $source_path === null ? SOURCE_PATH . '/' . $source : SOURCE_PATH . '/' . $source_path;
@@ -287,13 +288,12 @@ class Extension
     {
         // Run compile check if build target is cli
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
-        // If check failed, throw RuntimeException
         $sharedExtensions = $this->getSharedExtensionLoadString();
         [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         if ($ret !== 0) {
-            throw new RuntimeException(
-                'extension ' . $this->getName() . ' failed runtime check: php-cli returned ' . $ret . "\n" .
-                join("\n", $out)
+            throw new ValidationException(
+                "extension {$this->getName()} failed compile check: php-cli returned {$ret}",
+                validation_module: 'Extension ' . $this->getName() . ' sanity check'
             );
         }
 
@@ -307,8 +307,10 @@ class Extension
 
             [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
             if ($ret !== 0) {
-                var_dump($out);
-                throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
+                throw new ValidationException(
+                    "extension {$this->getName()} failed sanity check. Code: {$ret}, output: " . implode("\n", $out),
+                    validation_module: 'Extension ' . $this->getName() . ' function check'
+                );
             }
         }
     }
@@ -317,10 +319,9 @@ class Extension
     {
         // Run compile check if build target is cli
         // If you need to run some check, overwrite this or add your assert in src/globals/ext-tests/{extension_name}.php
-        // If check failed, throw RuntimeException
         [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe -n --ri "' . $this->getDistName() . '"', false);
         if ($ret !== 0) {
-            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+            throw new ValidationException("extension {$this->getName()} failed compile check: php-cli returned {$ret}", validation_module: "Extension {$this->getName()} sanity check");
         }
 
         if (file_exists(FileSystem::convertPath(ROOT_DIR . '/src/globals/ext-tests/' . $this->getName() . '.php'))) {
@@ -333,7 +334,10 @@ class Extension
 
             [$ret] = cmd()->execWithResult(BUILD_ROOT_PATH . '/bin/php.exe -n -r "' . trim($test) . '"');
             if ($ret !== 0) {
-                throw new RuntimeException('extension ' . $this->getName() . ' failed sanity check');
+                throw new ValidationException(
+                    "extension {$this->getName()} failed function check",
+                    validation_module: "Extension {$this->getName()} function check"
+                );
             }
         }
     }
@@ -348,34 +352,39 @@ class Extension
      */
     public function buildShared(): void
     {
-        if (Config::getExt($this->getName(), 'type') === 'builtin' || Config::getExt($this->getName(), 'build-with-php') === true) {
+        try {
+            if (Config::getExt($this->getName(), 'type') === 'builtin' || Config::getExt($this->getName(), 'build-with-php') === true) {
+                if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
+                    logger()->info('Shared extension [' . $this->getName() . '] was already built by php-src/configure (' . $this->getName() . '.so)');
+                    return;
+                }
+                if (Config::getExt($this->getName(), 'build-with-php') === true) {
+                    logger()->warning('Shared extension [' . $this->getName() . '] did not build with php-src/configure (' . $this->getName() . '.so)');
+                    logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
+                    return;
+                }
+            }
             if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
-                logger()->info('Shared extension [' . $this->getName() . '] was already built by php-src/configure (' . $this->getName() . '.so)');
-                return;
+                logger()->info('Shared extension [' . $this->getName() . '] was already built, skipping (' . $this->getName() . '.so)');
             }
-            if (Config::getExt($this->getName(), 'build-with-php') === true) {
-                logger()->warning('Shared extension [' . $this->getName() . '] did not build with php-src/configure (' . $this->getName() . '.so)');
-                logger()->warning('Try deleting your build and source folders and running `spc build`` again.');
-                return;
+            logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
+            foreach ($this->dependencies as $dependency) {
+                if (!$dependency instanceof Extension) {
+                    continue;
+                }
+                if (!$dependency->isBuildStatic()) {
+                    logger()->info('extension ' . $this->getName() . ' requires extension ' . $dependency->getName());
+                    $dependency->buildShared();
+                }
             }
+            match (PHP_OS_FAMILY) {
+                'Darwin', 'Linux' => $this->buildUnixShared(),
+                default => throw new WrongUsageException(PHP_OS_FAMILY . ' build shared extensions is not supported yet'),
+            };
+        } catch (SPCException $e) {
+            $e->bindExtensionInfo(['extension_name' => $this->getName()]);
+            throw $e;
         }
-        if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
-            logger()->info('Shared extension [' . $this->getName() . '] was already built, skipping (' . $this->getName() . '.so)');
-        }
-        logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
-        foreach ($this->dependencies as $dependency) {
-            if (!$dependency instanceof Extension) {
-                continue;
-            }
-            if (!$dependency->isBuildStatic()) {
-                logger()->info('extension ' . $this->getName() . ' requires extension ' . $dependency->getName());
-                $dependency->buildShared();
-            }
-        }
-        match (PHP_OS_FAMILY) {
-            'Darwin', 'Linux' => $this->buildUnixShared(),
-            default => throw new WrongUsageException(PHP_OS_FAMILY . ' build shared extensions is not supported yet'),
-        };
     }
 
     /**
@@ -479,7 +488,7 @@ class Extension
         $depLib = $this->builder->getLib($name);
         if (!$depLib) {
             if (!$optional) {
-                throw new RuntimeException("extension {$this->name} requires library {$name}");
+                throw new WrongUsageException("extension {$this->name} requires library {$name}");
             }
             logger()->info("enabling {$this->name} without library {$name}");
         } else {
@@ -492,7 +501,7 @@ class Extension
         $depExt = $this->builder->getExt($name);
         if (!$depExt) {
             if (!$optional) {
-                throw new RuntimeException("{$this->name} requires extension {$name}");
+                throw new WrongUsageException("{$this->name} requires extension {$name} which is not included");
             }
             logger()->info("enabling {$this->name} without extension {$name}");
         } else {

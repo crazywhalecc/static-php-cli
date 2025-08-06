@@ -8,8 +8,7 @@ use SPC\builder\Extension;
 use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\WindowsBuilder;
-use SPC\exception\FileSystemException;
-use SPC\exception\WrongUsageException;
+use SPC\exception\PatchException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
@@ -98,7 +97,7 @@ class curl extends Extension
         );
 
         if ($patched === null) {
-            throw new \RuntimeException('Failed to patch config.m4 due to a regex error');
+            throw new PatchException('shared extension curl patcher', 'Failed to patch config.m4 due to a regex error');
         }
 
         FileSystem::writeFile($file, $patched);

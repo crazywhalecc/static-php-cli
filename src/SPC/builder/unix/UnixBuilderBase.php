@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCInternalException;
+use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\CurlHook;
@@ -56,7 +56,14 @@ abstract class UnixBuilderBase extends BuilderBase
             }
             // if some libs are not supported (but in config "lib.json", throw exception)
             if (!isset($support_lib_list[$library])) {
-                throw new WrongUsageException('library [' . $library . '] is in the lib.json list but not supported to compile, but in the future I will support it!');
+                $os = match (PHP_OS_FAMILY) {
+                    'Linux' => 'Linux',
+                    'Darwin' => 'macOS',
+                    'Windows' => 'Windows',
+                    'BSD' => 'FreeBSD',
+                    default => PHP_OS_FAMILY,
+                };
+                throw new WrongUsageException("library [{$library}] is in the lib.json list but not supported to build on {$os}.");
             }
             $lib = new ($support_lib_list[$library])($this);
             $this->addLib($lib);
@@ -80,7 +87,7 @@ abstract class UnixBuilderBase extends BuilderBase
             [$ret, $output] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -r "echo \"hello\";"');
             $raw_output = implode('', $output);
             if ($ret !== 0 || trim($raw_output) !== 'hello') {
-                throw new RuntimeException("cli failed sanity check: ret[{$ret}]. out[{$raw_output}]");
+                throw new ValidationException("cli failed sanity check. code: {$ret}, output: {$raw_output}", validation_module: 'php-cli sanity check');
             }
 
             foreach ($this->getExts() as $ext) {
@@ -103,7 +110,10 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach ($task['conditions'] as $condition => $closure) {
                     if (!$closure($ret, $out)) {
                         $raw_out = trim(implode('', $out));
-                        throw new RuntimeException("micro failed sanity check: {$task_name}, condition [{$condition}], ret[{$ret}], out[{$raw_out}]");
+                        throw new ValidationException(
+                            "failure info: {$condition}, code: {$ret}, output: {$raw_out}",
+                            validation_module: "phpmicro sanity check item [{$task_name}]"
+                        );
                     }
                 }
             }
@@ -142,11 +152,17 @@ abstract class UnixBuilderBase extends BuilderBase
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
             if ($ret !== 0) {
-                throw new RuntimeException('embed failed sanity check: build failed. Error message: ' . implode("\n", $out));
+                throw new ValidationException(
+                    'embed failed sanity check: build failed. Error message: ' . implode("\n", $out),
+                    validation_module: 'static libphp.a sanity check'
+                );
             }
             [$ret, $output] = shell()->cd($sample_file_path)->execWithResult($ext_path . './embed');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
-                throw new RuntimeException('embed failed sanity check: run failed. Error message: ' . implode("\n", $output));
+                throw new ValidationException(
+                    'embed failed sanity check: run failed. Error message: ' . implode("\n", $output),
+                    validation_module: 'static libphp.a sanity check'
+                );
             }
         }
 
@@ -155,14 +171,20 @@ abstract class UnixBuilderBase extends BuilderBase
             logger()->info('running frankenphp sanity check');
             $frankenphp = BUILD_BIN_PATH . '/frankenphp';
             if (!file_exists($frankenphp)) {
-                throw new RuntimeException('FrankenPHP binary not found: ' . $frankenphp);
+                throw new ValidationException(
+                    "FrankenPHP binary not found: {$frankenphp}",
+                    validation_module: 'FrankenPHP sanity check'
+                );
             }
             $prefix = PHP_OS_FAMILY === 'Darwin' ? 'DYLD_' : 'LD_';
             [$ret, $output] = shell()
                 ->setEnv(["{$prefix}LIBRARY_PATH" => BUILD_LIB_PATH])
                 ->execWithResult("{$frankenphp} version");
             if ($ret !== 0 || !str_contains(implode('', $output), 'FrankenPHP')) {
-                throw new RuntimeException('FrankenPHP failed sanity check: ret[' . $ret . ']. out[' . implode('', $output) . ']');
+                throw new ValidationException(
+                    'FrankenPHP failed sanity check: ret[' . $ret . ']. out[' . implode('', $output) . ']',
+                    validation_module: 'FrankenPHP sanity check'
+                );
             }
         }
     }
@@ -178,7 +200,7 @@ abstract class UnixBuilderBase extends BuilderBase
             BUILD_TARGET_CLI => SOURCE_PATH . '/php-src/sapi/cli/php',
             BUILD_TARGET_MICRO => SOURCE_PATH . '/php-src/sapi/micro/micro.sfx',
             BUILD_TARGET_FPM => SOURCE_PATH . '/php-src/sapi/fpm/php-fpm',
-            default => throw new RuntimeException('Deployment does not accept type ' . $type),
+            default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
         FileSystem::createDir(BUILD_BIN_PATH);
@@ -191,7 +213,7 @@ abstract class UnixBuilderBase extends BuilderBase
      */
     protected function cleanMake(): void
     {
-        logger()->info('cleaning up');
+        logger()->info('cleaning up php-src build files');
         shell()->cd(SOURCE_PATH . '/php-src')->exec('make clean');
     }
 

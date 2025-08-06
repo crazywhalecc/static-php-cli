@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\util;
 
 use SPC\builder\macos\SystemUtil;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCInternalException;
 use SPC\exception\WrongUsageException;
 use SPC\toolchain\ToolchainManager;
 
@@ -33,7 +33,7 @@ class GlobalEnvManager
         }
         // Check pre-defined env vars exists
         if (getenv('BUILD_ROOT_PATH') === false) {
-            throw new RuntimeException('You must include src/globals/internal-env.php before using GlobalEnvManager');
+            throw new SPCInternalException('You must include src/globals/internal-env.php before using GlobalEnvManager');
         }
 
         // Define env vars for unix

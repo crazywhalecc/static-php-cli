@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\store;
 
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCException;
 
 class FileSystem
 {
@@ -147,6 +147,7 @@ class FileSystem
      */
     public static function copyDir(string $from, string $to): void
     {
+        logger()->debug("Copying directory from {$from} to {$to}");
         $dst_path = FileSystem::convertPath($to);
         $src_path = FileSystem::convertPath($from);
         switch (PHP_OS_FAMILY) {
@@ -158,6 +159,23 @@ class FileSystem
             case 'BSD':
                 f_passthru('cp -r "' . $src_path . '" "' . $dst_path . '"');
                 break;
+        }
+    }
+
+    /**
+     * Copy file from one location to another.
+     * This method will throw an exception if the copy operation fails.
+     *
+     * @param string $from Source file path
+     * @param string $to   Destination file path
+     */
+    public static function copy(string $from, string $to): void
+    {
+        logger()->debug("Copying file from {$from} to {$to}");
+        $dst_path = FileSystem::convertPath($to);
+        $src_path = FileSystem::convertPath($from);
+        if (!copy($src_path, $dst_path)) {
+            throw new FileSystemException('Cannot copy file from ' . $src_path . ' to ' . $dst_path);
         }
     }
 
@@ -187,13 +205,13 @@ class FileSystem
         try {
             // extract wrapper command
             self::extractWithType($source_type, $filename, $extract_path);
-        } catch (RuntimeException $e) {
+        } catch (SPCException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('rmdir /s /q ' . $target);
             } else {
                 f_passthru('rm -rf ' . $target);
             }
-            throw new FileSystemException('Cannot extract package ' . $name, $e->getCode(), $e);
+            throw new FileSystemException("Cannot extract package {$name}", $e->getCode(), $e);
         }
     }
 
@@ -223,7 +241,7 @@ class FileSystem
         try {
             self::extractWithType($source_type, $filename, $move_path);
             self::emitSourceExtractHook($name, $target);
-        } catch (RuntimeException $e) {
+        } catch (SPCException $e) {
             if (PHP_OS_FAMILY === 'Windows') {
                 f_passthru('rmdir /s /q ' . $target);
             } else {
@@ -505,7 +523,7 @@ class FileSystem
     public static function restoreBackupFile(string $path): void
     {
         if (!file_exists($path . '.bak')) {
-            throw new RuntimeException('Cannot find bak file for ' . $path);
+            throw new FileSystemException("Backup restore failed: Cannot find bak file for {$path}");
         }
         copy($path . '.bak', $path);
         unlink($path . '.bak');

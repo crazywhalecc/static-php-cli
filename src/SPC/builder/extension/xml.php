@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCInternalException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
@@ -24,7 +24,7 @@ class xml extends Extension
             'xmlreader' => '--enable-xmlreader',
             'xmlwriter' => '--enable-xmlwriter',
             'simplexml' => '--enable-simplexml',
-            default => throw new RuntimeException('Not accept non-xml extension'),
+            default => throw new SPCInternalException('Not accept non-xml extension'),
         };
         $arg .= ($shared ? '=shared' : '') . ' --with-libxml="' . BUILD_ROOT_PATH . '"';
         return $arg;
@@ -44,7 +44,7 @@ class xml extends Extension
             'xmlreader' => '--enable-xmlreader',
             'xmlwriter' => '--enable-xmlwriter',
             'simplexml' => '--with-simplexml',
-            default => throw new RuntimeException('Not accept non-xml extension'),
+            default => throw new SPCInternalException('Not accept non-xml extension'),
         };
         $arg .= ' --with-libxml';
         return $arg;
