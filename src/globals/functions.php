@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Psr\Log\LoggerInterface;
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
+use SPC\exception\ExecutionException;
 use SPC\exception\InterruptException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\util\shell\UnixShell;
 use SPC\util\shell\WindowsCmd;
@@ -165,7 +165,7 @@ function f_passthru(string $cmd): ?bool
     }
     $ret = passthru($cmd, $code);
     if ($code !== 0) {
-        throw new RuntimeException('Command run failed with code[' . $code . ']: ' . $cmd, $code);
+        throw new ExecutionException($cmd, "Direct command run failed with code: {$code}", $code);
     }
     return $ret;
 }
@@ -203,7 +203,7 @@ function f_putenv(string $env): bool
 function get_cmake_version(): ?string
 {
     try {
-        [,$output] = shell()->execWithResult('cmake --version', false);
+        [,$output] = shell(false)->execWithResult('cmake --version', false);
         if (preg_match('/cmake version ([\d.]+)/i', $output[0], $matches)) {
             return $matches[1];
         }
@@ -243,4 +243,43 @@ function get_pack_replace(): array
 function clean_spaces(string $string): string
 {
     return trim(preg_replace('/\s+/', ' ', $string));
+}
+
+/**
+ * Register a callback function to handle keyboard interrupts (Ctrl+C).
+ *
+ * @param callable $callback callback function to handle keyboard interrupts
+ */
+function keyboard_interrupt_register(callable $callback): void
+{
+    if (PHP_OS_FAMILY === 'Windows') {
+        sapi_windows_set_ctrl_handler($callback);
+    } elseif (extension_loaded('pcntl')) {
+        pcntl_signal(SIGINT, $callback);
+    }
+}
+
+/**
+ * Unregister the keyboard interrupt handler.
+ *
+ * This function is used to remove the previously registered keyboard interrupt handler.
+ * It should be called when you no longer need to handle keyboard interrupts.
+ */
+function keyboard_interrupt_unregister(): void
+{
+    if (PHP_OS_FAMILY === 'Windows') {
+        sapi_windows_set_ctrl_handler(null);
+    } elseif (extension_loaded('pcntl')) {
+        pcntl_signal(SIGINT, SIG_IGN);
+    }
+}
+
+/**
+ * Strip ANSI color codes from a string.
+ */
+function strip_ansi_colors(string $text): string
+{
+    // Regular expression to match ANSI escape sequences
+    // Including color codes, cursor control, clear screen and other control sequences
+    return preg_replace('/\e\[[0-9;]*[a-zA-Z]/', '', $text);
 }

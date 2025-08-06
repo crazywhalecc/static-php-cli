@@ -7,7 +7,7 @@ namespace SPC\util\executor;
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCException;
 use SPC\util\shell\UnixShell;
 
 class UnixAutoconfExecutor extends Executor
@@ -34,8 +34,7 @@ class UnixAutoconfExecutor extends Executor
         $args = array_diff($args, $this->ignore_args);
         $configure_args = implode(' ', $args);
 
-        $this->shell->exec("./configure {$configure_args}");
-        return $this;
+        return $this->seekLogFileOnException(fn () => $this->shell->exec("./configure {$configure_args}"));
     }
 
     public function getConfigureArgsString(): string
@@ -53,15 +52,17 @@ class UnixAutoconfExecutor extends Executor
      */
     public function make(string $target = '', false|string $with_install = 'install', bool $with_clean = true, array $after_env_vars = []): static
     {
-        if ($with_clean) {
-            $this->shell->exec('make clean');
-        }
-        $after_env_vars_str = $after_env_vars !== [] ? shell()->setEnv($after_env_vars)->getEnvString() : '';
-        $this->shell->exec("make -j{$this->library->getBuilder()->concurrency} {$target} {$after_env_vars_str}");
-        if ($with_install !== false) {
-            $this->shell->exec("make {$with_install}");
-        }
-        return $this;
+        return $this->seekLogFileOnException(function () use ($target, $with_install, $with_clean, $after_env_vars) {
+            if ($with_clean) {
+                $this->shell->exec('make clean');
+            }
+            $after_env_vars_str = $after_env_vars !== [] ? shell()->setEnv($after_env_vars)->getEnvString() : '';
+            $this->shell->exec("make -j{$this->library->getBuilder()->concurrency} {$target} {$after_env_vars_str}");
+            if ($with_install !== false) {
+                $this->shell->exec("make {$with_install}");
+            }
+            return $this->shell;
+        });
     }
 
     public function exec(string $cmd): static
@@ -140,5 +141,25 @@ class UnixAutoconfExecutor extends Executor
             'CXXFLAGS' => "-I{$this->library->getIncludeDir()}",
             'LDFLAGS' => "-L{$this->library->getLibDir()}",
         ]);
+    }
+
+    /**
+     * When an exception occurs, this method will check if the config log file exists.
+     */
+    private function seekLogFileOnException(mixed $callable): static
+    {
+        try {
+            $callable();
+            return $this;
+        } catch (SPCException $e) {
+            if (file_exists("{$this->library->getSourceDir()}/config.log")) {
+                logger()->debug("Config log file found: {$this->library->getSourceDir()}/config.log");
+                $log_file = "lib.{$this->library->getName()}.console.log";
+                logger()->debug('Saved config log file to: ' . SPC_LOGS_DIR . "/{$log_file}");
+                $e->addExtraLogFile("{$this->library->getName()} library config.log", $log_file);
+                copy("{$this->library->getSourceDir()}/config.log", SPC_LOGS_DIR . "/{$log_file}");
+            }
+            throw $e;
+        }
     }
 }
