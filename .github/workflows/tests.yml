@@ -206,6 +206,13 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'windows-') }}
         run: php src/globals/test-extensions.php build_embed_cmd ${{ matrix.os }} ${{ matrix.php }}
 
+      - name: "Upload logs"
+        if: ${{ always() && hashFiles('log/**') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ matrix.os }}-${{ matrix.php }}
+          path: log
+
 #      - name: Setup tmate session
 #        if: ${{ failure() }}
 #        uses: mxschmitt/action-tmate@v3

@@ -172,7 +172,7 @@ If the build is successful, you will see the `buildroot/bin` directory in the cu
 If the build fails, you can use the `--debug` parameter to view detailed error information, 
 or use the `--with-clean` to clear the old compilation results and recompile.
 
-If the build still fails to use the above method, please submit an issue and attach your `craft.yml` and `craft.log`.
+If the build still fails to use the above method, please submit an issue and attach your `craft.yml` and `./log` archive.
 
 ## Step-by-step build command
 

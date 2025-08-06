@@ -48,6 +48,12 @@ packlib_files.txt
 package-lock.json
 pnpm-lock.yaml
 
-# craft.log
-craft.log
+# craft
 craft.yml
+
+# SPC logs
+log/
+
+# spc.phar
+spc.phar
+spc.exe
