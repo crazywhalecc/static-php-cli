@@ -8,7 +8,6 @@ use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
-use SPC\exception\RuntimeException;
 
 class BSDToolCheckList
 {
@@ -56,11 +55,8 @@ class BSDToolCheckList
         } else {
             $prefix = '';
         }
-        try {
-            shell(true)->exec("ASSUME_ALWAYS_YES=yes {$prefix}pkg install -y " . implode(' ', $missing));
-        } catch (RuntimeException) {
-            return false;
-        }
+        shell(true)->exec("ASSUME_ALWAYS_YES=yes {$prefix}pkg install -y " . implode(' ', $missing));
+
         return true;
     }
 }
