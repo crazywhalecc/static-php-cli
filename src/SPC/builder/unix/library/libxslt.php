@@ -6,18 +6,10 @@ namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait libxslt
 {
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     protected function build(): void
     {
         $static_libs = $this instanceof LinuxLibraryBase ? $this->getStaticLibFiles(include_self: false) : '';

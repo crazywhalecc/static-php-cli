@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
 
@@ -20,9 +19,6 @@ trait libcares
         return false;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)->configure('--disable-tests')->make();

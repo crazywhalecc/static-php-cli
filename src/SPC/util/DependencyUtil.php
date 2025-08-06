@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
-use SPC\exception\FileSystemException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 
@@ -28,8 +27,6 @@ class DependencyUtil
      * - 'suggests': array of suggested dependency names (string)
      *
      * @return array<string, array{depends: array<int, string>, suggests: array<int, string>}>
-     * @throws WrongUsageException
-     * @throws FileSystemException
      */
     public static function platExtToLibs(): array
     {
@@ -67,10 +64,8 @@ class DependencyUtil
     /**
      * Get library dependencies in correct order
      *
-     * @param  array               $libs Array of library names
-     * @return array               Ordered array of library names
-     * @throws WrongUsageException
-     * @throws FileSystemException
+     * @param  array $libs Array of library names
+     * @return array Ordered array of library names
      */
     public static function getLibs(array $libs, bool $include_suggested_libs = false): array
     {
@@ -106,11 +101,9 @@ class DependencyUtil
     /**
      * Get extension dependencies in correct order
      *
-     * @param  array               $exts            Array of extension names
-     * @param  array               $additional_libs Array of additional libraries
-     * @return array               Ordered array of extension names
-     * @throws WrongUsageException
-     * @throws FileSystemException
+     * @param  array $exts            Array of extension names
+     * @param  array $additional_libs Array of additional libraries
+     * @return array Ordered array of extension names
      */
     public static function getExtsAndLibs(array $exts, array $additional_libs = [], bool $include_suggested_exts = false, bool $include_suggested_libs = false): array
     {

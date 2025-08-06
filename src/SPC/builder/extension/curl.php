@@ -16,9 +16,6 @@ use SPC\util\CustomExt;
 #[CustomExt('curl')]
 class curl extends Extension
 {
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeBuildconf(): bool
     {
         logger()->info('patching before-configure for curl checks');
@@ -46,10 +43,6 @@ class curl extends Extension
         return true;
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     public function patchBeforeConfigure(): bool
     {
         $frameworks = $this->builder instanceof MacOSBuilder ? ' ' . $this->builder->getFrameworks(true) . ' ' : '';

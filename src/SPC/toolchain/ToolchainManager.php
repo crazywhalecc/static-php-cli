@@ -36,9 +36,6 @@ class ToolchainManager
         return self::OS_DEFAULT_TOOLCHAIN[PHP_OS_FAMILY];
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     public static function initToolchain(): void
     {
         $toolchainClass = self::getToolchainClass();

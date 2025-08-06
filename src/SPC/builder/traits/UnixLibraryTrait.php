@@ -13,11 +13,6 @@ use SPC\util\SPCConfigUtil;
 
 trait UnixLibraryTrait
 {
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     public function getStaticLibFiles(bool $include_self = true): string
     {
         $libs = $include_self ? [$this] : [];
@@ -28,11 +23,11 @@ trait UnixLibraryTrait
     }
 
     /**
-     * Patch pkgconfig file prefix
+     * Patch pkgconfig file prefix, exec_prefix, libdir, includedir for correct build.
      *
-     * @param  array               $files file list
-     * @throws FileSystemException
-     * @throws RuntimeException
+     * @param array      $files          File list to patch, if empty, will use pkg-configs from config (e.g. ['zlib.pc', 'openssl.pc'])
+     * @param int        $patch_option   Patch options
+     * @param null|array $custom_replace Custom replace rules, if provided, will be used to replace in the format [regex, replacement]
      */
     public function patchPkgconfPrefix(array $files = [], int $patch_option = PKGCONF_PATCH_ALL, ?array $custom_replace = null): void
     {

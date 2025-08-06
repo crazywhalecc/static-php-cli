@@ -28,9 +28,6 @@ class InstallPkgCommand extends BaseCommand
         $this->addOption('skip-extract', null, null, 'Skip package extraction, just download the package archive');
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public function handle(): int
     {
         try {

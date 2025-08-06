@@ -24,10 +24,7 @@ class GlobalEnvManager
     }
 
     /**
-     * Initialize the environment variables
-     *
-     * @throws RuntimeException
-     * @throws WrongUsageException
+     * Initialize the environment variables.
      */
     public static function init(): void
     {
@@ -110,8 +107,6 @@ class GlobalEnvManager
     /**
      * Initialize the toolchain after the environment variables are set.
      * The toolchain or environment availability check is done here.
-     *
-     * @throws WrongUsageException
      */
     public static function afterInit(): void
     {
@@ -129,9 +124,6 @@ class GlobalEnvManager
         }
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     private static function readIniFile(): array
     {
         // Init env.ini file, read order:

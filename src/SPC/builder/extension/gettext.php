@@ -6,17 +6,12 @@ namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
 use SPC\builder\macos\MacOSBuilder;
-use SPC\exception\FileSystemException;
-use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('gettext')]
 class gettext extends Extension
 {
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeBuildconf(): bool
     {
         if ($this->builder instanceof MacOSBuilder) {
@@ -25,10 +20,6 @@ class gettext extends Extension
         return true;
     }
 
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
     public function patchBeforeConfigure(): bool
     {
         if ($this->builder instanceof MacOSBuilder) {

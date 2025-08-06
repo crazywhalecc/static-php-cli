@@ -24,9 +24,6 @@ class ClangNativeToolchain implements ToolchainInterface
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=ld');
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     public function afterInit(): void
     {
         foreach (['CC', 'CXX', 'AR', 'LD'] as $env) {

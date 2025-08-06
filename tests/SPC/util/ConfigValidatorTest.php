@@ -308,9 +308,6 @@ class ConfigValidatorTest extends TestCase
         }
     }
 
-    /**
-     * @throws ValidationException
-     */
     public function testValidateExts(): void
     {
         // Test valid extensions

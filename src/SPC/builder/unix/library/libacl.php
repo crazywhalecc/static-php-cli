@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait libacl
 {
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeMake(): bool
     {
         $file_path = SOURCE_PATH . '/php-src/Makefile';
@@ -25,9 +20,6 @@ trait libacl
         return true;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)

@@ -21,9 +21,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 
 class openssl extends MacOSLibraryBase
@@ -32,11 +29,6 @@ class openssl extends MacOSLibraryBase
 
     public const NAME = 'openssl';
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     protected function build(): void
     {
         // lib:zlib

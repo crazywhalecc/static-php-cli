@@ -55,11 +55,6 @@ class LinuxMuslCheck
         return CheckResult::fail('musl-cross-make is not installed on your system', 'fix-musl-cross-make');
     }
 
-    /** @noinspection PhpUnused */
-    /**
-     * @throws DownloaderException
-     * @throws FileSystemException
-     */
     #[AsFixItem('fix-musl-wrapper')]
     public function fixMusl(): bool
     {
@@ -94,11 +89,6 @@ class LinuxMuslCheck
         }
     }
 
-    /** @noinspection PhpUnused */
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     #[AsFixItem('fix-musl-cross-make')]
     public function fixMuslCrossMake(): bool
     {

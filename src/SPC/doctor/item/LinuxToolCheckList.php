@@ -114,10 +114,6 @@ class LinuxToolCheckList
         return CheckResult::ok();
     }
 
-    /**
-     * @throws RuntimeException
-     * @noinspection PhpUnused
-     */
     #[AsFixItem('install-linux-tools')]
     public function fixBuildTools(array $distro, array $missing): bool
     {

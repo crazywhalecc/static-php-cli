@@ -41,9 +41,6 @@ class GlobalFunctionsTest extends TestCase
         $this->assertInstanceOf('Psr\Log\LoggerInterface', logger());
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     public function testArch2Gnu(): void
     {
         $this->assertEquals('x86_64', arch2gnu('x86_64'));
@@ -61,9 +58,6 @@ class GlobalFunctionsTest extends TestCase
         $this->assertEquals("'hello'", quote('hello', "'"));
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function testFPassthru(): void
     {
         if (PHP_OS_FAMILY === 'Windows') {

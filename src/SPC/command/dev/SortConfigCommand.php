@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SPC\command\dev;
 
 use SPC\command\BaseCommand;
-use SPC\exception\FileSystemException;
-use SPC\exception\ValidationException;
 use SPC\store\FileSystem;
 use SPC\util\ConfigValidator;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,10 +21,6 @@ class SortConfigCommand extends BaseCommand
         $this->addArgument('config-name', InputArgument::REQUIRED, 'Your config to be sorted, you can sort "lib", "source" and "ext".');
     }
 
-    /**
-     * @throws ValidationException
-     * @throws FileSystemException
-     */
     public function handle(): int
     {
         switch ($name = $this->getArgument('config-name')) {

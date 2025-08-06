@@ -6,8 +6,6 @@ namespace SPC\util;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -51,11 +49,6 @@ class SPCConfigUtil
      *     ldflags: string,
      *     libs: string
      * }
-     * @throws \ReflectionException
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     * @throws \Throwable
      */
     public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
     {

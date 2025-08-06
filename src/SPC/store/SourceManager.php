@@ -4,17 +4,10 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 
 class SourceManager
 {
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
     public static function initSource(?array $sources = null, ?array $libs = null, ?array $exts = null, bool $source_only = false): void
     {
         $sources_extracted = [];

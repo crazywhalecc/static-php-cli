@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SPC\Tests\store;
 
 use PHPUnit\Framework\TestCase;
-use SPC\exception\FileSystemException;
-use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 
@@ -15,9 +13,6 @@ use SPC\store\FileSystem;
  */
 class ConfigTest extends TestCase
 {
-    /**
-     * @throws FileSystemException
-     */
     public static function setUpBeforeClass(): void
     {
         $testdir = WORKING_DIR . '/.configtest';
@@ -30,26 +25,16 @@ class ConfigTest extends TestCase
         FileSystem::loadConfigArray('source', $testdir);
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public static function tearDownAfterClass(): void
     {
         FileSystem::removeDir(WORKING_DIR . '/.configtest');
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public function testGetExts()
     {
         $this->assertTrue(is_assoc_array(Config::getExts()));
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     public function testGetLib()
     {
         $this->assertIsArray(Config::getLib('zlib'));
@@ -60,35 +45,22 @@ class ConfigTest extends TestCase
         };
     }
 
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
     public function testGetExt()
     {
         $this->assertIsArray(Config::getExt('bcmath'));
         $this->assertEquals('builtin', Config::getExt('bcmath', 'type'));
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public function testGetSources()
     {
         $this->assertTrue(is_assoc_array(Config::getSources()));
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public function testGetSource()
     {
         $this->assertIsArray(Config::getSource('php-src'));
     }
 
-    /**
-     * @throws FileSystemException
-     */
     public function testGetLibs()
     {
         $this->assertTrue(is_assoc_array(Config::getLibs()));

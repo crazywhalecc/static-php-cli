@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\linux;
 
 use SPC\builder\unix\UnixBuilderBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\exception\PatchException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
@@ -19,10 +18,6 @@ class LinuxBuilder extends UnixBuilderBase
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
-    /**
-     * @throws FileSystemException
-     * @throws WrongUsageException
-     */
     public function __construct(array $options = [])
     {
         $this->options = $options;
@@ -45,10 +40,7 @@ class LinuxBuilder extends UnixBuilderBase
     /**
      * Build PHP from source.
      *
-     * @param  int                 $build_target Build target, use `BUILD_TARGET_*` constants
-     * @throws RuntimeException
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param int $build_target Build target, use `BUILD_TARGET_*` constants
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
@@ -168,9 +160,6 @@ class LinuxBuilder extends UnixBuilderBase
 
     /**
      * Build cli sapi
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
      */
     protected function buildCli(): void
     {
@@ -193,10 +182,6 @@ class LinuxBuilder extends UnixBuilderBase
 
     /**
      * Build phpmicro sapi
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
      */
     protected function buildMicro(): void
     {
@@ -231,9 +216,6 @@ class LinuxBuilder extends UnixBuilderBase
 
     /**
      * Build fpm sapi
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
      */
     protected function buildFpm(): void
     {
@@ -255,8 +237,6 @@ class LinuxBuilder extends UnixBuilderBase
 
     /**
      * Build embed sapi
-     *
-     * @throws RuntimeException
      */
     protected function buildEmbed(): void
     {
@@ -346,12 +326,6 @@ class LinuxBuilder extends UnixBuilderBase
 
     /**
      * Return extra variables for php make command.
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     * @throws \ReflectionException
-     * @throws \Throwable
      */
     private function getMakeExtraVars(): array
     {
@@ -370,8 +344,6 @@ class LinuxBuilder extends UnixBuilderBase
      * Strip micro.sfx for Linux.
      * The micro.sfx does not support UPX directly, but we can remove UPX-info segment to adapt.
      * This will also make micro.sfx with upx-packed more like a malware fore antivirus :(
-     *
-     * @throws RuntimeException
      */
     private function processMicroUPX(): void
     {

@@ -6,18 +6,10 @@ namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait ngtcp2
 {
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)

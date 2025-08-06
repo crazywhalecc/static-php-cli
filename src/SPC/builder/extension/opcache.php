@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\SourcePatcher;
 use SPC\util\CustomExt;
@@ -13,10 +12,6 @@ use SPC\util\CustomExt;
 #[CustomExt('opcache')]
 class opcache extends Extension
 {
-    /**
-     * @throws WrongUsageException
-     * @throws RuntimeException
-     */
     public function validate(): void
     {
         if ($this->builder->getPHPVersionID() < 80000 && getenv('SPC_SKIP_PHP_VERSION_CHECK') !== 'yes') {

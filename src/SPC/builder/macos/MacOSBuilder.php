@@ -6,8 +6,6 @@ namespace SPC\builder\macos;
 
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\builder\unix\UnixBuilderBase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
@@ -19,11 +17,6 @@ class MacOSBuilder extends UnixBuilderBase
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
-    /**
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
     public function __construct(array $options = [])
     {
         $this->options = $options;
@@ -48,9 +41,7 @@ class MacOSBuilder extends UnixBuilderBase
     /**
      * Get dynamically linked macOS frameworks
      *
-     * @param  bool                $asString If true, return as string
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param bool $asString If true, return as string
      */
     public function getFrameworks(bool $asString = false): array|string
     {
@@ -83,10 +74,7 @@ class MacOSBuilder extends UnixBuilderBase
     /**
      * Just start to build statically linked php binary
      *
-     * @param  int                 $build_target build target
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
+     * @param int $build_target build target
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
@@ -190,9 +178,6 @@ class MacOSBuilder extends UnixBuilderBase
 
     /**
      * Build cli sapi
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
      */
     protected function buildCli(): void
     {
@@ -209,10 +194,6 @@ class MacOSBuilder extends UnixBuilderBase
 
     /**
      * Build phpmicro sapi
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
      */
     protected function buildMicro(): void
     {
@@ -248,9 +229,6 @@ class MacOSBuilder extends UnixBuilderBase
 
     /**
      * Build fpm sapi
-     *
-     * @throws RuntimeException
-     * @throws FileSystemException
      */
     protected function buildFpm(): void
     {
@@ -266,8 +244,6 @@ class MacOSBuilder extends UnixBuilderBase
 
     /**
      * Build embed sapi
-     *
-     * @throws RuntimeException
      */
     protected function buildEmbed(): void
     {

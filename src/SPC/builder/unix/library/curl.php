@@ -4,16 +4,10 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait curl
 {
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     protected function build(): void
     {
         shell()->cd($this->source_dir)->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ./CMakeLists.txt');

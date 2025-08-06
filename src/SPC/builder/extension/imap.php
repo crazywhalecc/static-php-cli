@@ -24,9 +24,6 @@ class imap extends Extension
         return false;
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     public function validate(): void
     {
         if ($this->builder->getOption('enable-zts')) {

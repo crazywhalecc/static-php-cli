@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 
@@ -13,10 +11,6 @@ class imap extends MacOSLibraryBase
 {
     public const NAME = 'imap';
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
     public function patchBeforeBuild(): bool
     {
         $cc = getenv('CC') ?: 'clang';
@@ -37,9 +31,6 @@ class imap extends MacOSLibraryBase
         return true;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     protected function build(): void
     {
         if ($this->builder->getLib('openssl')) {

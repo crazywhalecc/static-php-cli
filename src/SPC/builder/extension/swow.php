@@ -26,9 +26,6 @@ class swow extends Extension
         return $arg;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     public function patchBeforeBuildconf(): bool
     {
         if ($this->builder->getPHPVersionID() >= 80000 && !is_link(SOURCE_PATH . '/php-src/ext/swow')) {

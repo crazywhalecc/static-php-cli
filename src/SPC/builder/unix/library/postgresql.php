@@ -12,10 +12,6 @@ use SPC\util\SPCTarget;
 
 trait postgresql
 {
-    /**
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     protected function build(): void
     {
         $builddir = BUILD_ROOT_PATH;

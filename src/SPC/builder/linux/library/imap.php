@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\util\SPCTarget;
 
@@ -13,9 +11,6 @@ class imap extends LinuxLibraryBase
 {
     public const NAME = 'imap';
 
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeBuild(): bool
     {
         $cc = getenv('CC') ?: 'gcc';

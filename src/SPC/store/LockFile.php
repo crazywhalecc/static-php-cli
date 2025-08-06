@@ -60,10 +60,8 @@ class LockFile
     /**
      * Put a lock entry into the lock file.
      *
-     * @param  string              $lock_name    Lock name to set or remove
-     * @param  null|array          $lock_content lock content to set, or null to remove the lock entry
-     * @throws FileSystemException
-     * @throws WrongUsageException
+     * @param string     $lock_name    Lock name to set or remove
+     * @param null|array $lock_content lock content to set, or null to remove the lock entry
      */
     public static function put(string $lock_name, ?array $lock_content): void
     {
@@ -84,9 +82,8 @@ class LockFile
     /**
      * Get the full path of a lock file or directory based on the lock options.
      *
-     * @param  array               $lock_options lock item options, must contain 'source_type', 'filename' or 'dirname'
-     * @return string              the absolute path to the lock file or directory
-     * @throws WrongUsageException
+     * @param  array  $lock_options lock item options, must contain 'source_type', 'filename' or 'dirname'
+     * @return string the absolute path to the lock file or directory
      */
     public static function getLockFullPath(array $lock_options): string
     {
@@ -122,9 +119,8 @@ class LockFile
     /**
      * Get the hash of the lock source based on the lock options.
      *
-     * @param  array            $lock_options Lock options
-     * @return string           Hash of the lock source
-     * @throws RuntimeException
+     * @param  array  $lock_options Lock options
+     * @return string Hash of the lock source
      */
     public static function getLockSourceHash(array $lock_options): string
     {
@@ -141,10 +137,8 @@ class LockFile
     }
 
     /**
-     * @param  array               $lock_options Lock options
-     * @param  string              $destination  Target directory
-     * @throws FileSystemException
-     * @throws RuntimeException
+     * @param array  $lock_options Lock options
+     * @param string $destination  Target directory
      */
     public static function putLockSourceHash(array $lock_options, string $destination): void
     {
@@ -167,9 +161,6 @@ class LockFile
      *     move_path: ?string,
      *     lock_as: int
      * } $data Source data
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
      */
     public static function lockSource(string $name, array $data): void
     {
@@ -200,9 +191,7 @@ class LockFile
     /**
      * Remove the lock file or directory if it exists.
      *
-     * @param  array               $lock_options lock item options, must contain 'source_type', 'filename' or 'dirname'
-     * @throws WrongUsageException
-     * @throws FileSystemException
+     * @param array $lock_options lock item options, must contain 'source_type', 'filename' or 'dirname'
      */
     private static function removeLockFileIfExists(array $lock_options): void
     {

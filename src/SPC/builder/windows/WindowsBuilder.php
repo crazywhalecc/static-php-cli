@@ -26,9 +26,6 @@ class WindowsBuilder extends BuilderBase
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
-    /**
-     * @throws FileSystemException
-     */
     public function __construct(array $options = [])
     {
         $this->options = $options;
@@ -54,11 +51,6 @@ class WindowsBuilder extends BuilderBase
         f_mkdir(BUILD_LIB_PATH, recursive: true);
     }
 
-    /**
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
@@ -153,10 +145,6 @@ class WindowsBuilder extends BuilderBase
         $this->sanityCheck($build_target);
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
     public function buildCli(): void
     {
         SourcePatcher::patchWindowsCLITarget();
@@ -182,11 +170,6 @@ class WindowsBuilder extends BuilderBase
         */
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
-     */
     public function buildMicro(): void
     {
         // workaround for fiber (originally from https://github.com/dixyes/lwmbs/blob/master/windows/MicroBuild.php)
@@ -262,10 +245,6 @@ class WindowsBuilder extends BuilderBase
         $this->lib_list = $sorted_libraries;
     }
 
-    /**
-     * @throws FileSystemException
-     * @throws RuntimeException
-     */
     public function cleanMake(): void
     {
         FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_clean_wrapper.bat', 'nmake /nologo %*');
@@ -274,8 +253,6 @@ class WindowsBuilder extends BuilderBase
 
     /**
      * Run extension and PHP cli and micro check
-     *
-     * @throws RuntimeException
      */
     public function sanityCheck(mixed $build_target): void
     {
@@ -321,11 +298,9 @@ class WindowsBuilder extends BuilderBase
     }
 
     /**
-     * 将编译好的二进制文件发布到 buildroot
+     * Deploy the binary file to buildroot/bin/
      *
-     * @param  int                 $type 发布类型
-     * @throws RuntimeException
-     * @throws FileSystemException
+     * @param int $type Deploy type
      */
     public function deployBinary(int $type): bool
     {
@@ -348,34 +323,6 @@ class WindowsBuilder extends BuilderBase
 
         cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\\'));
         return true;
-    }
-
-    /**
-     * @throws WrongUsageException
-     * @throws FileSystemException
-     */
-    public function getAllStaticLibFiles(): array
-    {
-        $libs = [];
-
-        // reorder libs
-        foreach ($this->libs as $lib) {
-            foreach ($lib->getDependencies() as $dep) {
-                $libs[] = $dep;
-            }
-            $libs[] = $lib;
-        }
-
-        $libFiles = [];
-        $libNames = [];
-        // merge libs
-        foreach ($libs as $lib) {
-            if (!in_array($lib::NAME, $libNames, true)) {
-                $libNames[] = $lib::NAME;
-                array_unshift($libFiles, ...$lib->getStaticLibs());
-            }
-        }
-        return $libFiles;
     }
 
     /**

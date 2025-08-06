@@ -21,7 +21,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\macos\library;
 
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 
 class curl extends MacOSLibraryBase
@@ -30,9 +29,6 @@ class curl extends MacOSLibraryBase
 
     public const NAME = 'curl';
 
-    /**
-     * @throws FileSystemException
-     */
     public function patchBeforeBuild(): bool
     {
         FileSystem::replaceFileRegex(
