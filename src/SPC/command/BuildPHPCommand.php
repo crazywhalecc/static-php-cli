@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
-use SPC\exception\ExceptionHandler;
-use SPC\exception\WrongUsageException;
+use SPC\exception\SPCException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
@@ -119,167 +118,154 @@ class BuildPHPCommand extends BuildCommand
                 logger()->warning('Some cases micro.sfx cannot be packed via UPX due to dynamic size bug, be aware!');
             }
         }
-        try {
-            // create builder
-            $builder = BuilderProvider::makeBuilderByInput($this->input);
-            $include_suggest_ext = $this->getOption('with-suggested-exts');
-            $include_suggest_lib = $this->getOption('with-suggested-libs');
-            [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs(array_merge($static_extensions, $shared_extensions), $libraries, $include_suggest_ext, $include_suggest_lib);
-            $display_libs = array_filter($libraries, fn ($lib) => in_array(Config::getLib($lib, 'type', 'lib'), ['lib', 'package']));
+        // create builder
+        $builder = BuilderProvider::makeBuilderByInput($this->input);
+        $include_suggest_ext = $this->getOption('with-suggested-exts');
+        $include_suggest_lib = $this->getOption('with-suggested-libs');
+        [$extensions, $libraries, $not_included] = DependencyUtil::getExtsAndLibs(array_merge($static_extensions, $shared_extensions), $libraries, $include_suggest_ext, $include_suggest_lib);
+        $display_libs = array_filter($libraries, fn ($lib) => in_array(Config::getLib($lib, 'type', 'lib'), ['lib', 'package']));
 
-            // separate static and shared extensions from $extensions
-            // filter rule: including shared extensions if they are in $static_extensions or $shared_extensions
-            $static_extensions = array_filter($extensions, fn ($ext) => !in_array($ext, $shared_extensions) || in_array($ext, $static_extensions));
+        // separate static and shared extensions from $extensions
+        // filter rule: including shared extensions if they are in $static_extensions or $shared_extensions
+        $static_extensions = array_filter($extensions, fn ($ext) => !in_array($ext, $shared_extensions) || in_array($ext, $static_extensions));
 
-            // print info
-            $indent_texts = [
-                'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
-                'Build Target' => getenv('SPC_TARGET'),
-                'Build Toolchain' => getenv('SPC_TOOLCHAIN'),
-                'Build SAPI' => $builder->getBuildTypeName($rule),
-                'Static Extensions (' . count($static_extensions) . ')' => implode(',', $static_extensions),
-                'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
-                'Libraries (' . count($libraries) . ')' => implode(',', $display_libs),
-                'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
-                'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
-            ];
-            if (!empty($shared_extensions) || ($rule & BUILD_TARGET_EMBED)) {
-                $indent_texts['Build Dev'] = 'yes';
-            }
-            if (!empty($this->input->getOption('with-config-file-path'))) {
-                $indent_texts['Config File Path'] = $this->input->getOption('with-config-file-path');
-            }
-            if (!empty($this->input->getOption('with-hardcoded-ini'))) {
-                $indent_texts['Hardcoded INI'] = $this->input->getOption('with-hardcoded-ini');
-            }
-            if ($this->input->getOption('disable-opcache-jit')) {
-                $indent_texts['Opcache JIT'] = 'disabled';
-            }
-            if ($this->input->getOption('with-upx-pack') && in_array(PHP_OS_FAMILY, ['Linux', 'Windows'])) {
-                $indent_texts['UPX Pack'] = 'enabled';
-            }
+        // print info
+        $indent_texts = [
+            'Build OS' => PHP_OS_FAMILY . ' (' . php_uname('m') . ')',
+            'Build Target' => getenv('SPC_TARGET'),
+            'Build Toolchain' => getenv('SPC_TOOLCHAIN'),
+            'Build SAPI' => $builder->getBuildTypeName($rule),
+            'Static Extensions (' . count($static_extensions) . ')' => implode(',', $static_extensions),
+            'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
+            'Libraries (' . count($libraries) . ')' => implode(',', $display_libs),
+            'Strip Binaries' => $builder->getOption('no-strip') ? 'no' : 'yes',
+            'Enable ZTS' => $builder->getOption('enable-zts') ? 'yes' : 'no',
+        ];
+        if (!empty($shared_extensions) || ($rule & BUILD_TARGET_EMBED)) {
+            $indent_texts['Build Dev'] = 'yes';
+        }
+        if (!empty($this->input->getOption('with-config-file-path'))) {
+            $indent_texts['Config File Path'] = $this->input->getOption('with-config-file-path');
+        }
+        if (!empty($this->input->getOption('with-hardcoded-ini'))) {
+            $indent_texts['Hardcoded INI'] = $this->input->getOption('with-hardcoded-ini');
+        }
+        if ($this->input->getOption('disable-opcache-jit')) {
+            $indent_texts['Opcache JIT'] = 'disabled';
+        }
+        if ($this->input->getOption('with-upx-pack') && in_array(PHP_OS_FAMILY, ['Linux', 'Windows'])) {
+            $indent_texts['UPX Pack'] = 'enabled';
+        }
 
-            $ver = $builder->getPHPVersionFromArchive() ?: $builder->getPHPVersion(false);
-            $indent_texts['PHP Version'] = $ver;
+        $ver = $builder->getPHPVersionFromArchive() ?: $builder->getPHPVersion(false);
+        $indent_texts['PHP Version'] = $ver;
 
-            if (!empty($not_included)) {
-                $indent_texts['Extra Exts (' . count($not_included) . ')'] = implode(', ', $not_included);
-            }
-            $this->printFormatInfo($this->getDefinedEnvs(), true);
-            $this->printFormatInfo($indent_texts);
+        if (!empty($not_included)) {
+            $indent_texts['Extra Exts (' . count($not_included) . ')'] = implode(', ', $not_included);
+        }
+        $this->printFormatInfo($this->getDefinedEnvs(), true);
+        $this->printFormatInfo($indent_texts);
+        // bind extra info to SPCException
+        SPCException::bindBuildPHPExtraInfo($indent_texts);
 
-            logger()->notice('Build will start after 2s ...');
-            sleep(2);
+        logger()->notice('Build will start after 2s ...');
+        sleep(2);
 
-            // compile libraries
-            $builder->proveLibs($libraries);
-            // check extensions
-            $builder->proveExts($static_extensions, $shared_extensions);
-            // validate libs and extensions
-            $builder->validateLibsAndExts();
+        // compile libraries
+        $builder->proveLibs($libraries);
+        // check extensions
+        $builder->proveExts($static_extensions, $shared_extensions);
+        // validate libs and extensions
+        $builder->validateLibsAndExts();
 
-            // check some things before building all the things
-            $builder->checkBeforeBuildPHP($rule);
+        // check some things before building all the things
+        $builder->checkBeforeBuildPHP($rule);
 
-            // clean builds and sources
-            if ($this->input->getOption('with-clean')) {
-                logger()->info('Cleaning source and previous build dir...');
-                FileSystem::removeDir(SOURCE_PATH);
-                FileSystem::removeDir(BUILD_ROOT_PATH);
-            }
+        // clean builds and sources
+        if ($this->input->getOption('with-clean')) {
+            logger()->info('Cleaning source and previous build dir...');
+            FileSystem::removeDir(SOURCE_PATH);
+            FileSystem::removeDir(BUILD_ROOT_PATH);
+        }
 
-            // build or install libraries
-            $builder->setupLibs();
+        // build or install libraries
+        $builder->setupLibs();
 
-            // Process -I option
-            $custom_ini = [];
-            foreach ($this->input->getOption('with-hardcoded-ini') as $value) {
-                [$source_name, $ini_value] = explode('=', $value, 2);
-                $custom_ini[$source_name] = $ini_value;
-                logger()->info('Adding hardcoded INI [' . $source_name . ' = ' . $ini_value . ']');
-            }
-            if (!empty($custom_ini)) {
-                SourcePatcher::patchHardcodedINI($custom_ini);
-            }
+        // Process -I option
+        $custom_ini = [];
+        foreach ($this->input->getOption('with-hardcoded-ini') as $value) {
+            [$source_name, $ini_value] = explode('=', $value, 2);
+            $custom_ini[$source_name] = $ini_value;
+            logger()->info('Adding hardcoded INI [' . $source_name . ' = ' . $ini_value . ']');
+        }
+        if (!empty($custom_ini)) {
+            SourcePatcher::patchHardcodedINI($custom_ini);
+        }
 
-            // add static-php-cli.version to main.c, in order to debug php failure more easily
-            SourcePatcher::patchSPCVersionToPHP($this->getApplication()->getVersion());
+        // add static-php-cli.version to main.c, in order to debug php failure more easily
+        SourcePatcher::patchSPCVersionToPHP($this->getApplication()->getVersion());
 
-            // clean old modules that may conflict with the new php build
-            FileSystem::removeDir(BUILD_MODULES_PATH);
-            // start to build
-            $builder->buildPHP($rule);
+        // clean old modules that may conflict with the new php build
+        FileSystem::removeDir(BUILD_MODULES_PATH);
+        // start to build
+        $builder->buildPHP($rule);
 
-            // build dynamic extensions if needed
-            if (!empty($shared_extensions)) {
-                logger()->info('Building shared extensions ...');
-                $builder->buildSharedExts();
-            }
+        // build dynamic extensions if needed
+        if (!empty($shared_extensions)) {
+            logger()->info('Building shared extensions ...');
+            $builder->buildSharedExts();
+        }
 
-            $builder->testPHP($rule);
+        $builder->testPHP($rule);
 
-            // compile stopwatch :P
-            $time = round(microtime(true) - START_TIME, 3);
-            logger()->info('');
-            logger()->info('   Build complete, used ' . $time . ' s !');
-            logger()->info('');
+        // compile stopwatch :P
+        $time = round(microtime(true) - START_TIME, 3);
+        logger()->info('');
+        logger()->info('   Build complete, used ' . $time . ' s !');
+        logger()->info('');
 
-            // ---------- When using bin/spc-alpine-docker, the build root path is different from the host system ----------
-            $build_root_path = BUILD_ROOT_PATH;
-            $cwd = getcwd();
-            $fixed = '';
-            if (!empty(getenv('SPC_FIX_DEPLOY_ROOT'))) {
-                str_replace($cwd, '', $build_root_path);
-                $build_root_path = getenv('SPC_FIX_DEPLOY_ROOT') . '/' . basename($build_root_path);
-                $fixed = ' (host system)';
-            }
-            if (($rule & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
-                $win_suffix = PHP_OS_FAMILY === 'Windows' ? '.exe' : '';
-                $path = FileSystem::convertPath("{$build_root_path}/bin/php{$win_suffix}");
-                logger()->info("Static php binary path{$fixed}: {$path}");
-            }
-            if (($rule & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
-                $path = FileSystem::convertPath("{$build_root_path}/bin/micro.sfx");
-                logger()->info("phpmicro binary path{$fixed}: {$path}");
-            }
-            if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM && PHP_OS_FAMILY !== 'Windows') {
-                $path = FileSystem::convertPath("{$build_root_path}/bin/php-fpm");
-                logger()->info("Static php-fpm binary path{$fixed}: {$path}");
-            }
-            if (!empty($shared_extensions)) {
-                foreach ($shared_extensions as $ext) {
-                    $path = FileSystem::convertPath("{$build_root_path}/modules/{$ext}.so");
-                    if (file_exists(BUILD_MODULES_PATH . "/{$ext}.so")) {
-                        logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
-                    } else {
-                        logger()->warning("Shared extension [{$ext}] not found, please check!");
-                    }
+        // ---------- When using bin/spc-alpine-docker, the build root path is different from the host system ----------
+        $build_root_path = BUILD_ROOT_PATH;
+        $cwd = getcwd();
+        $fixed = '';
+        if (!empty(getenv('SPC_FIX_DEPLOY_ROOT'))) {
+            str_replace($cwd, '', $build_root_path);
+            $build_root_path = getenv('SPC_FIX_DEPLOY_ROOT') . '/' . basename($build_root_path);
+            $fixed = ' (host system)';
+        }
+        if (($rule & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
+            $win_suffix = PHP_OS_FAMILY === 'Windows' ? '.exe' : '';
+            $path = FileSystem::convertPath("{$build_root_path}/bin/php{$win_suffix}");
+            logger()->info("Static php binary path{$fixed}: {$path}");
+        }
+        if (($rule & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+            $path = FileSystem::convertPath("{$build_root_path}/bin/micro.sfx");
+            logger()->info("phpmicro binary path{$fixed}: {$path}");
+        }
+        if (($rule & BUILD_TARGET_FPM) === BUILD_TARGET_FPM && PHP_OS_FAMILY !== 'Windows') {
+            $path = FileSystem::convertPath("{$build_root_path}/bin/php-fpm");
+            logger()->info("Static php-fpm binary path{$fixed}: {$path}");
+        }
+        if (!empty($shared_extensions)) {
+            foreach ($shared_extensions as $ext) {
+                $path = FileSystem::convertPath("{$build_root_path}/modules/{$ext}.so");
+                if (file_exists(BUILD_MODULES_PATH . "/{$ext}.so")) {
+                    logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
+                } else {
+                    logger()->warning("Shared extension [{$ext}] not found, please check!");
                 }
             }
-
-            // export metadata
-            file_put_contents(BUILD_ROOT_PATH . '/build-extensions.json', json_encode($extensions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            file_put_contents(BUILD_ROOT_PATH . '/build-libraries.json', json_encode($libraries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            // export licenses
-            $dumper = new LicenseDumper();
-            $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
-            $path = FileSystem::convertPath("{$build_root_path}/license/");
-            logger()->info("License path{$fixed}: {$path}");
-            return static::SUCCESS;
-        } catch (WrongUsageException $e) {
-            // WrongUsageException is not an exception, it's a user error, so we just print the error message
-            logger()->critical($e->getMessage());
-            logger()->error($e->getTraceAsString());
-            return static::FAILURE;
-        } catch (\Throwable $e) {
-            if ($this->getOption('debug')) {
-                ExceptionHandler::getInstance()->handle($e);
-            } else {
-                logger()->critical('Build failed with ' . get_class($e) . ': ' . $e->getMessage());
-                logger()->critical('Please check with --debug option to see more details.');
-            }
-            return static::FAILURE;
         }
+
+        // export metadata
+        file_put_contents(BUILD_ROOT_PATH . '/build-extensions.json', json_encode($extensions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        file_put_contents(BUILD_ROOT_PATH . '/build-libraries.json', json_encode($libraries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        // export licenses
+        $dumper = new LicenseDumper();
+        $dumper->addExts($extensions)->addLibs($libraries)->addSources(['php-src'])->dump(BUILD_ROOT_PATH . '/license');
+        $path = FileSystem::convertPath("{$build_root_path}/license/");
+        logger()->info("License path{$fixed}: {$path}");
+        return static::SUCCESS;
     }
 
     /**

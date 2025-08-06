@@ -9,8 +9,8 @@ use Laravel\Prompts\Prompt;
 use Psr\Log\LogLevel;
 use SPC\ConsoleApplication;
 use SPC\exception\ExceptionHandler;
-use SPC\exception\ValidationException;
-use SPC\exception\WrongUsageException;
+use SPC\exception\SPCException;
+use SPC\util\AttributeMapper;
 use SPC\util\GlobalEnvManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -32,6 +32,7 @@ abstract class BaseCommand extends Command
         parent::__construct($name);
         $this->addOption('debug', null, null, 'Enable debug mode');
         $this->addOption('no-motd', null, null, 'Disable motd');
+        $this->addOption('preserve-log', null, null, 'Preserve log files, do not delete them on initialized');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -93,30 +94,20 @@ abstract class BaseCommand extends Command
             GlobalEnvManager::init();
             f_putenv('SPC_SKIP_TOOLCHAIN_CHECK=yes');
         }
-        if ($this->shouldExecute()) {
-            try {
-                // show raw argv list for logger()->debug
-                logger()->debug('argv: ' . implode(' ', $_SERVER['argv']));
-                return $this->handle();
-            } catch (ValidationException|WrongUsageException $e) {
-                $msg = explode("\n", $e->getMessage());
-                foreach ($msg as $v) {
-                    logger()->error($v);
-                }
-                return static::FAILURE;
-            } catch (\Throwable $e) {
-                if ($this->getOption('debug')) {
-                    ExceptionHandler::getInstance()->handle($e);
-                } else {
-                    $msg = explode("\n", $e->getMessage());
-                    foreach ($msg as $v) {
-                        logger()->error($v);
-                    }
-                }
-                return static::FAILURE;
-            }
+
+        try {
+            // show raw argv list for logger()->debug
+            logger()->debug('argv: ' . implode(' ', $_SERVER['argv']));
+            return $this->handle();
+        } /* @noinspection PhpRedundantCatchClauseInspection */ catch (SPCException $e) {
+            // Handle SPCException and log it
+            ExceptionHandler::handleSPCException($e);
+            return static::FAILURE;
+        } catch (\Throwable $e) {
+            // Handle any other exceptions
+            ExceptionHandler::handleDefaultException($e);
+            return static::FAILURE;
         }
-        return static::SUCCESS;
     }
 
     protected function getOption(string $name): mixed
@@ -127,11 +118,6 @@ abstract class BaseCommand extends Command
     protected function getArgument(string $name): mixed
     {
         return $this->input->getArgument($name);
-    }
-
-    protected function shouldExecute(): bool
-    {
-        return true;
     }
 
     protected function logWithResult(bool $result, string $success_msg, string $fail_msg): int
