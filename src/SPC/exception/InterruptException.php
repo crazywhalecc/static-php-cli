@@ -4,4 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\exception;
 
-class InterruptException extends \Exception {}
+/**
+ * Exception caused by manual intervention.
+ */
+class InterruptException extends SPCException {}
