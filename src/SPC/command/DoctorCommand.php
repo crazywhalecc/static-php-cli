@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SPC\command;
 
-use SPC\doctor\CheckListHandler;
 use SPC\doctor\CheckResult;
-use SPC\exception\RuntimeException;
+use SPC\doctor\DoctorHandler;
+use SPC\util\AttributeMapper;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
+use ZM\Logger\ConsoleColor;
 
 use function Laravel\Prompts\confirm;
 
@@ -16,72 +18,78 @@ class DoctorCommand extends BaseCommand
 {
     public function configure(): void
     {
-        $this->addOption('auto-fix', null, null, 'Automatically fix failed items (if possible)');
+        $this->addOption('auto-fix', null, InputOption::VALUE_OPTIONAL, 'Automatically fix failed items (if possible)', false);
     }
 
     public function handle(): int
     {
-        try {
-            $checker = new CheckListHandler();
-            // skipped items
-            $skip_items = array_filter(explode(',', getenv('SPC_SKIP_DOCTOR_CHECK_ITEMS') ?: ''));
+        $fix_policy = match ($this->input->getOption('auto-fix')) {
+            'never' => FIX_POLICY_DIE,
+            true, null => FIX_POLICY_AUTOFIX,
+            default => FIX_POLICY_PROMPT,
+        };
+        $fix_map = AttributeMapper::getDoctorFixMap();
 
-            $fix_policy = $this->input->getOption('auto-fix') ? FIX_POLICY_AUTOFIX : FIX_POLICY_PROMPT;
-            foreach ($checker->runChecks() as $check) {
-                if ($check->limit_os !== null && $check->limit_os !== PHP_OS_FAMILY) {
-                    continue;
+        foreach (DoctorHandler::getValidCheckList() as $check) {
+            // output
+            $this->output->write("Checking <comment>{$check->item_name}</comment> ... ");
+
+            // null => skipped
+            if (($result = call_user_func($check->callback)) === null) {
+                $this->output->writeln('skipped');
+                continue;
+            }
+            // invalid return value => skipped
+            if (!$result instanceof CheckResult) {
+                $this->output->writeln('<error>Skipped due to invalid return value</error>');
+                continue;
+            }
+            // true => OK
+            if ($result->isOK()) {
+                /* @phpstan-ignore-next-line */
+                $this->output->writeln($result->getMessage() ?? (string) ConsoleColor::green('✓'));
+                continue;
+            }
+
+            // Failed => output error message
+            $this->output->writeln('<error>' . $result->getMessage() . '</error>');
+            // If the result is not fixable, fail immediately
+            if ($result->getFixItem() === '') {
+                $this->output->writeln('This check item can not be fixed !');
+                return static::FAILURE;
+            }
+            if (!isset($fix_map[$result->getFixItem()])) {
+                $this->output->writeln("<error>Internal error: Unknown fix item: {$result->getFixItem()}</error>");
+                return static::FAILURE;
+            }
+
+            // prompt for fix
+            if ($fix_policy === FIX_POLICY_PROMPT) {
+                if (!confirm('Do you want to fix it?')) {
+                    $this->output->writeln('<comment>You canceled fix.</comment>');
+                    return static::FAILURE;
                 }
-
-                $this->output->write('Checking <comment>' . $check->item_name . '</comment> ... ');
-
-                // check if this item is skipped
-                if (in_array($check->item_name, $skip_items) || ($result = call_user_func($check->callback)) === null) {
-                    $this->output->writeln('skipped');
-                } elseif ($result instanceof CheckResult) {
-                    if ($result->isOK()) {
-                        $this->output->writeln($result->getMessage() ?? 'ok');
-                        continue;
-                    }
-
-                    // Failed
-                    $this->output->writeln('<error>' . $result->getMessage() . '</error>');
-                    switch ($fix_policy) {
-                        case FIX_POLICY_DIE:
-                            throw new RuntimeException('Some check items can not be fixed !');
-                        case FIX_POLICY_PROMPT:
-                            if ($result->getFixItem() !== '') {
-                                $question = confirm('Do you want to fix it?');
-                                if ($question) {
-                                    $checker->emitFix($this->output, $result);
-                                } else {
-                                    throw new RuntimeException('You cancelled fix');
-                                }
-                            } else {
-                                throw new RuntimeException('Some check items can not be fixed !');
-                            }
-                            break;
-                        case FIX_POLICY_AUTOFIX:
-                            if ($result->getFixItem() !== '') {
-                                $this->output->writeln('Automatically fixing ' . $result->getFixItem() . ' ...');
-                                $checker->emitFix($this->output, $result);
-                            } else {
-                                throw new RuntimeException('Some check items can not be fixed !');
-                            }
-                            break;
-                    }
+                if (DoctorHandler::emitFix($this->output, $result)) {
+                    $this->output->writeln('<info>Fix applied successfully!</info>');
+                } else {
+                    $this->output->writeln('<error>Failed to apply fix!</error>');
+                    return static::FAILURE;
                 }
             }
 
-            $this->output->writeln('<info>Doctor check complete !</info>');
-        } catch (\Throwable $e) {
-            $this->output->writeln('<error>' . $e->getMessage() . '</error>');
-
-            if (extension_loaded('pcntl')) {
-                pcntl_signal(SIGINT, SIG_IGN);
+            // auto fix
+            if ($fix_policy === FIX_POLICY_AUTOFIX) {
+                $this->output->writeln('Automatically fixing ' . $result->getFixItem() . ' ...');
+                if (DoctorHandler::emitFix($this->output, $result)) {
+                    $this->output->writeln('<info>Fix applied successfully!</info>');
+                } else {
+                    $this->output->writeln('<error>Failed to apply fix!</error>');
+                    return static::FAILURE;
+                }
             }
-            return static::FAILURE;
         }
 
+        $this->output->writeln('<info>Doctor check complete !</info>');
         return static::SUCCESS;
     }
 }

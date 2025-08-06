@@ -39,9 +39,6 @@ class imap extends LinuxLibraryBase
         return false;
     }
 
-    /**
-     * @throws RuntimeException
-     */
     protected function build(): void
     {
         if ($this->builder->getLib('openssl')) {
