@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\Tests\builder;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
@@ -14,7 +13,7 @@ use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
-use SPC\util\CustomExt;
+use SPC\util\AttributeMapper;
 use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Input\ArgvInput;
 
@@ -36,9 +35,8 @@ class BuilderTest extends TestCase
         $this->builder = BuilderProvider::makeBuilderByInput(new ArgvInput());
         [$extensions, $libs] = DependencyUtil::getExtsAndLibs(['mbregex']);
         $this->builder->proveLibs($libs);
-        CustomExt::loadCustomExt();
         foreach ($extensions as $extension) {
-            $class = CustomExt::getExtClass($extension);
+            $class = AttributeMapper::getExtensionClassByName($extension) ?? Extension::class;
             $ext = new $class($extension, $this->builder);
             $this->builder->addExt($ext);
         }

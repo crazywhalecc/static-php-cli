@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SPC\Tests\store;
 
 use PHPUnit\Framework\TestCase;
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 
 /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\doctor;
 
-#[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class AsFixItem
 {
     public function __construct(public string $name) {}

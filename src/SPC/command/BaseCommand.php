@@ -69,9 +69,6 @@ abstract class BaseCommand extends Command
         }
     }
 
-    /**
-     * @throws WrongUsageException
-     */
     abstract public function handle(): int;
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -79,22 +76,17 @@ abstract class BaseCommand extends Command
         $this->input = $input;
         $this->output = $output;
 
-        global $ob_logger;
-        if ($input->getOption('debug') || $output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
-            $ob_logger = new ConsoleLogger(LogLevel::DEBUG, decorated: !$input->getOption('no-ansi'));
-            define('DEBUG_MODE', true);
-        } else {
-            $ob_logger = new ConsoleLogger(decorated: !$input->getOption('no-ansi'));
-        }
+        // init log
+        $this->initLogFiles();
 
-        // windows fallback
-        Prompt::fallbackWhen(PHP_OS_FAMILY === 'Windows');
-        ConfirmPrompt::fallbackUsing(function (ConfirmPrompt $prompt) use ($input, $output) {
-            $helper = new QuestionHelper();
-            $case = $prompt->default ? ' [Y/n] ' : ' [y/N] ';
-            $question = new ConfirmationQuestion($prompt->label . $case, $prompt->default);
-            return $helper->ask($input, $output, $question);
-        });
+        // init logger
+        $this->initConsoleLogger();
+
+        // load attribute maps
+        AttributeMapper::init();
+
+        // init windows fallback
+        $this->initWindowsPromptFallback($input, $output);
 
         // init GlobalEnv
         if (!$this instanceof BuildCommand) {
@@ -177,5 +169,59 @@ abstract class BaseCommand extends Command
             }
             return true;
         }));
+    }
+
+    /**
+     * Initialize spc log files.
+     */
+    private function initLogFiles(): void
+    {
+        $log_dir = SPC_LOGS_DIR;
+        if (!file_exists($log_dir)) {
+            mkdir($log_dir, 0755, true);
+        } elseif (!$this->getOption('preserve-log')) {
+            // Clean up old log files
+            $files = glob($log_dir . '/*.log');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+        }
+    }
+
+    /**
+     * Initialize console logger.
+     */
+    private function initConsoleLogger(): void
+    {
+        global $ob_logger;
+        if ($this->input->getOption('debug') || $this->output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+            $ob_logger = new ConsoleLogger(LogLevel::DEBUG, decorated: !$this->input->getOption('no-ansi'));
+            define('DEBUG_MODE', true);
+        } else {
+            $ob_logger = new ConsoleLogger(decorated: !$this->input->getOption('no-ansi'));
+        }
+        $log_file_fd = fopen(SPC_OUTPUT_LOG, 'a');
+        $ob_logger->addLogCallback(function ($level, $output) use ($log_file_fd) {
+            if ($log_file_fd) {
+                fwrite($log_file_fd, strip_ansi_colors($output) . "\n");
+            }
+            return true;
+        });
+    }
+
+    /**
+     * Initialize Windows prompt fallback for laravel-prompts.
+     */
+    private function initWindowsPromptFallback(InputInterface $input, OutputInterface $output): void
+    {
+        Prompt::fallbackWhen(PHP_OS_FAMILY === 'Windows');
+        ConfirmPrompt::fallbackUsing(function (ConfirmPrompt $prompt) use ($input, $output) {
+            $helper = new QuestionHelper();
+            $case = $prompt->default ? ' [Y/n] ' : ' [y/N] ';
+            $question = new ConfirmationQuestion($prompt->label . $case, $prompt->default);
+            return $helper->ask($input, $output, $question);
+        });
     }
 }

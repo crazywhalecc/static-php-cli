@@ -46,20 +46,14 @@ abstract class BuilderBase
     /**
      * Convert libraries to class
      *
-     * @param  array<string>       $sorted_libraries Libraries to build (if not empty, must sort first)
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
+     * @param array<string> $sorted_libraries Libraries to build (if not empty, must sort first)
+     *
      * @internal
      */
     abstract public function proveLibs(array $sorted_libraries);
 
     /**
      * Set-Up libraries
-     *
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws WrongUsageException
      */
     public function setupLibs(): void
     {
@@ -139,9 +133,6 @@ abstract class BuilderBase
 
     /**
      * Check if there is a cpp extensions or libraries.
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function hasCpp(): bool
     {
@@ -174,15 +165,10 @@ abstract class BuilderBase
     /**
      * Verify the list of "ext" extensions for validity and declare an Extension object to check the dependencies of the extensions.
      *
-     * @throws FileSystemException
-     * @throws RuntimeException
-     * @throws \ReflectionException
-     * @throws \Throwable|WrongUsageException
      * @internal
      */
     public function proveExts(array $static_extensions, array $shared_extensions = [], bool $skip_check_deps = false, bool $skip_extract = false): void
     {
-        CustomExt::loadCustomExt();
         // judge ext
         foreach ($static_extensions as $ext) {
             // if extension does not support static build, throw exception
@@ -213,7 +199,7 @@ abstract class BuilderBase
         }
 
         foreach ([...$static_extensions, ...$shared_extensions] as $extension) {
-            $class = CustomExt::getExtClass($extension);
+            $class = AttributeMapper::getExtensionClassByName($extension) ?? Extension::class;
             /** @var Extension $ext */
             $ext = new $class($extension, $this);
             if (in_array($extension, $static_extensions)) {
@@ -247,11 +233,6 @@ abstract class BuilderBase
      */
     abstract public function testPHP(int $build_target = BUILD_TARGET_NONE);
 
-    /**
-     * @throws WrongUsageException
-     * @throws RuntimeException
-     * @throws FileSystemException
-     */
     public function buildSharedExts(): void
     {
         $lines = file(BUILD_BIN_PATH . '/php-config');
@@ -284,9 +265,6 @@ abstract class BuilderBase
     /**
      * Generate extension enable arguments for configure.
      * e.g. --enable-mbstring
-     *
-     * @throws FileSystemException
-     * @throws WrongUsageException
      */
     public function makeStaticExtensionArgs(): string
     {
@@ -321,9 +299,6 @@ abstract class BuilderBase
 
     /**
      * Get PHP Version ID from php-src/main/php_version.h
-     *
-     * @throws RuntimeException
-     * @throws WrongUsageException
      */
     public function getPHPVersionID(): int
     {
