@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
-use PharIo\FileSystem\File;
-use SPC\exception\ExceptionHandler;
-use SPC\exception\FileSystemException;
+use SPC\exception\BuildFailureException;
 use SPC\exception\InterruptException;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
 use SPC\store\SourceManager;
 use SPC\store\SourcePatcher;
-use SPC\util\CustomExt;
+use SPC\util\AttributeMapper;
 
 abstract class BuilderBase
 {
@@ -64,12 +61,11 @@ abstract class BuilderBase
             match ($status) {
                 LIB_STATUS_OK => logger()->info('lib [' . $lib::NAME . '] setup success, took ' . round(microtime(true) - $starttime, 2) . ' s'),
                 LIB_STATUS_ALREADY => logger()->notice('lib [' . $lib::NAME . '] already built'),
-                LIB_STATUS_BUILD_FAILED => logger()->error('lib [' . $lib::NAME . '] build failed'),
                 LIB_STATUS_INSTALL_FAILED => logger()->error('lib [' . $lib::NAME . '] install failed'),
                 default => logger()->warning('lib [' . $lib::NAME . '] build status unknown'),
             };
             if (in_array($status, [LIB_STATUS_BUILD_FAILED, LIB_STATUS_INSTALL_FAILED])) {
-                throw new RuntimeException('Library [' . $lib::NAME . '] setup failed.');
+                throw new BuildFailureException('Library [' . $lib::NAME . '] setup failed.');
             }
         }
     }
@@ -254,9 +250,8 @@ abstract class BuilderBase
                 }
                 $ext->buildShared();
             }
-        } catch (RuntimeException $e) {
+        } finally {
             FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
-            throw $e;
         }
         FileSystem::replaceFileLineContainsString(BUILD_BIN_PATH . '/php-config', 'extension_dir=', $extension_dir_line);
         FileSystem::replaceFileStr(BUILD_LIB_PATH . '/php/build/phpize.m4', '# test "[$]$1" = "no" && $1=yes', 'test "[$]$1" = "no" && $1=yes');
@@ -311,7 +306,7 @@ abstract class BuilderBase
             return intval($match[1]);
         }
 
-        throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
+        throw new WrongUsageException('PHP version file format is malformed, please remove "./source/php-src" dir and download/extract again');
     }
 
     public function getPHPVersion(bool $exception_on_failure = true): string
@@ -329,7 +324,7 @@ abstract class BuilderBase
         if (!$exception_on_failure) {
             return 'unknown';
         }
-        throw new RuntimeException('PHP version file format is malformed, please remove it and download again');
+        throw new WrongUsageException('PHP version file format is malformed, please remove it and download again');
     }
 
     /**
@@ -476,7 +471,7 @@ abstract class BuilderBase
         foreach ($patches as $patch) {
             try {
                 if (!file_exists($patch)) {
-                    throw new RuntimeException("Additional patch script file {$patch} not found!");
+                    throw new WrongUsageException("Additional patch script file {$patch} not found!");
                 }
                 logger()->debug('Running additional patch script: ' . $patch);
                 require $patch;
@@ -489,11 +484,6 @@ abstract class BuilderBase
                 exit($e->getCode());
             } catch (\Throwable $e) {
                 logger()->critical('Patch script ' . $patch . ' failed to run.');
-                if ($this->getOption('debug')) {
-                    ExceptionHandler::getInstance()->handle($e);
-                } else {
-                    logger()->critical('Please check with --debug option to see more details.');
-                }
                 throw $e;
             }
         }

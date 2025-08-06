@@ -9,7 +9,6 @@ use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
 use SPC\builder\Extension;
 use SPC\builder\LibraryBase;
-use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
@@ -88,7 +87,7 @@ class BuilderTest extends TestCase
             if ($cnt !== 0) {
                 $this->assertEquals(intval($match[1]), $this->builder->getPHPVersionID());
             } else {
-                $this->expectException(RuntimeException::class);
+                $this->expectException(WrongUsageException::class);
                 $this->builder->getPHPVersionID();
             }
         } else {
@@ -105,7 +104,7 @@ class BuilderTest extends TestCase
             if ($cnt !== 0) {
                 $this->assertEquals($match[1], $this->builder->getPHPVersion());
             } else {
-                $this->expectException(RuntimeException::class);
+                $this->expectException(WrongUsageException::class);
                 $this->builder->getPHPVersion();
             }
         } else {
@@ -246,7 +245,7 @@ class BuilderTest extends TestCase
     public function testEmitPatchPointNotExists()
     {
         $this->expectOutputRegex('/failed to run/');
-        $this->expectException(RuntimeException::class);
+        $this->expectException(WrongUsageException::class);
         $this->builder->setOption('with-added-patch', ['/tmp/patch-point.not_exsssists.php']);
         $this->builder->emitPatchPoint('not-exists');
     }
