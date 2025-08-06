@@ -54,17 +54,11 @@ class CraftCommand extends BuildCommand
         $shared_extensions = implode(',', $craft['shared-extensions'] ?? []);
         $libs = implode(',', $craft['libs']);
 
-        // init log
-        if (file_exists(WORKING_DIR . '/craft.log')) {
-            unlink(WORKING_DIR . '/craft.log');
-        }
-
         // craft doctor
         if ($craft['craft-options']['doctor']) {
             $retcode = $this->runCommand('doctor', '--auto-fix');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft doctor failed</error>');
-                $this->log("craft doctor failed with code: {$retcode}", true);
                 return static::FAILURE;
             }
         }
@@ -73,7 +67,6 @@ class CraftCommand extends BuildCommand
             $retcode = $this->runCommand('install-pkg', 'go-xcaddy');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft go-xcaddy failed</error>');
-                $this->log("craft: spc install-pkg go-xcaddy failed with code: {$retcode}", true);
                 return static::FAILURE;
             }
         }
@@ -82,7 +75,6 @@ class CraftCommand extends BuildCommand
             $retcode = $this->runCommand('install-pkg', 'zig');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft zig failed</error>');
-                $this->log("craft: spc install-pkg zig failed with code: {$retcode}", true);
                 return static::FAILURE;
             }
         }
@@ -103,7 +95,6 @@ class CraftCommand extends BuildCommand
             $retcode = $this->runCommand('download', ...$args);
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft download failed</error>');
-                $this->log('craft download failed with code: ' . $retcode, true);
                 return static::FAILURE;
             }
         }
@@ -115,7 +106,6 @@ class CraftCommand extends BuildCommand
             $retcode = $this->runCommand('build', ...$args);
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft build failed</error>');
-                $this->log('craft build failed with code: ' . $retcode, true);
                 return static::FAILURE;
             }
         }
@@ -129,18 +119,7 @@ class CraftCommand extends BuildCommand
             fwrite(STDERR, $buffer);
         } else {
             fwrite(STDOUT, $buffer);
-            $this->log($buffer);
         }
-    }
-
-    private function log(string $log, bool $master_log = false): void
-    {
-        if ($master_log) {
-            $log = "\n[static-php-cli]> " . $log . "\n\n";
-        } else {
-            $log = preg_replace('/\x1b\[[0-9;]*m/', '', $log);
-        }
-        file_put_contents('craft.log', $log, FILE_APPEND);
     }
 
     private function runCommand(string $cmd, ...$args): int
@@ -149,11 +128,11 @@ class CraftCommand extends BuildCommand
         if ($this->getOption('debug')) {
             array_unshift($args, '--debug');
         }
+        array_unshift($args, '--preserve-log');
         $prefix = PHP_SAPI === 'cli' ? [PHP_BINARY, $argv[0]] : [$argv[0]];
 
         $env = getenv();
         $process = new Process([...$prefix, $cmd, '--no-motd', ...$args], env: $env, timeout: null);
-        $this->log("Running: {$process->getCommandLine()}", true);
 
         if (PHP_OS_FAMILY === 'Windows') {
             sapi_windows_set_ctrl_handler(function () use ($process) {
@@ -163,6 +142,7 @@ class CraftCommand extends BuildCommand
             });
         } elseif (extension_loaded('pcntl')) {
             pcntl_signal(SIGINT, function () use ($process) {
+                /* @noinspection PhpComposerExtensionStubsInspection */
                 $process->signal(SIGINT);
             });
         } else {
