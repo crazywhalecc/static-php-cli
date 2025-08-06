@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\Tests\util;
 
-use SPC\exception\RuntimeException;
-use SPC\util\WindowsCmd;
+use SPC\exception\SPCInternalException;
+use SPC\util\shell\WindowsCmd;
 
 /**
  * @internal
@@ -18,7 +18,7 @@ final class WindowsCmdTest extends TestBase
             $this->markTestSkipped('This test is for Unix systems only');
         }
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(SPCInternalException::class);
         $this->expectExceptionMessage('Only windows can use WindowsCmd');
 
         new WindowsCmd();

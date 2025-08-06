@@ -8,7 +8,7 @@ use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\store\FileSystem;
-use SPC\util\UnixShell;
+use SPC\util\shell\UnixShell;
 
 /**
  * Unix-like OS cmake command executor.

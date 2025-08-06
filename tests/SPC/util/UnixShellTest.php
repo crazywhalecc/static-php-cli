@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\Tests\util;
 
-use SPC\exception\RuntimeException;
-use SPC\util\UnixShell;
+use SPC\exception\EnvironmentException;
+use SPC\util\shell\UnixShell;
 
 /**
  * @internal
@@ -18,7 +18,7 @@ final class UnixShellTest extends TestBase
             $this->markTestSkipped('This test is for Windows systems only');
         }
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(EnvironmentException::class);
         $this->expectExceptionMessage('Windows cannot use UnixShell');
 
         new UnixShell();

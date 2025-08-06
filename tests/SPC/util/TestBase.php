@@ -48,17 +48,17 @@ abstract class TestBase extends TestCase
     /**
      * Create a UnixShell instance with debug disabled to suppress logs
      */
-    protected function createUnixShell(): \SPC\util\UnixShell
+    protected function createUnixShell(): \SPC\util\shell\UnixShell
     {
-        return new \SPC\util\UnixShell(false);
+        return new \SPC\util\shell\UnixShell(false);
     }
 
     /**
      * Create a WindowsCmd instance with debug disabled to suppress logs
      */
-    protected function createWindowsCmd(): \SPC\util\WindowsCmd
+    protected function createWindowsCmd(): \SPC\util\shell\WindowsCmd
     {
-        return new \SPC\util\WindowsCmd(false);
+        return new \SPC\util\shell\WindowsCmd(false);
     }
 
     /**
