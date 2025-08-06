@@ -358,7 +358,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $out[1] = explode(' ', $out[1]);
                 $offset = $out[1][0];
                 if ($ret !== 0 || !str_starts_with($offset, '0x')) {
-                    throw new RuntimeException('Cannot find offset in readelf output');
+                    throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
                 }
                 $offset = hexdec($offset);
                 // remove upx extra wastes

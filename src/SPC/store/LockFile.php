@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\store;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCInternalException;
 use SPC\exception\WrongUsageException;
 
 class LockFile
@@ -128,10 +127,10 @@ class LockFile
             SPC_SOURCE_ARCHIVE => sha1_file(DOWNLOAD_PATH . '/' . $lock_options['filename']),
             SPC_SOURCE_GIT => exec('cd ' . escapeshellarg(DOWNLOAD_PATH . '/' . $lock_options['dirname']) . ' && ' . SPC_GIT_EXEC . ' rev-parse HEAD'),
             SPC_SOURCE_LOCAL => 'LOCAL HASH IS ALWAYS DIFFERENT',
-            default => filter_var(getenv('SPC_IGNORE_BAD_HASH'), FILTER_VALIDATE_BOOLEAN) ? '' : throw new RuntimeException("Unknown source type: {$lock_options['source_type']}"),
+            default => filter_var(getenv('SPC_IGNORE_BAD_HASH'), FILTER_VALIDATE_BOOLEAN) ? '' : throw new SPCInternalException("Unknown source type: {$lock_options['source_type']}"),
         };
         if ($result === false && !filter_var(getenv('SPC_IGNORE_BAD_HASH'), FILTER_VALIDATE_BOOLEAN)) {
-            throw new RuntimeException("Failed to get hash for source: {$lock_options['source_type']}");
+            throw new SPCInternalException("Failed to get hash for source: {$lock_options['source_type']}");
         }
         return $result ?: '';
     }
@@ -182,7 +181,7 @@ class LockFile
                 $file_content = file_get_contents(self::LOCK_FILE);
                 self::$lock_file_content = json_decode($file_content, true);
                 if (self::$lock_file_content === null) {
-                    throw new \RuntimeException('Failed to decode lock file: ' . self::LOCK_FILE);
+                    throw new SPCInternalException('Failed to decode lock file: ' . self::LOCK_FILE);
                 }
             }
         }

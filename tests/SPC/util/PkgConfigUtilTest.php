@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\Tests\util;
 
 use PHPUnit\Framework\TestCase;
-use SPC\exception\RuntimeException;
+use SPC\exception\ExecutionException;
 use SPC\util\PkgConfigUtil;
 
 /**
@@ -75,7 +75,7 @@ final class PkgConfigUtilTest extends TestCase
      */
     public function testGetCflagsWithInvalidPackage(string $package): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ExecutionException::class);
         PkgConfigUtil::getCflags($package);
     }
 
@@ -84,7 +84,7 @@ final class PkgConfigUtilTest extends TestCase
      */
     public function testGetLibsArrayWithInvalidPackage(string $package): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ExecutionException::class);
         PkgConfigUtil::getLibsArray($package);
     }
 

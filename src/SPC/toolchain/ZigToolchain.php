@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\toolchain;
 
-use SPC\exception\WrongUsageException;
+use SPC\exception\EnvironmentException;
 use SPC\store\pkg\Zig;
 use SPC\util\GlobalEnvManager;
 
@@ -43,7 +43,7 @@ class ZigToolchain implements ToolchainInterface
     public function afterInit(): void
     {
         if (!is_dir(Zig::getEnvironment()['PATH'])) {
-            throw new WrongUsageException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
+            throw new EnvironmentException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
         }
         GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
         f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough

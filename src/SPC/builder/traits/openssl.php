@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\traits;
 
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCException;
 use SPC\store\FileSystem;
 use SPC\util\PkgConfigUtil;
 
@@ -24,7 +24,7 @@ trait openssl
         if (PHP_OS_FAMILY !== 'Windows') {
             try {
                 return PkgConfigUtil::getModuleVersion('openssl');
-            } catch (RuntimeException) {
+            } catch (SPCException) {
             }
         }
         // get openssl version from header openssl/opensslv.h

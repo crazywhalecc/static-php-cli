@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
+use SPC\exception\SPCInternalException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 
@@ -100,7 +98,7 @@ class LicenseDumper
     {
         $licenses = Config::getSource($source_name)['license'] ?? [];
         if ($licenses === []) {
-            throw new RuntimeException('source [' . $source_name . '] license meta not exist');
+            throw new SPCInternalException("source [{$source_name}] license meta not exist");
         }
 
         if (!array_is_list($licenses)) {
@@ -111,7 +109,7 @@ class LicenseDumper
             yield $index => match ($license['type']) {
                 'text' => $license['text'],
                 'file' => $this->loadSourceFile($source_name, $index, $license['path'], Config::getSource($source_name)['path'] ?? null),
-                default => throw new RuntimeException('source [' . $source_name . '] license type is not allowed'),
+                default => throw new SPCInternalException("source [{$source_name}] license type is not allowed"),
             };
         }
     }
@@ -122,7 +120,7 @@ class LicenseDumper
     private function loadSourceFile(string $source_name, int $index, null|array|string $in_path, ?string $custom_base_path = null): string
     {
         if (is_null($in_path)) {
-            throw new RuntimeException('source [' . $source_name . '] license file is not set, please check config/source.json');
+            throw new SPCInternalException("source [{$source_name}] license file is not set, please check config/source.json");
         }
 
         if (!is_array($in_path)) {
@@ -139,6 +137,6 @@ class LicenseDumper
             return file_get_contents(BUILD_ROOT_PATH . '/source-licenses/' . $source_name . '/' . $index . '.txt');
         }
 
-        throw new RuntimeException('Cannot find any license file in source [' . $source_name . '] directory!');
+        throw new SPCInternalException("Cannot find any license file in source [{$source_name}] directory!");
     }
 }

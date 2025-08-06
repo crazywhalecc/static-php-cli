@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCException;
+use SPC\exception\SPCInternalException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\Downloader;
@@ -30,9 +30,9 @@ abstract class LibraryBase
     public function __construct(?string $source_dir = null)
     {
         if (static::NAME === 'unknown') {
-            throw new RuntimeException('no unknown!!!!!');
+            throw new SPCInternalException('Please set the NAME constant in ' . static::class);
         }
-        $this->source_dir = $source_dir ?? (SOURCE_PATH . '/' . Config::getLib(static::NAME, 'source'));
+        $this->source_dir = $source_dir ?? (SOURCE_PATH . DIRECTORY_SEPARATOR . Config::getLib(static::NAME, 'source'));
     }
 
     /**
@@ -154,7 +154,7 @@ abstract class LibraryBase
                 FileSystem::extractPackage($install_file, $lock['source_type'], DOWNLOAD_PATH . '/' . $install_file, BUILD_ROOT_PATH);
                 $this->install();
                 return LIB_STATUS_OK;
-            } catch (FileSystemException|RuntimeException $e) {
+            } catch (SPCException $e) {
                 logger()->error('Failed to extract pre-built library [' . static::NAME . ']: ' . $e->getMessage());
                 return LIB_STATUS_INSTALL_FAILED;
             }
@@ -304,7 +304,7 @@ abstract class LibraryBase
         }
         $replace_items = json_decode(file_get_contents($replace_item_file), true);
         if (!is_array($replace_items)) {
-            throw new RuntimeException('Invalid placeholder file: ' . $replace_item_file);
+            throw new SPCInternalException("Invalid placeholder file: {$replace_item_file}");
         }
         $placeholders = get_pack_replace();
         // replace placeholders in BUILD_ROOT_PATH
@@ -331,7 +331,7 @@ abstract class LibraryBase
             return;
         }
         if (!$optional) {
-            throw new RuntimeException(static::NAME . " requires library {$name}");
+            throw new WrongUsageException(static::NAME . " requires library {$name} but it is not included");
         }
         logger()->debug('enabling ' . static::NAME . " without {$name}");
     }

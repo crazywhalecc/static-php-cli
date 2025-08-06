@@ -9,8 +9,7 @@ use SPC\builder\linux\SystemUtil;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\builder\windows\WindowsBuilder;
 use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
+use SPC\exception\PatchException;
 use SPC\util\SPCTarget;
 
 class SourcePatcher
@@ -171,7 +170,7 @@ class SourcePatcher
                 $patches[] = "sapi/micro/patches/{$patchName}_{$tryMajMin}.patch";
                 continue 2;
             }
-            throw new RuntimeException("failed finding patch {$patchName}");
+            throw new PatchException('phpmicro patches', "Failed finding patch file or versioned file {$patchName} !");
         }
 
         foreach ($patches as $patch) {
@@ -202,7 +201,7 @@ class SourcePatcher
 
         $patch_str = FileSystem::convertPath($patch_file);
         if (!file_exists($patch_str)) {
-            throw new RuntimeException("Patch file [{$patch_str}] does not exist");
+            throw new PatchException($patch_name, "Patch file [{$patch_str}] does not exist");
         }
 
         // Copy patch from phar
@@ -524,7 +523,7 @@ class SourcePatcher
             ++$line_num;
         }
         if ($found === false) {
-            throw new RuntimeException('Cannot patch windows CLI Makefile!');
+            throw new PatchException('Windows Makefile patching for php.exe target', 'Cannot patch windows CLI Makefile, Makefile does not contain "$(BUILD_DIR)\php.exe:" line');
         }
         $lines[$line_num] = '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest';
         $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';

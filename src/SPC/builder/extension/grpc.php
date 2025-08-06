@@ -6,6 +6,7 @@ namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
 use SPC\builder\windows\WindowsBuilder;
+use SPC\exception\ValidationException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 use SPC\util\GlobalEnvManager;
@@ -18,7 +19,7 @@ class grpc extends Extension
     public function patchBeforeBuildconf(): bool
     {
         if ($this->builder instanceof WindowsBuilder) {
-            throw new \RuntimeException('grpc extension does not support windows yet');
+            throw new ValidationException('grpc extension does not support windows yet');
         }
         if (file_exists(SOURCE_PATH . '/php-src/ext/grpc')) {
             return false;
@@ -27,7 +28,7 @@ class grpc extends Extension
         if (is_dir($this->source_dir . '/src/php/ext/grpc')) {
             shell()->exec('ln -s ' . $this->source_dir . '/src/php/ext/grpc ' . SOURCE_PATH . '/php-src/ext/grpc');
         } else {
-            throw new \RuntimeException('Cannot find grpc source code');
+            throw new ValidationException('Cannot find grpc source code in ' . $this->source_dir . '/src/php/ext/grpc');
         }
         if (SPCTarget::getTargetOS() === 'Darwin') {
             FileSystem::replaceFileRegex(

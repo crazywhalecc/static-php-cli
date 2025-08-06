@@ -8,7 +8,6 @@ use SPC\builder\traits\UnixSystemUtilTrait;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
-use SPC\exception\RuntimeException;
 
 class MacOSToolCheckList
 {
@@ -89,11 +88,7 @@ class MacOSToolCheckList
     #[AsFixItem('brew')]
     public function fixBrew(): bool
     {
-        try {
-            shell(true)->exec('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"');
-        } catch (RuntimeException) {
-            return false;
-        }
+        shell(true)->exec('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"');
         return true;
     }
 
@@ -104,14 +99,10 @@ class MacOSToolCheckList
             'glibtoolize' => 'libtool',
         ];
         foreach ($missing as $cmd) {
-            try {
-                if (isset($replacement[$cmd])) {
-                    $cmd = $replacement[$cmd];
-                }
-                shell(true)->exec('brew install --formula ' . escapeshellarg($cmd));
-            } catch (RuntimeException) {
-                return false;
+            if (isset($replacement[$cmd])) {
+                $cmd = $replacement[$cmd];
             }
+            shell(true)->exec('brew install --formula ' . escapeshellarg($cmd));
         }
         return true;
     }

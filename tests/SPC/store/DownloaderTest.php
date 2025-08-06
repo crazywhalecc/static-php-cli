@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\Tests\store;
 
 use PHPUnit\Framework\TestCase;
-use SPC\exception\WrongUsageException;
+use SPC\exception\InterruptException;
 use SPC\store\Downloader;
 use SPC\store\LockFile;
 
@@ -34,7 +34,7 @@ class DownloaderTest extends TestCase
         // test keyboard interrupt
         try {
             Downloader::downloadGit('setup-static-php', 'https://github.com/static-php/setup-static-php.git', 'SIGINT');
-        } catch (WrongUsageException $e) {
+        } catch (InterruptException $e) {
             $this->assertStringContainsString('interrupted', $e->getMessage());
             return;
         }
@@ -49,7 +49,7 @@ class DownloaderTest extends TestCase
         // test keyboard interrupt
         try {
             Downloader::downloadFile('fake-file', 'https://fakecmd.com/curlDown', 'SIGINT');
-        } catch (WrongUsageException $e) {
+        } catch (InterruptException $e) {
             $this->assertStringContainsString('interrupted', $e->getMessage());
             return;
         }

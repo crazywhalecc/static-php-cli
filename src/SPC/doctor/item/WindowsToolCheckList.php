@@ -8,7 +8,6 @@ use SPC\builder\windows\SystemUtil;
 use SPC\doctor\AsCheckItem;
 use SPC\doctor\AsFixItem;
 use SPC\doctor\CheckResult;
-use SPC\exception\RuntimeException;
 use SPC\store\FileSystem;
 use SPC\store\PackageManager;
 
@@ -80,12 +79,8 @@ class WindowsToolCheckList
     #[AsFixItem('install-php-sdk')]
     public function installPhpSdk(): bool
     {
-        try {
-            FileSystem::removeDir(getenv('PHP_SDK_PATH'));
-            cmd(true)->exec('git.exe clone --depth 1 https://github.com/php/php-sdk-binary-tools.git ' . getenv('PHP_SDK_PATH'));
-        } catch (RuntimeException) {
-            return false;
-        }
+        FileSystem::removeDir(getenv('PHP_SDK_PATH'));
+        cmd(true)->exec('git.exe clone --depth 1 https://github.com/php/php-sdk-binary-tools.git ' . getenv('PHP_SDK_PATH'));
         return true;
     }
 

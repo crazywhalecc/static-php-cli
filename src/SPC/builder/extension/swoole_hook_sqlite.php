@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
-use SPC\exception\RuntimeException;
+use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\util\CustomExt;
 
@@ -41,10 +41,10 @@ class swoole_hook_sqlite extends Extension
         [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         $out = implode('', $out);
         if ($ret !== 0) {
-            throw new RuntimeException('extension ' . $this->getName() . ' failed compile check: php-cli returned ' . $ret);
+            throw new ValidationException("extension {$this->getName()} failed compile check: php-cli returned {$ret}", validation_module: "Extension {$this->getName()} sanity check");
         }
         if (!str_contains($out, 'coroutine_sqlite')) {
-            throw new RuntimeException('swoole sqlite hook is not enabled correctly.');
+            throw new ValidationException('swoole sqlite hook is not enabled correctly.', validation_module: 'Extension swoole sqlite hook availability check');
         }
     }
 }

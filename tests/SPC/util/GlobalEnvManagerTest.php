@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\Tests\util;
 
 use PHPUnit\Framework\TestCase;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCInternalException;
 use SPC\util\GlobalEnvManager;
 
 /**
@@ -105,7 +105,7 @@ final class GlobalEnvManagerTest extends TestCase
         // Temporarily unset BUILD_ROOT_PATH
         putenv('BUILD_ROOT_PATH');
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(SPCInternalException::class);
         GlobalEnvManager::init();
     }
 

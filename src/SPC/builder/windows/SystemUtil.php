@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\windows;
 
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 
 class SystemUtil

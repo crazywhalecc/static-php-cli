@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\traits;
 
-use SPC\exception\FileSystemException;
-use SPC\exception\RuntimeException;
-use SPC\exception\WrongUsageException;
+use SPC\exception\PatchException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\util\SPCConfigUtil;
@@ -38,7 +36,7 @@ trait UnixLibraryTrait
         foreach ($files as $name) {
             $realpath = realpath(BUILD_ROOT_PATH . '/lib/pkgconfig/' . $name);
             if ($realpath === false) {
-                throw new RuntimeException('Cannot find library [' . static::NAME . '] pkgconfig file [' . $name . '] !');
+                throw new PatchException('pkg-config prefix patcher', 'Cannot find library [' . static::NAME . '] pkgconfig file [' . $name . '] in ' . BUILD_LIB_PATH . '/pkgconfig/ !');
             }
             logger()->debug('Patching ' . $realpath);
             // replace prefix
@@ -65,7 +63,7 @@ trait UnixLibraryTrait
             $realpath = realpath(BUILD_LIB_PATH . '/' . $name);
             if ($realpath === false) {
                 if ($throwOnMissing) {
-                    throw new RuntimeException('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
+                    throw new PatchException('la dependency patcher', 'Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
                 }
                 logger()->warning('Cannot find library [' . static::NAME . '] la file [' . $name . '] !');
                 continue;

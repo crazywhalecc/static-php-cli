@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
-use SPC\exception\RuntimeException;
+use SPC\exception\ExecutionException;
 
 /**
  * Utility class for pkg-config operations
@@ -95,7 +95,7 @@ class PkgConfigUtil
     {
         f_exec($cmd, $output, $result_code);
         if ($result_code !== 0) {
-            throw new RuntimeException("pkg-config command failed with code {$result_code}: {$cmd}");
+            throw new ExecutionException($cmd, "pkg-config command failed with code: {$result_code}");
         }
         return implode("\n", $output);
     }

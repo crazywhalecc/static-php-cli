@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\freebsd;
 
 use SPC\builder\traits\UnixSystemUtilTrait;
-use SPC\exception\RuntimeException;
+use SPC\exception\EnvironmentException;
 use SPC\exception\WrongUsageException;
 
 class SystemUtil
@@ -20,7 +20,10 @@ class SystemUtil
     {
         [$ret, $output] = shell()->execWithResult('sysctl -n hw.ncpu');
         if ($ret !== 0) {
-            throw new RuntimeException('Failed to get cpu count');
+            throw new EnvironmentException(
+                'Failed to get cpu count from FreeBSD sysctl',
+                'Please ensure you are running this command on a FreeBSD system and have the sysctl command available.'
+            );
         }
 
         return (int) $output[0];
