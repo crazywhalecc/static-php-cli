@@ -2,53 +2,38 @@
 
 declare(strict_types=1);
 
-namespace SPC\util;
+namespace SPC\util\shell;
 
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\exception\RuntimeException;
+use SPC\exception\SPCInternalException;
 use ZM\Logger\ConsoleColor;
 
-class UnixShell
+/**
+ * Unix-like OS shell command executor.
+ *
+ * This class provides methods to execute shell commands in a Unix-like environment.
+ * It supports setting environment variables and changing the working directory.
+ */
+class UnixShell extends Shell
 {
-    private ?string $cd = null;
-
-    private bool $debug;
-
-    private array $env = [];
-
-    /**
-     * @throws RuntimeException
-     */
     public function __construct(?bool $debug = null)
     {
         if (PHP_OS_FAMILY === 'Windows') {
-            throw new RuntimeException('Windows cannot use UnixShell');
+            throw new SPCInternalException('Windows cannot use UnixShell');
         }
-        $this->debug = $debug ?? defined('DEBUG_MODE');
+        parent::__construct($debug);
     }
 
-    public function cd(string $dir): UnixShell
-    {
-        logger()->info('Entering dir: ' . $dir);
-        $c = clone $this;
-        $c->cd = $dir;
-        return $c;
-    }
-
-    /**
-     * @throws RuntimeException
-     */
-    public function exec(string $cmd): UnixShell
+    public function exec(string $cmd): static
     {
         /* @phpstan-ignore-next-line */
         logger()->info(ConsoleColor::yellow('[EXEC] ') . ConsoleColor::green($cmd));
-        $cmd = $this->getExecString($cmd);
-        if (!$this->debug) {
-            $cmd .= ' 1>/dev/null 2>&1';
-        }
-        f_passthru($cmd);
+        $original_command = $cmd;
+        $this->logCommandInfo($original_command);
+        $this->last_cmd = $cmd = $this->getExecString($cmd);
+        $this->passthru($cmd, $this->debug, $original_command);
         return $this;
     }
 
@@ -68,21 +53,6 @@ class UnixShell
         return $this;
     }
 
-    public function appendEnv(array $env): UnixShell
-    {
-        foreach ($env as $k => $v) {
-            if ($v === '') {
-                continue;
-            }
-            if (!isset($this->env[$k])) {
-                $this->env[$k] = $v;
-            } else {
-                $this->env[$k] = "{$v} {$this->env[$k]}";
-            }
-        }
-        return $this;
-    }
-
     public function execWithResult(string $cmd, bool $with_log = true): array
     {
         if ($with_log) {
@@ -97,17 +67,9 @@ class UnixShell
         return [$code, $out];
     }
 
-    public function setEnv(array $env): UnixShell
-    {
-        foreach ($env as $k => $v) {
-            if (trim($v) === '') {
-                continue;
-            }
-            $this->env[$k] = trim($v);
-        }
-        return $this;
-    }
-
+    /**
+     * Returns unix-style environment variable string.
+     */
     public function getEnvString(): string
     {
         $str = '';
@@ -117,9 +79,29 @@ class UnixShell
         return trim($str);
     }
 
+    protected function logCommandInfo(string $cmd): void
+    {
+        // write executed command to log file using fwrite
+        $log_file = fopen(SPC_SHELL_LOG, 'a');
+        fwrite($log_file, "\n>>>>>>>>>>>>>>>>>>>>>>>>>> [" . date('Y-m-d H:i:s') . "]\n");
+        fwrite($log_file, "> Executing command: {$cmd}\n");
+        // get the backtrace to find the file and line number
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        if (isset($backtrace[1]['file'], $backtrace[1]['line'])) {
+            $file = $backtrace[1]['file'];
+            $line = $backtrace[1]['line'];
+            fwrite($log_file, "> Called from: {$file} at line {$line}\n");
+        }
+        fwrite($log_file, "> Environment variables: {$this->getEnvString()}\n");
+        if ($this->cd !== null) {
+            fwrite($log_file, "> Working dir: {$this->cd}\n");
+        }
+        fwrite($log_file, "\n");
+    }
+
     private function getExecString(string $cmd): string
     {
-        logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
+        // logger()->debug('Executed at: ' . debug_backtrace()[0]['file'] . ':' . debug_backtrace()[0]['line']);
         $env_str = $this->getEnvString();
         if (!empty($env_str)) {
             $cmd = "{$env_str} {$cmd}";

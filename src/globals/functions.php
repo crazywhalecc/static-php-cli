@@ -8,8 +8,8 @@ use SPC\builder\BuilderProvider;
 use SPC\exception\InterruptException;
 use SPC\exception\RuntimeException;
 use SPC\exception\WrongUsageException;
-use SPC\util\UnixShell;
-use SPC\util\WindowsCmd;
+use SPC\util\shell\UnixShell;
+use SPC\util\shell\WindowsCmd;
 use ZM\Logger\ConsoleLogger;
 
 /**
