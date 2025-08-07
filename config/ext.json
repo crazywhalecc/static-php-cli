@@ -13,6 +13,14 @@
             "openssl"
         ]
     },
+    "snmp": {
+        "type": "builtin",
+        "arg-type-unix": "with-path",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "net-snmp"
+        ]
+    },
     "apcu": {
         "type": "external",
         "source": "apcu"
