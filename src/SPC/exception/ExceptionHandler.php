@@ -125,15 +125,6 @@ class ExceptionHandler
 
         self::logError("\n----------------------------------------\n");
 
-        // put getenv info to log
-        $env_log = fopen(SPC_ENV_LOG, 'a');
-        $env_info = getenv();
-        if ($env_info) {
-            foreach ($env_info as $k => $v) {
-                fwrite($env_log, $k . ' = ' . $v . PHP_EOL);
-            }
-        }
-
         self::logError('⚠ The ' . ConsoleColor::cyan('console output log') . ConsoleColor::red(' is saved in ') . ConsoleColor::none(SPC_OUTPUT_LOG));
         if (file_exists(SPC_SHELL_LOG)) {
             self::logError('⚠ The ' . ConsoleColor::cyan('shell output log') . ConsoleColor::red(' is saved in ') . ConsoleColor::none(SPC_SHELL_LOG));
