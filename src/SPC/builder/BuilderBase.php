@@ -229,6 +229,9 @@ abstract class BuilderBase
      */
     abstract public function testPHP(int $build_target = BUILD_TARGET_NONE);
 
+    /**
+     * Build shared extensions.
+     */
     public function buildSharedExts(): void
     {
         $lines = file(BUILD_BIN_PATH . '/php-config');

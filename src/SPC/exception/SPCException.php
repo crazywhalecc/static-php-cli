@@ -24,8 +24,6 @@ use SPC\builder\windows\WindowsBuilder;
  */
 abstract class SPCException extends \Exception
 {
-    private static ?array $build_php_extra_info = null;
-
     private ?array $library_info = null;
 
     private ?array $extension_info = null;
@@ -40,11 +38,6 @@ abstract class SPCException extends \Exception
         $this->loadStackTraceInfo();
     }
 
-    public static function bindBuildPHPExtraInfo(array $indent_texts): void
-    {
-        self::$build_php_extra_info = $indent_texts;
-    }
-
     public function bindExtensionInfo(array $extension_info): void
     {
         $this->extension_info = $extension_info;
@@ -53,11 +46,6 @@ abstract class SPCException extends \Exception
     public function addExtraLogFile(string $key, string $filename): void
     {
         $this->extra_log_files[$key] = $filename;
-    }
-
-    public function getBuildPHPExtraInfo(): ?array
-    {
-        return self::$build_php_extra_info;
     }
 
     /**
@@ -83,6 +71,8 @@ abstract class SPCException extends \Exception
      *
      * @return null|array{
      *     builder_class: string,
+     *     builder_options: array<string, mixed>,
+     *     builder_function: string,
      *     os: string,
      *     file: null|string,
      *     line: null|int,
@@ -124,7 +114,7 @@ abstract class SPCException extends \Exception
             }
 
             // Check if the class is a subclass of LibraryBase
-            if (!$this->library_info && is_subclass_of($frame['class'], LibraryBase::class)) {
+            if (!$this->library_info && is_a($frame['class'], LibraryBase::class, true)) {
                 try {
                     $reflection = new \ReflectionClass($frame['class']);
                     if ($reflection->hasConstant('NAME')) {
@@ -152,21 +142,20 @@ abstract class SPCException extends \Exception
             }
 
             // Check if the class is a subclass of BuilderBase and the method is buildPHP
-            if (!$this->build_php_info && is_subclass_of($frame['class'], BuilderBase::class) && $frame['function'] === 'buildPHP') {
-                $reflection = new \ReflectionClass($frame['class']);
-                if ($reflection->hasProperty('options')) {
-                    $options = $reflection->getProperty('options')->getValue();
-                }
+            if (!$this->build_php_info && is_a($frame['class'], BuilderBase::class, true)) {
+                $options = ExceptionHandler::$bind_builder?->getOptions() ?? [];
+                $os = match (get_class(ExceptionHandler::$bind_builder ?? $frame['class'])) {
+                    BSDBuilder::class => 'BSD',
+                    LinuxBuilder::class => 'Linux',
+                    MacOSBuilder::class => 'macOS',
+                    WindowsBuilder::class => 'Windows',
+                    default => 'Unknown',
+                };
                 $this->build_php_info = [
                     'builder_class' => $frame['class'],
-                    'builder_options' => $options ?? [],
-                    'os' => match (true) {
-                        is_a($frame['class'], BSDBuilder::class, true) => 'BSD',
-                        is_a($frame['class'], LinuxBuilder::class, true) => 'Linux',
-                        is_a($frame['class'], MacOSBuilder::class, true) => 'macOS',
-                        is_a($frame['class'], WindowsBuilder::class, true) => 'Windows',
-                        default => 'Unknown',
-                    },
+                    'builder_options' => $options,
+                    'builder_function' => $frame['function'],
+                    'os' => $os,
                     'file' => $frame['file'] ?? null,
                     'line' => $frame['line'] ?? null,
                 ];

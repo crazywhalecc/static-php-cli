@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\exception;
 
+use SPC\builder\BuilderBase;
 use ZM\Logger\ConsoleColor;
 
 class ExceptionHandler
@@ -26,21 +27,27 @@ class ExceptionHandler
         WrongUsageException::class,
     ];
 
+    /** @var null|BuilderBase Builder binding */
+    public static ?BuilderBase $bind_builder = null;
+
+    /** @var array<string, mixed> Build PHP extra info binding */
+    public static array $bind_build_php_extra_info = [];
+
     public static function handleSPCException(SPCException $e): void
     {
         // XXX error: yyy
         $head_msg = match ($class = get_class($e)) {
-            BuildFailureException::class => "Build failed: {$e->getMessage()}",
-            DownloaderException::class => "Download failed: {$e->getMessage()}",
-            EnvironmentException::class => "Environment check failed: {$e->getMessage()}",
-            ExecutionException::class => "Command execution failed: {$e->getMessage()}",
-            FileSystemException::class => "File system error: {$e->getMessage()}",
+            BuildFailureException::class => "✗ Build failed: {$e->getMessage()}",
+            DownloaderException::class => "✗ Download failed: {$e->getMessage()}",
+            EnvironmentException::class => "⚠ Environment check failed: {$e->getMessage()}",
+            ExecutionException::class => "✗ Command execution failed: {$e->getMessage()}",
+            FileSystemException::class => "✗ File system error: {$e->getMessage()}",
             InterruptException::class => "⚠ Build interrupted by user: {$e->getMessage()}",
-            PatchException::class => "Patch apply failed: {$e->getMessage()}",
-            SPCInternalException::class => "SPC internal error: {$e->getMessage()}",
-            ValidationException::class => "Validation failed: {$e->getMessage()}",
+            PatchException::class => "✗ Patch apply failed: {$e->getMessage()}",
+            SPCInternalException::class => "✗ SPC internal error: {$e->getMessage()}",
+            ValidationException::class => "⚠ Validation failed: {$e->getMessage()}",
             WrongUsageException::class => $e->getMessage(),
-            default => "Unknown SPC exception {$class}: {$e->getMessage()}",
+            default => "✗Unknown SPC exception {$class}: {$e->getMessage()}",
         };
         self::logError($head_msg);
 
@@ -55,24 +62,24 @@ class ExceptionHandler
 
         // get the SPCException module
         if ($php_info = $e->getBuildPHPInfo()) {
-            self::logError('✗ Failed module: ' . ConsoleColor::yellow("PHP builder {$php_info['builder_class']} for {$php_info['os']}"));
+            self::logError('Failed module: ' . ConsoleColor::yellow("Builder for {$php_info['os']}"));
         } elseif ($lib_info = $e->getLibraryInfo()) {
-            self::logError('✗ Failed module: ' . ConsoleColor::yellow("library {$lib_info['library_name']} builder for {$lib_info['os']}"));
+            self::logError('Failed module: ' . ConsoleColor::yellow("library {$lib_info['library_name']} builder for {$lib_info['os']}"));
         } elseif ($ext_info = $e->getExtensionInfo()) {
-            self::logError('✗ Failed module: ' . ConsoleColor::yellow("shared extension {$ext_info['extension_name']} builder"));
+            self::logError('Failed module: ' . ConsoleColor::yellow("shared extension {$ext_info['extension_name']} builder"));
         } elseif (!in_array($class, self::KNOWN_EXCEPTIONS)) {
-            self::logError('✗ Failed From: ' . ConsoleColor::yellow('Unknown SPC module ' . $class));
+            self::logError('Failed From: ' . ConsoleColor::yellow('Unknown SPC module ' . $class));
         }
-        self::logError('');
 
         // get command execution info
         if ($e instanceof ExecutionException) {
-            self::logError('✗ Failed command: ' . ConsoleColor::yellow($e->getExecutionCommand()));
+            self::logError('');
+            self::logError('Failed command: ' . ConsoleColor::yellow($e->getExecutionCommand()));
             if ($cd = $e->getCd()) {
-                self::logError('✗ Command executed in: ' . ConsoleColor::yellow($cd));
+                self::logError('Command executed in: ' . ConsoleColor::yellow($cd));
             }
             if ($env = $e->getEnv()) {
-                self::logError('✗ Command inline env variables:');
+                self::logError('Command inline env variables:');
                 foreach ($env as $k => $v) {
                     self::logError(ConsoleColor::yellow("{$k}={$v}"), 4);
                 }
@@ -81,46 +88,42 @@ class ExceptionHandler
 
         // validation error
         if ($e instanceof ValidationException) {
-            self::logError('✗ Failed validation module: ' . ConsoleColor::yellow($e->getValidationModuleString()));
+            self::logError('Failed validation module: ' . ConsoleColor::yellow($e->getValidationModuleString()));
         }
 
         // environment error
         if ($e instanceof EnvironmentException) {
-            self::logError('✗ Failed environment check: ' . ConsoleColor::yellow($e->getMessage()));
+            self::logError('Failed environment check: ' . ConsoleColor::yellow($e->getMessage()));
             if (($solution = $e->getSolution()) !== null) {
-                self::logError('✗ Solution: ' . ConsoleColor::yellow($solution));
+                self::logError('Solution: ' . ConsoleColor::yellow($solution));
             }
         }
 
         // get patch info
         if ($e instanceof PatchException) {
-            self::logError("✗ Failed patch module: {$e->getPatchModule()}");
+            self::logError("Failed patch module: {$e->getPatchModule()}");
         }
 
         // get internal trace
         if ($e instanceof SPCInternalException) {
-            self::logError('✗ Internal trace:');
+            self::logError('Internal trace:');
             self::logError(ConsoleColor::gray("{$e->getTraceAsString()}\n"), 4);
         }
 
         // get the full build info if possible
-        if (($info = $e->getBuildPHPExtraInfo()) && defined('DEBUG_MODE')) {
-            self::logError('✗ Build PHP extra info:');
-            $maxlen = 0;
-            foreach ($info as $k => $v) {
-                $maxlen = max(strlen($k), $maxlen);
-            }
-            foreach ($info as $k => $v) {
-                if (is_string($v)) {
-                    self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($v), 4);
-                } elseif (is_array($v) && !is_assoc_array($v)) {
-                    $first = array_shift($v);
-                    self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($first), 4);
-                    foreach ($v as $vs) {
-                        self::logError(str_pad('', $maxlen + 2) . ConsoleColor::yellow($vs), 4);
-                    }
-                }
-            }
+        if ($info = ExceptionHandler::$bind_build_php_extra_info) {
+            self::logError('', output_log: defined('DEBUG_MODE'));
+            self::logError('Build PHP extra info:', output_log: defined('DEBUG_MODE'));
+            self::printArrayInfo($info);
+        }
+
+        // get the full builder options if possible
+        if (self::$bind_builder && $e->getBuildPHPInfo()) {
+            $info = $e->getBuildPHPInfo();
+            self::logError('', output_log: defined('DEBUG_MODE'));
+            self::logError('Builder function: ' . ConsoleColor::yellow($info['builder_function']), output_log: defined('DEBUG_MODE'));
+            self::logError('Builder options:', output_log: defined('DEBUG_MODE'));
+            self::printArrayInfo(self::$bind_builder->getOptions());
         }
 
         self::logError("\n----------------------------------------\n");
@@ -142,20 +145,57 @@ class ExceptionHandler
     public static function handleDefaultException(\Throwable $e): void
     {
         $class = get_class($e);
-        self::logError("Unhandled exception {$class}: {$e->getMessage()}\n\t{$e->getMessage()}\n");
+        self::logError("✗ Unhandled exception {$class}:\n\t{$e->getMessage()}\n");
         self::logError('Stack trace:');
-        self::logError(ConsoleColor::gray($e->getTraceAsString()), 4);
-        self::logError('Please report this exception to: https://github.com/crazywhalecc/static-php-cli/issues');
+        self::logError(ConsoleColor::gray($e->getTraceAsString()) . PHP_EOL, 4);
+        self::logError('⚠ Please report this exception to: https://github.com/crazywhalecc/static-php-cli/issues');
     }
 
-    private static function logError($message, int $indent_space = 0): void
+    private static function logError($message, int $indent_space = 0, bool $output_log = true): void
     {
         $spc_log = fopen(SPC_OUTPUT_LOG, 'a');
         $msg = explode("\n", (string) $message);
         foreach ($msg as $v) {
             $line = str_pad($v, strlen($v) + $indent_space, ' ', STR_PAD_LEFT);
             fwrite($spc_log, strip_ansi_colors($line) . PHP_EOL);
-            echo ConsoleColor::red($line) . PHP_EOL;
+            if ($output_log) {
+                echo ConsoleColor::red($line) . PHP_EOL;
+            }
+        }
+    }
+
+    /**
+     * Print array info to console and log.
+     */
+    private static function printArrayInfo(array $info): void
+    {
+        $log_output = defined('DEBUG_MODE');
+        $maxlen = 0;
+        foreach ($info as $k => $v) {
+            $maxlen = max(strlen($k), $maxlen);
+        }
+        foreach ($info as $k => $v) {
+            if (is_string($v)) {
+                if ($v === '') {
+                    self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow('""'), 4, $log_output);
+                } else {
+                    self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($v), 4, $log_output);
+                }
+            } elseif (is_array($v) && !is_assoc_array($v)) {
+                if ($v === []) {
+                    self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow('[]'), 4, $log_output);
+                    continue;
+                }
+                $first = array_shift($v);
+                self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow($first), 4, $log_output);
+                foreach ($v as $vs) {
+                    self::logError(str_pad('', $maxlen + 2) . ConsoleColor::yellow($vs), 4, $log_output);
+                }
+            } elseif (is_bool($v) || is_null($v)) {
+                self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::cyan($v === true ? 'true' : ($v === false ? 'false' : 'null')), 4, $log_output);
+            } else {
+                self::logError($k . ': ' . str_pad('', $maxlen - strlen($k)) . ConsoleColor::yellow(json_encode($v, JSON_PRETTY_PRINT)), 4, $log_output);
+            }
         }
     }
 }
