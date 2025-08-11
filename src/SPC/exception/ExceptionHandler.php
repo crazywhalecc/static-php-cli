@@ -171,7 +171,7 @@ class ExceptionHandler
 
     public static function bindBuildPhpExtraInfo(array $build_php_extra_info): void
     {
-        self::$bind_build_php_extra_info = $bind_build_php_extra_info;
+        self::$build_php_extra_info = $build_php_extra_info;
     }
 
     private static function logError($message, int $indent_space = 0, bool $output_log = true): void
