@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace SPC\exception;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\freebsd\BSDBuilder;
+use SPC\builder\linux\LinuxBuilder;
+use SPC\builder\macos\MacOSBuilder;
+use SPC\builder\windows\WindowsBuilder;
 use ZM\Logger\ConsoleColor;
 
 class ExceptionHandler
@@ -28,10 +32,10 @@ class ExceptionHandler
     ];
 
     /** @var null|BuilderBase Builder binding */
-    public static ?BuilderBase $bind_builder = null;
+    private static ?BuilderBase $bind_builder = null;
 
     /** @var array<string, mixed> Build PHP extra info binding */
-    public static array $bind_build_php_extra_info = [];
+    private static array $bind_build_php_extra_info = [];
 
     public static function handleSPCException(SPCException $e): void
     {
@@ -47,7 +51,7 @@ class ExceptionHandler
             SPCInternalException::class => "✗ SPC internal error: {$e->getMessage()}",
             ValidationException::class => "⚠ Validation failed: {$e->getMessage()}",
             WrongUsageException::class => $e->getMessage(),
-            default => "✗Unknown SPC exception {$class}: {$e->getMessage()}",
+            default => "✗ Unknown SPC exception {$class}: {$e->getMessage()}",
         };
         self::logError($head_msg);
 
@@ -61,12 +65,19 @@ class ExceptionHandler
         self::logError("----------------------------------------\n");
 
         // get the SPCException module
-        if ($php_info = $e->getBuildPHPInfo()) {
-            self::logError('Failed module: ' . ConsoleColor::yellow("Builder for {$php_info['os']}"));
-        } elseif ($lib_info = $e->getLibraryInfo()) {
+        if ($lib_info = $e->getLibraryInfo()) {
             self::logError('Failed module: ' . ConsoleColor::yellow("library {$lib_info['library_name']} builder for {$lib_info['os']}"));
         } elseif ($ext_info = $e->getExtensionInfo()) {
             self::logError('Failed module: ' . ConsoleColor::yellow("shared extension {$ext_info['extension_name']} builder"));
+        } elseif (self::$bind_builder) {
+            $os = match (get_class(self::$bind_builder)) {
+                WindowsBuilder::class => 'Windows',
+                MacOSBuilder::class => 'macOS',
+                LinuxBuilder::class => 'Linux',
+                BSDBuilder::class => 'FreeBSD',
+                default => 'Unknown OS',
+            };
+            self::logError('Failed module: ' . ConsoleColor::yellow("Builder for {$os}"));
         } elseif (!in_array($class, self::KNOWN_EXCEPTIONS)) {
             self::logError('Failed From: ' . ConsoleColor::yellow('Unknown SPC module ' . $class));
         }
@@ -118,12 +129,14 @@ class ExceptionHandler
         }
 
         // get the full builder options if possible
-        if (self::$bind_builder && $e->getBuildPHPInfo()) {
+        if ($e->getBuildPHPInfo()) {
             $info = $e->getBuildPHPInfo();
             self::logError('', output_log: defined('DEBUG_MODE'));
             self::logError('Builder function: ' . ConsoleColor::yellow($info['builder_function']), output_log: defined('DEBUG_MODE'));
-            self::logError('Builder options:', output_log: defined('DEBUG_MODE'));
-            self::printArrayInfo(self::$bind_builder->getOptions());
+            if (self::$bind_builder) {
+                self::logError('Builder options:', output_log: defined('DEBUG_MODE'));
+                self::printArrayInfo(self::$bind_builder->getOptions());
+            }
         }
 
         self::logError("\n----------------------------------------\n");
@@ -149,6 +162,16 @@ class ExceptionHandler
         self::logError('Stack trace:');
         self::logError(ConsoleColor::gray($e->getTraceAsString()) . PHP_EOL, 4);
         self::logError('⚠ Please report this exception to: https://github.com/crazywhalecc/static-php-cli/issues');
+    }
+
+    public static function setBindBuilder(?BuilderBase $bind_builder): void
+    {
+        self::$bind_builder = $bind_builder;
+    }
+
+    public static function setBindBuildPhpExtraInfo(array $bind_build_php_extra_info): void
+    {
+        self::$bind_build_php_extra_info = $bind_build_php_extra_info;
     }
 
     private static function logError($message, int $indent_space = 0, bool $output_log = true): void

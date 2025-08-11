@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace SPC\exception;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\LibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\library\WindowsLibraryBase;
-use SPC\builder\windows\WindowsBuilder;
 
 /**
  * Base class for SPC exceptions.
@@ -70,10 +66,7 @@ abstract class SPCException extends \Exception
      * Returns an array containing information about the PHP build process.
      *
      * @return null|array{
-     *     builder_class: string,
-     *     builder_options: array<string, mixed>,
      *     builder_function: string,
-     *     os: string,
      *     file: null|string,
      *     line: null|int,
      * } an array containing PHP build information
@@ -143,19 +136,8 @@ abstract class SPCException extends \Exception
 
             // Check if the class is a subclass of BuilderBase and the method is buildPHP
             if (!$this->build_php_info && is_a($frame['class'], BuilderBase::class, true)) {
-                $options = ExceptionHandler::$bind_builder?->getOptions() ?? [];
-                $os = match (get_class(ExceptionHandler::$bind_builder ?? $frame['class'])) {
-                    BSDBuilder::class => 'BSD',
-                    LinuxBuilder::class => 'Linux',
-                    MacOSBuilder::class => 'macOS',
-                    WindowsBuilder::class => 'Windows',
-                    default => 'Unknown',
-                };
                 $this->build_php_info = [
-                    'builder_class' => $frame['class'],
-                    'builder_options' => $options,
                     'builder_function' => $frame['function'],
-                    'os' => $os,
                     'file' => $frame['file'] ?? null,
                     'line' => $frame['line'] ?? null,
                 ];
