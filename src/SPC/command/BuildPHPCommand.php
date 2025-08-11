@@ -167,7 +167,7 @@ class BuildPHPCommand extends BuildCommand
         $this->printFormatInfo($indent_texts);
 
         // bind extra info to exception handler
-        ExceptionHandler::setBindBuildPhpExtraInfo($indent_texts);
+        ExceptionHandler::bindBuildPhpExtraInfo($indent_texts);
 
         logger()->notice('Build will start after 2s ...');
         sleep(2);
