@@ -169,7 +169,7 @@ class ExceptionHandler
         self::$bind_builder = $bind_builder;
     }
 
-    public static function setBindBuildPhpExtraInfo(array $bind_build_php_extra_info): void
+    public static function bindBuildPhpExtraInfo(array $build_php_extra_info): void
     {
         self::$bind_build_php_extra_info = $bind_build_php_extra_info;
     }
