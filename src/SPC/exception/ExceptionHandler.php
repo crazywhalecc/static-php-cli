@@ -32,7 +32,7 @@ class ExceptionHandler
     ];
 
     /** @var null|BuilderBase Builder binding */
-    private static ?BuilderBase $bind_builder = null;
+    private static ?BuilderBase $builder = null;
 
     /** @var array<string, mixed> Build PHP extra info binding */
     private static array $bind_build_php_extra_info = [];
