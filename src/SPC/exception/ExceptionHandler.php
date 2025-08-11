@@ -69,8 +69,8 @@ class ExceptionHandler
             self::logError('Failed module: ' . ConsoleColor::yellow("library {$lib_info['library_name']} builder for {$lib_info['os']}"));
         } elseif ($ext_info = $e->getExtensionInfo()) {
             self::logError('Failed module: ' . ConsoleColor::yellow("shared extension {$ext_info['extension_name']} builder"));
-        } elseif (self::$bind_builder) {
-            $os = match (get_class(self::$bind_builder)) {
+        } elseif (self::$builder) {
+            $os = match (get_class(self::$builder)) {
                 WindowsBuilder::class => 'Windows',
                 MacOSBuilder::class => 'macOS',
                 LinuxBuilder::class => 'Linux',
@@ -122,7 +122,7 @@ class ExceptionHandler
         }
 
         // get the full build info if possible
-        if ($info = ExceptionHandler::$bind_build_php_extra_info) {
+        if ($info = ExceptionHandler::$build_php_extra_info) {
             self::logError('', output_log: defined('DEBUG_MODE'));
             self::logError('Build PHP extra info:', output_log: defined('DEBUG_MODE'));
             self::printArrayInfo($info);
@@ -133,9 +133,9 @@ class ExceptionHandler
             $info = $e->getBuildPHPInfo();
             self::logError('', output_log: defined('DEBUG_MODE'));
             self::logError('Builder function: ' . ConsoleColor::yellow($info['builder_function']), output_log: defined('DEBUG_MODE'));
-            if (self::$bind_builder) {
+            if (self::$builder) {
                 self::logError('Builder options:', output_log: defined('DEBUG_MODE'));
-                self::printArrayInfo(self::$bind_builder->getOptions());
+                self::printArrayInfo(self::$builder->getOptions());
             }
         }
 
@@ -166,7 +166,7 @@ class ExceptionHandler
 
     public static function bindBuilder(?BuilderBase $bind_builder): void
     {
-        self::$bind_builder = $bind_builder;
+        self::$builder = $bind_builder;
     }
 
     public static function bindBuildPhpExtraInfo(array $build_php_extra_info): void
