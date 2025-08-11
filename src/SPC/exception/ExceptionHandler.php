@@ -35,7 +35,7 @@ class ExceptionHandler
     private static ?BuilderBase $builder = null;
 
     /** @var array<string, mixed> Build PHP extra info binding */
-    private static array $bind_build_php_extra_info = [];
+    private static array $build_php_extra_info = [];
 
     public static function handleSPCException(SPCException $e): void
     {
