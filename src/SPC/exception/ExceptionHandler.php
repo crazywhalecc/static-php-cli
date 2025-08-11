@@ -164,7 +164,7 @@ class ExceptionHandler
         self::logError('⚠ Please report this exception to: https://github.com/crazywhalecc/static-php-cli/issues');
     }
 
-    public static function setBindBuilder(?BuilderBase $bind_builder): void
+    public static function bindBuilder(?BuilderBase $bind_builder): void
     {
         self::$bind_builder = $bind_builder;
     }
