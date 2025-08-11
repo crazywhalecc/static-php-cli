@@ -32,7 +32,7 @@ class BuilderProvider
         };
 
         // bind the builder to ExceptionHandler
-        ExceptionHandler::setBindBuilder(self::$builder);
+        ExceptionHandler::bindBuilder(self::$builder);
 
         return self::$builder;
     }
