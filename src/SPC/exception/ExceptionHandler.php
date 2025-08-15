@@ -133,10 +133,6 @@ class ExceptionHandler
             $info = $e->getBuildPHPInfo();
             self::logError('', output_log: defined('DEBUG_MODE'));
             self::logError('Builder function: ' . ConsoleColor::yellow($info['builder_function']), output_log: defined('DEBUG_MODE'));
-            if (self::$builder) {
-                self::logError('Builder options:', output_log: defined('DEBUG_MODE'));
-                self::printArrayInfo(self::$builder->getOptions());
-            }
         }
 
         self::logError("\n----------------------------------------\n");
