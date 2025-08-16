@@ -8,6 +8,7 @@ use SPC\builder\BuilderBase;
 use SPC\builder\linux\SystemUtil;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\builder\windows\WindowsBuilder;
+use SPC\exception\ExecutionException;
 use SPC\exception\FileSystemException;
 use SPC\exception\PatchException;
 use SPC\util\SPCTarget;
@@ -190,46 +191,51 @@ class SourcePatcher
      */
     public static function patchFile(string $patch_name, string $cwd, bool $reverse = false): bool
     {
-        if (FileSystem::isRelativePath($patch_name)) {
-            $patch_file = ROOT_DIR . "/src/globals/patch/{$patch_name}";
-        } else {
-            $patch_file = $patch_name;
-        }
-        if (!file_exists($patch_file)) {
-            return false;
-        }
+        try {
+            if (FileSystem::isRelativePath($patch_name)) {
+                $patch_file = ROOT_DIR . "/src/globals/patch/{$patch_name}";
+            } else {
+                $patch_file = $patch_name;
+            }
+            if (!file_exists($patch_file)) {
+                return false;
+            }
 
-        $patch_str = FileSystem::convertPath($patch_file);
-        if (!file_exists($patch_str)) {
-            throw new PatchException($patch_name, "Patch file [{$patch_str}] does not exist");
-        }
+            $patch_str = FileSystem::convertPath($patch_file);
+            if (!file_exists($patch_str)) {
+                throw new PatchException($patch_name, "Patch file [{$patch_str}] does not exist");
+            }
 
-        // Copy patch from phar
-        if (str_starts_with($patch_str, 'phar://')) {
-            $filename = pathinfo($patch_file, PATHINFO_BASENAME);
-            file_put_contents(SOURCE_PATH . "/{$filename}", file_get_contents($patch_file));
-            $patch_str = FileSystem::convertPath(SOURCE_PATH . "/{$filename}");
-        }
+            // Copy patch from phar
+            if (str_starts_with($patch_str, 'phar://')) {
+                $filename = pathinfo($patch_file, PATHINFO_BASENAME);
+                file_put_contents(SOURCE_PATH . "/{$filename}", file_get_contents($patch_file));
+                $patch_str = FileSystem::convertPath(SOURCE_PATH . "/{$filename}");
+            }
 
-        // detect
-        $detect_reverse = !$reverse;
-        $detect_cmd = 'cd ' . escapeshellarg($cwd) . ' && '
-            . (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . escapeshellarg($patch_str)
-            . ' | patch --dry-run -p1 -s -f ' . ($detect_reverse ? '-R' : '')
-            . ' > ' . (PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null') . ' 2>&1';
-        exec($detect_cmd, $output, $detect_status);
+            // detect
+            $detect_reverse = !$reverse;
+            $detect_cmd = 'cd ' . escapeshellarg($cwd) . ' && '
+                . (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . escapeshellarg($patch_str)
+                . ' | patch --dry-run -p1 -s -f ' . ($detect_reverse ? '-R' : '')
+                . ' > ' . (PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null') . ' 2>&1';
+            exec($detect_cmd, $output, $detect_status);
 
-        if ($detect_status === 0) {
+            if ($detect_status === 0) {
+                return true;
+            }
+
+            // apply patch
+            $apply_cmd = 'cd ' . escapeshellarg($cwd) . ' && '
+                . (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . escapeshellarg($patch_str)
+                . ' | patch -p1 ' . ($reverse ? '-R' : '');
+
+            f_passthru($apply_cmd);
             return true;
+        } catch (ExecutionException $e) {
+            // If patch failed, throw exception
+            throw new PatchException($patch_name, "Patch file [{$patch_name}] failed to apply", previous: $e);
         }
-
-        // apply patch
-        $apply_cmd = 'cd ' . escapeshellarg($cwd) . ' && '
-            . (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . escapeshellarg($patch_str)
-            . ' | patch -p1 ' . ($reverse ? '-R' : '');
-
-        f_passthru($apply_cmd);
-        return true;
     }
 
     public static function patchOpenssl11Darwin(): bool

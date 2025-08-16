@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\builder\BuilderProvider;
-use SPC\exception\SPCException;
+use SPC\exception\ExceptionHandler;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
@@ -165,8 +165,9 @@ class BuildPHPCommand extends BuildCommand
         }
         $this->printFormatInfo($this->getDefinedEnvs(), true);
         $this->printFormatInfo($indent_texts);
-        // bind extra info to SPCException
-        SPCException::bindBuildPHPExtraInfo($indent_texts);
+
+        // bind extra info to exception handler
+        ExceptionHandler::bindBuildPhpExtraInfo($indent_texts);
 
         logger()->notice('Build will start after 2s ...');
         sleep(2);

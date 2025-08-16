@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace SPC\exception;
 
 use SPC\builder\BuilderBase;
-use SPC\builder\freebsd\BSDBuilder;
 use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\LibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\library\WindowsLibraryBase;
-use SPC\builder\windows\WindowsBuilder;
 
 /**
  * Base class for SPC exceptions.
@@ -24,8 +20,6 @@ use SPC\builder\windows\WindowsBuilder;
  */
 abstract class SPCException extends \Exception
 {
-    private static ?array $build_php_extra_info = null;
-
     private ?array $library_info = null;
 
     private ?array $extension_info = null;
@@ -40,11 +34,6 @@ abstract class SPCException extends \Exception
         $this->loadStackTraceInfo();
     }
 
-    public static function bindBuildPHPExtraInfo(array $indent_texts): void
-    {
-        self::$build_php_extra_info = $indent_texts;
-    }
-
     public function bindExtensionInfo(array $extension_info): void
     {
         $this->extension_info = $extension_info;
@@ -53,11 +42,6 @@ abstract class SPCException extends \Exception
     public function addExtraLogFile(string $key, string $filename): void
     {
         $this->extra_log_files[$key] = $filename;
-    }
-
-    public function getBuildPHPExtraInfo(): ?array
-    {
-        return self::$build_php_extra_info;
     }
 
     /**
@@ -82,8 +66,7 @@ abstract class SPCException extends \Exception
      * Returns an array containing information about the PHP build process.
      *
      * @return null|array{
-     *     builder_class: string,
-     *     os: string,
+     *     builder_function: string,
      *     file: null|string,
      *     line: null|int,
      * } an array containing PHP build information
@@ -124,7 +107,7 @@ abstract class SPCException extends \Exception
             }
 
             // Check if the class is a subclass of LibraryBase
-            if (!$this->library_info && is_subclass_of($frame['class'], LibraryBase::class)) {
+            if (!$this->library_info && is_a($frame['class'], LibraryBase::class, true)) {
                 try {
                     $reflection = new \ReflectionClass($frame['class']);
                     if ($reflection->hasConstant('NAME')) {
@@ -152,21 +135,9 @@ abstract class SPCException extends \Exception
             }
 
             // Check if the class is a subclass of BuilderBase and the method is buildPHP
-            if (!$this->build_php_info && is_subclass_of($frame['class'], BuilderBase::class) && $frame['function'] === 'buildPHP') {
-                $reflection = new \ReflectionClass($frame['class']);
-                if ($reflection->hasProperty('options')) {
-                    $options = $reflection->getProperty('options')->getValue();
-                }
+            if (!$this->build_php_info && is_a($frame['class'], BuilderBase::class, true)) {
                 $this->build_php_info = [
-                    'builder_class' => $frame['class'],
-                    'builder_options' => $options ?? [],
-                    'os' => match (true) {
-                        is_a($frame['class'], BSDBuilder::class, true) => 'BSD',
-                        is_a($frame['class'], LinuxBuilder::class, true) => 'Linux',
-                        is_a($frame['class'], MacOSBuilder::class, true) => 'macOS',
-                        is_a($frame['class'], WindowsBuilder::class, true) => 'Windows',
-                        default => 'Unknown',
-                    },
+                    'builder_function' => $frame['function'],
                     'file' => $frame['file'] ?? null,
                     'line' => $frame['line'] ?? null,
                 ];
