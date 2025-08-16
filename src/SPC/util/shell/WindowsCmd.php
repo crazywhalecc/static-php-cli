@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\util\shell;
 
+use SPC\exception\ExecutionException;
 use SPC\exception\SPCInternalException;
 use ZM\Logger\ConsoleColor;
 
@@ -63,6 +64,53 @@ class WindowsCmd extends Shell
     public function getLastCommand(): string
     {
         return $this->last_cmd;
+    }
+
+    protected function passthru(string $cmd, bool $console_output = false, ?string $original_command = null): void
+    {
+        $file_res = null;
+        if ($this->enable_log_file) {
+            $file_res = fopen(SPC_SHELL_LOG, 'a');
+        }
+
+        try {
+            $process = popen($cmd . ' 2>&1', 'r');
+            if (!$process) {
+                throw new ExecutionException(
+                    cmd: $original_command ?? $cmd,
+                    message: 'Failed to open process for command, popen() failed.',
+                    code: -1,
+                    cd: $this->cd,
+                    env: $this->env
+                );
+            }
+
+            while (($line = fgets($process)) !== false) {
+                if ($console_output) {
+                    echo $line;
+                }
+                fwrite($file_res, $line);
+            }
+
+            $result_code = pclose($process);
+
+            if ($result_code !== 0) {
+                if ($file_res) {
+                    fwrite($file_res, "Command exited with non-zero code: {$result_code}\n");
+                }
+                throw new ExecutionException(
+                    cmd: $original_command ?? $cmd,
+                    message: "Command exited with non-zero code: {$result_code}",
+                    code: $result_code,
+                    cd: $this->cd,
+                    env: $this->env,
+                );
+            }
+        } finally {
+            if ($file_res) {
+                fclose($file_res);
+            }
+        }
     }
 
     protected function logCommandInfo(string $cmd): void
