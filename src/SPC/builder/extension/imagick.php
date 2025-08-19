@@ -19,7 +19,7 @@ class imagick extends Extension
     protected function splitLibsIntoStaticAndShared(string $allLibs): array
     {
         [$static, $shared] = parent::splitLibsIntoStaticAndShared($allLibs);
-        if (str_contains(getenv('PATH'), 'rh/devtoolset-10')) {
+        if (str_contains(getenv('PATH'), 'rh/devtoolset-10') || str_contains(getenv('PATH'), 'gcc-toolset')) {
             $static .= ' -l:libstdc++.a';
             $shared = str_replace('-lstdc++', '', $shared);
         }
