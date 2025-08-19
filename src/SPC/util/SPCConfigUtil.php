@@ -80,9 +80,7 @@ class SPCConfigUtil
         }
         if ($this->builder->hasCpp()) {
             $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
-            if (!str_contains($libs, $libcpp)) {
-                $libs .= " {$libcpp}";
-            }
+            $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
         }
 
         if ($this->libs_only_deps) {

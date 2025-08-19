@@ -16,9 +16,11 @@ class redis extends Extension
         if ($this->isBuildStatic()) {
             $arg .= $this->builder->getExt('session')?->isBuildStatic() ? ' --enable-redis-session' : ' --disable-redis-session';
             $arg .= $this->builder->getExt('igbinary')?->isBuildStatic() ? ' --enable-redis-igbinary' : ' --disable-redis-igbinary';
+            $arg .= $this->builder->getExt('msgpack')?->isBuildStatic() ? ' --enable-redis-msgpack' : ' --disable-redis-msgpack';
         } else {
             $arg .= $this->builder->getExt('session') ? ' --enable-redis-session' : ' --disable-redis-session';
             $arg .= $this->builder->getExt('igbinary') ? ' --enable-redis-igbinary' : ' --disable-redis-igbinary';
+            $arg .= $this->builder->getExt('msgpack') ? ' --enable-redis-msgpack' : ' --disable-redis-msgpack';
         }
         if ($this->builder->getLib('zstd')) {
             $arg .= ' --enable-redis-zstd --with-libzstd="' . BUILD_ROOT_PATH . '"';
