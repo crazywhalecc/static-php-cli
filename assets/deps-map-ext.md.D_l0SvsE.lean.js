@@ -1,0 +1,1 @@
+import{_ as d,c as b,o as r,af as l}from"./chunks/framework.PeLcR_tw.js";const c=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"deps-map-ext.md","filePath":"deps-map-ext.md"}'),s={name:"deps-map-ext.md"};function i(e,t,o,p,a,n){return r(),b("div",null,t[0]||(t[0]=[l("",8)]))}const g=d(s,[["render",i]]);export{c as __pageData,g as default};
