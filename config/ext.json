@@ -694,7 +694,8 @@
         "arg-type": "custom",
         "ext-suggests": [
             "session",
-            "igbinary"
+            "igbinary",
+            "msgpack"
         ],
         "lib-suggests-unix": [
             "zstd",
