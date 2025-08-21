@@ -13,7 +13,13 @@
             "micro"
         ],
         "lib-suggests-linux": [
-            "libacl"
+            "libacl",
+            "brotli",
+            "watcher"
+        ],
+        "lib-suggests-unix": [
+            "brotli",
+            "watcher"
         ]
     },
     "micro": {
