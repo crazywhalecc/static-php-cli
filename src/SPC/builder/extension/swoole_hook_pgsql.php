@@ -20,7 +20,7 @@ class swoole_hook_pgsql extends Extension
     public function validate(): void
     {
         // pdo_pgsql need to be disabled
-        if ($this->builder->getExt('pdo_pgsql') !== null) {
+        if ($this->builder->getExt('pdo_pgsql')?->isBuildStatic()) {
             throw new WrongUsageException('swoole-hook-pgsql provides pdo_pgsql, if you enable pgsql hook for swoole, you must remove pdo_pgsql extension.');
         }
     }

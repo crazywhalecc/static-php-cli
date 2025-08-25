@@ -35,7 +35,7 @@ class swoole_hook_mysql extends Extension
             throw new ValidationException("extension {$this->getName()} failed compile check: php-cli returned {$ret}", validation_module: 'extension swoole_hook_mysql sanity check');
         }
         if (!str_contains($out, 'mysqlnd')) {
-            throw new ValidationException('swoole mysql hook is not enabled correctly.', validation_module: 'Extension swoole mysql hook avilability check');
+            throw new ValidationException('swoole mysql hook is not enabled correctly.', validation_module: 'Extension swoole mysql hook availability check');
         }
     }
 }
