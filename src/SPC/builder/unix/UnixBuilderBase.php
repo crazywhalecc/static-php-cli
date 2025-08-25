@@ -283,7 +283,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $env = [
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => $this->arch_c_flags . ' ' . $config['cflags'],
-            'CGO_LDFLAGS' => $this->arch_ld_flags . " {$staticFlags} {$config['ldflags']} {$config['libs']} {$lrt}",
+            'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$config['libs']} {$lrt}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' . $debugFlags .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
