@@ -282,7 +282,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list);
         $env = [
             'CGO_ENABLED' => '1',
-            'CGO_CFLAGS' => $this->arch_c_flags . ' ' . $config['cflags'],
+            'CGO_CFLAGS' => clean_spaces("{$this->arch_c_flags} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS')),
             'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$config['libs']} {$lrt}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' . $debugFlags .
