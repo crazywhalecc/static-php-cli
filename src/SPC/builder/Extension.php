@@ -356,11 +356,8 @@ class Extension
     /**
      * Build shared extension
      */
-    public function buildShared(): void
+    public function buildShared(array $visited = []): void
     {
-        if (Config::getExt($this->getName(), 'type') === 'addon') {
-            return;
-        }
         try {
             if (Config::getExt($this->getName(), 'type') === 'builtin' || Config::getExt($this->getName(), 'build-with-php') === true) {
                 if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
@@ -375,16 +372,20 @@ class Extension
             }
             if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {
                 logger()->info('Shared extension [' . $this->getName() . '] was already built, skipping (' . $this->getName() . '.so)');
+                return;
             }
             logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
             foreach ($this->dependencies as $dependency) {
                 if (!$dependency instanceof Extension) {
                     continue;
                 }
-                if (!$dependency->isBuildStatic()) {
+                if (!$dependency->isBuildStatic() && !in_array($dependency->getName(), $visited)) {
                     logger()->info('extension ' . $this->getName() . ' requires extension ' . $dependency->getName());
-                    $dependency->buildShared();
+                    $dependency->buildShared([...$visited, $this->getName()]);
                 }
+            }
+            if (Config::getExt($this->getName(), 'type') === 'addon') {
+                return;
             }
             match (PHP_OS_FAMILY) {
                 'Darwin', 'Linux' => $this->buildUnixShared(),
