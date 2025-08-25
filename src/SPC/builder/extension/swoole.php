@@ -52,7 +52,7 @@ class swoole extends Extension
 
         // required feature: curl, openssl (but curl hook is buggy for php 8.0)
         $arg .= $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
-        $arg .= ' --enable-openssl'; // we depend on openssl so it's always enabled
+        $arg .= ' --enable-openssl';
 
         // additional feature: c-ares, brotli, nghttp2 (can be disabled, but we enable it by default in config to support full network feature)
         $arg .= $this->builder->getLib('libcares') ? ' --enable-cares' : '';
