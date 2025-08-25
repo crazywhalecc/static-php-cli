@@ -61,7 +61,7 @@ class swoole extends Extension
         }
         $arg .= $this->builder->getLib('nghttp2') ? (' --with-nghttp2-dir=' . BUILD_ROOT_PATH) : '';
         $arg .= $this->builder->getLib('zstd') ? ' --enable-zstd' : '';
-        $arg .= $this->builder->getLib('iouring') ? ' --enable-iouring' : '';
+        $arg .= $this->builder->getLib('liburing') ? ' --enable-iouring' : '';
         $arg .= $this->builder->getExt('sockets') ? ' --enable-sockets' : '';
 
         // additional feature: swoole-pgsql, it should depend on lib [postgresql], but it will lack of CFLAGS etc.

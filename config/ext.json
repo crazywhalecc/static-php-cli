@@ -846,6 +846,11 @@
             "zstd",
             "unixodbc"
         ],
+        "lib-suggests-linux": [
+            "zstd",
+            "unixodbc",
+            "liburing"
+        ],
         "ext-depends": [
             "openssl",
             "curl"
