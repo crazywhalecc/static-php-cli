@@ -34,7 +34,7 @@ class swoole_hook_odbc extends Extension
             throw new ValidationException("extension {$this->getName()} failed compile check: php-cli returned {$ret}", validation_module: "Extension {$this->getName()} sanity check");
         }
         if (!str_contains($out, 'coroutine_odbc')) {
-            throw new ValidationException('swoole sqlite hook is not enabled correctly.', validation_module: 'Extension swoole sqlite hook availability check');
+            throw new ValidationException('swoole odbc hook is not enabled correctly.', validation_module: 'Extension swoole odbc hook availability check');
         }
     }
 }
