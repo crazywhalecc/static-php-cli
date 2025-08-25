@@ -28,7 +28,7 @@ class swoole_hook_sqlite extends Extension
     public function runCliCheckUnix(): void
     {
         $sharedExtensions = $this->getSharedExtensionLoadString();
-        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"', false);
         $out = implode('', $out);
         if ($ret !== 0) {
             throw new ValidationException("extension {$this->getName()} failed compile check: php-cli returned {$ret}", validation_module: "Extension {$this->getName()} sanity check");
