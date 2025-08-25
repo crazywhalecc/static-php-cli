@@ -63,6 +63,9 @@ class swoole extends Extension
         // so this is a tricky way (enable ext [pgsql,pdo] to add postgresql hook and pdo_pgsql support)
         $arg .= $this->builder->getExt('swoole-hook-pgsql') ? ' --enable-swoole-pgsql' : ' --disable-swoole-pgsql';
 
+        // additional feature: swoole-mysql
+        $arg .= $this->builder->getExt('swoole-hook-mysql') ? ' --enable-swoole-mysql' : ' --disable-swoole-mysql';
+
         // enable this feature , need remove pdo_sqlite
         // more info : https://wenda.swoole.com/detail/109023
         $arg .= $this->builder->getExt('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
