@@ -252,12 +252,15 @@ class Extension
         $order = [];
 
         $resolve = function ($extension) use (&$resolve, &$loaded, &$order) {
+            if (!$extension instanceof Extension) {
+                return;
+            }
             if (isset($loaded[$extension->getName()])) {
                 return;
             }
             $loaded[$extension->getName()] = true;
 
-            foreach ($this->dependencies as $dependency) {
+            foreach ($extension->dependencies as $dependency) {
                 $resolve($dependency);
             }
 

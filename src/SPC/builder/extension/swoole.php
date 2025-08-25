@@ -8,6 +8,7 @@ use SPC\builder\Extension;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
+use SPC\util\SPCTarget;
 
 #[CustomExt('swoole')]
 class swoole extends Extension
@@ -48,7 +49,8 @@ class swoole extends Extension
         // commonly-used feature: coroutine-time
         $arg .= ' --enable-swoole-coro-time --with-pic';
 
-        $arg .= $this->builder->getOption('enable-zts') ? ' --enable-swoole-thread --disable-thread-context' : ' --disable-swoole-thread --enable-thread-context';
+        $arg .= $this->builder->getOption('enable-zts') && SPCTarget::getTargetOS() !== 'Darwin' ? ' --enable-swoole-thread' : ' --disable-swoole-thread';
+        $arg .= $this->builder->getOption('enable-zts') || SPCTarget::getTargetOS() === 'Darwin' ? ' --disable-thread-context' : ' --enable-thread-context';
 
         // required feature: curl, openssl (but curl hook is buggy for php 8.0)
         $arg .= $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
