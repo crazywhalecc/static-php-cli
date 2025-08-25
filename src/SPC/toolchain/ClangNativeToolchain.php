@@ -45,7 +45,7 @@ class ClangNativeToolchain implements ToolchainInterface
         $compiler = getenv('CC') ?: 'clang';
         $version = shell(false)->execWithResult("{$compiler} --version", false);
         $head = pathinfo($compiler, PATHINFO_BASENAME);
-        if ($version[0] === 0 && preg_match('/clang version (\d+.\d+.\d+)/', $version[1][0], $match)) {
+        if ($version[0] === 0 && preg_match('/clang version (\d+\.\d+\.\d+)/', $version[1][0], $match)) {
             return "{$head} {$match[1]}";
         }
         return $head;
