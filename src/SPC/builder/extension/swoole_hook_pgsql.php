@@ -25,11 +25,6 @@ class swoole_hook_pgsql extends Extension
         }
     }
 
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        return ''; // enabled in swoole.php
-    }
-
     public function runCliCheckUnix(): void
     {
         // skip if not enable swoole
@@ -51,16 +46,5 @@ class swoole_hook_pgsql extends Extension
                 validation_module: 'Extension swoole pgsql hook availability check'
             );
         }
-    }
-
-    public function getSharedExtensionLoadString(): string
-    {
-        $ret = parent::getSharedExtensionLoadString();
-        return str_replace(' -d "extension=' . $this->name . '"', '', $ret);
-    }
-
-    public function buildShared(): void
-    {
-        // nothing to do, it's built into swoole
     }
 }

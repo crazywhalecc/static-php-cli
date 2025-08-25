@@ -269,6 +269,9 @@ class Extension
         $ret = '';
         foreach ($order as $ext) {
             if ($ext instanceof self && $ext->isBuildShared()) {
+                if (Config::getExt($ext->getName(), 'type', false) === 'addon') {
+                    continue;
+                }
                 if (Config::getExt($ext->getName(), 'zend-extension', false) === true) {
                     $ret .= " -d \"zend_extension={$ext->getName()}\"";
                 } else {
@@ -352,6 +355,9 @@ class Extension
      */
     public function buildShared(): void
     {
+        if (Config::getExt($this->getName(), 'type') === 'addon') {
+            return;
+        }
         try {
             if (Config::getExt($this->getName(), 'type') === 'builtin' || Config::getExt($this->getName(), 'build-with-php') === true) {
                 if (file_exists(BUILD_MODULES_PATH . '/' . $this->getName() . '.so')) {

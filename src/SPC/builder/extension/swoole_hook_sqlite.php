@@ -25,11 +25,6 @@ class swoole_hook_sqlite extends Extension
         }
     }
 
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        return ''; // enabled in swoole.php
-    }
-
     public function runCliCheckUnix(): void
     {
         // skip if not enable swoole
@@ -45,16 +40,5 @@ class swoole_hook_sqlite extends Extension
         if (!str_contains($out, 'coroutine_sqlite')) {
             throw new ValidationException('swoole sqlite hook is not enabled correctly.', validation_module: 'Extension swoole sqlite hook availability check');
         }
-    }
-
-    public function getSharedExtensionLoadString(): string
-    {
-        $ret = parent::getSharedExtensionLoadString();
-        return str_replace(' -d "extension=' . $this->name . '"', '', $ret);
-    }
-
-    public function buildShared(): void
-    {
-        // nothing to do, it's built into swoole
     }
 }

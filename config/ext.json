@@ -843,7 +843,8 @@
             "zlib"
         ],
         "lib-suggests": [
-            "zstd"
+            "zstd",
+            "unixodbc"
         ],
         "ext-depends": [
             "openssl",
@@ -863,7 +864,7 @@
         },
         "notes": true,
         "type": "addon",
-        "arg-type": "custom",
+        "arg-type": "none",
         "ext-depends": [
             "mysqlnd",
             "pdo",
@@ -882,7 +883,7 @@
         },
         "notes": true,
         "type": "addon",
-        "arg-type": "custom",
+        "arg-type": "none",
         "ext-depends": [
             "pgsql",
             "pdo",
@@ -896,7 +897,7 @@
         },
         "notes": true,
         "type": "addon",
-        "arg-type": "custom",
+        "arg-type": "none",
         "ext-depends": [
             "sqlite3",
             "pdo",
