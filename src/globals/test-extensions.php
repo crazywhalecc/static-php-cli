@@ -23,9 +23,9 @@ $test_php_version = [
 
 // test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13', // bin/spc for x86_64
+    'macos-13', // bin/spc for x86_64
     // 'macos-14',  // bin/spc for arm64
-    // 'macos-15', // bin/spc for arm64
+    'macos-15', // bin/spc for arm64
     'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
@@ -50,7 +50,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pdo,pdo_mysql,pdo_sqlite,phar,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
+    'Linux', 'Darwin' => 'swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite',
     'Windows' => 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pdo,pdo_mysql,pdo_sqlite,phar,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
 };
 
@@ -62,7 +62,7 @@ $shared_extensions = match (PHP_OS_FAMILY) {
 };
 
 // If you want to test lib-suggests for all extensions and libraries, set it to true.
-$with_suggested_libs = false;
+$with_suggested_libs = true;
 
 // If you want to test extra libs for extensions, add them below (comma separated, example `libwebp,libavif`). Unnecessary, when $with_suggested_libs is true.
 $with_libs = match (PHP_OS_FAMILY) {
