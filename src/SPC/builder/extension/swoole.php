@@ -48,7 +48,7 @@ class swoole extends Extension
         // commonly-used feature: coroutine-time
         $arg .= ' --enable-swoole-coro-time --with-pic';
 
-        $arg .= $this->builder->getOption('enable-zts') ? ' --enable-thread-context' : ' --disable-thread-context';
+        $arg .= $this->builder->getOption('enable-zts') ? ' --enable-swoole-thread --disable-thread-context' : ' --disable-swoole-thread --enable-thread-context';
 
         // required feature: curl, openssl (but curl hook is buggy for php 8.0)
         $arg .= $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
@@ -76,7 +76,7 @@ class swoole extends Extension
         $arg .= $this->builder->getExt('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
 
         // enable this feature , need stop pdo_*
-        // $arg .= $this->builder->getLib('unixodbc') ? ' --with-swoole-odbc=unixODBC,'  : ' ';
+        $arg .= $this->builder->getLib('unixodbc') && !$this->builder->getExt('pgo')?->isBuildStatic() ? ' --with-swoole-odbc=unixODBC,'  : ' ';
         return $arg;
     }
 }
