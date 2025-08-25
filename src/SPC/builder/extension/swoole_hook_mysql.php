@@ -38,4 +38,15 @@ class swoole_hook_mysql extends Extension
             throw new ValidationException('swoole mysql hook is not enabled correctly.', validation_module: 'Extension swoole mysql hook availability check');
         }
     }
+
+    public function getSharedExtensionLoadString(): string
+    {
+        $ret = parent::getSharedExtensionLoadString();
+        return str_replace(' -d "extension=' . $this->name . '"', '', $ret);
+    }
+
+    public function buildShared(): void
+    {
+        // nothing to do, it's built into swoole
+    }
 }

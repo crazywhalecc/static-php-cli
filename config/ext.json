@@ -863,7 +863,8 @@
         "ext-depends": [
             "mysqlnd",
             "pdo",
-            "pdo_mysql"
+            "pdo_mysql",
+            "swoole"
         ],
         "ext-suggests": [
             "mysqli"
@@ -880,7 +881,8 @@
         "arg-type": "custom",
         "ext-depends": [
             "pgsql",
-            "pdo"
+            "pdo",
+            "swoole"
         ]
     },
     "swoole-hook-sqlite": {
@@ -893,7 +895,8 @@
         "arg-type": "custom",
         "ext-depends": [
             "sqlite3",
-            "pdo"
+            "pdo",
+            "swoole"
         ]
     },
     "swow": {

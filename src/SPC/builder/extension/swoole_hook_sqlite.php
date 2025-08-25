@@ -47,4 +47,15 @@ class swoole_hook_sqlite extends Extension
             throw new ValidationException('swoole sqlite hook is not enabled correctly.', validation_module: 'Extension swoole sqlite hook availability check');
         }
     }
+
+    public function getSharedExtensionLoadString(): string
+    {
+        $ret = parent::getSharedExtensionLoadString();
+        return str_replace(' -d "extension=' . $this->name . '"', '', $ret);
+    }
+
+    public function buildShared(): void
+    {
+        // nothing to do, it's built into swoole
+    }
 }

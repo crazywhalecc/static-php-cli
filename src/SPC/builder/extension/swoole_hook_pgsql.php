@@ -53,4 +53,15 @@ class swoole_hook_pgsql extends Extension
             );
         }
     }
+
+    public function getSharedExtensionLoadString(): string
+    {
+        $ret = parent::getSharedExtensionLoadString();
+        return str_replace(' -d "extension=' . $this->name . '"', '', $ret);
+    }
+
+    public function buildShared(): void
+    {
+        // nothing to do, it's built into swoole
+    }
 }

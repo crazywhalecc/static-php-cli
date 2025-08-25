@@ -61,11 +61,11 @@ class swoole extends Extension
 
         // additional feature: swoole-pgsql, it should depend on lib [postgresql], but it will lack of CFLAGS etc.
         // so this is a tricky way (enable ext [pgsql,pdo] to add postgresql hook and pdo_pgsql support)
-        $arg .= $this->builder->getExt('swoole-hook-pgsql') ? '' : ' --disable-swoole-pgsql';
+        $arg .= $this->builder->getExt('swoole-hook-pgsql') ? ' --enable-swoole-pgsql' : ' --disable-swoole-pgsql';
 
         // enable this feature , need remove pdo_sqlite
         // more info : https://wenda.swoole.com/detail/109023
-        $arg .= $this->builder->getExt('swoole-hook-sqlite') ? '' : ' --disable-swoole-sqlite';
+        $arg .= $this->builder->getExt('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
 
         // enable this feature , need stop pdo_*
         // $arg .= $this->builder->getLib('unixodbc') ? ' --with-swoole-odbc=unixODBC,'  : ' ';
