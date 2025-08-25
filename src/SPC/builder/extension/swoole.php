@@ -8,7 +8,6 @@ use SPC\builder\Extension;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
-use SPC\util\SPCTarget;
 
 #[CustomExt('swoole')]
 class swoole extends Extension
