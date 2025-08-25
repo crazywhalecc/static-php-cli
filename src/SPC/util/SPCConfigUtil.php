@@ -8,7 +8,6 @@ use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
-use SPC\toolchain\ClangNativeToolchain;
 use SPC\toolchain\GccNativeToolchain;
 use SPC\toolchain\ToolchainManager;
 use Symfony\Component\Console\Input\ArgvInput;
