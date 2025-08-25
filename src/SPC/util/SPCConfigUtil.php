@@ -52,6 +52,15 @@ class SPCConfigUtil
      */
     public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
     {
+        $extra_exts = [];
+        foreach ($extensions as $ext) {
+            $extra_exts = array_merge($extra_exts, Config::getExt($ext, 'ext-suggests', []));
+        }
+        foreach ($extra_exts as $ext) {
+            if ($this->builder?->getExt($ext) && !in_array($ext, $extensions)) {
+                $extensions[] = $ext;
+            }
+        }
         [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
         ob_start();

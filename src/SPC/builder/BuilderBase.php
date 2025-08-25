@@ -268,11 +268,11 @@ abstract class BuilderBase
     {
         $ret = [];
         foreach ($this->getExts() as $ext) {
-            $arg = $ext->getConfigureArg();
+            $arg = null;
             if ($ext->isBuildShared() && !$ext->isBuildStatic()) {
                 if (
                     (Config::getExt($ext->getName(), 'type') === 'builtin' &&
-                    !file_exists(SOURCE_PATH . '/php-src/ext/' . $ext->getName() . '/config.m4')) ||
+                        !file_exists(SOURCE_PATH . '/php-src/ext/' . $ext->getName() . '/config.m4')) ||
                     Config::getExt($ext->getName(), 'build-with-php') === true
                 ) {
                     $arg = $ext->getConfigureArg(true);
@@ -280,6 +280,7 @@ abstract class BuilderBase
                     continue;
                 }
             }
+            $arg ??= $ext->getConfigureArg();
             logger()->info($ext->getName() . ' is using ' . $arg);
             $ret[] = trim($arg);
         }
