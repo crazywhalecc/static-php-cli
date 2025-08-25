@@ -8,6 +8,9 @@ use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\toolchain\ClangNativeToolchain;
+use SPC\toolchain\GccNativeToolchain;
+use SPC\toolchain\ToolchainManager;
 use Symfony\Component\Console\Input\ArgvInput;
 
 class SPCConfigUtil
@@ -77,6 +80,9 @@ class SPCConfigUtil
         // extension frameworks
         if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
+        }
+        if (str_contains((string) getenv('SPC_DEFAULT_C_FLAGS'), '-fprofile') && ToolchainManager::getToolchainClass() === GccNativeToolchain::class) {
+            $libs .= ' -lgcov';
         }
         if ($this->builder->hasCpp()) {
             $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
