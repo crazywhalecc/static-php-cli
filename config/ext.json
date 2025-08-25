@@ -842,11 +842,15 @@
             "nghttp2",
             "zlib"
         ],
+        "lib-suggests": [
+            "zstd"
+        ],
         "ext-depends": [
             "openssl",
             "curl"
         ],
         "ext-suggests": [
+            "sockets",
             "swoole-hook-pgsql",
             "swoole-hook-mysql",
             "swoole-hook-sqlite"
