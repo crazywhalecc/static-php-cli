@@ -843,12 +843,10 @@
             "zlib"
         ],
         "lib-suggests": [
-            "zstd",
-            "unixodbc"
+            "zstd"
         ],
         "lib-suggests-linux": [
             "zstd",
-            "unixodbc",
             "liburing"
         ],
         "ext-depends": [
@@ -859,7 +857,8 @@
             "sockets",
             "swoole-hook-pgsql",
             "swoole-hook-mysql",
-            "swoole-hook-sqlite"
+            "swoole-hook-sqlite",
+            "swoole-hook-odbc"
         ]
     },
     "swoole-hook-mysql": {
@@ -907,6 +906,22 @@
             "sqlite3",
             "pdo",
             "swoole"
+        ]
+    },
+    "swoole-hook-odbc": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
+        "notes": true,
+        "type": "addon",
+        "arg-type": "none",
+        "ext-depends": [
+            "pdo",
+            "swoole"
+        ],
+        "lib-depends": [
+            "unixodbc"
         ]
     },
     "swow": {

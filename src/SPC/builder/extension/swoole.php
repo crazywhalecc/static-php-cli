@@ -8,6 +8,7 @@ use SPC\builder\Extension;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
+use SPC\util\SPCConfigUtil;
 
 #[CustomExt('swoole')]
 class swoole extends Extension
@@ -76,7 +77,8 @@ class swoole extends Extension
         $arg .= $this->builder->getExt('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
 
         // enable this feature , need stop pdo_*
-        $arg .= $this->builder->getLib('unixodbc') && !$this->builder->getExt('pdo')?->isBuildStatic() ? ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH : '';
+        $config = (new SPCConfigUtil($this->builder, ['libs_only_deps' => true]))->config([], ['unixodbc']);
+        $arg .= $this->builder->getExt('swoole-hook-odbc') ? ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH . ' SWOOLE_ODBC_LIBS="' . $config['libs'] . '"' : '';
         return $arg;
     }
 }

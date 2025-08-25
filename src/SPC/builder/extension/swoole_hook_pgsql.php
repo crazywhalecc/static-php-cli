@@ -27,10 +27,6 @@ class swoole_hook_pgsql extends Extension
 
     public function runCliCheckUnix(): void
     {
-        // skip if not enable swoole
-        if ($this->builder->getExt('swoole') === null) {
-            return;
-        }
         $sharedExtensions = $this->getSharedExtensionLoadString();
         [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
         $out = implode('', $out);
