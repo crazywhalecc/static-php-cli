@@ -76,7 +76,7 @@ class swoole extends Extension
         $arg .= $this->builder->getExt('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
 
         // enable this feature , need stop pdo_*
-        $arg .= $this->builder->getLib('unixodbc') && !$this->builder->getExt('pdo')?->isBuildStatic() ? ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH  : '';
+        $arg .= $this->builder->getLib('unixodbc') && !$this->builder->getExt('pdo')?->isBuildStatic() ? ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH : '';
         return $arg;
     }
 }
