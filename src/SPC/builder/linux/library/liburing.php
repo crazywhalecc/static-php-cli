@@ -4,12 +4,23 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
+use SPC\builder\linux\SystemUtil;
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
 use SPC\util\SPCTarget;
 
 class liburing extends LinuxLibraryBase
 {
     public const NAME = 'liburing';
+
+    public function patchBeforeBuild(): bool
+    {
+        if (!SystemUtil::isMuslDist()) {
+            return false;
+        }
+        FileSystem::replaceFileStr($this->source_dir . '/configure', 'realpath -s', 'realpath');
+        return true;
+    }
 
     protected function build(): void
     {
