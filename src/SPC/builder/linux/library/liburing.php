@@ -20,7 +20,7 @@ class liburing extends LinuxLibraryBase
 
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
-                'CFLAGS' => '-D_GNU_SOURCE'
+                'CFLAGS' => '-D_GNU_SOURCE',
             ])
             ->removeConfigureArgs(
                 '--disable-shared',
