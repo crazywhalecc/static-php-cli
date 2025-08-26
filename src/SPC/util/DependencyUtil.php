@@ -76,14 +76,6 @@ class DependencyUtil
                 $del_list = [];
                 foreach ($obj['suggests'] as $id => $suggest) {
                     if (!str_starts_with($suggest, 'ext@')) {
-                        $glibcMin = Config::getLib($suggest, 'glibc-min');
-                        if ($glibcMin !== null) {
-                            $libc = SPCTarget::getLibc();
-                            $ver = SPCTarget::getLibcVersion();
-                            if ($libc === 'glibc' && version_compare($ver, (string) $glibcMin, '<')) {
-                                continue;
-                            }
-                        }
                         $dep_list[$name]['depends'][] = $suggest;
                         $del_list[] = $id;
                     }
@@ -142,14 +134,6 @@ class DependencyUtil
                 $del_list = [];
                 foreach ($obj['suggests'] as $id => $suggest) {
                     if (!str_starts_with($suggest, 'ext@')) {
-                        $glibcMin = Config::getLib($suggest, 'glibc-min');
-                        if ($glibcMin !== null) {
-                            $libc = SPCTarget::getLibc();
-                            $ver = SPCTarget::getLibcVersion();
-                            if ($libc === 'glibc' && version_compare($ver, (string) $glibcMin, '<')) {
-                                continue;
-                            }
-                        }
                         $dep_list[$name]['depends'][] = $suggest;
                         $del_list[] = $id;
                     }
