@@ -100,7 +100,7 @@ class SPCTarget
     public static function getLibcVersion(): ?string
     {
         if (PHP_OS_FAMILY === 'Linux') {
-            $target = getenv('SPC_TARGET');
+            $target = (string) getenv('SPC_TARGET');
             if (str_contains($target, '-gnu.2.')) {
                 return preg_match('/-gnu\.(2\.\d+)/', $target, $matches) ? $matches[1] : null;
             }
