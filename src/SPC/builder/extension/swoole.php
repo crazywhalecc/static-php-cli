@@ -9,6 +9,7 @@ use SPC\builder\macos\MacOSBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 use SPC\util\SPCConfigUtil;
+use SPC\util\SPCTarget;
 
 #[CustomExt('swoole')]
 class swoole extends Extension
@@ -73,6 +74,11 @@ class swoole extends Extension
             $config = (new SPCConfigUtil($this->builder, ['libs_only_deps' => true]))->config([], ['unixodbc']);
             $arg .= ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH . ' SWOOLE_ODBC_LIBS="' . $config['libs'] . '"';
         }
+
+        if (SPCTarget::getTargetOS() === 'Darwin') {
+            $arg .= ' ac_cv_lib_pthread_pthread_barrier_init=no';
+        }
+
         return $arg;
     }
 }

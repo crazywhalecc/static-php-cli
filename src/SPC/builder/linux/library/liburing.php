@@ -51,7 +51,7 @@ class liburing extends LinuxLibraryBase
                 $use_libc ? '--use-libc' : '',
             )
             ->configure()
-            ->make('install library', with_clean: false)
+            ->make('library', with_clean: false)
             ->exec("rm -rf {$this->getLibDir()}/liburing*.so*");
 
         $this->patchPkgconfPrefix(['liburing.pc', 'liburing-ffi.pc']);
