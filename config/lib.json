@@ -939,6 +939,7 @@
         "headers-linux": [
             "liburing/",
             "liburing.h"
-        ]
+        ],
+        "glibc-min": "2.30"
     }
 }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux\library;
 
+use SPC\exception\WrongUsageException;
 use SPC\util\executor\UnixAutoconfExecutor;
+use SPC\util\SPCTarget;
 
 class liburing extends LinuxLibraryBase
 {
@@ -12,8 +14,14 @@ class liburing extends LinuxLibraryBase
 
     protected function build(): void
     {
-        // Build liburing with static linking via autoconf
+        if (SPCTarget::getLibc() === 'glibc' && SPCTarget::getLibcVersion() < 2.30) {
+            throw new WrongUsageException('liburing requires glibc >= 2.30');
+        }
+
         UnixAutoconfExecutor::create($this)
+            ->appendEnv([
+                'CFLAGS' => '-D_GNU_SOURCE'
+            ])
             ->removeConfigureArgs(
                 '--disable-shared',
                 '--enable-static',
