@@ -82,11 +82,11 @@ class PkgConfig extends CustomPackage
             ->appendEnv($env)->cd($srcdir);
         $shell->exec(
             "./configure --prefix='{$prefix}' " .
-            '--with-internal-glib '.
-            '--disable-host-tool '.
-            '--without-sysroot '.
-            '--without-system-include-path '.
-            '--without-system-library-path '.
+            '--with-internal-glib ' .
+            '--disable-host-tool ' .
+            '--without-sysroot ' .
+            '--without-system-include-path ' .
+            '--without-system-library-path ' .
             '--without-pc-path',
         );
         $shell->exec('make -j' . (getenv('SPC_CONCURRENCY') ?: '1'));
