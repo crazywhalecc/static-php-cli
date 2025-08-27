@@ -67,7 +67,7 @@ class PkgConfig extends CustomPackage
 
         // build from source into package prefix
         $env = [
-            'CFLAGS' => getenv('SPC_DEFAULT_C_FLAGS') ?: '-Os -Wno-int-conversion',
+            'CFLAGS' => '-Wno-int-conversion ' . (getenv('SPC_DEFAULT_C_FLAGS') ?: '-Os'),
             'LDFLAGS' => (SPCTarget::isStatic() ? '--static' : ''),
             'PKG_CONFIG' => 'pkg-config',
             'PKG_CONFIG_PATH' => BUILD_ROOT_PATH . '/lib/pkgconfig',
