@@ -81,6 +81,7 @@ class PkgConfig extends CustomPackage
             ])
             ->appendEnv($env)->cd($srcdir);
         $shell->exec(
+            "./configure --prefix='{$prefix}' " .
             '--with-internal-glib '.
             '--disable-host-tool '.
             '--without-sysroot '.
