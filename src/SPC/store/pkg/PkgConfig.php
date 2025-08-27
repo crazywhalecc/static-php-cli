@@ -67,15 +67,29 @@ class PkgConfig extends CustomPackage
 
         // build from source into package prefix
         $env = [
-            'CFLAGS' => getenv('SPC_DEFAULT_C_FLAGS') ?: '-Os',
+            'CFLAGS' => getenv('SPC_DEFAULT_C_FLAGS') ?: '-Os -Wno-int-conversion',
             'LDFLAGS' => (SPCTarget::isStatic() ? '--static' : ''),
             'PKG_CONFIG' => 'pkg-config',
             'PKG_CONFIG_PATH' => BUILD_ROOT_PATH . '/lib/pkgconfig',
         ];
-        $shell = shell()->appendEnv($env)->cd($srcdir);
-        $shell->exec("CC=cc ./configure --prefix='{$prefix}' --with-internal-glib --disable-host-tool --without-sysroot --without-system-include-path --without-system-library-path --without-pc-path");
-        $shell->exec('CC=cc make -j' . (getenv('SPC_CONCURRENCY') ?: '1'));
-        $shell->exec('CC=cc make install-exec');
+        $shell = shell()
+            ->setEnv([
+                'CC' => 'cc',
+                'CXX' => 'c++',
+                'AR' => 'ar',
+                'LD' => 'ld',
+            ])
+            ->appendEnv($env)->cd($srcdir);
+        $shell->exec(
+            '--with-internal-glib '.
+            '--disable-host-tool '.
+            '--without-sysroot '.
+            '--without-system-include-path '.
+            '--without-system-library-path '.
+            '--without-pc-path',
+        );
+        $shell->exec('make -j' . (getenv('SPC_CONCURRENCY') ?: '1'));
+        $shell->exec('make install-exec');
         if (is_file($bin)) {
             @shell()->exec('strip ' . $bin);
         }
