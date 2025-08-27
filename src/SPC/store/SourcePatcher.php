@@ -30,6 +30,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchImapLicense']);
         FileSystem::addSourceExtractHook('ext-imagick', [__CLASS__, 'patchImagickWith84']);
         FileSystem::addSourceExtractHook('libaom', [__CLASS__, 'patchLibaomForAlpine']);
+        FileSystem::addSourceExtractHook('pkg-config', [__CLASS__, 'patchPkgConfigForGcc15']);
         FileSystem::addSourceExtractHook('attr', [__CLASS__, 'patchAttrForAlpine']);
         FileSystem::addSourceExtractHook('gmssl', [__CLASS__, 'patchGMSSL']);
     }
@@ -495,6 +496,12 @@ class SourcePatcher
             return false;
         }
         self::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
+        return true;
+    }
+
+    public static function patchPkgConfigForGcc15(): bool
+    {
+        self::patchFile('pkg-config_gcc15.patch', SOURCE_PATH . '/pkg-config');
         return true;
     }
 
