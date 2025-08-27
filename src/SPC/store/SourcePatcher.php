@@ -153,7 +153,7 @@ class SourcePatcher
             $spc_micro_patches = $items;
         } else {
             $spc_micro_patches = getenv('SPC_MICRO_PATCHES');
-            $spc_micro_patches = $spc_micro_patches === false ? [] : explode(',', $spc_micro_patches);
+            $spc_micro_patches = $spc_micro_patches === false ? [] : array_filter(explode(',', $spc_micro_patches));
         }
         $patch_list = $spc_micro_patches;
         $patches = [];
