@@ -40,7 +40,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip', 'gcc',
         'bzip2', 'cmake', 'patch', 'which',
         'xz', 'libtool', 'gettext-devel',
-        'perl', 'patchelf',
+        'patchelf',
     ];
 
     public const TOOLS_ARCH = [
@@ -48,6 +48,7 @@ class LinuxToolCheckList
     ];
 
     private const PROVIDED_COMMAND = [
+        'perl' => '/usr/share/perl5/FindBin.pm',
         'binutils-gold' => 'ld.gold',
         'base-devel' => 'automake',
         'gettext-devel' => 'gettextize',
