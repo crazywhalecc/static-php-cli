@@ -1,9 +1,6 @@
 {
     "lib-base": {
-        "type": "root",
-        "lib-depends-unix": [
-            "pkg-config"
-        ]
+        "type": "root"
     },
     "php": {
         "type": "root",
@@ -25,13 +22,6 @@
     "micro": {
         "type": "target",
         "source": "micro"
-    },
-    "pkg-config": {
-        "type": "package",
-        "source": "pkg-config",
-        "bin-unix": [
-            "pkg-config"
-        ]
     },
     "attr": {
         "source": "attr",

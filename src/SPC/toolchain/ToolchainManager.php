@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace SPC\toolchain;
 
 use SPC\builder\linux\SystemUtil;
+use SPC\exception\EnvironmentException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\PkgConfig;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCTarget;
 
@@ -56,6 +58,10 @@ class ToolchainManager
         if (SPCTarget::getLibc() === 'glibc' && SystemUtil::isMuslDist()) {
             throw new WrongUsageException('You are linking against glibc dynamically, which is only supported on glibc distros.');
         }
+        if (!is_dir(PkgConfig::getEnvironment()['PATH'])) {
+            throw new EnvironmentException('Please install pkg-config first. (You can use `doctor` command to install it)');
+        }
+        GlobalEnvManager::addPathIfNotExists(PkgConfig::getEnvironment()['PATH']);
         $toolchain = getenv('SPC_TOOLCHAIN');
         /* @var ToolchainInterface $toolchain */
         $instance = new $toolchain();
