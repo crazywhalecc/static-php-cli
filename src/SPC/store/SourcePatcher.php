@@ -269,10 +269,12 @@ class SourcePatcher
         if ($version === '5.1.3') {
             self::patchFile('spc_fix_swoole_50513.patch', SOURCE_PATH . '/php-src/ext/swoole');
         }
-        // remove when https://github.com/swoole/swoole-src/pull/5848 is merged
-        self::patchFile('swoole_fix_date_time.patch', SOURCE_PATH . '/php-src/ext/swoole');
-        // remove when https://github.com/swoole/swoole-src/pull/5847 is merged
-        self::patchFile('swoole_fix_odbclibs.patch', SOURCE_PATH . '/php-src/ext/swoole');
+        if (version_compare($version, '6.0.0', '>=') && version_compare($version, '6.1.0', '<')) {
+            // remove when https://github.com/swoole/swoole-src/pull/5848 is merged
+            self::patchFile('swoole_fix_date_time.patch', SOURCE_PATH . '/php-src/ext/swoole');
+            // remove when https://github.com/swoole/swoole-src/pull/5847 is merged
+            self::patchFile('swoole_fix_odbclibs.patch', SOURCE_PATH . '/php-src/ext/swoole');
+        }
         return true;
     }
 

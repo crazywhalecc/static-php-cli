@@ -284,6 +284,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $cflags = "{$this->arch_c_flags} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS');
         $libs = $config['libs'];
         $libs .= PHP_OS_FAMILY === 'Linux' ? ' -lrt' : '';
+        // Go's gcc driver doesn't automatically link against -lgcov or -lrt. Ugly, but necessary fix.
         if ((str_contains((string) getenv('SPC_DEFAULT_C_FLAGS'), '-fprofile') ||
                 str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'), '-fprofile')) &&
             ToolchainManager::getToolchainClass() === GccNativeToolchain::class) {

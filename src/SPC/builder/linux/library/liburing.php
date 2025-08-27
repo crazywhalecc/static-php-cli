@@ -54,6 +54,6 @@ class liburing extends LinuxLibraryBase
             ->make('library', with_clean: false)
             ->exec("rm -rf {$this->getLibDir()}/liburing*.so*");
 
-        $this->patchPkgconfPrefix(['liburing.pc', 'liburing-ffi.pc']);
+        $this->patchPkgconfPrefix();
     }
 }
