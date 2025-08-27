@@ -868,15 +868,6 @@
             "path": "LICENSE"
         }
     },
-    "pkg-config": {
-        "type": "url",
-        "url": "https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz",
-        "provide-pre-built": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING"
-        }
-    },
     "postgresql": {
         "type": "ghtagtar",
         "repo": "postgres/postgres",

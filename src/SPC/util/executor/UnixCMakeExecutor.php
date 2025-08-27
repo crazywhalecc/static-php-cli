@@ -8,6 +8,7 @@ use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\store\FileSystem;
+use SPC\store\pkg\PkgConfig;
 use SPC\util\shell\UnixShell;
 
 /**
@@ -184,6 +185,7 @@ class UnixCMakeExecutor extends Executor
         $cxx = getenv('CCX');
         logger()->debug("making cmake tool chain file for {$os} {$target_arch} with CFLAGS='{$cflags}'");
         $root = BUILD_ROOT_PATH;
+        $pkgConfig = PkgConfig::getEnvironment()['PATH'];
         $ccLine = '';
         if ($cc) {
             $ccLine = 'SET(CMAKE_C_COMPILER ' . $cc . ')';
@@ -202,7 +204,7 @@ SET(CMAKE_PREFIX_PATH "{$root}")
 SET(CMAKE_INSTALL_PREFIX "{$root}")
 SET(CMAKE_INSTALL_LIBDIR "lib")
 
-set(PKG_CONFIG_EXECUTABLE "{$root}/bin/pkg-config")
+set(PKG_CONFIG_EXECUTABLE "{$pkgConfig}/pkg-config")
 list(APPEND PKG_CONFIG_EXECUTABLE "--static")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

@@ -7,6 +7,7 @@ namespace SPC\util;
 use SPC\builder\macos\SystemUtil;
 use SPC\exception\SPCInternalException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\PkgConfig;
 use SPC\toolchain\ToolchainManager;
 
 /**
@@ -39,8 +40,8 @@ class GlobalEnvManager
         // Define env vars for unix
         if (is_unix()) {
             self::addPathIfNotExists(BUILD_BIN_PATH);
-            self::putenv('PKG_CONFIG=' . BUILD_BIN_PATH . '/pkg-config');
-            self::putenv('PKG_CONFIG_PATH=' . BUILD_ROOT_PATH . '/lib/pkgconfig');
+            self::putenv('PKG_CONFIG=' . PkgConfig::getEnvironment()['PATH'] . '/pkg-config');
+            self::putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
         }
 
         $ini = self::readIniFile();

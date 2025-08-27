@@ -7,6 +7,7 @@ namespace SPC\builder\freebsd;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
+use SPC\store\pkg\PkgConfig;
 use SPC\store\SourcePatcher;
 
 class BSDBuilder extends UnixBuilderBase
@@ -26,7 +27,7 @@ class BSDBuilder extends UnixBuilderBase
         // set PATH
         f_putenv('PATH=' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
         // set PKG_CONFIG
-        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        f_putenv('PKG_CONFIG=' . PkgConfig::getEnvironment()['PATH'] . '/bin/pkg-config');
         // set PKG_CONFIG_PATH
         f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig/');
 
