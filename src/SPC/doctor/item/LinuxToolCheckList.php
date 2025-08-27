@@ -52,7 +52,7 @@ class LinuxToolCheckList
         'base-devel' => 'automake',
         'gettext-devel' => 'gettextize',
         'gettext-dev' => 'gettextize',
-        'perl-IPC-Cmd' => '/usr/share/doc/perl-IPC-Cmd'
+        'perl-IPC-Cmd' => '/usr/share/doc/perl-IPC-Cmd',
     ];
 
     /** @noinspection PhpUnused */
