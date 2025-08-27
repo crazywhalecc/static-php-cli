@@ -154,8 +154,9 @@ class SourcePatcher
             $spc_micro_patches = $items;
         } else {
             $spc_micro_patches = getenv('SPC_MICRO_PATCHES');
-            $spc_micro_patches = $spc_micro_patches === false ? [] : array_filter(explode(',', $spc_micro_patches));
+            $spc_micro_patches = $spc_micro_patches === false ? [] : explode(',', $spc_micro_patches);
         }
+        $spc_micro_patches = array_filter($spc_micro_patches, fn ($item) => trim((string) $item) !== '');
         $patch_list = $spc_micro_patches;
         $patches = [];
         $serial = ['80', '81', '82', '83', '84', '85'];
