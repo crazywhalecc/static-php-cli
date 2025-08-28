@@ -64,10 +64,7 @@ class LinuxBuilder extends UnixBuilderBase
             // if opcache_jit is enabled for 8.5 or opcache enabled,
             // we need to disable undefined behavior sanitizer.
             f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
-        } elseif ($opcache_jit) {
-            $opcache_jit = false;
         }
-        $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit ' : '--disable-opcache-jit ';
 
         if ($this->getOption('enable-zts', false)) {
             $maxExecutionTimers = $phpVersionID >= 80100 ? '--enable-zend-max-execution-timers ' : '';
@@ -115,7 +112,6 @@ class LinuxBuilder extends UnixBuilderBase
                 ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
                 $config_file_path .
                 $config_file_scan_dir .
-                $opcache_jit_arg .
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
