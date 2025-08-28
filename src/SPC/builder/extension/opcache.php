@@ -52,6 +52,7 @@ class opcache extends Extension
         if ((SPCTarget::getTargetOS() === 'Linux' &&
             SPCTarget::getLibc() === 'musl' &&
             $this->builder->getOption('enable-zts') &&
+            GNU_ARCH === 'x86_64' &&
             $phpVersionID < 80500) ||
             $this->builder->getOption('disable-opcache-jit')
         ) {
