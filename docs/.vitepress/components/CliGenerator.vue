@@ -15,9 +15,9 @@
     </div>
     <h2>{{ I18N[lang].selectExt }}{{ checkedExts.length > 0 ? (' (' + checkedExts.length + ')') : '' }}</h2>
     <div class="box">
-      <input class="input" v-model="filterText" placeholder="Highlight search..." />
+      <input class="input" v-model="filterText" :placeholder="I18N[lang].searchPlaceholder" />
       <br>
-      <div v-for="item in extFilter" class="ext-item">
+      <div v-for="item in extFilter" :key="item" class="ext-item">
         <span>
           <input type="checkbox" :id="item" :value="item" v-model="checkedExts" :disabled="extDisableList.indexOf(item) !== -1">
           <label :for="item">
@@ -26,7 +26,6 @@
             <span>{{ highlightItem(item, 2) }}</span>
           </label>
         </span>
-
       </div>
     </div>
     <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectCommon">{{ I18N[lang].selectCommon }}</div>
@@ -36,7 +35,7 @@
     <details class="details custom-block" open>
       <summary>{{ I18N[lang].buildLibs }}{{ checkedLibs.length > 0 ? (' (' + checkedLibs.length + ')') : '' }}</summary>
       <div class="box">
-        <div v-for="(item, index) in libContain" class="ext-item">
+        <div v-for="(item, index) in libContain" :key="index" class="ext-item">
           <input type="checkbox" :id="index" :value="item" v-model="checkedLibs" :disabled="libDisableList.indexOf(item) !== -1">
           <label :for="index">{{ item }}</label>
         </div>
@@ -49,7 +48,7 @@
     </div>
     <h2>{{ I18N[lang].buildTarget }}</h2>
     <div class="box">
-      <div v-for="(item) in TARGET" class="ext-item">
+      <div v-for="item in TARGET" :key="item" class="ext-item">
         <input type="checkbox" :id="'build_' + item" :value="item" v-model="checkedTargets" @change="onTargetChange">
         <label :for="'build_' + item">{{ item }}</label>
       </div>
@@ -58,7 +57,7 @@
       <p class="custom-block-title">WARNING</p>
       <p>{{ I18N[lang].microUnavailable }}</p>
     </div>
-    <div v-if="selectedSystem === 'windows' && (checkedTargets.indexOf('fpm') !== -1 || checkedTargets.indexOf('embed') !== -1)" class="warning custom-block">
+    <div v-if="selectedSystem === 'windows' && (checkedTargets.indexOf('fpm') !== -1 || checkedTargets.indexOf('embed') !== -1 || checkedTargets.indexOf('frankenphp') !== -1)" class="warning custom-block">
       <p class="custom-block-title">WARNING</p>
       <p>{{ I18N[lang].windowsSAPIUnavailable }}</p>
     </div>
@@ -81,7 +80,7 @@
         <td>{{ I18N[lang].downloadPhpVersion }}</td>
         <td>
           <select v-model="selectedPhpVersion">
-            <option v-for="item in availablePhpVersions" :value="item">{{ item }}</option>
+            <option v-for="item in availablePhpVersions" :key="item" :value="item">{{ item }}</option>
           </select>
         </td>
       </tr>
@@ -140,10 +139,17 @@
     <h2>{{ I18N[lang].hardcodedINI }}</h2>
     <textarea class="textarea" :placeholder="I18N[lang].hardcodedINIPlacehoder" v-model="hardcodedINIData" rows="5" />
     <h2>{{ I18N[lang].resultShow }}</h2>
+
+    <!-- SPC Binary Download Command -->
     <div v-if="selectedEnv === 'spc'" class="command-container">
       <b>{{ I18N[lang].downloadSPCBinaryCommand }}</b>
-      <div class="command-preview" v-if="selectedSystem !== 'windows'">
-        curl -fsSL -o spc.tgz https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-{{ selectedSystem }}-{{ selectedArch }}.tar.gz && tar -zxvf spc.tgz && rm spc.tgz<br>
+      <div v-if="selectedSystem !== 'windows'" class="command-preview">
+        <div class="command-content">
+          {{ spcDownloadCommand }}
+        </div>
+        <button class="copy-btn" @click="copyToClipboard(spcDownloadCommand)" :class="{ 'copied': copiedStates.spcDownload }">
+          {{ copiedStates.spcDownload ? I18N[lang].copied : I18N[lang].copy }}
+        </button>
       </div>
       <div v-else>
         <div class="warning custom-block">
@@ -153,35 +159,81 @@
         </div>
       </div>
     </div>
+
+    <!-- Download Commands -->
     <div v-if="downloadByExt" class="command-container">
       <b>{{ I18N[lang].downloadExtOnlyCommand }}</b>
-      <div id="download-ext-cmd" class="command-preview">
-        {{ downloadExtCommand }}
+      <div class="command-preview">
+        <div class="command-content">
+          {{ downloadExtCommand }}
+        </div>
+        <button class="copy-btn" @click="copyToClipboard(downloadExtCommand)" :class="{ 'copied': copiedStates.downloadExt }">
+          {{ copiedStates.downloadExt ? I18N[lang].copied : I18N[lang].copy }}
+        </button>
       </div>
     </div>
     <div v-else class="command-container">
       <b>{{ I18N[lang].downloadAllCommand }}</b>
-      <div id="download-all-cmd" class="command-preview">
-        {{ downloadAllCommand }}
+      <div class="command-preview">
+        <div class="command-content">
+          {{ downloadAllCommand }}
+        </div>
+        <button class="copy-btn" @click="copyToClipboard(downloadAllCommand)" :class="{ 'copied': copiedStates.downloadAll }">
+          {{ copiedStates.downloadAll ? I18N[lang].copied : I18N[lang].copy }}
+        </button>
       </div>
     </div>
+
+    <!-- UPX Download Command -->
     <div class="command-container" v-if="enableUPX">
       <b>{{ I18N[lang].downloadUPXCommand }}</b>
-      <div id="download-pkg-cmd" class="command-preview">
-        {{ downloadPkgCommand }}
+      <div class="command-preview">
+        <div class="command-content">
+          {{ downloadPkgCommand }}
+        </div>
+        <button class="copy-btn" @click="copyToClipboard(downloadPkgCommand)" :class="{ 'copied': copiedStates.downloadPkg }">
+          {{ copiedStates.downloadPkg ? I18N[lang].copied : I18N[lang].copy }}
+        </button>
       </div>
     </div>
+
+    <!-- Doctor Command -->
+    <div class="command-container">
+      <b>{{ I18N[lang].doctorCommand }}</b>
+      <div class="command-preview">
+        <div class="command-content">
+          {{ doctorCommandString }}
+        </div>
+        <button class="copy-btn" @click="copyToClipboard(doctorCommandString)" :class="{ 'copied': copiedStates.doctor }">
+          {{ copiedStates.doctor ? I18N[lang].copied : I18N[lang].copy }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Build Command -->
     <div class="command-container">
       <b>{{ I18N[lang].compileCommand }}</b>
-      <div id="build-cmd" class="command-preview">
-        {{ buildCommandString }}
+      <div class="command-preview">
+        <div class="command-content">
+          {{ buildCommandString }}
+        </div>
+        <button class="copy-btn" @click="copyToClipboard(buildCommandString)" :class="{ 'copied': copiedStates.build }">
+          {{ copiedStates.build ? I18N[lang].copied : I18N[lang].copy }}
+        </button>
       </div>
     </div>
+
+    <!-- Craft.yml -->
     <div class="command-container">
-        <b>craft.yml</b>
-        <div id="craft-cmd" class="command-preview pre">
+      <b>craft.yml</b>
+      <div class="command-preview pre">
+        <div class="command-content">
           {{ craftCommandString }}
         </div>
+        <button class="copy-btn" @click="copyToClipboard(craftCommandString)" :class="{ 'copied': copiedStates.craft }">
+          {{ copiedStates.craft ? I18N[lang].copied : I18N[lang].copy }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -198,49 +250,344 @@ import extData from '../config/ext.json';
 import libData from '../config/lib.json';
 import { getAllExtLibsByDeps } from './DependencyUtil.js';
 
-const ext = ref(extData);
-const extFilter = computed(() => {
-  const ls = [];
-  for (const [name, item] of Object.entries(ext.value)) {
-    if (isSupported(name, selectedSystem.value)) {
-      ls.push(name);
-    }
-  }
-  return ls;
-});
-const lib = ref(libData);
-const libContain = ref([]);
+// Constants
+const OS_MAP = new Map([['linux', 'Linux'], ['macos', 'Darwin'], ['windows', 'Windows']]);
+const TARGET = ['cli', 'fpm', 'micro', 'embed', 'frankenphp', 'all'];
+const availablePhpVersions = ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
 
-defineProps({
+// Props
+const props = defineProps({
   lang: {
     type: String,
     default: 'zh',
   }
 });
 
+// Reactive data
+const ext = ref(extData);
+const lib = ref(libData);
+const libContain = ref([]);
+const filterText = ref('');
+const checkedExts = ref([]);
+const checkedLibs = ref([]);
+const extDisableList = ref([]);
+const libDisableList = ref([]);
+const checkedTargets = ref(['cli']);
+const selectedEnv = ref('spc');
+const selectedPhpVersion = ref('8.4');
+const selectedSystem = ref('linux');
+const selectedArch = ref('x86_64');
+const debug = ref(0);
+const zts = ref(0);
+const downloadByExt = ref(1);
+const preBuilt = ref(1);
+const enableUPX = ref(0);
+const hardcodedINIData = ref('');
+const buildCommand = ref('--build-cli');
+
+// Copy states
+const copiedStates = ref({
+  spcDownload: false,
+  downloadExt: false,
+  downloadAll: false,
+  downloadPkg: false,
+  build: false,
+  craft: false,
+  doctor: false
+});
+
+// OS list
 const osList = [
   { os: 'linux', label: 'Linux', disabled: false },
   { os: 'macos', label: 'macOS', disabled: false },
   { os: 'windows', label: 'Windows', disabled: false },
 ];
 
-const isSupported = (extName, os) => {
-  // Convert os to target: linux->Linux, macos->Darwin, windows->Windows (using map)
-  const a = new Map([['linux', 'Linux'], ['macos', 'Darwin'], ['windows', 'Windows']]);
-  const osName = a.get(os);
+// Computed properties
+const extFilter = computed(() => {
+  return Object.entries(ext.value)
+    .filter(([name]) => isSupported(name, selectedSystem.value))
+    .map(([name]) => name);
+});
+
+const extList = computed(() => checkedExts.value.join(','));
+
+const additionalLibs = computed(() => {
+  const ls = checkedLibs.value.filter(item => libDisableList.value.indexOf(item) === -1);
+  return ls.length > 0 ? ` --with-libs="${ls.join(',')}"` : '';
+});
+
+const spcCommand = computed(() => {
+  switch (selectedEnv.value) {
+    case 'native':
+      return 'bin/spc';
+    case 'spc':
+      return selectedSystem.value === 'windows' ? '.\\spc.exe' : './spc';
+    case 'docker':
+      return 'bin/spc-alpine-docker';
+    default:
+      return '';
+  }
+});
+
+const spcDownloadCommand = computed(() => {
+  if (selectedSystem.value === 'windows') return '';
+  return `curl -fsSL -o spc.tgz https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-${selectedSystem.value}-${selectedArch.value}.tar.gz && tar -zxvf spc.tgz && rm spc.tgz`;
+});
+
+const displayINI = computed(() => {
+  const split = hardcodedINIData.value.split('\n');
+  const validLines = split.filter(x => x.indexOf('=') >= 1);
+  return validLines.length > 0 ? ' ' + validLines.map(x => `-I "${x}"`).join(' ') : '';
+});
+
+const downloadAllCommand = computed(() => {
+  return `${spcCommand.value} download --all --with-php=${selectedPhpVersion.value}${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
+});
+
+const downloadExtCommand = computed(() => {
+  return `${spcCommand.value} download --with-php=${selectedPhpVersion.value} --for-extensions "${extList.value}"${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
+});
+
+const downloadPkgCommand = computed(() => {
+  return `${spcCommand.value} install-pkg upx${debug.value ? ' --debug' : ''}`;
+});
+
+const doctorCommandString = computed(() => {
+  return `${spcCommand.value} doctor --auto-fix${debug.value ? ' --debug' : ''}`;
+});
+
+const buildCommandString = computed(() => {
+  return `${spcCommand.value} build ${buildCommand.value} "${extList.value}"${additionalLibs.value}${debug.value ? ' --debug' : ''}${zts.value ? ' --enable-zts' : ''}${enableUPX.value ? ' --with-upx-pack' : ''}${displayINI.value}`;
+});
+
+const craftCommandString = computed(() => {
+  let str = `php-version: ${selectedPhpVersion.value}\n`;
+  str += `extensions: "${extList.value}"\n`;
+
+  if (checkedTargets.value.join(',') === 'all') {
+    str += 'sapi: ' + ['cli', 'fpm', 'micro', 'embed', 'frankenphp'].join(',') + '\n';
+  } else {
+    str += `sapi: ${checkedTargets.value.join(',')}\n`;
+  }
+
+  if (additionalLibs.value) {
+    str += `libs: ${additionalLibs.value.replace('--with-libs="', '').replace('"', '').trim()}\n`;
+  }
+
+  if (debug.value) {
+    str += 'debug: true\n';
+  }
+
+  str += '{{position_hold}}';
+
+  if (enableUPX.value) {
+    str += '  with-upx-pack: true\n';
+  }
+  if (zts.value) {
+    str += '  enable-zts: true\n';
+  }
+  if (preBuilt.value) {
+    str += '  prefer-pre-built: true\n';
+  }
+
+  if (!str.endsWith('{{position_hold}}')) {
+    str = str.replace('{{position_hold}}', 'build-options:\n');
+  } else {
+    str = str.replace('{{position_hold}}', '');
+  }
+
+  return str;
+});
+
+// Methods
+const isSupported = (extName: string, os: string) => {
+  const osName = OS_MAP.get(os);
   const osSupport = ext.value[extName]?.support?.[osName] ?? 'yes';
   return osSupport === 'yes' || osSupport === 'partial';
 };
 
-const availablePhpVersions = [
-  '8.0',
-  '8.1',
-  '8.2',
-  '8.3',
-  '8.4',
-  '8.5',
-];
+const selectCommon = () => {
+  checkedExts.value = [
+    'apcu', 'bcmath', 'calendar', 'ctype', 'curl', 'dba', 'dom', 'exif',
+    'filter', 'fileinfo', 'gd', 'iconv', 'intl', 'mbstring', 'mbregex',
+    'mysqli', 'mysqlnd', 'openssl', 'opcache', 'pcntl', 'pdo', 'pdo_mysql',
+    'pdo_sqlite', 'pdo_pgsql', 'pgsql', 'phar', 'posix', 'readline', 'redis',
+    'session', 'simplexml', 'sockets', 'sodium', 'sqlite3', 'tokenizer',
+    'xml', 'xmlreader', 'xmlwriter', 'xsl', 'zip', 'zlib',
+  ];
+};
 
+const selectAll = () => {
+  checkedExts.value = [...extFilter.value];
+};
+
+const onTargetChange = (event: Event) => {
+  const target = (event.target as HTMLInputElement).value;
+  if (target === 'all') {
+    checkedTargets.value = ['all'];
+  } else {
+    const allIndex = checkedTargets.value.indexOf('all');
+    if (allIndex !== -1) {
+      checkedTargets.value.splice(allIndex, 1);
+    }
+  }
+  buildCommand.value = checkedTargets.value.map(x => `--build-${x}`).join(' ');
+};
+
+const highlightItem = (item: string, step: number) => {
+  if (!filterText.value || !item.includes(filterText.value)) {
+    return step === 0 ? item : '';
+  }
+
+  const index = item.indexOf(filterText.value);
+  switch (step) {
+    case 0: return item.substring(0, index);
+    case 1: return filterText.value;
+    case 2: return item.substring(index + filterText.value.length);
+    default: return '';
+  }
+};
+
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    // Find which command was copied and update its state
+    const commandMap = {
+      [spcDownloadCommand.value]: 'spcDownload',
+      [downloadExtCommand.value]: 'downloadExt',
+      [downloadAllCommand.value]: 'downloadAll',
+      [downloadPkgCommand.value]: 'downloadPkg',
+      [doctorCommandString.value]: 'doctor',
+      [buildCommandString.value]: 'build',
+      [craftCommandString.value]: 'craft'
+    };
+
+    const key = commandMap[text];
+    if (key) {
+      copiedStates.value[key] = true;
+      setTimeout(() => {
+        copiedStates.value[key] = false;
+      }, 2000);
+    }
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+  }
+};
+
+const calculateExtDepends = (input: string[]) => {
+  const result = new Set<string>();
+
+  const dfs = (node: string) => {
+    let depends: string[] = [];
+
+    if (selectedSystem.value === 'linux') {
+      depends = ext.value[node]?.['ext-depends-linux'] ?? ext.value[node]?.['ext-depends-unix'] ?? ext.value[node]?.['ext-depends'] ?? [];
+    } else if (selectedSystem.value === 'macos') {
+      depends = ext.value[node]?.['ext-depends-macos'] ?? ext.value[node]?.['ext-depends-unix'] ?? ext.value[node]?.['ext-depends'] ?? [];
+    } else if (selectedSystem.value === 'windows') {
+      depends = ext.value[node]?.['ext-depends-windows'] ?? ext.value[node]?.['ext-depends'] ?? [];
+    }
+
+    if (depends.length === 0) return;
+
+    depends.forEach(dep => {
+      result.add(dep);
+      dfs(dep);
+    });
+  };
+
+  input.forEach(dfs);
+  return Array.from(result);
+};
+
+const calculateExtLibDepends = (input: string[]) => {
+  const result = new Set<string>();
+
+  const dfsLib = (node: string) => {
+    let depends: string[] = [];
+
+    if (selectedSystem.value === 'linux') {
+      depends = lib.value[node]?.['lib-depends-linux'] ?? lib.value[node]?.['lib-depends-unix'] ?? lib.value[node]?.['lib-depends'] ?? [];
+    } else if (selectedSystem.value === 'macos') {
+      depends = lib.value[node]?.['lib-depends-macos'] ?? lib.value[node]?.['lib-depends-unix'] ?? lib.value[node]?.['lib-depends'] ?? [];
+    } else if (selectedSystem.value === 'windows') {
+      depends = lib.value[node]?.['lib-depends-windows'] ?? lib.value[node]?.['lib-depends'] ?? [];
+    }
+
+    if (depends.length === 0) return;
+
+    depends.forEach(dep => {
+      result.add(dep);
+      dfsLib(dep);
+    });
+  };
+
+  const dfsExt = (node: string) => {
+    let depends: string[] = [];
+
+    if (selectedSystem.value === 'linux') {
+      depends = ext.value[node]?.['lib-depends-linux'] ?? ext.value[node]?.['lib-depends-unix'] ?? ext.value[node]?.['lib-depends'] ?? [];
+    } else if (selectedSystem.value === 'macos') {
+      depends = ext.value[node]?.['lib-depends-macos'] ?? ext.value[node]?.['lib-depends-unix'] ?? ext.value[node]?.['lib-depends'] ?? [];
+    } else if (selectedSystem.value === 'windows') {
+      depends = ext.value[node]?.['lib-depends-windows'] ?? ext.value[node]?.['lib-depends'] ?? [];
+    }
+
+    if (depends.length === 0) return;
+
+    depends.forEach(dep => {
+      result.add(dep);
+      dfsLib(dep);
+    });
+  };
+
+  input.forEach(dfsExt);
+  return Array.from(result);
+};
+
+// Watchers
+watch(selectedSystem, () => {
+  if (selectedSystem.value === 'windows') {
+    selectedArch.value = 'x86_64';
+  }
+  // Reset related values when OS changes
+  checkedExts.value = [];
+  enableUPX.value = 0;
+});
+
+watch(checkedExts, (newValue) => {
+  // Apply ext-depends
+  extDisableList.value = calculateExtDepends(newValue);
+  extDisableList.value.forEach(x => {
+    if (checkedExts.value.indexOf(x) === -1) {
+      checkedExts.value.push(x);
+    }
+  });
+
+  checkedExts.value.sort();
+
+  const calculated = getAllExtLibsByDeps({ ext: ext.value, lib: lib.value, os: selectedSystem.value }, checkedExts.value);
+  libContain.value = calculated.libs.sort();
+
+  // Apply lib-depends
+  checkedLibs.value = [];
+  libDisableList.value = calculateExtLibDepends(calculated.exts);
+  libDisableList.value.forEach(x => {
+    if (checkedLibs.value.indexOf(x) === -1) {
+      checkedLibs.value.push(x);
+    }
+  });
+}, { deep: true });
+
+// I18N
 const I18N = {
   zh: {
     selectExt: '选择扩展',
@@ -273,10 +620,14 @@ const I18N = {
     depTips: '选择扩展后，不可选中的项目为必需的依赖，编译的依赖库列表中可选的为现有扩展和依赖库的可选依赖。选择可选依赖后，将生成 --with-libs 参数。',
     depTips2: '无法同时构建所有扩展，因为有些扩展之间相互冲突。请根据需要选择扩展。',
     microUnavailable: 'micro 不支持 PHP 7.4 及更早版本！',
-    windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed 构建！',
+    windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed、frankenphp 构建！',
     useUPX: '是否开启 UPX 压缩（减小二进制体积）',
     windowsDownSPCWarning: 'Windows 下请手动下载 spc.exe 二进制文件，解压到当前目录并重命名为 spc.exe！',
     usePreBuilt: '如果可能，下载预编译的依赖库（减少编译时间）',
+    searchPlaceholder: '搜索扩展...',
+    copy: '复制',
+    copied: '已复制',
+    doctorCommand: '自动检查和准备构建环境命令',
   },
   en: {
     selectExt: 'Select Extensions',
@@ -309,340 +660,16 @@ const I18N = {
     depTips: 'After selecting the extensions, the unselectable items are essential dependencies. In the compiled dependencies list, optional dependencies consist of existing extensions and optional dependencies of libraries. Optional dependencies will be added in --with-libs parameter.',
     depTips2: 'It is not possible to build all extensions at the same time, as some extensions conflict with each other. Please select the extensions you need.',
     microUnavailable: 'Micro does not support PHP 7.4 and earlier versions!',
-    windowsSAPIUnavailable: 'Windows does not support fpm and embed build!',
+    windowsSAPIUnavailable: 'Windows does not support fpm, embed and frankenphp build!',
     useUPX: 'Enable UPX compression (reduce binary size)',
     windowsDownSPCWarning: 'Please download the binary file manually, extract it to the current directory and rename to spc.exe on Windows!',
     usePreBuilt: 'Download pre-built dependencies if possible (reduce compile time)',
+    searchPlaceholder: 'Search extensions...',
+    copy: 'Copy',
+    copied: 'Copied',
+    doctorCommand: 'Auto-check and prepare build environment command',
   }
 };
-
-const TARGET = [
-  'cli',
-  'fpm',
-  'micro',
-  'embed',
-  'all',
-];
-
-const selectCommon = () => {
-  checkedExts.value = [
-      'apcu', 'bcmath',
-      'calendar', 'ctype', 'curl',
-      'dba', 'dom', 'exif',
-      'filter', 'fileinfo',
-      'gd', 'iconv', 'intl',
-      'mbstring', 'mbregex', 'mysqli', 'mysqlnd',
-      'openssl', 'opcache',
-      'pcntl', 'pdo',
-      'pdo_mysql', 'pdo_sqlite', 'pdo_pgsql',
-      'pgsql', 'phar', 'posix',
-      'readline', 'redis',
-      'session', 'simplexml', 'sockets',
-      'sodium', 'sqlite3', 'tokenizer',
-      'xml', 'xmlreader', 'xmlwriter',
-      'xsl', 'zip', 'zlib',
-  ];
-};
-
-const selectAll = () => {
-    checkedExts.value = extFilter.value;
-};
-
-const extList = computed(() => {
-  return checkedExts.value.join(',');
-});
-
-const additionalLibs = computed(() => {
-  const ls = checkedLibs.value.filter(item => libDisableList.value.indexOf(item) === -1);
-  if (ls.length > 0) {
-    return ' --with-libs="' + ls.join(',') + '"';
-  }
-  return '';
-});
-
-// chosen extensions
-const checkedExts = ref([]);
-
-const checkedLibs = ref([]);
-
-const extDisableList = ref([]);
-const libDisableList = ref([]);
-
-// chose targets
-const checkedTargets = ref(['cli']);
-
-// chosen env
-const selectedEnv = ref('spc');
-
-// chosen php version
-const selectedPhpVersion = ref('8.4');
-
-// chosen debug
-const debug = ref(0);
-
-// chosen zts
-const zts = ref(0);
-
-// chosen download by extensions
-const downloadByExt = ref(1);
-
-// use pre-built
-const preBuilt = ref(1);
-
-// chosen upx
-const enableUPX = ref(0);
-
-const hardcodedINIData = ref('');
-
-const selectedSystem = ref('linux');
-
-watch(selectedSystem, () => {
-  if (selectedSystem.value === 'windows') {
-    selectedArch.value = 'x86_64';
-  }
-});
-
-const selectedArch = ref('x86_64');
-
-// spc command string, alt: spc-alpine-docker, spc
-const spcCommand = computed(() => {
-  switch (selectedEnv.value) {
-    case 'native':
-      return 'bin/spc';
-    case 'spc':
-      if (selectedSystem.value === 'windows') {
-        return '.\\spc.exe';
-      }
-      return './spc';
-    case 'docker':
-      return 'bin/spc-alpine-docker';
-    default:
-      return '';
-  }
-});
-
-// build target string
-const buildCommand = ref('--build-cli');
-
-const displayINI = computed(() => {
-  const split = hardcodedINIData.value.split('\n');
-  let str = [];
-  split.forEach((x) => {
-    if (x.indexOf('=') >= 1) {
-      str.push(x);
-    }
-  });
-  return ' ' + str.map((x) => '-I "' + x + '"').join(' ');
-});
-
-const filterText = ref('');
-
-const highlightItem = (item, step) => {
-  if (item.includes(filterText.value)) {
-    if (step === 0) {
-      return item.substring(0, item.indexOf(filterText.value));
-    } else if (step === 1) {
-      return filterText.value;
-    } else {
-      return item.substring(item.indexOf(filterText.value) + filterText.value.length);
-    }
-  } else {
-    if (step === 0) {
-      return item;
-    }
-    return '';
-  }
-};
-
-const onTargetChange = (event) => {
-  let id;
-  if (checkedTargets.value.indexOf('all') !== -1 && event.target.value === 'all') {
-    checkedTargets.value = ['all'];
-  } else if ((id = checkedTargets.value.indexOf('all')) !== -1 && event.target.value !== 'all') {
-    checkedTargets.value.splice(id, 1);
-  }
-  buildCommand.value = checkedTargets.value.map((x) => '--build-' + x).join(' ');
-};
-
-const calculateExtDepends = (input) => {
-  const result = new Set();
-
-  const dfs = (node) => {
-    let depends = [];
-    // 计算深度前，先要确认fallback的 ext-depends
-    if (selectedSystem.value === 'linux') {
-      depends = ext.value[node]['ext-depends-linux'] ?? ext.value[node]['ext-depends-unix'] ?? ext.value[node]['ext-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    } else if (selectedSystem.value === 'macos') {
-      depends = ext.value[node]['ext-depends-macos'] ?? ext.value[node]['ext-depends-unix'] ?? ext.value[node]['ext-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    } else if (selectedSystem.value === 'windows') {
-      depends = ext.value[node]['ext-depends-windows'] ?? ext.value[node]['ext-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    }
-
-    depends.forEach((dep) => {
-      result.add(dep);
-      dfs(dep);
-    });
-  };
-
-  input.forEach((item) => {
-    dfs(item);
-  });
-
-  return Array.from(result);
-};
-
-const downloadAllCommand = computed(() => {
-  return `${spcCommand.value} download --all --with-php=${selectedPhpVersion.value}${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
-});
-
-const downloadExtCommand = computed(() => {
-  return `${spcCommand.value} download --with-php=${selectedPhpVersion.value} --for-extensions "${extList.value}"${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
-});
-
-const downloadPkgCommand = computed(() => {
-  return `${spcCommand.value} install-pkg upx${debug.value ? ' --debug' : ''}`;
-});
-
-const buildCommandString = computed(() => {
-  return `${spcCommand.value} build ${buildCommand.value} "${extList.value}"${additionalLibs.value}${debug.value ? ' --debug' : ''}${zts.value ? ' --enable-zts' : ''}${enableUPX.value ? ' --with-upx-pack' : ''}${displayINI.value}`;
-});
-
-const craftCommandString = computed(() => {
-    let str = `php-version: ${selectedPhpVersion.value}\n`;
-    str += `extensions: "${extList.value}"\n`;
-    if (checkedTargets.value.join(',') === 'all') {
-        str += 'sapi: ' + ['cli', 'fpm', 'micro', 'embed'].join(',') + '\n';
-    } else {
-        str += `sapi: ${checkedTargets.value.join(',')}\n`;
-    }
-    if (additionalLibs.value) {
-        str += `libs: ${additionalLibs.value.replace('--with-libs="', '').replace('"', '').trim()}\n`;
-    }
-    if (debug.value) {
-        str += 'debug: true\n';
-    }
-    str += '{{position_hold}}';
-    if (enableUPX.value) {
-        str += '  with-upx-pack: true\n';
-    }
-    if (zts.value) {
-        str += '  enable-zts: true\n';
-    }
-    if (preBuilt.value) {
-        str += '  prefer-pre-built: true\n';
-    }
-    if (!str.endsWith('{{position_hold}}')) {
-        str = str.replace('{{position_hold}}', 'build-options:\n');
-    } else {
-        str = str.replace('{{position_hold}}', '');
-    }
-    return str;
-});
-
-const calculateExtLibDepends = (input) => {
-  const result = new Set();
-
-  const dfsLib = (node) => {
-    let depends = [];
-    if (selectedSystem.value === 'linux') {
-      depends = lib.value[node]['lib-depends-linux'] ?? lib.value[node]['lib-depends-unix'] ??lib.value[node]['lib-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    } else if (selectedSystem.value === 'macos') {
-      depends = lib.value[node]['lib-depends-macos'] ?? lib.value[node]['lib-depends-unix'] ??lib.value[node]['lib-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    } else if (selectedSystem.value === 'windows') {
-      depends = lib.value[node]['lib-depends-windows'] ?? lib.value[node]['lib-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    }
-
-    depends.forEach((dep) => {
-      result.add(dep);
-      dfsLib(dep);
-    });
-  };
-
-  const dfsExt = (node) => {
-    let depends = [];
-    // 计算深度前，先要确认fallback的 lib-depends
-    if (selectedSystem.value === 'linux') {
-      depends = ext.value[node]['lib-depends-linux'] ?? ext.value[node]['lib-depends-unix'] ?? ext.value[node]['lib-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    } else if (selectedSystem.value === 'macos') {
-      depends = ext.value[node]['lib-depends-macos'] ?? ext.value[node]['lib-depends-unix'] ?? ext.value[node]['lib-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    } else if (selectedSystem.value === 'windows') {
-      depends = ext.value[node]['lib-depends-windows'] ?? ext.value[node]['lib-depends'] ?? [];
-      if (depends.length === 0) {
-        return;
-      }
-    }
-
-    depends.forEach((dep) => {
-      result.add(dep);
-      dfsLib(dep);
-    });
-  };
-
-  input.forEach((item) => {
-    dfsExt(item);
-  });
-
-  return Array.from(result);
-};
-
-// change os, clear ext
-watch(selectedSystem, () => checkedExts.value = []);
-
-// change os, reset upx
-watch(selectedSystem, () => enableUPX.value = 0);
-
-// selected ext change, calculate deps
-watch(
-    checkedExts,
-    (newValue) => {
-      // apply ext-depends
-      extDisableList.value = calculateExtDepends(newValue);
-      extDisableList.value.forEach((x) => {
-        if (checkedExts.value.indexOf(x) === -1) {
-          checkedExts.value.push(x);
-        }
-      });
-
-      checkedExts.value.sort();
-      console.log('检测到变化！');
-      console.log(newValue);
-
-      const calculated = getAllExtLibsByDeps({ ext: ext.value, lib: lib.value, os: selectedSystem.value }, checkedExts.value);
-      libContain.value = calculated.libs.sort();
-      // apply lib-depends
-      checkedLibs.value = [];
-      libDisableList.value = calculateExtLibDepends(calculated.exts);
-      libDisableList.value.forEach((x) => {
-        if (checkedLibs.value.indexOf(x) === -1) {
-          checkedLibs.value.push(x);
-        }
-      });
-    },
-);
 </script>
 
 <style scoped>
@@ -651,13 +678,17 @@ watch(
   flex-wrap: wrap;
   max-width: 100%;
 }
+
 .ext-item {
   margin: 4px 8px;
 }
+
 h2 {
   margin-bottom: 8px;
 }
+
 .command-preview {
+  position: relative;
   padding: 1.2rem;
   background: var(--vp-c-divider);
   border-radius: 8px;
@@ -666,25 +697,57 @@ h2 {
   overflow-wrap: break-word;
 }
 
+.command-content {
+  padding-right: 80px;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--vp-button-brand-bg);
+  color: var(--vp-button-brand-text);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: var(--vp-button-brand-hover-bg);
+  transform: translateY(-1px);
+}
+
+.copy-btn.copied {
+  background: var(--vp-c-green-1);
+  color: white;
+}
+
 .pre {
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .option-line {
   padding: 4px 8px;
 }
+
 .option-title {
   margin: 4px 8px 4px 4px;
   font-weight: bold;
 }
+
 select {
   border-radius: 4px;
   border: 1px solid var(--vp-c-divider);
   padding: 0 4px;
   width: 300px;
 }
+
 .my-btn {
   color: var(--vp-button-alt-text);
   background-color: var(--vp-button-alt-bg);
@@ -701,16 +764,19 @@ select {
   cursor: pointer;
   border: 1px solid var(--vp-button-alt-border);
 }
+
 .my-btn:hover {
   border-color: var(--vp-button-alt-hover-border);
   color: var(--vp-button-alt-hover-text);
   background-color: var(--vp-button-alt-hover-bg);
 }
+
 .my-btn:active {
   border-color: var(--vp-button-alt-active-border);
   color: var(--vp-button-alt-active-text);
   background-color: var(--vp-button-alt-active-bg);
 }
+
 .textarea {
   border: 1px solid var(--vp-c-divider);
   border-radius: 4px;
@@ -729,6 +795,7 @@ select {
 .command-container {
   margin-bottom: 24px;
 }
+
 .modal-button {
   padding: 4px 8px;
   border-radius: 4px;
@@ -736,14 +803,40 @@ select {
   color: var(--vp-button-alt-text);
   background-color: var(--vp-button-alt-bg);
 }
+
 .modal-button:hover {
   border-color: var(--vp-button-alt-hover-border);
   color: var(--vp-button-alt-hover-text);
   background-color: var(--vp-button-alt-hover-bg)
 }
+
 .modal-button:active {
   border-color: var(--vp-button-alt-active-border);
   color: var(--vp-button-alt-active-text);
   background-color: var(--vp-button-alt-active-bg)
+}
+
+@media (max-width: 768px) {
+  .command-preview {
+    padding: 1rem;
+  }
+
+  .copy-btn {
+    position: static;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  .command-content {
+    padding-right: 0;
+  }
+
+  .box {
+    flex-direction: column;
+  }
+
+  .ext-item {
+    margin: 2px 4px;
+  }
 }
 </style>
