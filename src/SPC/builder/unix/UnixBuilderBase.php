@@ -31,24 +31,23 @@ abstract class UnixBuilderBase extends BuilderBase
     /** @var string LD flags */
     public string $arch_ld_flags;
 
-    private static array $undefined_symbols = [];
+    private ?string $dynamic_export_list = null;
 
-    public static function getDynamicExportSymbols(): array
+    public function getDynamicExportSymbolsFile(): ?string
     {
-        if (count(self::$undefined_symbols)) {
-            return self::$undefined_symbols;
+        if ($this->dynamic_export_list) {
+            return $this->dynamic_export_list;
+        }
+        if (SPCTarget::isStatic()) {
+            return null;
         }
 
-        if (SPCTarget::isStatic()) { // no reason to keep symbols when we can't load shared extensions!
-            return [];
-        }
-
-        // keep all symbols defined in libphp.a
         $defined = [];
         $libphp = BUILD_LIB_PATH . '/libphp.a';
         if (!is_file($libphp)) {
             throw new WrongUsageException('You must build libphp.a before calling this function.');
         }
+
         $cmd = 'nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null';
         $out = shell_exec($cmd) ?: '';
         if ($out !== '') {
@@ -61,15 +60,25 @@ abstract class UnixBuilderBase extends BuilderBase
                     continue;
                 }
                 $name = preg_replace('/@.*$/', '', $name);
-                if ($name !== '' && $name !== false) {
-                    $defined[$name] = true;
+                if ($name !== '' && $name !== false && !str_starts_with($name, $libphp)) {
+                    $defined[] = $name;
                 }
             }
         }
-        sort($defined, SORT_STRING);
+        $defined = array_unique($defined);
+        sort($defined);
 
-        self::$undefined_symbols = $defined;
-        return self::$undefined_symbols;
+        $exportList = BUILD_LIB_PATH . '/export-dynamic.list';
+        $lines = [];
+        $lines[] = '{';
+        foreach ($defined as $sym) {
+            $lines[] = "  {$sym};";
+        }
+        $lines[] = '};';
+        file_put_contents($exportList, implode("\n", $lines) . "\n");
+
+        $this->dynamic_export_list = $exportList;
+        return $exportList;
     }
 
     public function proveLibs(array $sorted_libraries): void
@@ -193,15 +202,8 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
-                $symbols = self::getDynamicExportSymbols(); // returns unique, version-stripped names
-                // turn list into many --export-dynamic-symbol=... flags
-                $dynamic_exports = implode(
-                    ' ',
-                    array_map(
-                        static fn (string $s) => '-Wl,--export-dynamic-symbol=' . escapeshellarg($s),
-                        $symbols
-                    )
-                );
+                $symbolList = $this->getDynamicExportSymbolsFile();
+                $dynamic_exports = ' -Wl,--dynamic-list=' . $symbolList;
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens . ' ' . $dynamic_exports);
             if ($ret !== 0) {
@@ -324,15 +326,8 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
         $dynamic_exports = '';
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
-            $symbols = self::getDynamicExportSymbols(); // returns unique, version-stripped names
-            // turn list into many --export-dynamic-symbol=... flags
-            $dynamic_exports = ' ' . implode(
-                ' ',
-                array_map(
-                    static fn (string $s) => '-Wl,--export-dynamic-symbol="' . $s . '"',
-                    $symbols
-                )
-            );
+            $symbolList = $this->getDynamicExportSymbolsFile();
+            $dynamic_exports = ' -Wl,--dynamic-list=' . $symbolList;
         }
         $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
         $muslTags = '';
