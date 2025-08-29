@@ -31,6 +31,63 @@ abstract class UnixBuilderBase extends BuilderBase
     /** @var string LD flags */
     public string $arch_ld_flags;
 
+    private static array $undefined_symbols = [];
+
+    public static function getUndefinedSymbols(): array
+    {
+        if (count(self::$undefined_symbols)) {
+            return self::$undefined_symbols;
+        }
+
+        $undefined = [];
+
+        $addSymbolsFromString = function (string $out, &$list) {
+            foreach (preg_split('/\R/', trim($out)) as $line) {
+                if ($line === '') {
+                    continue;
+                }
+                $name = strtok($line, " \t");
+                if (!$name) {
+                    continue;
+                }
+                $name = preg_replace('/@.*$/', '', $name);
+                if ($name !== '' && $name !== false) {
+                    $list[$name] = true;
+                }
+            }
+        };
+
+        // collect undefined symbols from shared extensions
+        $files = glob(rtrim(BUILD_MODULES_PATH, '/') . DIRECTORY_SEPARATOR . '*.so') ?: [];
+        foreach ($files as $so) {
+            $cmd = 'nm -D --undefined-only -P ' . escapeshellarg($so) . ' 2>/dev/null';
+            $out = shell_exec($cmd);
+            if ($out !== '') {
+                $addSymbolsFromString($out, $undefined);
+            }
+        }
+
+        // keep only symbols defined in libphp.a
+        $defined = [];
+        $libphp = BUILD_LIB_PATH . '/libphp.a';
+        if (!is_file($libphp)) {
+            throw new WrongUsageException('You must build libphp.a statically before calling this function.');
+        }
+        $cmd = 'nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null';
+        $out = shell_exec($cmd) ?: '';
+        if ($out !== '') {
+            $addSymbolsFromString($out, $defined);
+        }
+        // intersect: only undefined symbols that libphp.a actually defines
+        $keys = array_intersect_key($undefined, $defined);
+
+        $list = array_keys($keys);
+        sort($list, SORT_STRING);
+
+        self::$undefined_symbols = $list;
+        return $list;
+    }
+
     public function proveLibs(array $sorted_libraries): void
     {
         // search all supported libs
@@ -137,6 +194,7 @@ abstract class UnixBuilderBase extends BuilderBase
             if (SPCTarget::isStatic()) {
                 $lens .= ' -static';
             }
+            $dynamic_exports = '';
             // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
                 if (PHP_OS_FAMILY === 'Darwin') {
@@ -151,8 +209,17 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
+                $symbols = self::getUndefinedSymbols(); // returns unique, version-stripped names
+                // turn list into many --export-dynamic-symbol=... flags
+                $dynamic_exports = implode(
+                    ' ',
+                    array_map(
+                        static fn (string $s) => '-Wl,--export-dynamic-symbol=' . escapeshellarg($s),
+                        $symbols
+                    )
+                );
             }
-            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
+            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens . ' ' . $dynamic_exports);
             if ($ret !== 0) {
                 throw new ValidationException(
                     'embed failed sanity check: build failed. Error message: ' . implode("\n", $out),
@@ -271,11 +338,23 @@ abstract class UnixBuilderBase extends BuilderBase
             $libphpVersion = preg_replace('/\.\d$/', '', $libphpVersion);
         }
         $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
-        $extLdFlags = "-extldflags '-pie'";
+        $dynamic_exports = '';
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
+            $symbols = self::getUndefinedSymbols(); // returns unique, version-stripped names
+            // turn list into many --export-dynamic-symbol=... flags
+            $dynamic_exports = ' ' . implode(
+                ' ',
+                array_map(
+                    static fn (string $s) => '-Wl,--export-dynamic-symbol="' . $s . '"',
+                    $symbols
+                )
+            );
+        }
+        $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
         $muslTags = '';
         $staticFlags = '';
         if (SPCTarget::isStatic()) {
-            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
+            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000{$dynamic_exports}'";
             $muslTags = 'static_build,';
             $staticFlags = '-static-pie';
         }
