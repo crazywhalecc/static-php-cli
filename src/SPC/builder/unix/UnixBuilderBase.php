@@ -70,11 +70,17 @@ abstract class UnixBuilderBase extends BuilderBase
 
         $exportList = BUILD_LIB_PATH . '/export-dynamic.list';
         $lines = [];
-        $lines[] = '{';
-        foreach ($defined as $sym) {
-            $lines[] = "  {$sym};";
+        if (SPCTarget::getTargetOS() === 'Linux') {
+            $lines[] = '{';
+            foreach ($defined as $sym) {
+                $lines[] = "  {$sym};";
+            }
+            $lines[] = '};';
+        } else {
+            foreach ($defined as $sym) {
+                $lines[] = "_{$sym}";
+            }
         }
-        $lines[] = '};';
         file_put_contents($exportList, implode("\n", $lines) . "\n");
 
         $this->dynamic_export_list = $exportList;
@@ -202,8 +208,14 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
-                $symbolList = $this->getDynamicExportSymbolsFile();
-                $dynamic_exports = $symbolList ? (' -Wl,--dynamic-list' . (SPCTarget::getTargetOS() === 'Darwin' ? '-file' : '') . '=' . $symbolList) : '';
+
+                if ($symbolList = $this->getDynamicExportSymbolsFile()) {
+                    if (SPCTarget::getTargetOS() === 'Linux') {
+                        $dynamic_exports = ' -Wl,--dynamic-list=' . $symbolList;
+                    } else {
+                        $dynamic_exports = ' -Wl,-exported_symbols_list,' . $symbolList;
+                    }
+                }
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens . ' ' . $dynamic_exports);
             if ($ret !== 0) {
