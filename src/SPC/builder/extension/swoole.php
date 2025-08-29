@@ -8,6 +8,8 @@ use SPC\builder\Extension;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
+use SPC\util\SPCConfigUtil;
+use SPC\util\SPCTarget;
 
 #[CustomExt('swoole')]
 class swoole extends Extension
@@ -43,32 +45,40 @@ class swoole extends Extension
     public function getUnixConfigureArg(bool $shared = false): string
     {
         // enable swoole
-        $arg = '--enable-swoole';
+        $arg = '--enable-swoole' . ($shared ? '=shared' : '');
 
-        // commonly-used feature: coroutine-time, disable-thread-context
-        $arg .= ' --enable-swoole-coro-time --disable-thread-context';
+        // commonly used feature: coroutine-time
+        $arg .= ' --enable-swoole-coro-time --with-pic';
 
-        // required feature: curl, openssl (but curl hook is buggy for php 8.0)
+        $arg .= $this->builder->getOption('enable-zts') ? ' --enable-swoole-thread --disable-thread-context' : ' --disable-swoole-thread --enable-thread-context';
+
+        // required features: curl, openssl (but curl hook is buggy for php 8.0)
         $arg .= $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
         $arg .= ' --enable-openssl';
 
-        // additional feature: c-ares, brotli, nghttp2 (can be disabled, but we enable it by default in config to support full network feature)
+        // additional features that only require libraries
         $arg .= $this->builder->getLib('libcares') ? ' --enable-cares' : '';
-        if (!$shared) {
-            $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : '';
-        }
+        $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : '';
         $arg .= $this->builder->getLib('nghttp2') ? (' --with-nghttp2-dir=' . BUILD_ROOT_PATH) : '';
+        $arg .= $this->builder->getLib('zstd') ? ' --enable-zstd' : '';
+        $arg .= $this->builder->getLib('liburing') ? ' --enable-iouring' : '';
+        $arg .= $this->builder->getExt('sockets') ? ' --enable-sockets' : '';
 
-        // additional feature: swoole-pgsql, it should depend on lib [postgresql], but it will lack of CFLAGS etc.
-        // so this is a tricky way (enable ext [pgsql,pdo] to add postgresql hook and pdo_pgsql support)
-        $arg .= $this->builder->getExt('swoole-hook-pgsql') ? '' : ' --disable-swoole-pgsql';
+        // enable additional features that require the pdo extension, but conflict with pdo_* extensions
+        // to make sure everything works as it should, this is done in fake addon extensions
+        $arg .= $this->builder->getExt('swoole-hook-pgsql') ? ' --enable-swoole-pgsql' : ' --disable-swoole-pgsql';
+        $arg .= $this->builder->getExt('swoole-hook-mysql') ? ' --enable-mysqlnd' : ' --disable-mysqlnd';
+        $arg .= $this->builder->getExt('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
 
-        // enable this feature , need remove pdo_sqlite
-        // more info : https://wenda.swoole.com/detail/109023
-        $arg .= $this->builder->getExt('swoole-hook-sqlite') ? '' : ' --disable-swoole-sqlite';
+        if ($this->builder->getExt('swoole-hook-odbc')) {
+            $config = (new SPCConfigUtil($this->builder, ['libs_only_deps' => true]))->config([], ['unixodbc']);
+            $arg .= ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH . ' SWOOLE_ODBC_LIBS="' . $config['libs'] . '"';
+        }
 
-        // enable this feature , need stop pdo_*
-        // $arg .= $this->builder->getLib('unixodbc') ? ' --with-swoole-odbc=unixODBC,'  : ' ';
+        if (SPCTarget::getTargetOS() === 'Darwin') {
+            $arg .= ' ac_cv_lib_pthread_pthread_barrier_init=no';
+        }
+
         return $arg;
     }
 }

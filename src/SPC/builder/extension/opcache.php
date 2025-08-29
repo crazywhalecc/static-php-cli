@@ -8,6 +8,7 @@ use SPC\builder\Extension;
 use SPC\exception\WrongUsageException;
 use SPC\store\SourcePatcher;
 use SPC\util\CustomExt;
+use SPC\util\SPCTarget;
 
 #[CustomExt('opcache')]
 class opcache extends Extension
@@ -46,7 +47,18 @@ class opcache extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--enable-opcache';
+        $phpVersionID = $this->builder->getPHPVersionID();
+        $opcache_jit = ' --enable-opcache-jit';
+        if ((SPCTarget::getTargetOS() === 'Linux' &&
+            SPCTarget::getLibc() === 'musl' &&
+            $this->builder->getOption('enable-zts') &&
+            arch2gnu(php_uname('m')) === 'x86_64' &&
+            $phpVersionID < 80500) ||
+            $this->builder->getOption('disable-opcache-jit')
+        ) {
+            $opcache_jit = ' --disable-opcache-jit';
+        }
+        return '--enable-opcache' . ($shared ? '=shared' : '') . $opcache_jit;
     }
 
     public function getDistName(): string

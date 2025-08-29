@@ -65,7 +65,7 @@ jobs:
           - sqlsrv
           - ssh2
           - swoole
-          - swoole,swoole-hook-pgsql,swoole-hook-mysql,swoole-hook-sqlite
+          - swoole,swoole-hook-pgsql,swoole-hook-mysql,swoole-hook-sqlite,swoole-hook-odbc
           - swow
           - sysvmsg,sysvsem,sysvshm
           - tidy
@@ -82,7 +82,7 @@ jobs:
           - zlib
           - zstd
         php-version:
-          - "8.5"
+          - "8.4"
         operating-system:
           - "ubuntu-latest"
           #- "macos-13"

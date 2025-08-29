@@ -19,6 +19,9 @@ trait UnixSystemUtilTrait
         if (!$paths) {
             $paths = explode(PATH_SEPARATOR, getenv('PATH'));
         }
+        if (str_starts_with($name, '/')) {
+            return file_exists($name) ? $name : null;
+        }
         foreach ($paths as $path) {
             if (file_exists($path . DIRECTORY_SEPARATOR . $name)) {
                 return $path . DIRECTORY_SEPARATOR . $name;

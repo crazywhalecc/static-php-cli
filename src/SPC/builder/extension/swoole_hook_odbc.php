@@ -9,8 +9,8 @@ use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\util\CustomExt;
 
-#[CustomExt('swoole-hook-sqlite')]
-class swoole_hook_sqlite extends Extension
+#[CustomExt('swoole-hook-odbc')]
+class swoole_hook_odbc extends Extension
 {
     public function getDistName(): string
     {
@@ -20,8 +20,8 @@ class swoole_hook_sqlite extends Extension
     public function validate(): void
     {
         // pdo_pgsql need to be disabled
-        if ($this->builder->getExt('pdo_sqlite')?->isBuildStatic()) {
-            throw new WrongUsageException('swoole-hook-sqlite provides pdo_sqlite, if you enable sqlite hook for swoole, you must remove pdo_sqlite extension.');
+        if ($this->builder->getExt('pdo_odbc')?->isBuildStatic()) {
+            throw new WrongUsageException('swoole-hook-odbc provides pdo_odbc, if you enable odbc hook for swoole, you must remove pdo_odbc extension.');
         }
     }
 
@@ -33,8 +33,8 @@ class swoole_hook_sqlite extends Extension
         if ($ret !== 0) {
             throw new ValidationException("extension {$this->getName()} failed compile check: php-cli returned {$ret}", validation_module: "Extension {$this->getName()} sanity check");
         }
-        if (!str_contains($out, 'coroutine_sqlite')) {
-            throw new ValidationException('swoole sqlite hook is not enabled correctly.', validation_module: 'Extension swoole sqlite hook availability check');
+        if (!str_contains($out, 'coroutine_odbc')) {
+            throw new ValidationException('swoole odbc hook is not enabled correctly.', validation_module: 'Extension swoole odbc hook availability check');
         }
     }
 }

@@ -252,7 +252,7 @@ class BuildPHPCommand extends BuildCommand
                 $path = FileSystem::convertPath("{$build_root_path}/modules/{$ext}.so");
                 if (file_exists(BUILD_MODULES_PATH . "/{$ext}.so")) {
                     logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");
-                } else {
+                } elseif (Config::getExt($ext, 'type') !== 'addon') {
                     logger()->warning("Shared extension [{$ext}] not found, please check!");
                 }
             }
