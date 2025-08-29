@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    '8.2',
-    '8.3',
+    // '8.1',
+    // '8.2',
+    // '8.3',
     '8.4',
     // '8.5',
     // 'git',
@@ -28,9 +28,9 @@ $test_os = [
     'macos-15', // bin/spc for arm64
     'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
-    'ubuntu-24.04', // bin/spc for x86_64
+    // 'ubuntu-24.04', // bin/spc for x86_64
     'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
-    'ubuntu-24.04-arm', // bin/spc for arm64
+    // 'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-latest', // .\bin\spc.ps1
 ];
 
