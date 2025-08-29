@@ -49,7 +49,9 @@ abstract class UnixBuilderBase extends BuilderBase
             throw new WrongUsageException('You must build libphp.a before calling this function.');
         }
 
-        $cmd = 'nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null';
+        $cmd = (SPCTarget::getTargetOS() === 'Linux')
+            ? 'nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null'
+            : 'nm -gUj ' . escapeshellarg($libphp) . ' 2>/dev/null';
         $out = shell_exec($cmd) ?: '';
         if ($out !== '') {
             foreach (preg_split('/\R/', trim($out)) as $line) {
@@ -89,7 +91,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $argument = '-Wl,--export-dynamic'; // https://github.com/ziglang/zig/issues/24662
         }
         if (SPCTarget::getTargetOS() !== 'Linux') {
-            $argument = "-Wl,-exported_symbols_list {$exportList}";
+            $argument = "-Wl,-exported_symbols_list,{$exportList}";
         }
 
         $this->dynamic_export_list = $argument;
