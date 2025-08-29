@@ -33,15 +33,25 @@ abstract class UnixBuilderBase extends BuilderBase
 
     private static array $undefined_symbols = [];
 
-    public static function getUndefinedSymbols(): array
+    public static function getDynamicExportSymbols(): array
     {
         if (count(self::$undefined_symbols)) {
             return self::$undefined_symbols;
         }
 
-        $undefined = [];
+        if (SPCTarget::isStatic()) { // no reason to keep symbols when we can't load shared extensions!
+            return [];
+        }
 
-        $addSymbolsFromString = function (string $out, &$list) {
+        // keep all symbols defined in libphp.a
+        $defined = [];
+        $libphp = BUILD_LIB_PATH . '/libphp.a';
+        if (!is_file($libphp)) {
+            throw new WrongUsageException('You must build libphp.a before calling this function.');
+        }
+        $cmd = 'nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null';
+        $out = shell_exec($cmd) ?: '';
+        if ($out !== '') {
             foreach (preg_split('/\R/', trim($out)) as $line) {
                 if ($line === '') {
                     continue;
@@ -52,40 +62,14 @@ abstract class UnixBuilderBase extends BuilderBase
                 }
                 $name = preg_replace('/@.*$/', '', $name);
                 if ($name !== '' && $name !== false) {
-                    $list[$name] = true;
+                    $defined[$name] = true;
                 }
             }
-        };
-
-        // collect undefined symbols from shared extensions
-        $files = glob(rtrim(BUILD_MODULES_PATH, '/') . DIRECTORY_SEPARATOR . '*.so') ?: [];
-        foreach ($files as $so) {
-            $cmd = 'nm -D --undefined-only -P ' . escapeshellarg($so) . ' 2>/dev/null';
-            $out = shell_exec($cmd);
-            if ($out !== '') {
-                $addSymbolsFromString($out, $undefined);
-            }
         }
+        sort($defined, SORT_STRING);
 
-        // keep only symbols defined in libphp.a
-        $defined = [];
-        $libphp = BUILD_LIB_PATH . '/libphp.a';
-        if (!is_file($libphp)) {
-            throw new WrongUsageException('You must build libphp.a statically before calling this function.');
-        }
-        $cmd = 'nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null';
-        $out = shell_exec($cmd) ?: '';
-        if ($out !== '') {
-            $addSymbolsFromString($out, $defined);
-        }
-        // intersect: only undefined symbols that libphp.a actually defines
-        $keys = array_intersect_key($undefined, $defined);
-
-        $list = array_keys($keys);
-        sort($list, SORT_STRING);
-
-        self::$undefined_symbols = $list;
-        return $list;
+        self::$undefined_symbols = $defined;
+        return self::$undefined_symbols;
     }
 
     public function proveLibs(array $sorted_libraries): void
@@ -209,7 +193,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
-                $symbols = self::getUndefinedSymbols(); // returns unique, version-stripped names
+                $symbols = self::getDynamicExportSymbols(); // returns unique, version-stripped names
                 // turn list into many --export-dynamic-symbol=... flags
                 $dynamic_exports = implode(
                     ' ',
@@ -340,7 +324,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
         $dynamic_exports = '';
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
-            $symbols = self::getUndefinedSymbols(); // returns unique, version-stripped names
+            $symbols = self::getDynamicExportSymbols(); // returns unique, version-stripped names
             // turn list into many --export-dynamic-symbol=... flags
             $dynamic_exports = ' ' . implode(
                 ' ',
