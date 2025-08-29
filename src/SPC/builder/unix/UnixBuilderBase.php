@@ -15,6 +15,7 @@ use SPC\store\FileSystem;
 use SPC\store\pkg\GoXcaddy;
 use SPC\toolchain\GccNativeToolchain;
 use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\DependencyUtil;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCConfigUtil;
@@ -33,7 +34,7 @@ abstract class UnixBuilderBase extends BuilderBase
 
     private ?string $dynamic_export_list = null;
 
-    public function getDynamicExportSymbolsFile(): ?string
+    public function getDynamicExportSymbolsArgument(): ?string
     {
         if ($this->dynamic_export_list) {
             return $this->dynamic_export_list;
@@ -78,13 +79,21 @@ abstract class UnixBuilderBase extends BuilderBase
             $lines[] = '};';
         } else {
             foreach ($defined as $sym) {
-                $lines[] = "_{$sym}";
+                $lines[] = $sym;
             }
         }
         file_put_contents($exportList, implode("\n", $lines) . "\n");
 
-        $this->dynamic_export_list = $exportList;
-        return $exportList;
+        $argument = "-Wl,--dynamic-list={$exportList}";
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $argument = "-Wl,--export-dynamic";
+        }
+        if (SPCTarget::getTargetOS() !== 'Linux') {
+            $argument = "-Wl,-exported_symbols_list {$exportList}";
+        }
+
+        $this->dynamic_export_list = $argument;
+        return $argument;
     }
 
     public function proveLibs(array $sorted_libraries): void
@@ -208,13 +217,8 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
-
-                if ($symbolList = $this->getDynamicExportSymbolsFile()) {
-                    if (SPCTarget::getTargetOS() === 'Linux') {
-                        $dynamic_exports = ' -Wl,--dynamic-list=' . $symbolList;
-                    } else {
-                        $dynamic_exports = ' -Wl,-exported_symbols_list,' . $symbolList;
-                    }
+                if ($dynamicSymbolsArgument = $this->getDynamicExportSymbolsArgument()) {
+                    $dynamic_exports = ' ' . $dynamicSymbolsArgument;
                 }
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens . ' ' . $dynamic_exports);
@@ -338,8 +342,9 @@ abstract class UnixBuilderBase extends BuilderBase
         $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
         $dynamic_exports = '';
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
-            $symbolList = $this->getDynamicExportSymbolsFile();
-            $dynamic_exports = $symbolList ? (' -Wl,--dynamic-list' . (SPCTarget::getTargetOS() === 'Darwin' ? '-file' : '') . '=' . $symbolList) : '';
+            if ($dynamicSymbolsArgument = $this->getDynamicExportSymbolsArgument()) {
+                $dynamic_exports = ' ' . $dynamicSymbolsArgument;
+            }
         }
         $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
         $muslTags = '';
