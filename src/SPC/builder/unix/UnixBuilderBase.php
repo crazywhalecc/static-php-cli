@@ -203,7 +203,7 @@ abstract class UnixBuilderBase extends BuilderBase
                     unlink($file);
                 }
                 $symbolList = $this->getDynamicExportSymbolsFile();
-                $dynamic_exports = $symbolList ? (' -Wl,--dynamic-list=' . $symbolList) : '';
+                $dynamic_exports = $symbolList ? (' -Wl,--dynamic-list' . (SPCTarget::getTargetOS() === 'Darwin' ? '-file' : '') . '=' . $symbolList) : '';
             }
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens . ' ' . $dynamic_exports);
             if ($ret !== 0) {
@@ -327,7 +327,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $dynamic_exports = '';
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
             $symbolList = $this->getDynamicExportSymbolsFile();
-            $dynamic_exports = $symbolList ? (' -Wl,--dynamic-list=' . $symbolList) : '';
+            $dynamic_exports = $symbolList ? (' -Wl,--dynamic-list' . (SPCTarget::getTargetOS() === 'Darwin' ? '-file' : '') . '=' . $symbolList) : '';
         }
         $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
         $muslTags = '';
