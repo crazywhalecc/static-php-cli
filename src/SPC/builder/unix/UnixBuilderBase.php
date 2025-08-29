@@ -86,7 +86,7 @@ abstract class UnixBuilderBase extends BuilderBase
 
         $argument = "-Wl,--dynamic-list={$exportList}";
         if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            $argument = "-Wl,--export-dynamic";
+            $argument = '-Wl,--export-dynamic'; // https://github.com/ziglang/zig/issues/24662
         }
         if (SPCTarget::getTargetOS() !== 'Linux') {
             $argument = "-Wl,-exported_symbols_list {$exportList}";
