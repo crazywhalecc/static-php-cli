@@ -51,7 +51,7 @@ abstract class UnixBuilderBase extends BuilderBase
 
         if ($out = shell_exec('nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null')) {
             foreach (preg_split('/\R/', trim($out)) as $line) {
-                if ($line === '' || str_ends_with($line, '.o:')) {
+                if ($line === '' || str_ends_with($line, '.o:') || str_ends_with($line, '.o]:')) {
                     continue;
                 }
                 $name = strtok($line, " \t");
@@ -59,7 +59,7 @@ abstract class UnixBuilderBase extends BuilderBase
                     continue;
                 }
                 $name = preg_replace('/@.*$/', '', $name);
-                if ($name !== '' && $name !== false && !str_starts_with($name, $libphp)) {
+                if ($name !== '' && $name !== false) {
                     $defined[] = $name;
                 }
             }
