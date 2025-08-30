@@ -49,13 +49,9 @@ abstract class UnixBuilderBase extends BuilderBase
             throw new WrongUsageException('You must build libphp.a before calling this function.');
         }
 
-        $cmd = (SPCTarget::getTargetOS() === 'Linux')
-            ? 'nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null'
-            : 'nm -gUj ' . escapeshellarg($libphp) . ' 2>/dev/null';
-        $out = shell_exec($cmd) ?: '';
-        if ($out !== '') {
+        if ($out = shell_exec('nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null')) {
             foreach (preg_split('/\R/', trim($out)) as $line) {
-                if ($line === '') {
+                if ($line === '' || str_ends_with($line, '.o:')) {
                     continue;
                 }
                 $name = strtok($line, " \t");
