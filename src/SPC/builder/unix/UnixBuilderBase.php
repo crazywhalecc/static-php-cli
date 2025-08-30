@@ -338,16 +338,15 @@ abstract class UnixBuilderBase extends BuilderBase
         ), true);
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
-        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
-            $libphpVersion = preg_replace('/\.\d$/', '', $libphpVersion);
-        }
-        $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
         $dynamic_exports = '';
-        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
+            $libphpVersion = preg_replace('/\.\d+$/', '', $libphpVersion);
+        } else {
             if ($dynamicSymbolsArgument = $this->getDynamicExportSymbolsArgument()) {
                 $dynamic_exports = ' ' . $dynamicSymbolsArgument;
             }
         }
+        $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
         $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
         $muslTags = '';
         $staticFlags = '';
