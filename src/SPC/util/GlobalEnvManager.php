@@ -122,14 +122,6 @@ class GlobalEnvManager
                 self::putenv("YACC={$yacc}");
             }
         }
-
-        // init pkg-config for unix
-        if (is_unix()) {
-            if (($found = PkgConfigUtil::findPkgConfig()) === null) {
-                throw new WrongUsageException('Cannot find pkg-config executable. Please run `doctor` to fix this.');
-            }
-            self::putenv("PKG_CONFIG={$found}");
-        }
     }
 
     private static function readIniFile(): array
