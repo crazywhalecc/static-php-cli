@@ -7,7 +7,6 @@ namespace SPC\util;
 use SPC\builder\macos\SystemUtil;
 use SPC\exception\SPCInternalException;
 use SPC\exception\WrongUsageException;
-use SPC\store\pkg\PkgConfig;
 use SPC\toolchain\ToolchainManager;
 
 /**
@@ -40,7 +39,7 @@ class GlobalEnvManager
         // Define env vars for unix
         if (is_unix()) {
             self::addPathIfNotExists(BUILD_BIN_PATH);
-            self::putenv('PKG_CONFIG=' . PkgConfig::getEnvironment()['PATH'] . '/pkg-config');
+            self::addPathIfNotExists(PKG_ROOT_PATH . '/bin');
             self::putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
         }
 
@@ -122,6 +121,14 @@ class GlobalEnvManager
             if ($yacc = SystemUtil::findCommand('yacc', ['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin'])) {
                 self::putenv("YACC={$yacc}");
             }
+        }
+
+        // init pkg-config for unix
+        if (is_unix()) {
+            if (($found = PkgConfigUtil::findPkgConfig()) === null) {
+                throw new WrongUsageException('Cannot find pkg-config executable. Please run `doctor` to fix this.');
+            }
+            self::putenv("PKG_CONFIG={$found}");
         }
     }
 

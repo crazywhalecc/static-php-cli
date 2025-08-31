@@ -71,15 +71,35 @@
         "type": "custom"
     },
     "pkg-config-x86_64-linux": {
-        "type": "custom"
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-x86_64-linux-musl-1.2.5.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+        }
     },
     "pkg-config-aarch64-linux": {
-        "type": "custom"
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-aarch64-linux-musl-1.2.5.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+        }
     },
     "pkg-config-x86_64-macos": {
-        "type": "custom"
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-x86_64-darwin.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+        }
     },
     "pkg-config-aarch64-macos": {
-        "type": "custom"
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-aarch64-darwin.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+        }
     }
 }

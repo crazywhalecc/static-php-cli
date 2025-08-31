@@ -19,6 +19,13 @@
             "watcher"
         ]
     },
+    "pkg-config": {
+        "type": "package",
+        "source": "pkg-config",
+        "bin-unix": [
+            "pkg-config"
+        ]
+    },
     "micro": {
         "type": "target",
         "source": "micro"
