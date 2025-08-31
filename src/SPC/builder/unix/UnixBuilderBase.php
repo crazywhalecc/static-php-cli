@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
 use SPC\exception\SPCInternalException;
 use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
@@ -137,6 +138,7 @@ abstract class UnixBuilderBase extends BuilderBase
             if (SPCTarget::isStatic()) {
                 $lens .= ' -static';
             }
+            $dynamic_exports = '';
             // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
                 if (PHP_OS_FAMILY === 'Darwin') {
@@ -151,8 +153,13 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
+                // calling linux system util in other unix OS is okay
+                if ($dynamic_exports = LinuxSystemUtil::getDynamicExportedSymbols(BUILD_LIB_PATH . '/libphp.a')) {
+                    $dynamic_exports = ' ' . $dynamic_exports;
+                }
             }
-            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens);
+            $cc = getenv('CC');
+            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult("{$cc} -o embed embed.c {$lens} {$dynamic_exports}");
             if ($ret !== 0) {
                 throw new ValidationException(
                     'embed failed sanity check: build failed. Error message: ' . implode("\n", $out),
@@ -267,15 +274,20 @@ abstract class UnixBuilderBase extends BuilderBase
         ), true);
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
+        $dynamic_exports = '';
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
-            $libphpVersion = preg_replace('/\.\d$/', '', $libphpVersion);
+            $libphpVersion = preg_replace('/\.\d+$/', '', $libphpVersion);
+        } else {
+            if ($dynamicSymbolsArgument = LinuxSystemUtil::getDynamicExportedSymbols(BUILD_LIB_PATH . '/libphp.a')) {
+                $dynamic_exports = ' ' . $dynamicSymbolsArgument;
+            }
         }
         $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
-        $extLdFlags = "-extldflags '-pie'";
+        $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
         $muslTags = '';
         $staticFlags = '';
         if (SPCTarget::isStatic()) {
-            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000'";
+            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000{$dynamic_exports}'";
             $muslTags = 'static_build,';
             $staticFlags = '-static-pie';
         }

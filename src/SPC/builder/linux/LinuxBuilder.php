@@ -142,6 +142,12 @@ class LinuxBuilder extends UnixBuilderBase
             }
             $this->buildEmbed();
         }
+        // build dynamic extensions if needed, must happen before building FrankenPHP to make sure we export all necessary, undefined symbols
+        $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
+        if (!empty($shared_extensions)) {
+            logger()->info('Building shared extensions ...');
+            $this->buildSharedExts();
+        }
         if ($enableFrankenphp) {
             logger()->info('building frankenphp');
             $this->buildFrankenphp();
@@ -312,6 +318,8 @@ class LinuxBuilder extends UnixBuilderBase
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
             $AR = getenv('AR') ?: 'ar';
             f_passthru("{$AR} -t " . BUILD_LIB_PATH . "/libphp.a | grep '\\.a$' | xargs -n1 {$AR} d " . BUILD_LIB_PATH . '/libphp.a');
+            // export dynamic symbols
+            SystemUtil::exportDynamicSymbols(BUILD_LIB_PATH . '/libphp.a');
         }
 
         if (!$this->getOption('no-strip', false) && file_exists(BUILD_LIB_PATH . '/' . $realLibName)) {
