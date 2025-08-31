@@ -1,1 +1,0 @@
-import{_ as d,c as e,o as s,af as y}from"./chunks/framework.PeLcR_tw.js";const p=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"extensions.md","filePath":"extensions.md"}'),r={name:"extensions.md"};function o(n,t,a,l,i,h){return s(),e("div",null,t[0]||(t[0]=[y("",1)]))}const x=d(r,[["render",o]]);export{p as __pageData,x as default};

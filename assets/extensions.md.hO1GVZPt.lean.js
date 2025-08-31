@@ -1,0 +1,1 @@
+import{_ as d,c as e,o as s,ah as y}from"./chunks/framework.Bhsyh9kO.js";const p=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"extensions.md","filePath":"extensions.md"}'),r={name:"extensions.md"};function o(n,t,a,l,i,h){return s(),e("div",null,[...t[0]||(t[0]=[y("",1)])])}const x=d(r,[["render",o]]);export{p as __pageData,x as default};
