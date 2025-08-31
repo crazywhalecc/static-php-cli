@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\traits;
 
 use SPC\exception\ExecutionException;
+use SPC\exception\SPCInternalException;
 use SPC\exception\WrongUsageException;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
@@ -66,7 +67,10 @@ trait UnixSystemUtilTrait
     {
         $symbol_file = "{$lib_file}.dynsym";
         if (!is_file($symbol_file)) {
-            return null;
+            self::exportDynamicSymbols($lib_file);
+        }
+        if (!is_file($symbol_file)) {
+            throw new SPCInternalException("The symbol file {$symbol_file} does not exist, please check if nm command is available.");
         }
         // https://github.com/ziglang/zig/issues/24662
         if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
