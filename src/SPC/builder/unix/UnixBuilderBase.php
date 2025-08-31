@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
 use SPC\exception\SPCInternalException;
 use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
@@ -15,7 +16,6 @@ use SPC\store\FileSystem;
 use SPC\store\pkg\GoXcaddy;
 use SPC\toolchain\GccNativeToolchain;
 use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\DependencyUtil;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCConfigUtil;
@@ -31,68 +31,6 @@ abstract class UnixBuilderBase extends BuilderBase
 
     /** @var string LD flags */
     public string $arch_ld_flags;
-
-    private ?string $dynamic_export_list = null;
-
-    public function getDynamicExportSymbolsArgument(): ?string
-    {
-        if ($this->dynamic_export_list) {
-            return $this->dynamic_export_list;
-        }
-        if (SPCTarget::isStatic()) {
-            return null;
-        }
-
-        $defined = [];
-        $libphp = BUILD_LIB_PATH . '/libphp.a';
-        if (!is_file($libphp)) {
-            throw new WrongUsageException('You must build libphp.a before calling this function.');
-        }
-
-        if ($out = shell_exec('nm -g --defined-only -P ' . escapeshellarg($libphp) . ' 2>/dev/null')) {
-            foreach (preg_split('/\R/', trim($out)) as $line) {
-                if ($line === '' || str_ends_with($line, '.o:') || str_ends_with($line, '.o]:')) {
-                    continue;
-                }
-                $name = strtok($line, " \t");
-                if (!$name) {
-                    continue;
-                }
-                $name = preg_replace('/@.*$/', '', $name);
-                if ($name !== '' && $name !== false) {
-                    $defined[] = $name;
-                }
-            }
-        }
-        $defined = array_unique($defined);
-        sort($defined);
-
-        $exportList = BUILD_LIB_PATH . '/export-dynamic.list';
-        $lines = [];
-        if (SPCTarget::getTargetOS() === 'Linux') {
-            $lines[] = '{';
-            foreach ($defined as $sym) {
-                $lines[] = "  {$sym};";
-            }
-            $lines[] = '};';
-        } else {
-            foreach ($defined as $sym) {
-                $lines[] = $sym;
-            }
-        }
-        file_put_contents($exportList, implode("\n", $lines) . "\n");
-
-        $argument = "-Wl,--dynamic-list={$exportList}";
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            $argument = '-Wl,--export-dynamic'; // https://github.com/ziglang/zig/issues/24662
-        }
-        if (SPCTarget::getTargetOS() !== 'Linux') {
-            $argument = "-Wl,-exported_symbols_list,{$exportList}";
-        }
-
-        $this->dynamic_export_list = $argument;
-        return $argument;
-    }
 
     public function proveLibs(array $sorted_libraries): void
     {
@@ -215,11 +153,13 @@ abstract class UnixBuilderBase extends BuilderBase
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
                     unlink($file);
                 }
-                if ($dynamicSymbolsArgument = $this->getDynamicExportSymbolsArgument()) {
-                    $dynamic_exports = ' ' . $dynamicSymbolsArgument;
+                // calling linux system util in other unix OS is okay
+                if ($dynamic_exports = LinuxSystemUtil::getDynamicExportedSymbols(BUILD_LIB_PATH . '/libphp.a')) {
+                    $dynamic_exports = ' ' . $dynamic_exports;
                 }
             }
-            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult(getenv('CC') . ' -o embed embed.c ' . $lens . ' ' . $dynamic_exports);
+            $cc = getenv('CC');
+            [$ret, $out] = shell()->cd($sample_file_path)->execWithResult("{$cc} -o embed embed.c {$lens} {$dynamic_exports}");
             if ($ret !== 0) {
                 throw new ValidationException(
                     'embed failed sanity check: build failed. Error message: ' . implode("\n", $out),
@@ -338,7 +278,7 @@ abstract class UnixBuilderBase extends BuilderBase
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
             $libphpVersion = preg_replace('/\.\d+$/', '', $libphpVersion);
         } else {
-            if ($dynamicSymbolsArgument = $this->getDynamicExportSymbolsArgument()) {
+            if ($dynamicSymbolsArgument = LinuxSystemUtil::getDynamicExportedSymbols(BUILD_LIB_PATH . '/libphp.a')) {
                 $dynamic_exports = ' ' . $dynamicSymbolsArgument;
             }
         }
