@@ -51,6 +51,14 @@ export default {
     footer: {
       message: 'Released under the MIT License.',
       copyright: 'Copyright © 2023-present crazywhalecc'
-    }
+    },
+    search: {
+      provider: 'algolia',
+      options: {
+        appId: 'IHJHUB1SF1',
+        apiKey: '8266d31cc2ffbd0e059f1c6e5bdaf8fc',
+        indexName: 'static-php docs',
+      },
+    },
   }
 }

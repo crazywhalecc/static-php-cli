@@ -1136,5 +1136,14 @@
             "type": "file",
             "path": "LICENSE"
         }
+    },
+    "liburing": {
+        "type": "ghtar",
+        "repo": "axboe/liburing",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
     }
 }

@@ -43,6 +43,14 @@ swoole-hook-sqlite 不是一个扩展，而是 Swoole 的 Hook 特性。
 swoole-hook-sqlite 与 `pdo_sqlite` 扩展冲突。如需使用 Swoole 和 `pdo_sqlite`，请删除 pdo_sqlite 扩展，启用 `swoole` 和 `swoole-hook-sqlite` 即可。
 该扩展包含了 `pdo_sqlite` 的协程环境的实现。
 
+## swoole-hook-odbc
+
+swoole-hook-odbc 不是一个扩展，而是 Swoole 的 Hook 特性。
+如果你在编译时添加了 `swoole,swoole-hook-odbc`，你将启用 Swoole 的 `odbc` 扩展的协程模式。
+
+swoole-hook-odbc 与 `pdo_odbc` 扩展冲突。如需使用 Swoole 和 `pdo_odbc`，请删除 `pdo_odbc` 扩展，启用 `swoole` 和 `swoole-hook-odbc` 即可。
+该扩展包含了 `pdo_odbc` 的协程环境的实现。
+
 ## swow
 
 1. swow 仅支持 PHP 8.0+ 版本。

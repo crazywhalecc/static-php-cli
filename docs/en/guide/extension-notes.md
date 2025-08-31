@@ -46,6 +46,14 @@ If you use `swoole,swoole-hook-sqlite`, you will enable the coroutine mode of Sw
 swoole-hook-sqlite conflicts with the `pdo_sqlite` extension. If you want to use Swoole and `pdo_sqlite`, please delete the pdo_sqlite extension and enable `swoole` and `swoole-hook-sqlite`.
 This extension contains an implementation of the coroutine environment for `pdo_sqlite`.
 
+## swoole-hook-odbc
+
+swoole-hook-odbc is not an extension, it's a Hook feature of Swoole.
+If you use `swoole,swoole-hook-odbc`, you will enable the coroutine mode of Swoole's `odbc` extension.
+
+swoole-hook-odbc conflicts with the `pdo_odbc` extension. If you want to use Swoole and `pdo_odbc`, please delete the `pdo_odbc` extension and enable `swoole` and `swoole-hook-odbc`.
+This extension contains an implementation of the coroutine environment for `pdo_odbc`.
+
 ## swow
 
 1. Only PHP 8.0+ is supported.

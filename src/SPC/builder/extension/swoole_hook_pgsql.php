@@ -20,25 +20,15 @@ class swoole_hook_pgsql extends Extension
     public function validate(): void
     {
         // pdo_pgsql need to be disabled
-        if ($this->builder->getExt('pdo_pgsql') !== null) {
+        if ($this->builder->getExt('pdo_pgsql')?->isBuildStatic()) {
             throw new WrongUsageException('swoole-hook-pgsql provides pdo_pgsql, if you enable pgsql hook for swoole, you must remove pdo_pgsql extension.');
         }
     }
 
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        // enable swoole pgsql hook
-        return '--enable-swoole-pgsql';
-    }
-
     public function runCliCheckUnix(): void
     {
-        // skip if not enable swoole
-        if ($this->builder->getExt('swoole') === null) {
-            return;
-        }
         $sharedExtensions = $this->getSharedExtensionLoadString();
-        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"');
+        [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $this->getDistName() . '"', false);
         $out = implode('', $out);
         if ($ret !== 0) {
             throw new ValidationException(
