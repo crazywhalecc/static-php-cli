@@ -15,6 +15,28 @@ use SPC\exception\ExecutionException;
 class PkgConfigUtil
 {
     /**
+     * Find the pkg-config executable which is compatible with static builds.
+     *
+     * @return null|string Path to pkg-config executable, or null if not found
+     */
+    public static function findPkgConfig(): ?string
+    {
+        // Find pkg-config executable
+        $find_list = [
+            PKG_ROOT_PATH . '/bin/pkg-config',
+            BUILD_BIN_PATH . '/pkg-config',
+        ];
+        $found = null;
+        foreach ($find_list as $file) {
+            if (file_exists($file) && is_executable($file)) {
+                $found = $file;
+                break;
+            }
+        }
+        return $found;
+    }
+
+    /**
      * Returns the version of a module.
      * This method uses `pkg-config --modversion` to get the version of the specified module.
      *

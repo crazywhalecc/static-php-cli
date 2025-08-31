@@ -1,4 +1,16 @@
 {
+    "go-xcaddy-aarch64-linux": {
+        "type": "custom"
+    },
+    "go-xcaddy-aarch64-macos": {
+        "type": "custom"
+    },
+    "go-xcaddy-x86_64-linux": {
+        "type": "custom"
+    },
+    "go-xcaddy-x86_64-macos": {
+        "type": "custom"
+    },
     "musl-toolchain-aarch64-linux": {
         "type": "url",
         "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz"
@@ -13,6 +25,38 @@
         "extract-files": {
             "nasm-2.16.01/nasm.exe": "{php_sdk_path}/bin/nasm.exe",
             "nasm-2.16.01/ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
+        }
+    },
+    "pkg-config-aarch64-linux": {
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-aarch64-linux-musl-1.2.5.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+        }
+    },
+    "pkg-config-aarch64-macos": {
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-aarch64-darwin.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+        }
+    },
+    "pkg-config-x86_64-linux": {
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-x86_64-linux-musl-1.2.5.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+        }
+    },
+    "pkg-config-x86_64-macos": {
+        "type": "ghrel",
+        "repo": "static-php/static-php-cli-hosted",
+        "match": "pkg-config-x86_64-darwin.txz",
+        "extract-files": {
+            "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
         }
     },
     "strawberry-perl-x86_64-win": {
@@ -43,28 +87,16 @@
             "upx-*-win64/upx.exe": "{pkg_root_path}/bin/upx.exe"
         }
     },
-    "go-xcaddy-x86_64-linux": {
+    "zig-aarch64-linux": {
         "type": "custom"
     },
-    "go-xcaddy-aarch64-linux": {
-        "type": "custom"
-    },
-    "go-xcaddy-x86_64-macos": {
-        "type": "custom"
-    },
-    "go-xcaddy-aarch64-macos": {
+    "zig-aarch64-macos": {
         "type": "custom"
     },
     "zig-x86_64-linux": {
         "type": "custom"
     },
-    "zig-aarch64-linux": {
-        "type": "custom"
-    },
     "zig-x86_64-macos": {
-        "type": "custom"
-    },
-    "zig-aarch64-macos": {
         "type": "custom"
     },
     "zig-x86_64-win": {

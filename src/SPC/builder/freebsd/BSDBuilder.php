@@ -25,10 +25,6 @@ class BSDBuilder extends UnixBuilderBase
         f_putenv('CXX=' . $this->getOption('cxx', 'clang++'));
         // set PATH
         f_putenv('PATH=' . BUILD_ROOT_PATH . '/bin:' . getenv('PATH'));
-        // set PKG_CONFIG
-        f_putenv('PKG_CONFIG=' . BUILD_ROOT_PATH . '/bin/pkg-config');
-        // set PKG_CONFIG_PATH
-        f_putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig/');
 
         // set arch (default: current)
         $this->setOptionIfNotExist('arch', php_uname('m'));

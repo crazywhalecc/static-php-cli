@@ -1,9 +1,6 @@
 {
     "lib-base": {
-        "type": "root",
-        "lib-depends-unix": [
-            "pkg-config"
-        ]
+        "type": "root"
     },
     "php": {
         "type": "root",
