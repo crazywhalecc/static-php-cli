@@ -82,12 +82,12 @@ jobs:
           - zlib
           - zstd
         php-version:
-          - "8.4"
+          - "8.5"
         operating-system:
           - "ubuntu-latest"
           #- "macos-13"
           #- "debian-arm64-self-hosted"
-          - "macos-14"
+          - "macos-15"
 
     steps:
       - name: "Checkout"
