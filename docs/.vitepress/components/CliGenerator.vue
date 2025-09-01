@@ -379,6 +379,11 @@ const craftCommandString = computed(() => {
     str += 'debug: true\n';
   }
 
+  if (preBuilt.value) {
+    str += 'download-options:\n';
+    str += '  prefer-pre-built: true\n';
+  }
+
   str += '{{position_hold}}';
 
   if (enableUPX.value) {
@@ -386,9 +391,6 @@ const craftCommandString = computed(() => {
   }
   if (zts.value) {
     str += '  enable-zts: true\n';
-  }
-  if (preBuilt.value) {
-    str += '  prefer-pre-built: true\n';
   }
 
   if (!str.endsWith('{{position_hold}}')) {
