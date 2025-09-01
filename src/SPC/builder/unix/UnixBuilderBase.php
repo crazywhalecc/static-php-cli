@@ -271,6 +271,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $releaseInfo = json_decode(Downloader::curlExec(
             'https://api.github.com/repos/php/frankenphp/releases/latest',
             hooks: [[CurlHook::class, 'setupGithubToken']],
+            retries: 3,
         ), true);
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
