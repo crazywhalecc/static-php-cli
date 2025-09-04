@@ -117,7 +117,7 @@ class LicenseDumper
     /**
      * Loads a source license file from the specified path.
      */
-    private function loadSourceFile(string $source_name, int $index, null|array|string $in_path, ?string $custom_base_path = null): string
+    private function loadSourceFile(string $source_name, int $index, array|string|null $in_path, ?string $custom_base_path = null): string
     {
         if (is_null($in_path)) {
             throw new SPCInternalException("source [{$source_name}] license file is not set, please check config/source.json");
