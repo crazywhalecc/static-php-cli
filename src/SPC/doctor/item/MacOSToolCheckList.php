@@ -32,12 +32,13 @@ class MacOSToolCheckList
         'bzip2',
         'cmake',
         'glibtoolize',
+        'gcc',
     ];
 
     #[AsCheckItem('if homebrew has installed', limit_os: 'Darwin', level: 998)]
     public function checkBrew(): ?CheckResult
     {
-        if (($path = $this->findCommand('brew')) === null) {
+        if (($path = self::findCommand('brew')) === null) {
             return CheckResult::fail('Homebrew is not installed', 'brew');
         }
         if ($path !== '/opt/homebrew/bin/brew' && getenv('GNU_ARCH') === 'aarch64') {
@@ -97,6 +98,7 @@ class MacOSToolCheckList
     {
         $replacement = [
             'glibtoolize' => 'libtool',
+            'gcc-15' => 'gcc@15',
         ];
         foreach ($missing as $cmd) {
             if (isset($replacement[$cmd])) {
