@@ -268,11 +268,19 @@ abstract class UnixBuilderBase extends BuilderBase
             logger()->warning('caddy-cbrotli module is enabled, but brotli library is not built. Disabling caddy-cbrotli.');
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
-        $releaseInfo = json_decode(Downloader::curlExec(
-            'https://api.github.com/repos/php/frankenphp/releases/latest',
-            hooks: [[CurlHook::class, 'setupGithubToken']],
-            retries: 3,
-        ), true);
+        $releaseInfo = false;
+        $retries = 5;
+        while (!$releaseInfo && --$retries >= 0) {
+            try {
+                $releaseInfo = json_decode(Downloader::curlExec(
+                    'https://api.github.com/repos/php/frankenphp/releases/latest',
+                    hooks: [[CurlHook::class, 'setupGithubToken']],
+                    retries: 3,
+                ), true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Exception) {
+                sleep(1);
+            }
+        }
         $frankenPhpVersion = $releaseInfo['tag_name'];
         $libphpVersion = $this->getPHPVersion();
         $dynamic_exports = '';
