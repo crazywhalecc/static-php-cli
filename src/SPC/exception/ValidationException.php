@@ -14,9 +14,9 @@ use SPC\builder\Extension;
  */
 class ValidationException extends SPCException
 {
-    private null|array|string $validation_module = null;
+    private array|string|null $validation_module = null;
 
-    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null, null|array|string $validation_module = null)
+    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null, array|string|null $validation_module = null)
     {
         parent::__construct($message, $code, $previous);
 
