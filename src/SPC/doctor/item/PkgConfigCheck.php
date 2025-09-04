@@ -29,6 +29,18 @@ class PkgConfigCheck
         return CheckResult::ok($pkgconf);
     }
 
+    #[AsCheckItem('if pkg-config is working', level: 799)]
+    public function checkPkgConfigFunctional(): CheckResult
+    {
+        $pkgconf = PkgConfigUtil::findPkgConfig();
+        // check if pkg-config is functional
+        [$ret, $output] = shell()->execWithResult("{$pkgconf} --version", false);
+        if ($ret === 0) {
+            return CheckResult::ok(implode(' ', $output));
+        }
+        return CheckResult::fail('pkg-config is not functional', 'install-pkgconfig');
+    }
+
     #[AsFixItem('install-pkgconfig')]
     public function installPkgConfig(): bool
     {
