@@ -249,6 +249,7 @@ bin/spc doctor --auto-fix
 
 - `--build-cli`: 构建一个 cli sapi（命令行界面，可在命令行执行 PHP 代码）
 - `--build-fpm`: 构建一个 fpm sapi（php-fpm，用于和其他传统的 fpm 架构的软件如 nginx 配合使用）
+- `--build-cgi`: 构建一个 cgi sapi（cgi，可用于传统的 cgi 架构的软件如 apache 配合使用）
 - `--build-micro`: 构建一个 micro sapi（用于构建一个包含 PHP 代码的独立可执行二进制）
 - `--build-embed`: 构建一个 embed sapi（用于嵌入到其他 C 语言程序中）
 - `--build-frankenphp`: 构建一个 [frankenphp](https://github.com/php/frankenphp) 二进制

@@ -207,6 +207,7 @@ bin/spc --version
 - `--build-micro`：构建 phpmicro 自执行二进制
 - `--build-fpm`：构建 fpm
 - `--build-embed`：构建 embed（libphp）
+- `--build-cgi`: 构建 cgi（不推荐）
 - `--build-all`：构建所有
 
 如果出现了任何错误，可以使用 `--debug` 参数来展示完整的输出日志，以供排查错误：

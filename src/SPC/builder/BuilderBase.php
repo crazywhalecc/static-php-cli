@@ -392,6 +392,9 @@ abstract class BuilderBase
         if (($type & BUILD_TARGET_FRANKENPHP) === BUILD_TARGET_FRANKENPHP) {
             $ls[] = 'frankenphp';
         }
+        if (($type & BUILD_TARGET_CGI) === BUILD_TARGET_CGI) {
+            $ls[] = 'cgi';
+        }
         return implode(', ', $ls);
     }
 
