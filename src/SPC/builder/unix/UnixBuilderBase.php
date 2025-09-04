@@ -143,11 +143,13 @@ abstract class UnixBuilderBase extends BuilderBase
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
                 if (PHP_OS_FAMILY === 'Darwin') {
                     $ext_path = 'DYLD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$DYLD_LIBRARY_PATH ';
-                } else {
+                }
+                else {
                     $ext_path = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$LD_LIBRARY_PATH ';
                 }
                 FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
-            } else {
+            }
+            else {
                 $ext_path = '';
                 $suffix = PHP_OS_FAMILY === 'Darwin' ? 'dylib' : 'so';
                 foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
@@ -268,25 +270,14 @@ abstract class UnixBuilderBase extends BuilderBase
             logger()->warning('caddy-cbrotli module is enabled, but brotli library is not built. Disabling caddy-cbrotli.');
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
-        $releaseInfo = false;
-        $retries = 5;
-        while (!$releaseInfo && --$retries >= 0) {
-            try {
-                $releaseInfo = json_decode(Downloader::curlExec(
-                    'https://api.github.com/repos/php/frankenphp/releases/latest',
-                    hooks: [[CurlHook::class, 'setupGithubToken']],
-                    retries: 3,
-                ), true, 512, JSON_THROW_ON_ERROR);
-            } catch (\Exception) {
-                sleep(1);
-            }
-        }
-        $frankenPhpVersion = $releaseInfo['tag_name'];
+        [, $out] = shell()->execWithResult('go list -m github.com/dunglas/frankenphp@latest');
+        $frankenPhpVersion = str_replace('github.com/dunglas/frankenphp v', '', $out[0]);
         $libphpVersion = $this->getPHPVersion();
         $dynamic_exports = '';
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
             $libphpVersion = preg_replace('/\.\d+$/', '', $libphpVersion);
-        } else {
+        }
+        else {
             if ($dynamicSymbolsArgument = LinuxSystemUtil::getDynamicExportedSymbols(BUILD_LIB_PATH . '/libphp.a')) {
                 $dynamic_exports = ' ' . $dynamicSymbolsArgument;
             }
@@ -306,8 +297,8 @@ abstract class UnixBuilderBase extends BuilderBase
         $libs = $config['libs'];
         $libs .= PHP_OS_FAMILY === 'Linux' ? ' -lrt' : '';
         // Go's gcc driver doesn't automatically link against -lgcov or -lrt. Ugly, but necessary fix.
-        if ((str_contains((string) getenv('SPC_DEFAULT_C_FLAGS'), '-fprofile') ||
-                str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'), '-fprofile')) &&
+        if ((str_contains((string)getenv('SPC_DEFAULT_C_FLAGS'), '-fprofile') ||
+                str_contains((string)getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'), '-fprofile')) &&
             ToolchainManager::getToolchainClass() === GccNativeToolchain::class) {
             $cflags .= ' -Wno-error=missing-profile';
             $libs .= ' -lgcov';
@@ -326,7 +317,8 @@ abstract class UnixBuilderBase extends BuilderBase
         foreach (GoXcaddy::getEnvironment() as $key => $value) {
             if ($key === 'PATH') {
                 GlobalEnvManager::addPathIfNotExists($value);
-            } else {
+            }
+            else {
                 $env[$key] = $value;
             }
         }
@@ -337,7 +329,8 @@ abstract class UnixBuilderBase extends BuilderBase
         if (!$this->getOption('no-strip', false) && file_exists(BUILD_BIN_PATH . '/frankenphp')) {
             if (PHP_OS_FAMILY === 'Linux') {
                 shell()->cd(BUILD_BIN_PATH)->exec('strip --strip-unneeded frankenphp');
-            } else { // macOS doesn't understand strip-unneeded
+            }
+            else { // macOS doesn't understand strip-unneeded
                 shell()->cd(BUILD_BIN_PATH)->exec('strip -S frankenphp');
             }
         }
