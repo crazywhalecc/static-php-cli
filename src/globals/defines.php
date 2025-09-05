@@ -63,7 +63,8 @@ const BUILD_TARGET_MICRO = 2;   // build micro
 const BUILD_TARGET_FPM = 4;     // build fpm
 const BUILD_TARGET_EMBED = 8;   // build embed
 const BUILD_TARGET_FRANKENPHP = 16;   // build frankenphp
-const BUILD_TARGET_ALL = BUILD_TARGET_CLI | BUILD_TARGET_MICRO | BUILD_TARGET_FPM | BUILD_TARGET_EMBED | BUILD_TARGET_FRANKENPHP;    // build all
+const BUILD_TARGET_CGI = 32;   // build cgi
+const BUILD_TARGET_ALL = BUILD_TARGET_CLI | BUILD_TARGET_MICRO | BUILD_TARGET_FPM | BUILD_TARGET_EMBED | BUILD_TARGET_FRANKENPHP | BUILD_TARGET_CGI;    // build all
 
 // doctor error fix policy
 const FIX_POLICY_DIE = 1;       // die directly

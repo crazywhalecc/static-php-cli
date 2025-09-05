@@ -218,6 +218,7 @@ Now we support `cli`, `micro`, `fpm` and `embed` SAPI. You can use one or more o
 - `--build-micro`: build static phpmicro self-extracted executable
 - `--build-fpm`: build static fpm binary
 - `--build-embed`: build embed (libphp)
+- `--build-cgi`: build cgi binary (not recommended)
 - `--build-all`: build all
 
 If anything goes wrong, use `--debug` option to display full terminal output:

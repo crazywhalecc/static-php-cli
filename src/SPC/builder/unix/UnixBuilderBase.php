@@ -120,6 +120,16 @@ abstract class UnixBuilderBase extends BuilderBase
             }
         }
 
+        // sanity check for php-cgi
+        if (($build_target & BUILD_TARGET_CGI) === BUILD_TARGET_CGI) {
+            logger()->info('running cgi sanity check');
+            [$ret, $output] = shell()->execWithResult("echo '<?php echo \"<h1>Hello, World!</h1>\";' | " . BUILD_BIN_PATH . '/php-cgi -n');
+            $raw_output = implode('', $output);
+            if ($ret !== 0 || !str_contains($raw_output, 'Hello, World!') || !str_contains($raw_output, 'text/html')) {
+                throw new ValidationException("cgi failed sanity check. code: {$ret}, output: {$raw_output}", validation_module: 'php-cgi sanity check');
+            }
+        }
+
         // sanity check for embed
         if (($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED) {
             logger()->info('running embed sanity check');
@@ -207,6 +217,7 @@ abstract class UnixBuilderBase extends BuilderBase
             BUILD_TARGET_CLI => SOURCE_PATH . '/php-src/sapi/cli/php',
             BUILD_TARGET_MICRO => SOURCE_PATH . '/php-src/sapi/micro/micro.sfx',
             BUILD_TARGET_FPM => SOURCE_PATH . '/php-src/sapi/fpm/php-fpm',
+            BUILD_TARGET_CGI => SOURCE_PATH . '/php-src/sapi/cgi/php-cgi',
             default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');

@@ -289,6 +289,7 @@ You need to specify a compilation target, choose from the following parameters:
 
 - `--build-cli`: Build a cli sapi (command line interface, which can execute PHP code on the command line)
 - `--build-fpm`: Build a fpm sapi (php-fpm, used in conjunction with other traditional fpm architecture software such as nginx)
+- `--build-cgi`: Build a cgi sapi (cgi, rarely used)
 - `--build-micro`: Build a micro sapi (used to build a standalone executable binary containing PHP code)
 - `--build-embed`: Build an embed sapi (used to embed into other C language programs)
 - `--build-frankenphp`: Build a [FrankenPHP](https://github.com/php/frankenphp) executable
