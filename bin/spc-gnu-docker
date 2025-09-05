@@ -112,8 +112,8 @@ ENV SPC_LIBC=glibc
 ENV PATH="/app/bin:/cmake/bin:/opt/rh/devtoolset-10/root/usr/bin:\$PATH"
 
 ADD ./config /app/config
-RUN CC=gcc PKG_ROOT_PATH=/app/pkgroot-private bin/spc doctor --auto-fix --debug
-RUN PKG_ROOT_PATH=/app/pkgroot-private bin/spc install-pkg upx
+RUN CC=gcc bin/spc doctor --auto-fix --debug
+RUN bin/spc install-pkg upx
 RUN if [ -f /app/buildroot/bin/re2c ]; then \
         cp /app/buildroot/bin/re2c /usr/local/bin/re2c ;\
     fi
@@ -133,6 +133,11 @@ RUN curl -o automake.tgz -fsSL https://ftp.gnu.org/gnu/automake/automake-1.17.ta
     make && \
     make install && \
     ln -sf /usr/local/bin/automake /usr/bin/automake
+
+RUN mv /app/pkgroot/\$(uname -m)-linux /app/pkgroot-private
+ADD bin/docker-entrypoint.sh /bin/docker-entrypoint.sh
+RUN chmod +x /bin/docker-entrypoint.sh
+ENTRYPOINT ["/bin/docker-entrypoint.sh"]
 EOF
 fi
 

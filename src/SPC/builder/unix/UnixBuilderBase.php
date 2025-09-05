@@ -10,8 +10,6 @@ use SPC\exception\SPCInternalException;
 use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
-use SPC\store\CurlHook;
-use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\pkg\GoXcaddy;
 use SPC\toolchain\GccNativeToolchain;

@@ -23,7 +23,6 @@ class PkgConfigUtil
     {
         // Find pkg-config executable
         $find_list = [
-            WORKING_DIR . '/pkgroot-private/bin/pkg-config', // used in Docker build, which is installed inside the container to avoid volume mounting issues
             PKG_ROOT_PATH . '/bin/pkg-config',
             BUILD_BIN_PATH . '/pkg-config',
         ];

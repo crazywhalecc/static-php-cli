@@ -22,7 +22,10 @@ define('BUILD_BIN_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_BI
 // output path for shared extensions
 define('BUILD_MODULES_PATH', FileSystem::convertPath(is_string($a = getenv('BUILD_MODULES_PATH')) ? $a : (BUILD_ROOT_PATH . '/modules')));
 
-define('PKG_ROOT_PATH', FileSystem::convertPath(is_string($a = getenv('PKG_ROOT_PATH')) ? $a : (WORKING_DIR . '/pkgroot')));
+// pkg arch name
+$_pkg_arch_name = arch2gnu(php_uname('m')) . '-' . strtolower(PHP_OS_FAMILY);
+define('PKG_ROOT_PATH', FileSystem::convertPath(is_string($a = getenv('PKG_ROOT_PATH')) ? $a : (WORKING_DIR . "/pkgroot/{$_pkg_arch_name}")));
+
 define('SOURCE_PATH', FileSystem::convertPath(is_string($a = getenv('SOURCE_PATH')) ? $a : (WORKING_DIR . '/source')));
 define('DOWNLOAD_PATH', FileSystem::convertPath(is_string($a = getenv('DOWNLOAD_PATH')) ? $a : (WORKING_DIR . '/downloads')));
 define('CPU_COUNT', match (PHP_OS_FAMILY) {
