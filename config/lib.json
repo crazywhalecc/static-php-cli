@@ -17,6 +17,9 @@
         "lib-suggests-unix": [
             "brotli",
             "watcher"
+        ],
+        "lib-depends-darwin": [
+            "libxml2"
         ]
     },
     "micro": {
