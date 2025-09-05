@@ -123,8 +123,13 @@ COPY ./composer.* /app/
 ADD ./bin /app/bin
 RUN composer install --no-dev
 ADD ./config /app/config
-RUN PKG_ROOT_PATH=/app/pkgroot-private bin/spc doctor --auto-fix
-RUN PKG_ROOT_PATH=/app/pkgroot-private bin/spc install-pkg upx
+RUN bin/spc doctor --auto-fix
+RUN bin/spc install-pkg upx
+
+RUN mv /app/pkgroot/\$(uname -m)-linux /app/pkgroot-private
+ADD bin/docker-entrypoint.sh /bin/docker-entrypoint.sh
+RUN chmod +x /bin/docker-entrypoint.sh
+ENTRYPOINT ["/bin/docker-entrypoint.sh"]
 EOF
 fi
 
