@@ -40,10 +40,6 @@ class GlobalEnvManager
         if (is_unix()) {
             self::addPathIfNotExists(BUILD_BIN_PATH);
             self::addPathIfNotExists(PKG_ROOT_PATH . '/bin');
-            // internally use `WORKING_DIR/pkgroot-private` to avoid volume mount issues in Docker
-            if (is_dir(WORKING_DIR . '/pkgroot-private/bin')) {
-                self::addPathIfNotExists(WORKING_DIR . '/pkgroot-private/bin');
-            }
             self::putenv('PKG_CONFIG_PATH=' . BUILD_LIB_PATH . '/pkgconfig');
         }
 
