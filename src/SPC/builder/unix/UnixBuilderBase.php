@@ -257,6 +257,7 @@ abstract class UnixBuilderBase extends BuilderBase
 
     protected function buildFrankenphp(): void
     {
+        GlobalEnvManager::addPathIfNotExists(GoXcaddy::getEnvironment()['PATH']);
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
@@ -312,9 +313,7 @@ abstract class UnixBuilderBase extends BuilderBase
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         foreach (GoXcaddy::getEnvironment() as $key => $value) {
-            if ($key === 'PATH') {
-                GlobalEnvManager::addPathIfNotExists($value);
-            } else {
+            if ($key !== 'PATH') {
                 $env[$key] = $value;
             }
         }
