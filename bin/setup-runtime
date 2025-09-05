@@ -25,7 +25,7 @@ __DIR__=$(cd "$(dirname "$0")" && pwd)
 __PROJECT__=$(cd "${__DIR__}"/../ && pwd)
 
 # set download dir
-__PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.4.4-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
+__PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.4.12-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
 __COMPOSER_URL__="https://getcomposer.org/download/latest-stable/composer.phar"
 
 # use china mirror
@@ -45,7 +45,7 @@ done
 
 case "$mirror" in
 china)
-  __PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.4.4-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
+  __PHP_RUNTIME_URL__="https://dl.static-php.dev/static-php-cli/bulk/php-8.4.12-cli-${__OS_FIXED__}-${__ARCH__}.tar.gz"
   __COMPOSER_URL__="https://mirrors.tencent.com/composer/composer.phar"
   ;;
 
