@@ -34,6 +34,7 @@ packlib_files.txt
 /bin/*
 !/bin/spc*
 !/bin/setup-runtime*
+!/bin/docker-entrypoint.sh
 
 # exclude windows build tools
 /php-sdk-binary-tools/
