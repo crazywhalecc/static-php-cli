@@ -17,6 +17,9 @@
         "lib-suggests-unix": [
             "brotli",
             "watcher"
+        ],
+        "lib-depends-macos": [
+            "libxml2"
         ]
     },
     "micro": {
