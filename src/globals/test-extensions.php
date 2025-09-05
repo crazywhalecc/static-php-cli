@@ -43,7 +43,7 @@ $no_strip = false;
 $upx = false;
 
 // whether to test frankenphp build, only available for macos and linux
-$frankenphp = true;
+$frankenphp = false;
 
 // prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = false;
