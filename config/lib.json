@@ -18,7 +18,7 @@
             "brotli",
             "watcher"
         ],
-        "lib-depends-darwin": [
+        "lib-depends-macos": [
             "libxml2"
         ]
     },
