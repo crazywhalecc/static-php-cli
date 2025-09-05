@@ -13,6 +13,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\pkg\GoXcaddy;
+use SPC\store\SourceManager;
 use SPC\toolchain\GccNativeToolchain;
 use SPC\toolchain\ToolchainManager;
 use SPC\util\DependencyUtil;
@@ -344,22 +345,70 @@ abstract class UnixBuilderBase extends BuilderBase
         }
     }
 
+    /**
+     * Process the --with-frankenphp-app option
+     * Creates app.tar and app.checksum in source/frankenphp directory
+     */
+    protected function processFrankenphpApp(): void
+    {
+        $frankenphpSourceDir = SOURCE_PATH . '/frankenphp';
+        SourceManager::initSource(['frankenphp'], ['frankenphp']);
+        $frankenphpAppPath = $this->getOption('with-frankenphp-app');
+
+        if ($frankenphpAppPath) {
+            if (!is_dir($frankenphpAppPath)) {
+                throw new WrongUsageException("The path provided to --with-frankenphp-app is not a valid directory: {$frankenphpAppPath}");
+            }
+            $appTarPath = $frankenphpSourceDir . '/app.tar';
+            logger()->info("Creating app.tar from {$frankenphpAppPath}");
+
+            shell()->exec('tar -cf ' . escapeshellarg($appTarPath) . ' -C ' . escapeshellarg($frankenphpAppPath) . ' .');
+
+            $checksum = hash_file('md5', $appTarPath);
+            file_put_contents($frankenphpSourceDir . '/app_checksum.txt', $checksum);
+        } else {
+            FileSystem::removeFileIfExists($frankenphpSourceDir . '/app.tar');
+            FileSystem::removeFileIfExists($frankenphpSourceDir . '/app_checksum.txt');
+            file_put_contents($frankenphpSourceDir . '/app.tar', '');
+            file_put_contents($frankenphpSourceDir . '/app_checksum.txt', '');
+        }
+    }
+
+    protected function getFrankenPHPVersion(): string
+    {
+        $goModPath = SOURCE_PATH . '/frankenphp/caddy/go.mod';
+
+        if (!file_exists($goModPath)) {
+            throw new SPCInternalException("FrankenPHP caddy/go.mod file not found at {$goModPath}, why did we not download FrankenPHP?");
+        }
+
+        $content = file_get_contents($goModPath);
+        if (preg_match('/github\.com\/dunglas\/frankenphp\s+v?(\d+\.\d+\.\d+)/', $content, $matches)) {
+            return $matches[1];
+        }
+
+        throw new SPCInternalException('Could not find FrankenPHP version in caddy/go.mod');
+    }
+
     protected function buildFrankenphp(): void
     {
         GlobalEnvManager::addPathIfNotExists(GoXcaddy::getPath());
+        $this->processFrankenphpApp();
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
-        // make it possible to build from a different frankenphp directory!
-        if (!str_contains($xcaddyModules, '--with github.com/dunglas/frankenphp')) {
-            $xcaddyModules = '--with github.com/dunglas/frankenphp ' . $xcaddyModules;
-        }
+        $frankenphpSourceDir = SOURCE_PATH . '/frankenphp';
+
+        $xcaddyModules = preg_replace('#--with github.com/dunglas/frankenphp(=\S+)?#', '', $xcaddyModules);
+        $xcaddyModules = preg_replace('#--with github.com/dunglas/frankenphp/caddy(=\S+)?#', '', $xcaddyModules);
+        $xcaddyModules = "--with github.com/dunglas/frankenphp={$frankenphpSourceDir} " .
+            "--with github.com/dunglas/frankenphp/caddy={$frankenphpSourceDir}/caddy {$xcaddyModules}";
         if ($this->getLib('brotli') === null && str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
             logger()->warning('caddy-cbrotli module is enabled, but brotli library is not built. Disabling caddy-cbrotli.');
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
         }
-        [, $out] = shell()->execWithResult('go list -m github.com/dunglas/frankenphp@latest');
-        $frankenPhpVersion = str_replace('github.com/dunglas/frankenphp v', '', $out[0]);
+
+        $frankenPhpVersion = $this->getFrankenPHPVersion();
         $libphpVersion = $this->getPHPVersion();
         $dynamic_exports = '';
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {

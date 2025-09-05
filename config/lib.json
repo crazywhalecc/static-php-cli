@@ -7,12 +7,14 @@
         "source": "php-src",
         "lib-depends": [
             "lib-base",
-            "micro"
+            "micro",
+            "frankenphp"
         ],
         "lib-depends-macos": [
             "lib-base",
             "micro",
-            "libxml2"
+            "libxml2",
+            "frankenphp"
         ],
         "lib-suggests-linux": [
             "libacl",
@@ -968,5 +970,9 @@
             "zstd.h",
             "zstd_errors.h"
         ]
+    },
+    "frankenphp": {
+        "source": "frankenphp",
+        "type": "target"
     }
 }

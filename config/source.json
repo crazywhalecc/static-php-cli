@@ -363,6 +363,16 @@
             "path": "LICENSE"
         }
     },
+    "frankenphp": {
+        "type": "ghtar",
+        "repo": "php/frankenphp",
+        "prefer-stable":  true,
+        "provide-pre-build": false,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "icu-static-win": {
         "type": "url",
         "url": "https://dl.static-php.dev/static-php-cli/deps/icu-static-windows-x64/icu-static-windows-x64.zip",
