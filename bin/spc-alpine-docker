@@ -3,7 +3,7 @@
 set -e
 
 # This file is using docker to run commands
-SPC_DOCKER_VERSION=v5
+SPC_DOCKER_VERSION=v6
 
 # Detect docker can run
 if ! which docker >/dev/null; then
@@ -122,6 +122,14 @@ ADD ./src /app/src
 COPY ./composer.* /app/
 ADD ./bin /app/bin
 RUN composer install --no-dev
+ADD ./config /app/config
+RUN bin/spc doctor --auto-fix
+RUN bin/spc install-pkg upx
+
+RUN mv /app/pkgroot/\$(uname -m)-linux /app/pkgroot-private
+ADD bin/docker-entrypoint.sh /bin/docker-entrypoint.sh
+RUN chmod +x /bin/docker-entrypoint.sh
+ENTRYPOINT ["/bin/docker-entrypoint.sh"]
 EOF
 fi
 
