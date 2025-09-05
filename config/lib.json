@@ -7,7 +7,8 @@
         "source": "php-src",
         "lib-depends": [
             "lib-base",
-            "micro"
+            "micro",
+            "frankenphp"
         ],
         "lib-suggests-linux": [
             "libacl",
@@ -940,5 +941,9 @@
             "liburing/",
             "liburing.h"
         ]
+    },
+    "frankenphp": {
+        "source": "frankenphp",
+        "type": "target"
     }
 }
