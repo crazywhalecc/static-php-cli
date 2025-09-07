@@ -6,6 +6,7 @@ namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
+use SPC\exception\SPCException;
 use SPC\exception\SPCInternalException;
 use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
@@ -336,6 +337,22 @@ abstract class UnixBuilderBase extends BuilderBase
             } else { // macOS doesn't understand strip-unneeded
                 shell()->cd(BUILD_BIN_PATH)->exec('strip -S frankenphp');
             }
+        }
+    }
+
+    /**
+     * Seek php-src/config.log when building PHP, add it to exception.
+     */
+    protected function seekPhpSrcLogFileOnException(callable $callback): void
+    {
+        try {
+            $callback();
+        } catch (SPCException $e) {
+            if (file_exists(SOURCE_PATH . '/php-src/config.log')) {
+                $e->addExtraLogFile('php-src config.log', 'php-src.config.log');
+                copy(SOURCE_PATH . '/php-src/config.log', SPC_LOGS_DIR . '/php-src.config.log');
+            }
+            throw $e;
         }
     }
 }
