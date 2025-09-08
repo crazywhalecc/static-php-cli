@@ -103,7 +103,7 @@ class Zig extends CustomPackage
     public function extract(string $name): void
     {
         $pkgroot = PKG_ROOT_PATH;
-        $zig_bin_dir = "{$pkgroot}/{$name}";
+        $zig_bin_dir = "{$pkgroot}/zig";
 
         $files = ['zig', 'zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
         $all_exist = true;
@@ -120,7 +120,7 @@ class Zig extends CustomPackage
         $lock = json_decode(FileSystem::readFile(LockFile::LOCK_FILE), true);
         $source_type = $lock[$name]['source_type'];
         $filename = DOWNLOAD_PATH . '/' . ($lock[$name]['filename'] ?? $lock[$name]['dirname']);
-        $extract = "{$pkgroot}/{$name}";
+        $extract = "{$pkgroot}/zig";
 
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
@@ -147,16 +147,7 @@ class Zig extends CustomPackage
 
     private static function getPath(): string
     {
-        $arch = arch2gnu(php_uname('m'));
-        $os = match (PHP_OS_FAMILY) {
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => 'linux',
-        };
-
-        $packageName = "zig-{$arch}-{$os}";
-        return PKG_ROOT_PATH . "/{$packageName}";
+        return PKG_ROOT_PATH . '/zig';
     }
 
     private function createZigCcScript(string $bin_dir): void
