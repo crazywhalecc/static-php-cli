@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-BUILDROOT_ABS="$(realpath "$SCRIPT_DIR/../../buildroot/include" 2>/dev/null || true)"
+BUILDROOT_ABS="$(realpath "$SCRIPT_DIR/../../../buildroot/include" 2>/dev/null || true)"
 PARSED_ARGS=()
 
 while [[ $# -gt 0 ]]; do
