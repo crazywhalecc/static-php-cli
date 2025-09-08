@@ -13,18 +13,7 @@ class GoXcaddy extends CustomPackage
 {
     public static function isInstalled(): bool
     {
-        $arch = arch2gnu(php_uname('m'));
-        $os = match (PHP_OS_FAMILY) {
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => 'linux',
-        };
-
-        $packageName = "go-xcaddy-{$arch}-{$os}";
-        $pkgroot = PKG_ROOT_PATH;
-        $folder = "{$pkgroot}/{$packageName}";
-
+        $folder = PKG_ROOT_PATH . '/go-xcaddy';
         return is_dir($folder) && is_file("{$folder}/bin/go") && is_file("{$folder}/bin/xcaddy");
     }
 
@@ -59,7 +48,7 @@ class GoXcaddy extends CustomPackage
             'macos' => 'darwin',
             default => throw new \InvalidArgumentException('Unsupported OS: ' . $name),
         };
-        $go_version = '1.24.4';
+        $go_version = '1.25.0';
         $config = [
             'type' => 'url',
             'url' => "https://go.dev/dl/go{$go_version}.{$os}-{$arch}.tar.gz",
@@ -70,15 +59,15 @@ class GoXcaddy extends CustomPackage
     public function extract(string $name): void
     {
         $pkgroot = PKG_ROOT_PATH;
-        $go_exec = "{$pkgroot}/{$name}/bin/go";
-        $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        $go_exec = "{$pkgroot}/go-xcaddy/bin/go";
+        $xcaddy_exec = "{$pkgroot}/go-xcaddy/bin/xcaddy";
         if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
             return;
         }
         $lock = json_decode(FileSystem::readFile(LockFile::LOCK_FILE), true);
         $source_type = $lock[$name]['source_type'];
         $filename = DOWNLOAD_PATH . '/' . ($lock[$name]['filename'] ?? $lock[$name]['dirname']);
-        $extract = $lock[$name]['move_path'] ?? "{$pkgroot}/{$name}";
+        $extract = $lock[$name]['move_path'] ?? "{$pkgroot}/go-xcaddy";
 
         FileSystem::extractPackage($name, $source_type, $filename, $extract);
 
@@ -91,9 +80,9 @@ class GoXcaddy extends CustomPackage
         // install xcaddy without using musl tools, xcaddy build requires dynamic linking
         shell()
             ->appendEnv([
-                'PATH' => "{$pkgroot}/{$name}/bin:" . $sanitizedPath,
-                'GOROOT' => "{$pkgroot}/{$name}",
-                'GOBIN' => "{$pkgroot}/{$name}/bin",
+                'PATH' => "{$pkgroot}/go-xcaddy/bin:" . $sanitizedPath,
+                'GOROOT' => "{$pkgroot}/go-xcaddy",
+                'GOBIN' => "{$pkgroot}/go-xcaddy/bin",
                 'GOPATH' => "{$pkgroot}/go",
             ])
             ->exec('CC=cc go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest');
