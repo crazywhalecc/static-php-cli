@@ -5,21 +5,23 @@
     "php": {
         "type": "root",
         "source": "php-src",
-        "lib-depends": [
+        "lib-depends-linux": [
             "lib-base",
             "micro"
+        ],
+        "lib-depends-macos": [
+            "lib-base",
+            "micro",
+            "libxml2"
         ],
         "lib-suggests-linux": [
             "libacl",
             "brotli",
             "watcher"
         ],
-        "lib-suggests-unix": [
+        "lib-suggests-macos": [
             "brotli",
             "watcher"
-        ],
-        "lib-depends-macos": [
-            "libxml2"
         ]
     },
     "micro": {
