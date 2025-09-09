@@ -5,7 +5,7 @@
     "php": {
         "type": "root",
         "source": "php-src",
-        "lib-depends-linux": [
+        "lib-depends": [
             "lib-base",
             "micro"
         ],
