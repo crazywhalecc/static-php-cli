@@ -90,22 +90,17 @@ class GoXcaddy extends CustomPackage
 
     public static function getEnvironment(): array
     {
-        $arch = arch2gnu(php_uname('m'));
-        $os = match (PHP_OS_FAMILY) {
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => 'linux',
-        };
-
-        $packageName = "go-xcaddy-{$arch}-{$os}";
+        $packageName = 'go-xcaddy';
         $pkgroot = PKG_ROOT_PATH;
-
         return [
-            'PATH' => "{$pkgroot}/{$packageName}/bin",
             'GOROOT' => "{$pkgroot}/{$packageName}",
             'GOBIN' => "{$pkgroot}/{$packageName}/bin",
             'GOPATH' => "{$pkgroot}/go",
         ];
+    }
+
+    public static function getPath(): ?string
+    {
+        return PKG_ROOT_PATH . '/go-xcaddy/bin';
     }
 }

@@ -30,9 +30,13 @@ abstract class CustomPackage
 
     /**
      * Get the environment variables this package needs to be usable.
-     * PATH needs to be appended, rather than replaced.
      */
     abstract public static function getEnvironment(): array;
+
+    /**
+     * Get the PATH required to use this package.
+     */
+    abstract public static function getPath(): ?string;
 
     abstract public static function isInstalled(): bool;
 

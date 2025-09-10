@@ -274,7 +274,7 @@ class FileSystem
     public static function convertWinPathToMinGW(string $path): string
     {
         if (preg_match('/^[A-Za-z]:/', $path)) {
-            $path = '/' . strtolower(substr($path, 0, 1)) . '/' . str_replace('\\', '/', substr($path, 2));
+            $path = '/' . strtolower($path[0]) . '/' . str_replace('\\', '/', substr($path, 2));
         }
         return $path;
     }
@@ -314,8 +314,13 @@ class FileSystem
             $sub_file = self::convertPath($dir . '/' . $v);
             if (is_dir($sub_file) && $recursive) {
                 # 如果是 目录 且 递推 , 则递推添加下级文件
-                $list = array_merge($list, self::scanDirFiles($sub_file, $recursive, $relative));
-            } elseif (is_file($sub_file) || is_dir($sub_file) && !$recursive && $include_dir) {
+                $sub_list = self::scanDirFiles($sub_file, $recursive, $relative);
+                if (is_array($sub_list)) {
+                    foreach ($sub_list as $item) {
+                        $list[] = $item;
+                    }
+                }
+            } elseif (is_file($sub_file) || (is_dir($sub_file) && !$recursive && $include_dir)) {
                 # 如果是 文件 或 (是 目录 且 不递推 且 包含目录)
                 if (is_string($relative) && mb_strpos($sub_file, $relative) === 0) {
                     $list[] = ltrim(mb_substr($sub_file, mb_strlen($relative)), '/\\');
@@ -440,7 +445,7 @@ class FileSystem
     public static function writeFile(string $path, mixed $content, ...$args): bool|int|string
     {
         $dir = pathinfo(self::convertPath($path), PATHINFO_DIRNAME);
-        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+        if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
             throw new FileSystemException('Write file failed, cannot create parent directory: ' . $dir);
         }
         return file_put_contents($path, $content, ...$args);

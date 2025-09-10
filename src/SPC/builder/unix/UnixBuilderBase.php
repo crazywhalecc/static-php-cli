@@ -267,7 +267,7 @@ abstract class UnixBuilderBase extends BuilderBase
 
     protected function buildFrankenphp(): void
     {
-        GlobalEnvManager::addPathIfNotExists(GoXcaddy::getEnvironment()['PATH']);
+        GlobalEnvManager::addPathIfNotExists(GoXcaddy::getPath());
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
@@ -311,22 +311,17 @@ abstract class UnixBuilderBase extends BuilderBase
             $cflags .= ' -Wno-error=missing-profile';
             $libs .= ' -lgcov';
         }
-        $env = [
+        $env = [...[
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => clean_spaces($cflags),
             'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$libs}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' . $debugFlags .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
-                "{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
+                "v{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
-        ];
-        foreach (GoXcaddy::getEnvironment() as $key => $value) {
-            if ($key !== 'PATH') {
-                $env[$key] = $value;
-            }
-        }
+        ], ...GoXcaddy::getEnvironment()];
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
             ->exec("xcaddy build --output frankenphp {$xcaddyModules}");
