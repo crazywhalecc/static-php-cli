@@ -317,7 +317,7 @@ abstract class UnixBuilderBase extends BuilderBase
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' . $debugFlags .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
-                "{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
+                "v{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ], ...GoXcaddy::getEnvironment()];
