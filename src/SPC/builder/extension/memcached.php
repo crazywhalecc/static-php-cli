@@ -17,6 +17,10 @@ class memcached extends Extension
             '--with-libmemcached-dir=' . BUILD_ROOT_PATH . ' ' .
             '--disable-memcached-sasl ' .
             '--enable-memcached-json ' .
+            ($this->builder->getLib('zstd') ? '--with-zstd ' : '') .
+            ($this->builder->getExt('igbinary') ? '--enable-memcached-igbinary ' : '') .
+            ($this->builder->getExt('session') ? '--enable-memcached-session ' : '') .
+            ($this->builder->getExt('msgpack') ? '--enable-memcached-msgpack ' : '') .
             '--with-system-fastlz';
     }
 }
