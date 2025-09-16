@@ -30,7 +30,7 @@ trait libxml2
             );
 
         if ($this instanceof LinuxLibraryBase) {
-            $cmake->addConfigureArgs('-DIconv_IS_BUILD_IN=OFF');
+            $cmake->addConfigureArgs('-DIconv_IS_BUILT_IN=OFF');
         }
 
         $cmake->build();
