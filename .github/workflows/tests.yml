@@ -145,25 +145,6 @@ jobs:
         os: ${{ fromJSON(needs.define-matrix.outputs.os) }}
       fail-fast: false
     steps:
-
-      - name: "Install CMake 3"
-        if: ${{ startsWith(matrix.os, 'macos-13') }}
-        run: |
-          curl -o cmake.tgz -#fSL https://github.com/Kitware/CMake/releases/download/v3.31.8/cmake-3.31.8-macos-universal.tar.gz
-          sudo mkdir -p /opt/cmake
-          sudo tar -xzf cmake.tgz -C /opt/cmake --strip-components 1
-          echo "/opt/cmake/CMake.app/Contents/bin" >> $GITHUB_PATH
-
-      - name: "Test CMake 3"
-        if: ${{ startsWith(matrix.os, 'macos-13') }}
-        run: |
-          if [ "$(which cmake)" != "/opt/cmake/CMake.app/Contents/bin/cmake" ]; then
-            echo "CMake path: $(which cmake)"
-            exit 1
-          else
-            echo "Good cmake"
-          fi
-          
       - name: "Update runner packages"
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
