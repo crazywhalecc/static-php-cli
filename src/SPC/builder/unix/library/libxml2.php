@@ -20,10 +20,10 @@ trait libxml2
                 "-DZLIB_INCLUDE_DIR={$this->getIncludeDir()}",
                 '-DLIBXML2_WITH_ZLIB=OFF',
             )
-            ->optionalLib('icu', ...cmake_boolean_args('LIBXML2_WITH_ICU'))
             ->optionalLib('xz', ...cmake_boolean_args('LIBXML2_WITH_LZMA'))
             ->addConfigureArgs(
                 '-DLIBXML2_WITH_ICONV=ON',
+                '-DLIBXML2_WITH_ICU=OFF', // optional, but discouraged: https://gitlab.gnome.org/GNOME/libxml2/-/blob/master/README.md
                 '-DLIBXML2_WITH_PYTHON=OFF',
                 '-DLIBXML2_WITH_PROGRAMS=OFF',
                 '-DLIBXML2_WITH_TESTS=OFF',

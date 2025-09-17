@@ -414,9 +414,17 @@
             "libmemcached",
             "fastlz"
         ],
+        "lib-suggests": [
+            "zstd"
+        ],
         "ext-depends": [
             "session",
             "zlib"
+        ],
+        "ext-suggests": [
+            "igbinary",
+            "msgpack",
+            "session"
         ]
     },
     "mongodb": {

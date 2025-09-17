@@ -452,6 +452,7 @@
     },
     "libmemcached": {
         "source": "libmemcached",
+        "cpp-library": true,
         "static-libs-unix": [
             "libmemcached.a",
             "libmemcachedprotocol.a",
@@ -596,7 +597,6 @@
         ],
         "lib-suggests-unix": [
             "xz",
-            "icu",
             "zlib"
         ],
         "lib-depends-windows": [

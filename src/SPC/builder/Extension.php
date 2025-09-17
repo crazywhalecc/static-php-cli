@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace SPC\builder;
 
 use SPC\exception\EnvironmentException;
+use SPC\exception\FileSystemException;
 use SPC\exception\SPCException;
 use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\toolchain\ClangNativeToolchain;
+use SPC\toolchain\GccNativeToolchain;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
@@ -418,8 +421,24 @@ class Extension
             'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class && SPCTarget::getTargetOS() === 'Linux') {
-            $env['SPC_COMPILER_EXTRA'] = '-lstdc++';
+        if (str_contains($env['LIBS'], '-lstdc++') && SPCTarget::getTargetOS() === 'Linux') {
+            if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+                $env['SPC_COMPILER_EXTRA'] = '-lstdc++';
+            } elseif (ToolchainManager::getToolchainClass() === GccNativeToolchain::class || ToolchainManager::getToolchainClass() === ClangNativeToolchain::class) {
+                try {
+                    $content = FileSystem::readFile($this->source_dir . '/config.m4');
+                    if ($content && !str_contains($content, 'PHP_ADD_LIBRARY(stdc++')) {
+                        $pattern = '/(PHP_NEW_EXTENSION\(' . $this->name . ',.*\))/m';
+                        $replacement = "$1\nPHP_ADD_LIBRARY(stdc++, 1, " . strtoupper($this->name) . '_SHARED_LIBADD)';
+                        FileSystem::replaceFileRegex(
+                            $this->source_dir . '/config.m4',
+                            $pattern,
+                            $replacement
+                        );
+                    }
+                } catch (FileSystemException) {
+                }
+            }
         }
 
         if ($this->patchBeforeSharedPhpize()) {
