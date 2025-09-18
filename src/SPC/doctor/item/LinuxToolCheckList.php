@@ -54,6 +54,7 @@ class LinuxToolCheckList
         'gettext-devel' => 'gettextize',
         'gettext-dev' => 'gettextize',
         'perl-IPC-Cmd' => '/usr/share/doc/perl-IPC-Cmd',
+        'perl-Time-Piece' => '/usr/share/doc/perl-Time-Piece',
     ];
 
     /** @noinspection PhpUnused */
@@ -65,7 +66,7 @@ class LinuxToolCheckList
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
             'redhat' => self::TOOLS_RHEL,
-            'centos' => array_merge(self::TOOLS_RHEL, ['perl-IPC-Cmd']),
+            'centos' => array_merge(self::TOOLS_RHEL, ['perl-IPC-Cmd', 'perl-Time-Piece']),
             'arch' => self::TOOLS_ARCH,
             default => self::TOOLS_DEBIAN,
         };
