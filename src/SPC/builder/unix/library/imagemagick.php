@@ -32,7 +32,10 @@ trait imagemagick
             );
 
         // special: linux-static target needs `-static`
-        $ldflags = SPCTarget::isStatic() ? ('-static -ldl') : '-ldl';
+        $ldflags = SPCTarget::isStatic() ? '-static -ldl' : '-ldl';
+        if (str_contains($this->builder->arch_ld_flags, '-Wl,--as-needed')) {
+            $ldflags = str_replace('-ldl', '-Wl,--no-as-needed -ldl -Wl,--as-needed', $ldflags);
+        }
 
         // special: macOS needs -iconv
         $libs = SPCTarget::getTargetOS() === 'Darwin' ? '-liconv' : '';
