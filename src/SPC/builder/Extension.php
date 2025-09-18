@@ -405,22 +405,7 @@ class Extension
      */
     public function buildUnixShared(): void
     {
-        $config = (new SPCConfigUtil($this->builder))->config(
-            [$this->getName()],
-            array_map(fn ($l) => $l->getName(), $this->getLibraryDependencies(recursive: true)),
-            $this->builder->getOption('with-suggested-exts'),
-            $this->builder->getOption('with-suggested-libs'),
-        );
-        [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
-        $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
-        $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';
-        $env = [
-            'CFLAGS' => $config['cflags'],
-            'CXXFLAGS' => $config['cflags'],
-            'LDFLAGS' => $config['ldflags'],
-            'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
-            'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
-        ];
+        $env = $this->getSharedExtensionEnv();
         if (str_contains($env['LIBS'], '-lstdc++') && SPCTarget::getTargetOS() === 'Linux') {
             if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
                 $env['SPC_COMPILER_EXTRA'] = '-lstdc++';
@@ -512,6 +497,26 @@ class Extension
         return $this->build_static;
     }
 
+    protected function getSharedExtensionEnv(): array
+    {
+        $config = (new SPCConfigUtil($this->builder))->config(
+            [$this->getName()],
+            array_map(fn ($l) => $l->getName(), $this->getLibraryDependencies(recursive: true)),
+            $this->builder->getOption('with-suggested-exts'),
+            $this->builder->getOption('with-suggested-libs'),
+        );
+        [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
+        $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
+        $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';
+        return [
+            'CFLAGS' => $config['cflags'],
+            'CXXFLAGS' => $config['cflags'],
+            'LDFLAGS' => $config['ldflags'],
+            'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
+            'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
+        ];
+    }
+
     protected function addLibraryDependency(string $name, bool $optional = false): void
     {
         $depLib = $this->builder->getLib($name);
@@ -570,7 +575,7 @@ class Extension
         return [trim($staticLibString), trim($sharedLibString)];
     }
 
-    private function getLibraryDependencies(bool $recursive = false): array
+    protected function getLibraryDependencies(bool $recursive = false): array
     {
         $ret = array_filter($this->dependencies, fn ($x) => $x instanceof LibraryBase);
         if (!$recursive) {
