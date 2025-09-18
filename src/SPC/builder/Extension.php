@@ -497,6 +497,10 @@ class Extension
         return $this->build_static;
     }
 
+    /**
+     * Returns the environment variables a shared extension needs to be built.
+     * CFLAGS, CXXFLAGS, LDFLAGS and so on.
+     */
     protected function getSharedExtensionEnv(): array
     {
         $config = (new SPCConfigUtil($this->builder))->config(
