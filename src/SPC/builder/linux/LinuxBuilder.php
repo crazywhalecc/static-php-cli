@@ -103,9 +103,8 @@ class LinuxBuilder extends UnixBuilderBase
             );
         }
 
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec(
-                $php_configure_env . ' ' .
+        $this->seekPhpSrcLogFileOnException(fn () => shell()->cd(SOURCE_PATH . '/php-src')->exec(
+            $php_configure_env . ' ' .
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
                 ($enableCli ? '--enable-cli ' : '--disable-cli ') .
                 ($enableFpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
@@ -118,7 +117,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $zts .
                 $maxExecutionTimers .
                 $this->makeStaticExtensionArgs() . ' '
-            );
+        ));
 
         $this->emitPatchPoint('before-php-make');
         SourcePatcher::patchBeforeMake($this);

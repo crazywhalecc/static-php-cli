@@ -9,17 +9,19 @@
             "lib-base",
             "micro"
         ],
+        "lib-depends-macos": [
+            "lib-base",
+            "micro",
+            "libxml2"
+        ],
         "lib-suggests-linux": [
             "libacl",
             "brotli",
             "watcher"
         ],
-        "lib-suggests-unix": [
+        "lib-suggests-macos": [
             "brotli",
             "watcher"
-        ],
-        "lib-depends-macos": [
-            "libxml2"
         ]
     },
     "micro": {
@@ -450,6 +452,7 @@
     },
     "libmemcached": {
         "source": "libmemcached",
+        "cpp-library": true,
         "static-libs-unix": [
             "libmemcached.a",
             "libmemcachedprotocol.a",
@@ -594,7 +597,6 @@
         ],
         "lib-suggests-unix": [
             "xz",
-            "icu",
             "zlib"
         ],
         "lib-depends-windows": [
