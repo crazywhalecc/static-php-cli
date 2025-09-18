@@ -566,7 +566,7 @@ class Extension
         return [trim($staticLibString), trim($sharedLibString)];
     }
 
-    protected function getLibraryDependencies(bool $recursive = false): array
+    private function getLibraryDependencies(bool $recursive = false): array
     {
         $ret = array_filter($this->dependencies, fn ($x) => $x instanceof LibraryBase);
         if (!$recursive) {
