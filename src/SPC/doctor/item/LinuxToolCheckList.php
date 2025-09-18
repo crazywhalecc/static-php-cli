@@ -53,8 +53,8 @@ class LinuxToolCheckList
         'base-devel' => 'automake',
         'gettext-devel' => 'gettextize',
         'gettext-dev' => 'gettextize',
-        'perl-IPC-Cmd' => '/usr/share/doc/perl-IPC-Cmd',
-        'perl-Time-Piece' => '/usr/share/doc/perl-Time-Piece',
+        'perl-IPC-Cmd' => '/usr/share/perl5/vendor_perl/IPC/Cmd.pm',
+        'perl-Time-Piece' => '/usr/lib64/perl5/Time/Piece.pm',
     ];
 
     /** @noinspection PhpUnused */
