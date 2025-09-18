@@ -5,16 +5,11 @@ declare(strict_types=1);
 namespace SPC\builder;
 
 use SPC\exception\EnvironmentException;
-use SPC\exception\FileSystemException;
 use SPC\exception\SPCException;
 use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
-use SPC\toolchain\ClangNativeToolchain;
-use SPC\toolchain\GccNativeToolchain;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
@@ -226,11 +221,11 @@ class Extension
     public function patchBeforeSharedMake(): bool
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
-        [$staticLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
+        [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         FileSystem::replaceFileRegex(
             $this->source_dir . '/Makefile',
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
-            '$1 ' . trim($staticLibs)
+            clean_spaces("$1 {$staticLibs} {$sharedLibs}")
         );
         if ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS')) {
             FileSystem::replaceFileRegex(
@@ -406,26 +401,6 @@ class Extension
     public function buildUnixShared(): void
     {
         $env = $this->getSharedExtensionEnv();
-        if (str_contains($env['LIBS'], '-lstdc++') && SPCTarget::getTargetOS() === 'Linux') {
-            if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-                $env['SPC_COMPILER_EXTRA'] = '-lstdc++';
-            } elseif (ToolchainManager::getToolchainClass() === GccNativeToolchain::class || ToolchainManager::getToolchainClass() === ClangNativeToolchain::class) {
-                try {
-                    $content = FileSystem::readFile($this->source_dir . '/config.m4');
-                    if ($content && !str_contains($content, 'PHP_ADD_LIBRARY(stdc++')) {
-                        $pattern = '/(PHP_NEW_EXTENSION\(' . $this->name . ',.*\))/m';
-                        $replacement = "$1\nPHP_ADD_LIBRARY(stdc++, 1, " . strtoupper($this->name) . '_SHARED_LIBADD)';
-                        FileSystem::replaceFileRegex(
-                            $this->source_dir . '/config.m4',
-                            $pattern,
-                            $replacement
-                        );
-                    }
-                } catch (FileSystemException) {
-                }
-            }
-        }
-
         if ($this->patchBeforeSharedPhpize()) {
             logger()->info("Extension [{$this->getName()}] patched before shared phpize");
         }
@@ -593,12 +568,12 @@ class Extension
             $added = 0;
             foreach ($ret as $depName => $dep) {
                 foreach ($dep->getDependencies(true) as $depdepName => $depdep) {
-                    if (!in_array($depdepName, array_keys($deps), true)) {
+                    if (!array_key_exists($depdepName, $deps)) {
                         $deps[$depdepName] = $depdep;
                         ++$added;
                     }
                 }
-                if (!in_array($depName, array_keys($deps), true)) {
+                if (!array_key_exists($depName, $deps)) {
                     $deps[$depName] = $dep;
                 }
             }
