@@ -222,7 +222,8 @@ class Extension
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
-        $lstdcpp = str_contains($sharedLibs, '-lstdc++') ? '-lstdc++' : '';
+        $lstdcpp = str_contains($sharedLibs, '-l:libstdc++.a') ? '-l:libstdc++.a' : null;
+        $lstdcpp ??= str_contains($sharedLibs, '-lstdc++') ? '-lstdc++' : '';
 
         $makefileContent = file_get_contents($this->source_dir . '/Makefile');
         if (preg_match('/^(.*_SHARED_LIBADD\s*=\s*)(.*)$/m', $makefileContent, $matches)) {

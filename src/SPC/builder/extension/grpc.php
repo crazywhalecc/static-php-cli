@@ -60,7 +60,17 @@ class grpc extends Extension
     protected function getSharedExtensionEnv(): array
     {
         $env = parent::getSharedExtensionEnv();
-        $env['CPPFLAGS'] = $env['CXXFLAGS'];
+        $env['CPPFLAGS'] = $env['CXXFLAGS'] . ' -Wno-attributes';
         return $env;
+    }
+
+    protected function splitLibsIntoStaticAndShared(string $allLibs): array
+    {
+        [$static, $shared] = parent::splitLibsIntoStaticAndShared($allLibs);
+        if (str_contains(getenv('PATH'), 'rh/devtoolset') || str_contains(getenv('PATH'), 'rh/gcc-toolset')) {
+            $static .= ' -l:libstdc++.a';
+            $shared = str_replace('-lstdc++', '', $shared);
+        }
+        return [clean_spaces($static), clean_spaces($shared)];
     }
 }
