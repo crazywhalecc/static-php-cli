@@ -231,6 +231,7 @@
     },
     "imagemagick": {
         "source": "imagemagick",
+        "cpp-library": true,
         "pkg-configs": [
             "Magick++-7.Q16HDRI",
             "MagickCore-7.Q16HDRI",
