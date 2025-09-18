@@ -129,23 +129,10 @@ class Zig extends CustomPackage
 
     public static function getEnvironment(): array
     {
-        $arch = arch2gnu(php_uname('m'));
-        $os = match (PHP_OS_FAMILY) {
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => 'linux',
-        };
-
-        $packageName = "zig-{$arch}-{$os}";
-        $path = PKG_ROOT_PATH . "/{$packageName}";
-
-        return [
-            'PATH' => $path,
-        ];
+        return [];
     }
 
-    private static function getPath(): string
+    public static function getPath(): ?string
     {
         return PKG_ROOT_PATH . '/zig';
     }
