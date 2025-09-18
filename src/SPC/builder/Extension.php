@@ -222,11 +222,23 @@ class Extension
     {
         $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
-        FileSystem::replaceFileRegex(
-            $this->source_dir . '/Makefile',
-            '/^(.*_SHARED_LIBADD\s*=.*)$/m',
-            clean_spaces("$1 {$staticLibs} {$sharedLibs}")
-        );
+        $lstdcpp = str_contains($sharedLibs, '-lstdc++') ? '-lstdc++' : '';
+
+        $makefileContent = file_get_contents($this->source_dir . '/Makefile');
+
+        if (preg_match('/^(.*_SHARED_LIBADD\s*=\s*)(.*)$/m', $makefileContent, $matches)) {
+            $prefix = $matches[1];
+            $currentLibs = trim($matches[2]);
+            $newLibs = trim("{$currentLibs} {$staticLibs} {$lstdcpp}");
+            $deduplicatedLibs = deduplicate_flags($newLibs);
+
+            FileSystem::replaceFileRegex(
+                $this->source_dir . '/Makefile',
+                '/^(.*_SHARED_LIBADD\s*=.*)$/m',
+                $prefix . $deduplicatedLibs
+            );
+        }
+
         if ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS')) {
             FileSystem::replaceFileRegex(
                 $this->source_dir . '/Makefile',
