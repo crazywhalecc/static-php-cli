@@ -61,5 +61,6 @@ class grpc extends Extension
     {
         $env = parent::getSharedExtensionEnv();
         $env['CPPFLAGS'] = $env['CXXFLAGS'];
+        return $env;
     }
 }
