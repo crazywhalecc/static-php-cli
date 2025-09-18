@@ -225,7 +225,6 @@ class Extension
         $lstdcpp = str_contains($sharedLibs, '-lstdc++') ? '-lstdc++' : '';
 
         $makefileContent = file_get_contents($this->source_dir . '/Makefile');
-
         if (preg_match('/^(.*_SHARED_LIBADD\s*=\s*)(.*)$/m', $makefileContent, $matches)) {
             $prefix = $matches[1];
             $currentLibs = trim($matches[2]);
