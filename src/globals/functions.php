@@ -245,6 +245,16 @@ function clean_spaces(string $string): string
     return trim(preg_replace('/\s+/', ' ', $string));
 }
 
+function deduplicate_flags(string $flags): string
+{
+    $tokens = preg_split('/\s+/', trim($flags));
+
+    // Reverse, unique, reverse back - keeps last occurrence of duplicates
+    $deduplicated = array_reverse(array_unique(array_reverse($tokens)));
+
+    return implode(' ', $deduplicated);
+}
+
 /**
  * Register a callback function to handle keyboard interrupts (Ctrl+C).
  *
