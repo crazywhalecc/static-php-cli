@@ -869,6 +869,7 @@
     },
     "watcher": {
         "source": "watcher",
+        "cpp-library": true,
         "static-libs-unix": [
             "libwatcher-c.a"
         ],
