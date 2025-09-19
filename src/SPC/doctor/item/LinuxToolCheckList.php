@@ -28,7 +28,7 @@ class LinuxToolCheckList
     public const TOOLS_DEBIAN = [
         'make', 'bison', 're2c', 'flex',
         'git', 'autoconf', 'automake', 'autopoint',
-        'tar', 'unzip', 'gzip',
+        'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch',
         'xz', 'libtoolize', 'which',
         'patchelf',
@@ -37,7 +37,7 @@ class LinuxToolCheckList
     public const TOOLS_RHEL = [
         'perl', 'make', 'bison', 're2c', 'flex',
         'git', 'autoconf', 'automake',
-        'tar', 'unzip', 'gzip', 'gcc',
+        'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch', 'which',
         'xz', 'libtool', 'gettext-devel',
         'patchelf',
