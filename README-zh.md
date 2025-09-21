@@ -107,13 +107,14 @@ buildroot/bin/php-fpm -v
 以下是几个具有不同扩展组合的预编译静态 PHP 二进制文件，
 您可以根据需要直接下载。
 
-| 组合名称                                                          | 扩展数量                                                            | 系统           | 备注                        |
-|----------------------------------------------------------------------|----------------------------------------------------------------------------|--------------|--------------------------------|
-| [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux, macOS | 二进制文件大小约为 7.5MB |
-| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | 二进制文件大小约为 25MB  |
-| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)         | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)           | Linux, macOS | 二进制文件大小约为 3MB   |
-| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)   | Windows      | 二进制文件大小约为 3MB   |
-| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max/) | [40+](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows      | 二进制文件大小约为 8.5MB |
+| 组合名称                                                                 | 扩展数量                                                            | 系统           | 备注                 |
+|----------------------------------------------------------------------|----------------------------------------------------------------------------|--------------|--------------------|
+| [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux, macOS | 二进制文件大小约为 7.5MB    |
+| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | 二进制文件大小约为 25MB     |
+| [gnu-bulk](https://dl.static-php.dev/static-php-cli/gnu-bulk/)       | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | 使用 glibc 的 bulk 组合 |
+| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)         | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)           | Linux, macOS | 二进制文件大小约为 3MB      |
+| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)   | Windows      | 二进制文件大小约为 3MB      |
+| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max/) | [40+](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows      | 二进制文件大小约为 8.5MB    |
 
 > Linux 和 Windows 支持对二进制文件进行 UPX 压缩，可以将二进制文件大小减少 30% 到 50%。
 > macOS 不支持 UPX 压缩，因此 mac 的预构建二进制文件大小较大。

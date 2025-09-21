@@ -112,6 +112,7 @@ which can be downloaded directly according to your needs.
 |----------------------------------------------------------------------|----------------------------------------------------------------------------|--------------|--------------------------------|
 | [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux, macOS | The binary size is about 7.5MB |
 | [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | The binary size is about 25MB  |
+| [gnu-bulk](https://dl.static-php.dev/static-php-cli/gnu-bulk/)       | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | Using shared glibc             |
 | [minimal](https://dl.static-php.dev/static-php-cli/minimal/)         | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)           | Linux, macOS | The binary size is about 3MB   |
 | [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)   | Windows      | The binary size is about 3MB   |
 | [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max/) | [40+](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows      | The binary size is about 8.5MB |
