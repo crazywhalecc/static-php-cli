@@ -11,6 +11,7 @@ with popular extensions.
 
 ## Features
 
+- :elephant: Support multiple PHP versions - PHP 8.1, 8.2, 8.3, 8.4, 8.5
 - :handbag: Build single-file PHP executable with zero dependencies
 - :hamburger:Build **[phpmicro](https://github.com/dixyes/phpmicro)** self-extracting executables (combines PHP binary and source code into one file)
 - :pill: Automatic build environment checker with auto-fix capabilities
@@ -83,7 +84,6 @@ Run command:
 Now you can copy binaries built by static-php-cli to another machine and run with no dependencies:
 
 ```
-# All executables are located in buildroot/bin/ directory
 # php-cli
 buildroot/bin/php -v
 

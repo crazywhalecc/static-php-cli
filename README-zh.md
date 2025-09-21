@@ -10,6 +10,7 @@
 
 ## 特性
 
+- :elephant: **支持多 PHP 版本** - 支持 PHP 8.1, 8.2, 8.3, 8.4, 8.5
 - :handbag: **单文件 PHP 可执行文件** - 构建零依赖的独立 PHP
 - :hamburger: **phpmicro 集成** - 构建 **[phpmicro](https://github.com/dixyes/phpmicro)** 自解压可执行文件（将 PHP 二进制文件和源代码合并为一个文件）
 - :pill: **智能环境检查器** - 自动构建环境检查器，具备自动修复功能
@@ -82,7 +83,6 @@ download-options:
 现在您可以将 static-php-cli 构建的二进制文件复制到另一台机器上，无需依赖即可运行：
 
 ```
-# 所有可执行文件都位于 buildroot/bin/ 目录中
 # php-cli
 buildroot/bin/php -v
 
