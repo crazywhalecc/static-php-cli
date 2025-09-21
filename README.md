@@ -121,7 +121,8 @@ which can be downloaded directly according to your needs.
 
 ### Build Online (using GitHub Actions)
 
-Use GitHub Action to easily build a statically compiled PHP,
+When the above direct download binaries cannot meet your needs,
+you can use GitHub Action to easily build a statically compiled PHP,
 and at the same time define the extensions to be compiled by yourself.
 
 1. Fork me.
