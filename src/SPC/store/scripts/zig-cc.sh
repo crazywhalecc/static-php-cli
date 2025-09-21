@@ -19,9 +19,15 @@ while [[ $# -gt 0 ]]; do
             ARG_ABS="$(realpath "$ARG" 2>/dev/null || true)"
             [[ "$ARG_ABS" == "$BUILDROOT_ABS" ]] && PARSED_ARGS+=("-I$ARG") || PARSED_ARGS+=("-isystem$ARG")
             ;;
-        -march=*|-mcpu=*) # replace -march=x86-64 with -march=x86_64
+        -march=*|-mcpu=*)
             OPT_NAME="${1%%=*}"
             OPT_VALUE="${1#*=}"
+            # Skip armv8- flags entirely as Zig doesn't support them
+            if [[ "$OPT_VALUE" == armv8-* ]]; then
+                shift
+                continue
+            fi
+            # replace -march=x86-64 with -march=x86_64
             OPT_VALUE="${OPT_VALUE//-/_}"
             PARSED_ARGS+=("${OPT_NAME}=${OPT_VALUE}")
             shift
