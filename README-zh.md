@@ -120,7 +120,7 @@ buildroot/bin/php-fpm -v
 
 ### 在线构建（使用 GitHub Actions）
 
-使用 GitHub Action 可以轻松构建静态编译的 PHP，
+上方直接下载的二进制不能满足需求时，可使用 GitHub Action 可以轻松构建静态编译的 PHP，
 同时自行定义要编译的扩展。
 
 1. Fork 本项目。
