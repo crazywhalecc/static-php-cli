@@ -65,19 +65,19 @@ class Downloader
             url: "https://api.github.com/repos/{$source['repo']}/{$type}",
             hooks: [[CurlHook::class, 'setupGithubToken']],
             retries: self::getRetryAttempts()
-        ), true);
+        ), true, 512, JSON_THROW_ON_ERROR);
 
         $url = null;
-        for ($i = 0; $i < count($data); ++$i) {
-            if (($data[$i]['prerelease'] ?? false) === true && ($source['prefer-stable'] ?? false)) {
+        foreach ($data as $rel) {
+            if (($rel['prerelease'] ?? false) === true && ($source['prefer-stable'] ?? false)) {
                 continue;
             }
             if (!($source['match'] ?? null)) {
-                $url = $data[$i]['tarball_url'] ?? null;
+                $url = $rel['tarball_url'] ?? null;
                 break;
             }
-            if (preg_match('|' . $source['match'] . '|', $data[$i]['tarball_url'])) {
-                $url = $data[$i]['tarball_url'];
+            if (preg_match('|' . $source['match'] . '|', $rel['tarball_url'])) {
+                $url = $rel['tarball_url'];
                 break;
             }
         }
@@ -232,7 +232,8 @@ class Downloader
         $quiet = !defined('DEBUG_MODE') ? '-q --quiet' : '';
         $git = SPC_GIT_EXEC;
         $shallow = defined('GIT_SHALLOW_CLONE') ? '--depth 1 --single-branch' : '';
-        $recursive = ($submodules === null) ? '--recursive' : '';
+        $recursive = ($submodules === null && defined('GIT_SHALLOW_CLONE')) ? '--recursive --shallow-submodules' : null;
+        $recursive ??= $submodules === null ? '--recursive' : '';
 
         try {
             self::registerCancelEvent(function () use ($download_path) {
@@ -243,8 +244,9 @@ class Downloader
             });
             f_passthru("{$git} clone {$quiet} --config core.autocrlf=false --branch \"{$branch}\" {$shallow} {$recursive} \"{$url}\" \"{$download_path}\"");
             if ($submodules !== null) {
+                $depth_flag = defined('GIT_SHALLOW_CLONE') ? '--depth 1' : '';
                 foreach ($submodules as $submodule) {
-                    f_passthru("cd \"{$download_path}\" && {$git} submodule update --init " . escapeshellarg($submodule));
+                    f_passthru("cd \"{$download_path}\" && {$git} submodule update --init {$depth_flag} " . escapeshellarg($submodule));
                 }
             }
         } catch (SPCException $e) {
@@ -399,7 +401,7 @@ class Downloader
      * Download source
      *
      * @param string $name source name
-     * @param  null|array{
+     * @param null|array{
      *     type: string,
      *     repo: ?string,
      *     url: ?string,
@@ -414,7 +416,7 @@ class Downloader
      *         path: ?string,
      *         text: ?string
      *     }
-     * }          $source  source meta info: [type, path, rev, url, filename, regex, license]
+     * } $source source meta info: [type, path, rev, url, filename, regex, license]
      * @param bool $force       Whether to force download (default: false)
      * @param int  $download_as Lock source type (default: SPC_LOCK_SOURCE)
      */
