@@ -38,7 +38,8 @@ class simdjson extends Extension
     {
         $env = parent::getSharedExtensionEnv();
         if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            $env['CFLAGS'] = $env['CXXFLAGS'] = $env['CFLAGS'] . ' -Xclang -target-feature -Xclang +evex512';
+            $env['CFLAGS'] .= ' -Xclang -target-feature -Xclang +evex512';
+            $env['CXXFLAGS'] .= ' -Xclang -target-feature -Xclang +evex512';
         }
         return $env;
     }
