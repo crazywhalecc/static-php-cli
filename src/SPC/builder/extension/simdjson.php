@@ -6,6 +6,8 @@ namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
 use SPC\store\FileSystem;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\CustomExt;
 
 #[CustomExt('simdjson')]
@@ -35,7 +37,9 @@ class simdjson extends Extension
     public function getSharedExtensionEnv(): array
     {
         $env = parent::getSharedExtensionEnv();
-        $env['CFLAGS'] = $env['CXXFLAGS'] = $env['CFLAGS'] . ' -Xclang -target-feature -Xclang +evex512';
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $env['CFLAGS'] = $env['CXXFLAGS'] = $env['CFLAGS'] . ' -Xclang -target-feature -Xclang +evex512';
+        }
         return $env;
     }
 }
