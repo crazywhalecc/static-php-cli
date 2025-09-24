@@ -87,7 +87,7 @@ class SPCConfigUtil
         if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
-        if ($this->builder->hasCpp()) {
+        if ($this->builder->hasCpp() || collect($extensions)->contains(static fn (string $ext) => Config::getExt($ext)['cpp-extension'] ?? false)) {
             $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
             $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
         }

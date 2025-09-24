@@ -291,11 +291,11 @@ abstract class UnixBuilderBase extends BuilderBase
             }
         }
         $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
-        $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
+        $extLdFlags = "-extldflags '-pie{$dynamic_exports} {$this->arch_ld_flags}'";
         $muslTags = '';
         $staticFlags = '';
         if (SPCTarget::isStatic()) {
-            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000{$dynamic_exports}'";
+            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000{$dynamic_exports} {$this->arch_ld_flags}'";
             $muslTags = 'static_build,';
             $staticFlags = '-static-pie';
         }
@@ -303,7 +303,6 @@ abstract class UnixBuilderBase extends BuilderBase
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list);
         $cflags = "{$this->arch_c_flags} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS');
         $libs = $config['libs'];
-        $libs .= PHP_OS_FAMILY === 'Linux' ? ' -lrt' : '';
         // Go's gcc driver doesn't automatically link against -lgcov or -lrt. Ugly, but necessary fix.
         if ((str_contains((string) getenv('SPC_DEFAULT_C_FLAGS'), '-fprofile') ||
                 str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'), '-fprofile')) &&
