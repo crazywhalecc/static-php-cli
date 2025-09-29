@@ -7,7 +7,6 @@ namespace SPC\util;
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
 use SPC\builder\Extension;
-use SPC\builder\LibraryBase;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -129,8 +128,7 @@ class SPCConfigUtil
     {
         // judge cpp-extension
         $builderExtNames = array_keys($this->builder->getExts(false));
-        $extNames = array_map(fn (Extension $x) => $x->getName(), $extensions);
-        $exts = array_unique([...$builderExtNames, ...$extNames]);
+        $exts = array_unique([...$builderExtNames, ...$extensions]);
 
         foreach ($exts as $ext) {
             if (Config::getExt($ext, 'cpp-extension', false) === true) {
@@ -138,8 +136,7 @@ class SPCConfigUtil
             }
         }
         $builderLibNames = array_keys($this->builder->getLibs());
-        $libNames = array_map(fn (LibraryBase $x) => $x->getName(), $libraries);
-        $libs = array_unique([...$builderLibNames, ...$libNames]);
+        $libs = array_unique([...$builderLibNames, ...$libraries]);
         foreach ($libs as $lib) {
             if (Config::getLib($lib, 'cpp-library', false) === true) {
                 return true;
