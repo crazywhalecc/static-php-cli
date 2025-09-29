@@ -33,7 +33,7 @@ class PhpSource extends CustomSourceBase
         // 查找最新的小版本号
         $info = json_decode(Downloader::curlExec(
             url: "https://www.php.net/releases/index.php?json&version={$major_version}",
-            retries: intval(getenv('SPC_DOWNLOAD_RETRIES') ?: 0)
+            retries: (int) getenv('SPC_DOWNLOAD_RETRIES') ?: 0
         ), true);
         if (!isset($info['version'])) {
             throw new DownloaderException("Version {$major_version} not found.");
