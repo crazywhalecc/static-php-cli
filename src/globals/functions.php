@@ -245,6 +245,13 @@ function clean_spaces(string $string): string
     return trim(preg_replace('/\s+/', ' ', $string));
 }
 
+/**
+ * Deduplicate flags in a string.
+ *
+ * @param  string $flags The string containing flags to deduplicate. Only the last occurence of each flag will be kept.
+ *                       E.g. `-lintl -lstdc++ -lphp -lstdc++` becomes `-lintl -lphp -lstdc++`
+ * @return string the deduplicated string with no duplicate flags
+ */
 function deduplicate_flags(string $flags): string
 {
     $tokens = preg_split('/\s+/', trim($flags));
