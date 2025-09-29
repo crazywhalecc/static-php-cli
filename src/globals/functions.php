@@ -246,10 +246,10 @@ function clean_spaces(string $string): string
 }
 
 /**
- * Deduplicate flags in a string.
+ * Deduplicate flags in a string. Only the last occurence of each flag will be kept.
+ *                        E.g. `-lintl -lstdc++ -lphp -lstdc++` becomes `-lintl -lphp -lstdc++`
  *
- * @param  string $flags The string containing flags to deduplicate. Only the last occurence of each flag will be kept.
- *                       E.g. `-lintl -lstdc++ -lphp -lstdc++` becomes `-lintl -lphp -lstdc++`
+ * @param  string $flags the string containing flags to deduplicate
  * @return string the deduplicated string with no duplicate flags
  */
 function deduplicate_flags(string $flags): string
