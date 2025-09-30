@@ -430,7 +430,6 @@ class Extension
         }
 
         $has_avx512 = str_contains($this->builder->arch_c_flags ?? '', '-mavx512') ||
-            str_contains($this->builder->arch_c_flags ?? '', '-march=x86-64-v3') ||
             str_contains($this->arch_c_flags ?? '', '-march=x86-64-v4') ||
             ToolchainManager::getToolchainClass() !== ZigToolchain::class;
 
@@ -440,7 +439,7 @@ class Extension
             ->exec(
                 './configure ' . $this->getUnixConfigureArg(true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
-                '--enable-shared --disable-static' . (!$has_avx512 ? ' php_cv_have_avx512=no ' : '')
+                '--enable-shared --disable-static' . (!$has_avx512 ? ' php_cv_have_avx512=no php_cv_have_avx512vbmi=no' : '')
             );
 
         if ($this->patchBeforeSharedMake()) {

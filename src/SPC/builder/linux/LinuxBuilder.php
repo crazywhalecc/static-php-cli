@@ -106,7 +106,6 @@ class LinuxBuilder extends UnixBuilderBase
         }
 
         $has_avx512 = str_contains($this->arch_c_flags, '-mavx512') ||
-            str_contains($this->arch_c_flags, '-march=x86-64-v3') ||
             str_contains($this->arch_c_flags, '-march=x86-64-v4') ||
             ToolchainManager::getToolchainClass() !== ZigToolchain::class;
 
@@ -123,7 +122,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                (!$has_avx512 ? 'php_cv_have_avx512=no ' : '') .
+                (!$has_avx512 ? 'php_cv_have_avx512=no php_cv_have_avx512vbmi ' : '') .
                 $this->makeStaticExtensionArgs() . ' '
         ));
 
