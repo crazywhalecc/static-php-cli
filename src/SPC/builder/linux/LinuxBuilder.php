@@ -122,7 +122,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                (!$has_avx512 ? 'php_cv_have_avx512=no php_cv_have_avx512vbmi ' : '') .
+                (!$has_avx512 ? 'php_cv_have_avx512=no php_cv_have_avx512vbmi=no ' : '') .
                 $this->makeStaticExtensionArgs() . ' '
         ));
 
