@@ -81,7 +81,7 @@ class Extension
     {
         $escapedPath = str_replace("'", '', escapeshellarg(BUILD_ROOT_PATH)) !== BUILD_ROOT_PATH || str_contains(BUILD_ROOT_PATH, ' ') ? escapeshellarg(BUILD_ROOT_PATH) : BUILD_ROOT_PATH;
         $_name = str_replace('_', '-', $this->name);
-        return match ($arg_type = Config::getExt($this->name, 'arg-type', 'enable')) {
+        $arg = match ($arg_type = Config::getExt($this->name, 'arg-type', 'enable')) {
             'enable' => '--enable-' . $_name . ($shared ? '=shared' : '') . ' ',
             'enable-path' => '--enable-' . $_name . '=' . ($shared ? 'shared,' : '') . $escapedPath . ' ',
             'with' => '--with-' . $_name . ($shared ? '=shared' : '') . ' ',
@@ -89,6 +89,7 @@ class Extension
             'none', 'custom' => '',
             default => throw new WrongUsageException("argType does not accept {$arg_type}, use [enable/with/with-path] ."),
         };
+        return str_replace('-shared', '', $arg);
     }
 
     /**
@@ -130,7 +131,7 @@ class Extension
 
     public function getName(): string
     {
-        return $this->name;
+        return str_replace('-shared', '', $this->name);
     }
 
     /**
@@ -138,7 +139,7 @@ class Extension
      */
     public function getDistName(): string
     {
-        return $this->name;
+        return str_replace('-shared', '', $this->name);
     }
 
     public function getWindowsConfigureArg(bool $shared = false): string

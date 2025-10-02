@@ -1171,6 +1171,27 @@
             "xz"
         ]
     },
+    "zip-shared": {
+        "support": {
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-zip",
+        "arg-type": "enable",
+        "lib-depends-unix": [
+            "libzip"
+        ],
+        "ext-depends-windows": [
+            "zlib",
+            "bz2"
+        ],
+        "lib-depends-windows": [
+            "libzip",
+            "zlib",
+            "bzip2",
+            "xz"
+        ]
+    },
     "zlib": {
         "type": "builtin",
         "arg-type": "custom",

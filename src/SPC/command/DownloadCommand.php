@@ -295,6 +295,11 @@ class DownloadCommand extends BaseCommand
      */
     private function calculateSourcesByExt(array $extensions, bool $include_suggests = true): array
     {
+        foreach ($extensions as $ext) {
+            if (array_key_exists($ext . '-shared', Config::getExts())) {
+                $extensions[] = $ext . '-shared';
+            }
+        }
         [$extensions, $libraries] = $include_suggests ? DependencyUtil::getExtsAndLibs($extensions, [], true, true) : DependencyUtil::getExtsAndLibs($extensions);
         $sources = [];
         foreach ($extensions as $extension) {

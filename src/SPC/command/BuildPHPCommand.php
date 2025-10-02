@@ -56,6 +56,12 @@ class BuildPHPCommand extends BuildCommand
         $libraries = array_map('trim', array_filter(explode(',', $this->getOption('with-libs'))));
         // transform string to array
         $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
+        foreach ($shared_extensions as &$ext) {
+            if (array_key_exists($ext . '-shared', Config::getExts())) {
+                $ext .= '-shared';
+            }
+        }
+        unset($ext);
         // transform string to array
         $static_extensions = $this->parseExtensionList($this->getArgument('extensions'));
 
@@ -205,7 +211,7 @@ class BuildPHPCommand extends BuildCommand
         }
 
         // add static-php-cli.version to main.c, in order to debug php failure more easily
-        SourcePatcher::patchSPCVersionToPHP($this->getApplication()->getVersion());
+        SourcePatcher::patchSPCVersionToPHP($this->getApplication()?->getVersion());
 
         // clean old modules that may conflict with the new php build
         FileSystem::removeDir(BUILD_MODULES_PATH);
@@ -244,6 +250,7 @@ class BuildPHPCommand extends BuildCommand
         }
         if (!empty($shared_extensions)) {
             foreach ($shared_extensions as $ext) {
+                $ext = str_replace('-shared', '', $ext);
                 $path = FileSystem::convertPath("{$build_root_path}/modules/{$ext}.so");
                 if (file_exists(BUILD_MODULES_PATH . "/{$ext}.so")) {
                     logger()->info("Shared extension [{$ext}] path{$fixed}: {$path}");

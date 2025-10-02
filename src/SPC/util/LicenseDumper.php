@@ -50,7 +50,13 @@ class LicenseDumper
             logger()->warning('Target dump directory is not empty, be aware!');
         }
         FileSystem::createDir($target_dir);
+        $exts = $this->exts;
         foreach ($this->exts as $ext) {
+            if (array_key_exists($ext . '-shared', Config::getExts())) {
+                $exts[] = $ext . '-shared';
+            }
+        }
+        foreach ($exts as $ext) {
             if (Config::getExt($ext, 'type') !== 'external') {
                 continue;
             }

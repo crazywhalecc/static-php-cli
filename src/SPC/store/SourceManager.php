@@ -28,6 +28,11 @@ class SourceManager
         // ext check source exist
         if (is_array($exts)) {
             foreach ($exts as $ext) {
+                if (in_array($ext . '-shared', Config::getExts())) {
+                    $exts[] = $ext . '-shared';
+                }
+            }
+            foreach ($exts as $ext) {
                 // get source name for ext
                 if (Config::getExt($ext, 'type') !== 'external') {
                     continue;
