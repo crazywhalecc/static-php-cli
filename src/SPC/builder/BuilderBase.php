@@ -10,6 +10,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
+use SPC\store\pkg\GoXcaddy;
 use SPC\store\SourceManager;
 use SPC\store\SourcePatcher;
 use SPC\util\AttributeMapper;
@@ -507,8 +508,7 @@ abstract class BuilderBase
                 throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
             }
             // frankenphp needs package go-xcaddy installed
-            $pkg_dir = PKG_ROOT_PATH . '/go-xcaddy-' . arch2gnu(php_uname('m')) . '-' . osfamily2shortname();
-            if (!file_exists("{$pkg_dir}/bin/go") || !file_exists("{$pkg_dir}/bin/xcaddy")) {
+            if (!GoXcaddy::isInstalled()) {
                 global $argv;
                 throw new WrongUsageException("FrankenPHP SAPI requires the go-xcaddy package, please install it first: {$argv[0]} install-pkg go-xcaddy");
             }

@@ -147,15 +147,14 @@ class LinuxBuilder extends UnixBuilderBase
             }
             $this->buildEmbed();
         }
-        // build dynamic extensions if needed, must happen before building FrankenPHP to make sure we export all necessary, undefined symbols
+        if ($enableFrankenphp) {
+            logger()->info('building frankenphp');
+            $this->buildFrankenphp();
+        }
         $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
         if (!empty($shared_extensions)) {
             logger()->info('Building shared extensions ...');
             $this->buildSharedExts();
-        }
-        if ($enableFrankenphp) {
-            logger()->info('building frankenphp');
-            $this->buildFrankenphp();
         }
     }
 
@@ -326,7 +325,7 @@ class LinuxBuilder extends UnixBuilderBase
         $target = "{$libDir}/{$realLibName}";
         if (file_exists($target)) {
             [, $output] = shell()->execWithResult('readelf -d ' . escapeshellarg($target));
-            $output = join("\n", $output);
+            $output = implode("\n", $output);
             if (preg_match('/SONAME.*\[(.+)]/', $output, $sonameMatch)) {
                 $currentSoname = $sonameMatch[1];
                 if ($currentSoname !== basename($target)) {

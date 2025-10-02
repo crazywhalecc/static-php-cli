@@ -28,7 +28,7 @@ class LinuxToolCheckList
     public const TOOLS_DEBIAN = [
         'make', 'bison', 're2c', 'flex',
         'git', 'autoconf', 'automake', 'autopoint',
-        'tar', 'unzip', 'gzip',
+        'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch',
         'xz', 'libtoolize', 'which',
         'patchelf',
@@ -37,7 +37,7 @@ class LinuxToolCheckList
     public const TOOLS_RHEL = [
         'perl', 'make', 'bison', 're2c', 'flex',
         'git', 'autoconf', 'automake',
-        'tar', 'unzip', 'gzip', 'gcc',
+        'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch', 'which',
         'xz', 'libtool', 'gettext-devel',
         'patchelf',
@@ -53,7 +53,8 @@ class LinuxToolCheckList
         'base-devel' => 'automake',
         'gettext-devel' => 'gettextize',
         'gettext-dev' => 'gettextize',
-        'perl-IPC-Cmd' => '/usr/share/doc/perl-IPC-Cmd',
+        'perl-IPC-Cmd' => '/usr/share/perl5/vendor_perl/IPC/Cmd.pm',
+        'perl-Time-Piece' => '/usr/lib64/perl5/Time/Piece.pm',
     ];
 
     /** @noinspection PhpUnused */
@@ -65,7 +66,7 @@ class LinuxToolCheckList
         $required = match ($distro['dist']) {
             'alpine' => self::TOOLS_ALPINE,
             'redhat' => self::TOOLS_RHEL,
-            'centos' => array_merge(self::TOOLS_RHEL, ['perl-IPC-Cmd']),
+            'centos' => array_merge(self::TOOLS_RHEL, ['perl-IPC-Cmd', 'perl-Time-Piece']),
             'arch' => self::TOOLS_ARCH,
             default => self::TOOLS_DEBIAN,
         };
