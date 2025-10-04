@@ -19,7 +19,7 @@ with popular extensions.
 - :wrench: Configurable source code patching
 - :books: Intelligent dependency management
 - 📦 Self-contained `spc` executable (built with [box](https://github.com/box-project/box))
-- :fire: Support 75+ popular [extensions](https://static-php.dev/en/guide/extensions.html)
+- :fire: Support 100+ popular [extensions](https://static-php.dev/en/guide/extensions.html)
 - :floppy_disk: UPX compression support (reduces binary size by 30-50%)
 
 **Single-file standalone php-cli:**
