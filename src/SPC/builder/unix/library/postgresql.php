@@ -103,7 +103,7 @@ trait postgresql
         }
 
         // configure
-        shell()->cd($this->source_dir . '/build')->initializeEnv($this)
+        $shell = shell()->cd($this->source_dir . '/build')->initializeEnv($this)
             ->appendEnv($env)
             ->exec(
                 "{$envs} ../configure " .
@@ -122,7 +122,13 @@ trait postgresql
                 '--without-pam ' .
                 '--without-bonjour ' .
                 '--without-tcl '
-            )
+            );
+
+        if (SPCTarget::getTargetOS() === 'Darwin') {
+            FileSystem::replaceFileStr($this->source_dir . '/build/src/Makefile.global', '-lldap', '-lldap -llber');
+        }
+
+        $shell
             ->exec($envs . ' make -C src/bin/pg_config install')
             ->exec($envs . ' make -C src/include install')
             ->exec($envs . ' make -C src/common install')
