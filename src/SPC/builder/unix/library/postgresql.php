@@ -95,9 +95,16 @@ trait postgresql
             '$(OBJS_FRONTEND): CPPFLAGS += -UUSE_PRIVATE_ENCODING_FUNCS -DFRONTEND',
         );
 
+        $env = [
+            'CFLAGS' => $cflags,
+        ];
+        if ($ldLibraryPath = getenv('SPC_LD_LIBRARY_PATH')) {
+            $env['LD_LIBRARY_PATH'] = $ldLibraryPath;
+        }
+
         // configure
         shell()->cd($this->source_dir . '/build')->initializeEnv($this)
-            ->appendEnv(['CFLAGS' => $cflags])
+            ->appendEnv($env)
             ->exec(
                 "{$envs} ../configure " .
                 "--prefix={$builddir} " .
