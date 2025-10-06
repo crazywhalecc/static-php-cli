@@ -15,6 +15,11 @@ trait postgresql
     {
         if (SPCTarget::getLibcVersion() === '2.17' && GNU_ARCH === 'aarch64') {
             FileSystem::replaceFileStr(
+                $this->source_dir . '/src/port/pg_popcount_aarch64.c',
+                'value & HWCAP_SVE',
+                'value & 0',
+            );
+            FileSystem::replaceFileStr(
                 $this->source_dir . '/src/port/pg_crc32c_armv8_choose.c',
                 '#if defined(__linux__) && !defined(__aarch64__) && !defined(HWCAP2_CRC32)',
                 '#if defined(__linux__) && !defined(HWCAP_CRC32)',
