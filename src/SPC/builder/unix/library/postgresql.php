@@ -7,6 +7,7 @@ namespace SPC\builder\unix\library;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\BuildFailureException;
 use SPC\store\FileSystem;
+use SPC\util\PkgConfigUtil;
 use SPC\util\SPCTarget;
 
 trait postgresql
@@ -124,9 +125,10 @@ trait postgresql
                 '--without-tcl '
             );
 
-        if (SPCTarget::getTargetOS() === 'Darwin') {
-            FileSystem::replaceFileStr($this->source_dir . '/build/src/Makefile.global', '-lldap', '-lldap -llber');
-        }
+        $libs = PkgConfigUtil::getLibsArray('ldap');
+        $libs = clean_spaces(implode(' ', $libs));
+        FileSystem::replaceFileStr($this->source_dir . '/build/src/Makefile.global', '-lldap', $libs);
+        FileSystem::replaceFileStr($this->source_dir . '/build/Makefile.status', '-lldap', $libs);
 
         $shell
             ->exec($envs . ' make -C src/bin/pg_config install')
