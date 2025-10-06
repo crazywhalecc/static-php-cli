@@ -7,9 +7,23 @@ namespace SPC\builder\unix\library;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\BuildFailureException;
 use SPC\store\FileSystem;
+use SPC\util\SPCTarget;
 
 trait postgresql
 {
+    public function patchBeforeBuild(): bool
+    {
+        if (SPCTarget::getLibcVersion() === '2.17' && GNU_ARCH === 'aarch64') {
+            FileSystem::replaceFileStr(
+                $this->source_dir . '/src/port/pg_crc32c_armv8_choose.c',
+                '#if defined(__linux__) && !defined(__aarch64__) && !defined(HWCAP2_CRC32)',
+                '#if defined(__linux__) && !defined(HWCAP_CRC32)',
+            );
+            return true;
+        }
+        return false;
+    }
+
     protected function build(): void
     {
         $builddir = BUILD_ROOT_PATH;
@@ -55,7 +69,7 @@ trait postgresql
             if ($this->builder->getLib('icu')) {
                 $libcpp = $this instanceof LinuxLibraryBase ? ' -lstdc++' : ' -lc++';
             }
-            $envs .= " LIBS=\"{$libs} {$libs}{$libcpp}\" "; // macOS doesn't understand how to link properly
+            $envs .= " LIBS=\"{$libs}{$libcpp}\" ";
         }
         if ($error_exec_cnt > 0) {
             throw new BuildFailureException('Failed to get pkg-config information!');
