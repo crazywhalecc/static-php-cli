@@ -127,8 +127,8 @@ trait postgresql
 
         $libs = PkgConfigUtil::getLibsArray('ldap');
         $libs = clean_spaces(implode(' ', $libs));
+        FileSystem::replaceFileStr($this->source_dir . '/build/config.status', '-lldap', $libs);
         FileSystem::replaceFileStr($this->source_dir . '/build/src/Makefile.global', '-lldap', $libs);
-        FileSystem::replaceFileStr($this->source_dir . '/build/Makefile.status', '-lldap', $libs);
 
         $shell
             ->exec($envs . ' make -C src/bin/pg_config install')
