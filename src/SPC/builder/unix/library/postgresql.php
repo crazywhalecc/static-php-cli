@@ -56,7 +56,7 @@ trait postgresql
             if ($this->builder->getLib('icu')) {
                 $libcpp = $this instanceof LinuxLibraryBase ? ' -lstdc++' : ' -lc++';
             }
-            $envs .= " LIBS=\"{$libs}{$libcpp}\" ";
+            $envs .= " LIBS=\"{$libs} {$libs}{$libcpp}\" "; // macOS doesn't understand how to link properly
         }
         if ($error_exec_cnt > 0) {
             throw new BuildFailureException('Failed to get pkg-config information!');
@@ -74,7 +74,7 @@ trait postgresql
         FileSystem::replaceFileStr(
             $this->source_dir . '/src/common/Makefile',
             '$(OBJS_FRONTEND): CPPFLAGS += -DUSE_PRIVATE_ENCODING_FUNCS',
-            '$(OBJS_FRONTEND): CPPFLAGS += -UUSE_PRIVATE_ENCODING_FUNCS',
+            '$(OBJS_FRONTEND): CPPFLAGS += -UUSE_PRIVATE_ENCODING_FUNCS -DFRONTEND',
         );
 
         // configure
