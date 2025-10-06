@@ -6,7 +6,6 @@ namespace SPC\builder\unix\library;
 
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\exception\BuildFailureException;
-use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\SPCTarget;
 
@@ -65,17 +64,18 @@ trait postgresql
 
         FileSystem::resetDir($this->source_dir . '/build');
 
-        $version = $this->getVersion();
-        // 16.1 workaround
-        if (version_compare($version, '16.1') >= 0) {
-            # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
-            shell()->cd($this->source_dir . '/build')
-                ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
-                ->exec('sed -i.backup "278 s/^/# /"  ../src/Makefile.shlib')
-                ->exec('sed -i.backup "402 s/^/# /"  ../src/Makefile.shlib');
-        } else {
-            throw new BuildFailureException('Unsupported version for postgresql: ' . $version . ' !');
-        }
+        # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
+        shell()->cd($this->source_dir . '/build')
+            ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
+            ->exec('sed -i.backup "278 s/^/# /"  ../src/Makefile.shlib')
+            ->exec('sed -i.backup "402 s/^/# /"  ../src/Makefile.shlib');
+
+        // php source relies on the non-private encoding functions in libpgcommon.a
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/src/common/Makefile',
+            '$(OBJS_FRONTEND): CPPFLAGS += -DUSE_PRIVATE_ENCODING_FUNCS',
+            '$(OBJS_FRONTEND): CPPFLAGS += -UUSE_PRIVATE_ENCODING_FUNCS',
+        );
 
         // configure
         shell()->cd($this->source_dir . '/build')->initializeEnv($this)
@@ -83,14 +83,12 @@ trait postgresql
             ->exec(
                 "{$envs} ../configure " .
                 "--prefix={$builddir} " .
-                ($this->builder->getOption('enable-zts') ? '--enable-thread-safety ' : '--disable-thread-safety ') .
                 '--enable-coverage=no ' .
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
                 '--with-libxml ' .
                 ($this->builder->getLib('icu') ? '--with-icu ' : '--without-icu ') .
                 ($this->builder->getLib('ldap') ? '--with-ldap ' : '--without-ldap ') .
-                // '--without-ldap ' .
                 ($this->builder->getLib('libxslt') ? '--with-libxslt ' : '--without-libxslt ') .
                 ($this->builder->getLib('zstd') ? '--with-zstd ' : '--without-zstd ') .
                 '--without-lz4 ' .
@@ -113,18 +111,5 @@ trait postgresql
             ->exec("rm -rf {$builddir}/lib/*.dylib");
 
         FileSystem::replaceFileStr(BUILD_LIB_PATH . '/pkgconfig/libpq.pc', '-lldap', '-lldap -llber');
-    }
-
-    private function getVersion(): string
-    {
-        try {
-            $file = FileSystem::readFile($this->source_dir . '/meson.build');
-            if (preg_match("/^\\s+version:\\s?'(.*)'/m", $file, $match)) {
-                return $match[1];
-            }
-            return 'unknown';
-        } catch (FileSystemException) {
-            return 'unknown';
-        }
     }
 }
