@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux;
 
+use SPC\builder\extension\readline;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\PatchException;
 use SPC\exception\WrongUsageException;
@@ -170,10 +171,12 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildCli(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
+        readline::patchCliLinux();
         $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
+        readline::patchCliLinux(true);
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-unneeded php');
