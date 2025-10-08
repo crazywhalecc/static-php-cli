@@ -38,7 +38,7 @@ trait ncurses
             ->make();
         $final = FileSystem::scanDirFiles(BUILD_BIN_PATH, relative: true);
         // Remove the new files
-        $new_files = array_diff($final, $filelist);
+        $new_files = array_diff($final, $filelist ?: []);
         foreach ($new_files as $file) {
             @unlink(BUILD_BIN_PATH . '/' . $file);
         }
