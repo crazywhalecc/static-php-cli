@@ -8,7 +8,6 @@ use SPC\builder\Extension;
 use SPC\exception\ValidationException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
-use SPC\util\SPCTarget;
 
 #[CustomExt('readline')]
 class readline extends Extension
@@ -43,23 +42,6 @@ class readline extends Extension
         [$ret, $out] = shell()->execWithResult('printf "exit\n" | ' . BUILD_BIN_PATH . '/php -a');
         if ($ret !== 0 || !str_contains(implode("\n", $out), 'Interactive shell')) {
             throw new ValidationException("readline extension failed sanity check. Code: {$ret}, output: " . implode("\n", $out));
-        }
-    }
-
-    public static function patchCliLinux(bool $patch): void
-    {
-        if (SPCTarget::getTargetOS() === 'Linux' && SPCTarget::isStatic() && $patch) {
-            FileSystem::replaceFileStr(
-                SOURCE_PATH . '/php-src/ext/readline/readline_cli.c',
-                "/*#else\n#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()",
-                "#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()\n/*#else",
-            );
-        } else {
-            FileSystem::replaceFileStr(
-                SOURCE_PATH . '/php-src/ext/readline/readline_cli.c',
-                "#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()\n/*#else",
-                "/*#else\n#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()",
-            );
         }
     }
 }

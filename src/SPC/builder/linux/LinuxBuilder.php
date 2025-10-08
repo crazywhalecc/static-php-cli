@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\linux;
 
-use SPC\builder\extension\readline;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\PatchException;
 use SPC\exception\WrongUsageException;
@@ -106,18 +105,18 @@ class LinuxBuilder extends UnixBuilderBase
 
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd(SOURCE_PATH . '/php-src')->exec(
             $php_configure_env . ' ' .
-                getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
-                ($enableCli ? '--enable-cli ' : '--disable-cli ') .
-                ($enableFpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
-                ($enableEmbed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
-                ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
-                ($enableCgi ? '--enable-cgi ' : '--disable-cgi ') .
-                $config_file_path .
-                $config_file_scan_dir .
-                $json_74 .
-                $zts .
-                $maxExecutionTimers .
-                $this->makeStaticExtensionArgs() . ' '
+            getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
+            ($enableCli ? '--enable-cli ' : '--disable-cli ') .
+            ($enableFpm ? '--enable-fpm ' . ($this->getLib('libacl') !== null ? '--with-fpm-acl ' : '') : '--disable-fpm ') .
+            ($enableEmbed ? "--enable-embed={$embed_type} " : '--disable-embed ') .
+            ($enableMicro ? '--enable-micro=all-static ' : '--disable-micro ') .
+            ($enableCgi ? '--enable-cgi ' : '--disable-cgi ') .
+            $config_file_path .
+            $config_file_scan_dir .
+            $json_74 .
+            $zts .
+            $maxExecutionTimers .
+            $this->makeStaticExtensionArgs() . ' '
         ));
 
         $this->emitPatchPoint('before-php-make');
@@ -170,18 +169,17 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildCli(): void
     {
-        if ($this->getExt('readline')) {
+        if ($this->getExt('readline') && SPCTarget::isStatic()) {
             SourcePatcher::patchFile('musl_static_readline.patch', SOURCE_PATH . '/php-src');
         }
+
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
-        readline::patchCliLinux(true);
-        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
+        $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
-        readline::patchCliLinux(false);
+            ->exec("make {$concurrency} {$vars} cli");
 
-        if ($this->getExt('readline')) {
+        if ($this->getExt('readline') && SPCTarget::isStatic()) {
             SourcePatcher::patchFile('musl_static_readline.patch', SOURCE_PATH . '/php-src', true);
         }
 
@@ -199,10 +197,10 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildCgi(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
-        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
+        $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cgi");
+            ->exec("make {$concurrency} {$vars} cgi");
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cgi')->exec('strip --strip-unneeded php-cgi');
@@ -234,11 +232,11 @@ class LinuxBuilder extends UnixBuilderBase
         // patch fake cli for micro
         $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
         $vars = SystemUtil::makeEnvVarString($vars);
-        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
+        $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
 
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} micro");
+            ->exec("make {$concurrency} {$vars} micro");
 
         $this->processMicroUPX();
 
@@ -255,10 +253,10 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildFpm(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
-        $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
+        $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} fpm");
+            ->exec("make {$concurrency} {$vars} fpm");
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-unneeded php-fpm');
@@ -276,11 +274,11 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildEmbed(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
-
+        $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
-            ->exec(getenv('SPC_CMD_PREFIX_PHP_MAKE') . ' INSTALL_ROOT=' . BUILD_ROOT_PATH . " {$vars} install");
+            ->exec("make {$concurrency} INSTALL_ROOT=" . BUILD_ROOT_PATH . " {$vars} install");
 
         $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '';
         $libDir = BUILD_LIB_PATH;
