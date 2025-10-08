@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\exception\ValidationException;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 use SPC\util\SPCTarget;
@@ -34,6 +35,15 @@ class readline extends Extension
             return;
         }
         parent::buildUnixShared();
+    }
+
+    public function runCliCheckUnix(): void
+    {
+        parent::runCliCheckUnix();
+        [$ret, $out] = shell()->execWithResult('printf "exit\n" | ' . BUILD_BIN_PATH . '/php -a');
+        if ($ret !== 0 || !str_contains(implode("\n", $out), 'Interactive shell')) {
+            throw new ValidationException("readline extension failed sanity check. Code: {$ret}, output: " . implode("\n", $out));
+        }
     }
 
     public static function patchCliLinux(bool $patch): void
