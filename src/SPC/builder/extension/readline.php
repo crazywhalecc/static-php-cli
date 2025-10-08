@@ -7,6 +7,7 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
+use SPC\util\SPCTarget;
 
 #[CustomExt('readline')]
 class readline extends Extension
@@ -33,5 +34,33 @@ class readline extends Extension
             return;
         }
         parent::buildUnixShared();
+    }
+
+    public function patchBeforeMake(): bool
+    {
+        if (SPCTarget::getTargetOS() === 'Linux' && SPCTarget::isStatic() && $this->builder->getOption('build-cli')) {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/ext/readline/readline_cli.c',
+                "/*\n#ifdef COMPILE_DL_READLINE",
+                "#ifdef COMPILE_DL_READLINE\n/*"
+            );
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/ext/readline/readline_cli.c',
+                '/\/\*#else\s+?#define GET_SHELL_CB\(cb\) \(cb\) = php_cli_get_shell_callbacks\(\)\s+#endif\*\//s',
+                "#else\n#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()\n#endif"
+            );
+        } else {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/ext/readline/readline_cli.c',
+                "#ifdef COMPILE_DL_READLINE\n/*",
+                "/*\n#ifdef COMPILE_DL_READLINE"
+            );
+            FileSystem::replaceFileRegex(
+                SOURCE_PATH . '/php-src/ext/readline/readline_cli.c',
+                '/#else\s+?#define GET_SHELL_CB\(cb\) \(cb\) = php_cli_get_shell_callbacks\(\)\s+#endif/s',
+                "/*#else\n#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()\n#endif*/"
+            );
+        }
+        return false;
     }
 }
