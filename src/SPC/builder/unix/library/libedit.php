@@ -11,9 +11,7 @@ trait libedit
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)
-            ->configure(
-                '--with-curses'
-            )
+            ->configure()
             ->make();
         $this->patchPkgconfPrefix(['libedit.pc']);
     }

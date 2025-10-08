@@ -23,7 +23,7 @@ class readline extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        return '--with-libedit=' . BUILD_ROOT_PATH . ' --without-readline';
+        return '--with-libedit --without-readline';
     }
 
     public function buildUnixShared(): void

@@ -489,6 +489,16 @@
             "path": "COPYING"
         }
     },
+    "libedit": {
+        "type": "filelist",
+        "url": "https://thrysoee.dk/editline/",
+        "regex": "/href=\"(?<file>libedit-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libevent": {
         "type": "ghrel",
         "repo": "libevent/libevent",
@@ -944,16 +954,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "libedit": {
-        "type": "filelist",
-        "url": "https://thrysoee.dk/editline/",
-        "regex": "/href=\"(?<file>editline-(?<version>[^\"]+)\\.tar\\.gz)\"/",
-        "provide-pre-built": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING"
         }
     },
     "readline": {

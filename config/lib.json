@@ -343,6 +343,15 @@
         ],
         "cpp-library": true
     },
+    "libedit": {
+        "source": "libedit",
+        "static-libs-unix": [
+            "libedit.a"
+        ],
+        "lib-depends": [
+            "ncurses"
+        ]
+    },
     "libevent": {
         "source": "libevent",
         "static-libs-unix": [
