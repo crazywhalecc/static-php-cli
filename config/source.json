@@ -946,6 +946,16 @@
             "path": "LICENSE"
         }
     },
+    "libedit": {
+        "type": "filelist",
+        "url": "https://thrysoee.dk/editline/",
+        "regex": "/href=\"(?<file>editline-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "readline": {
         "type": "filelist",
         "url": "https://ftp.gnu.org/pub/gnu/readline/",

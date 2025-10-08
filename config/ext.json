@@ -687,7 +687,7 @@
         "type": "builtin",
         "arg-type": "with-path",
         "lib-depends": [
-            "readline"
+            "libedit"
         ],
         "target": [
             "static"
