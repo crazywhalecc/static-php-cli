@@ -171,12 +171,12 @@ class LinuxBuilder extends UnixBuilderBase
     protected function buildCli(): void
     {
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
-        readline::patchCliLinux();
+        readline::patchCliLinux(true);
         $SPC_CMD_PREFIX_PHP_MAKE = getenv('SPC_CMD_PREFIX_PHP_MAKE') ?: 'make';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("{$SPC_CMD_PREFIX_PHP_MAKE} {$vars} cli");
-        readline::patchCliLinux(true);
+        readline::patchCliLinux(false);
 
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-unneeded php');

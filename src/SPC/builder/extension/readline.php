@@ -36,9 +36,9 @@ class readline extends Extension
         parent::buildUnixShared();
     }
 
-    public static function patchCliLinux(bool $revert = false): void
+    public static function patchCliLinux(bool $patch): void
     {
-        if (SPCTarget::getTargetOS() === 'Linux' && SPCTarget::isStatic() && !$revert) {
+        if (SPCTarget::getTargetOS() === 'Linux' && SPCTarget::isStatic() && $patch) {
             FileSystem::replaceFileStr(
                 SOURCE_PATH . '/php-src/ext/readline/readline_cli.c',
                 "/*#else\n#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()",
