@@ -44,7 +44,7 @@ trait postgresql
         $error_exec_cnt = 0;
 
         foreach ($optional_packages as $lib => $pkg) {
-            if ($this->getBuilder()->getLib($lib)) {
+            if ($this->builder->getLib($lib)) {
                 $packages .= ' ' . $pkg;
                 $output = shell()->execWithResult("pkg-config --static {$pkg}");
                 $error_exec_cnt += $output[0] === 0 ? 0 : 1;
@@ -125,10 +125,12 @@ trait postgresql
                 '--without-tcl '
             );
 
-        $libs = PkgConfigUtil::getLibsArray('ldap');
-        $libs = clean_spaces(implode(' ', $libs));
-        FileSystem::replaceFileStr($this->source_dir . '/build/config.status', '-lldap', $libs);
-        FileSystem::replaceFileStr($this->source_dir . '/build/src/Makefile.global', '-lldap', $libs);
+        if ($this->builder->getLib('ldap')) {
+            $libs = PkgConfigUtil::getLibsArray('ldap');
+            $libs = clean_spaces(implode(' ', $libs));
+            FileSystem::replaceFileStr($this->source_dir . '/build/config.status', '-lldap', $libs);
+            FileSystem::replaceFileStr($this->source_dir . '/build/src/Makefile.global', '-lldap', $libs);
+        }
 
         $shell
             ->exec($envs . ' make -C src/bin/pg_config install')
