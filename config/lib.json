@@ -202,6 +202,7 @@
             "openssl",
             "libcares"
         ],
+        "cpp-library": true,
         "provide-pre-built": true,
         "frameworks": [
             "CoreFoundation"
@@ -230,6 +231,7 @@
     },
     "imagemagick": {
         "source": "imagemagick",
+        "cpp-library": true,
         "pkg-configs": [
             "Magick++-7.Q16HDRI",
             "MagickCore-7.Q16HDRI",
@@ -822,6 +824,7 @@
     },
     "snappy": {
         "source": "snappy",
+        "cpp-library": true,
         "static-libs-unix": [
             "libsnappy.a"
         ],
@@ -867,6 +870,7 @@
     },
     "watcher": {
         "source": "watcher",
+        "cpp-library": true,
         "static-libs-unix": [
             "libwatcher-c.a"
         ],

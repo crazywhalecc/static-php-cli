@@ -116,6 +116,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
+                getenv('SPC_EXTRA_PHP_VARS') . ' ' .
                 $this->makeStaticExtensionArgs() . ' '
         ));
 
