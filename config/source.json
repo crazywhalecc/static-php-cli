@@ -880,7 +880,7 @@
     "postgresql": {
         "type": "ghtagtar",
         "repo": "postgres/postgres",
-        "match": "REL_16_\\d+",
+        "match": "REL_18_\\d+",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"
