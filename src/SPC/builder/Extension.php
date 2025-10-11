@@ -10,8 +10,6 @@ use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
@@ -429,17 +427,13 @@ class Extension
             logger()->info("Extension [{$this->getName()}] patched before shared configure");
         }
 
-        $has_avx512 = str_contains($this->builder->arch_c_flags ?? '', '-mavx512') ||
-            str_contains($this->arch_c_flags ?? '', '-march=x86-64-v4') ||
-            ToolchainManager::getToolchainClass() !== ZigToolchain::class;
-
         shell()->cd($this->source_dir)
             ->setEnv($env)
             ->appendEnv($this->getExtraEnv())
             ->exec(
                 './configure ' . $this->getUnixConfigureArg(true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
-                '--enable-shared --disable-static' . (!$has_avx512 ? ' php_cv_have_avx512=no php_cv_have_avx512vbmi=no' : '')
+                '--enable-shared --disable-static ' . getenv('SPC_EXTRA_PHP_VARS')
             );
 
         if ($this->patchBeforeSharedMake()) {

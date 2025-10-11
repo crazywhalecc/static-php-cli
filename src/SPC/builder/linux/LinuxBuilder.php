@@ -9,8 +9,6 @@ use SPC\exception\PatchException;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
-use SPC\toolchain\ToolchainManager;
-use SPC\toolchain\ZigToolchain;
 use SPC\util\GlobalEnvManager;
 use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
@@ -105,10 +103,6 @@ class LinuxBuilder extends UnixBuilderBase
             );
         }
 
-        $has_avx512 = str_contains($this->arch_c_flags, '-mavx512') ||
-            str_contains($this->arch_c_flags, '-march=x86-64-v4') ||
-            ToolchainManager::getToolchainClass() !== ZigToolchain::class;
-
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd(SOURCE_PATH . '/php-src')->exec(
             $php_configure_env . ' ' .
                 getenv('SPC_CMD_PREFIX_PHP_CONFIGURE') . ' ' .
@@ -122,7 +116,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                (!$has_avx512 ? 'php_cv_have_avx512=no php_cv_have_avx512vbmi=no ' : '') .
+                getenv('SPC_EXTRA_PHP_VARS') . ' ' .
                 $this->makeStaticExtensionArgs() . ' '
         ));
 
