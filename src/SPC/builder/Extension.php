@@ -427,13 +427,15 @@ class Extension
             logger()->info("Extension [{$this->getName()}] patched before shared configure");
         }
 
+        $phpvars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+
         shell()->cd($this->source_dir)
             ->setEnv($env)
             ->appendEnv($this->getExtraEnv())
             ->exec(
                 './configure ' . $this->getUnixConfigureArg(true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
-                '--enable-shared --disable-static ' . getenv('SPC_EXTRA_PHP_VARS')
+                "--enable-shared --disable-static {$phpvars}"
             );
 
         if ($this->patchBeforeSharedMake()) {

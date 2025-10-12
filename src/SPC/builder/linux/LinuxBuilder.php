@@ -95,6 +95,8 @@ class LinuxBuilder extends UnixBuilderBase
             // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
 
+        $phpvars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         if ($embed_type !== 'static' && SPCTarget::isStatic()) {
             throw new WrongUsageException(
@@ -116,7 +118,7 @@ class LinuxBuilder extends UnixBuilderBase
                 $json_74 .
                 $zts .
                 $maxExecutionTimers .
-                getenv('SPC_EXTRA_PHP_VARS') . ' ' .
+                "{$phpvars} " .
                 $this->makeStaticExtensionArgs() . ' '
         ));
 
