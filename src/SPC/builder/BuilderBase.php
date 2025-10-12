@@ -129,27 +129,6 @@ abstract class BuilderBase
     }
 
     /**
-     * Check if there is a cpp extensions or libraries.
-     */
-    public function hasCpp(): bool
-    {
-        // judge cpp-extension
-        $exts = array_keys($this->getExts(false));
-        foreach ($exts as $ext) {
-            if (Config::getExt($ext, 'cpp-extension', false) === true) {
-                return true;
-            }
-        }
-        $libs = array_keys($this->getLibs());
-        foreach ($libs as $lib) {
-            if (Config::getLib($lib, 'cpp-library', false) === true) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Set libs only mode.
      *
      * @internal

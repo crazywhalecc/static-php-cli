@@ -6,6 +6,7 @@ namespace SPC\util;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\BuilderProvider;
+use SPC\builder\Extension;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -87,7 +88,7 @@ class SPCConfigUtil
         if (SPCTarget::getTargetOS() === 'Darwin') {
             $libs .= " {$this->getFrameworksString($extensions)}";
         }
-        if ($this->builder->hasCpp()) {
+        if ($this->hasCpp($extensions, $libraries)) {
             $libcpp = SPCTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
             $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
         }
@@ -121,6 +122,27 @@ class SPCConfigUtil
             'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
             'libs' => clean_spaces($allLibs),
         ];
+    }
+
+    private function hasCpp(array $extensions, array $libraries): bool
+    {
+        // judge cpp-extension
+        $builderExtNames = array_keys($this->builder->getExts(false));
+        $exts = array_unique([...$builderExtNames, ...$extensions]);
+
+        foreach ($exts as $ext) {
+            if (Config::getExt($ext, 'cpp-extension', false) === true) {
+                return true;
+            }
+        }
+        $builderLibNames = array_keys($this->builder->getLibs());
+        $libs = array_unique([...$builderLibNames, ...$libraries]);
+        foreach ($libs as $lib) {
+            if (Config::getLib($lib, 'cpp-library', false) === true) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function getIncludesString(array $libraries): string

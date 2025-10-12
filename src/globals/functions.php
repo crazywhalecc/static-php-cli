@@ -246,6 +246,23 @@ function clean_spaces(string $string): string
 }
 
 /**
+ * Deduplicate flags in a string. Only the last occurence of each flag will be kept.
+ *                        E.g. `-lintl -lstdc++ -lphp -lstdc++` becomes `-lintl -lphp -lstdc++`
+ *
+ * @param  string $flags the string containing flags to deduplicate
+ * @return string the deduplicated string with no duplicate flags
+ */
+function deduplicate_flags(string $flags): string
+{
+    $tokens = preg_split('/\s+/', trim($flags));
+
+    // Reverse, unique, reverse back - keeps last occurrence of duplicates
+    $deduplicated = array_reverse(array_unique(array_reverse($tokens)));
+
+    return implode(' ', $deduplicated);
+}
+
+/**
  * Register a callback function to handle keyboard interrupts (Ctrl+C).
  *
  * @param callable $callback callback function to handle keyboard interrupts

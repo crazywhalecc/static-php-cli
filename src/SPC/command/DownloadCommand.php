@@ -106,7 +106,7 @@ class DownloadCommand extends BaseCommand
         }
 
         // retry
-        $retry = intval($this->getOption('retry'));
+        $retry = (int) $this->getOption('retry');
         f_putenv('SPC_DOWNLOAD_RETRIES=' . $retry);
 
         // Use shallow-clone can reduce git resource download
@@ -265,7 +265,7 @@ class DownloadCommand extends BaseCommand
             f_passthru((PHP_OS_FAMILY === 'Windows' ? 'rmdir /s /q ' : 'rm -rf ') . DOWNLOAD_PATH);
         }
         // unzip command check
-        if (PHP_OS_FAMILY !== 'Windows' && !$this->findCommand('unzip')) {
+        if (PHP_OS_FAMILY !== 'Windows' && !self::findCommand('unzip')) {
             $this->output->writeln('Missing unzip command, you need to install it first !');
             $this->output->writeln('You can use "bin/spc doctor" command to check and install required tools');
             return static::FAILURE;

@@ -334,7 +334,7 @@
     },
     "grpc": {
         "type": "git",
-        "rev": "v1.68.x",
+        "rev": "v1.75.x",
         "url": "https://github.com/grpc/grpc.git",
         "provide-pre-built": true,
         "license": {
