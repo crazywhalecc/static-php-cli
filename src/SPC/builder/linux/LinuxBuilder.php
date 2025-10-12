@@ -157,9 +157,9 @@ class LinuxBuilder extends UnixBuilderBase
         $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
         if (!empty($shared_extensions)) {
             if (SPCTarget::isStatic()) {
-                throw new WrongUsageException("You're building against musl libc statically, but you're trying to build shared extensions. Musl libc does not implement `dlopen`, so your php binary is not able to load shared extensions.");
+                throw new WrongUsageException("You're building against musl libc statically, but you're trying to build shared extensions. Static musl libc does not implement `dlopen`, so your php binary is not able to load shared extensions.");
             }
-            logger()->info('Building shared extensions ...');
+            logger()->info('Building shared extensions...');
             $this->buildSharedExts();
         }
     }
