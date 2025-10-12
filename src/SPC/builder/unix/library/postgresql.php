@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\exception\BuildFailureException;
 use SPC\store\FileSystem;
 use SPC\util\PkgConfigUtil;
+use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
 trait postgresql
@@ -25,90 +24,57 @@ trait postgresql
                 '#if defined(__linux__) && !defined(__aarch64__) && !defined(HWCAP2_CRC32)',
                 '#if defined(__linux__) && !defined(HWCAP_CRC32)',
             );
-            return true;
         }
-        return false;
+        // skip the test on platforms where libpq infrastructure may be provided by statically-linked libraries
+        FileSystem::replaceFileStr("{$this->source_dir}/src/interfaces/libpq/Makefile", 'invokes exit\'; exit 1;', 'invokes exit\';');
+        // disable shared libs build
+        FileSystem::replaceFileStr(
+            "{$this->source_dir}/src/Makefile.shlib",
+            [
+                '$(LINK.shared) -o $@ $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK)',
+                '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(pkglibdir)/$(shlib)\'',
+                '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(libdir)/$(shlib)\'',
+                '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(bindir)/$(shlib)\'',
+            ],
+            ''
+        );
+        return true;
     }
 
     protected function build(): void
     {
-        $builddir = BUILD_ROOT_PATH;
-        $envs = '';
-        $packages = 'zlib openssl readline libxml-2.0';
-        $optional_packages = [
-            'zstd' => 'libzstd',
-            'ldap' => 'ldap',
-            'libxslt' => 'libxslt',
-            'icu' => 'icu-i18n',
-        ];
-        $error_exec_cnt = 0;
+        $libs = array_map(fn ($x) => $x->getName(), $this->getDependencies());
+        $spc = new SPCConfigUtil($this->getBuilder(), ['no_php' => true, 'libs_only_deps' => true]);
+        $config = $spc->config(libraries: $libs);
 
-        foreach ($optional_packages as $lib => $pkg) {
-            if ($this->builder->getLib($lib)) {
-                $packages .= ' ' . $pkg;
-                $output = shell()->execWithResult("pkg-config --static {$pkg}");
-                $error_exec_cnt += $output[0] === 0 ? 0 : 1;
-                logger()->info(var_export($output[1], true));
-            }
-        }
-
-        $output = shell()->execWithResult("pkg-config --cflags-only-I --static {$packages}");
-        $error_exec_cnt += $output[0] === 0 ? 0 : 1;
         $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
-        $cflags = '';
-        if (!empty($output[1][0])) {
-            $cflags = $output[1][0];
-            $envs .= ' CPPFLAGS="-DPIC"';
-            $cflags = "{$cflags} -fno-ident{$macos_15_bug_cflags}";
-        }
-        $output = shell()->execWithResult("pkg-config --libs-only-L --static {$packages}");
-        $error_exec_cnt += $output[0] === 0 ? 0 : 1;
-        if (!empty($output[1][0])) {
-            $ldflags = $output[1][0];
-            $envs .= " LDFLAGS=\"{$ldflags}\" ";
-        }
-        $output = shell()->execWithResult("pkg-config --libs-only-l --static {$packages}");
-        $error_exec_cnt += $output[0] === 0 ? 0 : 1;
-        if (!empty($output[1][0])) {
-            $libs = $output[1][0];
-            $libcpp = '';
-            if ($this->builder->getLib('icu')) {
-                $libcpp = $this instanceof LinuxLibraryBase ? ' -lstdc++' : ' -lc++';
-            }
-            $envs .= " LIBS=\"{$libs}{$libcpp}\" ";
-        }
-        if ($error_exec_cnt > 0) {
-            throw new BuildFailureException('Failed to get pkg-config information!');
+
+        $env_vars = [
+            'CFLAGS' => "{$config['cflags']} -fno-ident{$macos_15_bug_cflags}",
+            'CPPFLAGS' => '-DPIC',
+            'LDFLAGS' => $config['ldflags'],
+            'LIBS' => $config['libs'],
+        ];
+
+        if ($ldLibraryPath = getenv('SPC_LD_LIBRARY_PATH')) {
+            $env_vars['LD_LIBRARY_PATH'] = $ldLibraryPath;
         }
 
         FileSystem::resetDir($this->source_dir . '/build');
 
-        # 有静态链接配置  参考文件： src/interfaces/libpq/Makefile
-        shell()->cd($this->source_dir . '/build')
-            ->exec('sed -i.backup "s/invokes exit\'; exit 1;/invokes exit\';/"  ../src/interfaces/libpq/Makefile')
-            ->exec('sed -i.backup "278 s/^/# /"  ../src/Makefile.shlib')
-            ->exec('sed -i.backup "402 s/^/# /"  ../src/Makefile.shlib');
-
         // php source relies on the non-private encoding functions in libpgcommon.a
         FileSystem::replaceFileStr(
-            $this->source_dir . '/src/common/Makefile',
+            "{$this->source_dir}/src/common/Makefile",
             '$(OBJS_FRONTEND): CPPFLAGS += -DUSE_PRIVATE_ENCODING_FUNCS',
             '$(OBJS_FRONTEND): CPPFLAGS += -UUSE_PRIVATE_ENCODING_FUNCS -DFRONTEND',
         );
 
-        $env = [
-            'CFLAGS' => $cflags,
-        ];
-        if ($ldLibraryPath = getenv('SPC_LD_LIBRARY_PATH')) {
-            $env['LD_LIBRARY_PATH'] = $ldLibraryPath;
-        }
-
         // configure
-        $shell = shell()->cd($this->source_dir . '/build')->initializeEnv($this)
-            ->appendEnv($env)
+        $shell = shell()->cd("{$this->source_dir}/build")->initializeEnv($this)
+            ->appendEnv($env_vars)
             ->exec(
-                "{$envs} ../configure " .
-                "--prefix={$builddir} " .
+                '../configure ' .
+                "--prefix={$this->getBuildRootPath()} " .
                 '--enable-coverage=no ' .
                 '--with-ssl=openssl ' .
                 '--with-readline ' .
@@ -125,6 +91,7 @@ trait postgresql
                 '--without-tcl '
             );
 
+        // patch ldap lib
         if ($this->builder->getLib('ldap')) {
             $libs = PkgConfigUtil::getLibsArray('ldap');
             $libs = clean_spaces(implode(' ', $libs));
@@ -133,18 +100,18 @@ trait postgresql
         }
 
         $shell
-            ->exec($envs . ' make -C src/bin/pg_config install')
-            ->exec($envs . ' make -C src/include install')
-            ->exec($envs . ' make -C src/common install')
-            ->exec($envs . ' make -C src/port install')
-            ->exec($envs . ' make -C src/interfaces/libpq install');
+            ->exec('make -C src/bin/pg_config install')
+            ->exec('make -C src/include install')
+            ->exec('make -C src/common install')
+            ->exec('make -C src/port install')
+            ->exec('make -C src/interfaces/libpq install');
 
         // remove dynamic libs
         shell()->cd($this->source_dir . '/build')
-            ->exec("rm -rf {$builddir}/lib/*.so.*")
-            ->exec("rm -rf {$builddir}/lib/*.so")
-            ->exec("rm -rf {$builddir}/lib/*.dylib");
+            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so.*")
+            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so")
+            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.dylib");
 
-        FileSystem::replaceFileStr(BUILD_LIB_PATH . '/pkgconfig/libpq.pc', '-lldap', '-lldap -llber');
+        FileSystem::replaceFileStr("{$this->getLibDir()}/pkgconfig/libpq.pc", '-lldap', '-lldap -llber');
     }
 }
