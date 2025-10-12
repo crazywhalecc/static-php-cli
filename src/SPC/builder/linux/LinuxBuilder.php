@@ -157,7 +157,11 @@ class LinuxBuilder extends UnixBuilderBase
         $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
         if (!empty($shared_extensions)) {
             if (SPCTarget::isStatic()) {
-                throw new WrongUsageException("You're building against musl libc statically, but you're trying to build shared extensions. Static musl libc does not implement `dlopen`, so your php binary is not able to load shared extensions.");
+                throw new WrongUsageException(
+                    "You're building against musl libc statically (the default on Linux), but you're trying to build shared extensions.\n" .
+                    'Static musl libc does not implement `dlopen`, so your php binary is not able to load shared extensions.' . "\n" .
+                    'Either use SPC_LIBC=glibc to link against glibc on a glibc OS, or use SPC_TARGET="native-native-musl -dynamic" to link against musl libc dynamically using `zig cc`.'
+                );
             }
             logger()->info('Building shared extensions...');
             $this->buildSharedExts();
