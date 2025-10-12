@@ -45,7 +45,7 @@ trait postgresql
     {
         $libs = array_map(fn ($x) => $x->getName(), $this->getDependencies());
         $spc = new SPCConfigUtil($this->getBuilder(), ['no_php' => true, 'libs_only_deps' => true]);
-        $config = $spc->config(libraries: $libs);
+        $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs'));
 
         $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
 
