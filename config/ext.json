@@ -759,11 +759,9 @@
         },
         "type": "builtin",
         "arg-type": "custom",
-        "lib-depends": [
-            "libxml2"
-        ],
-        "ext-depends-windows": [
-            "xml"
+        "ext-depends": [
+            "libxml",
+            "session"
         ]
     },
     "sockets": {
