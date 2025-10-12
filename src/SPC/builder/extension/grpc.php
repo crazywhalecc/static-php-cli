@@ -56,4 +56,11 @@ class grpc extends Extension
         GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -Wno-strict-prototypes');
         return true;
     }
+
+    protected function getSharedExtensionEnv(): array
+    {
+        $env = parent::getSharedExtensionEnv();
+        $env['CPPFLAGS'] = $env['CXXFLAGS'] . ' -Wno-attributes';
+        return $env;
+    }
 }
