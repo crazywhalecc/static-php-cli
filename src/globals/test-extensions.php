@@ -155,7 +155,6 @@ if ($shared_extensions) {
     switch ($argv[2] ?? null) {
         case 'ubuntu-22.04':
         case 'ubuntu-22.04-arm':
-        case 'macos-14':
         case 'macos-15':
         case 'macos-15-intel':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
