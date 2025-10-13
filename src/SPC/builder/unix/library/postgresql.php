@@ -49,10 +49,8 @@ trait postgresql
         $spc = new SPCConfigUtil($this->getBuilder(), ['no_php' => true, 'libs_only_deps' => true]);
         $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs'));
 
-        $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? '' : '';
-
         $env_vars = [
-            'CFLAGS' => "{$config['cflags']} -fno-ident{$macos_15_bug_cflags}",
+            'CFLAGS' => "{$config['cflags']} -fno-ident",
             'CPPFLAGS' => '-DPIC',
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => $config['libs'],
