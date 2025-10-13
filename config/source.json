@@ -266,7 +266,6 @@
     "ext-zip": {
         "type": "url",
         "url": "https://pecl.php.net/get/zip",
-        "path": "php-src/ext/zip/latest",
         "filename": "ext-zip.tgz",
         "license": {
             "type": "file",
