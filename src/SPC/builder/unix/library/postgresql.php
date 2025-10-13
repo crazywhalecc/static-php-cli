@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\exception\FileSystemException;
 use SPC\store\FileSystem;
 use SPC\util\PkgConfigUtil;
 use SPC\util\SPCConfigUtil;
@@ -13,17 +14,18 @@ trait postgresql
 {
     public function patchBeforeBuild(): bool
     {
+        // fix aarch64 build on glibc 2.17 (e.g. CentOS 7)
         if (SPCTarget::getLibcVersion() === '2.17' && GNU_ARCH === 'aarch64') {
-            FileSystem::replaceFileStr(
-                $this->source_dir . '/src/port/pg_popcount_aarch64.c',
-                'HWCAP_SVE',
-                '0',
-            );
-            FileSystem::replaceFileStr(
-                $this->source_dir . '/src/port/pg_crc32c_armv8_choose.c',
-                '#if defined(__linux__) && !defined(__aarch64__) && !defined(HWCAP2_CRC32)',
-                '#if defined(__linux__) && !defined(HWCAP_CRC32)',
-            );
+            try {
+                FileSystem::replaceFileStr("{$this->source_dir}/src/port/pg_popcount_aarch64.c", 'HWCAP_SVE', '0');
+                FileSystem::replaceFileStr(
+                    "{$this->source_dir}/src/port/pg_crc32c_armv8_choose.c",
+                    '#if defined(__linux__) && !defined(__aarch64__) && !defined(HWCAP2_CRC32)',
+                    '#if defined(__linux__) && !defined(HWCAP_CRC32)'
+                );
+            } catch (FileSystemException) {
+                // allow file not-existence to make it compatible with old and new version
+            }
         }
         // skip the test on platforms where libpq infrastructure may be provided by statically-linked libraries
         FileSystem::replaceFileStr("{$this->source_dir}/src/interfaces/libpq/Makefile", 'invokes exit\'; exit 1;', 'invokes exit\';');
@@ -47,7 +49,7 @@ trait postgresql
         $spc = new SPCConfigUtil($this->getBuilder(), ['no_php' => true, 'libs_only_deps' => true]);
         $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs'));
 
-        $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? ' -Wno-unguarded-availability-new' : '';
+        $macos_15_bug_cflags = PHP_OS_FAMILY === 'Darwin' ? '' : '';
 
         $env_vars = [
             'CFLAGS' => "{$config['cflags']} -fno-ident{$macos_15_bug_cflags}",
