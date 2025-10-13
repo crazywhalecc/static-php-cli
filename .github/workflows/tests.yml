@@ -1,13 +1,9 @@
 name: Tests
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/globals/test-extensions.php'
   pull_request:
     branches: [ "main" ]
+    types: [ opened, synchronize, reopened ]
     paths:
       - 'src/**'
       - 'config/**'
