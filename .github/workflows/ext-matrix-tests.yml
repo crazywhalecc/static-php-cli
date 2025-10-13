@@ -85,9 +85,9 @@ jobs:
           - "8.4"
         operating-system:
           - "ubuntu-latest"
-          #- "macos-13"
+          #- "macos-15-intel"
           #- "debian-arm64-self-hosted"
-          - "macos-14"
+          - "macos-15"
 
     steps:
       - name: "Checkout"
@@ -99,11 +99,11 @@ jobs:
           OS=""
           if [ "${{ matrix.operating-system }}" = "ubuntu-latest" ]; then
               OS="linux-x86_64"
-          elif [ "${{ matrix.operating-system }}" = "macos-13" ]; then
+          elif [ "${{ matrix.operating-system }}" = "macos-15-intel" ]; then
               OS="macos-x86_64"
           elif [ "${{ matrix.operating-system }}" = "debian-arm64-self-hosted" ]; then
               OS="linux-aarch64"
-          elif [ "${{ matrix.operating-system }}" = "macos-14" ]; then
+          elif [ "${{ matrix.operating-system }}" = "macos-15" ]; then
               OS="macos-aarch64"
           fi
           echo "OS=$OS" >> $GITHUB_ENV
