@@ -21,10 +21,9 @@ $test_php_version = [
     // 'git',
 ];
 
-// test os (macos-13, macos-14, macos-15, ubuntu-latest, windows-latest are available)
+// test os (macos-15-intel, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-13', // bin/spc for x86_64
-    'macos-14',  // bin/spc for arm64
+    'macos-15-intel', // bin/spc for x86_64
     'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
@@ -35,7 +34,7 @@ $test_os = [
 ];
 
 // whether enable thread safe
-$zts = true;
+$zts = false;
 
 $no_strip = false;
 
@@ -50,13 +49,13 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'readline',
+    'Linux', 'Darwin' => 'pdo_pgsql',
     'Windows' => 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pdo,pdo_mysql,pdo_sqlite,phar,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'grpc,imagick',
+    'Linux' => '',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -156,16 +155,12 @@ if ($shared_extensions) {
     switch ($argv[2] ?? null) {
         case 'ubuntu-22.04':
         case 'ubuntu-22.04-arm':
+        case 'macos-15':
+        case 'macos-15-intel':
             $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
             break;
         case 'ubuntu-24.04':
         case 'ubuntu-24.04-arm':
-            break;
-        case 'macos-13':
-        case 'macos-14':
-        case 'macos-15':
-            $shared_cmd = ' --build-shared=' . quote2($shared_extensions) . ' ';
-            $no_strip = true;
             break;
         default:
             $shared_cmd = '';

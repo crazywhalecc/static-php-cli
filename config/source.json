@@ -263,6 +263,15 @@
             "path": "LICENSE"
         }
     },
+    "ext-zip": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/zip",
+        "filename": "ext-zip.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",
@@ -890,7 +899,7 @@
     "postgresql": {
         "type": "ghtagtar",
         "repo": "postgres/postgres",
-        "match": "REL_16_\\d+",
+        "match": "REL_18_\\d+",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"

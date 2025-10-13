@@ -136,12 +136,12 @@ jobs:
             macos-x86_64)
               DOWN_CMD="composer update --no-dev --classmap-authoritative && ./bin/spc doctor --auto-fix && ./bin/spc download"
               BUILD_CMD="./bin/spc build"
-              RUNS_ON="macos-13"
+              RUNS_ON="macos-15-intel"
               ;;
             macos-aarch64)
               DOWN_CMD="composer update --no-dev --classmap-authoritative && ./bin/spc doctor --auto-fix && ./bin/spc download"
               BUILD_CMD="./bin/spc build"
-              RUNS_ON="macos-14"
+              RUNS_ON="macos-15"
               ;;
           esac
           DOWN_CMD="$DOWN_CMD --with-php=${{ inputs.php-version }} --for-extensions=${{ inputs.extensions }} --ignore-cache-sources=php-src"
