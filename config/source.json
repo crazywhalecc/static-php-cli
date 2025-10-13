@@ -263,6 +263,15 @@
             "path": "LICENSE"
         }
     },
+    "ext-zip": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/zip",
+        "filename": "ext-zip.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",

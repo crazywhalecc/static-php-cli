@@ -1152,8 +1152,9 @@
         "support": {
             "BSD": "wip"
         },
-        "type": "builtin",
-        "arg-type": "with-path",
+        "type": "external",
+        "source": "ext-zip",
+        "arg-type": "custom",
         "arg-type-windows": "enable",
         "lib-depends-unix": [
             "libzip"
