@@ -572,10 +572,10 @@ class SourcePatcher
         // cli:                 $(BUILD_DIR)\php.exe:                 $(DEPS_CLI) $(CLI_GLOBAL_OBJS)                                                   $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest
         // $lines[$line_num] = '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(CLI_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS)                        $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest';
         // cgi:              $(BUILD_DIR)\php-cgi.exe:                 $(DEPS_CGI) $(CGI_GLOBAL_OBJS)                                                   $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR)\php-cgi.exe.res $(BUILD_DIR)\php-cgi.exe.manifest
-        $lines[$line_num] = '$(BUILD_DIR)\php-cgi.exe: generated_files $(DEPS_CGI) $(CGI_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR)\php-cgi.exe.res $(BUILD_DIR)\php-cgi.exe.manifest';
+        $lines[$line_num] = '$(BUILD_DIR)\php-cgi.exe: $(DEPS_CGI) $(CGI_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php-cgi.exe.res $(BUILD_DIR)\php-cgi.exe.manifest';
 
         // cli:                        @"$(LINK)" /nologo $(CGI_GLOBAL_OBJS_RESP) $(BUILD_DIR)\$(PHPLIB)                                                                 $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI)
-        $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(BUILD_DIR)\$(PHPLIB) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
     }
 

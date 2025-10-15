@@ -172,7 +172,7 @@ class WindowsBuilder extends BuilderBase
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
 
         // add nmake wrapper
-        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cgi_wrapper.bat', "nmake /nologo LIBS_CGI=\"ws2_32.lib shell32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
+        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cgi_wrapper.bat', "nmake /nologo LIBS_CGI=\"ws2_32.lib kernel32.lib advapi32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cgi_wrapper.bat --task-args php-cgi.exe");
 
