@@ -178,9 +178,9 @@ class WindowsBuilder extends BuilderBase
 
         // deploy cgi binary
         logger()->info('Deploying cgi file');
-        FileSystem::createDir(BUILD_ROOT_PATH . '\bin');
+        FileSystem::createDir(BUILD_BIN_PATH);
 
-        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . '\php-src\x64\Release' . ($this->zts ? '_TS' : '') . '\php-cgi.exe') . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\php-cgi.exe'));
+        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . '\php-src\x64\Release' . ($this->zts ? '_TS' : '') . '\php-cgi.exe') . ' ' . escapeshellarg(BUILD_BIN_PATH . '\php-cgi.exe'));
     }
 
     public function buildEmbed(): void
@@ -289,7 +289,7 @@ class WindowsBuilder extends BuilderBase
         // sanity check for php-cli
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('running cli sanity check');
-            [$ret, $output] = cmd()->execWithResult(BUILD_ROOT_PATH . '\bin\php.exe -n -r "echo \"hello\";"');
+            [$ret, $output] = cmd()->execWithResult(BUILD_BIN_PATH . '\php.exe -n -r "echo \"hello\";"');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new ValidationException('cli failed sanity check', validation_module: 'php-cli function check');
             }
@@ -308,7 +308,7 @@ class WindowsBuilder extends BuilderBase
                 if (file_exists($test_file)) {
                     @unlink($test_file);
                 }
-                file_put_contents($test_file, file_get_contents(BUILD_ROOT_PATH . '\bin\micro.sfx') . $task['content']);
+                file_put_contents($test_file, file_get_contents(BUILD_BIN_PATH . '\micro.sfx') . $task['content']);
                 chmod($test_file, 0755);
                 [$ret, $out] = cmd()->execWithResult($test_file);
                 foreach ($task['conditions'] as $condition => $closure) {
@@ -357,9 +357,9 @@ class WindowsBuilder extends BuilderBase
         }
 
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
-        FileSystem::createDir(BUILD_ROOT_PATH . '\bin');
+        FileSystem::createDir(BUILD_BIN_PATH);
 
-        cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\\'));
+        cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_BIN_PATH . '\\'));
         return true;
     }
 
