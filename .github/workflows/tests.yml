@@ -179,7 +179,7 @@ jobs:
           key: php-dependencies-${{ matrix.os }}
 
       - name: "Install Dependencies"
-        run: composer update -vvv --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: composer update -vvv --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-plugins
 
       - name: "Run Build Tests (doctor)"
         run: php src/globals/test-extensions.php doctor_cmd ${{ matrix.os }} ${{ matrix.php }}
