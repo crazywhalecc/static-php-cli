@@ -549,6 +549,31 @@ class SourcePatcher
         FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
     }
 
+    /**
+     * Patch cgi SAPI Makefile for Windows.
+     */
+    public static function patchWindowsCGITarget(): void
+    {
+        // search Makefile code line contains "$(BUILD_DIR)\php.exe:"
+        $content = FileSystem::readFile(SOURCE_PATH . '/php-src/Makefile');
+        $lines = explode("\r\n", $content);
+        $line_num = 0;
+        $found = false;
+        foreach ($lines as $v) {
+            if (str_contains($v, '$(BUILD_DIR)\php-cgi.exe:')) {
+                $found = $line_num;
+                break;
+            }
+            ++$line_num;
+        }
+        if ($found === false) {
+            throw new PatchException('Windows Makefile patching for php-cgi.exe target', 'Cannot patch windows CGI Makefile, Makefile does not contain "$(BUILD_DIR)\php-cgi.exe:" line');
+        }
+        $lines[$line_num] = '$(BUILD_DIR)\php-cgi.exe: generated_files $(DEPS_CGI) $(CGI_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR)\php-cgi.exe.res $(BUILD_DIR)\php-cgi.exe.manifest';
+        $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
+    }
+
     public static function patchPhpLibxml212(): bool
     {
         $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');

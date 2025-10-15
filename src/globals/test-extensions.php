@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    // '8.1',
-    // '8.2',
-    // '8.3',
+    '8.1',
+    '8.2',
+    '8.3',
     '8.4',
     // '8.5',
     // 'git',
@@ -23,18 +23,18 @@ $test_php_version = [
 
 // test os (macos-15-intel, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    'macos-15-intel', // bin/spc for x86_64
-    'macos-15', // bin/spc for arm64
+    // 'macos-15-intel', // bin/spc for x86_64
+    // 'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
-    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
-    'ubuntu-24.04', // bin/spc for x86_64
-    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
-    'ubuntu-24.04-arm', // bin/spc for arm64
-    // 'windows-latest', // .\bin\spc.ps1
+    // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    // 'ubuntu-24.04', // bin/spc for x86_64
+    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    // 'ubuntu-24.04-arm', // bin/spc for arm64
+    'windows-latest', // .\bin\spc.ps1
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
@@ -208,7 +208,7 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $down_cmd, $retcode);
         break;
     case 'build_cmd':
-        passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
+        passthru($prefix . $build_cmd . ' --build-cli --build-micro --build-cgi', $retcode);
         break;
     case 'build_embed_cmd':
         if ($frankenphp) {

@@ -33,7 +33,7 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
         $this->addOption('build-embed', null, null, 'Build embed SAPI (not available on Windows)');
         $this->addOption('build-frankenphp', null, null, 'Build FrankenPHP SAPI (not available on Windows)');
-        $this->addOption('build-cgi', null, null, 'Build cgi SAPI (not available on Windows)');
+        $this->addOption('build-cgi', null, null, 'Build cgi SAPI');
         $this->addOption('build-all', null, null, 'Build all SAPI');
         $this->addOption('no-strip', null, null, 'build without strip, keep symbols to debug');
         $this->addOption('disable-opcache-jit', null, null, 'disable opcache jit');
