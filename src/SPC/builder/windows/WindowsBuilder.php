@@ -180,7 +180,7 @@ class WindowsBuilder extends BuilderBase
         logger()->info('Deploying cgi file');
         FileSystem::createDir(BUILD_ROOT_PATH . '\bin');
 
-        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . "\\php-src\\x64\\Release" . ($this->zts ? '_TS' : '') . "\\php-cgi.exe") . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\\php-cgi.exe'));
+        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . '\\php-src\\x64\\Release' . ($this->zts ? '_TS' : '') . '\\php-cgi.exe') . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\php-cgi.exe'));
     }
 
     public function buildEmbed(): void
@@ -326,8 +326,8 @@ class WindowsBuilder extends BuilderBase
         // sanity check for php-cgi
         if (($build_target & BUILD_TARGET_CGI) === BUILD_TARGET_CGI) {
             logger()->info('running cgi sanity check');
-            FileSystem::writeFile(SOURCE_PATH . '\\php-cgi-test.php', '<?php echo "<h1>Hello, World!</h1>"; ?>');
-            [$ret, $output] = cmd()->execWithResult(BUILD_BIN_PATH . '\\php-cgi.exe -n -f ' . SOURCE_PATH . '\\php-cgi-test.php');
+            FileSystem::writeFile(SOURCE_PATH . '\php-cgi-test.php', '<?php echo "<h1>Hello, World!</h1>"; ?>');
+            [$ret, $output] = cmd()->execWithResult(BUILD_BIN_PATH . '\php-cgi.exe -n -f ' . SOURCE_PATH . '\php-cgi-test.php');
             $raw_output = implode("\n", $output);
             if ($ret !== 0 || !str_contains($raw_output, 'Hello, World!')) {
                 throw new ValidationException("cgi failed sanity check. code: {$ret}, output: {$raw_output}", validation_module: 'php-cgi sanity check');
