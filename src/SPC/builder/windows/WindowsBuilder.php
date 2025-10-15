@@ -180,7 +180,7 @@ class WindowsBuilder extends BuilderBase
         logger()->info('Deploying cgi file');
         FileSystem::createDir(BUILD_ROOT_PATH . '\bin');
 
-        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . '\\php-src\\x64\\Release' . ($this->zts ? '_TS' : '') . '\\php-cgi.exe') . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\php-cgi.exe'));
+        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . '\php-src\x64\Release' . ($this->zts ? '_TS' : '') . '\php-cgi.exe') . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\php-cgi.exe'));
     }
 
     public function buildEmbed(): void
