@@ -17,7 +17,7 @@ $test_php_version = [
     '8.2',
     '8.3',
     '8.4',
-    // '8.5',
+    '8.5',
     // 'git',
 ];
 
@@ -51,7 +51,7 @@ $prefer_pre_built = false;
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'pdo_pgsql',
-    'Windows' => 'bcmath,bz2,calendar,ctype,mbstring,mbregex',
+    'Windows' => 'bcmath,bz2,calendar,ctype,curl,dba,dom,ds,exif,ffi,fileinfo,filter,ftp,gd,iconv,igbinary,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,session,shmop,simdjson,simplexml,soap,sockets,sqlite3,sqlsrv,ssh2,sysvshm,tokenizer,xml,xmlreader,xmlwriter,yaml,zip,zlib',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
