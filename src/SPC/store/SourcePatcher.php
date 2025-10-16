@@ -577,6 +577,9 @@ class SourcePatcher
         // cli:                        @"$(LINK)" /nologo $(CGI_GLOBAL_OBJS_RESP) $(BUILD_DIR)\$(PHPLIB)                                                                 $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI)
         $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile(SOURCE_PATH . '/php-src/Makefile', implode("\r\n", $lines));
+
+        // Patch cgi-static, comment ZEND_TSRMLS_CACHE_DEFINE()
+        FileSystem::replaceFileRegex(SOURCE_PATH . '\php-src\sapi\cgi\cgi_main.c', '/^ZEND_TSRMLS_CACHE_DEFINE\(\)/m', '// ZEND_TSRMLS_CACHE_DEFINE()');
     }
 
     public static function patchPhpLibxml212(): bool
