@@ -137,13 +137,18 @@ class ExceptionHandler
 
         self::logError("\n----------------------------------------\n");
 
-        self::logError('⚠ The ' . ConsoleColor::cyan('console output log') . ConsoleColor::red(' is saved in ') . ConsoleColor::none(SPC_OUTPUT_LOG));
+        // convert log file path if in docker
+        $spc_log_convert = get_display_path(SPC_OUTPUT_LOG);
+        $shell_log_convert = get_display_path(SPC_SHELL_LOG);
+        $spc_logs_dir_convert = get_display_path(SPC_LOGS_DIR);
+
+        self::logError('⚠ The ' . ConsoleColor::cyan('console output log') . ConsoleColor::red(' is saved in ') . ConsoleColor::none($spc_log_convert));
         if (file_exists(SPC_SHELL_LOG)) {
-            self::logError('⚠ The ' . ConsoleColor::cyan('shell output log') . ConsoleColor::red(' is saved in ') . ConsoleColor::none(SPC_SHELL_LOG));
+            self::logError('⚠ The ' . ConsoleColor::cyan('shell output log') . ConsoleColor::red(' is saved in ') . ConsoleColor::none($shell_log_convert));
         }
         if ($e->getExtraLogFiles() !== []) {
             foreach ($e->getExtraLogFiles() as $key => $file) {
-                self::logError("⚠ Log file [{$key}] is saved in: " . ConsoleColor::none(SPC_LOGS_DIR . "/{$file}"));
+                self::logError("⚠ Log file [{$key}] is saved in: " . ConsoleColor::none("{$spc_logs_dir_convert}/{$file}"));
             }
         }
         if (!defined('DEBUG_MODE')) {

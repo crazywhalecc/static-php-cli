@@ -222,11 +222,9 @@ class BuildPHPCommand extends BuildCommand
 
         // ---------- When using bin/spc-alpine-docker, the build root path is different from the host system ----------
         $build_root_path = BUILD_ROOT_PATH;
-        $cwd = getcwd();
         $fixed = '';
+        $build_root_path = get_display_path($build_root_path);
         if (!empty(getenv('SPC_FIX_DEPLOY_ROOT'))) {
-            str_replace($cwd, '', $build_root_path);
-            $build_root_path = getenv('SPC_FIX_DEPLOY_ROOT') . '/' . basename($build_root_path);
             $fixed = ' (host system)';
         }
         if (($rule & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {

@@ -150,6 +150,7 @@ MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/source:/app/source"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/dist:/app/dist"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/downloads:/app/downloads"
 MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/pkgroot:/app/pkgroot"
+MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/log:/app/log"
 if [ -f "$(pwd)/craft.yml" ]; then
     MOUNT_LIST="$MOUNT_LIST -v ""$(pwd)""/craft.yml:/app/craft.yml"
 fi
