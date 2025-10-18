@@ -281,10 +281,10 @@ class MacOSBuilder extends UnixBuilderBase
     private function getMakeExtraVars(): array
     {
         $config = (new SPCConfigUtil($this, ['libs_only_deps' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
-        return [
+        return array_filter([
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => '-L' . BUILD_LIB_PATH,
             'EXTRA_LIBS' => $config['libs'],
-        ];
+        ]);
     }
 }
