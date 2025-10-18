@@ -57,6 +57,7 @@ class WindowsBuilder extends BuilderBase
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
         $enableMicro = ($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO;
         $enableEmbed = ($build_target & BUILD_TARGET_EMBED) === BUILD_TARGET_EMBED;
+        $enableCgi = ($build_target & BUILD_TARGET_CGI) === BUILD_TARGET_CGI;
 
         SourcePatcher::patchBeforeBuildconf($this);
 
@@ -109,6 +110,7 @@ class WindowsBuilder extends BuilderBase
                 ($enableCli ? '--enable-cli=yes ' : '--enable-cli=no ') .
                 ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
                 ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
+                ($enableCgi ? '--enable-cgi=yes ' : '--enable-cgi=no ') .
                 $config_file_scan_dir .
                 $opcache_jit_arg .
                 "{$this->makeStaticExtensionArgs()} " .
@@ -126,6 +128,10 @@ class WindowsBuilder extends BuilderBase
         }
         if ($enableFpm) {
             logger()->warning('Windows does not support fpm SAPI, I will skip it.');
+        }
+        if ($enableCgi) {
+            logger()->info('building cgi');
+            $this->buildCgi();
         }
         if ($enableMicro) {
             logger()->info('building micro');
@@ -157,6 +163,24 @@ class WindowsBuilder extends BuilderBase
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cli_wrapper.bat --task-args php.exe");
 
         $this->deployBinary(BUILD_TARGET_CLI);
+    }
+
+    public function buildCgi(): void
+    {
+        SourcePatcher::patchWindowsCGITarget();
+
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+
+        // add nmake wrapper
+        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cgi_wrapper.bat', "nmake /nologo LIBS_CGI=\"ws2_32.lib kernel32.lib advapi32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
+
+        cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cgi_wrapper.bat --task-args php-cgi.exe");
+
+        // deploy cgi binary
+        logger()->info('Deploying cgi file');
+        FileSystem::createDir(BUILD_BIN_PATH);
+
+        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . '\php-src\x64\Release' . ($this->zts ? '_TS' : '') . '\php-cgi.exe') . ' ' . escapeshellarg(BUILD_BIN_PATH . '\php-cgi.exe'));
     }
 
     public function buildEmbed(): void
@@ -265,7 +289,7 @@ class WindowsBuilder extends BuilderBase
         // sanity check for php-cli
         if (($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI) {
             logger()->info('running cli sanity check');
-            [$ret, $output] = cmd()->execWithResult(BUILD_ROOT_PATH . '\bin\php.exe -n -r "echo \"hello\";"');
+            [$ret, $output] = cmd()->execWithResult(BUILD_BIN_PATH . '\php.exe -n -r "echo \"hello\";"');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new ValidationException('cli failed sanity check', validation_module: 'php-cli function check');
             }
@@ -284,7 +308,7 @@ class WindowsBuilder extends BuilderBase
                 if (file_exists($test_file)) {
                     @unlink($test_file);
                 }
-                file_put_contents($test_file, file_get_contents(BUILD_ROOT_PATH . '\bin\micro.sfx') . $task['content']);
+                file_put_contents($test_file, file_get_contents(BUILD_BIN_PATH . '\micro.sfx') . $task['content']);
                 chmod($test_file, 0755);
                 [$ret, $out] = cmd()->execWithResult($test_file);
                 foreach ($task['conditions'] as $condition => $closure) {
@@ -296,6 +320,17 @@ class WindowsBuilder extends BuilderBase
                         );
                     }
                 }
+            }
+        }
+
+        // sanity check for php-cgi
+        if (($build_target & BUILD_TARGET_CGI) === BUILD_TARGET_CGI) {
+            logger()->info('running cgi sanity check');
+            FileSystem::writeFile(SOURCE_PATH . '\php-cgi-test.php', '<?php echo "<h1>Hello, World!</h1>"; ?>');
+            [$ret, $output] = cmd()->execWithResult(BUILD_BIN_PATH . '\php-cgi.exe -n -f ' . SOURCE_PATH . '\php-cgi-test.php');
+            $raw_output = implode("\n", $output);
+            if ($ret !== 0 || !str_contains($raw_output, 'Hello, World!')) {
+                throw new ValidationException("cgi failed sanity check. code: {$ret}, output: {$raw_output}", validation_module: 'php-cgi sanity check');
             }
         }
     }
@@ -322,9 +357,9 @@ class WindowsBuilder extends BuilderBase
         }
 
         logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
-        FileSystem::createDir(BUILD_ROOT_PATH . '\bin');
+        FileSystem::createDir(BUILD_BIN_PATH);
 
-        cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\bin\\'));
+        cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_BIN_PATH . '\\'));
         return true;
     }
 
