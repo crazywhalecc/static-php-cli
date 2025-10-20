@@ -525,7 +525,6 @@ class ConfigValidator
             'object|bool' => (is_assoc_array($value) || is_bool($value)) ?: throw new ValidationException("{$type} {$name} [{$field}] must be object or boolean"),
             'object|array' => is_array($value) ?: throw new ValidationException("{$type} {$name} [{$field}] must be an object or array"),
             'callable' => true, // Skip validation for callable
-            default => true,
         };
     }
 

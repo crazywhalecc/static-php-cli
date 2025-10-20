@@ -668,7 +668,7 @@ class Downloader
                     ]);
                     break;
                 case 'custom': // Custom download method, like API-based download or other
-                    if (isset($conf['func']) && is_callable($conf['func'])) {
+                    if (isset($conf['func'])) {
                         $conf['name'] = $name;
                         $conf['func']($force, $conf, $download_as);
                         break;
