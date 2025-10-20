@@ -44,6 +44,9 @@ class SPCConfigUtilTest extends TestCase
 
     public function testConfig(): void
     {
+        if (PHP_OS_FAMILY !== 'Linux') {
+            $this->markTestSkipped('SPCConfigUtil tests are only applicable on Linux.');
+        }
         // normal
         $result = (new SPCConfigUtil())->config(['bcmath']);
         $this->assertStringContainsString(BUILD_ROOT_PATH . '/include', $result['cflags']);
