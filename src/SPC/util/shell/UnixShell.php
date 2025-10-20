@@ -8,6 +8,7 @@ use SPC\builder\freebsd\library\BSDLibraryBase;
 use SPC\builder\linux\library\LinuxLibraryBase;
 use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\exception\SPCInternalException;
+use SPC\util\SPCTarget;
 use ZM\Logger\ConsoleColor;
 
 /**
@@ -48,7 +49,7 @@ class UnixShell extends Shell
             'CFLAGS' => $library->getLibExtraCFlags(),
             'CXXFLAGS' => $library->getLibExtraCXXFlags(),
             'LDFLAGS' => $library->getLibExtraLdFlags(),
-            'LIBS' => $library->getLibExtraLibs(),
+            'LIBS' => $library->getLibExtraLibs() . SPCTarget::getRuntimeLibs(),
         ]);
         return $this;
     }
