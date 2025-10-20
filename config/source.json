@@ -999,9 +999,8 @@
         }
     },
     "spx": {
-        "type": "git",
-        "rev": "master",
-        "url": "https://github.com/NoiseByNorthwest/php-spx.git",
+        "type": "pie",
+        "repo": "noisebynorthwest/php-spx",
         "path": "php-src/ext/spx",
         "license": {
             "type": "file",
