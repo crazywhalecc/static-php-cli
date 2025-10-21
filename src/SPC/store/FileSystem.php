@@ -635,7 +635,7 @@ class FileSystem
 
     private static function extractWithType(string $source_type, string $filename, string $extract_path): void
     {
-        logger()->debug('Extracting source [' . $source_type . ']: ' . $filename);
+        logger()->debug("Extracting source [{$source_type}]: {$filename}");
         /* @phpstan-ignore-next-line */
         match ($source_type) {
             SPC_SOURCE_ARCHIVE => self::extractArchive($filename, $extract_path),
@@ -680,22 +680,37 @@ class FileSystem
         if (count($contents) === 1 && is_dir($subdir)) {
             rename($subdir, $extract_path);
         } else {
-            // else, move all contents to extract_path
-            self::createDir($extract_path);
+            // else, if it contains only one dir, strip dir and copy other files
+            $dircount = 0;
+            $dir = [];
+            $top_files = [];
             foreach ($contents as $item) {
-                $subdir = self::convertPath("{$temp_dir}/{$item}");
-                if (is_dir($subdir)) {
-                    // move all dir contents to extract_path (strip top-level)
-                    $sub_contents = self::scanDirFiles($subdir, false, true, true);
-                    if ($sub_contents === false) {
-                        throw new FileSystemException('Cannot scan unzip temp sub-dir: ' . $subdir);
-                    }
-                    foreach ($sub_contents as $sub_item) {
-                        rename(self::convertPath("{$subdir}/{$sub_item}"), self::convertPath("{$extract_path}/{$sub_item}"));
-                    }
+                if (is_dir(self::convertPath("{$temp_dir}/{$item}"))) {
+                    ++$dircount;
+                    $dir[] = $item;
                 } else {
+                    $top_files[] = $item;
+                }
+            }
+            // extract dir contents to extract_path
+            self::createDir($extract_path);
+            // extract move dir
+            if ($dircount === 1) {
+                $sub_contents = self::scanDirFiles("{$temp_dir}/{$dir[0]}", false, true, true);
+                if ($sub_contents === false) {
+                    throw new FileSystemException("Cannot scan unzip temp sub-dir: {$dir[0]}");
+                }
+                foreach ($sub_contents as $sub_item) {
+                    rename(self::convertPath("{$temp_dir}/{$dir[0]}/{$sub_item}"), self::convertPath("{$extract_path}/{$sub_item}"));
+                }
+            } else {
+                foreach ($dir as $item) {
                     rename(self::convertPath("{$temp_dir}/{$item}"), self::convertPath("{$extract_path}/{$item}"));
                 }
+            }
+            // move top-level files to extract_path
+            foreach ($top_files as $top_file) {
+                rename(self::convertPath("{$temp_dir}/{$top_file}"), self::convertPath("{$extract_path}/{$top_file}"));
             }
         }
     }
