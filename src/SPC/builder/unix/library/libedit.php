@@ -11,9 +11,9 @@ trait libedit
 {
     public function patchBeforeBuild(): bool
     {
-        FileSystem::replaceFileStr(
+        FileSystem::replaceFileRegex(
             $this->source_dir . '/src/sys.h',
-            '//#define strl',
+            '|//#define\s+strl|',
             '#define strl'
         );
         return true;
