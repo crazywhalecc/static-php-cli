@@ -300,3 +300,20 @@ function strip_ansi_colors(string $text): string
     // Including color codes, cursor control, clear screen and other control sequences
     return preg_replace('/\e\[[0-9;]*[a-zA-Z]/', '', $text);
 }
+
+/**
+ * Convert to a real path for display purposes, used in docker volumes.
+ */
+function get_display_path(string $path): string
+{
+    $deploy_root = getenv('SPC_FIX_DEPLOY_ROOT');
+    if ($deploy_root === false) {
+        return $path;
+    }
+    $cwd = WORKING_DIR;
+    // replace build root with deploy root, only if path starts with build root
+    if (str_starts_with($path, $cwd)) {
+        return $deploy_root . substr($path, strlen($cwd));
+    }
+    throw new WrongUsageException("Cannot convert path: {$path}");
+}

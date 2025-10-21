@@ -13,7 +13,7 @@ class spx extends Extension
 {
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        $arg = '--enable-spx' . ($shared ? '=shared' : '');
+        $arg = '--enable-SPX' . ($shared ? '=shared' : '');
         if ($this->builder->getLib('zlib') !== null) {
             $arg .= ' --with-zlib-dir=' . BUILD_ROOT_PATH;
         }
@@ -27,6 +27,22 @@ class spx extends Extension
             '@cp -r assets/web-ui/*',
             '@cp -r ' . $this->source_dir . '/assets/web-ui/*',
         );
+        return true;
+    }
+
+    public function patchBeforeBuildconf(): bool
+    {
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/config.m4',
+            'CFLAGS="$CFLAGS -Werror -Wall -O3 -pthread -std=gnu90"',
+            'CFLAGS="$CFLAGS -pthread"'
+        );
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/src/php_spx.h',
+            "extern zend_module_entry spx_module_entry;\n",
+            "extern zend_module_entry spx_module_entry;;\n#define phpext_spx_ptr &spx_module_entry\n"
+        );
+        FileSystem::copy($this->source_dir . '/src/php_spx.h', $this->source_dir . '/php_spx.h');
         return true;
     }
 }

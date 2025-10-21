@@ -584,7 +584,7 @@ class FileSystem
                 'tar', 'xz', 'txz' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
                 'tgz', 'gz' => f_passthru("tar -xzf {$filename} -C {$target} --strip-components 1"),
                 'bz2' => f_passthru("tar -xjf {$filename} -C {$target} --strip-components 1"),
-                'zip' => f_passthru("unzip {$filename} -d {$target}"),
+                'zip' => self::unzipWithStrip($filename, $target),
                 default => throw new FileSystemException('unknown archive format: ' . $filename),
             };
         } elseif (PHP_OS_FAMILY === 'Windows') {
@@ -599,7 +599,7 @@ class FileSystem
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
                 'xz', 'txz', 'gz', 'tgz', 'bz2' => cmd()->execWithResult("\"{$_7z}\" x -so {$filename} | tar -f - -x -C \"{$target}\" --strip-components 1"),
-                'zip' => f_passthru("\"{$_7z}\" x {$filename} -o{$target} -y"),
+                'zip' => self::unzipWithStrip($filename, $target),
                 default => throw new FileSystemException("unknown archive format: {$filename}"),
             };
         }
@@ -635,7 +635,7 @@ class FileSystem
 
     private static function extractWithType(string $source_type, string $filename, string $extract_path): void
     {
-        logger()->debug('Extracting source [' . $source_type . ']: ' . $filename);
+        logger()->debug("Extracting source [{$source_type}]: {$filename}");
         /* @phpstan-ignore-next-line */
         match ($source_type) {
             SPC_SOURCE_ARCHIVE => self::extractArchive($filename, $extract_path),
@@ -643,5 +643,75 @@ class FileSystem
             // soft link to the local source
             SPC_SOURCE_LOCAL => symlink(self::convertPath($filename), $extract_path),
         };
+    }
+
+    /**
+     * Unzip file with stripping top-level directory
+     */
+    private static function unzipWithStrip(string $zip_file, string $extract_path): void
+    {
+        $temp_dir = self::convertPath(sys_get_temp_dir() . '/spc_unzip_' . bin2hex(random_bytes(16)));
+        $zip_file = self::convertPath($zip_file);
+        $extract_path = self::convertPath($extract_path);
+
+        // extract to temp dir
+        self::createDir($temp_dir);
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            $mute = defined('DEBUG_MODE') ? '' : ' > NUL';
+            // use php-sdk-binary-tools/bin/7za.exe
+            $_7z = self::convertPath(getenv('PHP_SDK_PATH') . '/bin/7za.exe');
+            f_passthru("\"{$_7z}\" x {$zip_file} -o{$temp_dir} -y{$mute}");
+        } else {
+            $mute = defined('DEBUG_MODE') ? '' : ' > /dev/null';
+            f_passthru("unzip \"{$zip_file}\" -d \"{$temp_dir}\"{$mute}");
+        }
+        // scan first level dirs (relative, not recursive, include dirs)
+        $contents = self::scanDirFiles($temp_dir, false, true, true);
+        if ($contents === false) {
+            throw new FileSystemException('Cannot scan unzip temp dir: ' . $temp_dir);
+        }
+        // if extract path already exists, remove it
+        if (is_dir($extract_path)) {
+            self::removeDir($extract_path);
+        }
+        // if only one dir, move its contents to extract_path using rename
+        $subdir = self::convertPath("{$temp_dir}/{$contents[0]}");
+        if (count($contents) === 1 && is_dir($subdir)) {
+            rename($subdir, $extract_path);
+        } else {
+            // else, if it contains only one dir, strip dir and copy other files
+            $dircount = 0;
+            $dir = [];
+            $top_files = [];
+            foreach ($contents as $item) {
+                if (is_dir(self::convertPath("{$temp_dir}/{$item}"))) {
+                    ++$dircount;
+                    $dir[] = $item;
+                } else {
+                    $top_files[] = $item;
+                }
+            }
+            // extract dir contents to extract_path
+            self::createDir($extract_path);
+            // extract move dir
+            if ($dircount === 1) {
+                $sub_contents = self::scanDirFiles("{$temp_dir}/{$dir[0]}", false, true, true);
+                if ($sub_contents === false) {
+                    throw new FileSystemException("Cannot scan unzip temp sub-dir: {$dir[0]}");
+                }
+                foreach ($sub_contents as $sub_item) {
+                    rename(self::convertPath("{$temp_dir}/{$dir[0]}/{$sub_item}"), self::convertPath("{$extract_path}/{$sub_item}"));
+                }
+            } else {
+                foreach ($dir as $item) {
+                    rename(self::convertPath("{$temp_dir}/{$item}"), self::convertPath("{$extract_path}/{$item}"));
+                }
+            }
+            // move top-level files to extract_path
+            foreach ($top_files as $top_file) {
+                rename(self::convertPath("{$temp_dir}/{$top_file}"), self::convertPath("{$extract_path}/{$top_file}"));
+            }
+        }
     }
 }

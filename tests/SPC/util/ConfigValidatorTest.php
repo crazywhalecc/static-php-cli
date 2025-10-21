@@ -50,7 +50,6 @@ class ConfigValidatorTest extends TestCase
                 'filename' => 'test.tar.gz',
                 'path' => 'test/path',
                 'provide-pre-built' => true,
-                'prefer-stable' => false,
                 'license' => [
                     'type' => 'file',
                     'path' => 'LICENSE',

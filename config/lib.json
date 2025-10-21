@@ -203,7 +203,6 @@
             "libcares"
         ],
         "cpp-library": true,
-        "provide-pre-built": true,
         "frameworks": [
             "CoreFoundation"
         ]
@@ -558,6 +557,21 @@
             "jbig",
             "xz",
             "zstd"
+        ]
+    },
+    "liburing": {
+        "source": "liburing",
+        "pkg-configs": [
+            "liburing",
+            "liburing-ffi"
+        ],
+        "static-libs-linux": [
+            "liburing.a",
+            "liburing-ffi.a"
+        ],
+        "headers-linux": [
+            "liburing/",
+            "liburing.h"
         ]
     },
     "libuuid": {
@@ -939,21 +953,6 @@
         "headers-windows": [
             "zstd.h",
             "zstd_errors.h"
-        ]
-    },
-    "liburing": {
-        "source": "liburing",
-        "pkg-configs": [
-            "liburing",
-            "liburing-ffi"
-        ],
-        "static-libs-linux": [
-            "liburing.a",
-            "liburing-ffi.a"
-        ],
-        "headers-linux": [
-            "liburing/",
-            "liburing.h"
         ]
     }
 }

@@ -22,6 +22,9 @@ docker/source/
 # default package root directory
 /pkgroot/**
 
+# Windows PHP SDK binary tools
+/php-sdk-binary-tools/**
+
 # default pack:lib and release directory
 /dist/**
 packlib_files.txt
