@@ -12,6 +12,150 @@ use Symfony\Component\Yaml\Yaml;
 class ConfigValidator
 {
     /**
+     * Global field type definitions
+     * Maps field names to their expected types and validation rules
+     * Note: This only includes fields used in config files (source.json, lib.json, ext.json, pkg.json, pre-built.json)
+     */
+    private const array FIELD_TYPES = [
+        // String fields
+        'url' => 'string',      // url
+        'regex' => 'string',    // regex pattern
+        'rev' => 'string',      // revision/branch
+        'repo' => 'string',     // repository name
+        'match' => 'string',    // match pattern (aaa*bbb)
+        'filename' => 'string', // filename
+        'path' => 'string',     // copy path
+        'extract' => 'string',  // copy path (alias of path)
+        'dirname' => 'string',  // directory name for local source
+        'source' => 'string',   // the source name that this item uses
+        'match-pattern-linux' => 'string',   // pre-built match pattern for linux
+        'match-pattern-macos' => 'string',   // pre-built match pattern for macos
+        'match-pattern-windows' => 'string', // pre-built match pattern for windows
+
+        // Boolean fields
+        'prefer-stable' => 'bool',      // prefer stable releases
+        'provide-pre-built' => 'bool',  // provide pre-built binaries
+        'notes' => 'bool',              // whether to show notes in docs
+        'cpp-library' => 'bool',        // whether this is a C++ library
+        'cpp-extension' => 'bool',      // whether this is a C++ extension
+        'build-with-php' => 'bool',     // whether if this extension can be built to shared with PHP source together
+        'zend-extension' => 'bool',     // whether this is a zend extension
+        'unix-only' => 'bool',          // whether this extension is only for unix-like systems
+
+        // Array fields
+        'submodules' => 'array',    // git submodules list (for git source type)
+        'lib-depends' => 'list',
+        'lib-suggests' => 'list',
+        'ext-depends' => 'list',
+        'ext-suggests' => 'list',
+        'static-libs' => 'list',
+        'pkg-configs' => 'list',    // required pkg-config files without suffix (e.g. [libwebp])
+        'headers' => 'list',        // required header files
+        'bin' => 'list',            // required binary files
+        'frameworks' => 'list',     // shared library frameworks (macOS)
+
+        // Object/assoc array fields
+        'support' => 'object',          // extension OS support docs
+        'extract-files' => 'object',    // pkg.json extract files mapping with match pattern
+        'alt' => 'object|bool',         // alternative source/package
+        'license' => 'object|array',    // license information
+        'target' => 'array',            // extension build targets (default: [static], alternate: [shared] or both)
+
+        // Special/mixed fields
+        'func' => 'callable',           // custom download function for custom source/package type
+        'type' => 'string',             // type field (validated separately)
+    ];
+
+    /**
+     * Source/Package download type validation rules
+     * Maps type names to [required_props, optional_props]
+     */
+    private const array SOURCE_TYPE_FIELDS = [
+        'filelist' => [['url', 'regex'], []],
+        'git' => [['url', 'rev'], ['path', 'extract', 'submodules']],
+        'ghtagtar' => [['repo'], ['path', 'extract', 'prefer-stable', 'match']],
+        'ghtar' => [['repo'], ['path', 'extract', 'prefer-stable', 'match']],
+        'ghrel' => [['repo', 'match'], ['path', 'extract', 'prefer-stable']],
+        'url' => [['url'], ['filename', 'path', 'extract']],
+        'bitbuckettag' => [['repo'], ['path', 'extract']],
+        'local' => [['dirname'], ['path', 'extract']],
+        'pie' => [['repo'], ['path']],
+        'custom' => [[], ['func']],
+    ];
+
+    /**
+     * Source.json specific fields [field_name => required]
+     * Note: 'type' is validated separately in validateSourceTypeConfig
+     * Field types are defined in FIELD_TYPES constant
+     */
+    private const array SOURCE_FIELDS = [
+        'type' => true,                 // source type (must be SOURCE_TYPE_FIELDS key)
+        'provide-pre-built' => false,   // whether to provide pre-built binaries
+        'alt' => false,                 // alternative source configuration
+        'license' => false,             // license information for source
+        // ... other fields are validated based on source type
+    ];
+
+    /**
+     * Lib.json specific fields [field_name => required]
+     * Field types are defined in FIELD_TYPES constant
+     */
+    private const array LIB_FIELDS = [
+        'type' => false,        // lib type (lib/package/target/root)
+        'source' => false,      // the source name that this lib uses
+        'lib-depends' => false, // required libraries
+        'lib-suggests' => false, // suggested libraries
+        'static-libs' => false, // Generated static libraries
+        'pkg-configs' => false, // Generated pkg-config files
+        'cpp-library' => false, // whether this is a C++ library
+        'headers' => false,     // Generated header files
+        'bin' => false,         // Generated binary files
+        'frameworks' => false,  // Used shared library frameworks (macOS)
+    ];
+
+    /**
+     * Ext.json specific fields [field_name => required]
+     * Field types are defined in FIELD_TYPES constant
+     */
+    private const array EXT_FIELDS = [
+        'type' => true,             // extension type (builtin/external/addon/wip)
+        'source' => false,          // the source name that this extension uses
+        'support' => false,         // extension OS support docs
+        'notes' => false,           // whether to show notes in docs
+        'cpp-extension' => false,   // whether this is a C++ extension
+        'build-with-php' => false,  // whether if this extension can be built to shared with PHP source together
+        'target' => false,          // extension build targets (default: [static], alternate: [shared] or both)
+        'lib-depends' => false,
+        'lib-suggests' => false,
+        'ext-depends' => false,
+        'ext-suggests' => false,
+        'frameworks' => false,
+        'zend-extension' => false,  // whether this is a zend extension
+        'unix-only' => false,       // whether this extension is only for unix-like systems
+    ];
+
+    /**
+     * Pkg.json specific fields [field_name => required]
+     * Field types are defined in FIELD_TYPES constant
+     */
+    private const array PKG_FIELDS = [
+        'type' => true,             // package type (same as source type)
+        'extract-files' => false,   // files to extract mapping (source pattern => target path)
+    ];
+
+    /**
+     * Pre-built.json specific fields [field_name => required]
+     * Field types are defined in FIELD_TYPES constant
+     */
+    private const array PRE_BUILT_FIELDS = [
+        'repo' => true,                     // repository name for pre-built binaries
+        'prefer-stable' => false,           // prefer stable releases
+        'match-pattern-linux' => false,     // pre-built match pattern for linux
+        'match-pattern-macos' => false,     // pre-built match pattern for macos
+        'match-pattern-windows' => false,   // pre-built match pattern for windows
+    ];
+
+    /**
      * Validate source.json
      *
      * @param array $data source.json data array
@@ -22,33 +166,20 @@ class ConfigValidator
             // Validate basic source type configuration
             self::validateSourceTypeConfig($src, $name, 'source');
 
-            // Check source-specific fields
+            // Validate all source-specific fields using unified method
+            self::validateConfigFields($src, $name, 'source', self::SOURCE_FIELDS);
+
+            // Check for unknown fields
+            self::validateAllowedFields($src, $name, 'source', self::SOURCE_FIELDS);
+
             // check if alt is valid
-            if (isset($src['alt'])) {
-                if (!is_assoc_array($src['alt']) && !is_bool($src['alt'])) {
-                    throw new ValidationException("source {$name} alt must be object or boolean");
-                }
-                if (is_assoc_array($src['alt'])) {
-                    // validate alt source recursively
-                    self::validateSource([$name . '_alt' => $src['alt']]);
-                }
-            }
-
-            // check if provide-pre-built is boolean
-            if (isset($src['provide-pre-built']) && !is_bool($src['provide-pre-built'])) {
-                throw new ValidationException("source {$name} provide-pre-built must be boolean");
-            }
-
-            // check if prefer-stable is boolean
-            if (isset($src['prefer-stable']) && !is_bool($src['prefer-stable'])) {
-                throw new ValidationException("source {$name} prefer-stable must be boolean");
+            if (isset($src['alt']) && is_assoc_array($src['alt'])) {
+                // validate alt source recursively
+                self::validateSource([$name . '_alt' => $src['alt']]);
             }
 
             // check if license is valid
             if (isset($src['license'])) {
-                if (!is_array($src['license'])) {
-                    throw new ValidationException("source {$name} license must be an object or array");
-                }
                 if (is_assoc_array($src['license'])) {
                     self::checkSingleLicense($src['license'], $name);
                 } elseif (is_list_array($src['license'])) {
@@ -58,8 +189,6 @@ class ConfigValidator
                         }
                         self::checkSingleLicense($license, $name);
                     }
-                } else {
-                    throw new ValidationException("source {$name} license must be an object or array");
                 }
             }
         }
@@ -71,9 +200,8 @@ class ConfigValidator
         if (!is_array($data)) {
             throw new ValidationException('lib.json is broken');
         }
-        // check each lib
+
         foreach ($data as $name => $lib) {
-            // check if lib is an assoc array
             if (!is_assoc_array($lib)) {
                 throw new ValidationException("lib {$name} is not an object");
             }
@@ -89,36 +217,22 @@ class ConfigValidator
             if (isset($lib['source']) && !empty($source_data) && !isset($source_data[$lib['source']])) {
                 throw new ValidationException("lib {$name} assigns an invalid source: {$lib['source']}");
             }
-            // check if source is string
-            if (isset($lib['source']) && !is_string($lib['source'])) {
-                throw new ValidationException("lib {$name} source must be string");
-            }
-            // check if [lib-depends|lib-suggests|static-libs|headers|bin][-windows|-unix|-macos|-linux] are valid list array
+
+            // Validate basic fields using unified method
+            self::validateConfigFields($lib, $name, 'lib', self::LIB_FIELDS);
+
+            // Validate list array fields with suffixes
             $suffixes = ['', '-windows', '-unix', '-macos', '-linux'];
-            foreach ($suffixes as $suffix) {
-                if (isset($lib['lib-depends' . $suffix]) && !is_list_array($lib['lib-depends' . $suffix])) {
-                    throw new ValidationException("lib {$name} lib-depends must be a list");
-                }
-                if (isset($lib['lib-suggests' . $suffix]) && !is_list_array($lib['lib-suggests' . $suffix])) {
-                    throw new ValidationException("lib {$name} lib-suggests must be a list");
-                }
-                if (isset($lib['static-libs' . $suffix]) && !is_list_array($lib['static-libs' . $suffix])) {
-                    throw new ValidationException("lib {$name} static-libs must be a list");
-                }
-                if (isset($lib['pkg-configs' . $suffix]) && !is_list_array($lib['pkg-configs' . $suffix])) {
-                    throw new ValidationException("lib {$name} pkg-configs must be a list");
-                }
-                if (isset($lib['headers' . $suffix]) && !is_list_array($lib['headers' . $suffix])) {
-                    throw new ValidationException("lib {$name} headers must be a list");
-                }
-                if (isset($lib['bin' . $suffix]) && !is_list_array($lib['bin' . $suffix])) {
-                    throw new ValidationException("lib {$name} bin must be a list");
-                }
+            $fields = ['lib-depends', 'lib-suggests', 'static-libs', 'pkg-configs', 'headers', 'bin'];
+            self::validateListArrayFields($lib, $name, 'lib', $fields, $suffixes);
+
+            // Validate frameworks (special case without suffix)
+            if (isset($lib['frameworks'])) {
+                self::validateFieldType('frameworks', $lib['frameworks'], $name, 'lib');
             }
-            // check if frameworks is a list array
-            if (isset($lib['frameworks']) && !is_list_array($lib['frameworks'])) {
-                throw new ValidationException("lib {$name} frameworks must be a list");
-            }
+
+            // Check for unknown fields
+            self::validateAllowedFields($lib, $name, 'lib', self::LIB_FIELDS);
         }
     }
 
@@ -127,61 +241,34 @@ class ConfigValidator
         if (!is_array($data)) {
             throw new ValidationException('ext.json is broken');
         }
-        // check each extension
+
         foreach ($data as $name => $ext) {
-            // check if ext is an assoc array
             if (!is_assoc_array($ext)) {
                 throw new ValidationException("ext {$name} is not an object");
             }
-            // check if ext has valid type
+
             if (!in_array($ext['type'] ?? '', ['builtin', 'external', 'addon', 'wip'])) {
                 throw new ValidationException("ext {$name} type is invalid");
             }
-            // check if external ext has source
+
+            // Check source field requirement
             if (($ext['type'] ?? '') === 'external' && !isset($ext['source'])) {
                 throw new ValidationException("ext {$name} does not assign any source");
             }
-            // check if source is string
-            if (isset($ext['source']) && !is_string($ext['source'])) {
-                throw new ValidationException("ext {$name} source must be string");
-            }
-            // check if support is valid
-            if (isset($ext['support']) && !is_assoc_array($ext['support'])) {
-                throw new ValidationException("ext {$name} support must be an object");
-            }
-            // check if notes is boolean
-            if (isset($ext['notes']) && !is_bool($ext['notes'])) {
-                throw new ValidationException("ext {$name} notes must be boolean");
-            }
-            // check if [lib-depends|lib-suggests|ext-depends][-windows|-unix|-macos|-linux] are valid list array
+
+            // Validate basic fields using unified method
+            self::validateConfigFields($ext, $name, 'ext', self::EXT_FIELDS);
+
+            // Validate list array fields with suffixes
             $suffixes = ['', '-windows', '-unix', '-macos', '-linux'];
-            foreach ($suffixes as $suffix) {
-                if (isset($ext['lib-depends' . $suffix]) && !is_list_array($ext['lib-depends' . $suffix])) {
-                    throw new ValidationException("ext {$name} lib-depends must be a list");
-                }
-                if (isset($ext['lib-suggests' . $suffix]) && !is_list_array($ext['lib-suggests' . $suffix])) {
-                    throw new ValidationException("ext {$name} lib-suggests must be a list");
-                }
-                if (isset($ext['ext-depends' . $suffix]) && !is_list_array($ext['ext-depends' . $suffix])) {
-                    throw new ValidationException("ext {$name} ext-depends must be a list");
-                }
-            }
-            // check if arg-type is valid
-            if (isset($ext['arg-type'])) {
-                $valid_arg_types = ['enable', 'with', 'with-path', 'custom', 'none', 'enable-path'];
-                if (!in_array($ext['arg-type'], $valid_arg_types)) {
-                    throw new ValidationException("ext {$name} arg-type is invalid");
-                }
-            }
-            // check if arg-type with suffix is valid
-            foreach ($suffixes as $suffix) {
-                if (isset($ext['arg-type' . $suffix])) {
-                    $valid_arg_types = ['enable', 'with', 'with-path', 'custom', 'none', 'enable-path'];
-                    if (!in_array($ext['arg-type' . $suffix], $valid_arg_types)) {
-                        throw new ValidationException("ext {$name} arg-type{$suffix} is invalid");
-                    }
-                }
-            }
+            $fields = ['lib-depends', 'lib-suggests', 'ext-depends', 'ext-suggests'];
+            self::validateListArrayFields($ext, $name, 'ext', $fields, $suffixes);
+
+            // Validate arg-type fields
+            self::validateArgTypeFields($ext, $name, $suffixes);
+
+            // Check for unknown fields
+            self::validateAllowedFields($ext, $name, 'ext', self::EXT_FIELDS);
         }
     }
 
@@ -200,12 +287,11 @@ class ConfigValidator
             // Validate basic source type configuration (reuse from source validation)
             self::validateSourceTypeConfig($pkg, $name, 'pkg');
 
-            // Check pkg-specific fields
-            // check if extract-files is valid
+            // Validate all pkg-specific fields using unified method
+            self::validateConfigFields($pkg, $name, 'pkg', self::PKG_FIELDS);
+
+            // Validate extract-files content (object validation is done by validateFieldType)
             if (isset($pkg['extract-files'])) {
-                if (!is_assoc_array($pkg['extract-files'])) {
-                    throw new ValidationException("pkg {$name} extract-files must be an object");
-                }
                 // check each extract file mapping
                 foreach ($pkg['extract-files'] as $source => $target) {
                     if (!is_string($source) || !is_string($target)) {
@@ -213,6 +299,9 @@ class ConfigValidator
                     }
                 }
             }
+
+            // Check for unknown fields
+            self::validateAllowedFields($pkg, $name, 'pkg', self::PKG_FIELDS);
         }
     }
 
@@ -227,18 +316,11 @@ class ConfigValidator
             throw new ValidationException('pre-built.json is broken');
         }
 
-        // Check required fields
-        if (!isset($data['repo'])) {
-            throw new ValidationException('pre-built.json must have [repo] field');
-        }
-        if (!is_string($data['repo'])) {
-            throw new ValidationException('pre-built.json [repo] must be string');
-        }
+        // Validate all fields using unified method
+        self::validateConfigFields($data, 'pre-built', 'pre-built', self::PRE_BUILT_FIELDS);
 
-        // Check optional prefer-stable field
-        if (isset($data['prefer-stable']) && !is_bool($data['prefer-stable'])) {
-            throw new ValidationException('pre-built.json [prefer-stable] must be boolean');
-        }
+        // Check for unknown fields
+        self::validateAllowedFields($data, 'pre-built', 'pre-built', self::PRE_BUILT_FIELDS);
 
         // Check match pattern fields (at least one must exist)
         $pattern_fields = ['match-pattern-linux', 'match-pattern-macos', 'match-pattern-windows'];
@@ -247,9 +329,6 @@ class ConfigValidator
         foreach ($pattern_fields as $field) {
             if (isset($data[$field])) {
                 $has_pattern = true;
-                if (!is_string($data[$field])) {
-                    throw new ValidationException("pre-built.json [{$field}] must be string");
-                }
                 // Validate pattern contains required placeholders
                 if (!str_contains($data[$field], '{name}')) {
                     throw new ValidationException("pre-built.json [{$field}] must contain {name} placeholder");
@@ -403,6 +482,52 @@ class ConfigValidator
         return $craft;
     }
 
+    /**
+     * Validate a field based on its global type definition
+     *
+     * @param  string $field Field name
+     * @param  mixed  $value Field value
+     * @param  string $name  Item name (for error messages)
+     * @param  string $type  Item type (for error messages)
+     * @return bool   Returns true if validation passes
+     */
+    private static function validateFieldType(string $field, mixed $value, string $name, string $type): bool
+    {
+        // Check if field exists in FIELD_TYPES
+        if (!isset(self::FIELD_TYPES[$field])) {
+            // Try to strip suffix and check base field name
+            $suffixes = ['-windows', '-unix', '-macos', '-linux'];
+            $base_field = $field;
+            foreach ($suffixes as $suffix) {
+                if (str_ends_with($field, $suffix)) {
+                    $base_field = substr($field, 0, -strlen($suffix));
+                    break;
+                }
+            }
+
+            if (!isset(self::FIELD_TYPES[$base_field])) {
+                // Unknown field is not allowed - strict validation
+                throw new ValidationException("{$type} {$name} has unknown field [{$field}]");
+            }
+
+            // Use base field type for validation
+            $expected_type = self::FIELD_TYPES[$base_field];
+        } else {
+            $expected_type = self::FIELD_TYPES[$field];
+        }
+
+        return match ($expected_type) {
+            'string' => is_string($value) ?: throw new ValidationException("{$type} {$name} [{$field}] must be string"),
+            'bool' => is_bool($value) ?: throw new ValidationException("{$type} {$name} [{$field}] must be boolean"),
+            'array' => is_array($value) ?: throw new ValidationException("{$type} {$name} [{$field}] must be array"),
+            'list' => is_list_array($value) ?: throw new ValidationException("{$type} {$name} [{$field}] must be a list"),
+            'object' => is_assoc_array($value) ?: throw new ValidationException("{$type} {$name} [{$field}] must be an object"),
+            'object|bool' => (is_assoc_array($value) || is_bool($value)) ?: throw new ValidationException("{$type} {$name} [{$field}] must be object or boolean"),
+            'object|array' => is_array($value) ?: throw new ValidationException("{$type} {$name} [{$field}] must be an object or array"),
+            'callable' => true, // Skip validation for callable
+        };
+    }
+
     private static function checkSingleLicense(array $license, string $name): void
     {
         if (!is_assoc_array($license)) {
@@ -410,9 +535,6 @@ class ConfigValidator
         }
         if (!isset($license['type'])) {
             throw new ValidationException("source {$name} license must have type");
-        }
-        if (!in_array($license['type'], ['file', 'text'])) {
-            throw new ValidationException("source {$name} license type is invalid");
         }
         if (!in_array($license['type'], ['file', 'text'])) {
             throw new ValidationException("source {$name} license type is invalid");
@@ -440,68 +562,127 @@ class ConfigValidator
         if (!is_string($item['type'])) {
             throw new ValidationException("{$config_type} {$name} type prop must be string");
         }
-        if (!in_array($item['type'], ['filelist', 'git', 'ghtagtar', 'ghtar', 'ghrel', 'url', 'custom'])) {
+
+        if (!isset(self::SOURCE_TYPE_FIELDS[$item['type']])) {
             throw new ValidationException("{$config_type} {$name} type [{$item['type']}] is invalid");
         }
 
-        // Validate type-specific requirements
-        switch ($item['type']) {
-            case 'filelist':
-                if (!isset($item['url'], $item['regex'])) {
-                    throw new ValidationException("{$config_type} {$name} needs [url] and [regex] props");
+        [$required, $optional] = self::SOURCE_TYPE_FIELDS[$item['type']];
+
+        // Check required fields exist
+        foreach ($required as $prop) {
+            if (!isset($item[$prop])) {
+                $props = implode('] and [', $required);
+                throw new ValidationException("{$config_type} {$name} needs [{$props}] props");
+            }
+        }
+
+        // Validate field types using global field type definitions
+        foreach (array_merge($required, $optional) as $prop) {
+            if (isset($item[$prop])) {
+                self::validateFieldType($prop, $item[$prop], $name, $config_type);
+            }
+        }
+    }
+
+    /**
+     * Validate that fields with suffixes are list arrays
+     */
+    private static function validateListArrayFields(array $item, string $name, string $type, array $fields, array $suffixes): void
+    {
+        foreach ($fields as $field) {
+            foreach ($suffixes as $suffix) {
+                $key = $field . $suffix;
+                if (isset($item[$key])) {
+                    self::validateFieldType($key, $item[$key], $name, $type);
                 }
-                if (!is_string($item['url']) || !is_string($item['regex'])) {
-                    throw new ValidationException("{$config_type} {$name} [url] and [regex] must be string");
+            }
+        }
+    }
+
+    /**
+     * Validate arg-type fields with suffixes
+     */
+    private static function validateArgTypeFields(array $item, string $name, array $suffixes): void
+    {
+        $valid_arg_types = ['enable', 'with', 'with-path', 'custom', 'none', 'enable-path'];
+
+        foreach (array_merge([''], $suffixes) as $suffix) {
+            $key = 'arg-type' . $suffix;
+            if (isset($item[$key]) && !in_array($item[$key], $valid_arg_types)) {
+                throw new ValidationException("ext {$name} {$key} is invalid");
+            }
+        }
+    }
+
+    /**
+     * Unified method to validate config fields based on field definitions
+     *
+     * @param array  $item              Item data to validate
+     * @param string $name              Item name for error messages
+     * @param string $type              Config type (source, lib, ext, pkg, pre-built)
+     * @param array  $field_definitions Field definitions [field_name => required (bool)]
+     */
+    private static function validateConfigFields(array $item, string $name, string $type, array $field_definitions): void
+    {
+        foreach ($field_definitions as $field => $required) {
+            if ($required && !isset($item[$field])) {
+                throw new ValidationException("{$type} {$name} must have [{$field}] field");
+            }
+
+            if (isset($item[$field])) {
+                self::validateFieldType($field, $item[$field], $name, $type);
+            }
+        }
+    }
+
+    /**
+     * Validate that item only contains allowed fields
+     * This method checks for unknown fields based on the config type
+     *
+     * @param array  $item              Item data to validate
+     * @param string $name              Item name for error messages
+     * @param string $type              Config type (source, lib, ext, pkg, pre-built)
+     * @param array  $field_definitions Field definitions [field_name => required (bool)]
+     */
+    private static function validateAllowedFields(array $item, string $name, string $type, array $field_definitions): void
+    {
+        // For source and pkg types, we need to check SOURCE_TYPE_FIELDS as well
+        $allowed_fields = array_keys($field_definitions);
+
+        // For source/pkg, add allowed fields from SOURCE_TYPE_FIELDS based on the type
+        if (in_array($type, ['source', 'pkg']) && isset($item['type'], self::SOURCE_TYPE_FIELDS[$item['type']])) {
+            [$required, $optional] = self::SOURCE_TYPE_FIELDS[$item['type']];
+            $allowed_fields = array_merge($allowed_fields, $required, $optional);
+        }
+
+        // For lib and ext types, add fields with suffixes
+        if (in_array($type, ['lib', 'ext'])) {
+            $suffixes = ['-windows', '-unix', '-macos', '-linux'];
+            $base_fields = ['lib-depends', 'lib-suggests', 'static-libs', 'pkg-configs', 'headers', 'bin'];
+            if ($type === 'ext') {
+                $base_fields = ['lib-depends', 'lib-suggests', 'ext-depends', 'ext-suggests'];
+                // Add arg-type fields
+                foreach (array_merge([''], $suffixes) as $suffix) {
+                    $allowed_fields[] = 'arg-type' . $suffix;
                 }
-                break;
-            case 'git':
-                if (!isset($item['url'], $item['rev'])) {
-                    throw new ValidationException("{$config_type} {$name} needs [url] and [rev] props");
+            }
+            foreach ($base_fields as $field) {
+                foreach ($suffixes as $suffix) {
+                    $allowed_fields[] = $field . $suffix;
                 }
-                if (!is_string($item['url']) || !is_string($item['rev'])) {
-                    throw new ValidationException("{$config_type} {$name} [url] and [rev] must be string");
-                }
-                if (isset($item['path']) && !is_string($item['path'])) {
-                    throw new ValidationException("{$config_type} {$name} [path] must be string");
-                }
-                break;
-            case 'ghtagtar':
-            case 'ghtar':
-                if (!isset($item['repo'])) {
-                    throw new ValidationException("{$config_type} {$name} needs [repo] prop");
-                }
-                if (!is_string($item['repo'])) {
-                    throw new ValidationException("{$config_type} {$name} [repo] must be string");
-                }
-                if (isset($item['path']) && !is_string($item['path'])) {
-                    throw new ValidationException("{$config_type} {$name} [path] must be string");
-                }
-                break;
-            case 'ghrel':
-                if (!isset($item['repo'], $item['match'])) {
-                    throw new ValidationException("{$config_type} {$name} needs [repo] and [match] props");
-                }
-                if (!is_string($item['repo']) || !is_string($item['match'])) {
-                    throw new ValidationException("{$config_type} {$name} [repo] and [match] must be string");
-                }
-                break;
-            case 'url':
-                if (!isset($item['url'])) {
-                    throw new ValidationException("{$config_type} {$name} needs [url] prop");
-                }
-                if (!is_string($item['url'])) {
-                    throw new ValidationException("{$config_type} {$name} [url] must be string");
-                }
-                if (isset($item['filename']) && !is_string($item['filename'])) {
-                    throw new ValidationException("{$config_type} {$name} [filename] must be string");
-                }
-                if (isset($item['path']) && !is_string($item['path'])) {
-                    throw new ValidationException("{$config_type} {$name} [path] must be string");
-                }
-                break;
-            case 'custom':
-                // custom type has no specific requirements
-                break;
+            }
+            // frameworks is lib-only
+            if ($type === 'lib') {
+                $allowed_fields[] = 'frameworks';
+            }
+        }
+
+        // Check each field in item
+        foreach (array_keys($item) as $field) {
+            if (!in_array($field, $allowed_fields)) {
+                throw new ValidationException("{$type} {$name} has unknown field [{$field}]");
+            }
         }
     }
 }

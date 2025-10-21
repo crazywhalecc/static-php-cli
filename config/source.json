@@ -669,6 +669,15 @@
             "path": "LICENSE.md"
         }
     },
+    "liburing": {
+        "type": "ghtar",
+        "repo": "axboe/liburing",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libuuid": {
         "type": "git",
         "url": "https://github.com/static-php/libuuid.git",
@@ -990,7 +999,6 @@
     },
     "snappy": {
         "type": "git",
-        "repo": "google/snappy",
         "rev": "main",
         "url": "https://github.com/google/snappy",
         "license": {
@@ -999,9 +1007,8 @@
         }
     },
     "spx": {
-        "type": "git",
-        "rev": "master",
-        "url": "https://github.com/NoiseByNorthwest/php-spx.git",
+        "type": "pie",
+        "repo": "noisebynorthwest/php-spx",
         "path": "php-src/ext/spx",
         "license": {
             "type": "file",
@@ -1154,15 +1161,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "liburing": {
-        "type": "ghtar",
-        "repo": "axboe/liburing",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING"
         }
     }
 }

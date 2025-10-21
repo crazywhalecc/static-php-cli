@@ -454,7 +454,7 @@
         "type": "external",
         "source": "msgpack",
         "arg-type-unix": "with",
-        "arg-type-win": "enable",
+        "arg-type-windows": "enable",
         "ext-depends": [
             "session"
         ]
@@ -889,6 +889,22 @@
             "mysqli"
         ]
     },
+    "swoole-hook-odbc": {
+        "support": {
+            "Windows": "no",
+            "BSD": "wip"
+        },
+        "notes": true,
+        "type": "addon",
+        "arg-type": "none",
+        "ext-depends": [
+            "pdo",
+            "swoole"
+        ],
+        "lib-depends": [
+            "unixodbc"
+        ]
+    },
     "swoole-hook-pgsql": {
         "support": {
             "Windows": "no",
@@ -916,22 +932,6 @@
             "sqlite3",
             "pdo",
             "swoole"
-        ]
-    },
-    "swoole-hook-odbc": {
-        "support": {
-            "Windows": "no",
-            "BSD": "wip"
-        },
-        "notes": true,
-        "type": "addon",
-        "arg-type": "none",
-        "ext-depends": [
-            "pdo",
-            "swoole"
-        ],
-        "lib-depends": [
-            "unixodbc"
         ]
     },
     "swow": {

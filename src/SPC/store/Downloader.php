@@ -17,6 +17,42 @@ use SPC\util\SPCTarget;
 class Downloader
 {
     /**
+     * Get latest version from PIE config (Packagist)
+     *
+     * @param  string             $name   Source name
+     * @param  array              $source Source meta info: [repo]
+     * @return array<int, string> [url, filename]
+     */
+    public static function getPIEInfo(string $name, array $source): array
+    {
+        $packagist_url = "https://repo.packagist.org/p2/{$source['repo']}.json";
+        logger()->debug("Fetching {$name} source from packagist index: {$packagist_url}");
+        $data = json_decode(self::curlExec(
+            url: $packagist_url,
+            retries: self::getRetryAttempts()
+        ), true);
+        if (!isset($data['packages'][$source['repo']]) || !is_array($data['packages'][$source['repo']])) {
+            throw new DownloaderException("failed to find {$name} repo info from packagist");
+        }
+        // get the first version
+        $first = $data['packages'][$source['repo']][0] ?? [];
+        // check 'type' => 'php-ext' or contains 'php-ext' key
+        if (!isset($first['php-ext'])) {
+            throw new DownloaderException("failed to find {$name} php-ext info from packagist, maybe not a php extension package");
+        }
+        // get download link from dist
+        $dist_url = $first['dist']['url'] ?? null;
+        $dist_type = $first['dist']['type'] ?? null;
+        if (!$dist_url || !$dist_type) {
+            throw new DownloaderException("failed to find {$name} dist info from packagist");
+        }
+        $name = str_replace('/', '_', $source['repo']);
+        $version = $first['version'] ?? 'unknown';
+        // file name use: $name-$version.$dist_type
+        return [$dist_url, "{$name}-{$version}.{$dist_type}"];
+    }
+
+    /**
      * Get latest version from BitBucket tag
      *
      * @param  string             $name   Source name
@@ -317,84 +353,7 @@ class Downloader
         if (self::isAlreadyDownloaded($name, $force, SPC_DOWNLOAD_PACKAGE)) {
             return;
         }
-
-        try {
-            switch ($pkg['type']) {
-                case 'bitbuckettag':    // BitBucket Tag
-                    [$url, $filename] = self::getLatestBitbucketTag($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
-                    break;
-                case 'ghtar':           // GitHub Release (tar)
-                    [$url, $filename] = self::getLatestGithubTarball($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE, hooks: [[CurlHook::class, 'setupGithubToken']]);
-                    break;
-                case 'ghtagtar':        // GitHub Tag (tar)
-                    [$url, $filename] = self::getLatestGithubTarball($name, $pkg, 'tags');
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE, hooks: [[CurlHook::class, 'setupGithubToken']]);
-                    break;
-                case 'ghrel':           // GitHub Release (uploaded)
-                    [$url, $filename] = self::getLatestGithubRelease($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE, ['Accept: application/octet-stream'], [[CurlHook::class, 'setupGithubToken']]);
-                    break;
-                case 'filelist':        // Basic File List (regex based crawler)
-                    [$url, $filename] = self::getFromFileList($name, $pkg);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
-                    break;
-                case 'url':             // Direct download URL
-                    $url = $pkg['url'];
-                    $filename = $pkg['filename'] ?? basename($pkg['url']);
-                    self::downloadFile($name, $url, $filename, $pkg['extract'] ?? null, SPC_DOWNLOAD_PACKAGE);
-                    break;
-                case 'git':             // Git repo
-                    self::downloadGit(
-                        $name,
-                        $pkg['url'],
-                        $pkg['rev'],
-                        $pkg['submodules'] ?? null,
-                        $pkg['extract'] ?? null,
-                        self::getRetryAttempts(),
-                        SPC_DOWNLOAD_PRE_BUILT
-                    );
-                    break;
-                case 'local':
-                    // Local directory, do nothing, just lock it
-                    logger()->debug("Locking local source {$name}");
-                    LockFile::lockSource($name, [
-                        'source_type' => SPC_SOURCE_LOCAL,
-                        'dirname' => $pkg['dirname'],
-                        'move_path' => $pkg['extract'] ?? null,
-                        'lock_as' => SPC_DOWNLOAD_PACKAGE,
-                    ]);
-                    break;
-                case 'custom':          // Custom download method, like API-based download or other
-                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg');
-                    if (isset($pkg['func']) && is_callable($pkg['func'])) {
-                        $pkg['name'] = $name;
-                        $pkg['func']($force, $pkg, SPC_DOWNLOAD_PACKAGE);
-                        break;
-                    }
-                    foreach ($classes as $class) {
-                        if (is_a($class, CustomPackage::class, true) && $class !== CustomPackage::class) {
-                            $cls = new $class();
-                            if (in_array($name, $cls->getSupportName())) {
-                                (new $class())->fetch($name, $force, $pkg);
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    throw new DownloaderException('unknown source type: ' . $pkg['type']);
-            }
-        } catch (\Throwable $e) {
-            // Because sometimes files downloaded through the command line are not automatically deleted after a failure.
-            // Here we need to manually delete the file if it is detected to exist.
-            if (isset($filename) && file_exists(DOWNLOAD_PATH . '/' . $filename)) {
-                logger()->warning('Deleting download file: ' . $filename);
-                unlink(DOWNLOAD_PATH . '/' . $filename);
-            }
-            throw new DownloaderException('Download failed! ' . $e->getMessage());
-        }
+        self::downloadByType($pkg['type'], $name, $pkg, $force, SPC_DOWNLOAD_PACKAGE);
     }
 
     /**
@@ -439,80 +398,7 @@ class Downloader
             return;
         }
 
-        try {
-            switch ($source['type']) {
-                case 'bitbuckettag':    // BitBucket Tag
-                    [$url, $filename] = self::getLatestBitbucketTag($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as);
-                    break;
-                case 'ghtar':           // GitHub Release (tar)
-                    [$url, $filename] = self::getLatestGithubTarball($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as, hooks: [[CurlHook::class, 'setupGithubToken']]);
-                    break;
-                case 'ghtagtar':        // GitHub Tag (tar)
-                    [$url, $filename] = self::getLatestGithubTarball($name, $source, 'tags');
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as, hooks: [[CurlHook::class, 'setupGithubToken']]);
-                    break;
-                case 'ghrel':           // GitHub Release (uploaded)
-                    [$url, $filename] = self::getLatestGithubRelease($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as, ['Accept: application/octet-stream'], [[CurlHook::class, 'setupGithubToken']]);
-                    break;
-                case 'filelist':        // Basic File List (regex based crawler)
-                    [$url, $filename] = self::getFromFileList($name, $source);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as);
-                    break;
-                case 'url':             // Direct download URL
-                    $url = $source['url'];
-                    $filename = $source['filename'] ?? basename($source['url']);
-                    self::downloadFile($name, $url, $filename, $source['path'] ?? null, $download_as);
-                    break;
-                case 'git':             // Git repo
-                    self::downloadGit(
-                        $name,
-                        $source['url'],
-                        $source['rev'],
-                        $source['submodules'] ?? null,
-                        $source['path'] ?? null,
-                        self::getRetryAttempts(),
-                        $download_as
-                    );
-                    break;
-                case 'local':
-                    // Local directory, do nothing, just lock it
-                    logger()->debug("Locking local source {$name}");
-                    LockFile::lockSource($name, [
-                        'source_type' => SPC_SOURCE_LOCAL,
-                        'dirname' => $source['dirname'],
-                        'move_path' => $source['extract'] ?? null,
-                        'lock_as' => $download_as,
-                    ]);
-                    break;
-                case 'custom':          // Custom download method, like API-based download or other
-                    if (isset($source['func']) && is_callable($source['func'])) {
-                        $source['name'] = $name;
-                        $source['func']($force, $source, $download_as);
-                        break;
-                    }
-                    $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
-                    foreach ($classes as $class) {
-                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
-                            (new $class())->fetch($force, $source, $download_as);
-                            break;
-                        }
-                    }
-                    break;
-                default:
-                    throw new DownloaderException('unknown source type: ' . $source['type']);
-            }
-        } catch (\Throwable $e) {
-            // Because sometimes files downloaded through the command line are not automatically deleted after a failure.
-            // Here we need to manually delete the file if it is detected to exist.
-            if (isset($filename) && file_exists(DOWNLOAD_PATH . '/' . $filename)) {
-                logger()->warning('Deleting download file: ' . $filename);
-                unlink(DOWNLOAD_PATH . '/' . $filename);
-            }
-            throw new DownloaderException('Download failed! ' . $e->getMessage());
-        }
+        self::downloadByType($source['type'], $name, $source, $force, $download_as);
     }
 
     /**
@@ -712,5 +598,110 @@ class Downloader
             }
         }
         return false;
+    }
+
+    /**
+     * Download by type.
+     *
+     * @param string $type Types
+     * @param string $name Download item name
+     * @param array{
+     *     url?: string,
+     *     repo?: string,
+     *     rev?: string,
+     *     path?: string,
+     *     filename?: string,
+     *     dirname?: string,
+     *     match?: string,
+     *     prefer-stable?: bool,
+     *     extract?: string,
+     *     submodules?: array<string>,
+     *     provide-pre-built?: bool,
+     *     func?: ?callable,
+     *     license?: array
+     * } $conf Download item config
+     * @param bool $force       Force download
+     * @param int  $download_as Lock source type
+     */
+    private static function downloadByType(string $type, string $name, array $conf, bool $force, int $download_as): void
+    {
+        try {
+            switch ($type) {
+                case 'pie': // Packagist
+                    [$url, $filename] = self::getPIEInfo($name, $conf);
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as, hooks: [[CurlHook::class, 'setupGithubToken']]);
+                    break;
+                case 'bitbuckettag': // BitBucket Tag
+                    [$url, $filename] = self::getLatestBitbucketTag($name, $conf);
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
+                    break;
+                case 'ghtar': // GitHub Release (tar)
+                    [$url, $filename] = self::getLatestGithubTarball($name, $conf);
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as, hooks: [[CurlHook::class, 'setupGithubToken']]);
+                    break;
+                case 'ghtagtar': // GitHub Tag (tar)
+                    [$url, $filename] = self::getLatestGithubTarball($name, $conf, 'tags');
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as, hooks: [[CurlHook::class, 'setupGithubToken']]);
+                    break;
+                case 'ghrel': // GitHub Release (uploaded)
+                    [$url, $filename] = self::getLatestGithubRelease($name, $conf);
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as, ['Accept: application/octet-stream'], [[CurlHook::class, 'setupGithubToken']]);
+                    break;
+                case 'filelist': // Basic File List (regex based crawler)
+                    [$url, $filename] = self::getFromFileList($name, $conf);
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
+                    break;
+                case 'url': // Direct download URL
+                    $url = $conf['url'];
+                    $filename = $conf['filename'] ?? basename($conf['url']);
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
+                    break;
+                case 'git': // Git repo
+                    self::downloadGit($name, $conf['url'], $conf['rev'], $conf['submodules'] ?? null, $conf['path'] ?? $conf['extract'] ?? null, self::getRetryAttempts(), $download_as);
+                    break;
+                case 'local': // Local directory, do nothing, just lock it
+                    LockFile::lockSource($name, [
+                        'source_type' => SPC_SOURCE_LOCAL,
+                        'dirname' => $conf['dirname'],
+                        'move_path' => $conf['path'] ?? $conf['extract'] ?? null,
+                        'lock_as' => $download_as,
+                    ]);
+                    break;
+                case 'custom': // Custom download method, like API-based download or other
+                    if (isset($conf['func'])) {
+                        $conf['name'] = $name;
+                        $conf['func']($force, $conf, $download_as);
+                        break;
+                    }
+                    $classes = [
+                        ...FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source'),
+                        ...FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg'),
+                    ];
+                    foreach ($classes as $class) {
+                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
+                            (new $class())->fetch($force, $conf, $download_as);
+                            break;
+                        }
+                        if (is_a($class, CustomPackage::class, true) && $class !== CustomPackage::class) {
+                            $cls = new $class();
+                            if (in_array($name, $cls->getSupportName())) {
+                                (new $class())->fetch($name, $force, $conf);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    throw new DownloaderException("Unknown download type: {$type}");
+            }
+        } catch (\Throwable $e) {
+            // Because sometimes files downloaded through the command line are not automatically deleted after a failure.
+            // Here we need to manually delete the file if it is detected to exist.
+            if (isset($filename) && file_exists(DOWNLOAD_PATH . '/' . $filename)) {
+                logger()->warning("Deleting download file: {$filename}");
+                unlink(DOWNLOAD_PATH . '/' . $filename);
+            }
+            throw new DownloaderException("Download failed: {$e->getMessage()}");
+        }
     }
 }
