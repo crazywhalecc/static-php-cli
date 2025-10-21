@@ -7,6 +7,7 @@ namespace SPC\builder\linux;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\PatchException;
 use SPC\exception\WrongUsageException;
+use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\GlobalEnvManager;
@@ -283,12 +284,17 @@ class LinuxBuilder extends UnixBuilderBase
      */
     protected function buildEmbed(): void
     {
+        $sharedExts = array_filter($this->exts, static fn ($ext) => $ext->isBuildShared());
+        $sharedExts = array_filter($sharedExts, static function ($ext) {
+            return Config::getExt($ext->getName(), 'build-with-php') === true;
+        });
+        $install_modules = $sharedExts ? 'install-modules' : '';
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
-            ->exec("make {$concurrency} INSTALL_ROOT=" . BUILD_ROOT_PATH . " {$vars} install-sapi install-build install-headers install-programs");
+            ->exec("make {$concurrency} INSTALL_ROOT=" . BUILD_ROOT_PATH . " {$vars} install-sapi {$install_modules} install-build install-headers install-programs");
 
         $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '';
         $libDir = BUILD_LIB_PATH;

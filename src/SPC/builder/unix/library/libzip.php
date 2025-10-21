@@ -22,6 +22,7 @@ trait libzip
                 '-DBUILD_EXAMPLES=OFF',
                 '-DBUILD_REGRESS=OFF',
                 '-DBUILD_TOOLS=OFF',
+                '-DBUILD_OSSFUZZ=OFF',
             )
             ->build();
         $this->patchPkgconfPrefix(['libzip.pc'], PKGCONF_PATCH_PREFIX);
