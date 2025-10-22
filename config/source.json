@@ -47,7 +47,7 @@
         "provide-pre-built": true,
         "license": {
             "type": "file",
-            "path": "doc/COPYING"
+            "path": "doc/COPYING.LGPL"
         }
     },
     "brotli": {
