@@ -16,8 +16,8 @@ $test_php_version = [
     // '8.1',
     // '8.2',
     // '8.3',
-    '8.4',
-    // '8.5',
+    // '8.4',
+    '8.5',
     // 'git',
 ];
 
@@ -25,7 +25,7 @@ $test_php_version = [
 $test_os = [
     'macos-15-intel', // bin/spc for x86_64
     'macos-15', // bin/spc for arm64
-    // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
+    'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
     'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
@@ -49,7 +49,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'spx',
+    'Linux', 'Darwin' => 'gettext',
     'Windows' => 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pdo,pdo_mysql,pdo_sqlite,phar,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
 };
 
