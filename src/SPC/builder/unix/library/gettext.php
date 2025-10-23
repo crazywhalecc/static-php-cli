@@ -31,7 +31,7 @@ trait gettext
             $autoconf->addConfigureArgs('--disable-threads');
         }
 
-        $autoconf->configure()->make();
+        $autoconf->configure()->make(dir: $this->getSourceDir() . '/gettext-runtime/intl');
         $this->patchLaDependencyPrefix();
     }
 }

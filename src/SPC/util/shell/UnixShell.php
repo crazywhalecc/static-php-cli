@@ -29,6 +29,7 @@ class UnixShell extends Shell
 
     public function exec(string $cmd): static
     {
+        $cmd = clean_spaces($cmd);
         /* @phpstan-ignore-next-line */
         logger()->info(ConsoleColor::yellow('[EXEC] ') . ConsoleColor::green($cmd));
         $original_command = $cmd;
