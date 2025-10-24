@@ -1,0 +1,110 @@
+From d919783778c6d2310285e657fd0c3612238bf6ac Mon Sep 17 00:00:00 2001
+From: "Christoph M. Becker" <cmbecker69@gmx.de>
+Date: Wed, 14 Aug 2024 13:02:12 +0200
+Subject: [PATCH 1/2] GetSystemTimePreciseAsFileTime() is now always available
+
+As of PHP 8.3.0, we require Windows Server 2012 or Windows 8 as bare
+minimum.  Since GetSystemTimePreciseAsFileTime() is always available on
+these Windows versions[1], there is no more need for the workaround
+described in dllmain.c; we just can call the function directly.
+
+[1] <https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemtimepreciseasfiletime>
+---
+ win32/dllmain.c | 14 --------------
+ win32/time.c    | 29 +----------------------------
+ 2 files changed, 1 insertion(+), 42 deletions(-)
+
+diff --git a/win32/dllmain.c b/win32/dllmain.c
+index a507f1e169246..ab625bf3e597b 100644
+--- a/win32/dllmain.c
++++ b/win32/dllmain.c
+@@ -38,20 +38,6 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
+ 	switch (reason)
+ 	{
+ 		case DLL_PROCESS_ATTACH:
+-			/*
+-			 * We do not need to check the return value of php_win32_init_gettimeofday()
+-			 * because the symbol bare minimum symbol we need is always available on our
+-			 * lowest supported platform.
+-			 *
+-			 * On Windows 8 or greater, we use a more precise symbol to obtain the system
+-			 * time, which is dynamically. The fallback allows us to proper support
+-			 * Vista/7/Server 2003 R2/Server 2008/Server 2008 R2.
+-			 *
+-			 * Instead simply initialize the global in win32/time.c for gettimeofday()
+-			 * use later on
+-			 */
+-			php_win32_init_gettimeofday();
+-
+ 			ret = ret && php_win32_ioutil_init();
+ 			if (!ret) {
+ 				fprintf(stderr, "ioutil initialization failed");
+diff --git a/win32/time.c b/win32/time.c
+index d1fe51458ec57..af02ee96a10e7 100644
+--- a/win32/time.c
++++ b/win32/time.c
+@@ -25,40 +25,13 @@
+ 
+ typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
+ 
+-static MyGetSystemTimeAsFileTime timefunc = NULL;
+-
+-#ifdef PHP_EXPORTS
+-static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
+-{/*{{{*/
+-	MyGetSystemTimeAsFileTime timefunc = NULL;
+-	HMODULE hMod = GetModuleHandle("kernel32.dll");
+-
+-	if (hMod) {
+-		/* Max possible resolution <1us, win8/server2012 */
+-		timefunc = (MyGetSystemTimeAsFileTime)GetProcAddress(hMod, "GetSystemTimePreciseAsFileTime");
+-	}
+-
+-	if(!timefunc) {
+-		/* 100ns blocks since 01-Jan-1641 */
+-		timefunc = (MyGetSystemTimeAsFileTime) GetSystemTimeAsFileTime;
+-	}
+-
+-	return timefunc;
+-}/*}}}*/
+-
+-void php_win32_init_gettimeofday(void)
+-{/*{{{*/
+-	timefunc = get_time_func();
+-}/*}}}*/
+-#endif
+-
+ static zend_always_inline int getfilesystemtime(struct timeval *tv)
+ {/*{{{*/
+ 	FILETIME ft;
+ 	unsigned __int64 ff = 0;
+ 	ULARGE_INTEGER fft;
+ 
+-	timefunc(&ft);
++	GetSystemTimePreciseAsFileTime(&ft);
+ 
+         /*
+ 	 * Do not cast a pointer to a FILETIME structure to either a
+
+From b357bc794b0dafe9cee3f09972ba596ac4610d01 Mon Sep 17 00:00:00 2001
+From: "Christoph M. Becker" <cmbecker69@gmx.de>
+Date: Wed, 14 Aug 2024 13:12:24 +0200
+Subject: [PATCH 2/2] Remove now unused typedef
+
+---
+ win32/time.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/win32/time.c b/win32/time.c
+index af02ee96a10e7..57db914e6a8f6 100644
+--- a/win32/time.c
++++ b/win32/time.c
+@@ -23,8 +23,6 @@
+ #include <errno.h>
+ #include "php_win32_globals.h"
+ 
+-typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
+-
+ static zend_always_inline int getfilesystemtime(struct timeval *tv)
+ {/*{{{*/
+ 	FILETIME ft;

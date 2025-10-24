@@ -23,6 +23,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchWin32Time']);
         FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('yaml', [__CLASS__, 'patchYamlWin32']);
@@ -498,6 +499,22 @@ class SourcePatcher
         }
         self::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
         return true;
+    }
+
+    public static function patchWin32Time(): bool
+    {
+        if (PHP_OS_FAMILY !== 'Windows') {
+            return false;
+        }
+        if (!file_exists(SOURCE_PATH . '/php-src/main/php_version.h')) {
+            return false;
+        }
+        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
+        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0 && intval($match[1]) < 80400) {
+            self::patchFile('php_win32_time.patch', SOURCE_PATH . '/php-src');
+            return true;
+        }
+        return false;
     }
 
     public static function patchPkgConfigForGcc15(): bool
