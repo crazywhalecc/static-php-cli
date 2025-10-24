@@ -15,10 +15,11 @@ class gettext extends Extension
     public function patchBeforeBuildconf(): bool
     {
         if ($this->builder instanceof MacOSBuilder) {
-            // new php versions
-            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gettext/config.m4', 'AC_CHECK_LIB([$GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB([intl');
-            // old php versions
-            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gettext/config.m4', 'AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB(intl');
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/ext/gettext/config.m4',
+                ['AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB([$GETTEXT_CHECK_IN_LIB'],
+                ['AC_CHECK_LIB(intl', 'AC_CHECK_LIB([intl'] // new php versions use a bracket
+            );
         }
         return true;
     }
