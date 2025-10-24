@@ -82,14 +82,14 @@ class LinuxToolCheckList
         return CheckResult::ok();
     }
 
-    #[AsCheckItem('if cmake version >= 3.18', limit_os: 'Linux')]
+    #[AsCheckItem('if cmake version >= 3.22', limit_os: 'Linux')]
     public function checkCMakeVersion(): ?CheckResult
     {
         $ver = get_cmake_version();
         if ($ver === null) {
             return CheckResult::fail('Failed to get cmake version');
         }
-        if (version_compare($ver, '3.18.0') < 0) {
+        if (version_compare($ver, '3.22.0') < 0) {
             return CheckResult::fail('cmake version is too low (' . $ver . '), please update it manually!');
         }
         return CheckResult::ok($ver);
