@@ -36,6 +36,7 @@ The following is the source download configuration corresponding to the `libeven
 The most important field here is `type`. Currently, the types it supports are:
 
 - `url`: Directly use URL to download, for example: `https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz`.
+- `pie`: Download PHP extensions from Packagist using the PIE (PHP Installer for Extensions) standard.
 - `ghrel`: Use the GitHub Release API to download, download the artifacts uploaded from the latest version released by maintainers.
 - `ghtar`: Use the GitHub Release API to download. 
     Different from `ghrel`, `ghtar` is downloaded from the `source code (tar.gz)` in the latest Release of the project.
@@ -88,6 +89,37 @@ Example (download the imagick extension and extract it to the extension storage 
    }
 }
 ```
+
+## Download type - pie
+
+PIE (PHP Installer for Extensions) type sources refer to downloading PHP extensions from Packagist that follow the PIE standard.
+This method automatically fetches extension information from the Packagist repository and downloads the appropriate distribution file.
+
+The parameters included are:
+
+- `repo`: The Packagist vendor/package name, such as `vendor/package-name`
+
+Example (download a PHP extension from Packagist using PIE):
+
+```json
+{
+  "ext-example": {
+    "type": "pie",
+    "repo": "vendor/example-extension",
+    "path": "php-src/ext/example",
+    "license": {
+      "type": "file",
+      "path": "LICENSE"
+    }
+  }
+}
+```
+
+::: tip
+The PIE download type will automatically detect the extension information from Packagist metadata, 
+including the download URL, version, and distribution type. 
+The extension must be marked as `type: php-ext` or contain `php-ext` metadata in its Packagist package definition.
+:::
 
 ## Download type - ghrel
 

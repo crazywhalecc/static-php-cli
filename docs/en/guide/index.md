@@ -21,19 +21,30 @@ The following is the architecture support situation, where :gear: represents sup
 | Windows | :gear: :computer: |                   |
 | FreeBSD | :computer:        | :computer:        |
 
-Among them, Linux is currently only tested on Ubuntu, Debian, and Alpine distributions, 
-and other distributions have not been tested, which cannot guarantee successful compilation.
-For untested distributions, local compilation can be done using methods such as Docker to avoid environmental issues.
+Current supported PHP versions for compilation:
 
-There are two architectures for macOS: `x86_64` and `Arm`, but binaries compiled on one architecture cannot be directly used on the other architecture.
-Rosetta 2 cannot guarantee that programs compiled with `Arm` architecture can fully run on `x86_64` environment.
+> :warning: Partial support, there may be issues with new beta versions and old versions.
+>
+> :heavy_check_mark: Supported
+>
+> :x: Not supported
 
-Windows currently only supports the x86_64 architecture, and does not support 32-bit x86 or arm64 architecture.
+| PHP Version | Status             | Comment                                                                                                                 |
+|-------------|--------------------|-------------------------------------------------------------------------------------------------------------------------|
+| 7.2         | :x:                |                                                                                                                         |
+| 7.3         | :x:                | phpmicro and many extensions do not support 7.3, 7.4 versions                                                           |
+| 7.4         | :x:                | phpmicro and many extensions do not support 7.3, 7.4 versions                                                           |
+| 8.0         | :warning:          | PHP official has stopped maintaining 8.0, we no longer handle 8.0 related backport support                              |
+| 8.1         | :warning:          | PHP official only provides security updates for 8.1, we no longer handle 8.1 related backport support after 8.5 release |
+| 8.2         | :heavy_check_mark: |                                                                                                                         |
+| 8.3         | :heavy_check_mark: |                                                                                                                         |
+| 8.4         | :heavy_check_mark: |                                                                                                                         |
+| 8.5 (beta)  | :warning:          | PHP 8.5 is currently in beta stage                                                                                      |
 
-## Supported PHP Version
+> This table shows the support status of static-php-cli for building corresponding versions, not the PHP official support status for that version.
 
-Currently, static php cli supports PHP versions 8.1 to 8.5, and theoretically supports PHP 8.0 and earlier versions. 
-Simply select the earlier version when downloading.
-However, due to some extensions and special components that have stopped supporting earlier versions of PHP, 
-static-php-cli will not explicitly support earlier versions.
+## PHP Support Versions
+
+Currently, static-php-cli supports PHP versions 8.2 ~ 8.5, and theoretically supports PHP 8.1 and earlier versions, just select the earlier version when downloading.
+However, due to some extensions and special components that have stopped supporting earlier versions of PHP, static-php-cli will not explicitly support earlier versions.
 We recommend that you compile the latest PHP version possible for a better experience.

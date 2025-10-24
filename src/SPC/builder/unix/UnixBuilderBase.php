@@ -6,6 +6,7 @@ namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
+use SPC\exception\SPCException;
 use SPC\exception\SPCInternalException;
 use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
@@ -312,7 +313,7 @@ abstract class UnixBuilderBase extends BuilderBase
 
     protected function buildFrankenphp(): void
     {
-        GlobalEnvManager::addPathIfNotExists(GoXcaddy::getEnvironment()['PATH']);
+        GlobalEnvManager::addPathIfNotExists(GoXcaddy::getPath());
         $this->processFrankenphpApp();
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
@@ -339,11 +340,11 @@ abstract class UnixBuilderBase extends BuilderBase
             }
         }
         $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
-        $extLdFlags = "-extldflags '-pie{$dynamic_exports}'";
+        $extLdFlags = "-extldflags '-pie{$dynamic_exports} {$this->arch_ld_flags}'";
         $muslTags = '';
         $staticFlags = '';
         if (SPCTarget::isStatic()) {
-            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000{$dynamic_exports}'";
+            $extLdFlags = "-extldflags '-static-pie -Wl,-z,stack-size=0x80000{$dynamic_exports} {$this->arch_ld_flags}'";
             $muslTags = 'static_build,';
             $staticFlags = '-static-pie';
         }
@@ -351,7 +352,6 @@ abstract class UnixBuilderBase extends BuilderBase
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list);
         $cflags = "{$this->arch_c_flags} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS');
         $libs = $config['libs'];
-        $libs .= PHP_OS_FAMILY === 'Linux' ? ' -lrt' : '';
         // Go's gcc driver doesn't automatically link against -lgcov or -lrt. Ugly, but necessary fix.
         if ((str_contains((string) getenv('SPC_DEFAULT_C_FLAGS'), '-fprofile') ||
                 str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'), '-fprofile')) &&
@@ -359,7 +359,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $cflags .= ' -Wno-error=missing-profile';
             $libs .= ' -lgcov';
         }
-        $env = [
+        $env = [...[
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => clean_spaces($cflags),
             'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$libs}",
@@ -369,12 +369,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 "v{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
-        ];
-        foreach (GoXcaddy::getEnvironment() as $key => $value) {
-            if ($key !== 'PATH') {
-                $env[$key] = $value;
-            }
-        }
+        ], ...GoXcaddy::getEnvironment()];
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
             ->exec("xcaddy build --output frankenphp {$xcaddyModules}");
@@ -385,6 +380,22 @@ abstract class UnixBuilderBase extends BuilderBase
             } else { // macOS doesn't understand strip-unneeded
                 shell()->cd(BUILD_BIN_PATH)->exec('strip -S frankenphp');
             }
+        }
+    }
+
+    /**
+     * Seek php-src/config.log when building PHP, add it to exception.
+     */
+    protected function seekPhpSrcLogFileOnException(callable $callback): void
+    {
+        try {
+            $callback();
+        } catch (SPCException $e) {
+            if (file_exists(SOURCE_PATH . '/php-src/config.log')) {
+                $e->addExtraLogFile('php-src config.log', 'php-src.config.log');
+                copy(SOURCE_PATH . '/php-src/config.log', SPC_LOGS_DIR . '/php-src.config.log');
+            }
+            throw $e;
         }
     }
 }

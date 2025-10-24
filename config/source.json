@@ -47,7 +47,7 @@
         "provide-pre-built": true,
         "license": {
             "type": "file",
-            "path": "doc/COPYING"
+            "path": "doc/COPYING.LGPL"
         }
     },
     "brotli": {
@@ -263,6 +263,15 @@
             "path": "LICENSE"
         }
     },
+    "ext-zip": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/zip",
+        "filename": "ext-zip.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-zstd": {
         "type": "git",
         "path": "php-src/ext/zstd",
@@ -297,16 +306,17 @@
         "regex": "/href=\"(?<file>gettext-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "gettext-runtime/intl/COPYING.LIB"
         }
     },
     "gmp": {
-        "type": "url",
-        "url": "https://dl.static-php.dev/static-php-cli/deps/gmp/gmp-6.3.0.tar.xz",
+        "type": "filelist",
+        "url": "https://gmplib.org/download/gmp/",
+        "regex": "/href=\"(?<file>gmp-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "provide-pre-built": true,
         "alt": {
-            "type": "ghtagtar",
-            "repo": "alisw/GMP"
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/gmp/gmp-6.3.0.tar.xz"
         },
         "license": {
             "type": "text",
@@ -324,7 +334,7 @@
     },
     "grpc": {
         "type": "git",
-        "rev": "v1.68.x",
+        "rev": "v1.75.x",
         "url": "https://github.com/grpc/grpc.git",
         "provide-pre-built": true,
         "license": {
@@ -440,7 +450,7 @@
         "provide-pre-built": true,
         "license": {
             "type": "file",
-            "path": "doc/COPYING"
+            "path": "doc/COPYING.LGPL"
         }
     },
     "libaom": {
@@ -499,6 +509,16 @@
             "path": "COPYING"
         }
     },
+    "libedit": {
+        "type": "filelist",
+        "url": "https://thrysoee.dk/editline/",
+        "regex": "/href=\"(?<file>libedit-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libevent": {
         "type": "ghrel",
         "repo": "libevent/libevent",
@@ -547,7 +567,7 @@
         "provide-pre-built": true,
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "COPYING.LIB"
         }
     },
     "libiconv-win": {
@@ -658,6 +678,15 @@
         "license": {
             "type": "file",
             "path": "LICENSE.md"
+        }
+    },
+    "liburing": {
+        "type": "ghtar",
+        "repo": "axboe/liburing",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
         }
     },
     "libuuid": {
@@ -890,7 +919,7 @@
     "postgresql": {
         "type": "ghtagtar",
         "repo": "postgres/postgres",
-        "match": "REL_16_\\d+",
+        "match": "REL_18_\\d+",
         "license": {
             "type": "file",
             "path": "COPYRIGHT"
@@ -981,7 +1010,6 @@
     },
     "snappy": {
         "type": "git",
-        "repo": "google/snappy",
         "rev": "main",
         "url": "https://github.com/google/snappy",
         "license": {
@@ -990,9 +1018,8 @@
         }
     },
     "spx": {
-        "type": "git",
-        "rev": "master",
-        "url": "https://github.com/static-php/php-spx.git",
+        "type": "pie",
+        "repo": "noisebynorthwest/php-spx",
         "path": "php-src/ext/spx",
         "license": {
             "type": "file",
@@ -1145,15 +1172,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "liburing": {
-        "type": "ghtar",
-        "repo": "axboe/liburing",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING"
         }
     }
 }

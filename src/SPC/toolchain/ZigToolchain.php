@@ -42,10 +42,10 @@ class ZigToolchain implements ToolchainInterface
 
     public function afterInit(): void
     {
-        if (!is_dir(Zig::getEnvironment()['PATH'])) {
+        if (!Zig::isInstalled()) {
             throw new EnvironmentException('You are building with zig, but zig is not installed, please install zig first. (You can use `doctor` command to install it)');
         }
-        GlobalEnvManager::addPathIfNotExists(Zig::getEnvironment()['PATH']);
+        GlobalEnvManager::addPathIfNotExists(Zig::getPath());
         f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
         $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: '';
         $cxxflags = getenv('SPC_DEFAULT_CXX_FLAGS') ?: '';
@@ -63,6 +63,11 @@ class ZigToolchain implements ToolchainInterface
             // Add unwind library if not already present
             $extra_libs = trim($extra_libs . ' -lunwind');
             GlobalEnvManager::putenv("SPC_EXTRA_LIBS={$extra_libs}");
+        }
+        $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: getenv('CFLAGS') ?: '';
+        $has_avx512 = str_contains($cflags, '-mavx512') || str_contains($cflags, '-march=x86-64-v4');
+        if (!$has_avx512) {
+            GlobalEnvManager::putenv('SPC_EXTRA_PHP_VARS=php_cv_have_avx512=no php_cv_have_avx512vbmi=no');
         }
     }
 

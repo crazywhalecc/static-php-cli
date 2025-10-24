@@ -10,17 +10,19 @@
             "micro",
             "frankenphp"
         ],
+        "lib-depends-macos": [
+            "lib-base",
+            "micro",
+            "libxml2"
+        ],
         "lib-suggests-linux": [
             "libacl",
             "brotli",
             "watcher"
         ],
-        "lib-suggests-unix": [
+        "lib-suggests-macos": [
             "brotli",
             "watcher"
-        ],
-        "lib-depends-macos": [
-            "libxml2"
         ]
     },
     "micro": {
@@ -201,7 +203,7 @@
             "openssl",
             "libcares"
         ],
-        "provide-pre-built": true,
+        "cpp-library": true,
         "frameworks": [
             "CoreFoundation"
         ]
@@ -229,6 +231,7 @@
     },
     "imagemagick": {
         "source": "imagemagick",
+        "cpp-library": true,
         "pkg-configs": [
             "Magick++-7.Q16HDRI",
             "MagickCore-7.Q16HDRI",
@@ -342,6 +345,15 @@
         ],
         "cpp-library": true
     },
+    "libedit": {
+        "source": "libedit",
+        "static-libs-unix": [
+            "libedit.a"
+        ],
+        "lib-depends": [
+            "ncurses"
+        ]
+    },
     "libevent": {
         "source": "libevent",
         "static-libs-unix": [
@@ -451,6 +463,7 @@
     },
     "libmemcached": {
         "source": "libmemcached",
+        "cpp-library": true,
         "static-libs-unix": [
             "libmemcached.a",
             "libmemcachedprotocol.a",
@@ -547,6 +560,21 @@
             "zstd"
         ]
     },
+    "liburing": {
+        "source": "liburing",
+        "pkg-configs": [
+            "liburing",
+            "liburing-ffi"
+        ],
+        "static-libs-linux": [
+            "liburing.a",
+            "liburing-ffi.a"
+        ],
+        "headers-linux": [
+            "liburing/",
+            "liburing.h"
+        ]
+    },
     "libuuid": {
         "source": "libuuid",
         "static-libs-unix": [
@@ -595,7 +623,6 @@
         ],
         "lib-suggests-unix": [
             "xz",
-            "icu",
             "zlib"
         ],
         "lib-depends-windows": [
@@ -769,7 +796,7 @@
             "libxml2",
             "openssl",
             "zlib",
-            "readline"
+            "libedit"
         ],
         "lib-suggests": [
             "icu",
@@ -821,6 +848,7 @@
     },
     "snappy": {
         "source": "snappy",
+        "cpp-library": true,
         "static-libs-unix": [
             "libsnappy.a"
         ],
@@ -866,6 +894,7 @@
     },
     "watcher": {
         "source": "watcher",
+        "cpp-library": true,
         "static-libs-unix": [
             "libwatcher-c.a"
         ],

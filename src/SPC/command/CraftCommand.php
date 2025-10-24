@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SPC\command;
 
 use SPC\exception\ValidationException;
+use SPC\store\pkg\GoXcaddy;
+use SPC\store\pkg\Zig;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\ConfigValidator;
@@ -63,7 +65,7 @@ class CraftCommand extends BuildCommand
             }
         }
         // install go and xcaddy for frankenphp
-        if (in_array('frankenphp', $craft['sapi'])) {
+        if (in_array('frankenphp', $craft['sapi']) && !GoXcaddy::isInstalled()) {
             $retcode = $this->runCommand('install-pkg', 'go-xcaddy');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft go-xcaddy failed</error>');
@@ -71,7 +73,7 @@ class CraftCommand extends BuildCommand
             }
         }
         // install zig if requested
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class && !Zig::isInstalled()) {
             $retcode = $this->runCommand('install-pkg', 'zig');
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft zig failed</error>');

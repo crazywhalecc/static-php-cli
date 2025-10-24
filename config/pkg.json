@@ -23,8 +23,8 @@
         "type": "url",
         "url": "https://dl.static-php.dev/static-php-cli/deps/nasm/nasm-2.16.01-win64.zip",
         "extract-files": {
-            "nasm-2.16.01/nasm.exe": "{php_sdk_path}/bin/nasm.exe",
-            "nasm-2.16.01/ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
+            "nasm.exe": "{php_sdk_path}/bin/nasm.exe",
+            "ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
         }
     },
     "pkg-config-aarch64-linux": {
@@ -84,7 +84,7 @@
         "repo": "upx/upx",
         "match": "upx.+-win64\\.zip",
         "extract-files": {
-            "upx-*-win64/upx.exe": "{pkg_root_path}/bin/upx.exe"
+            "upx.exe": "{pkg_root_path}/bin/upx.exe"
         }
     },
     "zig-aarch64-linux": {

@@ -10,6 +10,7 @@ use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
+use SPC\store\pkg\GoXcaddy;
 use SPC\store\SourceManager;
 use SPC\store\SourcePatcher;
 use SPC\util\AttributeMapper;
@@ -125,27 +126,6 @@ abstract class BuilderBase
             return $this->exts;
         }
         return array_filter($this->exts, fn ($ext) => $ext->isBuildStatic());
-    }
-
-    /**
-     * Check if there is a cpp extensions or libraries.
-     */
-    public function hasCpp(): bool
-    {
-        // judge cpp-extension
-        $exts = array_keys($this->getExts(false));
-        foreach ($exts as $ext) {
-            if (Config::getExt($ext, 'cpp-extension', false) === true) {
-                return true;
-            }
-        }
-        $libs = array_keys($this->getLibs());
-        foreach ($libs as $lib) {
-            if (Config::getLib($lib, 'cpp-library', false) === true) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -507,8 +487,7 @@ abstract class BuilderBase
                 throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
             }
             // frankenphp needs package go-xcaddy installed
-            $pkg_dir = PKG_ROOT_PATH . '/go-xcaddy-' . arch2gnu(php_uname('m')) . '-' . osfamily2shortname();
-            if (!file_exists("{$pkg_dir}/bin/go") || !file_exists("{$pkg_dir}/bin/xcaddy")) {
+            if (!GoXcaddy::isInstalled()) {
                 global $argv;
                 throw new WrongUsageException("FrankenPHP SAPI requires the go-xcaddy package, please install it first: {$argv[0]} install-pkg go-xcaddy");
             }

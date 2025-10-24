@@ -12,6 +12,11 @@ trait imagemagick
 {
     protected function build(): void
     {
+        $original_ldflags = $this->builder->arch_ld_flags;
+        if (str_contains($this->builder->arch_ld_flags, '-Wl,--as-needed')) {
+            $this->builder->arch_ld_flags = str_replace('-Wl,--as-needed', '', $original_ldflags);
+        }
+
         $ac = UnixAutoconfExecutor::create($this)
             ->optionalLib('libzip', ...ac_with_args('zip'))
             ->optionalLib('libjpeg', ...ac_with_args('jpeg'))
@@ -32,7 +37,7 @@ trait imagemagick
             );
 
         // special: linux-static target needs `-static`
-        $ldflags = SPCTarget::isStatic() ? ('-static -ldl') : '-ldl';
+        $ldflags = SPCTarget::isStatic() ? '-static -ldl' : '-ldl';
 
         // special: macOS needs -iconv
         $libs = SPCTarget::getTargetOS() === 'Darwin' ? '-liconv' : '';
@@ -44,6 +49,8 @@ trait imagemagick
         ]);
 
         $ac->configure()->make();
+
+        $this->builder->arch_ld_flags = $original_ldflags;
 
         $filelist = [
             'ImageMagick.pc',

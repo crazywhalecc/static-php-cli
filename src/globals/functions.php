@@ -246,6 +246,23 @@ function clean_spaces(string $string): string
 }
 
 /**
+ * Deduplicate flags in a string. Only the last occurence of each flag will be kept.
+ *                        E.g. `-lintl -lstdc++ -lphp -lstdc++` becomes `-lintl -lphp -lstdc++`
+ *
+ * @param  string $flags the string containing flags to deduplicate
+ * @return string the deduplicated string with no duplicate flags
+ */
+function deduplicate_flags(string $flags): string
+{
+    $tokens = preg_split('/\s+/', trim($flags));
+
+    // Reverse, unique, reverse back - keeps last occurrence of duplicates
+    $deduplicated = array_reverse(array_unique(array_reverse($tokens)));
+
+    return implode(' ', $deduplicated);
+}
+
+/**
  * Register a callback function to handle keyboard interrupts (Ctrl+C).
  *
  * @param callable $callback callback function to handle keyboard interrupts
@@ -282,4 +299,21 @@ function strip_ansi_colors(string $text): string
     // Regular expression to match ANSI escape sequences
     // Including color codes, cursor control, clear screen and other control sequences
     return preg_replace('/\e\[[0-9;]*[a-zA-Z]/', '', $text);
+}
+
+/**
+ * Convert to a real path for display purposes, used in docker volumes.
+ */
+function get_display_path(string $path): string
+{
+    $deploy_root = getenv('SPC_FIX_DEPLOY_ROOT');
+    if ($deploy_root === false) {
+        return $path;
+    }
+    $cwd = WORKING_DIR;
+    // replace build root with deploy root, only if path starts with build root
+    if (str_starts_with($path, $cwd)) {
+        return $deploy_root . substr($path, strlen($cwd));
+    }
+    throw new WrongUsageException("Cannot convert path: {$path}");
 }
