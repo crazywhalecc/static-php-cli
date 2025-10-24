@@ -571,7 +571,7 @@ class SourcePatcher
      */
     public static function patchWindowsCGITarget(): void
     {
-        // search Makefile code line contains "$(BUILD_DIR)\php.exe:"
+        // search Makefile code line contains "$(BUILD_DIR)\php-cgi.exe:"
         $content = FileSystem::readFile(SOURCE_PATH . '/php-src/Makefile');
         $lines = explode("\r\n", $content);
         $line_num = 0;

@@ -176,11 +176,7 @@ class WindowsBuilder extends BuilderBase
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cgi_wrapper.bat --task-args php-cgi.exe");
 
-        // deploy cgi binary
-        logger()->info('Deploying cgi file');
-        FileSystem::createDir(BUILD_BIN_PATH);
-
-        cmd()->exec('copy ' . escapeshellarg(SOURCE_PATH . '\php-src\x64\Release' . ($this->zts ? '_TS' : '') . '\php-cgi.exe') . ' ' . escapeshellarg(BUILD_BIN_PATH . '\php-cgi.exe'));
+        $this->deployBinary(BUILD_TARGET_CGI);
     }
 
     public function buildEmbed(): void
@@ -346,12 +342,13 @@ class WindowsBuilder extends BuilderBase
         $src = match ($type) {
             BUILD_TARGET_CLI => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\php.exe",
             BUILD_TARGET_MICRO => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\micro.sfx",
+            BUILD_TARGET_CGI => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\php-cgi.exe",
             default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
 
         // with-upx-pack for cli and micro
         if ($this->getOption('with-upx-pack', false)) {
-            if ($type === BUILD_TARGET_CLI || ($type === BUILD_TARGET_MICRO && version_compare($this->getMicroVersion(), '0.2.0') >= 0)) {
+            if ($type === BUILD_TARGET_CLI || $type === BUILD_TARGET_CGI || ($type === BUILD_TARGET_MICRO && version_compare($this->getMicroVersion(), '0.2.0') >= 0)) {
                 cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($src));
             }
         }
