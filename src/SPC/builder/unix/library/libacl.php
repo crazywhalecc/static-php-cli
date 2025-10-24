@@ -26,7 +26,7 @@ trait libacl
             ->exec('libtoolize --force --copy')
             ->exec('./autogen.sh || autoreconf -if')
             ->configure('--disable-nls', '--disable-tests')
-            ->make();
+            ->make('install-acl_h install-libacl_h install-data install-libLTLIBRARIES install-pkgincludeHEADERS install-sysincludeHEADERS install-pkgconfDATA', with_install: false);
         $this->patchPkgconfPrefix(['libacl.pc'], PKGCONF_PATCH_PREFIX);
     }
 }

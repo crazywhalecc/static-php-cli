@@ -47,7 +47,7 @@
         "provide-pre-built": true,
         "license": {
             "type": "file",
-            "path": "doc/COPYING"
+            "path": "doc/COPYING.LGPL"
         }
     },
     "brotli": {
@@ -306,16 +306,17 @@
         "regex": "/href=\"(?<file>gettext-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "license": {
             "type": "file",
-            "path": "COPYING"
+            "path": "gettext-runtime/intl/COPYING.LIB"
         }
     },
     "gmp": {
-        "type": "url",
-        "url": "https://dl.static-php.dev/static-php-cli/deps/gmp/gmp-6.3.0.tar.xz",
+        "type": "filelist",
+        "url": "https://gmplib.org/download/gmp/",
+        "regex": "/href=\"(?<file>gmp-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "provide-pre-built": true,
         "alt": {
-            "type": "ghtagtar",
-            "repo": "alisw/GMP"
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/gmp/gmp-6.3.0.tar.xz"
         },
         "license": {
             "type": "text",
@@ -439,7 +440,7 @@
         "provide-pre-built": true,
         "license": {
             "type": "file",
-            "path": "doc/COPYING"
+            "path": "doc/COPYING.LGPL"
         }
     },
     "libaom": {

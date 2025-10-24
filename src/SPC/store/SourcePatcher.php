@@ -44,7 +44,7 @@ class SourcePatcher
         }
         foreach ($builder->getLibs() as $lib) {
             if ($lib->patchBeforeBuildconf() === true) {
-                logger()->info("Library [{$lib->getName()}]patched before buildconf");
+                logger()->info("Library [{$lib->getName()}] patched before buildconf");
             }
         }
         // patch windows php 8.1 bug

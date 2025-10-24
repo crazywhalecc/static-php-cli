@@ -795,7 +795,7 @@
             "libxml2",
             "openssl",
             "zlib",
-            "readline"
+            "libedit"
         ],
         "lib-suggests": [
             "icu",

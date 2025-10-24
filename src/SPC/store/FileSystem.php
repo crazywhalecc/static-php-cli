@@ -646,6 +646,36 @@ class FileSystem
     }
 
     /**
+     * Move file or directory, handling cross-device scenarios
+     * Uses rename() if possible, falls back to copy+delete for cross-device moves
+     *
+     * @param string $source Source path
+     * @param string $dest   Destination path
+     */
+    private static function moveFileOrDir(string $source, string $dest): void
+    {
+        $source = self::convertPath($source);
+        $dest = self::convertPath($dest);
+
+        // Try rename first (fast, atomic)
+        if (@rename($source, $dest)) {
+            return;
+        }
+
+        if (is_dir($source)) {
+            self::copyDir($source, $dest);
+            self::removeDir($source);
+        } else {
+            if (!copy($source, $dest)) {
+                throw new FileSystemException("Failed to copy file from {$source} to {$dest}");
+            }
+            if (!unlink($source)) {
+                throw new FileSystemException("Failed to remove source file: {$source}");
+            }
+        }
+    }
+
+    /**
      * Unzip file with stripping top-level directory
      */
     private static function unzipWithStrip(string $zip_file, string $extract_path): void
@@ -675,10 +705,10 @@ class FileSystem
         if (is_dir($extract_path)) {
             self::removeDir($extract_path);
         }
-        // if only one dir, move its contents to extract_path using rename
+        // if only one dir, move its contents to extract_path
         $subdir = self::convertPath("{$temp_dir}/{$contents[0]}");
         if (count($contents) === 1 && is_dir($subdir)) {
-            rename($subdir, $extract_path);
+            self::moveFileOrDir($subdir, $extract_path);
         } else {
             // else, if it contains only one dir, strip dir and copy other files
             $dircount = 0;
@@ -701,17 +731,20 @@ class FileSystem
                     throw new FileSystemException("Cannot scan unzip temp sub-dir: {$dir[0]}");
                 }
                 foreach ($sub_contents as $sub_item) {
-                    rename(self::convertPath("{$temp_dir}/{$dir[0]}/{$sub_item}"), self::convertPath("{$extract_path}/{$sub_item}"));
+                    self::moveFileOrDir(self::convertPath("{$temp_dir}/{$dir[0]}/{$sub_item}"), self::convertPath("{$extract_path}/{$sub_item}"));
                 }
             } else {
                 foreach ($dir as $item) {
-                    rename(self::convertPath("{$temp_dir}/{$item}"), self::convertPath("{$extract_path}/{$item}"));
+                    self::moveFileOrDir(self::convertPath("{$temp_dir}/{$item}"), self::convertPath("{$extract_path}/{$item}"));
                 }
             }
             // move top-level files to extract_path
             foreach ($top_files as $top_file) {
-                rename(self::convertPath("{$temp_dir}/{$top_file}"), self::convertPath("{$extract_path}/{$top_file}"));
+                self::moveFileOrDir(self::convertPath("{$temp_dir}/{$top_file}"), self::convertPath("{$extract_path}/{$top_file}"));
             }
         }
+
+        // Clean up temp directory
+        self::removeDir($temp_dir);
     }
 }
