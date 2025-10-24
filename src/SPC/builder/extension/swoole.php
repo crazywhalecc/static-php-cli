@@ -69,10 +69,13 @@ class swoole extends Extension
         $arg .= $this->builder->getExt('swoole-hook-pgsql') ? ' --enable-swoole-pgsql' : ' --disable-swoole-pgsql';
         $arg .= $this->builder->getExt('swoole-hook-mysql') ? ' --enable-mysqlnd' : ' --disable-mysqlnd';
         $arg .= $this->builder->getExt('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
-
         if ($this->builder->getExt('swoole-hook-odbc')) {
             $config = (new SPCConfigUtil($this->builder, ['libs_only_deps' => true]))->config([], ['unixodbc']);
             $arg .= ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH . ' SWOOLE_ODBC_LIBS="' . $config['libs'] . '"';
+        }
+
+        if ($this->getExtVersion() >= '6.1.0') {
+            $arg .= ' --enable-swoole-stdext';
         }
 
         if (SPCTarget::getTargetOS() === 'Darwin') {
