@@ -15,7 +15,7 @@ class gettext extends Extension
     public function patchBeforeBuildconf(): bool
     {
         if ($this->builder instanceof MacOSBuilder) {
-            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gettext/config.m4', 'AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB(intl');
+            FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gettext/config.m4', 'AC_CHECK_LIB([$GETTEXT_CHECK_IN_LIB', 'AC_CHECK_LIB([intl');
         }
         return true;
     }
