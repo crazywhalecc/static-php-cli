@@ -810,6 +810,14 @@
             "path": "COPYING"
         }
     },
+    "net-snmp": {
+        "type": "ghtagtar",
+        "repo": "net-snmp/net-snmp",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "nghttp2": {
         "type": "ghrel",
         "repo": "nghttp2/nghttp2",

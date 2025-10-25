@@ -115,6 +115,12 @@ class UnixAutoconfExecutor extends Executor
         return $this;
     }
 
+    public function setEnv(array $env): static
+    {
+        $this->shell->setEnv($env);
+        return $this;
+    }
+
     public function appendEnv(array $env): static
     {
         $this->shell->appendEnv($env);
