@@ -762,7 +762,7 @@
     "micro": {
         "type": "git",
         "path": "php-src/sapi/micro",
-        "rev": "php-85-win",
+        "rev": "master",
         "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
