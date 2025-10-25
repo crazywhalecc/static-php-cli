@@ -103,14 +103,13 @@ class WindowsBuilder extends BuilderBase
             ->exec(
                 "{$this->sdk_prefix} configure.bat --task-args \"" .
                 '--disable-all ' .
-                '--disable-cgi ' .
                 '--with-php-build=' . BUILD_ROOT_PATH . ' ' .
                 '--with-extra-includes=' . BUILD_INCLUDE_PATH . ' ' .
                 '--with-extra-libs=' . BUILD_LIB_PATH . ' ' .
-                ($enableCli ? '--enable-cli=yes ' : '--enable-cli=no ') .
-                ($enableMicro ? ('--enable-micro=yes ' . $micro_logo . $micro_w32) : '--enable-micro=no ') .
-                ($enableEmbed ? '--enable-embed=yes ' : '--enable-embed=no ') .
-                ($enableCgi ? '--enable-cgi=yes ' : '--enable-cgi=no ') .
+                ($enableCli ? '--enable-cli ' : '--disable-cli ') .
+                ($enableMicro ? ('--enable-micro ' . $micro_logo . $micro_w32) : '--disable-micro ') .
+                ($enableEmbed ? '--enable-embed ' : '--disable-embed ') .
+                ($enableCgi ? '--enable-cgi ' : '--disable-cgi ') .
                 $config_file_scan_dir .
                 $opcache_jit_arg .
                 "{$this->makeStaticExtensionArgs()} " .
