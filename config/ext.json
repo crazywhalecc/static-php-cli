@@ -756,6 +756,14 @@
             "apcu"
         ]
     },
+    "snmp": {
+        "type": "builtin",
+        "arg-type-unix": "with",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "net-snmp"
+        ]
+    },
     "soap": {
         "support": {
             "BSD": "wip"

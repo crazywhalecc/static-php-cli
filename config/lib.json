@@ -697,6 +697,17 @@
             "libncurses.a"
         ]
     },
+    "net-snmp": {
+        "source": "net-snmp",
+        "pkg-configs": [
+            "netsnmp",
+            "netsnmp-agent"
+        ],
+        "lib-depends": [
+            "openssl",
+            "zlib"
+        ]
+    },
     "nghttp2": {
         "source": "nghttp2",
         "static-libs-unix": [
