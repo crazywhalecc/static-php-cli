@@ -14,9 +14,9 @@ declare(strict_types=1);
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
     '8.1',
-    '8.2',
-    '8.3',
-    '8.4',
+    // '8.2',
+    // '8.3',
+    // '8.4',
     '8.5',
     // 'git',
 ];
@@ -208,7 +208,7 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $down_cmd, $retcode);
         break;
     case 'build_cmd':
-        passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
+        passthru($prefix . $build_cmd . ' --build-cli --build-micro --build-cgi', $retcode);
         break;
     case 'build_embed_cmd':
         if ($frankenphp) {
