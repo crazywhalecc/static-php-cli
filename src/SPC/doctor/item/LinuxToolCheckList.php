@@ -31,7 +31,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch',
         'xz', 'libtoolize', 'which',
-        'patchelf',
+        'patchelf', 'file',
     ];
 
     public const TOOLS_RHEL = [
