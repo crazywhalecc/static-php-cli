@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait net_snmp
 {
+    public function patchBeforeBuild(): bool
+    {
+        if (PHP_OS_FAMILY === 'Linux') {
+            FileSystem::replaceFileStr("{$this->source_dir}/configure", 'LIBS="-lssl ${OPENSSL_LIBS}"', 'LIBS="-lssl ${OPENSSL_LIBS} -lpthread -ldl"');
+            return true;
+        }
+        return false;
+    }
+
     protected function build(): void
     {
         // use --static for PKG_CONFIG
