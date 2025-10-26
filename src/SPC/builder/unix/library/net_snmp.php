@@ -20,7 +20,7 @@ trait net_snmp
                 '--with-sys-contact="@@no.where"',
                 '--with-sys-location="Unknown"',
                 '--with-logfile="/var/log/snmpd.log"',
-                '--with-persistent-directory="/var/net-snmp"',
+                '--with-persistent-directory="/var/lib/net-snmp"',
                 '--with-openssl=' . BUILD_ROOT_PATH,
                 '--with-zlib=' . BUILD_ROOT_PATH,
             )->make(with_install: 'installheaders installlibs install_pkgconfig');
