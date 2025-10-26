@@ -40,7 +40,7 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch', 'which',
         'xz', 'libtool', 'gettext-devel',
-        'patchelf',
+        'patchelf', 'file',
     ];
 
     public const TOOLS_ARCH = [

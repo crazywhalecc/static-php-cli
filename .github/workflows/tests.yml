@@ -209,6 +209,6 @@ jobs:
           name: build-logs-${{ matrix.os }}-${{ matrix.php }}
           path: log
 
-      - name: Setup tmate session
-        if: ${{ failure() && matrix.os == 'ubuntu-22.04-arm' && matrix.php == '8.1' }}
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        if: ${{ failure() && matrix.os == 'ubuntu-22.04-arm' && matrix.php == '8.1' }}
+#        uses: mxschmitt/action-tmate@v3
