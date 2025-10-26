@@ -15,6 +15,7 @@ trait net_snmp
             ->setEnv(['PKG_CONFIG' => getenv('PKG_CONFIG') . ' --static'])
             ->configure(
                 '--disable-mibs',
+                '--without-nl',
                 '--with-default-snmp-version="3"',
                 '--with-sys-contact="@@no.where"',
                 '--with-sys-location="Unknown"',
