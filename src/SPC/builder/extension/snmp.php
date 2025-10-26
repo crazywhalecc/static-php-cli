@@ -16,7 +16,7 @@ class snmp extends Extension
     {
         // Overwrite m4 config using newer PHP version
         if ($this->builder->getPHPVersionID() < 80400) {
-            FileSystem::copy(ROOT_DIR . '/src/global/extra/snmp-ext-config-old.m4', "{$this->source_dir}/config.m4");
+            FileSystem::copy(ROOT_DIR . '/src/globals/extra/snmp-ext-config-old.m4', "{$this->source_dir}/config.m4");
         }
         $libs = implode(' ', PkgConfigUtil::getLibsArray('netsnmp'));
         FileSystem::replaceFileStr(
