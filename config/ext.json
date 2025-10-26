@@ -757,6 +757,10 @@
         ]
     },
     "snmp": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
         "type": "builtin",
         "arg-type-unix": "with",
         "arg-type-windows": "with",
