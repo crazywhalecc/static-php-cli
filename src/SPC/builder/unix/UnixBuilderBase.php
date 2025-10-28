@@ -339,7 +339,7 @@ abstract class UnixBuilderBase extends BuilderBase
                 $dynamic_exports = ' ' . $dynamicSymbolsArgument;
             }
         }
-        $debugFlags = $this->getOption('no-strip') ? '-w -s ' : '';
+        $debugFlags = $this->getOption('no-strip') ? '' : '-w -s ';
         $extLdFlags = "-extldflags '-pie{$dynamic_exports} {$this->arch_ld_flags}'";
         $muslTags = '';
         $staticFlags = '';
