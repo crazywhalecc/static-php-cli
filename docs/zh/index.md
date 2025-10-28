@@ -14,14 +14,11 @@ hero:
       link: ./guide/
 
 features:
-  - icon: 🚀
-    title: 静态 CLI 二进制
+  - title: 静态 CLI 二进制
     details: 您可以轻松地编译一个独立的 PHP 二进制文件以供通用使用，包括 CLI、FPM SAPI。
-  - icon: 📦
-    title: Micro 自解压可执行文件
+  - title: Micro 自解压可执行文件
     details: 您可以编译一个自解压的可执行文件，并将 PHP 源代码与二进制文件打包在一起。
-  - icon: 🔧
-    title: 依赖管理
+  - title: 依赖管理
     details: static-php-cli 附带依赖项管理，支持安装不同类型的 PHP 扩展。
 ---
 
@@ -37,7 +34,7 @@ const sponsors = [
 
 <div class="sponsors-section">
   <div class="sponsors-header">
-    <h2>💝 特别赞助商</h2>
+    <h2>特别赞助商</h2>
     <p class="sponsors-description">
       感谢我们出色的赞助商对本项目的支持！
     </p>

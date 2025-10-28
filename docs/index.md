@@ -17,14 +17,11 @@ hero:
       link: /zh/
 
 features:
-  - icon: 🚀
-    title: Static CLI Binary
+  - title: Static CLI Binary
     details: You can easily compile a standalone php binary for general use. Including CLI, FPM sapi.
-  - icon: 📦
-    title: Micro Self-Extracted Executable
+  - title: Micro Self-Extracted Executable
     details: You can compile a self-extracted executable and build with your php source code.
-  - icon: 🔧
-    title: Dependency Management
+  - title: Dependency Management
     details: static-php-cli comes with dependency management and supports installation of different types of PHP extensions.
 ---
 
@@ -40,7 +37,7 @@ const sponsors = [
 
 <div class="sponsors-section">
   <div class="sponsors-header">
-    <h2>💝 Special Sponsors</h2>
+    <h2>Special Sponsors</h2>
     <p class="sponsors-description">
       Thank you to our amazing sponsors for supporting this project!
     </p>
