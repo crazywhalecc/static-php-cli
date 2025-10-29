@@ -988,6 +988,14 @@
         "type": "builtin",
         "build-with-php": true
     },
+    "trader": {
+        "support": {
+            "BSD": "wip",
+            "Windows": "wip"
+        },
+        "type": "external",
+        "source": "ext-trader"
+    },
     "uuid": {
         "support": {
             "Windows": "wip",
