@@ -233,6 +233,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-trader": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/trader",
+        "path": "php-src/ext/trader",
+        "filename": "trader.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-uuid": {
         "type": "url",
         "url": "https://pecl.php.net/get/uuid",
