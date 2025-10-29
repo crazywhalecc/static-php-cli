@@ -210,5 +210,5 @@ jobs:
           path: log
 
 #      - name: Setup tmate session
-#        if: ${{ failure() && matrix.os == 'ubuntu-22.04-arm' && matrix.php == '8.1' }}
+#        if: ${{ failure() }}
 #        uses: mxschmitt/action-tmate@v3
