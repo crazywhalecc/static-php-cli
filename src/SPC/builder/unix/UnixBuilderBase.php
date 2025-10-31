@@ -238,7 +238,7 @@ abstract class UnixBuilderBase extends BuilderBase
         } elseif (!$no_strip_option && PHP_OS_FAMILY === 'Linux') {
             shell()
                 ->exec("objcopy --only-keep-debug {$src} {$src}.debug") // extract debug symbols
-                ->exec("objcopy --strip-debug --add-gnu-debuglink={$src}.debug {$src}") // link debug symbols
+                ->exec("objcopy --add-gnu-debuglink={$src}.debug {$src}") // link debug symbols
                 ->exec("strip --strip-unneeded {$src}"); // strip unneeded symbols
             $copy_files[] = "{$src}.debug";
         }
@@ -274,7 +274,10 @@ abstract class UnixBuilderBase extends BuilderBase
             if (!file_exists($file)) {
                 throw new SPCInternalException("Deploy failed. Cannot find file: {$file}");
             }
-            FileSystem::copy($file, BUILD_BIN_PATH . '/' . basename($file));
+            // ignore copy to self
+            if (realpath($file) !== realpath(BUILD_BIN_PATH . '/' . basename($file))) {
+                shell()->exec('cp ' . escapeshellarg($file) . ' ' . escapeshellarg(BUILD_BIN_PATH . '/'));
+            }
         }
     }
 
