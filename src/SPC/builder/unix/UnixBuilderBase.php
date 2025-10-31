@@ -6,6 +6,7 @@ namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
 use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
+use SPC\exception\PatchException;
 use SPC\exception\SPCException;
 use SPC\exception\SPCInternalException;
 use SPC\exception\ValidationException;
@@ -210,21 +211,71 @@ abstract class UnixBuilderBase extends BuilderBase
     /**
      * Deploy the binary file to the build bin path.
      *
-     * @param int $type Type integer, one of BUILD_TARGET_CLI, BUILD_TARGET_MICRO, BUILD_TARGET_FPM
+     * @param int $type Type integer, one of BUILD_TARGET_CLI, BUILD_TARGET_MICRO, BUILD_TARGET_FPM, BUILD_TARGET_CGI, BUILD_TARGET_FRANKENPHP
      */
-    protected function deployBinary(int $type): bool
+    protected function deployBinary(int $type): void
     {
+        FileSystem::createDir(BUILD_BIN_PATH);
+        $copy_files = [];
         $src = match ($type) {
             BUILD_TARGET_CLI => SOURCE_PATH . '/php-src/sapi/cli/php',
             BUILD_TARGET_MICRO => SOURCE_PATH . '/php-src/sapi/micro/micro.sfx',
             BUILD_TARGET_FPM => SOURCE_PATH . '/php-src/sapi/fpm/php-fpm',
             BUILD_TARGET_CGI => SOURCE_PATH . '/php-src/sapi/cgi/php-cgi',
+            BUILD_TARGET_FRANKENPHP => BUILD_BIN_PATH . '/frankenphp',
             default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
-        logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
-        FileSystem::createDir(BUILD_BIN_PATH);
-        shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_BIN_PATH));
-        return true;
+        $no_strip_option = (bool) $this->getOption('no-strip', false);
+        $upx_option = (bool) $this->getOption('with-upx-pack', false);
+
+        // Generate debug symbols if needed
+        $copy_files[] = $src;
+        if (!$no_strip_option && PHP_OS_FAMILY === 'Darwin') {
+            shell()
+                ->exec("dsymutil -f {$src}") // generate .dwarf file
+                ->exec("strip -S {$src}"); // strip unneeded symbols
+            $copy_files[] = "{$src}.dwarf";
+        } elseif (!$no_strip_option && PHP_OS_FAMILY === 'Linux') {
+            shell()
+                ->exec("objcopy --only-keep-debug {$src} {$src}.debug") // extract debug symbols
+                ->exec("objcopy --strip-debug --add-gnu-debuglink={$src}.debug {$src}") // link debug symbols
+                ->exec("strip --strip-unneeded {$src}"); // strip unneeded symbols
+            $copy_files[] = "{$src}.debug";
+        }
+
+        // Compress binary with UPX if needed (only for Linux)
+        if ($upx_option && PHP_OS_FAMILY === 'Linux') {
+            if ($no_strip_option) {
+                logger()->warning('UPX compression is not recommended when --no-strip is enabled.');
+            }
+            logger()->info("Compressing {$src} with UPX");
+            shell()->exec(getenv('UPX_EXEC') . " --best {$src}");
+
+            // micro needs special section handling in LinuxBuilder.
+            // The micro.sfx does not support UPX directly, but we can remove UPX-info segment to adapt.
+            // This will also make micro.sfx with upx-packed more like a malware fore antivirus :(
+            if ($type === BUILD_TARGET_MICRO && version_compare($this->getMicroVersion(), '0.2.0') >= 0) {
+                // strip first
+                // cut binary with readelf
+                [$ret, $out] = shell()->execWithResult("readelf -l {$src} | awk '/LOAD|GNU_STACK/ {getline; print \$1, \$2, \$3, \$4, \$6, \$7}'");
+                $out[1] = explode(' ', $out[1]);
+                $offset = $out[1][0];
+                if ($ret !== 0 || !str_starts_with($offset, '0x')) {
+                    throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
+                }
+                $offset = hexdec($offset);
+                // remove upx extra wastes
+                file_put_contents($src, substr(file_get_contents($src), 0, $offset));
+            }
+        }
+
+        // Copy files
+        foreach ($copy_files as $file) {
+            if (!file_exists($file)) {
+                throw new SPCInternalException("Deploy failed. Cannot find file: {$file}");
+            }
+            FileSystem::copy($file, BUILD_BIN_PATH . '/' . basename($file));
+        }
     }
 
     /**
@@ -325,13 +376,7 @@ abstract class UnixBuilderBase extends BuilderBase
             ->setEnv($env)
             ->exec("xcaddy build --output frankenphp {$xcaddyModules}");
 
-        if (!$this->getOption('no-strip', false) && file_exists(BUILD_BIN_PATH . '/frankenphp')) {
-            if (PHP_OS_FAMILY === 'Linux') {
-                shell()->cd(BUILD_BIN_PATH)->exec('strip --strip-unneeded frankenphp');
-            } else { // macOS doesn't understand strip-unneeded
-                shell()->cd(BUILD_BIN_PATH)->exec('strip -S frankenphp');
-            }
-        }
+        $this->deployBinary(BUILD_TARGET_FRANKENPHP);
     }
 
     /**
