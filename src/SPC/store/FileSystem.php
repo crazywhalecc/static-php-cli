@@ -174,6 +174,9 @@ class FileSystem
         logger()->debug("Copying file from {$from} to {$to}");
         $dst_path = FileSystem::convertPath($to);
         $src_path = FileSystem::convertPath($from);
+        if ($src_path === $dst_path) {
+            return;
+        }
         if (!copy($src_path, $dst_path)) {
             throw new FileSystemException('Cannot copy file from ' . $src_path . ' to ' . $dst_path);
         }

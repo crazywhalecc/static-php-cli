@@ -189,9 +189,6 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         $shell->exec("make {$concurrency} {$vars} cli");
-        if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/cli/php')->exec('strip -S sapi/cli/php');
-        }
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
@@ -202,9 +199,6 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         $shell->exec("make {$concurrency} {$vars} cgi");
-        if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/cgi/php-cgi')->exec('strip -S sapi/cgi/php-cgi');
-        }
         $this->deployBinary(BUILD_TARGET_CGI);
     }
 
@@ -216,31 +210,30 @@ class MacOSBuilder extends UnixBuilderBase
         if ($this->getPHPVersionID() < 80000) {
             throw new WrongUsageException('phpmicro only support PHP >= 8.0!');
         }
-        if ($this->getExt('phar')) {
-            $this->phar_patched = true;
-            SourcePatcher::patchMicroPhar($this->getPHPVersionID());
-        }
 
-        $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-        $vars = $this->getMakeExtraVars();
+        try {
+            if ($this->getExt('phar')) {
+                $this->phar_patched = true;
+                SourcePatcher::patchMicroPhar($this->getPHPVersionID());
+            }
 
-        // patch fake cli for micro
-        $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
-        $vars = SystemUtil::makeEnvVarString($vars);
+            $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+            $vars = $this->getMakeExtraVars();
 
-        $shell = shell()->cd(SOURCE_PATH . '/php-src');
-        // build
-        $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
-        $shell->exec("make {$concurrency} {$vars} micro");
-        // strip
-        if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/micro/micro.sfx')->exec('strip -S sapi/micro/micro.sfx');
-        }
+            // patch fake cli for micro
+            $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
+            $vars = SystemUtil::makeEnvVarString($vars);
 
-        $this->deployBinary(BUILD_TARGET_MICRO);
+            $shell = shell()->cd(SOURCE_PATH . '/php-src');
+            // build
+            $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
+            $shell->exec("make {$concurrency} {$vars} micro");
 
-        if ($this->phar_patched) {
-            SourcePatcher::unpatchMicroPhar();
+            $this->deployBinary(BUILD_TARGET_MICRO);
+        } finally {
+            if ($this->phar_patched) {
+                SourcePatcher::unpatchMicroPhar();
+            }
         }
     }
 
@@ -254,9 +247,6 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         $shell->exec("make {$concurrency} {$vars} fpm");
-        if (!$this->getOption('no-strip', false)) {
-            $shell->exec('dsymutil -f sapi/fpm/php-fpm')->exec('strip -S sapi/fpm/php-fpm');
-        }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 

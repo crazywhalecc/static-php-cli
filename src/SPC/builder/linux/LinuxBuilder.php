@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SPC\builder\linux;
 
 use SPC\builder\unix\UnixBuilderBase;
-use SPC\exception\PatchException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
@@ -194,14 +193,6 @@ class LinuxBuilder extends UnixBuilderBase
             SourcePatcher::patchFile('musl_static_readline.patch', SOURCE_PATH . '/php-src', true);
         }
 
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')->exec('strip --strip-unneeded php');
-        }
-        if ($this->getOption('with-upx-pack')) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cli')
-                ->exec(getenv('UPX_EXEC') . ' --best php');
-        }
-
         $this->deployBinary(BUILD_TARGET_CLI);
     }
 
@@ -212,14 +203,6 @@ class LinuxBuilder extends UnixBuilderBase
         shell()->cd(SOURCE_PATH . '/php-src')
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make {$concurrency} {$vars} cgi");
-
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cgi')->exec('strip --strip-unneeded php-cgi');
-        }
-        if ($this->getOption('with-upx-pack')) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/cgi')
-                ->exec(getenv('UPX_EXEC') . ' --best php-cgi');
-        }
 
         $this->deployBinary(BUILD_TARGET_CGI);
     }
@@ -232,29 +215,29 @@ class LinuxBuilder extends UnixBuilderBase
         if ($this->getPHPVersionID() < 80000) {
             throw new WrongUsageException('phpmicro only support PHP >= 8.0!');
         }
-        if ($this->getExt('phar')) {
-            $this->phar_patched = true;
-            SourcePatcher::patchMicroPhar($this->getPHPVersionID());
-        }
+        try {
+            if ($this->getExt('phar')) {
+                $this->phar_patched = true;
+                SourcePatcher::patchMicroPhar($this->getPHPVersionID());
+            }
 
-        $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-        $vars = $this->getMakeExtraVars();
+            $enable_fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+            $vars = $this->getMakeExtraVars();
 
-        // patch fake cli for micro
-        $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
-        $vars = SystemUtil::makeEnvVarString($vars);
-        $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
+            // patch fake cli for micro
+            $vars['EXTRA_CFLAGS'] .= $enable_fake_cli;
+            $vars = SystemUtil::makeEnvVarString($vars);
+            $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
 
-        shell()->cd(SOURCE_PATH . '/php-src')
-            ->exec('sed -i "s|//lib|/lib|g" Makefile')
-            ->exec("make {$concurrency} {$vars} micro");
+            shell()->cd(SOURCE_PATH . '/php-src')
+                ->exec('sed -i "s|//lib|/lib|g" Makefile')
+                ->exec("make {$concurrency} {$vars} micro");
 
-        $this->processMicroUPX();
-
-        $this->deployBinary(BUILD_TARGET_MICRO);
-
-        if ($this->phar_patched) {
-            SourcePatcher::unpatchMicroPhar();
+            $this->deployBinary(BUILD_TARGET_MICRO);
+        } finally {
+            if ($this->phar_patched) {
+                SourcePatcher::unpatchMicroPhar();
+            }
         }
     }
 
@@ -269,13 +252,6 @@ class LinuxBuilder extends UnixBuilderBase
             ->exec('sed -i "s|//lib|/lib|g" Makefile')
             ->exec("make {$concurrency} {$vars} fpm");
 
-        if (!$this->getOption('no-strip', false)) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')->exec('strip --strip-unneeded php-fpm');
-        }
-        if ($this->getOption('with-upx-pack')) {
-            shell()->cd(SOURCE_PATH . '/php-src/sapi/fpm')
-                ->exec(getenv('UPX_EXEC') . ' --best php-fpm');
-        }
         $this->deployBinary(BUILD_TARGET_FPM);
     }
 
@@ -389,32 +365,5 @@ class LinuxBuilder extends UnixBuilderBase
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => "-L{$lib} {$static} -pie",
         ]);
-    }
-
-    /**
-     * Strip micro.sfx for Linux.
-     * The micro.sfx does not support UPX directly, but we can remove UPX-info segment to adapt.
-     * This will also make micro.sfx with upx-packed more like a malware fore antivirus :(
-     */
-    private function processMicroUPX(): void
-    {
-        if (version_compare($this->getMicroVersion(), '0.2.0') >= 0 && !$this->getOption('no-strip', false)) {
-            shell()->exec('strip --strip-unneeded ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx');
-
-            if ($this->getOption('with-upx-pack')) {
-                // strip first
-                shell()->exec(getenv('UPX_EXEC') . ' --best ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx');
-                // cut binary with readelf
-                [$ret, $out] = shell()->execWithResult('readelf -l ' . SOURCE_PATH . '/php-src/sapi/micro/micro.sfx | awk \'/LOAD|GNU_STACK/ {getline; print $1, $2, $3, $4, $6, $7}\'');
-                $out[1] = explode(' ', $out[1]);
-                $offset = $out[1][0];
-                if ($ret !== 0 || !str_starts_with($offset, '0x')) {
-                    throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
-                }
-                $offset = hexdec($offset);
-                // remove upx extra wastes
-                file_put_contents(SOURCE_PATH . '/php-src/sapi/micro/micro.sfx', substr(file_get_contents(SOURCE_PATH . '/php-src/sapi/micro/micro.sfx'), 0, $offset));
-            }
-        }
     }
 }
