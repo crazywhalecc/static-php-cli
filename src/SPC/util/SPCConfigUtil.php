@@ -62,8 +62,7 @@ class SPCConfigUtil
                 $extensions[] = $ext;
             }
         }
-        $extra_builder_libs = $this->builder?->getLibs() ?? [];
-        [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib, array_map(fn ($l) => $l->getName(), $extra_builder_libs));
+        [$extensions, $libraries] = DependencyUtil::getExtsAndLibs($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 
         ob_start();
         if ($this->builder === null) {

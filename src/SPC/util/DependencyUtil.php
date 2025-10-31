@@ -105,7 +105,7 @@ class DependencyUtil
      * @param  array $additional_libs Array of additional libraries
      * @return array Ordered array of extension names
      */
-    public static function getExtsAndLibs(array $exts, array $additional_libs = [], bool $include_suggested_exts = false, bool $include_suggested_libs = false, array $extra_libraries_from_builder = []): array
+    public static function getExtsAndLibs(array $exts, array $additional_libs = [], bool $include_suggested_exts = false, bool $include_suggested_libs = false): array
     {
         $dep_list = self::platExtToLibs();
 
@@ -134,23 +134,6 @@ class DependencyUtil
                 $del_list = [];
                 foreach ($obj['suggests'] as $id => $suggest) {
                     if (!str_starts_with($suggest, 'ext@')) {
-                        $dep_list[$name]['depends'][] = $suggest;
-                        $del_list[] = $id;
-                    }
-                }
-                foreach ($del_list as $id) {
-                    unset($dep_list[$name]['suggests'][$id]);
-                }
-                $dep_list[$name]['suggests'] = array_values($dep_list[$name]['suggests']);
-            }
-        }
-        // include suggested libraries
-        if ($extra_libraries_from_builder) {
-            // check every deps suggests
-            foreach ($dep_list as $name => $obj) {
-                $del_list = [];
-                foreach ($obj['suggests'] as $id => $suggest) {
-                    if (!str_starts_with($suggest, 'ext@') && in_array($suggest, $extra_libraries_from_builder)) {
                         $dep_list[$name]['depends'][] = $suggest;
                         $del_list[] = $id;
                     }
