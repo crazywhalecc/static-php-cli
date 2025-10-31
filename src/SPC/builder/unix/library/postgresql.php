@@ -45,8 +45,8 @@ trait postgresql
 
     protected function build(): void
     {
-        $libs = array_map(fn ($x) => $x->getName(), $this->getDependencies());
-        $spc = new SPCConfigUtil($this->getBuilder(), ['no_php' => true, 'libs_only_deps' => true]);
+        $libs = array_map(fn ($x) => $x->getName(), $this->getDependencies(true));
+        $spc = new SPCConfigUtil($this->builder, ['no_php' => true, 'libs_only_deps' => true]);
         $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs'));
 
         $env_vars = [

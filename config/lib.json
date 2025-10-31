@@ -607,8 +607,8 @@
     },
     "libxml2": {
         "source": "libxml2",
-        "static-libs-unix": [
-            "libxml2.a"
+        "pkg-configs": [
+            "libxml-2.0"
         ],
         "static-libs-windows": [
             "libxml2s.lib",
