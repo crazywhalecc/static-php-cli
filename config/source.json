@@ -233,6 +233,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-trader": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/trader",
+        "path": "php-src/ext/trader",
+        "filename": "trader.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-uuid": {
         "type": "url",
         "url": "https://pecl.php.net/get/uuid",
@@ -762,7 +772,7 @@
     "micro": {
         "type": "git",
         "path": "php-src/sapi/micro",
-        "rev": "php-85-win",
+        "rev": "master",
         "url": "https://github.com/static-php/phpmicro",
         "license": {
             "type": "file",
@@ -805,6 +815,14 @@
         "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
         "regex": "/href=\"(?<file>ncurses-(?<version>[^\"]+)\\.tar\\.gz)\"/",
         "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "net-snmp": {
+        "type": "ghtagtar",
+        "repo": "net-snmp/net-snmp",
         "license": {
             "type": "file",
             "path": "COPYING"

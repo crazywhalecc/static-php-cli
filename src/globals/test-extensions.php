@@ -14,9 +14,9 @@ declare(strict_types=1);
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
     '8.1',
-    // '8.2',
-    // '8.3',
-    // '8.4',
+    '8.2',
+    '8.3',
+    '8.4',
     '8.5',
     // 'git',
 ];
@@ -30,11 +30,12 @@ $test_os = [
     'ubuntu-24.04', // bin/spc for x86_64
     'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
     'ubuntu-24.04-arm', // bin/spc for arm64
-    // 'windows-latest', // .\bin\spc.ps1
+    // 'windows-2022', // .\bin\spc.ps1
+    // 'windows-2025',
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
@@ -61,7 +62,7 @@ $shared_extensions = match (PHP_OS_FAMILY) {
 };
 
 // If you want to test lib-suggests for all extensions and libraries, set it to true.
-$with_suggested_libs = true;
+$with_suggested_libs = false;
 
 // If you want to test extra libs for extensions, add them below (comma separated, example `libwebp,libavif`). Unnecessary, when $with_suggested_libs is true.
 $with_libs = match (PHP_OS_FAMILY) {
@@ -208,7 +209,7 @@ switch ($argv[1] ?? null) {
         passthru($prefix . $down_cmd, $retcode);
         break;
     case 'build_cmd':
-        passthru($prefix . $build_cmd . ' --build-cli --build-micro', $retcode);
+        passthru($prefix . $build_cmd . ' --build-cli --build-micro --build-cgi', $retcode);
         break;
     case 'build_embed_cmd':
         if ($frankenphp) {

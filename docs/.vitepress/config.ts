@@ -4,7 +4,7 @@ import sidebarZh from "./sidebar.zh";
 
 // https://vitepress.dev/reference/site-config
 export default {
-  title: "static-php-cli",
+  title: "Static PHP",
   description: "Build single static PHP binary, with PHP project together, with popular extensions included.",
   locales: {
     en: {
@@ -44,6 +44,7 @@ export default {
   },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: '/images/static-php_nobg.png',
     nav: [],
     socialLinks: [
       {icon: 'github', link: 'https://github.com/crazywhalecc/static-php-cli'}
