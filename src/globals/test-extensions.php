@@ -49,7 +49,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'gettext',
+    'Linux', 'Darwin' => 'rdkafka',
     'Windows' => 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pdo,pdo_mysql,pdo_sqlite,phar,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
 };
 
