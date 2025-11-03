@@ -42,7 +42,6 @@ class rdkafka extends Extension
         $pkgconf_libs = trim(implode('', $pkgconf_libs));
         $pkgconf_libs = str_replace(BUILD_LIB_PATH . '/lib', '-l', $pkgconf_libs);
         $pkgconf_libs = str_replace('.a', '', $pkgconf_libs);
-        $pkgconf_libs = deduplicate_flags($pkgconf_libs);
         return '--with-rdkafka=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . ' RDKAFKA_LIBS="' . $pkgconf_libs . '"';
     }
 }
