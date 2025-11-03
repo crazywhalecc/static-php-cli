@@ -513,6 +513,10 @@
         ],
         "cpp-library": true,
         "lib-suggests": [
+            "curl",
+            "liblz4",
+            "openssl",
+            "zlib",
             "zstd"
         ]
     },

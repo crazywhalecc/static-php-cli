@@ -32,20 +32,28 @@ trait librdkafka
                 'zstd',
                 function ($lib) {
                     putenv("STATIC_LIB_libzstd={$lib->getLibDir()}/libzstd.a");
-                    return '';
+                    return '--enable-zstd';
                 },
                 '--disable-zstd'
             )
+            ->optionalLib(
+                'curl',
+                function () {
+                    $pkg_libs = shell()->execWithResult('pkg-config --libs --static libcurl')[1];
+                    putenv("STATIC_LIB_libcurl={$pkg_libs}");
+                    return '--enable-curl';
+                },
+                '--disable-curl'
+            )
+            ->optionalLib('openssl', '--enable-ssl', '--disable-ssl')
+            ->optionalLib('zlib', '--enable-zlib', '--disable-zlib')
             ->removeConfigureArgs(
                 '--with-pic',
                 '--enable-pic',
             )
             ->configure(
-                '--disable-curl',
                 '--disable-sasl',
                 '--disable-valgrind',
-                '--disable-zlib',
-                '--disable-ssl',
             )
             ->make();
 

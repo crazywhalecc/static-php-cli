@@ -15,6 +15,7 @@ class rdkafka extends Extension
     {
         FileSystem::replaceFileStr("{$this->source_dir}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\n", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm \$RDKAFKA_LIBS\n");
         FileSystem::replaceFileStr("{$this->source_dir}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\"\n", '-L$RDKAFKA_DIR/$PHP_LIBDIR -lm $RDKAFKA_LIBS"');
+        FileSystem::replaceFileStr("{$this->source_dir}/config.m4", 'PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,', 'AC_CHECK_LIB([$LIBNAME], [$LIBSYMBOL],');
         return true;
     }
 
@@ -39,6 +40,9 @@ class rdkafka extends Extension
     {
         $pkgconf_libs = shell()->execWithResult('pkg-config --libs --static rdkafka')[1];
         $pkgconf_libs = trim(implode('', $pkgconf_libs));
+        $pkgconf_libs = str_replace(BUILD_LIB_PATH . '/lib', '-l', $pkgconf_libs);
+        $pkgconf_libs = str_replace('.a', '', $pkgconf_libs);
+        $pkgconf_libs = deduplicate_flags($pkgconf_libs);
         return '--with-rdkafka=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . ' RDKAFKA_LIBS="' . $pkgconf_libs . '"';
     }
 }
