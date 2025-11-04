@@ -486,6 +486,11 @@ class Extension
         return $this->build_static;
     }
 
+    /**
+     * Get the library dependencies that current extension depends on.
+     *
+     * @param bool $recursive Whether it includes dependencies recursively
+     */
     public function getLibraryDependencies(bool $recursive = false): array
     {
         $ret = array_filter($this->dependencies, fn ($x) => $x instanceof LibraryBase);
