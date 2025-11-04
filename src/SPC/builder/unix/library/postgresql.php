@@ -47,7 +47,7 @@ trait postgresql
     {
         $libs = array_map(fn ($x) => $x->getName(), $this->getDependencies(true));
         $spc = new SPCConfigUtil($this->builder, ['no_php' => true, 'libs_only_deps' => true]);
-        $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs'));
+        $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs', false));
 
         $env_vars = [
             'CFLAGS' => $config['cflags'],
