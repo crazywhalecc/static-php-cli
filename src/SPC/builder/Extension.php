@@ -516,11 +516,6 @@ class Extension
             }
         }
 
-        if (array_key_exists(0, $deps)) {
-            $zero = [0 => $deps[0]];
-            unset($deps[0]);
-            return $zero + $deps;
-        }
         return $deps;
     }
 
@@ -552,7 +547,7 @@ class Extension
             }
             logger()->info("enabling {$this->name} without library {$name}");
         } else {
-            $this->dependencies[] = $depLib;
+            $this->dependencies[$name] = $depLib;
         }
     }
 
@@ -565,7 +560,7 @@ class Extension
             }
             logger()->info("enabling {$this->name} without extension {$name}");
         } else {
-            $this->dependencies[] = $depExt;
+            $this->dependencies[$name] = $depExt;
         }
     }
 
