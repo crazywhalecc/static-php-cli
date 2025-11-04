@@ -506,10 +506,9 @@
     },
     "librdkafka": {
         "source": "librdkafka",
-        "static-libs-unix": [
-            "librdkafka.a",
-            "librdkafka++.a",
-            "librdkafka-static.a"
+        "pkg-configs": [
+            "rdkafka++-static",
+            "rdkafka-static"
         ],
         "cpp-library": true,
         "lib-suggests": [
