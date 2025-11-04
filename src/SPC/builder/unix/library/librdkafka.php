@@ -31,12 +31,12 @@ trait librdkafka
             ->optionalLib('curl', ...cmake_boolean_args('WITH_CURL'))
             ->optionalLib('openssl', ...cmake_boolean_args('WITH_SSL'))
             ->optionalLib('zlib', ...cmake_boolean_args('WITH_ZLIB'))
+            ->optionalLib('liblz4', ...cmake_boolean_args('ENABLE_LZ4_EXT'))
             ->addConfigureArgs(
                 '-DWITH_SASL=OFF',
                 '-DRDKAFKA_BUILD_STATIC=ON',
                 '-DRDKAFKA_BUILD_EXAMPLES=OFF',
                 '-DRDKAFKA_BUILD_TESTS=OFF',
-                '-DENABLE_LZ4_EXT=OFF',
             )
             ->build();
     }

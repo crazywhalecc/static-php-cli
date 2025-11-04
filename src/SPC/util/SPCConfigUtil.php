@@ -146,8 +146,10 @@ class SPCConfigUtil
         if (!is_array($extension)) {
             $extension = [$extension];
         }
+        $libs = array_map(fn ($y) => $y->getName(), array_merge(...array_map(fn ($x) => $x->getLibraryDependencies(true), $extension)));
         return $this->config(
             extensions: array_map(fn ($x) => $x->getName(), $extension),
+            libraries: $libs,
             include_suggest_ext: $include_suggest_ext ?: $this->builder?->getOption('with-suggested-exts') ?? false,
             include_suggest_lib: $include_suggest_lib ?: $this->builder?->getOption('with-suggested-libs') ?? false,
         );
