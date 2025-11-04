@@ -1,5 +1,6 @@
 import sidebarEn from "./sidebar.en";
 import sidebarZh from "./sidebar.zh";
+import sidebarJa from "./sidebar.ja";
 
 
 // https://vitepress.dev/reference/site-config
@@ -61,5 +62,19 @@ export default {
         indexName: 'static-php docs',
       },
     },
-  }
+  },
+  head: [
+    [
+      'script',
+      { async: '', src: 'https://www.googletagmanager.com/gtag/js?id=G-0MBJ29BD7F' }
+    ],
+    [
+      'script',
+      {},
+      `window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-0MBJ29BD7F');`
+    ]
+  ]
 }
