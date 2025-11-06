@@ -448,6 +448,13 @@ class Extension
             ->exec('make clean')
             ->exec('make -j' . $this->builder->concurrency)
             ->exec('make install');
+
+        // process *.so file
+        $soFile = BUILD_MODULES_PATH . '/' . $this->getName() . '.so';
+        if (!file_exists($soFile)) {
+            throw new ValidationException("extension {$this->getName()} build failed: {$soFile} not found", validation_module: "Extension {$this->getName()} build");
+        }
+        $this->builder->deployBinary($soFile, $soFile, false);
     }
 
     /**

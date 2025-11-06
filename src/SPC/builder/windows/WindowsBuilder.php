@@ -161,7 +161,7 @@ class WindowsBuilder extends BuilderBase
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cli_wrapper.bat --task-args php.exe");
 
-        $this->deployBinary(BUILD_TARGET_CLI);
+        $this->deploySAPIBinary(BUILD_TARGET_CLI);
     }
 
     public function buildCgi(): void
@@ -186,7 +186,7 @@ class WindowsBuilder extends BuilderBase
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cgi_wrapper.bat --task-args php-cgi.exe");
 
-        $this->deployBinary(BUILD_TARGET_CGI);
+        $this->deploySAPIBinary(BUILD_TARGET_CGI);
     }
 
     public function buildEmbed(): void
@@ -243,7 +243,7 @@ class WindowsBuilder extends BuilderBase
             }
         }
 
-        $this->deployBinary(BUILD_TARGET_MICRO);
+        $this->deploySAPIBinary(BUILD_TARGET_MICRO);
     }
 
     public function proveLibs(array $sorted_libraries): void
@@ -357,8 +357,18 @@ class WindowsBuilder extends BuilderBase
      *
      * @param int $type Deploy type
      */
-    public function deployBinary(int $type): void
+    public function deploySAPIBinary(int $type): void
     {
+        logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
+
+        $debug_dir = BUILD_ROOT_PATH . '\debug';
+        $bin_path = BUILD_BIN_PATH;
+
+        // create dirs
+        FileSystem::createDir($debug_dir);
+        FileSystem::createDir($bin_path);
+
+        // determine source path for different SAPI
         $rel_type = 'Release'; // TODO: Debug build support
         $ts = $this->zts ? '_TS' : '';
         $src = match ($type) {
@@ -368,20 +378,31 @@ class WindowsBuilder extends BuilderBase
             default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
 
+        $src = "{$src[0]}\\{$src[1]}";
+        $dst = BUILD_BIN_PATH . '\\' . basename($src);
+
+        // file must exists
+        if (!file_exists($src)) {
+            throw new SPCInternalException("Deploy failed. Cannot find file: {$src}");
+        }
+        // dst dir must exists
+        FileSystem::createDir(dirname($dst));
+
+        // copy file
+        if (realpath($src) !== realpath($dst)) {
+            cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg($dst));
+        }
+
+        // extract debug info in buildroot/debug
+        if ($this->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
+            cmd()->exec('copy ' . escapeshellarg("{$src[0]}\\{$src[2]}") . ' ' . escapeshellarg($debug_dir));
+        }
+
         // with-upx-pack for cli and micro
         if ($this->getOption('with-upx-pack', false)) {
             if ($type === BUILD_TARGET_CLI || $type === BUILD_TARGET_CGI || ($type === BUILD_TARGET_MICRO && version_compare($this->getMicroVersion(), '0.2.0') >= 0)) {
-                cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg("{$src[0]}\\{$src[1]}"));
+                cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($dst));
             }
-        }
-
-        logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
-        FileSystem::createDir(BUILD_BIN_PATH);
-
-        cmd()->exec('copy ' . escapeshellarg("{$src[0]}\\{$src[1]}") . ' ' . escapeshellarg(BUILD_BIN_PATH . '\\'));
-        if ($this->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
-            logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' debug symbols');
-            cmd()->exec('copy ' . escapeshellarg("{$src[0]}\\{$src[2]}") . ' ' . escapeshellarg(BUILD_BIN_PATH . '\\'));
         }
     }
 

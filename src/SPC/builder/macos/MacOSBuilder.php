@@ -189,7 +189,7 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         $shell->exec("make {$concurrency} {$vars} cli");
-        $this->deployBinary(BUILD_TARGET_CLI);
+        $this->deploySAPIBinary(BUILD_TARGET_CLI);
     }
 
     protected function buildCgi(): void
@@ -199,7 +199,7 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         $shell->exec("make {$concurrency} {$vars} cgi");
-        $this->deployBinary(BUILD_TARGET_CGI);
+        $this->deploySAPIBinary(BUILD_TARGET_CGI);
     }
 
     /**
@@ -229,7 +229,7 @@ class MacOSBuilder extends UnixBuilderBase
             $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
             $shell->exec("make {$concurrency} {$vars} micro");
 
-            $this->deployBinary(BUILD_TARGET_MICRO);
+            $this->deploySAPIBinary(BUILD_TARGET_MICRO);
         } finally {
             if ($this->phar_patched) {
                 SourcePatcher::unpatchMicroPhar();
@@ -247,7 +247,7 @@ class MacOSBuilder extends UnixBuilderBase
         $shell = shell()->cd(SOURCE_PATH . '/php-src');
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         $shell->exec("make {$concurrency} {$vars} fpm");
-        $this->deployBinary(BUILD_TARGET_FPM);
+        $this->deploySAPIBinary(BUILD_TARGET_FPM);
     }
 
     /**
