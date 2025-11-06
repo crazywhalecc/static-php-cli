@@ -355,7 +355,7 @@ abstract class UnixBuilderBase extends BuilderBase
         }
 
         $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list);
-        $cflags = "{$this->arch_c_flags} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS');
+        $cflags = "{$this->arch_c_flags} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -DFRANKENPHP_VERSION=' . $frankenPhpVersion;
         $libs = $config['libs'];
         // Go's gcc driver doesn't automatically link against -lgcov or -lrt. Ugly, but necessary fix.
         if ((str_contains((string) getenv('SPC_DEFAULT_C_FLAGS'), '-fprofile') ||

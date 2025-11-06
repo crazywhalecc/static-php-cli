@@ -7,6 +7,7 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\store\FileSystem;
 use SPC\util\CustomExt;
+use SPC\util\SPCConfigUtil;
 
 #[CustomExt('rdkafka')]
 class rdkafka extends Extension
@@ -15,6 +16,7 @@ class rdkafka extends Extension
     {
         FileSystem::replaceFileStr("{$this->source_dir}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\n", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm \$RDKAFKA_LIBS\n");
         FileSystem::replaceFileStr("{$this->source_dir}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\"\n", '-L$RDKAFKA_DIR/$PHP_LIBDIR -lm $RDKAFKA_LIBS"');
+        FileSystem::replaceFileStr("{$this->source_dir}/config.m4", 'PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,', 'AC_CHECK_LIB([$LIBNAME], [$LIBSYMBOL],');
         return true;
     }
 
@@ -37,8 +39,7 @@ class rdkafka extends Extension
 
     public function getUnixConfigureArg(bool $shared = false): string
     {
-        $pkgconf_libs = shell()->execWithResult('pkg-config --libs --static rdkafka')[1];
-        $pkgconf_libs = trim(implode('', $pkgconf_libs));
-        return '--with-rdkafka=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . ' RDKAFKA_LIBS="' . $pkgconf_libs . '"';
+        $pkgconf_libs = (new SPCConfigUtil($this->builder, ['no_php' => true, 'libs_only_deps' => true]))->getExtensionConfig($this);
+        return '--with-rdkafka=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . " RDKAFKA_LIBS=\"{$pkgconf_libs['libs']}\"";
     }
 }

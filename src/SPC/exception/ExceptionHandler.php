@@ -159,7 +159,9 @@ class ExceptionHandler
     public static function handleDefaultException(\Throwable $e): void
     {
         $class = get_class($e);
-        self::logError("✗ Unhandled exception {$class}:\n\t{$e->getMessage()}\n");
+        $file = $e->getFile();
+        $line = $e->getLine();
+        self::logError("✗ Unhandled exception {$class} on {$file} line {$line}:\n\t{$e->getMessage()}\n");
         self::logError('Stack trace:');
         self::logError(ConsoleColor::gray($e->getTraceAsString()) . PHP_EOL, 4);
         self::logError('⚠ Please report this exception to: https://github.com/crazywhalecc/static-php-cli/issues');

@@ -506,13 +506,16 @@
     },
     "librdkafka": {
         "source": "librdkafka",
-        "static-libs-unix": [
-            "librdkafka.a",
-            "librdkafka++.a",
-            "librdkafka-static.a"
+        "pkg-configs": [
+            "rdkafka++-static",
+            "rdkafka-static"
         ],
         "cpp-library": true,
         "lib-suggests": [
+            "curl",
+            "liblz4",
+            "openssl",
+            "zlib",
             "zstd"
         ]
     },
@@ -607,8 +610,8 @@
     },
     "libxml2": {
         "source": "libxml2",
-        "static-libs-unix": [
-            "libxml2.a"
+        "pkg-configs": [
+            "libxml-2.0"
         ],
         "static-libs-windows": [
             "libxml2s.lib",

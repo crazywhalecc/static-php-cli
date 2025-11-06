@@ -220,7 +220,7 @@ class Extension
      */
     public function patchBeforeSharedMake(): bool
     {
-        $config = (new SPCConfigUtil($this->builder))->config([$this->getName()], array_map(fn ($l) => $l->getName(), $this->builder->getLibs()));
+        $config = (new SPCConfigUtil($this->builder))->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $lstdcpp = str_contains($sharedLibs, '-l:libstdc++.a') ? '-l:libstdc++.a' : null;
         $lstdcpp ??= str_contains($sharedLibs, '-lstdc++') ? '-lstdc++' : '';
@@ -487,17 +487,45 @@ class Extension
     }
 
     /**
+     * Get the library dependencies that current extension depends on.
+     *
+     * @param bool $recursive Whether it includes dependencies recursively
+     */
+    public function getLibraryDependencies(bool $recursive = false): array
+    {
+        $ret = array_filter($this->dependencies, fn ($x) => $x instanceof LibraryBase);
+        if (!$recursive) {
+            return $ret;
+        }
+
+        $deps = [];
+
+        $added = 1;
+        while ($added !== 0) {
+            $added = 0;
+            foreach ($ret as $depName => $dep) {
+                foreach ($dep->getDependencies(true) as $depdepName => $depdep) {
+                    if (!array_key_exists($depdepName, $deps)) {
+                        $deps[$depdepName] = $depdep;
+                        ++$added;
+                    }
+                }
+                if (!array_key_exists($depName, $deps)) {
+                    $deps[$depName] = $dep;
+                }
+            }
+        }
+
+        return $deps;
+    }
+
+    /**
      * Returns the environment variables a shared extension needs to be built.
      * CFLAGS, CXXFLAGS, LDFLAGS and so on.
      */
     protected function getSharedExtensionEnv(): array
     {
-        $config = (new SPCConfigUtil($this->builder))->config(
-            [$this->getName()],
-            array_map(fn ($l) => $l->getName(), $this->getLibraryDependencies(recursive: true)),
-            $this->builder->getOption('with-suggested-exts'),
-            $this->builder->getOption('with-suggested-libs'),
-        );
+        $config = (new SPCConfigUtil($this->builder))->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
         $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';
@@ -519,7 +547,7 @@ class Extension
             }
             logger()->info("enabling {$this->name} without library {$name}");
         } else {
-            $this->dependencies[] = $depLib;
+            $this->dependencies[$name] = $depLib;
         }
     }
 
@@ -532,7 +560,7 @@ class Extension
             }
             logger()->info("enabling {$this->name} without extension {$name}");
         } else {
-            $this->dependencies[] = $depExt;
+            $this->dependencies[$name] = $depExt;
         }
     }
 
@@ -566,38 +594,5 @@ class Extension
             }
         }
         return [trim($staticLibString), trim($sharedLibString)];
-    }
-
-    private function getLibraryDependencies(bool $recursive = false): array
-    {
-        $ret = array_filter($this->dependencies, fn ($x) => $x instanceof LibraryBase);
-        if (!$recursive) {
-            return $ret;
-        }
-
-        $deps = [];
-
-        $added = 1;
-        while ($added !== 0) {
-            $added = 0;
-            foreach ($ret as $depName => $dep) {
-                foreach ($dep->getDependencies(true) as $depdepName => $depdep) {
-                    if (!array_key_exists($depdepName, $deps)) {
-                        $deps[$depdepName] = $depdep;
-                        ++$added;
-                    }
-                }
-                if (!array_key_exists($depName, $deps)) {
-                    $deps[$depName] = $dep;
-                }
-            }
-        }
-
-        if (array_key_exists(0, $deps)) {
-            $zero = [0 => $deps[0]];
-            unset($deps[0]);
-            return $zero + $deps;
-        }
-        return $deps;
     }
 }
