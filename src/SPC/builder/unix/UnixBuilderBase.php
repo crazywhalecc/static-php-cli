@@ -101,11 +101,15 @@ abstract class UnixBuilderBase extends BuilderBase
         FileSystem::createDir($target_dir);
         $basename = basename($binary_path);
         $debug_file = "{$target_dir}/{$basename}" . (PHP_OS_FAMILY === 'Darwin' ? '.dwarf' : '.debug');
-        shell()->exec(match (PHP_OS_FAMILY) {
-            'Darwin' => "dsymutil -f {$binary_path} -o {$debug_file}",
-            'Linux' => "objcopy ---only-keep-debug {$binary_path} {$debug_file}",
-            default => throw new SPCInternalException('extractDebugInfo is only supported on Linux and macOS'),
-        });
+        if (PHP_OS_FAMILY === 'Darwin') {
+            shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
+        } elseif (PHP_OS_FAMILY === 'Linux') {
+            shell()
+                ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
+                ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+        } else {
+            throw new SPCInternalException('extractDebugInfo is only supported on Linux and macOS');
+        }
         return $debug_file;
     }
 
