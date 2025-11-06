@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder;
 
+use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\EnvironmentException;
 use SPC\exception\SPCException;
 use SPC\exception\ValidationException;
@@ -454,7 +455,9 @@ class Extension
         if (!file_exists($soFile)) {
             throw new ValidationException("extension {$this->getName()} build failed: {$soFile} not found", validation_module: "Extension {$this->getName()} build");
         }
-        $this->builder->deployBinary($soFile, $soFile, false);
+        /** @var UnixBuilderBase $builder */
+        $builder = $this->builder;
+        $builder->deployBinary($soFile, $soFile, false);
     }
 
     /**
