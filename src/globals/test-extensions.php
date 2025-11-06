@@ -51,7 +51,7 @@ $prefer_pre_built = false;
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'rdkafka',
-    'Windows' => 'bcmath,bz2,calendar,ctype,zlib,zip',
+    'Windows' => 'bcmath',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
