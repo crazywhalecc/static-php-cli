@@ -44,6 +44,11 @@ So on macOS, you can **directly** use SPC to build statically compiled PHP binar
 2. You will get `buildroot/modules/xdebug.so` and `buildroot/bin/php`.
 3. The `xdebug.so` file could be used for php that version and thread-safe are the same.
 
+For the Windows platform, since officially built extensions (such as `php_yaml.dll`) force the use of the `php8.dll` dynamic library as a link, and statically built PHP does not include any dynamic libraries other than system libraries,
+php.exe built by static-php cannot load officially built dynamic extensions. Since static-php-cli does not yet support building dynamic extensions, there is currently no way to load dynamic extensions with static-php.
+
+However, Windows can normally use the `FFI` extension to load other dll files and call them.
+
 ## Can it support Oracle database extension?
 
 Some extensions that rely on closed source libraries, such as `oci8`, `sourceguardian`, etc., 

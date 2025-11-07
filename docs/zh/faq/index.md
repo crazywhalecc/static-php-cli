@@ -41,6 +41,11 @@ buildroot/bin/php -d "zend_extension=/path/to/php{PHP_VER}-{ts/nts}/xdebug.so" -
 2. 你将获得 `buildroot/modules/xdebug.so` 和 `buildroot/bin/php`。
 3. `xdebug.so` 文件可用于版本和线程安全相同的 php。
 
+对于 Windows 平台，由于官方构建的扩展（如 `php_yaml.dll`）强制使用了 `php8.dll` 动态库作为链接，静态构建的 PHP 不包含任何系统库以外的动态库，
+所以 Windows 下无法加载官方构建的动态扩展。 由于 static-php-cli 还暂未支持构建动态扩展，所以目前还没有让 static-php 加载动态扩展的方法。
+
+不过，Windows 可以正常使用 `FFI` 扩展加载其他的 dll 文件并调用。
+
 ## 可以支持 Oracle 数据库扩展吗？
 
 部分依赖库闭源的扩展，如 `oci8`、`sourceguardian` 等，它们没有提供纯静态编译的依赖库文件（`.a`），仅提供了动态依赖库文件（`.so`），

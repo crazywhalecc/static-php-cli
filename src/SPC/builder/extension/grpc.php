@@ -43,7 +43,7 @@ class grpc extends Extension
     public function patchBeforeConfigure(): bool
     {
         $util = new SPCConfigUtil($this->builder, ['libs_only_deps' => true]);
-        $config = $util->config(['grpc']);
+        $config = $util->getExtensionConfig($this);
         $libs = $config['libs'];
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/configure', '-lgrpc', $libs);
         return true;

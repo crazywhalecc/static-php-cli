@@ -756,6 +756,18 @@
             "apcu"
         ]
     },
+    "snmp": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "builtin",
+        "arg-type-unix": "with",
+        "arg-type-windows": "with",
+        "lib-depends": [
+            "net-snmp"
+        ]
+    },
     "soap": {
         "support": {
             "BSD": "wip"
@@ -987,6 +999,14 @@
     "tokenizer": {
         "type": "builtin",
         "build-with-php": true
+    },
+    "trader": {
+        "support": {
+            "BSD": "wip",
+            "Windows": "wip"
+        },
+        "type": "external",
+        "source": "ext-trader"
     },
     "uuid": {
         "support": {
