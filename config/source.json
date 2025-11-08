@@ -302,9 +302,9 @@
         }
     },
     "freetype": {
-        "type": "git",
-        "rev": "VER-2-13-2",
-        "url": "https://github.com/freetype/freetype",
+        "type": "ghtagtar",
+        "repo": "freetype/freetype",
+        "match": "VER-2-\\d+-\\d+",
         "license": {
             "type": "file",
             "path": "LICENSE.TXT"
