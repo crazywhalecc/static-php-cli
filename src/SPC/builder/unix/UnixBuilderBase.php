@@ -399,8 +399,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
         $frankenphpSourceDir = SOURCE_PATH . '/frankenphp';
 
-        $xcaddyModules = preg_replace('#--with github.com/dunglas/frankenphp(=\S+)?#', '', $xcaddyModules);
-        $xcaddyModules = preg_replace('#--with github.com/dunglas/frankenphp/caddy(=\S+)?#', '', $xcaddyModules);
+        $xcaddyModules = preg_replace('#--with github.com/dunglas/frankenphp\S*#', '', $xcaddyModules);
         $xcaddyModules = "--with github.com/dunglas/frankenphp={$frankenphpSourceDir} " .
             "--with github.com/dunglas/frankenphp/caddy={$frankenphpSourceDir}/caddy {$xcaddyModules}";
         if ($this->getLib('brotli') === null && str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
