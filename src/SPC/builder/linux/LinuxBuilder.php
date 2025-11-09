@@ -8,6 +8,7 @@ use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\PatchException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\DirDiff;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\GlobalEnvManager;
@@ -270,6 +271,9 @@ class LinuxBuilder extends UnixBuilderBase
             return Config::getExt($ext->getName(), 'build-with-php') === true;
         });
         $install_modules = $sharedExts ? 'install-modules' : '';
+
+        // detect changes in module path
+        $diff = new DirDiff(BUILD_MODULES_PATH, true);
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
         shell()->cd(SOURCE_PATH . '/php-src')
@@ -284,6 +288,12 @@ class LinuxBuilder extends UnixBuilderBase
             $this->deployBinary($libphpSo, $libphpSo, false);
             // post actions: rename libphp.so to libphp-<release>.so if -release is set in LDFLAGS
             $this->processLibphpSoFile($libphpSo);
+        }
+
+        // process shared extensions build-with-php
+        $increment_files = $diff->getChangedFiles();
+        foreach ($increment_files as $increment_file) {
+            $this->deployBinary($increment_file, $increment_file, false);
         }
 
         // process libphp.a for static embed

@@ -8,6 +8,7 @@ use SPC\builder\macos\library\MacOSLibraryBase;
 use SPC\builder\unix\UnixBuilderBase;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
+use SPC\store\DirDiff;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
 use SPC\util\GlobalEnvManager;
@@ -262,8 +263,24 @@ class MacOSBuilder extends UnixBuilderBase
         $install_modules = $sharedExts ? 'install-modules' : '';
         $vars = SystemUtil::makeEnvVarString($this->getMakeExtraVars());
         $concurrency = getenv('SPC_CONCURRENCY') ? '-j' . getenv('SPC_CONCURRENCY') : '';
+
+        $diff = new DirDiff(BUILD_MODULES_PATH, true);
+
         shell()->cd(SOURCE_PATH . '/php-src')
+            ->exec('sed -i "" "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
             ->exec("make {$concurrency} INSTALL_ROOT=" . BUILD_ROOT_PATH . " {$vars} install-sapi {$install_modules} install-build install-headers install-programs");
+
+        $libphp = BUILD_LIB_PATH . '/libphp.dylib';
+        if (file_exists($libphp)) {
+            $this->deployBinary($libphp, $libphp, false);
+            // macOS currently have no -release option for dylib, so we just rename it here
+        }
+
+        // process shared extensions build-with-php
+        $increment_files = $diff->getChangedFiles();
+        foreach ($increment_files as $increment_file) {
+            $this->deployBinary($increment_file, $increment_file, false);
+        }
 
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'static') {
             $AR = getenv('AR') ?: 'ar';

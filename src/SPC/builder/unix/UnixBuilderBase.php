@@ -118,6 +118,8 @@ abstract class UnixBuilderBase extends BuilderBase
      */
     public function deployBinary(string $src, string $dst, bool $executable = true): string
     {
+        logger()->debug('Deploying binary from ' . $src . ' to ' . $dst);
+
         // UPX for linux
         $upx_option = (bool) $this->getOption('with-upx-pack', false);
 
