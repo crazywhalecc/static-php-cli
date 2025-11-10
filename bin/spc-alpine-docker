@@ -200,7 +200,7 @@ if [ -n "$FRANKENPHP_APP_PATH" ]; then
         /*) ABS_APP_PATH="$FRANKENPHP_APP_PATH" ;;
         *) ABS_APP_PATH="$(pwd)/$FRANKENPHP_APP_PATH" ;;
     esac
-    MOUNT_LIST="$MOUNT_LIST -v \"$ABS_APP_PATH\":/app/app"
+    MOUNT_LIST="$MOUNT_LIST -v $ABS_APP_PATH:/app/app"
 fi
 
 # Run docker
