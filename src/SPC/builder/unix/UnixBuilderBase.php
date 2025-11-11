@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
 use SPC\exception\SPCException;
 use SPC\exception\SPCInternalException;
@@ -105,10 +106,9 @@ abstract class UnixBuilderBase extends BuilderBase
         if (PHP_OS_FAMILY === 'Darwin') {
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (PHP_OS_FAMILY === 'Linux') {
-            $has_eu_strip = shell()->execWithResult('which eu-strip')[0] === 0;
-            if ($has_eu_strip) {
+            if ($eu_strip = SystemUtil::findCommand('eu-strip')) {
                 shell()
-                    ->exec("eu-strip -f {$debug_file} {$binary_path}")
+                    ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
                     ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
             } else {
                 shell()
