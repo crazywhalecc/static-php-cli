@@ -26,6 +26,10 @@
             "watcher"
         ]
     },
+    "frankenphp": {
+        "source": "frankenphp",
+        "type": "target"
+    },
     "micro": {
         "type": "target",
         "source": "micro"
@@ -970,9 +974,5 @@
             "zstd.h",
             "zstd_errors.h"
         ]
-    },
-    "frankenphp": {
-        "source": "frankenphp",
-        "type": "target"
     }
 }

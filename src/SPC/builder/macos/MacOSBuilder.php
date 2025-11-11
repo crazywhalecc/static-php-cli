@@ -106,7 +106,7 @@ class MacOSBuilder extends UnixBuilderBase
 
         // prepare build php envs
         $envs_build_php = SystemUtil::makeEnvVarString([
-            'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
+            'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
         ]);

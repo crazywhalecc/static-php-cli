@@ -91,7 +91,7 @@ class LinuxBuilder extends UnixBuilderBase
         // prepare build php envs
         // $musl_flag = SPCTarget::getLibc() === 'musl' ? ' -D__MUSL__' : ' -U__MUSL__';
         $php_configure_env = SystemUtil::makeEnvVarString([
-            'CFLAGS' => getenv('SPC_CMD_VAR_PHP_CONFIGURE_CFLAGS'),
+            'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH, // . ' -Dsomethinghere', // . $musl_flag,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
             // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
@@ -284,10 +284,10 @@ class LinuxBuilder extends UnixBuilderBase
         // process libphp.so for shared embed
         $libphpSo = BUILD_LIB_PATH . '/libphp.so';
         if (file_exists($libphpSo)) {
-            // deploy libphp.so
-            $this->deployBinary($libphpSo, $libphpSo, false);
             // post actions: rename libphp.so to libphp-<release>.so if -release is set in LDFLAGS
             $this->processLibphpSoFile($libphpSo);
+            // deploy libphp.so
+            $this->deployBinary($libphpSo, $libphpSo, false);
         }
 
         // process shared extensions build-with-php
