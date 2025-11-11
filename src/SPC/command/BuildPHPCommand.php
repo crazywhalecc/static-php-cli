@@ -48,6 +48,7 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('with-upx-pack', null, null, 'Compress / pack binary using UPX tool (linux/windows only)');
         $this->addOption('with-micro-logo', null, InputOption::VALUE_REQUIRED, 'Use custom .ico for micro.sfx (windows only)');
         $this->addOption('enable-micro-win32', null, null, 'Enable win32 mode for phpmicro (Windows only)');
+        $this->addOption('with-frankenphp-app', null, InputOption::VALUE_REQUIRED, 'Path to a folder to be embedded in FrankenPHP');
     }
 
     public function handle(): int

@@ -174,6 +174,47 @@ if [ ! -z "$GITHUB_TOKEN" ]; then
     ENV_LIST="$ENV_LIST -e GITHUB_TOKEN=$GITHUB_TOKEN"
 fi
 
+# Intercept and rewrite --with-frankenphp-app option, and mount host path to /app/app
+FRANKENPHP_APP_PATH=""
+NEW_ARGS=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --with-frankenphp-app=*)
+            FRANKENPHP_APP_PATH="${1#*=}"
+            NEW_ARGS+=("--with-frankenphp-app=/app/app")
+            shift
+            ;;
+        --with-frankenphp-app)
+            if [ -n "${2:-}" ]; then
+                FRANKENPHP_APP_PATH="$2"
+                NEW_ARGS+=("--with-frankenphp-app=/app/app")
+                shift 2
+            else
+                NEW_ARGS+=("$1")
+                shift
+            fi
+            ;;
+        *)
+            NEW_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Normalize the path and add mount if provided
+if [ -n "$FRANKENPHP_APP_PATH" ]; then
+    # expand ~ to $HOME
+    if [ "${FRANKENPHP_APP_PATH#~}" != "$FRANKENPHP_APP_PATH" ]; then
+        FRANKENPHP_APP_PATH="$HOME${FRANKENPHP_APP_PATH#~}"
+    fi
+    # make absolute if relative
+    case "$FRANKENPHP_APP_PATH" in
+        /*) ABS_APP_PATH="$FRANKENPHP_APP_PATH" ;;
+        *) ABS_APP_PATH="$(pwd)/$FRANKENPHP_APP_PATH" ;;
+    esac
+    MOUNT_LIST="$MOUNT_LIST -v $ABS_APP_PATH:/app/app"
+fi
+
 # Run docker
 # shellcheck disable=SC2068
 # shellcheck disable=SC2086
@@ -196,5 +237,5 @@ if [ "$SPC_DOCKER_DEBUG" = "yes" ]; then
     set -ex
     $DOCKER_EXECUTABLE run $PLATFORM_ARG --privileged --rm -it $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION /bin/bash
 else
-    $DOCKER_EXECUTABLE run $PLATFORM_ARG --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION bin/spc $@
+    $DOCKER_EXECUTABLE run $PLATFORM_ARG --rm $INTERACT $ENV_LIST --env-file /tmp/spc-gnu-docker.env $MOUNT_LIST cwcc-spc-gnu-$SPC_USE_ARCH-$SPC_DOCKER_VERSION bin/spc "${NEW_ARGS[@]}"
 fi

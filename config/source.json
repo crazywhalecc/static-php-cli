@@ -302,9 +302,9 @@
         }
     },
     "freetype": {
-        "type": "git",
-        "rev": "VER-2-13-2",
-        "url": "https://github.com/freetype/freetype",
+        "type": "ghtagtar",
+        "repo": "freetype/freetype",
+        "match": "VER-2-\\d+-\\d+",
         "license": {
             "type": "file",
             "path": "LICENSE.TXT"
@@ -358,6 +358,16 @@
         "match": "icu4c.+-src\\.tgz",
         "prefer-stable": true,
         "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "frankenphp": {
+        "type": "ghtar",
+        "repo": "php/frankenphp",
+        "prefer-stable":  true,
+        "provide-pre-build": false,
         "license": {
             "type": "file",
             "path": "LICENSE"
