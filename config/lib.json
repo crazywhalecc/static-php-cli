@@ -974,5 +974,24 @@
             "zstd.h",
             "zstd_errors.h"
         ]
+    },
+    "liburing": {
+        "source": "liburing",
+        "pkg-configs": [
+            "liburing",
+            "liburing-ffi"
+        ],
+        "static-libs-linux": [
+            "liburing.a",
+            "liburing-ffi.a"
+        ],
+        "headers-linux": [
+            "liburing/",
+            "liburing.h"
+        ]
+    },
+    "frankenphp": {
+        "source": "frankenphp",
+        "type": "target"
     }
 }
