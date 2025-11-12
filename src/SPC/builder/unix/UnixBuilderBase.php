@@ -128,9 +128,6 @@ abstract class UnixBuilderBase extends BuilderBase
     {
         logger()->debug('Deploying binary from ' . $src . ' to ' . $dst);
 
-        // UPX for linux
-        $upx_option = (bool) $this->getOption('with-upx-pack', false);
-
         // file must exists
         if (!file_exists($src)) {
             throw new SPCInternalException("Deploy failed. Cannot find file: {$src}");
@@ -152,13 +149,14 @@ abstract class UnixBuilderBase extends BuilderBase
         $this->extractDebugInfo($dst);
 
         // strip
-        if (!$this->getOption('no-strip', false)) {
+        if (!$this->getOption('no-strip')) {
             $this->stripBinary($dst);
         }
 
-        // Compress binary with UPX if needed (only for Linux)
+        // UPX for linux
+        $upx_option = $this->getOption('with-upx-pack');
         if ($upx_option && PHP_OS_FAMILY === 'Linux' && $executable) {
-            if ($this->getOption('no-strip', false)) {
+            if ($this->getOption('no-strip')) {
                 logger()->warning('UPX compression is not recommended when --no-strip is enabled.');
             }
             logger()->info("Compressing {$dst} with UPX");
