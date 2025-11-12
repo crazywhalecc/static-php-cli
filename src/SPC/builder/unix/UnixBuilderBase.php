@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix;
 
 use SPC\builder\BuilderBase;
+use SPC\builder\linux\SystemUtil;
 use SPC\builder\linux\SystemUtil as LinuxSystemUtil;
 use SPC\exception\SPCException;
 use SPC\exception\SPCInternalException;
@@ -105,9 +106,15 @@ abstract class UnixBuilderBase extends BuilderBase
         if (PHP_OS_FAMILY === 'Darwin') {
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (PHP_OS_FAMILY === 'Linux') {
-            shell()
-                ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
-                ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+            if ($eu_strip = SystemUtil::findCommand('eu-strip')) {
+                shell()
+                    ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
+                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+            } else {
+                shell()
+                    ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
+                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+            }
         } else {
             throw new SPCInternalException('extractDebugInfo is only supported on Linux and macOS');
         }
@@ -120,9 +127,6 @@ abstract class UnixBuilderBase extends BuilderBase
     public function deployBinary(string $src, string $dst, bool $executable = true): string
     {
         logger()->debug('Deploying binary from ' . $src . ' to ' . $dst);
-
-        // UPX for linux
-        $upx_option = (bool) $this->getOption('with-upx-pack', false);
 
         // file must exists
         if (!file_exists($src)) {
@@ -145,13 +149,14 @@ abstract class UnixBuilderBase extends BuilderBase
         $this->extractDebugInfo($dst);
 
         // strip
-        if (!$this->getOption('no-strip', false)) {
+        if (!$this->getOption('no-strip')) {
             $this->stripBinary($dst);
         }
 
-        // Compress binary with UPX if needed (only for Linux)
+        // UPX for linux
+        $upx_option = $this->getOption('with-upx-pack');
         if ($upx_option && PHP_OS_FAMILY === 'Linux' && $executable) {
-            if ($this->getOption('no-strip', false)) {
+            if ($this->getOption('no-strip')) {
                 logger()->warning('UPX compression is not recommended when --no-strip is enabled.');
             }
             logger()->info("Compressing {$dst} with UPX");
@@ -351,8 +356,10 @@ abstract class UnixBuilderBase extends BuilderBase
      */
     protected function processFrankenphpApp(): void
     {
-        $frankenphpSourceDir = SOURCE_PATH . '/frankenphp';
-        SourceManager::initSource(['frankenphp'], ['frankenphp']);
+        $frankenphpSourceDir = getenv('FRANKENPHP_SOURCE_PATH') ?: SOURCE_PATH . '/frankenphp';
+        if (!is_dir($frankenphpSourceDir)) {
+            SourceManager::initSource(['frankenphp'], ['frankenphp']);
+        }
         $frankenphpAppPath = $this->getOption('with-frankenphp-app');
 
         if ($frankenphpAppPath) {
@@ -376,7 +383,11 @@ abstract class UnixBuilderBase extends BuilderBase
 
     protected function getFrankenPHPVersion(): string
     {
-        $goModPath = SOURCE_PATH . '/frankenphp/caddy/go.mod';
+        if ($version = getenv('FRANKENPHP_VERSION')) {
+            return $version;
+        }
+        $frankenphpSourceDir = getenv('FRANKENPHP_SOURCE_PATH') ?: SOURCE_PATH . '/frankenphp';
+        $goModPath = $frankenphpSourceDir . '/caddy/go.mod';
 
         if (!file_exists($goModPath)) {
             throw new SPCInternalException("FrankenPHP caddy/go.mod file not found at {$goModPath}, why did we not download FrankenPHP?");
@@ -397,7 +408,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $nobrotli = $this->getLib('brotli') === null ? ',nobrotli' : '';
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
-        $frankenphpSourceDir = SOURCE_PATH . '/frankenphp';
+        $frankenphpSourceDir = getenv('FRANKENPHP_SOURCE_PATH') ?: SOURCE_PATH . '/frankenphp';
 
         $xcaddyModules = preg_replace('#--with github.com/dunglas/frankenphp\S*#', '', $xcaddyModules);
         $xcaddyModules = "--with github.com/dunglas/frankenphp={$frankenphpSourceDir} " .
@@ -417,7 +428,6 @@ abstract class UnixBuilderBase extends BuilderBase
                 $dynamic_exports = ' ' . $dynamicSymbolsArgument;
             }
         }
-        $debugFlags = $this->getOption('no-strip') ? '' : '-w -s ';
         $extLdFlags = "-extldflags '-pie{$dynamic_exports} {$this->arch_ld_flags}'";
         $muslTags = '';
         $staticFlags = '';
@@ -442,7 +452,7 @@ abstract class UnixBuilderBase extends BuilderBase
             'CGO_CFLAGS' => clean_spaces($cflags),
             'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$libs}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
-                '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' . $debugFlags .
+                '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
                 "v{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
