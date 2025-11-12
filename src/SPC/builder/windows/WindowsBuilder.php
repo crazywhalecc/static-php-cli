@@ -67,21 +67,6 @@ class WindowsBuilder extends BuilderBase
 
         $zts = $this->zts ? '--enable-zts=yes ' : '--enable-zts=no ';
 
-        // with-upx-pack for phpmicro
-        if ($enableMicro && version_compare($this->getMicroVersion(), '0.2.0') < 0) {
-            $makefile = FileSystem::convertPath(SOURCE_PATH . '/php-src/sapi/micro/Makefile.frag.w32');
-            if ($this->getOption('with-upx-pack', false)) {
-                if (!file_exists($makefile . '.originfile')) {
-                    copy($makefile, $makefile . '.originfile');
-                    FileSystem::replaceFileStr($makefile, '$(MICRO_SFX):', '_MICRO_UPX = ' . getenv('UPX_EXEC') . " --best $(MICRO_SFX)\n$(MICRO_SFX):");
-                    FileSystem::replaceFileStr($makefile, '@$(_MICRO_MT)', "@$(_MICRO_MT)\n\t@$(_MICRO_UPX)");
-                }
-            } elseif (file_exists($makefile . '.originfile')) {
-                copy($makefile . '.originfile', $makefile);
-                unlink($makefile . '.originfile');
-            }
-        }
-
         $opcache_jit = !$this->getOption('disable-opcache-jit', false);
         $opcache_jit_arg = $opcache_jit ? '--enable-opcache-jit=yes ' : '--enable-opcache-jit=no ';
 
@@ -145,7 +130,7 @@ class WindowsBuilder extends BuilderBase
         }
     }
 
-    public function testPHP(int $build_target = BUILD_TARGET_NONE)
+    public function testPHP(int $build_target = BUILD_TARGET_NONE): void
     {
         $this->sanityCheck($build_target);
     }
@@ -156,12 +141,27 @@ class WindowsBuilder extends BuilderBase
 
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
 
+        // Add debug symbols for release build if --no-strip is specified
+        // We need to modify CFLAGS to replace /Ox with /Zi and add /DEBUG to LDFLAGS
+        $debug_overrides = '';
+        if ($this->getOption('no-strip', false)) {
+            // Read current CFLAGS from Makefile and replace optimization flags
+            $makefile_content = file_get_contents(SOURCE_PATH . '\php-src\Makefile');
+            if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
+                $cflags = $matches[1];
+                // Replace /Ox (full optimization) with /Zi (debug info) and /Od (disable optimization)
+                // Keep optimization for speed: /O2 /Zi instead of /Od /Zi
+                $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_CLI=/DEBUG" ';
+            }
+        }
+
         // add nmake wrapper
-        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cli_wrapper.bat', "nmake /nologo LIBS_CLI=\"ws2_32.lib shell32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
+        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cli_wrapper.bat', "nmake /nologo {$debug_overrides}LIBS_CLI=\"ws2_32.lib shell32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cli_wrapper.bat --task-args php.exe");
 
-        $this->deployBinary(BUILD_TARGET_CLI);
+        $this->deploySAPIBinary(BUILD_TARGET_CLI);
     }
 
     public function buildCgi(): void
@@ -170,12 +170,23 @@ class WindowsBuilder extends BuilderBase
 
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
 
+        // Add debug symbols for release build if --no-strip is specified
+        $debug_overrides = '';
+        if ($this->getOption('no-strip', false)) {
+            $makefile_content = file_get_contents(SOURCE_PATH . '\php-src\Makefile');
+            if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
+                $cflags = $matches[1];
+                $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_CGI=/DEBUG" ';
+            }
+        }
+
         // add nmake wrapper
-        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cgi_wrapper.bat', "nmake /nologo LIBS_CGI=\"ws2_32.lib kernel32.lib advapi32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
+        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_cgi_wrapper.bat', "nmake /nologo {$debug_overrides}LIBS_CGI=\"ws2_32.lib kernel32.lib advapi32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= %*");
 
         cmd()->cd(SOURCE_PATH . '\php-src')->exec("{$this->sdk_prefix} nmake_cgi_wrapper.bat --task-args php-cgi.exe");
 
-        $this->deployBinary(BUILD_TARGET_CGI);
+        $this->deploySAPIBinary(BUILD_TARGET_CGI);
     }
 
     public function buildEmbed(): void
@@ -202,9 +213,20 @@ class WindowsBuilder extends BuilderBase
 
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
 
+        // Add debug symbols for release build if --no-strip is specified
+        $debug_overrides = '';
+        if ($this->getOption('no-strip', false) && !$this->getOption('debug', false)) {
+            $makefile_content = file_get_contents(SOURCE_PATH . '\php-src\Makefile');
+            if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
+                $cflags = $matches[1];
+                $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_MICRO=/DEBUG" ';
+            }
+        }
+
         // add nmake wrapper
         $fake_cli = $this->getOption('with-micro-fake-cli', false) ? ' /DPHP_MICRO_FAKE_CLI" ' : '';
-        $wrapper = "nmake /nologo LIBS_MICRO=\"ws2_32.lib shell32.lib {$extra_libs}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" %*";
+        $wrapper = "nmake /nologo {$debug_overrides}LIBS_MICRO=\"ws2_32.lib shell32.lib {$extra_libs}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" %*";
         FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_micro_wrapper.bat', $wrapper);
 
         // phar patch for micro
@@ -221,7 +243,7 @@ class WindowsBuilder extends BuilderBase
             }
         }
 
-        $this->deployBinary(BUILD_TARGET_MICRO);
+        $this->deploySAPIBinary(BUILD_TARGET_MICRO);
     }
 
     public function proveLibs(array $sorted_libraries): void
@@ -335,28 +357,53 @@ class WindowsBuilder extends BuilderBase
      *
      * @param int $type Deploy type
      */
-    public function deployBinary(int $type): bool
+    public function deploySAPIBinary(int $type): void
     {
+        logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
+
+        $debug_dir = BUILD_ROOT_PATH . '\debug';
+        $bin_path = BUILD_BIN_PATH;
+
+        // create dirs
+        FileSystem::createDir($debug_dir);
+        FileSystem::createDir($bin_path);
+
+        // determine source path for different SAPI
+        $rel_type = 'Release'; // TODO: Debug build support
         $ts = $this->zts ? '_TS' : '';
         $src = match ($type) {
-            BUILD_TARGET_CLI => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\php.exe",
-            BUILD_TARGET_MICRO => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\micro.sfx",
-            BUILD_TARGET_CGI => SOURCE_PATH . "\\php-src\\x64\\Release{$ts}\\php-cgi.exe",
+            BUILD_TARGET_CLI => [SOURCE_PATH . "\\php-src\\x64\\{$rel_type}{$ts}", 'php.exe', 'php.pdb'],
+            BUILD_TARGET_MICRO => [SOURCE_PATH . "\\php-src\\x64\\{$rel_type}{$ts}", 'micro.sfx', 'micro.pdb'],
+            BUILD_TARGET_CGI => [SOURCE_PATH . "\\php-src\\x64\\{$rel_type}{$ts}", 'php-cgi.exe', 'php-cgi.pdb'],
             default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
+
+        $src = "{$src[0]}\\{$src[1]}";
+        $dst = BUILD_BIN_PATH . '\\' . basename($src);
+
+        // file must exists
+        if (!file_exists($src)) {
+            throw new SPCInternalException("Deploy failed. Cannot find file: {$src}");
+        }
+        // dst dir must exists
+        FileSystem::createDir(dirname($dst));
+
+        // copy file
+        if (realpath($src) !== realpath($dst)) {
+            cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg($dst));
+        }
+
+        // extract debug info in buildroot/debug
+        if ($this->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
+            cmd()->exec('copy ' . escapeshellarg("{$src[0]}\\{$src[2]}") . ' ' . escapeshellarg($debug_dir));
+        }
 
         // with-upx-pack for cli and micro
         if ($this->getOption('with-upx-pack', false)) {
             if ($type === BUILD_TARGET_CLI || $type === BUILD_TARGET_CGI || ($type === BUILD_TARGET_MICRO && version_compare($this->getMicroVersion(), '0.2.0') >= 0)) {
-                cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($src));
+                cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($dst));
             }
         }
-
-        logger()->info('Deploying ' . $this->getBuildTypeName($type) . ' file');
-        FileSystem::createDir(BUILD_BIN_PATH);
-
-        cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg(BUILD_BIN_PATH . '\\'));
-        return true;
     }
 
     /**

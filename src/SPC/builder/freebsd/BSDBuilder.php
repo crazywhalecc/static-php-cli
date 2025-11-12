@@ -153,7 +153,7 @@ class BSDBuilder extends UnixBuilderBase
         if (!$this->getOption('no-strip', false)) {
             $shell->exec('strip sapi/cli/php');
         }
-        $this->deployBinary(BUILD_TARGET_CLI);
+        $this->deploySAPIBinary(BUILD_TARGET_CLI);
     }
 
     /**
@@ -184,7 +184,7 @@ class BSDBuilder extends UnixBuilderBase
         if (!$this->getOption('no-strip', false)) {
             shell()->cd(SOURCE_PATH . '/php-src/sapi/micro')->exec('strip --strip-unneeded micro.sfx');
         }
-        $this->deployBinary(BUILD_TARGET_MICRO);
+        $this->deploySAPIBinary(BUILD_TARGET_MICRO);
 
         if ($this->phar_patched) {
             SourcePatcher::unpatchMicroPhar();
@@ -206,7 +206,7 @@ class BSDBuilder extends UnixBuilderBase
         if (!$this->getOption('no-strip', false)) {
             $shell->exec('strip sapi/fpm/php-fpm');
         }
-        $this->deployBinary(BUILD_TARGET_FPM);
+        $this->deploySAPIBinary(BUILD_TARGET_FPM);
     }
 
     /**
