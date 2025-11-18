@@ -305,7 +305,6 @@
         "type": "ghtar",
         "repo": "php/frankenphp",
         "prefer-stable": true,
-        "provide-pre-built": false,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -373,16 +372,6 @@
             "path": "LICENSE"
         }
     },
-    "frankenphp": {
-        "type": "ghtar",
-        "repo": "php/frankenphp",
-        "prefer-stable":  true,
-        "provide-pre-build": false,
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "icu-static-win": {
         "type": "url",
         "url": "https://dl.static-php.dev/static-php-cli/deps/icu-static-windows-x64/icu-static-windows-x64.zip",
@@ -439,6 +428,16 @@
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "krb5": {
+        "type": "ghtagtar",
+        "repo": "krb5/krb5",
+        "match": "krb5.+-final",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "NOTICE"
         }
     },
     "ldap": {
@@ -599,6 +598,15 @@
             "path": "source/COPYING"
         }
     },
+    "libidn2": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/gnu/libidn/",
+        "regex": "/href=\"(?<file>libidn2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "libjpeg": {
         "type": "ghtar",
         "repo": "libjpeg-turbo/libjpeg-turbo",
@@ -652,6 +660,16 @@
             "path": "LICENSE"
         }
     },
+    "libpsl": {
+        "type": "ghrel",
+        "repo": "rockdaboot/libpsl",
+        "match": "libpsl.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "librabbitmq": {
         "type": "git",
         "url": "https://github.com/alanxz/rabbitmq-c.git",
@@ -698,6 +716,15 @@
         "license": {
             "type": "file",
             "path": "LICENSE.md"
+        }
+    },
+    "libunistring": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/gnu/libunistring/",
+        "regex": "/href=\"(?<file>libunistring-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING.LIB"
         }
     },
     "liburing": {
@@ -1179,46 +1206,6 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
-        }
-    },
-    "krb5": {
-        "type": "ghtagtar",
-        "repo": "krb5/krb5",
-        "match": "krb5.+-final",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "NOTICE"
-        }
-    },
-    "libunistring": {
-        "type": "filelist",
-        "url": "https://ftp.gnu.org/gnu/libunistring/",
-        "regex": "/href=\"(?<file>libunistring-(?<version>[^\"]+)\\.tar\\.gz)\"/",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING.LIB"
-        }
-    },
-    "libidn2": {
-        "type": "filelist",
-        "url": "https://ftp.gnu.org/gnu/libidn/",
-        "regex": "/href=\"(?<file>libidn2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING"
-        }
-    },
-    "libpsl": {
-        "type": "ghrel",
-        "repo": "rockdaboot/libpsl",
-        "match": "libpsl.+\\.tar\\.gz",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING"
         }
     },
     "zlib": {

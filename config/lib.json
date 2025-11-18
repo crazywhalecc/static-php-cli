@@ -249,6 +249,24 @@
             "unicode"
         ]
     },
+    "idn2": {
+        "source": "libidn2",
+        "pkg-configs": [
+            "libidn2"
+        ],
+        "headers": [
+            "idn2.h"
+        ],
+        "lib-suggests-unix": [
+            "libiconv",
+            "libunistring",
+            "gettext"
+        ],
+        "lib-depends-macos": [
+            "libiconv",
+            "gettext"
+        ]
+    },
     "imagemagick": {
         "source": "imagemagick",
         "cpp-library": true,
@@ -294,6 +312,16 @@
             "jbig.h",
             "jbig85.h",
             "jbig_ar.h"
+        ]
+    },
+    "krb5": {
+        "source": "krb5",
+        "pkg-configs": [
+            "krb5-gssapi"
+        ],
+        "headers": [
+            "krb5.h",
+            "gssapi/gssapi.h"
         ]
     },
     "ldap": {
@@ -583,6 +611,16 @@
             "zstd"
         ]
     },
+    "libunistring": {
+        "source": "libunistring",
+        "static-libs-unix": [
+            "libunistring.a"
+        ],
+        "headers": [
+            "unistring.h",
+            "unistring/"
+        ]
+    },
     "liburing": {
         "source": "liburing",
         "pkg-configs": [
@@ -847,6 +885,18 @@
             "libpgcommon.lib"
         ]
     },
+    "psl": {
+        "source": "libpsl",
+        "pkg-configs": [
+            "libpsl"
+        ],
+        "headers": [
+            "libpsl.h"
+        ],
+        "lib-depends": [
+            "idn2"
+        ]
+    },
     "pthreads4w": {
         "source": "pthreads4w",
         "static-libs-windows": [
@@ -956,56 +1006,6 @@
             "libiconv"
         ]
     },
-    "krb5": {
-        "source": "krb5",
-        "pkg-configs": [
-            "krb5-gssapi"
-        ],
-        "headers": [
-            "krb5.h",
-            "gssapi/gssapi.h"
-        ]
-    },
-    "libunistring": {
-        "source": "libunistring",
-        "static-libs-unix": [
-            "libunistring.a"
-        ],
-        "headers": [
-            "unistring.h",
-            "unistring/"
-        ]
-    },
-    "idn2": {
-        "source": "libidn2",
-        "pkg-configs": [
-            "libidn2"
-        ],
-        "headers": [
-            "idn2.h"
-        ],
-        "lib-suggests-linux": [
-            "libiconv",
-            "libunistring",
-            "gettext"
-        ],
-        "lib-depends-macos": [
-            "libiconv",
-            "gettext"
-        ]
-    },
-    "psl": {
-        "source": "libpsl",
-        "pkg-configs": [
-            "libpsl"
-        ],
-        "headers": [
-            "libpsl.h"
-        ],
-        "lib-depends": [
-            "idn2"
-        ]
-    },
     "zlib": {
         "source": "zlib",
         "static-libs-unix": [
@@ -1039,9 +1039,5 @@
             "zstd.h",
             "zstd_errors.h"
         ]
-    },
-    "frankenphp": {
-        "source": "frankenphp",
-        "type": "target"
     }
 }
