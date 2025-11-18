@@ -322,6 +322,13 @@
         "headers": [
             "krb5.h",
             "gssapi/gssapi.h"
+        ],
+        "lib-depends": [
+            "openssl"
+        ],
+        "lib-suggests": [
+            "ldap",
+            "libedit"
         ]
     },
     "ldap": {

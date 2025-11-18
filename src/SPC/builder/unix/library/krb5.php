@@ -13,8 +13,15 @@ trait krb5
         $this->source_dir .= '/src';
         shell()->cd($this->source_dir)->exec('autoreconf -if');
         UnixAutoconfExecutor::create($this)
-            ->appendEnv(['LDFLAGS' => '-Wl,--allow-multiple-definition'])
-            ->configure()
+            ->appendEnv([
+                'LDFLAGS' => '-Wl,--allow-multiple-definition',
+            ])
+            ->optionalLib('ldap', '--with-ldap', '--without-ldap')
+            ->optionalLib('libedit', '--with-readline', '--without-readline')
+            ->configure(
+                '--disable-nls',
+                '--disable-rpath',
+            )
             ->make();
         $this->patchPkgconfPrefix([
             'krb5-gssapi.pc',
