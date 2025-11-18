@@ -301,6 +301,16 @@
             "path": "LICENSE.MIT"
         }
     },
+    "frankenphp": {
+        "type": "ghtar",
+        "repo": "php/frankenphp",
+        "prefer-stable": true,
+        "provide-pre-built": false,
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "freetype": {
         "type": "ghtagtar",
         "repo": "freetype/freetype",
