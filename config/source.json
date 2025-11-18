@@ -1171,6 +1171,46 @@
             "path": "LICENSE"
         }
     },
+    "krb5": {
+        "type": "ghtagtar",
+        "repo": "krb5/krb5",
+        "match": "krb5.+-final",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "NOTICE"
+        }
+    },
+    "libunistring": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/gnu/libunistring/",
+        "regex": "/href=\"(?<file>libunistring-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING.LIB"
+        }
+    },
+    "libidn2": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/gnu/libidn/",
+        "regex": "/href=\"(?<file>libidn2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
+    "libpsl": {
+        "type": "ghrel",
+        "repo": "rockdaboot/libpsl",
+        "match": "libpsl.+\\.tar\\.gz",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        }
+    },
     "zlib": {
         "type": "ghrel",
         "repo": "madler/zlib",
