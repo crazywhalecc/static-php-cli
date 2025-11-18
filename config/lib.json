@@ -107,7 +107,8 @@
             "ldap",
             "krb5",
             "idn2",
-            "psl"
+            "psl",
+            "gsasl"
         ],
         "lib-suggests-macos": [
             "libssh2",
@@ -902,6 +903,21 @@
         ],
         "lib-depends": [
             "idn2"
+        ]
+    },
+    "gsasl": {
+        "source": "gsasl",
+        "pkg-configs": [
+            "libgsasl"
+        ],
+        "headers": [
+            "gsasl.h"
+        ],
+        "lib-depends": [
+            "idn2"
+        ],
+        "lib-suggests": [
+            "krb5"
         ]
     },
     "pthreads4w": {
