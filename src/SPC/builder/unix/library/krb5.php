@@ -22,7 +22,7 @@ trait krb5
                 'LDFLAGS' => '-Wl,--allow-multiple-definition',
             ])
             ->optionalLib('ldap', '--with-ldap', '--without-ldap')
-            ->optionalLib('libedit', '--with-libedit', '--without-libedit')
+            ->optionalLib('libedit', '--with-readline', '--without-readline')
             ->configure(
                 '--disable-nls',
                 '--disable-rpath',

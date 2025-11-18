@@ -1200,16 +1200,6 @@
             "path": "LICENSE"
         }
     },
-    "gsasl": {
-        "type": "filelist",
-        "url": "https://ftp.gnu.org/gnu/gsasl/",
-        "regex": "/href=\\\"(?<file>gsasl-(?<version>[^\\\"]+)\\.tar\\.gz)\\\"/",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING.LESSER"
-        }
-    },
     "yaml": {
         "type": "git",
         "path": "php-src/ext/yaml",

@@ -24,7 +24,6 @@ trait curl
             ->optionalLib('idn2', ...cmake_boolean_args('USE_LIBIDN2'))
             ->optionalLib('psl', ...cmake_boolean_args('CURL_USE_LIBPSL'))
             ->optionalLib('krb5', ...cmake_boolean_args('CURL_USE_GSSAPI'))
-            ->optionalLib('gsasl', ...cmake_boolean_args('USE_GSASL'))
             ->optionalLib('idn2', ...cmake_boolean_args('CURL_USE_IDN2'))
             ->optionalLib('libcares', '-DENABLE_ARES=ON')
             ->addConfigureArgs(
