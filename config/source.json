@@ -722,6 +722,7 @@
         "type": "filelist",
         "url": "https://ftp.gnu.org/gnu/libunistring/",
         "regex": "/href=\"(?<file>libunistring-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING.LIB"
@@ -740,6 +741,7 @@
         "type": "git",
         "url": "https://github.com/static-php/libuuid.git",
         "rev": "master",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
