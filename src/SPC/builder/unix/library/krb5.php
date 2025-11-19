@@ -30,7 +30,8 @@ trait krb5
         $args = [
             '--disable-nls',
             '--disable-rpath',
-            '--without-system-verto'];
+            '--without-system-verto',
+        ];
         if (PHP_OS_FAMILY === 'Darwin') {
             $args[] = 'ac_cv_func_secure_getenv=no';
         }
