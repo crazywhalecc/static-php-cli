@@ -27,15 +27,17 @@ trait krb5
                 'LIBRARY_PATH' => getenv('SPC_LIBRARY_PATH'),
             ]);
         }
+        $args = [
+            '--disable-nls',
+            '--disable-rpath',
+            '--without-system-verto'];
+        if (PHP_OS_FAMILY === 'Darwin') {
+            $args[] = 'ac_cv_func_secure_getenv=no';
+        }
         $make
             ->optionalLib('ldap', '--with-ldap', '--without-ldap')
             ->optionalLib('libedit', '--with-libedit', '--without-libedit')
-            ->configure(
-                '--disable-nls',
-                '--disable-rpath',
-                '--disable-silent-rules',
-                '--without-system-verto',
-            )
+            ->configure(...$args)
             ->make();
         $this->patchPkgconfPrefix([
             'krb5-gssapi.pc',
