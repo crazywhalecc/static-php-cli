@@ -32,7 +32,7 @@ trait krb5
             '--without-system-verto',
         ];
         if (PHP_OS_FAMILY === 'Darwin') {
-            $extraEnv['LDFLAGS'] = '-framework Kerberos -framework Security -framework CoreFoundation';
+            $extraEnv['LDFLAGS'] = '-framework Kerberos';
             $args[] = 'ac_cv_func_secure_getenv=no';
         }
         UnixAutoconfExecutor::create($this)

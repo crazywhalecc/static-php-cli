@@ -316,6 +316,9 @@
         "lib-suggests": [
             "ldap",
             "libedit"
+        ],
+        "frameworks": [
+            "Kerberos"
         ]
     },
     "ldap": {
