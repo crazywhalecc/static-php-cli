@@ -660,16 +660,6 @@
             "path": "LICENSE"
         }
     },
-    "libpsl": {
-        "type": "ghrel",
-        "repo": "rockdaboot/libpsl",
-        "match": "libpsl.+\\.tar\\.gz",
-        "prefer-stable": true,
-        "license": {
-            "type": "file",
-            "path": "COPYING"
-        }
-    },
     "librabbitmq": {
         "type": "git",
         "url": "https://github.com/alanxz/rabbitmq-c.git",

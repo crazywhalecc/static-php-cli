@@ -96,20 +96,7 @@
             "libssh2",
             "nghttp2"
         ],
-        "lib-suggests-linux": [
-            "libssh2",
-            "brotli",
-            "nghttp2",
-            "nghttp3",
-            "ngtcp2",
-            "zstd",
-            "libcares",
-            "ldap",
-            "krb5",
-            "idn2",
-            "psl"
-        ],
-        "lib-suggests-macos": [
+        "lib-suggests-unix": [
             "libssh2",
             "brotli",
             "nghttp2",
@@ -119,7 +106,7 @@
             "libcares",
             "ldap",
             "idn2",
-            "psl"
+            "krb5"
         ],
         "lib-suggests-windows": [
             "brotli",
@@ -259,8 +246,8 @@
         ],
         "lib-suggests-unix": [
             "libiconv",
-            "libunistring",
-            "gettext"
+            "gettext",
+            "libunistring"
         ],
         "lib-depends-macos": [
             "libiconv",
@@ -624,7 +611,7 @@
             "libunistring.a"
         ],
         "headers": [
-            "unistring.h",
+            "unistr.h",
             "unistring/"
         ]
     },
@@ -890,18 +877,6 @@
             "libpq.lib",
             "libpgport.lib",
             "libpgcommon.lib"
-        ]
-    },
-    "psl": {
-        "source": "libpsl",
-        "pkg-configs": [
-            "libpsl"
-        ],
-        "headers": [
-            "libpsl.h"
-        ],
-        "lib-depends": [
-            "idn2"
         ]
     },
     "pthreads4w": {

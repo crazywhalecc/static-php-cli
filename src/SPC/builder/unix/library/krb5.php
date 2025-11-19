@@ -18,8 +18,8 @@ trait krb5
         $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs', false));
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
+                'CFLAGS' => '-fcommon',
                 'LIBS' => $config['libs'],
-                'LDFLAGS' => '-Wl,--allow-multiple-definition',
             ])
             ->optionalLib('ldap', '--with-ldap', '--without-ldap')
             ->optionalLib('libedit', '--with-libedit', '--without-libedit')
