@@ -11,6 +11,7 @@ trait krb5
 {
     protected function build(): void
     {
+        $origin_source_dir = $this->source_dir;
         $this->source_dir .= '/src';
         shell()->cd($this->source_dir)->exec('autoreconf -if');
         $libs = array_map(fn ($x) => $x->getName(), $this->getDependencies(true));
@@ -51,5 +52,6 @@ trait krb5
             'mit-krb5.pc',
             'gssrpc.pc',
         ]);
+        $this->source_dir = $origin_source_dir;
     }
 }
