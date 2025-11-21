@@ -31,7 +31,7 @@ $test_os = [
     'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
     'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-2022', // .\bin\spc.ps1
-    'windows-2025',
+    // 'windows-2025',
 ];
 
 // whether enable thread safe
@@ -50,14 +50,14 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'rdkafka',
+    'Linux', 'Darwin' => 'curl',
     'Windows' => 'bcmath',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'snmp',
-    'Darwin' => 'snmp',
+    'Linux' => '',
+    'Darwin' => '',
     'Windows' => '',
 };
 

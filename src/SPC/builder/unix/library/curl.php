@@ -23,6 +23,8 @@ trait curl
             ->optionalLib('zstd', ...cmake_boolean_args('CURL_ZSTD'))
             ->optionalLib('idn2', ...cmake_boolean_args('USE_LIBIDN2'))
             ->optionalLib('psl', ...cmake_boolean_args('CURL_USE_LIBPSL'))
+            ->optionalLib('krb5', ...cmake_boolean_args('CURL_USE_GSSAPI'))
+            ->optionalLib('idn2', ...cmake_boolean_args('CURL_USE_IDN2'))
             ->optionalLib('libcares', '-DENABLE_ARES=ON')
             ->addConfigureArgs(
                 '-DBUILD_CURL_EXE=OFF',

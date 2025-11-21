@@ -104,7 +104,9 @@
             "ngtcp2",
             "zstd",
             "libcares",
-            "ldap"
+            "ldap",
+            "idn2",
+            "krb5"
         ],
         "lib-suggests-windows": [
             "brotli",
@@ -234,6 +236,24 @@
             "unicode"
         ]
     },
+    "idn2": {
+        "source": "libidn2",
+        "pkg-configs": [
+            "libidn2"
+        ],
+        "headers": [
+            "idn2.h"
+        ],
+        "lib-suggests-unix": [
+            "libiconv",
+            "gettext",
+            "libunistring"
+        ],
+        "lib-depends-macos": [
+            "libiconv",
+            "gettext"
+        ]
+    },
     "imagemagick": {
         "source": "imagemagick",
         "cpp-library": true,
@@ -279,6 +299,26 @@
             "jbig.h",
             "jbig85.h",
             "jbig_ar.h"
+        ]
+    },
+    "krb5": {
+        "source": "krb5",
+        "pkg-configs": [
+            "krb5-gssapi"
+        ],
+        "headers": [
+            "krb5.h",
+            "gssapi/gssapi.h"
+        ],
+        "lib-depends": [
+            "openssl"
+        ],
+        "lib-suggests": [
+            "ldap",
+            "libedit"
+        ],
+        "frameworks": [
+            "Kerberos"
         ]
     },
     "ldap": {
@@ -566,6 +606,16 @@
             "jbig",
             "xz",
             "zstd"
+        ]
+    },
+    "libunistring": {
+        "source": "libunistring",
+        "static-libs-unix": [
+            "libunistring.a"
+        ],
+        "headers": [
+            "unistr.h",
+            "unistring/"
         ]
     },
     "liburing": {
@@ -974,24 +1024,5 @@
             "zstd.h",
             "zstd_errors.h"
         ]
-    },
-    "liburing": {
-        "source": "liburing",
-        "pkg-configs": [
-            "liburing",
-            "liburing-ffi"
-        ],
-        "static-libs-linux": [
-            "liburing.a",
-            "liburing-ffi.a"
-        ],
-        "headers-linux": [
-            "liburing/",
-            "liburing.h"
-        ]
-    },
-    "frankenphp": {
-        "source": "frankenphp",
-        "type": "target"
     }
 }

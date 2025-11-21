@@ -305,7 +305,6 @@
         "type": "ghtar",
         "repo": "php/frankenphp",
         "prefer-stable": true,
-        "provide-pre-built": false,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -373,16 +372,6 @@
             "path": "LICENSE"
         }
     },
-    "frankenphp": {
-        "type": "ghtar",
-        "repo": "php/frankenphp",
-        "prefer-stable":  true,
-        "provide-pre-build": false,
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        }
-    },
     "icu-static-win": {
         "type": "url",
         "url": "https://dl.static-php.dev/static-php-cli/deps/icu-static-windows-x64/icu-static-windows-x64.zip",
@@ -439,6 +428,16 @@
         "license": {
             "type": "file",
             "path": "COPYING"
+        }
+    },
+    "krb5": {
+        "type": "ghtagtar",
+        "repo": "krb5/krb5",
+        "match": "krb5.+-final",
+        "prefer-stable": true,
+        "license": {
+            "type": "file",
+            "path": "NOTICE"
         }
     },
     "ldap": {
@@ -599,6 +598,15 @@
             "path": "source/COPYING"
         }
     },
+    "libidn2": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/gnu/libidn/",
+        "regex": "/href=\"(?<file>libidn2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "license": {
+            "type": "file",
+            "path": "COPYING.LESSERv3"
+        }
+    },
     "libjpeg": {
         "type": "ghtar",
         "repo": "libjpeg-turbo/libjpeg-turbo",
@@ -700,6 +708,16 @@
             "path": "LICENSE.md"
         }
     },
+    "libunistring": {
+        "type": "filelist",
+        "url": "https://ftp.gnu.org/gnu/libunistring/",
+        "regex": "/href=\"(?<file>libunistring-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+        "provide-pre-built": true,
+        "license": {
+            "type": "file",
+            "path": "COPYING.LIB"
+        }
+    },
     "liburing": {
         "type": "ghtar",
         "repo": "axboe/liburing",
@@ -713,6 +731,7 @@
         "type": "git",
         "url": "https://github.com/static-php/libuuid.git",
         "rev": "master",
+        "provide-pre-built": true,
         "license": {
             "type": "file",
             "path": "COPYING"
