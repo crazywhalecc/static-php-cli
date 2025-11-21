@@ -46,7 +46,7 @@ $upx = false;
 $frankenphp = true;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = false;
+$prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
