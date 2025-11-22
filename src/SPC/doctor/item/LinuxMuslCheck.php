@@ -22,7 +22,7 @@ class LinuxMuslCheck
     public static function optionalCheck(): bool
     {
         return getenv('SPC_TOOLCHAIN') === MuslToolchain::class ||
-            (getenv('SPC_TOOLCHAIN') === ZigToolchain::class && !SystemUtil::isMuslDist());
+            (getenv('SPC_TOOLCHAIN') === ZigToolchain::class && !SystemUtil::isMuslDist() && !str_contains((string) getenv('SPC_TARGET'), 'gnu'));
     }
 
     /** @noinspection PhpUnused */
