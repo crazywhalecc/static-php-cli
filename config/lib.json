@@ -506,6 +506,16 @@
             "liblz4.a"
         ]
     },
+    "libmaxminddb": {
+        "source": "libmaxminddb",
+        "static-libs-unix": [
+            "libmaxminddb.a"
+        ],
+        "headers": [
+            "maxminddb.h",
+            "maxminddb_config.h"
+        ]
+    },
     "libmemcached": {
         "source": "libmemcached",
         "cpp-library": true,
