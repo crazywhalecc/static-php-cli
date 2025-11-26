@@ -1,4 +1,4 @@
-# static-php-cli
+# StaticPHP
 
 [![Chinese readme](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%20%F0%9F%87%A8%F0%9F%87%B3-moccasin?style=flat-square)](README-zh.md)
 [![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
@@ -6,8 +6,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
 
-**static-php-cli** is a powerful tool designed for building static, standalone PHP runtime
-with popular extensions.
+**StaticPHP** (formerly **static-php-cli**) is a powerful tool designed for building static, standalone PHP runtime with popular extensions.
 
 ## Features
 
@@ -34,6 +33,8 @@ with popular extensions.
 
 ### 1. Download spc binary
 
+`spc` binary is StaticPHP CLI tool packaged as a single executable file.
+
 ```bash
 # For Linux x86_64
 curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
@@ -53,7 +54,7 @@ For macOS and Linux, add execute permission first:
 chmod +x ./spc
 ```
 
-### 2. Build Static PHP
+### 2. Build standalone PHP binaries
 
 First, create a `craft.yml` file and specify which extensions you want to include from [extension list](https://static-php.dev/en/guide/extensions.html) or [command generator](https://static-php.dev/en/guide/cli-generator.html):
 
@@ -79,7 +80,7 @@ Run command:
 ./spc craft --debug
 ```
 
-### 3. Static PHP usage
+### 3. Using the built binaries
 
 Now you can copy binaries built by static-php-cli to another machine and run with no dependencies:
 
@@ -105,7 +106,7 @@ see <https://static-php.dev> .
 
 If you don't want to build or want to test first, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-bulk.yml), or from self-hosted server.
 
-Below are several precompiled static-php binaries with different extension combinations,
+Below are several precompiled statically built php binaries with different extension combinations,
 which can be downloaded directly according to your needs.
 
 | Combination                                                          | Extension Count                                                            | OS           | Comment                        |

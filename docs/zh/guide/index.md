@@ -12,12 +12,14 @@ static-php-cli 是一个用于构建静态编译的 PHP 二进制的工具，目
 
 下面是架构支持情况，:gear: 代表支持 GitHub Action 构建，:computer: 代表支持本地构建，空 代表暂不支持。
 
-|         | x86_64            | aarch64           |
-|---------|-------------------|-------------------|
-| macOS   | :gear: :computer: | :gear: :computer: |
-| Linux   | :gear: :computer: | :gear: :computer: |
-| Windows | :gear: :computer: |                   |
-| FreeBSD | :computer:        | :computer:        |
+|         | x86_64                 | aarch64                |
+|---------|------------------------|------------------------|
+| macOS   | :gear: :computer:      | :gear: :computer:      |
+| Linux   | :gear: :computer:      | :gear: :computer:      |
+| Windows | :gear: :computer:      |                        |
+| FreeBSD | :computer: (:warning:) | :computer: (:warning:) |
+
+> 由于缺乏用户和测试，FreeBSD 在最新的 StaticPHP 项目中不再受支持。
 
 当前支持编译的 PHP 版本：
 
@@ -27,17 +29,17 @@ static-php-cli 是一个用于构建静态编译的 PHP 二进制的工具，目
 >
 > :x: 不支持
 
-| PHP Version | Status             | Comment                                                 |
-|-------------|--------------------|---------------------------------------------------------|
-| 7.2         | :x:                |                                                         |
-| 7.3         | :x:                | phpmicro 和许多扩展不支持 7.3、7.4 版本                            |
-| 7.4         | :x:                | phpmicro 和许多扩展不支持 7.3、7.4 版本                            |
-| 8.0         | :warning:          | PHP 官方已停止 8.0 的维护，我们不再处理 8.0 相关的 backport 支持            |
-| 8.1         | :warning:          | PHP 官方仅对 8.1 提供安全更新，在 8.5 发布后我们不再处理 8.1 相关的 backport 支持 |
-| 8.2         | :heavy_check_mark: |                                                         |
-| 8.3         | :heavy_check_mark: |                                                         |
-| 8.4         | :heavy_check_mark: |                                                         |
-| 8.5 (beta)  | :warning:          | PHP 8.5 目前处于 beta 阶段                                    |
+| PHP Version | Status             | Comment                                      |
+|-------------|--------------------|----------------------------------------------|
+| 7.2         | :x:                |                                              |
+| 7.3         | :x:                | phpmicro 和许多扩展不支持 7.3、7.4 版本                 |
+| 7.4         | :x:                | phpmicro 和许多扩展不支持 7.3、7.4 版本                 |
+| 8.0         | :warning:          | PHP 官方已停止 8.0 的维护，我们不再处理 8.0 相关的 backport 支持 |
+| 8.1         | :warning:          | PHP 官方仅对 8.1 提供安全更新                          |
+| 8.2         | :heavy_check_mark: |                                              |
+| 8.3         | :heavy_check_mark: |                                              |
+| 8.4         | :heavy_check_mark: |                                              |
+| 8.5         | :heavy_check_mark: |                                              |
 
 > 这个表格的支持状态是 static-php-cli 对构建对应版本的支持情况，不是 PHP 官方对该版本的支持情况。
 

@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Static PHP"
+  name: "StaticPHP"
   tagline: "Build standalone PHP binary on Linux, macOS, FreeBSD, Windows, with PHP project together, with popular extensions included."
   image:
     src: /images/static-php_nobg.png
