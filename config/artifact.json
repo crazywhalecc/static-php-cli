@@ -1,0 +1,1046 @@
+{
+    "vswhere": {
+        "binary": {
+            "windows-x86_64": {
+                "type": "url",
+                "url": "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe",
+                "extract": "{pkg_root_path}/bin/vswhere.exe"
+            }
+        }
+    },
+    "php-src": {
+        "source": {
+            "type": "php-release"
+        }
+    },
+    "php-sdk-binary-tools": {
+        "binary": {
+            "windows-x86_64": {
+                "type": "git",
+                "rev": "master",
+                "url": "https://github.com/php/php-sdk-binary-tools.git",
+                "extract": "{php_sdk_path}"
+            }
+        }
+    },
+    "go-xcaddy": {
+        "binary": "custom"
+    },
+    "musl-toolchain": {
+        "binary": {
+            "linux-x86_64": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz",
+            "linux-aarch64": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz"
+        }
+    },
+    "pkg-config": {
+        "source": "https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz",
+        "binary": {
+            "linux-x86_64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-aarch64-linux-musl-1.2.5.txz",
+                "extract": {
+                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+                }
+            },
+            "linux-aarch64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-x86_64-linux-musl-1.2.5.txz",
+                "extract": {
+                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+                }
+            },
+            "macos-x86_64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-x86_64-darwin.txz",
+                "extract": {
+                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+                }
+            },
+            "macos-aarch64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-aarch64-darwin.txz",
+                "extract": "{pkg_root_path}"
+            }
+        }
+    },
+    "strawberry-perl": {
+        "binary": {
+            "windows-x86_64": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip"
+        }
+    },
+    "upx": {
+        "binary": {
+            "linux-x86_64": {
+                "type": "ghrel",
+                "repo": "upx/upx",
+                "match": "upx.+-amd64_linux\\.tar\\.xz",
+                "extract": {
+                    "upx": "{pkg_root_path}/bin/upx"
+                }
+            },
+            "linux-aarch64": {
+                "type": "ghrel",
+                "repo": "upx/upx",
+                "match": "upx.+-arm64_linux\\.tar\\.xz",
+                "extract": {
+                    "upx": "{pkg_root_path}/bin/upx"
+                }
+            },
+            "windows-x86_64": {
+                "type": "ghrel",
+                "repo": "upx/upx",
+                "match": "upx.+-win64\\.zip",
+                "extract": {
+                    "upx.exe": "{pkg_root_path}/bin/upx.exe"
+                }
+            }
+        }
+    },
+    "zig": {
+        "binary": "custom"
+    },
+    "nasm": {
+        "binary": {
+            "windows-x86_64": {
+                "type": "url",
+                "url": "https://dl.static-php.dev/static-php-cli/deps/nasm/nasm-2.16.01-win64.zip",
+                "extract": {
+                    "nasm.exe": "{php_sdk_path}/bin/nasm.exe",
+                    "ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
+                }
+            }
+        }
+    },
+    "amqp": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/amqp",
+            "filename": "amqp.tgz",
+            "extract": "php-src/ext/amqp"
+        }
+    },
+    "apcu": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/APCu",
+            "filename": "apcu.tgz",
+            "extract": "php-src/ext/apcu"
+        }
+    },
+    "ast": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/ast",
+            "filename": "ast.tgz",
+            "extract": "php-src/ext/ast"
+        }
+    },
+    "attr": {
+        "binary": "hosted",
+        "source": {
+            "type": "url",
+            "url": "https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.gz"
+        },
+        "source-mirror": {
+            "type": "url",
+            "url": "https://mirror.souseiseki.middlendian.com/nongnu/attr/attr-2.5.2.tar.gz"
+        }
+    },
+    "brotli": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghtagtar",
+            "repo": "google/brotli",
+            "match": "v1\\.\\d.*"
+        }
+    },
+    "bzip2": {
+        "binary": "hosted",
+        "source": {
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/bzip2/bzip2-1.0.8.tar.gz"
+        },
+        "source-mirror": {
+            "type": "filelist",
+            "url": "https://sourceware.org/pub/bzip2/",
+            "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        }
+    },
+    "curl": {
+        "source": {
+            "type": "ghrel",
+            "repo": "curl/curl",
+            "match": "curl.+\\.tar\\.xz",
+            "prefer-stable": true
+        }
+    },
+    "dio": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/dio",
+            "filename": "dio.tgz",
+            "extract": "php-src/ext/dio"
+        }
+    },
+    "ev": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/ev",
+            "filename": "ev.tgz",
+            "extract": "php-src/ext/ev"
+        }
+    },
+    "ext-brotli": {
+        "source": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://github.com/kjdev/php-ext-brotli",
+            "extract": "php-src/ext/brotli"
+        }
+    },
+    "ext-ds": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/ds",
+            "filename": "ds.tgz",
+            "extract": "php-src/ext/ds"
+        }
+    },
+    "ext-event": {
+        "source": {
+            "type": "url",
+            "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
+            "extract": "php-src/ext/event"
+        }
+    },
+    "ext-glfw": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/mario-deluna/php-glfw",
+            "rev": "master"
+        }
+    },
+    "ext-gmssl": {
+        "source": {
+            "type": "ghtar",
+            "repo": "gmssl/GmSSL-PHP",
+            "extract": "php-src/ext/gmssl"
+        }
+    },
+    "ext-imagick": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/imagick",
+            "filename": "imagick.tgz",
+            "extract": "php-src/ext/imagick"
+        }
+    },
+    "ext-imap": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/imap",
+            "filename": "imap.tgz",
+            "extract": "php-src/ext/imap"
+        }
+    },
+    "ext-lz4": {
+        "source": {
+            "type": "ghtagtar",
+            "repo": "kjdev/php-ext-lz4",
+            "extract": "php-src/ext/lz4"
+        }
+    },
+    "ext-memcache": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/memcache",
+            "filename": "memcache.tgz",
+            "extract": "php-src/ext/memcache"
+        }
+    },
+    "ext-rdkafka": {
+        "source": {
+            "type": "ghtar",
+            "repo": "arnaud-lb/php-rdkafka",
+            "extract": "php-src/ext/rdkafka"
+        }
+    },
+    "ext-simdjson": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/simdjson",
+            "filename": "simdjson.tgz",
+            "extract": "php-src/ext/simdjson"
+        }
+    },
+    "ext-snappy": {
+        "source": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://github.com/kjdev/php-ext-snappy",
+            "extract": "php-src/ext/snappy"
+        }
+    },
+    "ext-ssh2": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/ssh2",
+            "filename": "ssh2.tgz",
+            "extract": "php-src/ext/ssh2"
+        }
+    },
+    "ext-trader": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/trader",
+            "filename": "trader.tgz",
+            "extract": "php-src/ext/trader"
+        }
+    },
+    "ext-uuid": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/uuid",
+            "filename": "uuid.tgz",
+            "extract": "php-src/ext/uuid"
+        }
+    },
+    "ext-uv": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/uv",
+            "filename": "uv.tgz",
+            "extract": "php-src/ext/uv"
+        }
+    },
+    "ext-xz": {
+        "source": {
+            "type": "git",
+            "rev": "main",
+            "url": "https://github.com/codemasher/php-ext-xz",
+            "extract": "php-src/ext/xz"
+        }
+    },
+    "ext-zip": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/zip",
+            "filename": "ext-zip.tgz"
+        }
+    },
+    "ext-zstd": {
+        "source": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://github.com/kjdev/php-ext-zstd",
+            "extract": "php-src/ext/zstd"
+        }
+    },
+    "fastlz": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ariya/FastLZ.git",
+            "rev": "master"
+        }
+    },
+    "freetype": {
+        "source": {
+            "type": "git",
+            "rev": "VER-2-13-2",
+            "url": "https://github.com/freetype/freetype"
+        }
+    },
+    "gettext": {
+        "source": {
+            "type": "filelist",
+            "url": "https://ftp.gnu.org/pub/gnu/gettext/",
+            "regex": "/href=\"(?<file>gettext-(?<version>[^\"]+)\\.tar\\.xz)\"/"
+        }
+    },
+    "gmp": {
+        "binary": "hosted",
+        "source": {
+            "type": "filelist",
+            "url": "https://gmplib.org/download/gmp/",
+            "regex": "/href=\"(?<file>gmp-(?<version>[^\"]+)\\.tar\\.xz)\"/"
+        },
+        "source-mirror": {
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/gmp/gmp-6.3.0.tar.xz"
+        }
+    },
+    "gmssl": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghtar",
+            "repo": "guanzhi/GmSSL"
+        }
+    },
+    "grpc": {
+        "binary": "hosted",
+        "source": {
+            "type": "git",
+            "rev": "v1.75.x",
+            "url": "https://github.com/grpc/grpc.git"
+        }
+    },
+    "icu": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "unicode-org/icu",
+            "match": "icu4c.+-src\\.tgz",
+            "prefer-stable": true
+        }
+    },
+    "icu-static-win": {
+        "source": {
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/icu-static-windows-x64/icu-static-windows-x64.zip"
+        }
+    },
+    "igbinary": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/igbinary",
+            "filename": "igbinary.tgz",
+            "extract": "php-src/ext/igbinary"
+        }
+    },
+    "imagemagick": {
+        "source": {
+            "type": "ghtar",
+            "repo": "ImageMagick/ImageMagick"
+        }
+    },
+    "imap": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/static-php/imap.git",
+            "rev": "master"
+        }
+    },
+    "inotify": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/inotify",
+            "filename": "inotify.tgz",
+            "extract": "php-src/ext/inotify"
+        }
+    },
+    "jbig": {
+        "binary": "hosted",
+        "source": {
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/jbig/jbigkit-2.1.tar.gz"
+        },
+        "source-mirror": {
+            "type": "url",
+            "url": "https://www.cl.cam.ac.uk/~mgk25/jbigkit/download/jbigkit-2.1.tar.gz"
+        }
+    },
+    "ldap": {
+        "source": {
+            "type": "filelist",
+            "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
+            "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/"
+        }
+    },
+    "lerc": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghtar",
+            "repo": "Esri/lerc",
+            "prefer-stable": true
+        }
+    },
+    "libacl": {
+        "binary": "hosted",
+        "source": {
+            "type": "url",
+            "url": "https://download.savannah.nongnu.org/releases/acl/acl-2.3.2.tar.gz"
+        },
+        "source-mirror": {
+            "type": "url",
+            "url": "https://mirror.souseiseki.middlendian.com/nongnu/acl/acl-2.3.2.tar.gz"
+        }
+    },
+    "libaom": {
+        "binary": "hosted",
+        "source": {
+            "type": "git",
+            "rev": "main",
+            "url": "https://aomedia.googlesource.com/aom"
+        }
+    },
+    "libargon2": {
+        "binary": "hosted",
+        "source": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://github.com/static-php/phc-winner-argon2"
+        }
+    },
+    "libavif": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghtar",
+            "repo": "AOMediaCodec/libavif"
+        }
+    },
+    "libcares": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "c-ares/c-ares",
+            "match": "c-ares-.+\\.tar\\.gz",
+            "prefer-stable": true
+        },
+        "source-mirror": {
+            "type": "filelist",
+            "url": "https://c-ares.org/download/",
+            "regex": "/href=\"\\/download\\/(?<file>c-ares-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        }
+    },
+    "libde265": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "strukturag/libde265",
+            "match": "libde265-.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libedit": {
+        "binary": "hosted",
+        "source": {
+            "type": "filelist",
+            "url": "https://thrysoee.dk/editline/",
+            "regex": "/href=\"(?<file>libedit-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        }
+    },
+    "libevent": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "libevent/libevent",
+            "match": "libevent.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libffi": {
+        "source": {
+            "type": "ghrel",
+            "repo": "libffi/libffi",
+            "match": "libffi.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libffi-win": {
+        "source": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://github.com/static-php/libffi-win.git"
+        }
+    },
+    "libheif": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "strukturag/libheif",
+            "match": "libheif-.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libiconv": {
+        "binary": "hosted",
+        "source": {
+            "type": "filelist",
+            "url": "https://ftp.gnu.org/gnu/libiconv/",
+            "regex": "/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "source-mirror": "https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/libiconv/libiconv-spc-mirror.tar.gz"
+    },
+    "libiconv-win": {
+        "source": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://github.com/static-php/libiconv-win.git"
+        }
+    },
+    "libjpeg": {
+        "source": {
+            "type": "ghtar",
+            "repo": "libjpeg-turbo/libjpeg-turbo"
+        }
+    },
+    "libjxl": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/libjxl/libjxl",
+            "rev": "main",
+            "submodules": [
+                "third_party/highway",
+                "third_party/libjpeg-turbo",
+                "third_party/sjpeg",
+                "third_party/skcms"
+            ]
+        }
+    },
+    "liblz4": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "lz4/lz4",
+            "match": "lz4-.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libmemcached": {
+        "source": {
+            "type": "ghtagtar",
+            "repo": "awesomized/libmemcached",
+            "match": "1.\\d.\\d"
+        }
+    },
+    "libpng": {
+        "binary": "hosted",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/glennrp/libpng.git",
+            "rev": "libpng16"
+        }
+    },
+    "librabbitmq": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/alanxz/rabbitmq-c.git",
+            "rev": "master"
+        }
+    },
+    "librdkafka": {
+        "source": {
+            "type": "ghtar",
+            "repo": "confluentinc/librdkafka"
+        }
+    },
+    "libsodium": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "jedisct1/libsodium",
+            "match": "libsodium-\\d+(\\.\\d+)*\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libssh2": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "libssh2/libssh2",
+            "match": "libssh2.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libtiff": {
+        "source": {
+            "type": "filelist",
+            "url": "https://download.osgeo.org/libtiff/",
+            "regex": "/href=\"(?<file>tiff-(?<version>[^\"]+)\\.tar\\.xz)\"/"
+        }
+    },
+    "liburing": {
+        "source": {
+            "type": "ghtar",
+            "repo": "axboe/liburing",
+            "prefer-stable": true
+        }
+    },
+    "libuuid": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/static-php/libuuid.git",
+            "rev": "master"
+        }
+    },
+    "libuv": {
+        "source": {
+            "type": "ghtar",
+            "repo": "libuv/libuv"
+        }
+    },
+    "libwebp": {
+        "binary": "hosted",
+        "source": {
+            "type": "url",
+            "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.3.2.tar.gz"
+        }
+    },
+    "libxml2": {
+        "source": {
+            "type": "url",
+            "url": "https://github.com/GNOME/libxml2/archive/refs/tags/v2.12.5.tar.gz"
+        }
+    },
+    "libxslt": {
+        "source": {
+            "type": "filelist",
+            "url": "https://download.gnome.org/sources/libxslt/1.1/",
+            "regex": "/href=\"(?<file>libxslt-(?<version>[^\"]+)\\.tar\\.xz)\"/"
+        }
+    },
+    "libyaml": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "yaml/libyaml",
+            "match": "yaml-.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "libzip": {
+        "source": {
+            "type": "ghrel",
+            "repo": "nih-at/libzip",
+            "match": "libzip.+\\.tar\\.xz",
+            "prefer-stable": true
+        }
+    },
+    "memcached": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/memcached",
+            "filename": "memcached.tgz",
+            "extract": "php-src/ext/memcached"
+        }
+    },
+    "mimalloc": {
+        "source": {
+            "type": "ghtagtar",
+            "repo": "microsoft/mimalloc",
+            "match": "v2\\.\\d\\.[^3].*"
+        }
+    },
+    "micro": {
+        "source": {
+            "type": "git",
+            "extract": "php-src/sapi/micro",
+            "rev": "master",
+            "url": "https://github.com/static-php/phpmicro"
+        }
+    },
+    "mongodb": {
+        "source": {
+            "type": "ghrel",
+            "repo": "mongodb/mongo-php-driver",
+            "match": "mongodb.+\\.tgz",
+            "prefer-stable": true,
+            "extract": "php-src/ext/mongodb"
+        }
+    },
+    "msgpack": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/msgpack",
+            "filename": "msgpack.tgz",
+            "extract": "php-src/ext/msgpack"
+        }
+    },
+    "ncurses": {
+        "binary": "hosted",
+        "source": {
+            "type": "filelist",
+            "url": "https://ftp.gnu.org/pub/gnu/ncurses/",
+            "regex": "/href=\"(?<file>ncurses-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        }
+    },
+    "net-snmp": {
+        "source": {
+            "type": "ghtagtar",
+            "repo": "net-snmp/net-snmp"
+        }
+    },
+    "nghttp2": {
+        "source": {
+            "type": "ghrel",
+            "repo": "nghttp2/nghttp2",
+            "match": "nghttp2.+\\.tar\\.xz",
+            "prefer-stable": true
+        }
+    },
+    "nghttp3": {
+        "source": {
+            "type": "ghrel",
+            "repo": "ngtcp2/nghttp3",
+            "match": "nghttp3.+\\.tar\\.xz",
+            "prefer-stable": true
+        }
+    },
+    "ngtcp2": {
+        "source": {
+            "type": "ghrel",
+            "repo": "ngtcp2/ngtcp2",
+            "match": "ngtcp2.+\\.tar\\.xz",
+            "prefer-stable": true
+        }
+    },
+    "onig": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "kkos/oniguruma",
+            "match": "onig-.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "openssl": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "openssl/openssl",
+            "match": "openssl.+\\.tar\\.gz",
+            "prefer-stable": true
+        },
+        "source-mirror": {
+            "type": "filelist",
+            "url": "https://www.openssl.org/source/",
+            "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        }
+    },
+    "opentelemetry": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/opentelemetry",
+            "filename": "opentelemetry.tgz",
+            "extract": "php-src/ext/opentelemetry"
+        }
+    },
+    "parallel": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/parallel",
+            "filename": "parallel.tgz",
+            "extract": "php-src/ext/parallel"
+        }
+    },
+    "pdo_sqlsrv": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/pdo_sqlsrv",
+            "filename": "pdo_sqlsrv.tgz",
+            "extract": "php-src/ext/pdo_sqlsrv"
+        }
+    },
+    "postgresql": {
+        "source": {
+            "type": "ghtagtar",
+            "repo": "postgres/postgres",
+            "match": "REL_18_\\d+"
+        }
+    },
+    "postgresql-win": {
+        "source": {
+            "type": "url",
+            "url": "https://get.enterprisedb.com/postgresql/postgresql-16.8-1-windows-x64-binaries.zip"
+        }
+    },
+    "protobuf": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/protobuf",
+            "filename": "protobuf.tgz",
+            "extract": "php-src/ext/protobuf"
+        }
+    },
+    "pthreads4w": {
+        "source": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://git.code.sf.net/p/pthreads4w/code"
+        }
+    },
+    "qdbm": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/static-php/qdbm.git",
+            "rev": "main"
+        }
+    },
+    "rar": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/static-php/php-rar.git",
+            "rev": "issue-php82",
+            "extract": "php-src/ext/rar"
+        }
+    },
+    "re2c": {
+        "source": {
+            "type": "ghrel",
+            "repo": "skvadrik/re2c",
+            "match": "re2c.+\\.tar\\.xz",
+            "prefer-stable": true
+        },
+        "source-mirror": {
+            "type": "url",
+            "url": "https://dl.static-php.dev/static-php-cli/deps/re2c/re2c-4.3.tar.xz"
+        }
+    },
+    "readline": {
+        "binary": "hosted",
+        "source": {
+            "type": "filelist",
+            "url": "https://ftp.gnu.org/pub/gnu/readline/",
+            "regex": "/href=\"(?<file>readline-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        }
+    },
+    "redis": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/redis",
+            "filename": "redis.tgz",
+            "extract": "php-src/ext/redis"
+        }
+    },
+    "snappy": {
+        "source": {
+            "type": "git",
+            "rev": "main",
+            "url": "https://github.com/google/snappy"
+        }
+    },
+    "spx": {
+        "source": {
+            "type": "pie",
+            "repo": "noisebynorthwest/php-spx",
+            "extract": "php-src/ext/spx"
+        }
+    },
+    "sqlite": {
+        "binary": "hosted",
+        "source": {
+            "type": "url",
+            "url": "https://www.sqlite.org/2024/sqlite-autoconf-3450200.tar.gz"
+        }
+    },
+    "sqlsrv": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/sqlsrv",
+            "filename": "sqlsrv.tgz",
+            "extract": "php-src/ext/sqlsrv"
+        }
+    },
+    "swoole": {
+        "source": {
+            "type": "ghtar",
+            "repo": "swoole/swoole-src",
+            "match": "v6\\.+",
+            "prefer-stable": true,
+            "extract": "php-src/ext/swoole"
+        }
+    },
+    "swow": {
+        "source": {
+            "type": "ghtar",
+            "repo": "swow/swow",
+            "prefer-stable": true,
+            "extract": "php-src/ext/swow-src"
+        }
+    },
+    "tidy": {
+        "source": {
+            "type": "ghtar",
+            "repo": "htacg/tidy-html5",
+            "prefer-stable": true
+        }
+    },
+    "unixodbc": {
+        "binary": "hosted",
+        "source": {
+            "type": "url",
+            "url": "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz",
+            "version": "2.3.12"
+        }
+    },
+    "watcher": {
+        "source": {
+            "type": "ghtar",
+            "repo": "e-dant/watcher",
+            "prefer-stable": true
+        }
+    },
+    "xdebug": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/xdebug",
+            "filename": "xdebug.tgz"
+        }
+    },
+    "xhprof": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/xhprof",
+            "filename": "xhprof.tgz",
+            "extract": "php-src/ext/xhprof-src"
+        }
+    },
+    "xlswriter": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/xlswriter",
+            "filename": "xlswriter.tgz",
+            "extract": "php-src/ext/xlswriter"
+        }
+    },
+    "xz": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "tukaani-project/xz",
+            "match": "xz.+\\.tar\\.xz",
+            "prefer-stable": true
+        },
+        "source-mirror": {
+            "type": "url",
+            "url": "https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.gz"
+        }
+    },
+    "yac": {
+        "source": {
+            "type": "url",
+            "url": "https://pecl.php.net/get/yac",
+            "filename": "yac.tgz",
+            "extract": "php-src/ext/yac"
+        }
+    },
+    "yaml": {
+        "source": {
+            "type": "git",
+            "rev": "php7",
+            "url": "https://github.com/php/pecl-file_formats-yaml",
+            "extract": "php-src/ext/yaml"
+        }
+    },
+    "zlib": {
+        "binary": "hosted",
+        "source": {
+            "type": "ghrel",
+            "repo": "madler/zlib",
+            "match": "zlib.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    },
+    "zstd": {
+        "source": {
+            "type": "ghrel",
+            "repo": "facebook/zstd",
+            "match": "zstd.+\\.tar\\.gz",
+            "prefer-stable": true
+        }
+    }
+}
