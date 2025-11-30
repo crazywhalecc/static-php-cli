@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-use Psr\Log\LoggerInterface;
-use SPC\builder\BuilderBase;
-use SPC\builder\BuilderProvider;
-use SPC\exception\ExecutionException;
-use SPC\exception\InterruptException;
-use SPC\exception\WrongUsageException;
-use SPC\util\shell\UnixShell;
-use SPC\util\shell\WindowsCmd;
+use StaticPHP\Exception\ExecutionException;
+use StaticPHP\Exception\InterruptException;
+use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Runtime\Shell\DefaultShell;
+use StaticPHP\Runtime\Shell\UnixShell;
+use StaticPHP\Runtime\Shell\WindowsCmd;
 use ZM\Logger\ConsoleLogger;
 
 /**
@@ -31,18 +29,13 @@ function is_list_array(mixed $array): bool
 /**
  * Return a logger instance
  */
-function logger(): LoggerInterface
+function logger(): ConsoleLogger
 {
     global $ob_logger;
     if ($ob_logger === null) {
         return new ConsoleLogger();
     }
     return $ob_logger;
-}
-
-function is_unix(): bool
-{
-    return in_array(PHP_OS_FAMILY, ['Linux', 'Darwin', 'BSD']);
 }
 
 /**
@@ -84,36 +77,16 @@ function quote(string $str, string $quote = '"'): string
     return $quote . $str . $quote;
 }
 
-/**
- * Get Family name of current OS.
- */
-function osfamily2dir(): string
-{
-    return match (PHP_OS_FAMILY) {
-        /* @phpstan-ignore-next-line */
-        'Windows', 'WINNT', 'Cygwin' => 'windows',
-        'Darwin' => 'macos',
-        'Linux' => 'linux',
-        'BSD' => 'freebsd',
-        default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
-    };
-}
-
-function osfamily2shortname(): string
-{
-    return match (PHP_OS_FAMILY) {
-        'Windows' => 'win',
-        'Darwin' => 'macos',
-        'Linux' => 'linux',
-        'BSD' => 'bsd',
-        default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
-    };
-}
-
 function shell(?bool $debug = null): UnixShell
 {
     /* @noinspection PhpUnhandledExceptionInspection */
     return new UnixShell($debug);
+}
+
+function default_shell(): DefaultShell
+{
+    /* @noinspection PhpUnhandledExceptionInspection */
+    return new DefaultShell();
 }
 
 function cmd(?bool $debug = null): WindowsCmd
@@ -123,19 +96,15 @@ function cmd(?bool $debug = null): WindowsCmd
 }
 
 /**
- * Get current builder.
- */
-function builder(): BuilderBase
-{
-    return BuilderProvider::getBuilder();
-}
-
-/**
  * Get current patch point.
  */
 function patch_point(): string
 {
-    return BuilderProvider::getBuilder()->getPatchPoint();
+    if (StaticPHP\DI\ApplicationContext::has('patch_point')) {
+        /* @phpstan-ignore-next-line */
+        return StaticPHP\DI\ApplicationContext::get('patch_point');
+    }
+    return '';
 }
 
 function patch_point_interrupt(int $retcode, string $msg = ''): InterruptException
@@ -272,6 +241,8 @@ function keyboard_interrupt_register(callable $callback): void
     if (PHP_OS_FAMILY === 'Windows') {
         sapi_windows_set_ctrl_handler($callback);
     } elseif (extension_loaded('pcntl')) {
+        global $_previous_sigint_handler;
+        $_previous_sigint_handler = pcntl_signal_get_handler(SIGINT);
         pcntl_signal(SIGINT, $callback);
     }
 }
@@ -287,6 +258,12 @@ function keyboard_interrupt_unregister(): void
     if (PHP_OS_FAMILY === 'Windows') {
         sapi_windows_set_ctrl_handler(null);
     } elseif (extension_loaded('pcntl')) {
+        global $_previous_sigint_handler;
+        if ($_previous_sigint_handler !== null) {
+            pcntl_signal(SIGINT, $_previous_sigint_handler);
+            $_previous_sigint_handler = null;
+            return;
+        }
         pcntl_signal(SIGINT, SIG_IGN);
     }
 }
@@ -316,4 +293,62 @@ function get_display_path(string $path): string
         return $deploy_root . substr($path, strlen($cwd));
     }
     throw new WrongUsageException("Cannot convert path: {$path}");
+}
+
+/**
+ * Get the global DI container instance.
+ *
+ * @deprecated Use ApplicationContext::getContainer() or dependency injection instead.
+ *             This function is kept for backward compatibility during the migration period.
+ */
+function spc_container(): DI\Container
+{
+    return \StaticPHP\DI\ApplicationContext::getContainer();
+}
+
+/**
+ * Parse extension list from string, replace alias and filter internal extensions.
+ *
+ * @param  null|array|string $ext_list Extension list, can be array or comma-separated string
+ * @return string[]          List of extension names
+ */
+function parse_extension_list(array|string|null $ext_list): array
+{
+    // standardize and trim
+    $ext_list = parse_comma_list($ext_list);
+    // replace alias
+    $ls = array_map(function ($x) {
+        $lower = strtolower(trim($x));
+        if (isset(SPC_EXTENSION_ALIAS[$lower])) {
+            logger()->debug("Extension [{$lower}] is an alias of [" . SPC_EXTENSION_ALIAS[$lower] . '], it will be replaced.');
+            return SPC_EXTENSION_ALIAS[$lower];
+        }
+        return $lower;
+    }, $ext_list);
+    // filter internals
+    return array_values(array_filter($ls, function ($x) {
+        if (in_array($x, SPC_INTERNAL_EXTENSIONS)) {
+            logger()->debug("Extension [{$x}] is an builtin extension, it will be ignored.");
+            return false;
+        }
+        return true;
+    }));
+}
+
+/**
+ * Parse comma list from string.
+ *
+ * @param  null|array|string $package_list Comma list, can be array or comma-separated string
+ * @return string[]          List of items
+ */
+function parse_comma_list(array|string|null $package_list): array
+{
+    if (is_string($package_list)) {
+        $package_list = array_map('trim', array_filter(explode(',', $package_list)));
+    }
+    if (is_array($package_list)) {
+        // remove duplicates
+        return array_values(array_unique($package_list));
+    }
+    return [];
 }

@@ -1,0 +1,34 @@
+diff --git a/ext/fileinfo/config.w32 b/ext/fileinfo/config.w32
+index 2a42dc45..c207694f 100644
+--- a/ext/fileinfo/config.w32
++++ b/ext/fileinfo/config.w32
+@@ -10,7 +10,7 @@ if (PHP_FILEINFO != 'no') {
+ 			readcdf.c softmagic.c der.c \
+ 			strcasestr.c buffer.c is_csv.c";
+ 
+-	EXTENSION('fileinfo', 'fileinfo.c php_libmagic.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
++	EXTENSION('fileinfo', 'fileinfo.c php_libmagic.c', PHP_FILEINFO_SHARED, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
+ 	ADD_EXTENSION_DEP('fileinfo', 'pcre');
+ 	ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
+ }
+diff --git a/ext/openssl/config.w32 b/ext/openssl/config.w32
+index 24064ec2..87ff3161 100644
+--- a/ext/openssl/config.w32
++++ b/ext/openssl/config.w32
+@@ -1,6 +1,6 @@
+ // vim:ft=javascript
+ 
+-ARG_WITH("openssl", "OpenSSL support", "no,shared");
++ARG_WITH("openssl", "OpenSSL support", "no");
+ 
+ ARG_WITH("openssl-legacy-provider", "OPENSSL: Load legacy algorithm provider in addition to default provider", "no");
+ 
+@@ -10,7 +10,7 @@ if (PHP_OPENSSL != "no") {
+ 	var ret = SETUP_OPENSSL("openssl", PHP_OPENSSL);
+ 
+ 	if (ret >= 2) {
+-		EXTENSION("openssl", "openssl.c openssl_pwhash.c xp_ssl.c");
++		EXTENSION("openssl", "openssl.c openssl_pwhash.c xp_ssl.c", PHP_OPENSSL_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+ 		AC_DEFINE("HAVE_OPENSSL_EXT", 1, "Define to 1 if the PHP extension 'openssl' is available.");
+ 		if (PHP_OPENSSL_LEGACY_PROVIDER != "no") {
+ 			AC_DEFINE("LOAD_OPENSSL_LEGACY_PROVIDER", 1, "Define to 1 to load the OpenSSL legacy algorithm provider in addition to the default provider.");

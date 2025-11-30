@@ -1,0 +1,12 @@
+--- a/main/main.c	2020-09-29 10:17:07.000000000 +0000
++++ b/main/main.c	2020-11-19 07:57:40.769785000 +0000
+@@ -2172,7 +2172,8 @@ int php_module_startup(sapi_module_struc
+ #endif
+ 
+ #ifdef PHP_WIN32
+-# if PHP_LINKER_MAJOR == 14
++// fucked here
++# if false && PHP_LINKER_MAJOR == 14
+ 	/* Extend for other CRT if needed. */
+ #  if PHP_DEBUG
+ #   define PHP_VCRUNTIME "vcruntime140d.dll"

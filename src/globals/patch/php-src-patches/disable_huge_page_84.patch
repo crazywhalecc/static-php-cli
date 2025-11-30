@@ -1,0 +1,13 @@
+diff --git a/configure.ac b/configure.ac
+index 48778c7bd2..760c4f2670 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1127,7 +1127,7 @@ dnl Extensions post-config.
+ dnl ----------------------------------------------------------------------------
+ 
+ dnl Align segments on huge page boundary
+-AS_CASE([$host_alias], [[i[3456]86-*-linux-* | x86_64-*-linux-*]],
++AS_CASE([nope], [[i[3456]86-*-linux-* | x86_64-*-linux-*]],
+   [AC_CACHE_CHECK([linker support for -zcommon-page-size=2097152],
+     [php_cv_have_common_page_size], [
+     save_LDFLAGS=$LDFLAGS

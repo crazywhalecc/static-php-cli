@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use ZM\Logger\ConsoleLogger;
-
 define('WORKING_DIR', getcwd());
 define('ROOT_DIR', dirname(__DIR__, 2));
 putenv('WORKING_DIR=' . WORKING_DIR);
@@ -79,22 +77,32 @@ const PKGCONF_PATCH_INCLUDEDIR = 8;
 const PKGCONF_PATCH_CUSTOM = 16;
 const PKGCONF_PATCH_ALL = 31;
 
-// autoconf flags
-const AUTOCONF_LIBS = 1;
-const AUTOCONF_CFLAGS = 2;
-const AUTOCONF_CPPFLAGS = 4;
-const AUTOCONF_LDFLAGS = 8;
-const AUTOCONF_ALL = 15;
+// spc download status
+const SPC_DOWNLOAD_STATUS_SKIPPED = 1;
+const SPC_DOWNLOAD_STATUS_SUCCESS = 2;
+const SPC_DOWNLOAD_STATUS_FAILED = 3;
 
 // spc download source type
 const SPC_SOURCE_ARCHIVE = 'archive'; // download as archive
 const SPC_SOURCE_GIT = 'git'; // download as git repository
 const SPC_SOURCE_LOCAL = 'local'; // download as local directory
 
-// spc logs dir
-const SPC_LOGS_DIR = WORKING_DIR . DIRECTORY_SEPARATOR . 'log';
-const SPC_OUTPUT_LOG = SPC_LOGS_DIR . DIRECTORY_SEPARATOR . 'spc.output.log';
-const SPC_SHELL_LOG = SPC_LOGS_DIR . DIRECTORY_SEPARATOR . 'spc.shell.log';
+const SPC_STATUS_EXTRACTED = 0;
+const SPC_STATUS_INSTALLED = 0;
+const SPC_STATUS_BUILT = 0;
+const SPC_STATUS_ALREADY_EXTRACTED = 1;
+const SPC_STATUS_ALREADY_INSTALLED = 1;
+const SPC_STATUS_ALREADY_BUILT = 1;
 
-ConsoleLogger::$date_format = 'H:i:s';
-ConsoleLogger::$format = '[%date%] [%level_short%] %body%';
+const SPC_DOWNLOAD_TYPE_DISPLAY_NAME = [
+    'bitbuckettag' => 'BitBucket',
+    'filelist' => 'website',
+    'git' => 'git',
+    'ghrel' => 'GitHub release',
+    'ghtar', 'ghtagtar' => 'GitHub tarball',
+    'local' => 'local dir',
+    'pie' => 'PHP Installer for Extensions',
+    'url' => 'url',
+    'php-release' => 'php.net',
+    'custom' => 'custom downloader',
+];

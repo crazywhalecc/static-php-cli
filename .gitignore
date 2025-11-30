@@ -1,8 +1,8 @@
 .idea
-runtime/
-docker/libraries/
-docker/extensions/
-docker/source/
+/runtime/
+/docker/libraries/
+/docker/extensions/
+/docker/source/
 
 # Vendor files
 /vendor/**
