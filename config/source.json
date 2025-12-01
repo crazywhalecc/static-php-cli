@@ -963,6 +963,15 @@
             "path": "LICENSE"
         }
     },
+    "pcov": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/pcov",
+        "filename": "pcov.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "pdo_sqlsrv": {
         "type": "url",
         "url": "https://pecl.php.net/get/pdo_sqlsrv",
