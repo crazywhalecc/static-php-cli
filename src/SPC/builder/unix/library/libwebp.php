@@ -11,6 +11,9 @@ trait libwebp
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
+            ->appendEnv([
+                'CFLAGS' => GNU_ARCH === 'x86_64' ? '-mavx2' : '',
+            ])
             ->addConfigureArgs(
                 '-DWEBP_BUILD_EXTRAS=OFF'
             )
