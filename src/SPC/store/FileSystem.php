@@ -572,6 +572,44 @@ class FileSystem
         return file_put_contents($file, implode('', $lines));
     }
 
+    /**
+     * Move file or directory, handling cross-device scenarios
+     * Uses rename() if possible, falls back to copy+delete for cross-device moves
+     *
+     * @param string $source Source path
+     * @param string $dest   Destination path
+     */
+    public static function moveFileOrDir(string $source, string $dest): void
+    {
+        $source = self::convertPath($source);
+        $dest = self::convertPath($dest);
+
+        // Check if source and dest are on the same device to avoid cross-device rename errors
+        $source_stat = @stat($source);
+        $dest_parent = dirname($dest);
+        $dest_stat = @stat($dest_parent);
+
+        // Only use rename if on same device
+        if ($source_stat !== false && $dest_stat !== false && $source_stat['dev'] === $dest_stat['dev']) {
+            if (@rename($source, $dest)) {
+                return;
+            }
+        }
+
+        // Fall back to copy + delete for cross-device moves or if rename failed
+        if (is_dir($source)) {
+            self::copyDir($source, $dest);
+            self::removeDir($source);
+        } else {
+            if (!copy($source, $dest)) {
+                throw new FileSystemException("Failed to copy file from {$source} to {$dest}");
+            }
+            if (!unlink($source)) {
+                throw new FileSystemException("Failed to remove source file: {$source}");
+            }
+        }
+    }
+
     private static function extractArchive(string $filename, string $target): void
     {
         // Create base dir
@@ -646,44 +684,6 @@ class FileSystem
             // soft link to the local source
             SPC_SOURCE_LOCAL => symlink(self::convertPath($filename), $extract_path),
         };
-    }
-
-    /**
-     * Move file or directory, handling cross-device scenarios
-     * Uses rename() if possible, falls back to copy+delete for cross-device moves
-     *
-     * @param string $source Source path
-     * @param string $dest   Destination path
-     */
-    private static function moveFileOrDir(string $source, string $dest): void
-    {
-        $source = self::convertPath($source);
-        $dest = self::convertPath($dest);
-
-        // Check if source and dest are on the same device to avoid cross-device rename errors
-        $source_stat = @stat($source);
-        $dest_parent = dirname($dest);
-        $dest_stat = @stat($dest_parent);
-
-        // Only use rename if on same device
-        if ($source_stat !== false && $dest_stat !== false && $source_stat['dev'] === $dest_stat['dev']) {
-            if (@rename($source, $dest)) {
-                return;
-            }
-        }
-
-        // Fall back to copy + delete for cross-device moves or if rename failed
-        if (is_dir($source)) {
-            self::copyDir($source, $dest);
-            self::removeDir($source);
-        } else {
-            if (!copy($source, $dest)) {
-                throw new FileSystemException("Failed to copy file from {$source} to {$dest}");
-            }
-            if (!unlink($source)) {
-                throw new FileSystemException("Failed to remove source file: {$source}");
-            }
-        }
     }
 
     /**
