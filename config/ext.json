@@ -567,6 +567,13 @@
         "type": "builtin",
         "unix-only": true
     },
+    "pcov": {
+        "type": "external",
+        "source": "pcov",
+        "target": [
+            "shared"
+        ]
+    },
     "pdo": {
         "type": "builtin"
     },
