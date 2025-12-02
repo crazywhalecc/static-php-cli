@@ -571,18 +571,30 @@ class ArtifactExtractor
     }
 
     /**
-     * Move file or directory to destination.
+     * Move file or directory, handling cross-device scenarios
+     * Uses rename() if possible, falls back to copy+delete for cross-device moves
+     *
+     * @param string $source Source path
+     * @param string $dest   Destination path
      */
-    protected function moveFileOrDir(string $source, string $dest): void
+    private static function moveFileOrDir(string $source, string $dest): void
     {
         $source = FileSystem::convertPath($source);
         $dest = FileSystem::convertPath($dest);
 
-        // Try rename first (fast, atomic)
-        if (@rename($source, $dest)) {
-            return;
+        // Check if source and dest are on the same device to avoid cross-device rename errors
+        $source_stat = @stat($source);
+        $dest_parent = dirname($dest);
+        $dest_stat = @stat($dest_parent);
+
+        // Only use rename if on same device
+        if ($source_stat !== false && $dest_stat !== false && $source_stat['dev'] === $dest_stat['dev']) {
+            if (@rename($source, $dest)) {
+                return;
+            }
         }
 
+        // Fall back to copy + delete for cross-device moves or if rename failed
         if (is_dir($source)) {
             FileSystem::copyDir($source, $dest);
             FileSystem::removeDir($source);
