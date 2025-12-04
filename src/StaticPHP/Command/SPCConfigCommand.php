@@ -18,6 +18,7 @@ class SPCConfigCommand extends BaseCommand
     {
         $this->addArgument('extensions', InputArgument::OPTIONAL, 'The extensions will be compiled, comma separated');
         $this->addOption('with-libs', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
+        $this->addOption('with-packages', null, InputOption::VALUE_REQUIRED, 'add additional libraries, comma separated', '');
         $this->addOption('with-suggested-libs', 'L', null, 'Build with suggested libs for selected exts and libs');
         $this->addOption('with-suggests', null, null, 'Build with suggested packages for selected exts and libs');
         $this->addOption('with-suggested-exts', 'E', null, 'Build with suggested extensions for selected exts');
@@ -31,15 +32,16 @@ class SPCConfigCommand extends BaseCommand
     public function handle(): int
     {
         // transform string to array
-        $libraries = array_map('trim', array_filter(explode(',', $this->getOption('with-libs'))));
+        $libraries = parse_comma_list($this->getOption('with-libs'));
+        $libraries = array_merge($libraries, $this->getOption('with-packages'));
         // transform string to array
         $extensions = $this->getArgument('extensions') ? parse_extension_list($this->getArgument('extensions')) : [];
         $include_suggests = $this->getOption('with-suggests') ?: $this->getOption('with-suggested-libs') || $this->getOption('with-suggested-exts');
 
         $util = new SPCConfigUtil(options: [
-            'no_php' => $this->getOption('no-php'),
-            'libs_only_deps' => $this->getOption('libs-only-deps'),
-            'absolute_libs' => $this->getOption('absolute-libs'),
+            'no_php' => (bool) $this->getOption('no-php'),
+            'libs_only_deps' => (bool) $this->getOption('libs-only-deps'),
+            'absolute_libs' => (bool) $this->getOption('absolute-libs'),
         ]);
         $packages = array_merge(array_map(fn ($x) => "ext-{$x}", $extensions), $libraries);
         $config = $util->config($packages, $include_suggests);
