@@ -87,7 +87,11 @@ class Registry
         if (isset($data['package']['config']) && is_array($data['package']['config'])) {
             foreach ($data['package']['config'] as $path) {
                 $path = self::fullpath($path, dirname($registry_file));
-                PackageConfig::loadFromFile($path);
+                if (is_file($path)) {
+                    PackageConfig::loadFromFile($path);
+                } elseif (is_dir($path)) {
+                    PackageConfig::loadFromDir($path);
+                }
             }
         }
 
@@ -95,7 +99,11 @@ class Registry
         if (isset($data['artifact']['config']) && is_array($data['artifact']['config'])) {
             foreach ($data['artifact']['config'] as $path) {
                 $path = self::fullpath($path, dirname($registry_file));
-                ArtifactConfig::loadFromFile($path);
+                if (is_file($path)) {
+                    ArtifactConfig::loadFromFile($path);
+                } elseif (is_dir($path)) {
+                    ArtifactConfig::loadFromDir($path);
+                }
             }
         }
 
@@ -232,7 +240,7 @@ class Registry
      */
     private static function requireClassFile(string $class, ?string $file_path, string $base_path, bool $auto_require): void
     {
-        if (!$auto_require || class_exists($class, true)) {
+        if (!$auto_require || class_exists($class)) {
             return;
         }
 
