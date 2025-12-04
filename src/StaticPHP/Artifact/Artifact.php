@@ -493,7 +493,7 @@ class Artifact
      * Emit all after binary extract callbacks for the specified platform.
      *
      * @param null|string $target_path The directory where binary was extracted
-     * @param string $platform    The platform string (e.g., 'linux-x86_64')
+     * @param string      $platform    The platform string (e.g., 'linux-x86_64')
      */
     public function emitAfterBinaryExtract(?string $target_path, string $platform): void
     {

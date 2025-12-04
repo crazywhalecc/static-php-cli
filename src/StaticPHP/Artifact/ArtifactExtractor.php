@@ -571,6 +571,21 @@ class ArtifactExtractor
     }
 
     /**
+     * Replace path variables.
+     */
+    protected function replacePathVariables(string $path): string
+    {
+        $replacement = [
+            '{pkg_root_path}' => PKG_ROOT_PATH,
+            '{build_root_path}' => BUILD_ROOT_PATH,
+            '{source_path}' => SOURCE_PATH,
+            '{download_path}' => DOWNLOAD_PATH,
+            '{working_dir}' => WORKING_DIR,
+        ];
+        return str_replace(array_keys($replacement), array_values($replacement), $path);
+    }
+
+    /**
      * Move file or directory, handling cross-device scenarios
      * Uses rename() if possible, falls back to copy+delete for cross-device moves
      *
@@ -606,21 +621,6 @@ class ArtifactExtractor
                 throw new FileSystemException("Failed to remove source file: {$source}");
             }
         }
-    }
-
-    /**
-     * Replace path variables.
-     */
-    protected function replacePathVariables(string $path): string
-    {
-        $replacement = [
-            '{pkg_root_path}' => PKG_ROOT_PATH,
-            '{build_root_path}' => BUILD_ROOT_PATH,
-            '{source_path}' => SOURCE_PATH,
-            '{download_path}' => DOWNLOAD_PATH,
-            '{working_dir}' => WORKING_DIR,
-        ];
-        return str_replace(array_keys($replacement), array_values($replacement), $path);
     }
 
     private function copyFile(string $source_file, string $target_path): void
