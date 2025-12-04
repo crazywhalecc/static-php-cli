@@ -68,7 +68,8 @@ class DownloadCommand extends BaseCommand
         }
 
         // resolve package dependencies and get artifacts directly
-        $resolved = DependencyResolver::resolve($packages, [], !$this->getOption('without-suggests'));
+        $suggests = !($this->getOption('without-suggests') || $this->getOption('without-suggestions'));
+        $resolved = DependencyResolver::resolve($packages, [], $suggests);
         foreach ($resolved as $pkg_name) {
             $pkg = PackageLoader::getPackage($pkg_name);
             if ($artifact = $pkg->getArtifact()) {
