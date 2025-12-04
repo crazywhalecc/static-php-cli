@@ -35,10 +35,11 @@ class ConsoleApplication extends Application
             // only add target that contains artifact.source
             if ($package->hasStage('build')) {
                 logger()->debug("Registering build target command for package: {$name}");
-                $this->add(new BuildTargetCommand($name));
+                $this->addCommand(new BuildTargetCommand($name));
             }
         }
 
+        // add core commands
         $this->addCommands([
             new DownloadCommand(),
             new DoctorCommand(),

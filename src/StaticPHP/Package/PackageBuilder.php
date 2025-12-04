@@ -9,9 +9,11 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\Shell;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\System\LinuxUtil;
 
 class PackageBuilder
 {
@@ -83,6 +85,92 @@ class PackageBuilder
     public function getOption(string $key, mixed $default = null): mixed
     {
         return $this->options[$key] ?? $default;
+    }
+
+    /**
+     * Deploy the binary file from src to dst.
+     */
+    public function deployBinary(string $src, string $dst, bool $executable = true): string
+    {
+        logger()->debug("Deploying binary from {$src} to {$dst}");
+
+        // file must exists
+        if (!file_exists($src)) {
+            throw new SPCInternalException("Deploy failed. Cannot find file: {$src}");
+        }
+        // dst dir must exists
+        FileSystem::createDir(dirname($dst));
+
+        // ignore copy to self
+        if (realpath($src) !== realpath($dst)) {
+            shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg($dst));
+        }
+
+        // file exist
+        if (!file_exists($dst)) {
+            throw new SPCInternalException("Deploy failed. Cannot find file after copy: {$dst}");
+        }
+
+        // extract debug info
+        $this->extractDebugInfo($dst);
+
+        // strip
+        if (!$this->getOption('no-strip')) {
+            $this->stripBinary($dst);
+        }
+
+        // UPX for linux
+        $upx_option = $this->getOption('with-upx-pack');
+        if ($upx_option && SystemTarget::getTargetOS() === 'Linux' && $executable) {
+            if ($this->getOption('no-strip')) {
+                logger()->warning('UPX compression is not recommended when --no-strip is enabled.');
+            }
+            logger()->info("Compressing {$dst} with UPX");
+            shell()->exec(getenv('UPX_EXEC') . " --best {$dst}");
+        }
+
+        return $dst;
+    }
+
+    /**
+     * Extract debug information from binary file.
+     *
+     * @param string $binary_path the path to the binary file, including executables, shared libraries, etc
+     */
+    public function extractDebugInfo(string $binary_path): string
+    {
+        $target_dir = BUILD_ROOT_PATH . '/debug';
+        FileSystem::createDir($target_dir);
+        $basename = basename($binary_path);
+        $debug_file = "{$target_dir}/{$basename}" . (SystemTarget::getTargetOS() === 'Darwin' ? '.dwarf' : '.debug');
+        if (SystemTarget::getTargetOS() === 'Darwin') {
+            shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
+        } elseif (SystemTarget::getTargetOS() === 'Linux') {
+            if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
+                shell()
+                    ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
+                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+            } else {
+                shell()
+                    ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
+                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+            }
+        } else {
+            throw new SPCInternalException('extractDebugInfo is only supported on Linux and macOS');
+        }
+        return $debug_file;
+    }
+
+    /**
+     * Strip unneeded symbols from binary file.
+     */
+    public function stripBinary(string $binary_path): void
+    {
+        shell()->exec(match (SystemTarget::getTargetOS()) {
+            'Darwin' => "strip -S {$binary_path}",
+            'Linux' => "strip --strip-unneeded {$binary_path}",
+            default => throw new SPCInternalException('stripBinary is only supported on Linux and macOS'),
+        });
     }
 
     private function installLicense(Package $package, array $license): void

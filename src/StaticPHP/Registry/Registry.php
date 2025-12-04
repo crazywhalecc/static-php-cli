@@ -252,6 +252,12 @@ class Registry
         );
     }
 
+    /**
+     * Return full path, resolving relative paths against a base path.
+     *
+     * @param string $path               Input path (relative or absolute)
+     * @param string $relative_path_base Base path for relative paths
+     */
     private static function fullpath(string $path, string $relative_path_base): string
     {
         if (FileSystem::isRelativePath($path)) {

@@ -107,4 +107,9 @@ class PhpExtensionPackage extends Package
     {
         return $this->build_with_php;
     }
+
+    public function buildSharedExtension(): void
+    {
+        // TODO: build common shared extensions code here...
+    }
 }

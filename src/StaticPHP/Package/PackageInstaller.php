@@ -195,15 +195,20 @@ class PackageInstaller
 
     /**
      * Get all resolved packages.
+     * You can filter by package type class if needed.
      *
-     * @return array<string, Package>
+     * @template T
+     * @param  class-string<T> $package_type Filter by package type
+     * @return array<T>
      */
-    public function getResolvedPackages(): array
+    public function getResolvedPackages(mixed $package_type = Package::class): array
     {
-        return $this->packages;
+        return array_filter($this->packages, function (Package $pkg) use ($package_type): bool {
+            return $pkg instanceof $package_type;
+        });
     }
 
-    public function isPackageBeingResolved(string $package_name): bool
+    public function isPackageResolved(string $package_name): bool
     {
         return isset($this->packages[$package_name]);
     }

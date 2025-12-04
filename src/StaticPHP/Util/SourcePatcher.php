@@ -159,4 +159,39 @@ class SourcePatcher
 
         return $result;
     }
+
+    /**
+     * Patch micro SAPI to support compressed phar loading from the current executable.
+     *
+     * @param int $version_id PHP version ID
+     */
+    public static function patchMicroPhar(int $version_id): void
+    {
+        FileSystem::backupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/phar/phar.c',
+            'static zend_op_array *phar_compile_file',
+            "char *micro_get_filename(void);\n\nstatic zend_op_array *phar_compile_file"
+        );
+        if ($version_id < 80100) {
+            // PHP 8.0.x
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/ext/phar/phar.c',
+                'if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {',
+                'if ((strstr(file_handle->filename, micro_get_filename()) || strstr(file_handle->filename, ".phar")) && !strstr(file_handle->filename, "://")) {'
+            );
+        } else {
+            // PHP >= 8.1
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/ext/phar/phar.c',
+                'if (strstr(ZSTR_VAL(file_handle->filename), ".phar") && !strstr(ZSTR_VAL(file_handle->filename), "://")) {',
+                'if ((strstr(ZSTR_VAL(file_handle->filename), micro_get_filename()) || strstr(ZSTR_VAL(file_handle->filename), ".phar")) && !strstr(ZSTR_VAL(file_handle->filename), "://")) {'
+            );
+        }
+    }
+
+    public static function unpatchMicroPhar(): void
+    {
+        FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
+    }
 }

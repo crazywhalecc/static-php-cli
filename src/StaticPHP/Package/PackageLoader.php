@@ -232,7 +232,7 @@ class PackageLoader
         $installer = ApplicationContext::get(PackageInstaller::class);
         $stages = self::$before_stages[$package_name][$stage] ?? [];
         foreach ($stages as [$callback, $only_when_package_resolved]) {
-            if ($only_when_package_resolved !== null && !$installer->isPackageBeingResolved($only_when_package_resolved)) {
+            if ($only_when_package_resolved !== null && !$installer->isPackageResolved($only_when_package_resolved)) {
                 continue;
             }
             yield $callback;
@@ -246,7 +246,7 @@ class PackageLoader
         $stages = self::$after_stage[$package_name][$stage] ?? [];
         $result = [];
         foreach ($stages as [$callback, $only_when_package_resolved]) {
-            if ($only_when_package_resolved !== null && !$installer->isPackageBeingResolved($only_when_package_resolved)) {
+            if ($only_when_package_resolved !== null && !$installer->isPackageResolved($only_when_package_resolved)) {
                 continue;
             }
             $result[] = $callback;
