@@ -29,14 +29,14 @@ class ExtractCommand extends BaseCommand
         $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Extract artifacts for libraries, e.g "libcares,openssl"');
         $this->addOption('for-packages', null, InputOption::VALUE_REQUIRED, 'Extract artifacts for packages, e.g "php,libssl,libcurl"');
         $this->addOption('without-suggests', null, null, 'Do not include suggested packages when using --for-extensions');
-        $this->addOption('force-source', null, null, 'Force extract source even if binary is available');
+        $this->addOption('source-only', null, null, 'Force extract source even if binary is available');
     }
 
     public function handle(): int
     {
         $cache = ApplicationContext::get(ArtifactCache::class);
         $extractor = new ArtifactExtractor($cache);
-        $force_source = (bool) $this->getOption('force-source');
+        $force_source = (bool) $this->getOption('source-only');
 
         $artifacts = [];
 
@@ -59,6 +59,9 @@ class ExtractCommand extends BaseCommand
             $packages = array_map(fn ($x) => "ext-{$x}", parse_extension_list($exts));
             // Include php package when using for-extensions
             array_unshift($packages, 'php');
+            array_unshift($packages, 'php-micro');
+            array_unshift($packages, 'php-embed');
+            array_unshift($packages, 'php-fpm');
         }
         if ($libs = $this->getOption('for-libs')) {
             $packages = array_merge($packages, parse_comma_list($libs));
