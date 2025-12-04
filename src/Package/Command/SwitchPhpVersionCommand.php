@@ -67,12 +67,10 @@ class SwitchPhpVersionCommand extends BaseCommand
             InteractiveTerm::finish('Removed: ' . $source_dir);
         }
 
-        // Set the PHP version for download
-        // This defines the version that will be used when resolving php-src artifact
-        define('SPC_BUILD_PHP_VERSION', $php_ver);
-
         // Download new PHP source
         $this->output->writeln("<info>Downloading PHP {$php_ver} source...</info>");
+
+        $this->input->setOption('with-php', $php_ver);
 
         $downloaderOptions = DownloaderOptions::extractFromConsoleOptions($this->input->getOptions());
         $downloader = new ArtifactDownloader($downloaderOptions);
