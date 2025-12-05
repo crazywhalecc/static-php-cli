@@ -21,6 +21,26 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
 
     private ?string $version = null;
 
+    public function getGitHubReleases(string $name, string $repo, bool $prefer_stable = true): array
+    {
+        logger()->debug("Fetching {$name} GitHub releases from {$repo}");
+        $url = str_replace('{repo}', $repo, self::API_URL);
+        $headers = $this->getGitHubTokenHeaders();
+        $data2 = default_shell()->executeCurl($url, headers: $headers);
+        $data = json_decode($data2 ?: '', true);
+        if (!is_array($data)) {
+            throw new DownloaderException("Failed to get GitHub release API info for {$repo} from {$url}");
+        }
+        $releases = [];
+        foreach ($data as $release) {
+            if ($prefer_stable && $release['prerelease'] === true) {
+                continue;
+            }
+            $releases[] = $release;
+        }
+        return $releases;
+    }
+
     /**
      * Get the latest GitHub release assets for a given repository.
      * match_asset is provided, only return the asset that matches the regex.

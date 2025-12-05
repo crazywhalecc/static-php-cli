@@ -8,6 +8,11 @@ trait GitHubTokenSetupTrait
 {
     public function getGitHubTokenHeaders(): array
     {
+        return self::getGitHubTokenHeadersStatic();
+    }
+
+    public static function getGitHubTokenHeadersStatic(): array
+    {
         // GITHUB_TOKEN support
         if (($token = getenv('GITHUB_TOKEN')) !== false && ($user = getenv('GITHUB_USER')) !== false) {
             logger()->debug("Using 'GITHUB_TOKEN' with user {$user} for authentication");
