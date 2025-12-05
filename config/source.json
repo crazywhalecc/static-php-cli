@@ -1172,9 +1172,8 @@
         }
     },
     "xdebug": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/xdebug",
-        "filename": "xdebug.tgz",
+        "type": "pie",
+        "repo": "xdebug/xdebug",
         "license": {
             "type": "file",
             "path": "LICENSE"
