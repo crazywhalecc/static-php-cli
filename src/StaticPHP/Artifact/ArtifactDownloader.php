@@ -12,6 +12,7 @@ use StaticPHP\Artifact\Downloader\Type\FileList;
 use StaticPHP\Artifact\Downloader\Type\Git;
 use StaticPHP\Artifact\Downloader\Type\GitHubRelease;
 use StaticPHP\Artifact\Downloader\Type\GitHubTarball;
+use StaticPHP\Artifact\Downloader\Type\HostedPackageBin;
 use StaticPHP\Artifact\Downloader\Type\LocalDir;
 use StaticPHP\Artifact\Downloader\Type\PhpRelease;
 use StaticPHP\Artifact\Downloader\Type\PIE;
@@ -35,6 +36,19 @@ use ZM\Logger\ConsoleColor;
  */
 class ArtifactDownloader
 {
+    public const array DOWNLOADERS = [
+        'bitbuckettag' => BitBucketTag::class,
+        'filelist' => FileList::class,
+        'git' => Git::class,
+        'ghrel' => GitHubRelease::class,
+        'ghtar', 'ghtagtar' => GitHubTarball::class,
+        'local' => LocalDir::class,
+        'pie' => PIE::class,
+        'url' => Url::class,
+        'php-release' => PhpRelease::class,
+        'hosted' => HostedPackageBin::class,
+    ];
+
     /** @var array<string, Artifact> Artifact objects */
     protected array $artifacts = [];
 
@@ -355,18 +369,7 @@ class ArtifactDownloader
         foreach ($queue as $item) {
             try {
                 $instance = null;
-                $call = match ($item['config']['type']) {
-                    'bitbuckettag' => BitBucketTag::class,
-                    'filelist' => FileList::class,
-                    'git' => Git::class,
-                    'ghrel' => GitHubRelease::class,
-                    'ghtar', 'ghtagtar' => GitHubTarball::class,
-                    'local' => LocalDir::class,
-                    'pie' => PIE::class,
-                    'url' => Url::class,
-                    'php-release' => PhpRelease::class,
-                    default => null,
-                };
+                $call = self::DOWNLOADERS[$item['config']['type']] ?? null;
                 $type_display_name = match (true) {
                     $item['lock'] === 'source' && ($callback = $artifact->getCustomSourceCallback()) !== null => 'user defined source downloader',
                     $item['lock'] === 'binary' && ($callback = $artifact->getCustomBinaryCallback()) !== null => 'user defined binary downloader',
