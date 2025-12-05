@@ -6,6 +6,8 @@ namespace StaticPHP\Util;
 
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Runtime\SystemTarget;
 
 class SPCConfigUtil
@@ -99,26 +101,21 @@ class SPCConfigUtil
      * [Helper function]
      * Get configuration for a specific extension(s) dependencies.
      *
-     * @param Extension|Extension[] $extension           Extension instance or list
-     * @param bool                  $include_suggest_ext Whether to include suggested extensions
-     * @param bool                  $include_suggest_lib Whether to include suggested libraries
+     * @param array|PhpExtensionPackage $extension_packages Extension instance or list
      * @return array{
      *     cflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function getExtensionConfig(array|Extension $extension, bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
+    public function getExtensionConfig(array|PhpExtensionPackage $extension_packages, bool $include_suggests = false): array
     {
-        if (!is_array($extension)) {
-            $extension = [$extension];
+        if (!is_array($extension_packages)) {
+            $extension_packages = [$extension_packages];
         }
-        $libs = array_map(fn ($y) => $y->getName(), array_merge(...array_map(fn ($x) => $x->getLibraryDependencies(true), $extension)));
         return $this->config(
-            extensions: array_map(fn ($x) => $x->getName(), $extension),
-            libraries: $libs,
-            include_suggest_ext: $include_suggest_ext ?: $this->builder?->getOption('with-suggested-exts') ?? false,
-            include_suggest_lib: $include_suggest_lib ?: $this->builder?->getOption('with-suggested-libs') ?? false,
+            packages: array_map(fn ($y) => $y->getName(), $extension_packages),
+            include_suggests: $include_suggests,
         );
     }
 
@@ -126,15 +123,15 @@ class SPCConfigUtil
      * [Helper function]
      * Get configuration for a specific library(s) dependencies.
      *
-     * @param LibraryBase|LibraryBase[] $lib                 Library instance or list
-     * @param bool                      $include_suggest_lib Whether to include suggested libraries
+     * @param array|LibraryPackage $lib              Library instance or list
+     * @param bool                 $include_suggests Whether to include suggested libraries
      * @return array{
      *     cflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function getLibraryConfig(array|LibraryBase $lib, bool $include_suggest_lib = false): array
+    public function getLibraryConfig(array|LibraryPackage $lib, bool $include_suggests = false): array
     {
         if (!is_array($lib)) {
             $lib = [$lib];
@@ -144,8 +141,8 @@ class SPCConfigUtil
         $save_libs_only_deps = $this->libs_only_deps;
         $this->libs_only_deps = true;
         $ret = $this->config(
-            libraries: array_map(fn ($x) => $x->getName(), $lib),
-            include_suggest_lib: $include_suggest_lib ?: $this->builder?->getOption('with-suggested-libs') ?? false,
+            packages: array_map(fn ($y) => $y->getName(), $lib),
+            include_suggests: $include_suggests,
         );
         $this->no_php = $save_no_php;
         $this->libs_only_deps = $save_libs_only_deps;
