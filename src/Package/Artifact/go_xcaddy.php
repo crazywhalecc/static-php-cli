@@ -9,7 +9,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
-use StaticPHP\Exception\ValidationException;
+use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\System\LinuxUtil;
 
@@ -28,29 +28,41 @@ class go_xcaddy
         $arch = match (explode('-', $name)[1]) {
             'x86_64' => 'amd64',
             'aarch64' => 'arm64',
-            default => throw new ValidationException('Unsupported architecture: ' . $name),
+            default => throw new DownloaderException('Unsupported architecture: ' . $name),
         };
         $os = match (explode('-', $name)[0]) {
             'linux' => 'linux',
             'macos' => 'darwin',
-            default => throw new ValidationException('Unsupported OS: ' . $name),
+            default => throw new DownloaderException('Unsupported OS: ' . $name),
         };
-        $hash = match ("{$os}-{$arch}") {
-            'linux-amd64' => '2852af0cb20a13139b3448992e69b868e50ed0f8a1e5940ee1de9e19a123b613',
-            'linux-arm64' => '05de75d6994a2783699815ee553bd5a9327d8b79991de36e38b66862782f54ae',
-            'darwin-amd64' => '5bd60e823037062c2307c71e8111809865116714d6f6b410597cf5075dfd80ef',
-            'darwin-arm64' => '544932844156d8172f7a28f77f2ac9c15a23046698b6243f633b0a0b00c0749c',
-        };
-        $go_version = '1.25.0';
-        $url = "https://go.dev/dl/go{$go_version}.{$os}-{$arch}.tar.gz";
-        $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . "go{$go_version}.{$os}-{$arch}.tar.gz";
+
+        // get version and hash
+        [$version] = explode("\n", default_shell()->executeCurl('https://go.dev/VERSION?m=text') ?: '');
+        if ($version === '') {
+            throw new DownloaderException('Failed to get latest Go version from https://go.dev/VERSION?m=text');
+        }
+        $page = default_shell()->executeCurl('https://go.dev/dl/');
+        if ($page === '' || $page === false) {
+            throw new DownloaderException('Failed to get Go download page from https://go.dev/dl/');
+        }
+
+        $version_regex = str_replace('.', '\.', $version);
+        $pattern = "/href=\"\\/dl\\/{$version_regex}\\.{$os}-{$arch}\\.tar\\.gz\">.*?<tt>([a-f0-9]{64})<\\/tt>/s";
+        if (preg_match($pattern, $page, $matches)) {
+            $hash = $matches[1];
+        } else {
+            throw new DownloaderException("Failed to find download hash for Go {$version} {$os}-{$arch}");
+        }
+
+        $url = "https://go.dev/dl/{$version}.{$os}-{$arch}.tar.gz";
+        $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . "{$version}.{$os}-{$arch}.tar.gz";
         default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
         // verify hash
         $file_hash = hash_file('sha256', $path);
         if ($file_hash !== $hash) {
-            throw new ValidationException("Hash mismatch for downloaded go-xcaddy binary. Expected {$hash}, got {$file_hash}");
+            throw new DownloaderException("Hash mismatch for downloaded go-xcaddy binary. Expected {$hash}, got {$file_hash}");
         }
-        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $go_version], extract: "{$pkgroot}/go-xcaddy", verified: true, version: $go_version);
+        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $version], extract: "{$pkgroot}/go-xcaddy", verified: true, version: $version);
     }
 
     #[AfterBinaryExtract('go-xcaddy', [
