@@ -24,9 +24,4 @@ class mongodb extends Extension
         $arg .= $this->builder->getLib('zlib') ? ' --with-mongodb-zlib=yes ' : ' --with-mongodb-zlib=bundled ';
         return clean_spaces($arg);
     }
-
-    protected function getExtraEnv(): array
-    {
-        return ['CFLAGS' => '-std=c17'];
-    }
 }
