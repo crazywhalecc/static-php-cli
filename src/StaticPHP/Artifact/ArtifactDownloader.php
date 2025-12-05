@@ -36,12 +36,14 @@ use ZM\Logger\ConsoleColor;
  */
 class ArtifactDownloader
 {
+    /** @var array<string, class-string<DownloadTypeInterface>> */
     public const array DOWNLOADERS = [
         'bitbuckettag' => BitBucketTag::class,
         'filelist' => FileList::class,
         'git' => Git::class,
         'ghrel' => GitHubRelease::class,
-        'ghtar', 'ghtagtar' => GitHubTarball::class,
+        'ghtar' => GitHubTarball::class,
+        'ghtagtar' => GitHubTarball::class,
         'local' => LocalDir::class,
         'pie' => PIE::class,
         'url' => Url::class,

@@ -58,6 +58,6 @@ class HostedPackageBin implements DownloadTypeInterface
                 return DownloadResult::archive($filename, $config, extract: $config['extract'] ?? null, version: $version);
             }
         }
-        throw new DownloaderException("No matching asset found for hosted package-bin {$name} with criteria: {$find_str}");
+        throw new DownloaderException("No matching asset found for hosted package-bin {$name}: {$find_str}");
     }
 }
