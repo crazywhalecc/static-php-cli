@@ -16,6 +16,7 @@ trait ncurses
 
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
+                'CFLAGS' => '-std=gnu99',
                 'LDFLAGS' => SPCTarget::isStatic() ? '-static' : '',
             ])
             ->configure(
