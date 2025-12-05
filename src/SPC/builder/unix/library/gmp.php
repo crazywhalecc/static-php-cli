@@ -12,7 +12,7 @@ trait gmp
     {
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
-                'CFLAGS' => '-std=gnu99',
+                'CFLAGS' => '-std=c17',
             ])
             ->configure()
             ->make();
