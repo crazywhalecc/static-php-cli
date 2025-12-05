@@ -8,6 +8,9 @@
             }
         }
     },
+    "musl-wrapper": {
+        "source": "https://musl.libc.org/releases/musl-1.2.5.tar.gz"
+    },
     "php-src": {
         "source": {
             "type": "php-release"
@@ -28,8 +31,16 @@
     },
     "musl-toolchain": {
         "binary": {
-            "linux-x86_64": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz",
-            "linux-aarch64": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz"
+            "linux-x86_64": {
+                "type": "url",
+                "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz",
+                "extract": "{pkg_root_path}/musl-toolchain"
+            },
+            "linux-aarch64": {
+                "type": "url",
+                "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz",
+                "extract": "{pkg_root_path}/musl-toolchain"
+            }
         }
     },
     "pkg-config": {

@@ -320,7 +320,7 @@ class ArtifactDownloader
                 $skipped = [];
                 foreach ($this->artifacts as $artifact) {
                     ++$current;
-                    if ($this->downloadWithType($artifact, $current, $count) === SPC_DOWNLOAD_STATUS_SKIPPED) {
+                    if ($this->downloadWithType($artifact, $current, $count, interactive: $interactive) === SPC_DOWNLOAD_STATUS_SKIPPED) {
                         $skipped[] = $artifact->getName();
                         continue;
                     }
@@ -358,7 +358,7 @@ class ArtifactDownloader
         return $this->options[$name] ?? $default;
     }
 
-    private function downloadWithType(Artifact $artifact, int $current, int $total, bool $parallel = false): int
+    private function downloadWithType(Artifact $artifact, int $current, int $total, bool $parallel = false, bool $interactive = true): int
     {
         $queue = $this->generateQueue($artifact);
         // already downloaded
@@ -379,7 +379,7 @@ class ArtifactDownloader
                 };
                 $try_h = $try ? 'Try downloading' : 'Downloading';
                 logger()->info("{$try_h} artifact '{$artifact->getName()}' {$item['display']} ...");
-                if ($parallel === false) {
+                if ($parallel === false && $interactive) {
                     InteractiveTerm::indicateProgress("[{$current}/{$total}] Downloading artifact " . ConsoleColor::green($artifact->getName()) . " {$item['display']} from {$type_display_name} ...");
                 }
                 // is valid download type
@@ -413,13 +413,13 @@ class ArtifactDownloader
                 }
                 // process lock
                 ApplicationContext::get(ArtifactCache::class)->lock($artifact, $item['lock'], $lock, SystemTarget::getCurrentPlatformString());
-                if ($parallel === false) {
+                if ($parallel === false && $interactive) {
                     $ver = $lock->hasVersion() ? (' (' . ConsoleColor::yellow($lock->version) . ')') : '';
                     InteractiveTerm::finish('Downloaded ' . ($verified ? 'and verified ' : '') . 'artifact ' . ConsoleColor::green($artifact->getName()) . $ver . " {$item['display']} .");
                 }
                 return SPC_DOWNLOAD_STATUS_SUCCESS;
             } catch (DownloaderException|ExecutionException $e) {
-                if ($parallel === false) {
+                if ($parallel === false && $interactive) {
                     InteractiveTerm::finish("Download artifact {$artifact->getName()} {$item['display']} failed !", false);
                     InteractiveTerm::error("Failed message: {$e->getMessage()}", true);
                 }
