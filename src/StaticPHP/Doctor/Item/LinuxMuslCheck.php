@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace StaticPHP\Doctor\Item;
 
+use StaticPHP\Artifact\ArtifactCache;
+use StaticPHP\Artifact\ArtifactDownloader;
+use StaticPHP\Artifact\ArtifactExtractor;
 use StaticPHP\Attribute\Doctor\CheckItem;
 use StaticPHP\Attribute\Doctor\FixItem;
 use StaticPHP\Attribute\Doctor\OptionalCheck;
+use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Doctor\CheckResult;
+use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Toolchain\MuslToolchain;
 use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\System\LinuxUtil;
 
 #[OptionalCheck([self::class, 'optionalCheck'])]
@@ -51,23 +58,46 @@ class LinuxMuslCheck
     #[FixItem('fix-musl-wrapper')]
     public function fixMusl(): bool
     {
-        // TODO: implement musl-wrapper installation
-        // This should:
-        // 1. Download musl source using Downloader::downloadSource()
-        // 2. Extract the source using FileSystem::extractSource()
-        // 3. Apply CVE patches using SourcePatcher::patchFile()
-        // 4. Build and install musl wrapper
-        // 5. Add path using putenv instead of editing /etc/profile
-        return false;
+        $downloader = new ArtifactDownloader();
+        $downloader->add('musl-wrapper')->download(false);
+        $extractor = new ArtifactExtractor(ApplicationContext::get(ArtifactCache::class));
+        $extractor->extract('musl-wrapper');
+
+        // Apply CVE-2025-26519 patch and install musl wrapper
+        SourcePatcher::patchFile('musl-1.2.5_CVE-2025-26519_0001.patch', SOURCE_PATH . '/musl-wrapper');
+        SourcePatcher::patchFile('musl-1.2.5_CVE-2025-26519_0002.patch', SOURCE_PATH . '/musl-wrapper');
+
+        $prefix = '';
+        if (get_current_user() !== 'root') {
+            $prefix = 'sudo ';
+            logger()->warning('Current user is not root, using sudo for running command');
+        }
+        shell()->cd(SOURCE_PATH . '/musl-wrapper')
+            ->exec('CC=gcc CXX=g++ AR=ar LD=ld ./configure --disable-gcc-wrapper')
+            ->exec('CC=gcc CXX=g++ AR=ar LD=ld make -j')
+            ->exec("CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
+        return true;
     }
 
     #[FixItem('fix-musl-cross-make')]
     public function fixMuslCrossMake(): bool
     {
-        // TODO: implement musl-cross-make installation
-        // This should:
-        // 1. Install musl-toolchain package using PackageManager::installPackage()
-        // 2. Copy toolchain files to /usr/local/musl
-        return false;
+        // sudo
+        $prefix = '';
+        if (get_current_user() !== 'root') {
+            $prefix = 'sudo ';
+            logger()->warning('Current user is not root, using sudo for running command');
+        }
+        Shell::passthruCallback(function () {
+            InteractiveTerm::advance();
+        });
+        $downloader = new ArtifactDownloader();
+        $extractor = new ArtifactExtractor(ApplicationContext::get(ArtifactCache::class));
+        $downloader->add('musl-toolchain')->download(false);
+        $extractor->extract('musl-toolchain');
+        $pkg_root = PKG_ROOT_PATH . '/musl-toolchain';
+        shell()->exec("{$prefix}cp -rf {$pkg_root}/* /usr/local/musl");
+        FileSystem::removeDir($pkg_root);
+        return true;
     }
 }

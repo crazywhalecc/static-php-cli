@@ -78,12 +78,17 @@ class ArtifactExtractor
     /**
      * Extract a single artifact.
      *
-     * @param Artifact $artifact     The artifact to extract
-     * @param bool     $force_source If true, always extract source (ignore binary)
+     * @param Artifact|string $artifact     The artifact to extract
+     * @param bool            $force_source If true, always extract source (ignore binary)
      */
-    public function extract(Artifact $artifact, bool $force_source = false): int
+    public function extract(Artifact|string $artifact, bool $force_source = false): int
     {
-        $name = $artifact->getName();
+        if (is_string($artifact)) {
+            $name = $artifact;
+            $artifact = ArtifactLoader::getArtifactInstance($name);
+        } else {
+            $name = $artifact->getName();
+        }
 
         // Already extracted in this session
         if (isset($this->extracted[$name])) {

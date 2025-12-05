@@ -91,7 +91,7 @@ class LinuxUtil extends UnixUtil
     {
         return [
             // debian-like
-            'debian', 'ubuntu', 'Deepin',
+            'debian', 'ubuntu', 'Deepin', 'neon',
             // rhel-like
             'redhat',
             // centos
