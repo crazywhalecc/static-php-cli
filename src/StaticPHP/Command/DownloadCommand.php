@@ -27,6 +27,8 @@ class DownloadCommand extends BaseCommand
         $this->addOption('for-libs', 'l', InputOption::VALUE_REQUIRED, 'Fetch by libraries, e.g "libcares,openssl,onig"');
         $this->addOption('without-suggests', null, null, 'Do not fetch suggested sources when using --for-extensions');
 
+        $this->addOption('without-suggestions', null, null, '(deprecated) Do not fetch suggested sources when using --for-extensions');
+
         // download command specific options
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('for-packages', null, InputOption::VALUE_REQUIRED, 'Fetch by packages, e.g "php,libssl,libcurl"');

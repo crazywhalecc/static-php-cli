@@ -33,7 +33,7 @@ class SPCConfigCommand extends BaseCommand
     {
         // transform string to array
         $libraries = parse_comma_list($this->getOption('with-libs'));
-        $libraries = array_merge($libraries, $this->getOption('with-packages'));
+        $libraries = array_merge($libraries, parse_comma_list($this->getOption('with-packages')));
         // transform string to array
         $extensions = $this->getArgument('extensions') ? parse_extension_list($this->getArgument('extensions')) : [];
         $include_suggests = $this->getOption('with-suggests') ?: $this->getOption('with-suggested-libs') || $this->getOption('with-suggested-exts');

@@ -371,17 +371,6 @@ class FileSystem
     }
 
     /**
-     * Add source extraction hook
-     *
-     * @param string   $name     Source name
-     * @param callable $callback Callback function
-     */
-    public static function addSourceExtractHook(string $name, callable $callback): void
-    {
-        self::$_extract_hook[$name][] = $callback;
-    }
-
-    /**
      * Check if path is relative
      *
      * @param  string $path Path to check

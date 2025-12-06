@@ -137,8 +137,14 @@ class ConfigValidator
                         ];
                         continue;
                     }
-                    // TODO: expand hosted to static-php hosted download urls
                     if ($v === 'hosted') {
+                        $data[$name][$k] = [
+                            'linux-x86_64' => ['type' => 'hosted'],
+                            'linux-aarch64' => ['type' => 'hosted'],
+                            'windows-x86_64' => ['type' => 'hosted'],
+                            'macos-x86_64' => ['type' => 'hosted'],
+                            'macos-aarch64' => ['type' => 'hosted'],
+                        ];
                         continue;
                     }
                     if (is_assoc_array($v)) {
