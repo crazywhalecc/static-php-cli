@@ -1,0 +1,23 @@
+diff --git a/sapi/cli/php_cli.c b/sapi/cli/php_cli.c
+--- a/sapi/cli/php_cli.c	(revision d3bf67d44102869f340a7be0e12f4f09de0edbcf)
++++ b/sapi/cli/php_cli.c	(date 1735128770216)
+@@ -98,7 +98,7 @@
+ 
+ #if defined(PHP_WIN32)
+ #if defined(ZTS)
+-ZEND_TSRMLS_CACHE_DEFINE()
++//ZEND_TSRMLS_CACHE_DEFINE()
+ #endif
+ static DWORD orig_cp = 0;
+ #endif
+@@ -1137,6 +1137,10 @@
+ #endif
+ {
+ #if defined(PHP_WIN32)
++	if (!php_win32_ioutil_init()) {
++		fprintf(stderr, "ioutil initialization failed");
++		return 1;
++	}
+ # ifdef PHP_CLI_WIN32_NO_CONSOLE
+ 	int argc = __argc;
+ 	char **argv = __argv;

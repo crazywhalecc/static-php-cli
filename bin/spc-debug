@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# This script runs the 'spc' command with Xdebug enabled for debugging purposes.
+php -d xdebug.mode=debug -d xdebug.client_host=127.0.0.1 -d xdebug.client_port=9003 -d xdebug.start_with_request=yes "$(dirname "$0")/../bin/spc" "$@"

@@ -17,3 +17,4 @@ parameters:
             - ./src/globals/ext-tests/swoole.php
             - ./src/globals/ext-tests/swoole.phpt
             - ./src/globals/test-extensions.php
+            - ./src/SPC/
