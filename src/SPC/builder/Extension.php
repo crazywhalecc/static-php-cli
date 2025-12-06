@@ -576,7 +576,7 @@ class Extension
 
     protected function getExtraEnv(): array
     {
-        return ['CFLAGS' => '-std=c17'];
+        return ['CFLAGS' => ''];
     }
 
     /**
