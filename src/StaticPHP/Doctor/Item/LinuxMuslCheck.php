@@ -13,6 +13,7 @@ use StaticPHP\Attribute\Doctor\OptionalCheck;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Doctor\CheckResult;
 use StaticPHP\Runtime\Shell\Shell;
+use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\MuslToolchain;
 use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\FileSystem;
@@ -25,8 +26,8 @@ class LinuxMuslCheck
 {
     public static function optionalCheck(): bool
     {
-        return getenv('SPC_TOOLCHAIN') === MuslToolchain::class ||
-            (getenv('SPC_TOOLCHAIN') === ZigToolchain::class && !LinuxUtil::isMuslDist());
+        $toolchain = ApplicationContext::get(ToolchainInterface::class);
+        return $toolchain instanceof MuslToolchain || $toolchain instanceof ZigToolchain && !LinuxUtil::isMuslDist();
     }
 
     /** @noinspection PhpUnused */

@@ -397,7 +397,12 @@ class ArtifactDownloader
                     $instance = new $call();
                     $lock = $instance->download($artifact->getName(), $item['config'], $this);
                 } else {
-                    throw new ValidationException("Artifact has invalid download type '{$item['config']['type']}' for {$item['display']}.");
+                    if ($item['config']['type'] === 'custom') {
+                        $msg = "Artifact [{$artifact->getName()}] has no valid custom " . SystemTarget::getCurrentPlatformString() . ' download callback defined.';
+                    } else {
+                        $msg = "Artifact has invalid download type '{$item['config']['type']}' for {$item['display']}.";
+                    }
+                    throw new ValidationException($msg);
                 }
                 if (!$lock instanceof DownloadResult) {
                     throw new ValidationException("Artifact {$artifact->getName()} has invalid custom return value. Must be instance of DownloadResult.");

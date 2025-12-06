@@ -112,7 +112,7 @@ class LinuxToolCheckList
     public function fixBuildTools(array $distro, array $missing): bool
     {
         $install_cmd = match ($distro['dist']) {
-            'ubuntu', 'debian', 'Deepin' => 'apt-get install -y',
+            'ubuntu', 'debian', 'Deepin', 'neon' => 'apt-get install -y',
             'alpine' => 'apk add',
             'redhat' => 'dnf install -y',
             'centos' => 'yum install -y',
@@ -128,7 +128,7 @@ class LinuxToolCheckList
             logger()->warning('Current user (' . $user . ') is not root, using sudo for running command (may require password input)');
         }
 
-        $is_debian = in_array($distro['dist'], ['debian', 'ubuntu', 'Deepin']);
+        $is_debian = in_array($distro['dist'], ['debian', 'ubuntu', 'Deepin', 'neon']);
         $to_install = $is_debian ? str_replace('xz', 'xz-utils', $missing) : $missing;
         // debian, alpine libtool -> libtoolize
         $to_install = str_replace('libtoolize', 'libtool', $to_install);

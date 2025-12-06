@@ -13,13 +13,14 @@ class LinuxUtil extends UnixUtil
      * Get current linux distro name and version.
      *
      * @noinspection PhpMissingBreakStatementInspection
-     * @return array{dist: string, ver: string} Linux distro info (unknown if not found)
+     * @return array{dist: string, ver: string, family: string} Linux distro info (unknown if not found)
      */
     public static function getOSRelease(): array
     {
         $ret = [
             'dist' => 'unknown',
             'ver' => 'unknown',
+            'family' => 'unknown',
         ];
         switch (true) {
             case file_exists('/etc/centos-release'):
@@ -43,6 +44,9 @@ class LinuxUtil extends UnixUtil
                 foreach ($lines as $line) {
                     if (preg_match('/^ID=(.*)$/', $line, $matches)) {
                         $ret['dist'] = $matches[1];
+                    }
+                    if (preg_match('/^ID_LIKE=(.*)$/', $line, $matches)) {
+                        $ret['family'] = $matches[1];
                     }
                     if (preg_match('/^VERSION_ID=(.*)$/', $line, $matches)) {
                         $ret['ver'] = $matches[1];
@@ -101,6 +105,16 @@ class LinuxUtil extends UnixUtil
             // arch
             'arch', 'manjaro',
         ];
+    }
+
+    /**
+     * Check if current linux distro is debian-based.
+     */
+    public static function isDebianDist(): bool
+    {
+        $dist = static::getOSRelease()['dist'];
+        $family = explode(' ', static::getOSRelease()['family']);
+        return in_array($dist, ['debian', 'ubuntu', 'Deepin', 'neon']) || in_array('debian', $family);
     }
 
     /**

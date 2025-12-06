@@ -34,7 +34,7 @@ readonly class Doctor
             InteractiveTerm::notice('Starting doctor checks ...');
         }
         foreach ($this->getValidCheckList() as $check) {
-            if (!$this->checkItem($check)) {
+            if (!$this->checkItem($check, $interactive)) {
                 return false;
             }
         }
@@ -47,7 +47,7 @@ readonly class Doctor
      * @param  CheckItem|string $check The check item to be checked
      * @return bool             True if the check passed or was fixed, false otherwise
      */
-    public function checkItem(CheckItem|string $check): bool
+    public function checkItem(CheckItem|string $check, bool $interactive = true): bool
     {
         if (is_string($check)) {
             $found = null;
@@ -63,7 +63,8 @@ readonly class Doctor
             }
             $check = $found;
         }
-        $this->output?->write("Checking <comment>{$check->item_name}</comment> ... ");
+        $prepend = $interactive ? '  - ' : '';
+        $this->output?->write("{$prepend}Checking <comment>{$check->item_name}</comment> ... ");
 
         // call check
         $result = call_user_func($check->callback);
