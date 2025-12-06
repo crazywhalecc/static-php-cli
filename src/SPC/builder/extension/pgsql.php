@@ -45,7 +45,7 @@ class pgsql extends Extension
     protected function getExtraEnv(): array
     {
         return [
-            'CFLAGS' => '-Wno-int-conversion',
+            'CFLAGS' => '-std=c17 -Wno-int-conversion',
         ];
     }
 }

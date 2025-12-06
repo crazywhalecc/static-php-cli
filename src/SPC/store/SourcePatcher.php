@@ -25,6 +25,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
         FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
+        FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVPhp85']);
         FileSystem::addSourceExtractHook('yaml', [__CLASS__, 'patchYamlWin32']);
         FileSystem::addSourceExtractHook('libyaml', [__CLASS__, 'patchLibYaml']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchImapLicense']);
@@ -427,6 +428,23 @@ class SourcePatcher
         $source_name = preg_replace('/[^a-z_]/', '', $source_name);
         if (file_exists(SOURCE_PATH . '/php-src/ext/' . $source_name . '/config.w32')) {
             FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/' . $source_name . '/config.w32', '/sdl', '');
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Fix the compilation issue of pdo_sqlsrv with php 8.5
+     */
+    public static function patchSQLSRVPhp85(): bool
+    {
+        $source_dir = SOURCE_PATH . '/php-src/ext/pdo_sqlsrv';
+        if (!file_exists($source_dir . '/config.m4') && is_dir($source_dir . '/source/pdo_sqlsrv')) {
+            FileSystem::moveFileOrDir($source_dir . '/LICENSE', $source_dir . '/source/pdo_sqlsrv/LICENSE');
+            FileSystem::moveFileOrDir($source_dir . '/source/shared', $source_dir . '/source/pdo_sqlsrv/shared');
+            FileSystem::moveFileOrDir($source_dir . '/source/pdo_sqlsrv', SOURCE_PATH . '/pdo_sqlsrv');
+            FileSystem::removeDir($source_dir);
+            FileSystem::moveFileOrDir(SOURCE_PATH . '/pdo_sqlsrv', $source_dir);
             return true;
         }
         return false;

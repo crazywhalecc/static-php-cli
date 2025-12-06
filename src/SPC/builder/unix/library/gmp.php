@@ -10,7 +10,12 @@ trait gmp
 {
     protected function build(): void
     {
-        UnixAutoconfExecutor::create($this)->configure()->make();
+        UnixAutoconfExecutor::create($this)
+            ->appendEnv([
+                'CFLAGS' => '-std=c17',
+            ])
+            ->configure()
+            ->make();
         $this->patchPkgconfPrefix(['gmp.pc']);
     }
 }
