@@ -45,7 +45,7 @@ class PkgConfigCheck
     public function fix(): bool
     {
         ApplicationContext::set('elephant', true);
-        $installer = new PackageInstaller(['dl-prefer-binary' => true]);
+        $installer = new PackageInstaller(['dl-binary-only' => true]);
         $installer->addInstallPackage('pkg-config');
         $installer->run(false, true);
         return true;
