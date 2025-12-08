@@ -221,6 +221,10 @@ class PackageLoader
             self::$packages[$pkg->getName()] = $pkg;
         }
 
+        if (!isset($instance_class)) {
+            $instance_class = $refClass->newInstance();
+        }
+
         // parse non-package available attributes
         foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
             $method_attributes = $method->getAttributes();
