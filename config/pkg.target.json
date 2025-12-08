@@ -82,7 +82,10 @@
     },
     "zig": {
         "type": "target",
-        "artifact": "zig"
+        "artifact": "zig",
+        "static-bins": [
+            "{pkg_root_path}/zig/zig"
+        ]
     },
     "nasm": {
         "type": "target",
