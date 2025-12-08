@@ -6,6 +6,8 @@ namespace StaticPHP;
 
 use StaticPHP\Command\BuildLibsCommand;
 use StaticPHP\Command\BuildTargetCommand;
+use StaticPHP\Command\Dev\IsInstalledCommand;
+use StaticPHP\Command\Dev\ShellCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
 use StaticPHP\Command\ExtractCommand;
@@ -47,6 +49,10 @@ class ConsoleApplication extends Application
             new BuildLibsCommand(),
             new ExtractCommand(),
             new SPCConfigCommand(),
+
+            // dev commands
+            new ShellCommand(),
+            new IsInstalledCommand(),
         ]);
 
         // add additional commands from registries
