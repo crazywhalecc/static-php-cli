@@ -14,6 +14,7 @@ use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Attribute\Package\Validate;
 use StaticPHP\Attribute\PatchDescription;
+use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\WrongUsageException;
@@ -111,7 +112,7 @@ class php
     }
 
     #[ResolveBuild]
-    public function resolveBuild(TargetPackage $package): array
+    public function resolveBuild(TargetPackage $package, PackageInstaller $installer): array
     {
         // Parse extensions and additional packages for all php-* targets
         $static_extensions = parse_extension_list($package->getBuildArgument('extensions'));
@@ -128,6 +129,7 @@ class php
         // get instances
         foreach ($extensions_pkg as $extension) {
             $extname = substr($extension, 4);
+            $config = PackageConfig::get($extension, 'php-extension', []);
             if (!PackageLoader::hasPackage($extension)) {
                 throw new WrongUsageException("Extension [{$extname}] does not exist. Please check your extension name.");
             }
@@ -137,11 +139,23 @@ class php
             }
             // set build static/shared
             if (in_array($extname, $static_extensions)) {
+                if (($config['build-static'] ?? true) === false) {
+                    throw new WrongUsageException("Extension [{$extname}] cannot be built as static extension.");
+                }
                 $instance->setBuildStatic();
             }
             if (in_array($extname, $shared_extensions)) {
+                if (($config['build-shared'] ?? true) === false) {
+                    throw new WrongUsageException("Extension [{$extname}] cannot be built as shared extension, please remove it from --build-shared option.");
+                }
                 $instance->setBuildShared();
+                $instance->setBuildWithPhp($config['build-with-php'] ?? false);
             }
+        }
+
+        // building shared extensions need embed SAPI
+        if (!empty($shared_extensions) && !$package->getBuildOption('build-embed', false) && $package->getName() === 'php') {
+            $installer->addBuildPackage('php-embed');
         }
 
         return [...$extensions_pkg, ...$additional_packages];
@@ -178,14 +192,14 @@ class php
             return [];
         }
         $sapis = array_filter([
-            $installer->getBuildPackage('php-cli') ? 'cli' : null,
-            $installer->getBuildPackage('php-fpm') ? 'fpm' : null,
-            $installer->getBuildPackage('php-micro') ? 'micro' : null,
-            $installer->getBuildPackage('php-cgi') ? 'cgi' : null,
-            $installer->getBuildPackage('php-embed') ? 'embed' : null,
-            $installer->getBuildPackage('frankenphp') ? 'frankenphp' : null,
+            $installer->isPackageResolved('php-cli') ? 'cli' : null,
+            $installer->isPackageResolved('php-fpm') ? 'fpm' : null,
+            $installer->isPackageResolved('php-micro') ? 'micro' : null,
+            $installer->isPackageResolved('php-cgi') ? 'cgi' : null,
+            $installer->isPackageResolved('php-embed') ? 'embed' : null,
+            $installer->isPackageResolved('frankenphp') ? 'frankenphp' : null,
         ]);
-        $static_extensions = array_filter($installer->getResolvedPackages(), fn ($x) => $x->getType() === 'php-extension');
+        $static_extensions = array_filter($installer->getResolvedPackages(), fn ($x) => $x instanceof PhpExtensionPackage && $x->isBuildStatic());
         $shared_extensions = parse_extension_list($package->getBuildOption('build-shared') ?? []);
         $install_packages = array_filter($installer->getResolvedPackages(), fn ($x) => $x->getType() !== 'php-extension' && $x->getName() !== 'php' && !str_starts_with($x->getName(), 'php-'));
         return [
@@ -281,15 +295,15 @@ class php
             $args[] = "--with-config-file-scan-dir={$option}";
         }
         // perform enable cli options
-        $args[] = $installer->isBuildPackage('php-cli') ? '--enable-cli' : '--disable-cli';
-        $args[] = $installer->isBuildPackage('php-fpm') ? '--enable-fpm' : '--disable-fpm';
-        $args[] = $installer->isBuildPackage('php-micro') ? match (SystemTarget::getTargetOS()) {
+        $args[] = $installer->isPackageResolved('php-cli') ? '--enable-cli' : '--disable-cli';
+        $args[] = $installer->isPackageResolved('php-fpm') ? '--enable-fpm' : '--disable-fpm';
+        $args[] = $installer->isPackageResolved('php-micro') ? match (SystemTarget::getTargetOS()) {
             'Linux' => '--enable-micro=all-static',
             default => '--enable-micro',
         } : null;
-        $args[] = $installer->isBuildPackage('php-cgi') ? '--enable-cgi' : '--disable-cgi';
+        $args[] = $installer->isPackageResolved('php-cgi') ? '--enable-cgi' : '--disable-cgi';
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
-        $args[] = $installer->isBuildPackage('php-embed') ? "--enable-embed={$embed_type}" : '--disable-embed';
+        $args[] = $installer->isPackageResolved('php-embed') ? "--enable-embed={$embed_type}" : '--disable-embed';
         $args[] = getenv('SPC_EXTRA_PHP_VARS') ?: null;
         $args = implode(' ', array_filter($args));
 
@@ -311,19 +325,19 @@ class php
         logger()->info('cleaning up php-src build files');
         shell()->cd($package->getSourceDir())->exec('make clean');
 
-        if ($installer->isBuildPackage('php-cli')) {
+        if ($installer->isPackageResolved('php-cli')) {
             $package->runStage('unix-make-cli');
         }
-        if ($installer->isBuildPackage('php-cgi')) {
+        if ($installer->isPackageResolved('php-cgi')) {
             $package->runStage('unix-make-cgi');
         }
-        if ($installer->isBuildPackage('php-fpm')) {
+        if ($installer->isPackageResolved('php-fpm')) {
             $package->runStage('unix-make-fpm');
         }
-        if ($installer->isBuildPackage('php-micro')) {
+        if ($installer->isPackageResolved('php-micro')) {
             $package->runStage('unix-make-micro');
         }
-        if ($installer->isBuildPackage('php-embed')) {
+        if ($installer->isPackageResolved('php-embed')) {
             $package->runStage('unix-make-embed');
         }
     }
@@ -359,6 +373,7 @@ class php
     }
 
     #[Stage('unix-make-micro')]
+    #[PatchDescription('Patch phar extension for micro SAPI to support compressed phar')]
     public function makeMicroForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
         $phar_patched = false;
@@ -375,6 +390,8 @@ class php
             shell()->cd($package->getSourceDir())
                 ->setEnv($vars)
                 ->exec("make -j{$builder->concurrency} micro");
+
+            $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', BUILD_BIN_PATH . '/micro.sfx');
         } finally {
             if ($phar_patched) {
                 SourcePatcher::unpatchMicroPhar();
@@ -385,6 +402,7 @@ class php
     #[Stage('unix-make-embed')]
     public function makeEmbedForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
+        InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make embed'));
         $shared_exts = array_filter(
             $installer->getResolvedPackages(),
             static fn ($x) => $x instanceof PhpExtensionPackage && $x->isBuildShared() && $x->isBuildWithPhp()
@@ -395,9 +413,11 @@ class php
         $diff = new DirDiff(BUILD_MODULES_PATH, true);
 
         $root = BUILD_ROOT_PATH;
+        $sed_prefix = SystemTarget::getTargetOS() === 'Darwin' ? 'sed -i ""' : 'sed -i';
+
         shell()->cd($package->getSourceDir())
             ->setEnv($this->makeVars($installer))
-            ->exec('sed -i "s|^EXTENSION_DIR = .*|EXTENSION_DIR = /' . basename(BUILD_MODULES_PATH) . '|" Makefile')
+            ->exec("{$sed_prefix} \"s|^EXTENSION_DIR = .*|EXTENSION_DIR = /" . basename(BUILD_MODULES_PATH) . '|" Makefile')
             ->exec("make -j{$builder->concurrency} INSTALL_ROOT={$root} install-sapi {$install_modules} install-build install-headers install-programs");
 
         // ------------- SPC_CMD_VAR_PHP_EMBED_TYPE=shared -------------
@@ -417,12 +437,15 @@ class php
         // process shared extensions that built-with-php
         $increment_files = $diff->getChangedFiles();
         foreach ($increment_files as $increment_file) {
-            $builder->deployBinary($increment_file, $libphp_so, false);
+            $builder->deployBinary($increment_file, $increment_file, false);
         }
 
         // ------------- SPC_CMD_VAR_PHP_EMBED_TYPE=static -------------
 
         // process libphp.a for static embed
+        if (!file_exists("{$package->getLibDir()}/libphp.a")) {
+            return;
+        }
         $ar = getenv('AR') ?: 'ar';
         $libphp_a = "{$package->getLibDir()}/libphp.a";
         shell()->exec("{$ar} -t {$libphp_a} | grep '\\.a$' | xargs -n1 {$ar} d {$libphp_a}");
@@ -432,19 +455,9 @@ class php
         $package->runStage('patch-embed-scripts');
     }
 
-    #[BuildFor('Darwin')]
-    #[BuildFor('Linux')]
-    public function build(TargetPackage $package, PackageInstaller $installer, ToolchainInterface $toolchain): void
+    #[Stage('unix-build-shared-ext')]
+    public function unixBuildSharedExt(PackageInstaller $installer, ToolchainInterface $toolchain): void
     {
-        // virtual target, do nothing
-        if ($package->getName() !== 'php') {
-            return;
-        }
-
-        $package->runStage('unix-buildconf');
-        $package->runStage('unix-configure');
-        $package->runStage('unix-make');
-
         // collect shared extensions
         /** @var PhpExtensionPackage[] $shared_extensions */
         $shared_extensions = array_filter(
@@ -470,9 +483,10 @@ class php
         }
 
         try {
+            logger()->debug('Building shared extensions...');
             foreach ($shared_extensions as $extension) {
-                logger()->info('Building shared extensions...');
-                $extension->buildSharedExtension();
+                InteractiveTerm::setMessage('Building shared PHP extension: ' . ConsoleColor::yellow($extension->getName()));
+                $extension->buildShared();
             }
         } finally {
             // restore php-config
@@ -481,6 +495,22 @@ class php
                 FileSystem::restoreBackupFile(BUILD_LIB_PATH . '/php/build/phpize.m4');
             }
         }
+    }
+
+    #[BuildFor('Darwin')]
+    #[BuildFor('Linux')]
+    public function build(TargetPackage $package): void
+    {
+        // virtual target, do nothing
+        if ($package->getName() !== 'php') {
+            return;
+        }
+
+        $package->runStage('unix-buildconf');
+        $package->runStage('unix-configure');
+        $package->runStage('unix-make');
+
+        $package->runStage('unix-build-shared-ext');
     }
 
     /**
