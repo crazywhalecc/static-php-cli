@@ -113,7 +113,7 @@ class ArtifactDownloader
                 foreach ($ls as $name) {
                     $this->fetch_prefs[$name] = Artifact::FETCH_PREFER_SOURCE;
                 }
-            } elseif ($options['prefer-source'] === null) {
+            } elseif ($options['prefer-source'] === null || $options['prefer-source'] === true) {
                 $this->default_fetch_pref = Artifact::FETCH_PREFER_SOURCE;
             }
         }
@@ -124,7 +124,7 @@ class ArtifactDownloader
                 foreach ($ls as $name) {
                     $this->fetch_prefs[$name] = Artifact::FETCH_PREFER_BINARY;
                 }
-            } elseif ($options['prefer-binary'] === null) {
+            } elseif ($options['prefer-binary'] === null || $options['prefer-binary'] === true) {
                 $this->default_fetch_pref = Artifact::FETCH_PREFER_BINARY;
             }
         }
@@ -134,7 +134,7 @@ class ArtifactDownloader
                 foreach ($ls as $name) {
                     $this->fetch_prefs[$name] = Artifact::FETCH_PREFER_BINARY;
                 }
-            } elseif ($options['prefer-pre-built'] === null) {
+            } elseif ($options['prefer-pre-built'] === null || $options['prefer-pre-built'] === true) {
                 $this->default_fetch_pref = Artifact::FETCH_PREFER_BINARY;
             }
         }
@@ -145,7 +145,7 @@ class ArtifactDownloader
                 foreach ($ls as $name) {
                     $this->fetch_prefs[$name] = Artifact::FETCH_ONLY_SOURCE;
                 }
-            } elseif ($options['source-only'] === null) {
+            } elseif ($options['source-only'] === null || $options['source-only'] === true) {
                 $this->default_fetch_pref = Artifact::FETCH_ONLY_SOURCE;
             }
         }
@@ -156,7 +156,7 @@ class ArtifactDownloader
                 foreach ($ls as $name) {
                     $this->fetch_prefs[$name] = Artifact::FETCH_ONLY_BINARY;
                 }
-            } elseif ($options['binary-only'] === null) {
+            } elseif ($options['binary-only'] === null || $options['binary-only'] === true) {
                 $this->default_fetch_pref = Artifact::FETCH_ONLY_BINARY;
             }
         }
@@ -164,7 +164,7 @@ class ArtifactDownloader
         if (array_key_exists('ignore-cache', $options)) {
             if (is_string($options['ignore-cache'])) {
                 $this->ignore_cache = parse_comma_list($options['ignore-cache']);
-            } elseif ($options['ignore-cache'] === null) {
+            } elseif ($options['ignore-cache'] === null || $options['ignore-cache'] === true) {
                 $this->ignore_cache = true;
             }
         }
@@ -172,7 +172,7 @@ class ArtifactDownloader
         if (array_key_exists('ignore-cache-sources', $options)) {
             if (is_string($options['ignore-cache-sources'])) {
                 $this->ignore_cache = parse_comma_list($options['ignore-cache-sources']);
-            } elseif ($options['ignore-cache-sources'] === null) {
+            } elseif ($options['ignore-cache-sources'] === null || $options['ignore-cache-sources'] === true) {
                 $this->ignore_cache = true;
             }
         }
