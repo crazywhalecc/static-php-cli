@@ -7,8 +7,10 @@ namespace StaticPHP\DI;
 use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
+use StaticPHP\Attribute\PatchDescription;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use ZM\Logger\ConsoleColor;
 
 use function DI\factory;
 
@@ -138,6 +140,14 @@ class ApplicationContext
     public static function invoke(callable $callback, array $context = []): mixed
     {
         logger()->debug('[INVOKE] ' . (is_array($callback) ? (is_object($callback[0]) ? get_class($callback[0]) : $callback[0]) . '::' . $callback[1] : (is_string($callback) ? $callback : 'Closure')));
+
+        // get if callback has attribute PatchDescription
+        $ref = new \ReflectionFunction(\Closure::fromCallable($callback));
+        $attributes = $ref->getAttributes(PatchDescription::class);
+        foreach ($attributes as $attribute) {
+            $attrInstance = $attribute->newInstance();
+            logger()->info(ConsoleColor::magenta('[PATCH]') . ConsoleColor::green(" {$attrInstance->description}"));
+        }
         return self::getInvoker()->invoke($callback, $context);
     }
 
