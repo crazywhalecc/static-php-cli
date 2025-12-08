@@ -108,8 +108,10 @@ class PackageInstaller
      */
     public function run(bool $interactive = true, bool $disable_delay_msg = false): void
     {
-        // resolve input, make dependency graph
-        $this->resolvePackages();
+        if (empty($this->packages)) {
+            // resolve input, make dependency graph
+            $this->resolvePackages();
+        }
 
         if ($interactive && !$disable_delay_msg) {
             // show install or build options in terminal with beautiful output
@@ -148,7 +150,10 @@ class PackageInstaller
         }
         $builder = ApplicationContext::get(PackageBuilder::class);
         foreach ($this->packages as $package) {
-            if ($this->isBuildPackage($package) || $package instanceof LibraryPackage && $package->hasStage('build')) {
+            if (
+                $this->isBuildPackage($package) ||
+                $package instanceof LibraryPackage && $package->hasStage('build') && !$package->getArtifact()->shouldUseBinary()
+            ) {
                 if ($interactive) {
                     InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
                 }
@@ -211,6 +216,31 @@ class PackageInstaller
     public function isPackageResolved(string $package_name): bool
     {
         return isset($this->packages[$package_name]);
+    }
+
+    public function isPackageInstalled(Package|string $package_name): bool
+    {
+        if (empty($this->packages)) {
+            $this->resolvePackages();
+        }
+        if (is_string($package_name)) {
+            $package = $this->getPackage($package_name);
+            if ($package === null) {
+                throw new WrongUsageException("Package '{$package_name}' is not resolved.");
+            }
+        } else {
+            $package = $package_name;
+        }
+
+        // check if package is built/installed
+        if ($this->isBuildPackage($package)) {
+            return $package->isInstalled();
+        }
+        if ($package instanceof LibraryPackage && $package->getArtifact()->shouldUseBinary()) {
+            $artifact = $package->getArtifact();
+            return $artifact->isBinaryExtracted();
+        }
+        return false;
     }
 
     /**

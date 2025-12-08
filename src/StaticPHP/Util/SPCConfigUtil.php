@@ -225,11 +225,15 @@ class SPCConfigUtil
             // convert all static-libs to short names
             $libs = array_reverse(PackageConfig::get($package, 'static-libs', []));
             foreach ($libs as $lib) {
-                // check file existence
-                if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
-                    throw new WrongUsageException("Library file '{$lib}' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
+                if (FileSystem::isRelativePath($lib)) {
+                    // check file existence
+                    if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
+                        throw new WrongUsageException("Library file '{$lib}' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
+                    }
+                    $lib_names[] = $this->getShortLibName($lib);
+                } else {
+                    $lib_names[] = $lib;
                 }
-                $lib_names[] = $this->getShortLibName($lib);
             }
             // add frameworks for macOS
             if (SystemTarget::getTargetOS() === 'Darwin') {
