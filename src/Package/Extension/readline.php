@@ -7,6 +7,7 @@ namespace Package\Extension;
 use StaticPHP\Attribute\Package\AfterStage;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\Extension;
+use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\SourcePatcher;
@@ -14,7 +15,8 @@ use StaticPHP\Util\SourcePatcher;
 #[Extension('readline')]
 class readline
 {
-    #[BeforeStage('php', 'unix-make-cli')]
+    #[BeforeStage('php', 'unix-make-cli', 'ext-readline')]
+    #[PatchDescription('Fix readline static build with musl')]
     public function beforeMakeLinuxCli(PackageInstaller $installer, ToolchainInterface $toolchain): void
     {
         if ($toolchain->isStatic()) {
@@ -23,7 +25,7 @@ class readline
         }
     }
 
-    #[AfterStage('php', 'unix-make-cli')]
+    #[AfterStage('php', 'unix-make-cli', 'ext-readline')]
     public function afterMakeLinuxCli(PackageInstaller $installer, ToolchainInterface $toolchain): void
     {
         if ($toolchain->isStatic()) {
