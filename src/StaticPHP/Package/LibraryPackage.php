@@ -130,6 +130,36 @@ class LibraryPackage extends Package
     }
 
     /**
+     * Patch pkgconfig file prefix, exec_prefix, libdir, includedir for correct build.
+     *
+     * @param array      $files          File list to patch, if empty, will use pkg-configs from config (e.g. ['zlib.pc', 'openssl.pc'])
+     * @param int        $patch_option   Patch options
+     * @param null|array $custom_replace Custom replace rules, if provided, will be used to replace in the format [regex, replacement]
+     */
+    public function patchPkgconfPrefix(array $files = [], int $patch_option = PKGCONF_PATCH_ALL, ?array $custom_replace = null): void
+    {
+        logger()->info("Patching library [{$this->getName()}] pkgconfig");
+        if ($files === [] && ($conf_pc = PackageConfig::get($this->getName(), 'pkg-configs', [])) !== []) {
+            $files = array_map(fn ($x) => "{$x}.pc", $conf_pc);
+        }
+        foreach ($files as $name) {
+            $realpath = realpath("{$this->getLibDir()}/pkgconfig/{$name}");
+            if ($realpath === false) {
+                throw new PatchException('pkg-config prefix patcher', "Cannot find library [{$this->getName()}] pkgconfig file [{$name}] in {$this->getLibDir()}/pkgconfig/ !");
+            }
+            logger()->debug("Patching {$realpath}");
+            // replace prefix
+            $file = FileSystem::readFile($realpath);
+            $file = ($patch_option & PKGCONF_PATCH_PREFIX) === PKGCONF_PATCH_PREFIX ? preg_replace('/^prefix\s*=.*$/m', 'prefix=' . BUILD_ROOT_PATH, $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_EXEC_PREFIX) === PKGCONF_PATCH_EXEC_PREFIX ? preg_replace('/^exec_prefix\s*=.*$/m', 'exec_prefix=${prefix}', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_LIBDIR) === PKGCONF_PATCH_LIBDIR ? preg_replace('/^libdir\s*=.*$/m', 'libdir=${prefix}/lib', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_INCLUDEDIR) === PKGCONF_PATCH_INCLUDEDIR ? preg_replace('/^includedir\s*=.*$/m', 'includedir=${prefix}/include', $file) : $file;
+            $file = ($patch_option & PKGCONF_PATCH_CUSTOM) === PKGCONF_PATCH_CUSTOM && $custom_replace !== null ? preg_replace($custom_replace[0], $custom_replace[1], $file) : $file;
+            FileSystem::writeFile($realpath, $file);
+        }
+    }
+
+    /**
      * Get extra LIBS for current package.
      * You need to define the environment variable in the format of {LIBRARY_NAME}_LIBS
      * where {LIBRARY_NAME} is the snake_case name of the library.
