@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 
-if [ "$BUILD_ROOT_PATH" = "" ]; then
-    echo "The script must be run in the SPC build environment."
-    exit 1
-fi
-
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-BUILDROOT_ABS=$BUILD_ROOT_PATH
+BUILDROOT_ABS="${BUILD_ROOT_PATH:-$(realpath "$SCRIPT_DIR/../../../buildroot/include" 2>/dev/null || true)}"
 PARSED_ARGS=()
 
 while [[ $# -gt 0 ]]; do
