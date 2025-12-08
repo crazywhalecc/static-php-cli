@@ -13,23 +13,6 @@ use StaticPHP\Util\FileSystem;
  */
 class LibraryPackage extends Package
 {
-    /** @var array<string, callable> $build_functions Build functions for different OS binding */
-    protected array $build_functions = [];
-
-    /**
-     * Add a build function for a specific platform.
-     *
-     * @param string   $platform PHP_OS_FAMILY
-     * @param callable $func     Function to build for the platform
-     */
-    public function addBuildFunction(string $platform, callable $func): void
-    {
-        $this->build_functions[$platform] = $func;
-        if ($platform === PHP_OS_FAMILY) {
-            $this->addStage('build', $func);
-        }
-    }
-
     public function isInstalled(): bool
     {
         foreach (PackageConfig::get($this->getName(), 'static-libs', []) as $lib) {

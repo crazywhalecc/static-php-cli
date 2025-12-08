@@ -19,6 +19,9 @@ abstract class Package
      */
     protected array $stages = [];
 
+    /** @var array<string, callable> $build_functions Build functions for different OS binding */
+    protected array $build_functions = [];
+
     /**
      * @param string $name Name of the package
      * @param string $type Type of the package
@@ -53,6 +56,20 @@ abstract class Package
         // emit AfterStage
         $this->emitAfterStage($name, $stageContext, $ret);
         return $ret;
+    }
+
+    /**
+     * Add a build function for a specific platform.
+     *
+     * @param string   $os_family PHP_OS_FAMILY
+     * @param callable $func      Function to build for the platform
+     */
+    public function addBuildFunction(string $os_family, callable $func): void
+    {
+        $this->build_functions[$os_family] = $func;
+        if ($os_family === PHP_OS_FAMILY) {
+            $this->addStage('build', $func);
+        }
     }
 
     public function isInstalled(): bool
