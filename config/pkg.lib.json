@@ -711,6 +711,9 @@
     "ncurses": {
         "type": "library",
         "artifact": "ncurses",
+        "static-libs@unix": [
+            "libncurses.a"
+        ],
         "license": {
             "type": "file",
             "path": "COPYING"
