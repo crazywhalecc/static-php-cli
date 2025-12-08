@@ -33,22 +33,28 @@ class LibraryPackage extends Package
     public function isInstalled(): bool
     {
         foreach (PackageConfig::get($this->getName(), 'static-libs', []) as $lib) {
-            if (!file_exists("{$this->getLibDir()}/{$lib}")) {
+            $path = FileSystem::isRelativePath($lib) ? "{$this->getLibDir()}/{$lib}" : $lib;
+            if (!file_exists($path)) {
                 return false;
             }
         }
         foreach (PackageConfig::get($this->getName(), 'headers', []) as $header) {
-            if (!file_exists("{$this->getIncludeDir()}/{$header}")) {
+            $path = FileSystem::isRelativePath($header) ? "{$this->getIncludeDir()}/{$header}" : $header;
+            if (!file_exists($path)) {
                 return false;
             }
         }
         foreach (PackageConfig::get($this->getName(), 'pkg-configs', []) as $pc) {
-            if (!file_exists("{$this->getLibDir()}/pkgconfig/{$pc}.pc")) {
+            if (!str_ends_with($pc, '.pc')) {
+                $pc .= '.pc';
+            }
+            if (!file_exists("{$this->getLibDir()}/pkgconfig/{$pc}")) {
                 return false;
             }
         }
         foreach (PackageConfig::get($this->getName(), 'static-bins', []) as $bin) {
-            if (!file_exists("{$this->getBinDir()}/{$bin}")) {
+            $path = FileSystem::isRelativePath($bin) ? "{$this->getBinDir()}/{$bin}" : $bin;
+            if (!file_exists($path)) {
                 return false;
             }
         }
