@@ -150,27 +150,11 @@ class PackageInstaller
         }
         $builder = ApplicationContext::get(PackageBuilder::class);
         foreach ($this->packages as $package) {
-            if (
-                $this->isBuildPackage($package) ||
-                $package instanceof LibraryPackage && $package->hasStage('build') && !$package->getArtifact()->shouldUseBinary()
-            ) {
-                if ($interactive) {
-                    InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
-                }
-                try {
-                    /** @var LibraryPackage $package */
-                    $status = $builder->buildPackage($package, $this->isBuildPackage($package));
-                } catch (\Throwable $e) {
-                    if ($interactive) {
-                        InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);
-                        echo PHP_EOL;
-                    }
-                    throw $e;
-                }
-                if ($interactive) {
-                    InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
-                }
-            } elseif ($package instanceof LibraryPackage && $package->getArtifact()->shouldUseBinary()) {
+            $is_to_build = $this->isBuildPackage($package);
+            $has_build_stage = $package instanceof LibraryPackage && $package->hasStage('build');
+            $should_use_binary = $package instanceof LibraryPackage && ($package->getArtifact()?->shouldUseBinary() ?? false);
+            $has_source = $package->hasSource();
+            if (!$is_to_build && $should_use_binary) {
                 // install binary
                 if ($interactive) {
                     InteractiveTerm::indicateProgress('Installing package: ' . ConsoleColor::yellow($package->getName()));
@@ -187,7 +171,24 @@ class PackageInstaller
                 if ($interactive) {
                     InteractiveTerm::finish('Installed binary package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_INSTALLED ? ' (already installed, skipped)' : ''));
                 }
-            } elseif ($package instanceof LibraryPackage) {
+            } elseif ($is_to_build && $has_build_stage || $has_source && $has_build_stage) {
+                if ($interactive) {
+                    InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
+                }
+                try {
+                    /** @var LibraryPackage $package */
+                    $status = $builder->buildPackage($package, $this->isBuildPackage($package));
+                } catch (\Throwable $e) {
+                    if ($interactive) {
+                        InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);
+                        echo PHP_EOL;
+                    }
+                    throw $e;
+                }
+                if ($interactive) {
+                    InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
+                }
+            } elseif ($package->getType() === 'library') {
                 throw new WrongUsageException("Package '{$package->getName()}' cannot be installed: no build stage defined and no binary artifact available for current OS.");
             }
         }
@@ -442,32 +443,32 @@ class PackageInstaller
 
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-cli')) {
                 $cli = PackageLoader::getPackage('php-cli');
-                $this->build_packages[$cli->getName()] = $cli;
+                $this->install_packages[$cli->getName()] = $cli;
                 $added = true;
             }
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-fpm')) {
                 $fpm = PackageLoader::getPackage('php-fpm');
-                $this->build_packages[$fpm->getName()] = $fpm;
+                $this->install_packages[$fpm->getName()] = $fpm;
                 $added = true;
             }
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-micro')) {
                 $micro = PackageLoader::getPackage('php-micro');
-                $this->build_packages[$micro->getName()] = $micro;
+                $this->install_packages[$micro->getName()] = $micro;
                 $added = true;
             }
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-cgi')) {
                 $cgi = PackageLoader::getPackage('php-cgi');
-                $this->build_packages[$cgi->getName()] = $cgi;
+                $this->install_packages[$cgi->getName()] = $cgi;
                 $added = true;
             }
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-embed')) {
                 $embed = PackageLoader::getPackage('php-embed');
-                $this->build_packages[$embed->getName()] = $embed;
+                $this->install_packages[$embed->getName()] = $embed;
                 $added = true;
             }
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-frankenphp')) {
                 $frankenphp = PackageLoader::getPackage('frankenphp');
-                $this->build_packages[$frankenphp->getName()] = $frankenphp;
+                $this->install_packages[$frankenphp->getName()] = $frankenphp;
                 $added = true;
             }
             $this->build_packages[$package->getName()] = $package;
@@ -481,7 +482,7 @@ class PackageInstaller
         } else {
             // process specific php sapi targets
             $this->build_packages['php'] = PackageLoader::getPackage('php');
-            $this->build_packages[$package->getName()] = $package;
+            $this->install_packages[$package->getName()] = $package;
         }
     }
 
