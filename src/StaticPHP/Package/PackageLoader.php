@@ -143,8 +143,6 @@ class PackageLoader
         }
         self::$loaded_classes[$class_name] = true;
 
-        $instance_class = $refClass->newInstance();
-
         $attributes = $refClass->getAttributes();
         foreach ($attributes as $attribute) {
             $pkg = null;
@@ -160,6 +158,19 @@ class PackageLoader
             if ($package_type === null) {
                 throw new WrongUsageException("Package [{$attribute_instance->name}] not defined in config, please check your config files.");
             }
+
+            // if class has parent class and matches the attribute instance, use custom class
+            if ($refClass->getParentClass() !== false) {
+                if (is_a($class_name, Package::class, true)) {
+                    self::$packages[$attribute_instance->name] = new $class_name($attribute_instance->name, $package_type);
+                    $instance_class = self::$packages[$attribute_instance->name];
+                }
+            }
+
+            if (!isset($instance_class)) {
+                $instance_class = $refClass->newInstance();
+            }
+
             $pkg = self::$packages[$attribute_instance->name];
 
             // validate package type matches
@@ -272,9 +283,6 @@ class PackageLoader
 
     private static function addBuildFunction(Package $pkg, object $attr, callable $fn): void
     {
-        if (!$pkg instanceof LibraryPackage) {
-            throw new ValidationException("Class [{$pkg->getName()}] must implement LibraryPackage for BuildFor attribute.");
-        }
         $pkg->addBuildFunction($attr->os, $fn);
     }
 }
