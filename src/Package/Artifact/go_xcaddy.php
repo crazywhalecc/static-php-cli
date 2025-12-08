@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Package\Artifact;
 
-use SPC\util\GlobalEnvManager;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\System\LinuxUtil;
 
 class go_xcaddy

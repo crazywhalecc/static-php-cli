@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Package\Target;
 
-use SPC\util\GlobalEnvManager;
 use StaticPHP\Attribute\Package\InitPackage;
 use StaticPHP\Attribute\Package\Target;
+use StaticPHP\Util\GlobalEnvManager;
 
 #[Target('go-xcaddy')]
 class go_xcaddy
