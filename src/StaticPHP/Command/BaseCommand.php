@@ -70,7 +70,8 @@ abstract class BaseCommand extends Command
         });
         $version = $this->getVersionWithCommit();
         if (!$this->no_motd) {
-            echo str_replace('{version}', '' . ConsoleColor::none("v{$version}"), '' . ConsoleColor::magenta(self::$motd));
+            $str = str_replace('{version}', '' . ConsoleColor::none("v{$version}"), '' . ConsoleColor::magenta(self::$motd));
+            echo $this->input->getOption('no-ansi') ? strip_ansi_colors($str) : $str;
         }
     }
 

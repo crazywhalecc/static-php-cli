@@ -10,6 +10,7 @@ use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\WindowsBuilder;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Util\InteractiveTerm;
 use ZM\Logger\ConsoleColor;
 
 class ExceptionHandler
@@ -189,7 +190,7 @@ class ExceptionHandler
             $line = str_pad($v, strlen($v) + $indent_space, ' ', STR_PAD_LEFT);
             fwrite($spc_log, strip_ansi_colors($line) . PHP_EOL);
             if ($output_log) {
-                echo ConsoleColor::red($line) . PHP_EOL;
+                InteractiveTerm::plain(ConsoleColor::red($line) . '');
             }
         }
     }

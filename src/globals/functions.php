@@ -271,11 +271,11 @@ function keyboard_interrupt_unregister(): void
 /**
  * Strip ANSI color codes from a string.
  */
-function strip_ansi_colors(string $text): string
+function strip_ansi_colors(string|Stringable $text): string
 {
     // Regular expression to match ANSI escape sequences
     // Including color codes, cursor control, clear screen and other control sequences
-    return preg_replace('/\e\[[0-9;]*[a-zA-Z]/', '', $text);
+    return preg_replace('/\e\[[0-9;]*[a-zA-Z]/', '', strval($text));
 }
 
 /**
