@@ -45,7 +45,7 @@ use ZM\Logger\ConsoleColor;
 #[Target('php-cgi')]
 #[Target('php-embed')]
 #[Target('frankenphp')]
-class php
+class php extends TargetPackage
 {
     public static function getPHPVersionID(): int
     {
@@ -350,6 +350,9 @@ class php
         shell()->cd($package->getSourceDir())
             ->setEnv($this->makeVars($installer))
             ->exec("make -j{$concurrency} cli");
+
+        $builder->deployBinary("{$package->getSourceDir()}/sapi/cli/php", BUILD_BIN_PATH . '/php');
+        $package->setOutput('Binary path for cli SAPI', BUILD_BIN_PATH . '/php');
     }
 
     #[Stage]
@@ -360,6 +363,9 @@ class php
         shell()->cd($package->getSourceDir())
             ->setEnv($this->makeVars($installer))
             ->exec("make -j{$concurrency} cgi");
+
+        $builder->deployBinary("{$package->getSourceDir()}/sapi/cgi/php-cgi", BUILD_BIN_PATH . '/php-cgi');
+        $package->setOutput('Binary path for cgi SAPI', BUILD_BIN_PATH . '/php-cgi');
     }
 
     #[Stage]
@@ -370,6 +376,9 @@ class php
         shell()->cd($package->getSourceDir())
             ->setEnv($this->makeVars($installer))
             ->exec("make -j{$concurrency} fpm");
+
+        $builder->deployBinary("{$package->getSourceDir()}/sapi/fpm/php-fpm", BUILD_BIN_PATH . '/php-fpm');
+        $package->setOutput('Binary path for fpm SAPI', BUILD_BIN_PATH . '/php-fpm');
     }
 
     #[Stage]
@@ -392,6 +401,7 @@ class php
                 ->exec("make -j{$builder->concurrency} micro");
 
             $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', BUILD_BIN_PATH . '/micro.sfx');
+            $package->setOutput('Binary path for micro SAPI', BUILD_BIN_PATH . '/micro.sfx');
         } finally {
             if ($phar_patched) {
                 SourcePatcher::unpatchMicroPhar();
@@ -432,12 +442,17 @@ class php
             }
             // deploy
             $builder->deployBinary($libphp_so, $libphp_so, false);
+            $package->setOutput('Library path for embed SAPI', $libphp_so);
         }
 
         // process shared extensions that built-with-php
         $increment_files = $diff->getChangedFiles();
         foreach ($increment_files as $increment_file) {
             $builder->deployBinary($increment_file, $increment_file, false);
+            $files[] = basename($increment_file);
+        }
+        if (!empty($files)) {
+            $package->setOutput('Built shared extensions', implode(', ', $files));
         }
 
         // ------------- SPC_CMD_VAR_PHP_EMBED_TYPE=static -------------
@@ -524,6 +539,7 @@ class php
             logger()->debug('Patching phpize prefix');
             FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', "prefix=''", "prefix='" . BUILD_ROOT_PATH . "'");
             FileSystem::replaceFileStr(BUILD_BIN_PATH . '/phpize', 's##', 's#/usr/local#');
+            $this->setOutput('phpize script path for embed SAPI', BUILD_BIN_PATH . '/phpize');
         }
         // patch php-config
         if (file_exists(BUILD_BIN_PATH . '/php-config')) {
@@ -535,6 +551,7 @@ class php
             // move lstdc++ to the end of libs
             $php_config_str = preg_replace('/(libs=")(.*?)\s*(-lstdc\+\+)\s*(.*?)"/', '$1$2 $4 $3"', $php_config_str);
             FileSystem::writeFile(BUILD_BIN_PATH . '/php-config', $php_config_str);
+            $this->setOutput('php-config script path for embed SAPI', BUILD_BIN_PATH . '/php-config');
         }
     }
 

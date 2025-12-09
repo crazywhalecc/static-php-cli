@@ -12,7 +12,6 @@ use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\Package\Info;
 use StaticPHP\Attribute\Package\InitPackage;
 use StaticPHP\Attribute\Package\Library;
-use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Attribute\Package\ResolveBuild;
 use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Attribute\Package\Target;
@@ -166,15 +165,13 @@ class PackageLoader
             if ($refClass->getParentClass() !== false) {
                 if (is_a($class_name, Package::class, true)) {
                     self::$packages[$attribute_instance->name] = new $class_name($attribute_instance->name, $package_type);
-                    $instance_class = self::$packages[$attribute_instance->name];
                 }
             }
 
-            if (!isset($instance_class)) {
-                $instance_class = $refClass->newInstance();
-            }
-
             $pkg = self::$packages[$attribute_instance->name];
+
+            // Use the package instance if it's a Package subclass, otherwise create a new instance
+            $instance_class = is_a($class_name, Package::class, true) ? $pkg : $refClass->newInstance();
 
             // validate package type matches
             $pkg_type_attr = match ($attribute->getName()) {
@@ -204,18 +201,13 @@ class PackageLoader
                         // #[Stage('stage_name')]
                         Stage::class => self::addStage($method, $pkg, $instance_class, $method_instance),
                         // #[InitPackage] (run now with package context)
-                        InitPackage::class => ApplicationContext::invoke([$instance_class, $method->getName()], [
-                            Package::class => $pkg,
-                            $pkg::class => $pkg,
-                        ]),
+                        InitPackage::class => ApplicationContext::invoke([$instance_class, $method->getName()], ['package' => $pkg]),
                         // #[InitBuild]
                         ResolveBuild::class => $pkg instanceof TargetPackage ? $pkg->setResolveBuildCallback([$instance_class, $method->getName()]) : null,
                         // #[Info]
                         Info::class => $pkg->setInfoCallback([$instance_class, $method->getName()]),
                         // #[Validate]
                         Validate::class => $pkg->setValidateCallback([$instance_class, $method->getName()]),
-                        // #[PatchBeforeBuild]
-                        PatchBeforeBuild::class => $pkg->setPatchBeforeBuildCallback([$instance_class, $method->getName()]),
                         default => null,
                     };
                 }
@@ -224,6 +216,7 @@ class PackageLoader
             self::$packages[$pkg->getName()] = $pkg;
         }
 
+        // For classes without package attributes, create a simple instance for non-package stage callbacks
         if (!isset($instance_class)) {
             $instance_class = $refClass->newInstance();
         }

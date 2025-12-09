@@ -23,6 +23,9 @@ abstract class Package
     /** @var array<string, callable> $build_functions Build functions for different OS binding */
     protected array $build_functions = [];
 
+    /** @var array<string, string> */
+    protected array $outputs = [];
+
     /**
      * @param string $name Name of the package
      * @param string $type Type of the package
@@ -67,6 +70,17 @@ abstract class Package
         // emit AfterStage
         $this->emitAfterStage($name, $stageContext, $ret);
         return $ret;
+    }
+
+    public function setOutput(string $key, string $value): static
+    {
+        $this->outputs[$key] = $value;
+        return $this;
+    }
+
+    public function getOutputs(): array
+    {
+        return $this->outputs;
     }
 
     /**

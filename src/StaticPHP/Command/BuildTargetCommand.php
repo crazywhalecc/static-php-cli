@@ -51,6 +51,8 @@ class BuildTargetCommand extends BaseCommand
         $this->output->writeln("<info>✔ BUILD SUCCESSFUL ({$usedtime} s)</info>");
         $this->output->writeln("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
+        $installer->printBuildPackageOutputs();
+
         return static::SUCCESS;
     }
 }

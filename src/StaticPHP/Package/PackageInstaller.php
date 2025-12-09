@@ -104,6 +104,16 @@ class PackageInstaller
         return $this;
     }
 
+    public function printBuildPackageOutputs(): void
+    {
+        foreach ($this->build_packages as $package) {
+            if (($outputs = $package->getOutputs()) !== []) {
+                InteractiveTerm::notice('Package ' . ConsoleColor::green($package->getName()) . ' outputs');
+                $this->printArrayInfo(info: $outputs);
+            }
+        }
+    }
+
     /**
      * Run the package installation process.
      */
