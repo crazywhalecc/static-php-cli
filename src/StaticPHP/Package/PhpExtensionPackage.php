@@ -211,9 +211,9 @@ class PhpExtensionPackage extends Package
     {
         $env = $this->getSharedExtensionEnv();
 
-        $this->runStage('phpizeForUnix', ['env' => $env]);
-        $this->runStage('configureForUnix', ['env' => $env]);
-        $this->runStage('makeForUnix', ['env' => $env]);
+        $this->runStage([$this, 'phpizeForUnix'], ['env' => $env]);
+        $this->runStage([$this, 'configureForUnix'], ['env' => $env]);
+        $this->runStage([$this, 'makeForUnix'], ['env' => $env]);
 
         // process *.so file
         $soFile = BUILD_MODULES_PATH . '/' . $this->getExtensionName() . '.so';
