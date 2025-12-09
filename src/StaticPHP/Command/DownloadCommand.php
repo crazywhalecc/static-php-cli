@@ -6,7 +6,7 @@ namespace StaticPHP\Command;
 
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
-use StaticPHP\Package\PackageLoader;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;

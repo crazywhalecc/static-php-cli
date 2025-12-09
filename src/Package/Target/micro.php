@@ -13,7 +13,7 @@ use StaticPHP\Util\FileSystem;
 #[Target('php-micro')]
 class micro
 {
-    #[BeforeStage('php', 'unix-make-embed', 'php-micro')]
+    #[BeforeStage('php', [php::class, 'makeEmbedForUnix'], 'php-micro')]
     #[PatchDescription('Patch Makefile to build only libphp.la for embedding')]
     public function patchBeforeEmbed(TargetPackage $package): void
     {

@@ -24,6 +24,7 @@ use StaticPHP\Exception\ExecutionException;
 use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Package\Target;
 
-use StaticPHP\Artifact\ArtifactLoader;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Info;
@@ -21,9 +20,10 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\Package;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
-use StaticPHP\Package\PackageLoader;
 use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Package\TargetPackage;
+use StaticPHP\Registry\ArtifactLoader;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ToolchainManager;
@@ -241,7 +241,7 @@ class php
         FileSystem::removeDir(BUILD_MODULES_PATH);
     }
 
-    #[BeforeStage('php', 'unix-buildconf')]
+    #[BeforeStage('php', [self::class, 'buildconfForUnix'], 'php')]
     #[PatchDescription('Patch configure.ac for musl and musl-toolchain')]
     #[PatchDescription('Let php m4 tools use static pkg-config')]
     public function patchBeforeBuildconf(TargetPackage $package): void
@@ -259,7 +259,7 @@ class php
         FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
     }
 
-    #[Stage('unix-buildconf')]
+    #[Stage]
     public function buildconfForUnix(TargetPackage $package): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./buildconf'));
@@ -267,7 +267,7 @@ class php
         shell()->cd($package->getSourceDir())->exec(getenv('SPC_CMD_PREFIX_PHP_BUILDCONF'));
     }
 
-    #[Stage('unix-configure')]
+    #[Stage]
     public function configureForUnix(TargetPackage $package, PackageInstaller $installer): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./configure'));
@@ -317,7 +317,7 @@ class php
         ])->exec("{$cmd} {$args} {$static_extension_str}"), $package->getSourceDir());
     }
 
-    #[Stage('unix-make')]
+    #[Stage]
     public function makeForUnix(TargetPackage $package, PackageInstaller $installer): void
     {
         V2CompatLayer::emitPatchPoint('before-php-make');
@@ -326,23 +326,23 @@ class php
         shell()->cd($package->getSourceDir())->exec('make clean');
 
         if ($installer->isPackageResolved('php-cli')) {
-            $package->runStage('unix-make-cli');
+            $package->runStage([self::class, 'makeCliForUnix']);
         }
         if ($installer->isPackageResolved('php-cgi')) {
-            $package->runStage('unix-make-cgi');
+            $package->runStage([self::class, 'makeCgiForUnix']);
         }
         if ($installer->isPackageResolved('php-fpm')) {
-            $package->runStage('unix-make-fpm');
+            $package->runStage([self::class, 'makeFpmForUnix']);
         }
         if ($installer->isPackageResolved('php-micro')) {
-            $package->runStage('unix-make-micro');
+            $package->runStage([self::class, 'makeMicroForUnix']);
         }
         if ($installer->isPackageResolved('php-embed')) {
-            $package->runStage('unix-make-embed');
+            $package->runStage([self::class, 'makeEmbedForUnix']);
         }
     }
 
-    #[Stage('unix-make-cli')]
+    #[Stage]
     public function makeCliForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make cli'));
@@ -352,7 +352,7 @@ class php
             ->exec("make -j{$concurrency} cli");
     }
 
-    #[Stage('unix-make-cgi')]
+    #[Stage]
     public function makeCgiForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make cgi'));
@@ -362,7 +362,7 @@ class php
             ->exec("make -j{$concurrency} cgi");
     }
 
-    #[Stage('unix-make-fpm')]
+    #[Stage]
     public function makeFpmForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make fpm'));
@@ -372,7 +372,7 @@ class php
             ->exec("make -j{$concurrency} fpm");
     }
 
-    #[Stage('unix-make-micro')]
+    #[Stage]
     #[PatchDescription('Patch phar extension for micro SAPI to support compressed phar')]
     public function makeMicroForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
@@ -399,7 +399,7 @@ class php
         }
     }
 
-    #[Stage('unix-make-embed')]
+    #[Stage]
     public function makeEmbedForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make embed'));
@@ -452,10 +452,10 @@ class php
         UnixUtil::exportDynamicSymbols($libphp_a);
 
         // deploy embed php scripts
-        $package->runStage('patch-embed-scripts');
+        $package->runStage([$this, 'patchEmbedScripts']);
     }
 
-    #[Stage('unix-build-shared-ext')]
+    #[Stage]
     public function unixBuildSharedExt(PackageInstaller $installer, ToolchainInterface $toolchain): void
     {
         // collect shared extensions
@@ -506,18 +506,18 @@ class php
             return;
         }
 
-        $package->runStage('unix-buildconf');
-        $package->runStage('unix-configure');
-        $package->runStage('unix-make');
+        $package->runStage([$this, 'buildconfForUnix']);
+        $package->runStage([$this, 'configureForUnix']);
+        $package->runStage([$this, 'makeForUnix']);
 
-        $package->runStage('unix-build-shared-ext');
+        $package->runStage([$this, 'unixBuildSharedExt']);
     }
 
     /**
      * Patch phpize and php-config if needed
      */
-    #[Stage('patch-embed-scripts')]
-    public function patchPhpScripts(): void
+    #[Stage]
+    public function patchEmbedScripts(): void
     {
         // patch phpize
         if (file_exists(BUILD_BIN_PATH . '/phpize')) {

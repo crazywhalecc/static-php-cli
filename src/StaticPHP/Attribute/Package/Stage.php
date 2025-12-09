@@ -10,5 +10,5 @@ namespace StaticPHP\Attribute\Package;
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 readonly class Stage
 {
-    public function __construct(public string $name) {}
+    public function __construct(public ?string $function = null) {}
 }

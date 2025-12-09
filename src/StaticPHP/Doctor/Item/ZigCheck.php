@@ -38,13 +38,6 @@ class ZigCheck
     #[FixItem('install-zig')]
     public function installZig(): bool
     {
-        $arch = arch2gnu(php_uname('m'));
-        $os = match (PHP_OS_FAMILY) {
-            'Windows' => 'win',
-            'Darwin' => 'macos',
-            'BSD' => 'freebsd',
-            default => 'linux',
-        };
         $installer = new PackageInstaller();
         $installer->addInstallPackage('zig');
         $installer->run(false);

@@ -25,11 +25,13 @@ class ExceptionHandler
         SPCInternalException::class,
         ValidationException::class,
         WrongUsageException::class,
+        RegistryException::class,
     ];
 
     public const array MINOR_LOG_EXCEPTIONS = [
         InterruptException::class,
         WrongUsageException::class,
+        RegistryException::class,
     ];
 
     /** @var null|BuilderBase Builder binding */
@@ -52,6 +54,7 @@ class ExceptionHandler
             SPCInternalException::class => "✗ SPC internal error: {$e->getMessage()}",
             ValidationException::class => "⚠ Validation failed: {$e->getMessage()}",
             WrongUsageException::class => $e->getMessage(),
+            RegistryException::class => "✗ Registry parsing error: {$e->getMessage()}",
             default => "✗ Unknown SPC exception {$class}: {$e->getMessage()}",
         };
         self::logError($head_msg);

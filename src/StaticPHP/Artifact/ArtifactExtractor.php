@@ -9,6 +9,7 @@ use StaticPHP\Exception\FileSystemException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\Package;
+use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;

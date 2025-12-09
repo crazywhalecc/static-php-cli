@@ -14,7 +14,7 @@ use StaticPHP\Util\FileSystem;
 #[Library('libedit')]
 class libedit extends LibraryPackage
 {
-    #[BeforeStage('libedit', 'build')]
+    #[BeforeStage(stage: 'build')]
     public function patchBeforeBuild(): void
     {
         FileSystem::replaceFileRegex(

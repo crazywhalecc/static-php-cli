@@ -11,6 +11,7 @@ use StaticPHP\Artifact\ArtifactExtractor;
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;

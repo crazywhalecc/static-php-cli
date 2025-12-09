@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace StaticPHP\Package;
+namespace StaticPHP\Registry;
 
 use StaticPHP\Attribute\Package\AfterStage;
 use StaticPHP\Attribute\Package\BeforeStage;
@@ -19,8 +19,13 @@ use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Attribute\Package\Validate;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
-use StaticPHP\Exception\ValidationException;
+use StaticPHP\Exception\RegistryException;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\Package;
+use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Package\TargetPackage;
 use StaticPHP\Util\FileSystem;
 
 class PackageLoader
@@ -30,9 +35,7 @@ class PackageLoader
 
     private static array $before_stages = [];
 
-    private static array $after_stage = [];
-
-    private static array $patch_before_builds = [];
+    private static array $after_stages = [];
 
     /** @var array<string, true> Track loaded classes to prevent duplicates */
     private static array $loaded_classes = [];
@@ -53,7 +56,7 @@ class PackageLoader
             if ($pkg !== null) {
                 self::$packages[$name] = $pkg;
             } else {
-                throw new WrongUsageException("Package [{$name}] has unknown type [{$item['type']}]");
+                throw new RegistryException("Package [{$name}] has unknown type [{$item['type']}]");
             }
         }
     }
@@ -156,7 +159,7 @@ class PackageLoader
             }
             $package_type = PackageConfig::get($attribute_instance->name, 'type');
             if ($package_type === null) {
-                throw new WrongUsageException("Package [{$attribute_instance->name}] not defined in config, please check your config files.");
+                throw new RegistryException("Package [{$attribute_instance->name}] not defined in config, please check your config files.");
             }
 
             // if class has parent class and matches the attribute instance, use custom class
@@ -181,10 +184,10 @@ class PackageLoader
                 default => null,
             };
             if (!in_array($package_type, $pkg_type_attr, true)) {
-                throw new ValidationException("Package [{$attribute_instance->name}] type mismatch: config type is [{$package_type}], but attribute type is [" . implode('|', $pkg_type_attr) . '].');
+                throw new RegistryException("Package [{$attribute_instance->name}] type mismatch: config type is [{$package_type}], but attribute type is [" . implode('|', $pkg_type_attr) . '].');
             }
             if ($pkg !== null && !PackageConfig::isPackageExists($pkg->getName())) {
-                throw new ValidationException("Package [{$pkg->getName()}] config not found for class {$class}");
+                throw new RegistryException("Package [{$pkg->getName()}] config not found for class {$class}");
             }
 
             // init method attributes
@@ -199,7 +202,7 @@ class PackageLoader
                         // #[CustomPhpConfigureArg(PHP_OS_FAMILY)]
                         CustomPhpConfigureArg::class => self::bindCustomPhpConfigureArg($pkg, $method_attribute->newInstance(), [$instance_class, $method->getName()]),
                         // #[Stage('stage_name')]
-                        Stage::class => $pkg->addStage($method_attribute->newInstance()->name, [$instance_class, $method->getName()]),
+                        Stage::class => self::addStage($method, $pkg, $instance_class, $method_instance),
                         // #[InitPackage] (run now with package context)
                         InitPackage::class => ApplicationContext::invoke([$instance_class, $method->getName()], [
                             Package::class => $pkg,
@@ -232,9 +235,9 @@ class PackageLoader
                 $method_instance = $method_attribute->newInstance();
                 match ($method_attribute->getName()) {
                     // #[BeforeStage('package_name', 'stage')] and #[AfterStage('package_name', 'stage')]
-                    BeforeStage::class => self::$before_stages[$method_instance->package_name][$method_instance->stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved],
-                    AfterStage::class => self::$after_stage[$method_instance->package_name][$method_instance->stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved],
-                    // #[PatchBeforeBuild()
+                    BeforeStage::class => self::addBeforeStage($method, $pkg ?? null, $instance_class, $method_instance),
+                    AfterStage::class => self::addAfterStage($method, $pkg ?? null, $instance_class, $method_instance),
+
                     default => null,
                 };
             }
@@ -258,7 +261,7 @@ class PackageLoader
     {
         // match condition
         $installer = ApplicationContext::get(PackageInstaller::class);
-        $stages = self::$after_stage[$package_name][$stage] ?? [];
+        $stages = self::$after_stages[$package_name][$stage] ?? [];
         $result = [];
         foreach ($stages as [$callback, $only_when_package_resolved]) {
             if ($only_when_package_resolved !== null && !$installer->isPackageResolved($only_when_package_resolved)) {
@@ -269,9 +272,53 @@ class PackageLoader
         return $result;
     }
 
-    public static function getPatchBeforeBuildCallbacks(string $package_name): array
+    /**
+     * Register default stages for all PhpExtensionPackage instances.
+     * Should be called after all registries have been loaded.
+     */
+    public static function registerAllDefaultStages(): void
     {
-        return self::$patch_before_builds[$package_name] ?? [];
+        foreach (self::$packages as $pkg) {
+            if ($pkg instanceof PhpExtensionPackage) {
+                $pkg->registerDefaultStages();
+            }
+        }
+    }
+
+    /**
+     * Check loaded stage events for consistency.
+     */
+    public static function checkLoadedStageEvents(): void
+    {
+        foreach (['BeforeStage' => self::$before_stages, 'AfterStage' => self::$after_stages] as $event_name => $ev_all) {
+            foreach ($ev_all as $package_name => $stages) {
+                // check package exists
+                if (!self::hasPackage($package_name)) {
+                    throw new RegistryException(
+                        "{$event_name} event registered for unknown package [{$package_name}]."
+                    );
+                }
+                $pkg = self::getPackage($package_name);
+                foreach ($stages as $stage_name => $before_events) {
+                    foreach ($before_events as [$event_callable, $only_when_package_resolved]) {
+                        // check only_when_package_resolved package exists
+                        if ($only_when_package_resolved !== null && !self::hasPackage($only_when_package_resolved)) {
+                            throw new RegistryException("{$event_name} event in package [{$package_name}] for stage [{$stage_name}] has unknown only_when_package_resolved package [{$only_when_package_resolved}].");
+                        }
+                        // check callable is valid
+                        if (!is_callable($event_callable)) {
+                            throw new RegistryException(
+                                "{$event_name} event in package [{$package_name}] for stage [{$stage_name}] has invalid callable.",
+                            );
+                        }
+                    }
+                    // check stage exists
+                    if (!$pkg->hasStage($stage_name)) {
+                        throw new RegistryException("Package stage [{$stage_name}] is not registered in package [{$package_name}].");
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -280,7 +327,7 @@ class PackageLoader
     private static function bindCustomPhpConfigureArg(Package $pkg, object $attr, callable $fn): void
     {
         if (!$pkg instanceof PhpExtensionPackage) {
-            throw new ValidationException("Class [{$pkg->getName()}] must implement PhpExtensionPackage for CustomPhpConfigureArg attribute.");
+            throw new RegistryException("Class [{$pkg->getName()}] must implement PhpExtensionPackage for CustomPhpConfigureArg attribute.");
         }
         $pkg->addCustomPhpConfigureArgCallback($attr->os, $fn);
     }
@@ -288,5 +335,45 @@ class PackageLoader
     private static function addBuildFunction(Package $pkg, object $attr, callable $fn): void
     {
         $pkg->addBuildFunction($attr->os, $fn);
+    }
+
+    private static function addStage(\ReflectionMethod $method, Package $pkg, object $instance_class, object $method_instance): void
+    {
+        $name = $method_instance->function;
+        if ($name === null) {
+            $name = $method->getName();
+        }
+        $pkg->addStage($name, [$instance_class, $method->getName()]);
+    }
+
+    private static function addBeforeStage(\ReflectionMethod $method, ?Package $pkg, mixed $instance_class, object $method_instance): void
+    {
+        /** @var BeforeStage $method_instance */
+        $stage = $method_instance->stage;
+        $stage = match (true) {
+            is_string($stage) => $stage,
+            is_array($stage) && count($stage) === 2 => $stage[1],
+            default => throw new RegistryException('Invalid stage definition in BeforeStage attribute.'),
+        };
+        if ($method_instance->package_name === '' && $pkg === null) {
+            throw new RegistryException('Package name must not be empty when no package context is available for BeforeStage attribute.');
+        }
+        $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
+        self::$before_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved];
+    }
+
+    private static function addAfterStage(\ReflectionMethod $method, ?Package $pkg, mixed $instance_class, object $method_instance): void
+    {
+        $stage = $method_instance->stage;
+        $stage = match (true) {
+            is_string($stage) => $stage,
+            is_array($stage) && count($stage) === 2 => $stage[1],
+            default => throw new RegistryException('Invalid stage definition in AfterStage attribute.'),
+        };
+        if ($method_instance->package_name === '' && $pkg === null) {
+            throw new RegistryException('Package name must not be empty when no package context is available for AfterStage attribute.');
+        }
+        $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
+        self::$after_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved];
     }
 }

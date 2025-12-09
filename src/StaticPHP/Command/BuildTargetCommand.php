@@ -6,7 +6,7 @@ namespace StaticPHP\Command;
 
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Package\PackageInstaller;
-use StaticPHP\Package\PackageLoader;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\V2CompatLayer;
 use Symfony\Component\Console\Input\InputOption;
 

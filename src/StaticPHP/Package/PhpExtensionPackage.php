@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Package;
 
+use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\ValidationException;
@@ -100,22 +101,6 @@ class PhpExtensionPackage extends Package
     public function setBuildShared(bool $build_shared = true): void
     {
         $this->build_shared = $build_shared;
-        // Add build stages for shared build on Unix-like systems
-        // TODO: Windows shared build support
-        if ($build_shared && in_array(SystemTarget::getTargetOS(), ['Linux', 'Darwin'])) {
-            if (!$this->hasStage('build')) {
-                $this->addBuildFunction(SystemTarget::getTargetOS(), [$this, '_buildSharedUnix']);
-            }
-            if (!$this->hasStage('phpize')) {
-                $this->addStage('phpize', [$this, '_phpize']);
-            }
-            if (!$this->hasStage('configure')) {
-                $this->addStage('configure', [$this, '_configure']);
-            }
-            if (!$this->hasStage('make')) {
-                $this->addStage('make', [$this, '_make']);
-            }
-        }
     }
 
     public function setBuildStatic(bool $build_static = true): void
@@ -180,18 +165,18 @@ class PhpExtensionPackage extends Package
 
     /**
      * @internal
-     * #[Stage('phpize')]
      */
-    public function _phpize(array $env, PhpExtensionPackage $package): void
+    #[Stage]
+    public function phpizeForUnix(array $env, PhpExtensionPackage $package): void
     {
         shell()->cd($package->getSourceDir())->setEnv($env)->exec(BUILD_BIN_PATH . '/phpize');
     }
 
     /**
      * @internal
-     * #[Stage('configure')]
      */
-    public function _configure(array $env, PhpExtensionPackage $package): void
+    #[Stage]
+    public function configureForUnix(array $env, PhpExtensionPackage $package): void
     {
         $phpvars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
         shell()->cd($package->getSourceDir())
@@ -205,9 +190,9 @@ class PhpExtensionPackage extends Package
 
     /**
      * @internal
-     * #[Stage('make')]
      */
-    public function _make(array $env, PhpExtensionPackage $package, PackageBuilder $builder): void
+    #[Stage]
+    public function makeForUnix(array $env, PhpExtensionPackage $package, PackageBuilder $builder): void
     {
         shell()->cd($package->getSourceDir())
             ->setEnv($env)
@@ -222,13 +207,13 @@ class PhpExtensionPackage extends Package
      * @internal
      * #[Stage('build')]
      */
-    public function _buildSharedUnix(PackageBuilder $builder): void
+    public function buildSharedForUnix(PackageBuilder $builder): void
     {
         $env = $this->getSharedExtensionEnv();
 
-        $this->runStage('phpize', ['env' => $env]);
-        $this->runStage('configure', ['env' => $env]);
-        $this->runStage('make', ['env' => $env]);
+        $this->runStage('phpizeForUnix', ['env' => $env]);
+        $this->runStage('configureForUnix', ['env' => $env]);
+        $this->runStage('makeForUnix', ['env' => $env]);
 
         // process *.so file
         $soFile = BUILD_MODULES_PATH . '/' . $this->getExtensionName() . '.so';
@@ -236,6 +221,32 @@ class PhpExtensionPackage extends Package
             throw new ValidationException("Extension {$this->getExtensionName()} build failed: {$soFile} not found", validation_module: "Extension {$this->getExtensionName()} build");
         }
         $builder->deployBinary($soFile, $soFile, false);
+    }
+
+    /**
+     * Register default stages if not already defined by attributes.
+     * This is called after all attributes have been loaded.
+     *
+     * @internal Called by PackageLoader after loading attributes
+     */
+    public function registerDefaultStages(): void
+    {
+        // Add build stages for shared build on Unix-like systems
+        // TODO: Windows shared build support
+        if ($this->build_shared && in_array(SystemTarget::getTargetOS(), ['Linux', 'Darwin'])) {
+            if (!$this->hasStage('build')) {
+                $this->addBuildFunction(SystemTarget::getTargetOS(), [$this, 'buildSharedForUnix']);
+            }
+            if (!$this->hasStage('phpizeForUnix')) {
+                $this->addStage('phpizeForUnix', [$this, 'phpizeForUnix']);
+            }
+            if (!$this->hasStage('configureForUnix')) {
+                $this->addStage('configureForUnix', [$this, 'configureForUnix']);
+            }
+            if (!$this->hasStage('makeForUnix')) {
+                $this->addStage('makeForUnix', [$this, 'makeForUnix']);
+            }
+        }
     }
 
     /**

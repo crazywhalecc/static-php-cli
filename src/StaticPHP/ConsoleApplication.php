@@ -13,8 +13,9 @@ use StaticPHP\Command\DownloadCommand;
 use StaticPHP\Command\ExtractCommand;
 use StaticPHP\Command\InstallPackageCommand;
 use StaticPHP\Command\SPCConfigCommand;
-use StaticPHP\Package\PackageLoader;
 use StaticPHP\Package\TargetPackage;
+use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Registry\Registry;
 use Symfony\Component\Console\Application;
 
 class ConsoleApplication extends Application
@@ -28,6 +29,9 @@ class ConsoleApplication extends Application
         parent::__construct('static-php-cli', self::VERSION);
 
         require_once ROOT_DIR . '/src/bootstrap.php';
+
+        // check registry
+        Registry::checkLoadedRegistries();
 
         /**
          * @var string        $name

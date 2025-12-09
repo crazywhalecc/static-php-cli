@@ -7,6 +7,7 @@ namespace StaticPHP\Doctor;
 use StaticPHP\Attribute\Doctor\CheckItem;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCException;
+use StaticPHP\Registry\DoctorLoader;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Output\OutputInterface;
