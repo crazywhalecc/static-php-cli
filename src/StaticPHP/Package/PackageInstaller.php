@@ -12,6 +12,7 @@ use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
@@ -133,6 +134,9 @@ class PackageInstaller
             echo PHP_EOL;
         }
 
+        // Early validation: check if packages can be built or installed before downloading
+        $this->validatePackagesBeforeBuild();
+
         // check download
         if ($this->download) {
             $downloaderOptions = DownloaderOptions::extractFromConsoleOptions($this->options, 'dl');
@@ -199,8 +203,6 @@ class PackageInstaller
                 if ($interactive) {
                     InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
                 }
-            } elseif ($package->getType() === 'library') {
-                throw new WrongUsageException("Package '{$package->getName()}' cannot be installed: no build stage defined and no binary artifact available for current OS.");
             }
         }
     }
@@ -531,6 +533,23 @@ class PackageInstaller
                 foreach ($v as $vs) {
                     InteractiveTerm::plain(str_pad('', $maxlen + 4) . ConsoleColor::yellow($vs));
                 }
+            }
+        }
+    }
+
+    private function validatePackagesBeforeBuild(): void
+    {
+        foreach ($this->packages as $package) {
+            if ($package->getType() !== 'library') {
+                continue;
+            }
+            $is_to_build = $this->isBuildPackage($package);
+            $has_build_stage = $package instanceof LibraryPackage && $package->hasStage('build');
+            $should_use_binary = $package instanceof LibraryPackage && ($package->getArtifact()?->shouldUseBinary() ?? false);
+
+            // Check if package can neither be built nor installed
+            if (!$is_to_build && !$should_use_binary && !$has_build_stage) {
+                throw new WrongUsageException("Package '{$package->getName()}' cannot be installed: no build stage defined and no binary artifact available for current OS: " . SystemTarget::getCurrentPlatformString());
             }
         }
     }
