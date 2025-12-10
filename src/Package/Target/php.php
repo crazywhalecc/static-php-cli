@@ -15,6 +15,7 @@ use StaticPHP\Attribute\Package\Validate;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\Package;
@@ -527,6 +528,12 @@ class php extends TargetPackage
         $package->runStage([$this, 'makeForUnix']);
 
         $package->runStage([$this, 'unixBuildSharedExt']);
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(TargetPackage $package): void
+    {
+        throw new EnvironmentException('Not implemented');
     }
 
     /**
