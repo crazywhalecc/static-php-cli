@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace StaticPHP\Doctor;
+namespace StaticPHP\Registry;
 
 use StaticPHP\Attribute\Doctor\CheckItem;
 use StaticPHP\Attribute\Doctor\FixItem;

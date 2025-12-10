@@ -10,6 +10,7 @@ use SPC\builder\linux\LinuxBuilder;
 use SPC\builder\macos\MacOSBuilder;
 use SPC\builder\windows\WindowsBuilder;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Util\InteractiveTerm;
 use ZM\Logger\ConsoleColor;
 
 class ExceptionHandler
@@ -25,11 +26,13 @@ class ExceptionHandler
         SPCInternalException::class,
         ValidationException::class,
         WrongUsageException::class,
+        RegistryException::class,
     ];
 
     public const array MINOR_LOG_EXCEPTIONS = [
         InterruptException::class,
         WrongUsageException::class,
+        RegistryException::class,
     ];
 
     /** @var null|BuilderBase Builder binding */
@@ -52,6 +55,7 @@ class ExceptionHandler
             SPCInternalException::class => "✗ SPC internal error: {$e->getMessage()}",
             ValidationException::class => "⚠ Validation failed: {$e->getMessage()}",
             WrongUsageException::class => $e->getMessage(),
+            RegistryException::class => "✗ Registry parsing error: {$e->getMessage()}",
             default => "✗ Unknown SPC exception {$class}: {$e->getMessage()}",
         };
         self::logError($head_msg);
@@ -186,7 +190,7 @@ class ExceptionHandler
             $line = str_pad($v, strlen($v) + $indent_space, ' ', STR_PAD_LEFT);
             fwrite($spc_log, strip_ansi_colors($line) . PHP_EOL);
             if ($output_log) {
-                echo ConsoleColor::red($line) . PHP_EOL;
+                InteractiveTerm::plain(ConsoleColor::red($line) . '');
             }
         }
     }

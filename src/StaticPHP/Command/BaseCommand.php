@@ -10,6 +10,7 @@ use StaticPHP\Exception\SPCException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use ZM\Logger\ConsoleColor;
 
 abstract class BaseCommand extends Command
 {
@@ -21,7 +22,7 @@ abstract class BaseCommand extends Command
 / ___|| |_ __ _| |_(_) ___|  _ \| | | |  _ \
 \___ \| __/ _` | __| |/ __| |_) | |_| | |_) |
  ___) | || (_| | |_| | (__|  __/|  _  |  __/
-|____/ \__\__,_|\__|_|\___|_|   |_| |_|_|    v{version}
+|____/ \__\__,_|\__|_|\___|_|   |_| |_|_|    {version}
 
 ';
 
@@ -69,7 +70,8 @@ abstract class BaseCommand extends Command
         });
         $version = $this->getVersionWithCommit();
         if (!$this->no_motd) {
-            echo str_replace('{version}', $version, self::$motd);
+            $str = str_replace('{version}', '' . ConsoleColor::none("v{$version}"), '' . ConsoleColor::magenta(self::$motd));
+            echo $this->input->getOption('no-ansi') ? strip_ansi_colors($str) : $str;
         }
     }
 

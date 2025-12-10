@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace StaticPHP\Registry;
 
-use StaticPHP\Artifact\ArtifactLoader;
 use StaticPHP\Config\ArtifactConfig;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\ConsoleApplication;
-use StaticPHP\Doctor\DoctorLoader;
-use StaticPHP\Exception\EnvironmentException;
-use StaticPHP\Package\PackageLoader;
+use StaticPHP\Exception\RegistryException;
 use StaticPHP\Util\FileSystem;
 use Symfony\Component\Yaml\Yaml;
 
@@ -30,19 +27,19 @@ class Registry
     {
         $yaml = file_get_contents($registry_file);
         if ($yaml === false) {
-            throw new EnvironmentException("Failed to read registry file: {$registry_file}");
+            throw new RegistryException("Failed to read registry file: {$registry_file}");
         }
         $data = match (pathinfo($registry_file, PATHINFO_EXTENSION)) {
             'json' => json_decode($yaml, true),
             'yaml', 'yml' => Yaml::parse($yaml),
-            default => throw new EnvironmentException("Unsupported registry file format: {$registry_file}"),
+            default => throw new RegistryException("Unsupported registry file format: {$registry_file}"),
         };
         if (!is_array($data)) {
-            throw new EnvironmentException("Invalid registry format in file: {$registry_file}");
+            throw new RegistryException("Invalid registry format in file: {$registry_file}");
         }
         $registry_name = $data['name'] ?? null;
         if (!is_string($registry_name) || empty($registry_name)) {
-            throw new EnvironmentException("Registry 'name' is missing or invalid in file: {$registry_file}");
+            throw new RegistryException("Registry 'name' is missing or invalid in file: {$registry_file}");
         }
 
         // Prevent loading the same registry twice
@@ -190,6 +187,16 @@ class Registry
         }
     }
 
+    public static function checkLoadedRegistries(): void
+    {
+        // Register default stages for all PhpExtensionPackage instances
+        // This must be done after all registries are loaded to ensure custom stages take precedence
+        PackageLoader::registerAllDefaultStages();
+
+        // check BeforeStage, AfterStage is valid
+        PackageLoader::checkLoadedStageEvents();
+    }
+
     /**
      * Get list of loaded registry names.
      *
@@ -252,7 +259,7 @@ class Registry
         }
 
         // Class not found and no file path provided
-        throw new EnvironmentException(
+        throw new RegistryException(
             "Class '{$class}' not found. For external registries, either:\n" .
             "  1. Add an 'autoload' entry pointing to your composer autoload file\n" .
             "  2. Use 'psr-4' instead of 'classes' for auto-discovery\n" .
@@ -272,7 +279,7 @@ class Registry
             $path = $relative_path_base . DIRECTORY_SEPARATOR . $path;
         }
         if (!file_exists($path)) {
-            throw new EnvironmentException("Path does not exist: {$path}");
+            throw new RegistryException("Path does not exist: {$path}");
         }
         return FileSystem::convertPath($path);
     }

@@ -9,7 +9,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Command\BaseCommand;
 use StaticPHP\DI\ApplicationContext;
-use StaticPHP\Package\PackageLoader;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Attribute\AsCommand;

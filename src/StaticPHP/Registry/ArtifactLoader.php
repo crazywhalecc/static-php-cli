@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace StaticPHP\Artifact;
+namespace StaticPHP\Registry;
 
+use StaticPHP\Artifact\Artifact;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\AfterSourceExtract;
 use StaticPHP\Attribute\Artifact\BinaryExtract;

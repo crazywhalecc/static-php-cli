@@ -26,6 +26,10 @@ class CallbackInvoker
      * 4. Default value
      * 5. Null (if nullable)
      *
+     * Note: For object values in context, the invoker automatically registers
+     * the object under all its parent classes and interfaces, allowing type hints
+     * to match any type in the inheritance hierarchy.
+     *
      * @param callable $callback The callback to invoke
      * @param array    $context  Context parameters (type => value or name => value)
      *
@@ -35,6 +39,9 @@ class CallbackInvoker
      */
     public function invoke(callable $callback, array $context = []): mixed
     {
+        // Expand context to include all parent classes and interfaces for objects
+        $context = $this->expandContextHierarchy($context);
+
         $reflection = new \ReflectionFunction(\Closure::fromCallable($callback));
         $args = [];
 
@@ -94,5 +101,44 @@ class CallbackInvoker
             'object', 'callable', 'iterable', 'mixed',
             'void', 'null', 'false', 'true', 'never',
         ], true);
+    }
+
+    /**
+     * Expand context to include all parent classes and interfaces for object values.
+     * This allows type hints to match any type in the object's inheritance hierarchy.
+     *
+     * @param  array $context Original context array
+     * @return array Expanded context with all class hierarchy mappings
+     */
+    private function expandContextHierarchy(array $context): array
+    {
+        $expanded = [];
+
+        foreach ($context as $key => $value) {
+            // Keep the original key-value pair
+            $expanded[$key] = $value;
+
+            // If value is an object, add mappings for all parent classes and interfaces
+            if (is_object($value)) {
+                $reflection = new \ReflectionClass($value);
+
+                // Add concrete class
+                $expanded[$reflection->getName()] = $value;
+
+                // Add all parent classes
+                while ($parent = $reflection->getParentClass()) {
+                    $expanded[$parent->getName()] = $value;
+                    $reflection = $parent;
+                }
+
+                // Add all interfaces
+                $interfaces = (new \ReflectionClass($value))->getInterfaceNames();
+                foreach ($interfaces as $interface) {
+                    $expanded[$interface] = $value;
+                }
+            }
+        }
+
+        return $expanded;
     }
 }

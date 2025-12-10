@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace StaticPHP\Package;
 
 use StaticPHP\Artifact\Artifact;
-use StaticPHP\Artifact\ArtifactLoader;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCInternalException;
+use StaticPHP\Registry\ArtifactLoader;
+use StaticPHP\Registry\PackageLoader;
 
 abstract class Package
 {
@@ -18,6 +19,12 @@ abstract class Package
      * @var array<string, callable> $stages Defined stages for the package
      */
     protected array $stages = [];
+
+    /** @var array<string, callable> $build_functions Build functions for different OS binding */
+    protected array $build_functions = [];
+
+    /** @var array<string, string> */
+    protected array $outputs = [];
 
     /**
      * @param string $name Name of the package
@@ -29,15 +36,25 @@ abstract class Package
      * Run a defined stage of the package.
      * If the stage is not defined, an exception should be thrown.
      *
-     * @param  string $name    Name of the stage to run
-     * @param  array  $context Additional context to pass to the stage callback
-     * @return mixed  Based on the stage definition, return the result of the stage
+     * @param  array|callable|string $name    Name of the stage to run (can be callable)
+     * @param  array                 $context Additional context to pass to the stage callback
+     * @return mixed                 Based on the stage definition, return the result of the stage
      */
-    public function runStage(string $name, array $context = []): mixed
+    public function runStage(mixed $name, array $context = []): mixed
     {
-        if (!isset($this->stages[$name])) {
+        if (!$this->hasStage($name)) {
+            $name = match (true) {
+                is_string($name) => $name,
+                is_array($name) && count($name) === 2 => $name[1], // use function name
+                default => '{' . gettype($name) . '}',
+            };
             throw new SPCInternalException("Stage '{$name}' is not defined for package '{$this->name}'.");
         }
+        $name = match (true) {
+            is_string($name) => $name,
+            is_array($name) && count($name) === 2 => $name[1], // use function name
+            default => throw new SPCInternalException('Invalid stage name type: ' . gettype($name)),
+        };
 
         // Merge package context with provided context
         /** @noinspection PhpDuplicateArrayKeysInspection */
@@ -55,6 +72,31 @@ abstract class Package
         return $ret;
     }
 
+    public function setOutput(string $key, string $value): static
+    {
+        $this->outputs[$key] = $value;
+        return $this;
+    }
+
+    public function getOutputs(): array
+    {
+        return $this->outputs;
+    }
+
+    /**
+     * Add a build function for a specific platform.
+     *
+     * @param string   $os_family PHP_OS_FAMILY
+     * @param callable $func      Function to build for the platform
+     */
+    public function addBuildFunction(string $os_family, callable $func): void
+    {
+        $this->build_functions[$os_family] = $func;
+        if ($os_family === PHP_OS_FAMILY) {
+            $this->addStage('build', $func);
+        }
+    }
+
     public function isInstalled(): bool
     {
         // By default, assume package is not installed.
@@ -63,9 +105,6 @@ abstract class Package
 
     /**
      * Add a stage to the package.
-     *
-     * @param string   $name  Stage name
-     * @param callable $stage Stage callable
      */
     public function addStage(string $name, callable $stage): void
     {
@@ -75,11 +114,17 @@ abstract class Package
     /**
      * Check if the package has a specific stage defined.
      *
-     * @param string $name Stage name
+     * @param mixed $name Stage name
      */
-    public function hasStage(string $name): bool
+    public function hasStage(mixed $name): bool
     {
-        return isset($this->stages[$name]);
+        if (is_array($name) && count($name) === 2) {
+            return isset($this->stages[$name[1]]); // use function name
+        }
+        if (is_string($name)) {
+            return isset($this->stages[$name]); // use defined name
+        }
+        return false;
     }
 
     /**

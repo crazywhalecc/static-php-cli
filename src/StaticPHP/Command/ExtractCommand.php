@@ -6,9 +6,9 @@ namespace StaticPHP\Command;
 
 use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Artifact\ArtifactExtractor;
-use StaticPHP\Artifact\ArtifactLoader;
 use StaticPHP\DI\ApplicationContext;
-use StaticPHP\Package\PackageLoader;
+use StaticPHP\Registry\ArtifactLoader;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Attribute\AsCommand;

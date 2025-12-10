@@ -7,6 +7,7 @@ namespace StaticPHP\Doctor\Item;
 use StaticPHP\Attribute\Doctor\CheckItem;
 use StaticPHP\Attribute\Doctor\FixItem;
 use StaticPHP\Doctor\CheckResult;
+use StaticPHP\Package\PackageInstaller;
 
 class Re2cVersionCheck
 {
@@ -29,7 +30,9 @@ class Re2cVersionCheck
     #[FixItem('build-re2c')]
     public function buildRe2c(): bool
     {
-        // TODO: implement re2c build process
-        return false;
+        $installer = new PackageInstaller();
+        $installer->addInstallPackage('re2c');
+        $installer->run(false);
+        return true;
     }
 }

@@ -10,5 +10,5 @@ namespace StaticPHP\Attribute\Package;
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 readonly class AfterStage
 {
-    public function __construct(public string $package_name, public string $stage, public ?string $only_when_package_resolved = null) {}
+    public function __construct(public string $package_name, public array|string $stage, public ?string $only_when_package_resolved = null) {}
 }
