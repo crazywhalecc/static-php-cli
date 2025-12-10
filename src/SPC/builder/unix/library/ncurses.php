@@ -29,7 +29,7 @@ trait ncurses
                 '--without-tests',
                 '--without-dlsym',
                 '--without-debug',
-                '-enable-symlinks',
+                '--enable-symlinks',
                 "--bindir={$this->getBinDir()}",
                 "--includedir={$this->getIncludeDir()}",
                 "--libdir={$this->getLibDir()}",
