@@ -447,6 +447,7 @@ class php extends TargetPackage
 
         // process shared extensions that built-with-php
         $increment_files = $diff->getChangedFiles();
+        $files = [];
         foreach ($increment_files as $increment_file) {
             $builder->deployBinary($increment_file, $increment_file, false);
             $files[] = basename($increment_file);
