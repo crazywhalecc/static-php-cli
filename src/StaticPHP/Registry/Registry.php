@@ -25,7 +25,7 @@ class Registry
      */
     public static function loadRegistry(string $registry_file, bool $auto_require = true): void
     {
-        $yaml = file_get_contents($registry_file);
+        $yaml = @file_get_contents($registry_file);
         if ($yaml === false) {
             throw new RegistryException("Failed to read registry file: {$registry_file}");
         }

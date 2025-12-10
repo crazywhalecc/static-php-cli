@@ -404,8 +404,6 @@ class PackageInstaller
 
     /**
      * Validate that a package has required artifacts.
-     *
-     * @throws WrongUsageException if target/library package has no source or platform binary
      */
     private function validatePackageArtifact(Package $package): void
     {

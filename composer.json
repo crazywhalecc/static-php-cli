@@ -41,7 +41,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "SPC\\Tests\\": "tests/SPC"
+            "Tests\\StaticPHP\\": "tests/StaticPHP"
         }
     },
     "bin": [
