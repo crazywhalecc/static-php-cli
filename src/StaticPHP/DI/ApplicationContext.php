@@ -83,7 +83,7 @@ class ApplicationContext
      *
      * @param class-string<T> $id Service identifier
      *
-     * @return T
+     * @return null|T
      */
     public static function get(string $id): mixed
     {
