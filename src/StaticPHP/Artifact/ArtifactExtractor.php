@@ -352,8 +352,6 @@ class ArtifactExtractor
      * @param string $name        Artifact name (for error messages)
      * @param string $source_file Path to the source file or directory
      * @param string $cache_type  Cache type: archive, git, local
-     *
-     * @throws WrongUsageException if source file does not exist
      */
     protected function validateSourceFile(string $name, string $source_file, string $cache_type): void
     {

@@ -35,8 +35,6 @@ class ApplicationContext
      * @param array $options Initialization options
      *                       - 'debug': Enable debug mode (disables compilation)
      *                       - 'definitions': Additional container definitions
-     *
-     * @throws \RuntimeException If already initialized
      */
     public static function initialize(array $options = []): Container
     {
@@ -60,7 +58,8 @@ class ApplicationContext
         self::$debug = $options['debug'] ?? false;
 
         self::$container = $builder->build();
-        self::$invoker = new CallbackInvoker(self::$container);
+        // Get invoker from container to ensure singleton consistency
+        self::$invoker = self::$container->get(CallbackInvoker::class);
 
         return self::$container;
     }
@@ -126,7 +125,8 @@ class ApplicationContext
     public static function getInvoker(): CallbackInvoker
     {
         if (self::$invoker === null) {
-            self::$invoker = new CallbackInvoker(self::getContainer());
+            // Get from container to ensure singleton consistency
+            self::$invoker = self::getContainer()->get(CallbackInvoker::class);
         }
         return self::$invoker;
     }
@@ -139,14 +139,18 @@ class ApplicationContext
      */
     public static function invoke(callable $callback, array $context = []): mixed
     {
-        logger()->debug('[INVOKE] ' . (is_array($callback) ? (is_object($callback[0]) ? get_class($callback[0]) : $callback[0]) . '::' . $callback[1] : (is_string($callback) ? $callback : 'Closure')));
+        if (function_exists('logger')) {
+            logger()->debug('[INVOKE] ' . (is_array($callback) ? (is_object($callback[0]) ? get_class($callback[0]) : $callback[0]) . '::' . $callback[1] : (is_string($callback) ? $callback : 'Closure')));
+        }
 
         // get if callback has attribute PatchDescription
         $ref = new \ReflectionFunction(\Closure::fromCallable($callback));
         $attributes = $ref->getAttributes(PatchDescription::class);
         foreach ($attributes as $attribute) {
             $attrInstance = $attribute->newInstance();
-            logger()->info(ConsoleColor::magenta('[PATCH]') . ConsoleColor::green(" {$attrInstance->description}"));
+            if (function_exists('logger')) {
+                logger()->info(ConsoleColor::magenta('[PATCH]') . ConsoleColor::green(" {$attrInstance->description}"));
+            }
         }
         return self::getInvoker()->invoke($callback, $context);
     }

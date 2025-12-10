@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace StaticPHP\DI;
 
 use DI\Container;
+use StaticPHP\Exception\SPCInternalException;
 
 /**
  * CallbackInvoker is responsible for invoking callbacks with automatic dependency injection.
  * It supports context-based parameter resolution, allowing temporary bindings without polluting the container.
  */
-class CallbackInvoker
+readonly class CallbackInvoker
 {
     public function __construct(
         private Container $container
@@ -34,8 +35,6 @@ class CallbackInvoker
      * @param array    $context  Context parameters (type => value or name => value)
      *
      * @return mixed The return value of the callback
-     *
-     * @throws \RuntimeException If a required parameter cannot be resolved
      */
     public function invoke(callable $callback, array $context = []): mixed
     {
@@ -64,8 +63,13 @@ class CallbackInvoker
 
             // 3. Look up in container by type
             if ($typeName !== null && !$this->isBuiltinType($typeName) && $this->container->has($typeName)) {
-                $args[] = $this->container->get($typeName);
-                continue;
+                try {
+                    $args[] = $this->container->get($typeName);
+                    continue;
+                } catch (\Throwable $e) {
+                    // Container failed to resolve (e.g., missing constructor params)
+                    // Fall through to try default value or nullable
+                }
             }
 
             // 4. Use default value if available
@@ -81,7 +85,7 @@ class CallbackInvoker
             }
 
             // Cannot resolve parameter
-            throw new \RuntimeException(
+            throw new SPCInternalException(
                 "Cannot resolve parameter '{$paramName}'" .
                 ($typeName ? " of type '{$typeName}'" : '') .
                 ' for callback invocation'
@@ -120,19 +124,20 @@ class CallbackInvoker
 
             // If value is an object, add mappings for all parent classes and interfaces
             if (is_object($value)) {
-                $reflection = new \ReflectionClass($value);
+                $originalReflection = new \ReflectionClass($value);
 
                 // Add concrete class
-                $expanded[$reflection->getName()] = $value;
+                $expanded[$originalReflection->getName()] = $value;
 
                 // Add all parent classes
+                $reflection = $originalReflection;
                 while ($parent = $reflection->getParentClass()) {
                     $expanded[$parent->getName()] = $value;
                     $reflection = $parent;
                 }
 
-                // Add all interfaces
-                $interfaces = (new \ReflectionClass($value))->getInterfaceNames();
+                // Add all interfaces - reuse original reflection
+                $interfaces = $originalReflection->getInterfaceNames();
                 foreach ($interfaces as $interface) {
                     $expanded[$interface] = $value;
                 }
