@@ -36,7 +36,7 @@ class ncurses
                 '--without-tests',
                 '--without-dlsym',
                 '--without-debug',
-                '-enable-symlinks',
+                '--enable-symlinks',
                 "--bindir={$package->getBinDir()}",
                 "--includedir={$package->getIncludeDir()}",
                 "--libdir={$package->getLibDir()}",
