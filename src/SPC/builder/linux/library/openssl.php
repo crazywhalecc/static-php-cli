@@ -62,6 +62,7 @@ class openssl extends LinuxLibraryBase
                 "{$zlib_extra}" .
                 'enable-pie ' .
                 'no-legacy ' .
+                'no-tests ' .
                 "linux-{$arch}"
             )
             ->exec('make clean')
