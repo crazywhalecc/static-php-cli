@@ -26,7 +26,7 @@ class ArtifactConfigTest extends TestCase
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
         $property->setAccessible(true);
-        $property->setValue([]);
+        $property->setValue(null, []);
     }
 
     /** @noinspection PhpExpressionResultUnusedInspection */
@@ -42,7 +42,7 @@ class ArtifactConfigTest extends TestCase
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
         $property->setAccessible(true);
-        $property->setValue([]);
+        $property->setValue(null, []);
     }
 
     public function testLoadFromDirThrowsExceptionWhenDirectoryDoesNotExist(): void

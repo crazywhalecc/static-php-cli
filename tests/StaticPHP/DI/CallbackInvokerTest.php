@@ -7,15 +7,15 @@ namespace Tests\StaticPHP\DI;
 use DI\Container;
 use PHPUnit\Framework\TestCase;
 use StaticPHP\DI\CallbackInvoker;
+use StaticPHP\Exception\SPCInternalException;
 
 /**
  * Helper class that requires constructor parameters for testing
  */
-class UnresolvableTestClass
+readonly class UnresolvableTestClass
 {
-    public function __construct(
-        private string $requiredParam
-    ) {}
+    /** @noinspection PhpPropertyOnlyWrittenInspection */
+    public function __construct(private string $requiredParam) {}
 }
 
 /**
@@ -92,7 +92,7 @@ class CallbackInvokerTest extends TestCase
 
         // Should not resolve from container as 'test.service' is not a type
         // Will try default value or null
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(SPCInternalException::class);
         $this->invoker->invoke($callback);
     }
 
@@ -139,7 +139,7 @@ class CallbackInvokerTest extends TestCase
             return $required;
         };
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(SPCInternalException::class);
         $this->expectExceptionMessage("Cannot resolve parameter 'required' of type 'string'");
         $this->invoker->invoke($callback);
     }
@@ -527,7 +527,7 @@ class CallbackInvokerTest extends TestCase
         $callback = eval('return function (string|int $param) { return $param; };');
 
         // Union types are not ReflectionNamedType, should not be resolved from container
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(SPCInternalException::class);
         $this->invoker->invoke($callback);
     }
 
@@ -594,7 +594,7 @@ class CallbackInvokerTest extends TestCase
             return $obj;
         };
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(SPCInternalException::class);
         $this->expectExceptionMessage("Cannot resolve parameter 'obj'");
 
         $this->invoker->invoke($callback);

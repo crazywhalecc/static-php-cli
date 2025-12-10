@@ -31,7 +31,7 @@ class ArtifactConfig
      */
     public static function loadFromFile(string $file): void
     {
-        $content = file_get_contents($file);
+        $content = @file_get_contents($file);
         if ($content === false) {
             throw new WrongUsageException("Failed to read artifact config file: {$file}");
         }

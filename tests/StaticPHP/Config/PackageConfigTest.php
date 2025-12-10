@@ -26,7 +26,7 @@ class PackageConfigTest extends TestCase
         $reflection = new \ReflectionClass(PackageConfig::class);
         $property = $reflection->getProperty('package_configs');
         $property->setAccessible(true);
-        $property->setValue([]);
+        $property->setValue(null, []);
     }
 
     protected function tearDown(): void
@@ -41,7 +41,7 @@ class PackageConfigTest extends TestCase
         $reflection = new \ReflectionClass(PackageConfig::class);
         $property = $reflection->getProperty('package_configs');
         $property->setAccessible(true);
-        $property->setValue([]);
+        $property->setValue(null, []);
     }
 
     public function testLoadFromDirThrowsExceptionWhenDirectoryDoesNotExist(): void
