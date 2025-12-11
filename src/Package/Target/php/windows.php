@@ -199,7 +199,7 @@ trait windows
 
         // patch micro win32
         if ($package->getBuildOption('enable-micro-win32') && !file_exists("{$package->getSourceDir()}\\sapi\\micro\\php_micro.c.win32bak")) {
-            copy("{$package->getSourceDir()}\\sapi\\micro\\php_micro.c", "{$package->getSourceDir()}\\php-src\\sapi\\micro\\php_micro.c.win32bak");
+            copy("{$package->getSourceDir()}\\sapi\\micro\\php_micro.c", "{$package->getSourceDir()}\\sapi\\micro\\php_micro.c.win32bak");
             FileSystem::replaceFileStr("{$package->getSourceDir()}\\sapi\\micro\\php_micro.c", '#include "php_variables.h"', '#include "php_variables.h"' . "\n#define PHP_MICRO_WIN32_NO_CONSOLE 1");
         } else {
             if (file_exists("{$package->getSourceDir()}\\sapi\\micro\\php_micro.c.win32bak")) {
