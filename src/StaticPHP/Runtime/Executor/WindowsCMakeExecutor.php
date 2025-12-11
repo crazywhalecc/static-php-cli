@@ -35,16 +35,10 @@ class WindowsCMakeExecutor extends Executor
 
     protected PackageInstaller $installer;
 
-    public function __construct(protected LibraryPackage $package, ?PackageBuilder $builder = null)
+    public function __construct(protected LibraryPackage $package)
     {
         parent::__construct($this->package);
-        if ($builder !== null) {
-            $this->builder = $builder;
-        } elseif (ApplicationContext::has(PackageBuilder::class)) {
-            $this->builder = ApplicationContext::get(PackageBuilder::class);
-        } else {
-            throw new SPCInternalException('PackageBuilder not found in ApplicationContext.');
-        }
+        $this->builder = ApplicationContext::get(PackageBuilder::class);
         $this->installer = ApplicationContext::get(PackageInstaller::class);
         $this->initCmd();
 
