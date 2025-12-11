@@ -107,6 +107,8 @@ class GlobalEnvManager
     {
         if (SystemTarget::isUnix() && !str_contains(getenv('PATH'), $path)) {
             self::putenv("PATH={$path}:" . getenv('PATH'));
+        } elseif (SystemTarget::getTargetOS() === 'Windows' && !str_contains(getenv('PATH'), $path)) {
+            self::putenv("PATH={$path};" . getenv('PATH'));
         }
     }
 

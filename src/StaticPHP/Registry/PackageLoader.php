@@ -306,7 +306,9 @@ class PackageLoader
                         }
                     }
                     // check stage exists
-                    if (!$pkg->hasStage($stage_name)) {
+                    // Skip validation if the package has no build function for current OS
+                    // (e.g., libedit has BeforeStage for 'build' but only BuildFor('Darwin'/'Linux'))
+                    if (!$pkg->hasStage($stage_name) && $pkg->hasBuildFunctionForCurrentOS()) {
                         throw new RegistryException("Package stage [{$stage_name}] is not registered in package [{$package_name}].");
                     }
                 }

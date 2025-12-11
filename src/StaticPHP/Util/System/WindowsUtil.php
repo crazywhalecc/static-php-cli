@@ -15,13 +15,10 @@ class WindowsUtil
      * @param  array       $paths search path (default use env path)
      * @return null|string null if not found, string is absolute path
      */
-    public static function findCommand(string $name, array $paths = [], bool $include_sdk_bin = false): ?string
+    public static function findCommand(string $name, array $paths = []): ?string
     {
         if (!$paths) {
             $paths = explode(PATH_SEPARATOR, getenv('Path'));
-            if ($include_sdk_bin) {
-                $paths[] = getenv('PHP_SDK_PATH') . '\bin';
-            }
         }
         foreach ($paths as $path) {
             if (file_exists($path . DIRECTORY_SEPARATOR . $name)) {
@@ -34,29 +31,35 @@ class WindowsUtil
     /**
      * Find Visual Studio installation.
      *
-     * @return array<string, string>|false False if not installed, array contains 'version' and 'dir'
+     * @return array{
+     *     version: string,
+     *     major_version: string,
+     *     dir: string
+     * }|false False if not installed, array contains 'version' and 'dir'
      */
     public static function findVisualStudio(): array|false
     {
-        $check_path = [
-            'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe' => 'vs17',
-            'C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe' => 'vs17',
-            'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe' => 'vs17',
-            'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe' => 'vs16',
-            'C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe' => 'vs16',
-            'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe' => 'vs16',
+        // call vswhere (need VS and C++ tools installed), output is json
+        $vswhere_exec = PKG_ROOT_PATH . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'vswhere.exe';
+        $args = [
+            '-latest',
+            '-format', 'json',
+            '-requires', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
         ];
-        foreach ($check_path as $path => $vs_version) {
-            if (file_exists($path)) {
-                $vs_ver = $vs_version;
-                $d_dir = dirname($path, 4);
-                return [
-                    'version' => $vs_ver,
-                    'dir' => $d_dir,
-                ];
-            }
+        $cmd = escapeshellarg($vswhere_exec) . ' ' . implode(' ', $args);
+        $result = f_exec($cmd, $out, $code);
+        if ($code !== 0 || !$result) {
+            return false;
         }
-        return false;
+        $json = json_decode(implode("\n", $out), true);
+        if (!is_array($json) || count($json) === 0) {
+            return false;
+        }
+        return [
+            'version' => $json[0]['installationVersion'],
+            'major_version' => explode('.', $json[0]['installationVersion'])[0],
+            'dir' => $json[0]['installationPath'],
+        ];
     }
 
     /**

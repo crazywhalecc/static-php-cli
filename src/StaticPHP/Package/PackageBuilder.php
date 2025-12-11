@@ -11,7 +11,6 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
-use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\System\LinuxUtil;
 
@@ -26,9 +25,6 @@ class PackageBuilder
     public function __construct(protected array $options = [])
     {
         ApplicationContext::set(PackageBuilder::class, $this);
-
-        // apply build toolchain envs
-        GlobalEnvManager::afterInit();
 
         $this->concurrency = (int) getenv('SPC_CONCURRENCY') ?: 1;
     }
@@ -103,7 +99,7 @@ class PackageBuilder
 
         // ignore copy to self
         if (realpath($src) !== realpath($dst)) {
-            shell()->exec('cp ' . escapeshellarg($src) . ' ' . escapeshellarg($dst));
+            FileSystem::copy($src, $dst);
         }
 
         // file exist
@@ -115,7 +111,7 @@ class PackageBuilder
         $this->extractDebugInfo($dst);
 
         // strip
-        if (!$this->getOption('no-strip')) {
+        if (!$this->getOption('no-strip') && SystemTarget::isUnix()) {
             $this->stripBinary($dst);
         }
 
@@ -127,6 +123,9 @@ class PackageBuilder
             }
             logger()->info("Compressing {$dst} with UPX");
             shell()->exec(getenv('UPX_EXEC') . " --best {$dst}");
+        } elseif ($upx_option && SystemTarget::getTargetOS() === 'Windows' && $executable) {
+            logger()->info("Compressing {$dst} with UPX");
+            shell()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($dst));
         }
 
         return $dst;
@@ -140,12 +139,13 @@ class PackageBuilder
     public function extractDebugInfo(string $binary_path): string
     {
         $target_dir = BUILD_ROOT_PATH . '/debug';
-        FileSystem::createDir($target_dir);
         $basename = basename($binary_path);
         $debug_file = "{$target_dir}/{$basename}" . (SystemTarget::getTargetOS() === 'Darwin' ? '.dwarf' : '.debug');
         if (SystemTarget::getTargetOS() === 'Darwin') {
+            FileSystem::createDir($target_dir);
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
+            FileSystem::createDir($target_dir);
             if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
                 shell()
                     ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
@@ -156,7 +156,8 @@ class PackageBuilder
                     ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
             }
         } else {
-            throw new SPCInternalException('extractDebugInfo is only supported on Linux and macOS');
+            logger()->debug('extractDebugInfo is only supported on Linux and macOS');
+            return '';
         }
         return $debug_file;
     }

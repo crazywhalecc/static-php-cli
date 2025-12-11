@@ -293,7 +293,7 @@ class ArtifactExtractor
             // Process file mappings
             foreach ($file_map as $src_pattern => $dst_path) {
                 $dst_path = $this->replacePathVariables($dst_path);
-                $src_full = "{$temp_path}/{$src_pattern}";
+                $src_full = FileSystem::convertPath("{$temp_path}/{$src_pattern}");
 
                 // Handle glob patterns
                 if (str_contains($src_pattern, '*')) {
@@ -460,40 +460,36 @@ class ArtifactExtractor
         $target = FileSystem::convertPath($target);
         $filename = FileSystem::convertPath($filename);
 
-        FileSystem::createDir($target);
+        $extname = FileSystem::extname($filename);
 
-        if (PHP_OS_FAMILY === 'Windows') {
-            // Use 7za.exe for Windows
-            $is_txz = str_ends_with($filename, '.txz') || str_ends_with($filename, '.tar.xz');
-            default_shell()->execute7zExtract($filename, $target, $is_txz);
-            return;
+        if ($extname !== 'exe' && !is_dir($target)) {
+            FileSystem::createDir($target);
         }
-
-        // Unix-like systems: determine compression type
-        if (str_ends_with($filename, '.tar.gz') || str_ends_with($filename, '.tgz')) {
-            default_shell()->executeTarExtract($filename, $target, 'gz');
-        } elseif (str_ends_with($filename, '.tar.bz2')) {
-            default_shell()->executeTarExtract($filename, $target, 'bz2');
-        } elseif (str_ends_with($filename, '.tar.xz') || str_ends_with($filename, '.txz')) {
-            default_shell()->executeTarExtract($filename, $target, 'xz');
-        } elseif (str_ends_with($filename, '.tar')) {
-            default_shell()->executeTarExtract($filename, $target, 'none');
-        } elseif (str_ends_with($filename, '.zip')) {
-            // Zip requires special handling for strip-components
-            $this->unzipWithStrip($filename, $target);
-        } elseif (str_ends_with($filename, '.exe')) {
-            // exe just copy to target
-            $dest_file = FileSystem::convertPath("{$target}/" . basename($filename));
-            FileSystem::copy($filename, $dest_file);
-        } else {
-            throw new FileSystemException("Unknown archive format: {$filename}");
-        }
+        match (SystemTarget::getTargetOS()) {
+            'Windows' => match ($extname) {
+                'tar' => default_shell()->executeTarExtract($filename, $target, 'none'),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => default_shell()->execute7zExtract($filename, $target),
+                'zip' => $this->unzipWithStrip($filename, $target),
+                'exe' => $this->copyFile($filename, $target),
+                default => throw new FileSystemException("Unknown archive format: {$filename}"),
+            },
+            'Linux', 'Darwin' => match ($extname) {
+                'tar' => default_shell()->executeTarExtract($filename, $target, 'none'),
+                'gz', 'tgz' => default_shell()->executeTarExtract($filename, $target, 'gz'),
+                'bz2' => default_shell()->executeTarExtract($filename, $target, 'bz2'),
+                'xz', 'txz' => default_shell()->executeTarExtract($filename, $target, 'xz'),
+                'zip' => $this->unzipWithStrip($filename, $target),
+                'exe' => $this->copyFile($filename, $target),
+                default => throw new FileSystemException("Unknown archive format: {$filename}"),
+            },
+            default => throw new SPCInternalException('Unsupported OS for archive extraction')
+        };
     }
 
     /**
      * Unzip file with stripping top-level directory.
      */
-    protected function unzipWithStrip(string $zip_file, string $extract_path): void
+    protected function unzipWithStrip(string $zip_file, string $extract_path): bool
     {
         $temp_dir = FileSystem::convertPath(sys_get_temp_dir() . '/spc_unzip_' . bin2hex(random_bytes(16)));
         $zip_file = FileSystem::convertPath($zip_file);
@@ -572,6 +568,8 @@ class ArtifactExtractor
 
         // Clean up temp directory
         FileSystem::removeDir($temp_dir);
+
+        return true;
     }
 
     /**
@@ -585,6 +583,7 @@ class ArtifactExtractor
             '{source_path}' => SOURCE_PATH,
             '{download_path}' => DOWNLOAD_PATH,
             '{working_dir}' => WORKING_DIR,
+            '{php_sdk_path}' => getenv('PHP_SDK_PATH') ?: '',
         ];
         return str_replace(array_keys($replacement), array_values($replacement), $path);
     }
@@ -627,9 +626,9 @@ class ArtifactExtractor
         }
     }
 
-    private function copyFile(string $source_file, string $target_path): void
+    private function copyFile(string $source_file, string $target_path): bool
     {
         FileSystem::createDir(dirname($target_path));
-        FileSystem::copy(FileSystem::convertPath($source_file), $target_path);
+        return FileSystem::copy(FileSystem::convertPath($source_file), $target_path);
     }
 }

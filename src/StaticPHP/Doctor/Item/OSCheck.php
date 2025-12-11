@@ -10,7 +10,7 @@ use StaticPHP\Util\System\LinuxUtil;
 
 class OSCheck
 {
-    #[CheckItem('if current OS are supported', level: 1000)]
+    #[CheckItem('if current OS is supported', level: 1000)]
     public function checkOS(): ?CheckResult
     {
         if (!in_array(PHP_OS_FAMILY, ['Darwin', 'Linux', 'Windows'])) {

@@ -128,6 +128,14 @@ abstract class Package
     }
 
     /**
+     * Check if the package has a build function for the current OS.
+     */
+    public function hasBuildFunctionForCurrentOS(): bool
+    {
+        return isset($this->build_functions[PHP_OS_FAMILY]);
+    }
+
+    /**
      * Get the name of the package.
      */
     public function getName(): string

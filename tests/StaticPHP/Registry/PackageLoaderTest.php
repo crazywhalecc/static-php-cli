@@ -377,6 +377,10 @@ class PackageLoaderTest extends TestCase
         $this->createTestPackageConfig('test-lib', 'library');
         PackageLoader::initPackageInstances();
 
+        // Add a build function for current OS so the stage validation is triggered
+        $package = PackageLoader::getPackage('test-lib');
+        $package->addBuildFunction(PHP_OS_FAMILY, fn () => null);
+
         // Manually add a before_stage for non-existent stage
         $reflection = new \ReflectionClass(PackageLoader::class);
         $property = $reflection->getProperty('before_stages');
@@ -415,6 +419,33 @@ class PackageLoaderTest extends TestCase
         $this->expectExceptionMessage('unknown only_when_package_resolved package');
 
         PackageLoader::checkLoadedStageEvents();
+    }
+
+    public function testCheckLoadedStageEventsDoesNotThrowForNonCurrentOSPackage(): void
+    {
+        $this->createTestPackageConfig('test-lib', 'library');
+        PackageLoader::initPackageInstances();
+
+        // Add a build function for a different OS (not current OS)
+        $package = PackageLoader::getPackage('test-lib');
+        $otherOS = PHP_OS_FAMILY === 'Windows' ? 'Linux' : 'Windows';
+        $package->addBuildFunction($otherOS, fn () => null);
+
+        // Manually add a before_stage for 'build' stage
+        // This should NOT throw an exception because the package has no build function for current OS
+        $reflection = new \ReflectionClass(PackageLoader::class);
+        $property = $reflection->getProperty('before_stages');
+        $property->setAccessible(true);
+        $property->setValue(null, [
+            'test-lib' => [
+                'build' => [[fn () => null, null]],
+            ],
+        ]);
+
+        // This should not throw an exception
+        PackageLoader::checkLoadedStageEvents();
+
+        $this->assertTrue(true); // If we get here, the test passed
     }
 
     public function testGetBeforeStageCallbacksReturnsCallbacks(): void

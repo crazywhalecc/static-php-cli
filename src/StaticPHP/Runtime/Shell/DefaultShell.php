@@ -42,7 +42,7 @@ class DefaultShell extends Shell
         $cmd = SPC_CURL_EXEC . " -sfSL {$retry_arg} {$method_arg} {$header_arg} {$url_arg}";
 
         $this->logCommandInfo($cmd);
-        $result = $this->passthru($cmd, console_output: false, capture_output: true, throw_on_error: false);
+        $result = $this->passthru($cmd, capture_output: true, throw_on_error: false);
         $ret = $result['code'];
         $output = $result['output'];
         if ($ret !== 0) {
@@ -96,15 +96,15 @@ class DefaultShell extends Shell
         $cmd = clean_spaces("{$git} clone --config core.autocrlf=false --branch {$branch_arg} {$shallow_arg} {$submodules_arg} {$url_arg} {$path_arg}");
         $this->logCommandInfo($cmd);
         logger()->debug("[GIT CLONE] {$cmd}");
-        $this->passthru($cmd, $this->console_putput, capture_output: false, throw_on_error: true);
+        $this->passthru($cmd, $this->console_putput);
         if ($submodules !== null) {
             $depth_flag = $shallow ? '--depth 1' : '';
             foreach ($submodules as $submodule) {
                 $submodule = escapeshellarg($submodule);
-                $submodule_cmd = clean_spaces("cd {$path_arg} && {$git} submodule update --init {$depth_flag} {$submodule}");
+                $submodule_cmd = clean_spaces("{$git} submodule update --init {$depth_flag} {$submodule}");
                 $this->logCommandInfo($submodule_cmd);
                 logger()->debug("[GIT SUBMODULE] {$submodule_cmd}");
-                $this->passthru($submodule_cmd, $this->console_putput, capture_output: false, throw_on_error: true);
+                $this->passthru($submodule_cmd, $this->console_putput, cwd: $path_arg);
             }
         }
     }
@@ -117,7 +117,7 @@ class DefaultShell extends Shell
      * @param string $compression  Compression type: 'gz', 'bz2', 'xz', or 'none'
      * @param int    $strip        Number of leading components to strip (default: 1)
      */
-    public function executeTarExtract(string $archive_path, string $target_path, string $compression, int $strip = 1): void
+    public function executeTarExtract(string $archive_path, string $target_path, string $compression, int $strip = 1): bool
     {
         $archive_arg = escapeshellarg(FileSystem::convertPath($archive_path));
         $target_arg = escapeshellarg(FileSystem::convertPath($target_path));
@@ -135,7 +135,8 @@ class DefaultShell extends Shell
 
         $this->logCommandInfo($cmd);
         logger()->debug("[TAR EXTRACT] {$cmd}");
-        $this->passthru($cmd, $this->console_putput, capture_output: false, throw_on_error: true);
+        $this->passthru($cmd, $this->console_putput);
+        return true;
     }
 
     /**
@@ -154,7 +155,7 @@ class DefaultShell extends Shell
 
         $this->logCommandInfo($cmd);
         logger()->debug("[UNZIP] {$cmd}");
-        $this->passthru($cmd, $this->console_putput, capture_output: false, throw_on_error: true);
+        $this->passthru($cmd, $this->console_putput);
     }
 
     /**
@@ -162,9 +163,8 @@ class DefaultShell extends Shell
      *
      * @param string $archive_path Path to the archive file
      * @param string $target_path  Path to extract to
-     * @param bool   $is_txz       Whether this is a .txz/.tar.xz file that needs double extraction
      */
-    public function execute7zExtract(string $archive_path, string $target_path, bool $is_txz = false): void
+    public function execute7zExtract(string $archive_path, string $target_path): bool
     {
         $sdk_path = getenv('PHP_SDK_PATH');
         if ($sdk_path === false) {
@@ -177,15 +177,19 @@ class DefaultShell extends Shell
 
         $mute = $this->console_putput ? '' : ' > NUL';
 
-        if ($is_txz) {
-            // txz/tar.xz contains a tar file inside, extract twice
-            $cmd = "{$_7z} x {$archive_arg} -so | {$_7z} x -si -ttar -o{$target_arg} -y{$mute}";
-        } else {
-            $cmd = "{$_7z} x {$archive_arg} -o{$target_arg} -y{$mute}";
-        }
+        $run = function ($cmd) {
+            $this->logCommandInfo($cmd);
+            logger()->debug("[7Z EXTRACT] {$cmd}");
+            $this->passthru($cmd, $this->console_putput);
+        };
 
-        $this->logCommandInfo($cmd);
-        logger()->debug("[7Z EXTRACT] {$cmd}");
-        $this->passthru($cmd, $this->console_putput, capture_output: false, throw_on_error: true);
+        $extname = FileSystem::extname($archive_path);
+        match ($extname) {
+            'tar' => $this->executeTarExtract($archive_path, $target_path, 'none'),
+            'gz', 'tgz', 'xz', 'txz', 'bz2' => $run("{$_7z} x -so {$archive_arg} | tar -f - -x -C {$target_arg} --strip-components 1"),
+            default => $run("{$_7z} x {$archive_arg} -o{$target_arg} -y{$mute}"),
+        };
+
+        return true;
     }
 }

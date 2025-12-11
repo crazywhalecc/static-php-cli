@@ -15,6 +15,7 @@ use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\V2CompatLayer;
 use ZM\Logger\ConsoleColor;
@@ -120,6 +121,9 @@ class PackageInstaller
      */
     public function run(bool $interactive = true, bool $disable_delay_msg = false): void
     {
+        // apply build toolchain envs
+        GlobalEnvManager::afterInit();
+
         if (empty($this->packages)) {
             // resolve input, make dependency graph
             $this->resolvePackages();

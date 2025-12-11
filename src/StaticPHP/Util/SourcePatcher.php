@@ -6,6 +6,7 @@ namespace StaticPHP\Util;
 
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Exception\PatchException;
+use StaticPHP\Registry\PackageLoader;
 
 /**
  * SourcePatcher provides static utility methods for patching source files.
@@ -193,5 +194,70 @@ class SourcePatcher
     public static function unpatchMicroPhar(): void
     {
         FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
+    }
+
+    public static function patchPhpSrc(?array $items = null): bool
+    {
+        $patch_dir = ROOT_DIR . '/src/globals/patch/php-src-patches';
+        // in phar mode, we need to extract all the patch files
+        if (str_starts_with($patch_dir, 'phar://')) {
+            $tmp_dir = sys_get_temp_dir() . '/php-src-patches';
+            FileSystem::createDir($tmp_dir);
+            foreach (FileSystem::scanDirFiles($patch_dir) as $file) {
+                FileSystem::writeFile("{$tmp_dir}/" . basename($file), file_get_contents($file));
+            }
+            $patch_dir = $tmp_dir;
+        }
+        $php_package = PackageLoader::getTargetPackage('php');
+        if (!file_exists("{$php_package->getSourceDir()}/sapi/micro/php_micro.c")) {
+            return false;
+        }
+        $ver_file = "{$php_package->getSourceDir()}/main/php_version.h";
+        if (!file_exists($ver_file)) {
+            throw new PatchException('php-src patcher (original micro patches)', 'Patch failed, cannot find php source files');
+        }
+        $version_h = FileSystem::readFile("{$php_package->getSourceDir()}/main/php_version.h");
+        preg_match('/#\s*define\s+PHP_MAJOR_VERSION\s+(\d+)\s+#\s*define\s+PHP_MINOR_VERSION\s+(\d+)\s+/m', $version_h, $match);
+        // $ver = "{$match[1]}.{$match[2]}";
+
+        $major_ver = $match[1] . $match[2];
+        if ($major_ver === '74') {
+            return false;
+        }
+        // $check = !defined('DEBUG_MODE') ? ' -q' : '';
+        // f_passthru('cd ' . SOURCE_PATH . '/php-src && git checkout' . $check . ' HEAD');
+
+        if ($items !== null) {
+            $spc_micro_patches = $items;
+        } else {
+            $spc_micro_patches = getenv('SPC_MICRO_PATCHES');
+            $spc_micro_patches = $spc_micro_patches === false ? [] : explode(',', $spc_micro_patches);
+        }
+        $spc_micro_patches = array_filter($spc_micro_patches, fn ($item) => trim((string) $item) !== '');
+        $patch_list = $spc_micro_patches;
+        $patches = [];
+        $serial = ['80', '81', '82', '83', '84', '85'];
+        foreach ($patch_list as $patchName) {
+            if (file_exists("{$patch_dir}/{$patchName}.patch")) {
+                $patches[] = "{$patch_dir}/{$patchName}.patch";
+                continue;
+            }
+            for ($i = array_search($major_ver, $serial, true); $i >= 0; --$i) {
+                $tryMajMin = $serial[$i];
+                if (!file_exists("{$patch_dir}/{$patchName}_{$tryMajMin}.patch")) {
+                    continue;
+                }
+                $patches[] = "{$patch_dir}/{$patchName}_{$tryMajMin}.patch";
+                continue 2;
+            }
+            throw new PatchException('phpmicro patches', "Failed finding patch file or versioned file {$patchName} !");
+        }
+
+        foreach ($patches as $patch) {
+            logger()->info("Patching micro with {$patch}");
+            self::patchFile($patch, $php_package->getSourceDir());
+        }
+
+        return true;
     }
 }

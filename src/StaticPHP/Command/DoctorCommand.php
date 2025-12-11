@@ -18,6 +18,7 @@ class DoctorCommand extends BaseCommand
 
     public function handle(): int
     {
+        f_putenv('SPC_SKIP_TOOLCHAIN_CHECK=yes');
         $fix_policy = match ($this->input->getOption('auto-fix')) {
             'never' => FIX_POLICY_DIE,
             true, null => FIX_POLICY_AUTOFIX,

@@ -6,6 +6,7 @@ namespace StaticPHP;
 
 use StaticPHP\Command\BuildLibsCommand;
 use StaticPHP\Command\BuildTargetCommand;
+use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\ShellCommand;
 use StaticPHP\Command\DoctorCommand;
@@ -57,6 +58,7 @@ class ConsoleApplication extends Application
             // dev commands
             new ShellCommand(),
             new IsInstalledCommand(),
+            new EnvCommand(),
         ]);
 
         // add additional commands from registries

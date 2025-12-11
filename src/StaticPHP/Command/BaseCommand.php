@@ -94,7 +94,7 @@ abstract class BaseCommand extends Command
             }
 
             // Set debug mode in ApplicationContext
-            $isDebug = $this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE;
+            $isDebug = $this->output->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG;
             ApplicationContext::setDebug($isDebug);
 
             // show raw argv list for logger()->debug

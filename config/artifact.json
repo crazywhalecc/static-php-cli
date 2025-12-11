@@ -80,7 +80,11 @@
     },
     "strawberry-perl": {
         "binary": {
-            "windows-x86_64": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip"
+            "windows-x86_64": {
+                "type": "url",
+                "url": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip",
+                "extract": "{pkg_root_path}/strawberry-perl"
+            }
         }
     },
     "upx": {
@@ -395,7 +399,7 @@
         "binary": "hosted",
         "source": {
             "type": "git",
-            "rev": "v1.75.x",
+            "regex": "v(?<version>1.\\d+).x",
             "url": "https://github.com/grpc/grpc.git"
         }
     },
