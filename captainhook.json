@@ -11,7 +11,7 @@
         "enabled": true,
         "actions": [
             {
-                "action": ".\\vendor\\bin\\php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff {$STAGED_FILES|of-type:php}",
+                "action": ".\\vendor\\bin\\php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff {$STAGED_FILES|of-type:php} --sequential",
                 "conditions": [
                     {
                         "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\OfType",

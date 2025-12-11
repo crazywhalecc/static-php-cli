@@ -130,6 +130,7 @@ readonly class Doctor
             $this->output?->writeln('<error>Fix failed: ' . $e->getMessage() . '</error>');
             return false;
         } catch (\Throwable $e) {
+            logger()->debug('Error: ' . $e->getMessage() . " at {$e->getFile()}:{$e->getLine()}\n" . $e->getTraceAsString());
             $this->output?->writeln('<error>Fix failed with an unexpected error: ' . $e->getMessage() . '</error>');
             return false;
         } finally {

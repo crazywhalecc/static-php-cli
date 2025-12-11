@@ -33,7 +33,7 @@ class UnixShell extends Shell
         $original_command = $cmd;
         $this->logCommandInfo($original_command);
         $this->last_cmd = $cmd = $this->getExecString($cmd);
-        $this->passthru($cmd, $this->console_putput, $original_command, capture_output: false, throw_on_error: true);
+        $this->passthru($cmd, $this->console_putput, $original_command, cwd: $this->cd);
         return $this;
     }
 
@@ -71,7 +71,7 @@ class UnixShell extends Shell
         }
         $cmd = $this->getExecString($cmd);
         $this->logCommandInfo($cmd);
-        $result = $this->passthru($cmd, $this->console_putput, $cmd, capture_output: true, throw_on_error: false);
+        $result = $this->passthru($cmd, $this->console_putput, $cmd, capture_output: true, throw_on_error: false, cwd: $this->cd);
         $out = explode("\n", $result['output']);
         return [$result['code'], $out];
     }
@@ -82,9 +82,6 @@ class UnixShell extends Shell
         $env_str = $this->getEnvString();
         if (!empty($env_str)) {
             $cmd = "{$env_str} {$cmd}";
-        }
-        if ($this->cd !== null) {
-            $cmd = 'cd ' . escapeshellarg($this->cd) . ' && ' . $cmd;
         }
         return $cmd;
     }

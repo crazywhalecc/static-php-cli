@@ -30,7 +30,8 @@ class DownloadResult
     ) {
         switch ($this->cache_type) {
             case 'archive':
-                $this->filename !== null ?: throw new DownloaderException('Archive download result must have a filename.');
+            case 'file':
+                $this->filename !== null ?: throw new DownloaderException('Archive/file download result must have a filename.');
                 $fn = FileSystem::isRelativePath($this->filename) ? (DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $this->filename) : $this->filename;
                 file_exists($fn) ?: throw new DownloaderException("Downloaded archive file does not exist: {$fn}");
                 break;
@@ -60,7 +61,20 @@ class DownloadResult
         ?string $version = null,
         array $metadata = []
     ): DownloadResult {
-        return new self('archive', config: $config, filename: $filename, extract: $extract, verified: $verified, version: $version, metadata: $metadata);
+        // judge if it is archive or just a pure file
+        $cache_type = self::isArchiveFile($filename) ? 'archive' : 'file';
+        return new self($cache_type, config: $config, filename: $filename, extract: $extract, verified: $verified, version: $version, metadata: $metadata);
+    }
+
+    public static function file(
+        string $filename,
+        array $config,
+        bool $verified = false,
+        ?string $version = null,
+        array $metadata = []
+    ): DownloadResult {
+        $cache_type = self::isArchiveFile($filename) ? 'archive' : 'file';
+        return new self($cache_type, config: $config, filename: $filename, verified: $verified, version: $version, metadata: $metadata);
     }
 
     /**
@@ -142,5 +156,17 @@ class DownloadResult
             $this->version,
             array_merge($this->metadata, [$key => $value])
         );
+    }
+
+    /**
+     * Check
+     */
+    private static function isArchiveFile(string $filename): bool
+    {
+        $archive_extensions = [
+            'zip', 'tar', 'tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz', 'txz', 'rar', '7z',
+        ];
+        $lower_filename = strtolower($filename);
+        return array_any($archive_extensions, fn ($ext) => str_ends_with($lower_filename, '.' . $ext));
     }
 }

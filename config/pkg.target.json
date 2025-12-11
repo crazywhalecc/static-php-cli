@@ -1,7 +1,10 @@
 {
     "vswhere": {
         "type": "target",
-        "artifact": "vswhere"
+        "artifact": "vswhere",
+        "static-bins@windows": [
+            "vswhere.exe"
+        ]
     },
     "pkg-config": {
         "type": "target",

@@ -11,7 +11,6 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
-use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\System\LinuxUtil;
 
@@ -26,9 +25,6 @@ class PackageBuilder
     public function __construct(protected array $options = [])
     {
         ApplicationContext::set(PackageBuilder::class, $this);
-
-        // apply build toolchain envs
-        GlobalEnvManager::afterInit();
 
         $this->concurrency = (int) getenv('SPC_CONCURRENCY') ?: 1;
     }

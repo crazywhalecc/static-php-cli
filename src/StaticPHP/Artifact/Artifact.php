@@ -167,11 +167,22 @@ class Artifact
             return false;
         }
 
-        // For standalone mode, check directory and hash
+        // For standalone mode, check directory or file and hash
         $target_path = $extract_config['path'];
 
-        if (!is_dir($target_path)) {
-            return false;
+        // Check if target is a file or directory
+        $is_file_target = !is_dir($target_path) && str_contains($target_path, '.');
+
+        if ($is_file_target) {
+            // For single file extraction (e.g., vswhere.exe)
+            if (!file_exists($target_path)) {
+                return false;
+            }
+        } else {
+            // For directory extraction
+            if (!is_dir($target_path)) {
+                return false;
+            }
         }
 
         if (!$compare_hash) {
@@ -320,7 +331,7 @@ class Artifact
      * For merge mode, returns the base path.
      * For standalone mode, returns the specific directory.
      */
-    public function getBinaryDir(): string
+    public function getBinaryDir(): ?string
     {
         $config = $this->getBinaryExtractConfig();
         return $config['path'];

@@ -120,7 +120,7 @@ class FileSystem
         $src_path = FileSystem::convertPath($from);
         switch (PHP_OS_FAMILY) {
             case 'Windows':
-                f_passthru('xcopy "' . $src_path . '" "' . $dst_path . '" /s/e/v/y/i');
+                cmd(false)->exec('xcopy "' . $src_path . '" "' . $dst_path . '" /s/e/v/y/i');
                 break;
             case 'Linux':
             case 'Darwin':
@@ -137,7 +137,7 @@ class FileSystem
      * @param string $from Source file path
      * @param string $to   Destination file path
      */
-    public static function copy(string $from, string $to): void
+    public static function copy(string $from, string $to): bool
     {
         logger()->debug("Copying file from {$from} to {$to}");
         $dst_path = FileSystem::convertPath($to);
@@ -145,6 +145,7 @@ class FileSystem
         if (!copy($src_path, $dst_path)) {
             throw new FileSystemException('Cannot copy file from ' . $src_path . ' to ' . $dst_path);
         }
+        return true;
     }
 
     /**
@@ -317,7 +318,12 @@ class FileSystem
                 }
             } elseif (is_link($sub_file) || is_file($sub_file)) {
                 if (!unlink($sub_file)) {
-                    return false;
+                    $cmd = PHP_OS_FAMILY === 'Windows' ? 'del /f /q' : 'rm -f';
+                    f_exec("{$cmd} " . escapeshellarg($sub_file), $out, $ret);
+                    if ($ret !== 0) {
+                        logger()->warning('Remove file failed: ' . $sub_file);
+                        return false;
+                    }
                 }
             }
         }
