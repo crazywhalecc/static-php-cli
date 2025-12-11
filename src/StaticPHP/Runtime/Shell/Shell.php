@@ -149,7 +149,8 @@ abstract class Shell
         ?string $original_command = null,
         bool $capture_output = false,
         bool $throw_on_error = true,
-        ?string $cwd = null
+        ?string $cwd = null,
+        ?array $env = null,
     ): array {
         $file_res = null;
         if ($this->enable_log_file) {
@@ -164,7 +165,13 @@ abstract class Shell
             1 => PHP_OS_FAMILY === 'Windows' ? ['socket'] : ['pipe', 'w'], // stdout
             2 => PHP_OS_FAMILY === 'Windows' ? ['socket'] : ['pipe', 'w'], // stderr
         ];
-        $process = proc_open($cmd, $descriptors, $pipes, $cwd);
+        if ($env !== null && $env !== []) {
+            // merge current PHP envs
+            $env = array_merge(getenv(), $env);
+        } else {
+            $env = null;
+        }
+        $process = proc_open($cmd, $descriptors, $pipes, $cwd, env_vars: $env);
 
         $output_value = '';
         try {

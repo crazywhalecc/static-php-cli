@@ -45,21 +45,9 @@ class WindowsCmd extends Shell
             logger()->debug('Running command with result: ' . $cmd);
         }
         $cmd = $this->getExecString($cmd);
-        $result = $this->passthru($cmd, $this->console_putput, $cmd, capture_output: true, throw_on_error: false, cwd: $this->cd);
+        $result = $this->passthru($cmd, $this->console_putput, $cmd, capture_output: true, throw_on_error: false, cwd: $this->cd, env: $this->env);
         $out = explode("\n", $result['output']);
         return [$result['code'], $out];
-    }
-
-    public function setEnv(array $env): static
-    {
-        // windows currently does not support setting environment variables
-        throw new SPCInternalException('Windows does not support setting environment variables in shell commands.');
-    }
-
-    public function appendEnv(array $env): static
-    {
-        // windows currently does not support appending environment variables
-        throw new SPCInternalException('Windows does not support appending environment variables in shell commands.');
     }
 
     public function getLastCommand(): string
