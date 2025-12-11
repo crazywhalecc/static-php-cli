@@ -181,11 +181,15 @@ trait windows
         // Fix PHP VS version
         // get vs version
         $vc = WindowsUtil::findVisualStudio();
-        $vc_matches = match ($vc['major_version']) {
-            '17' => ['VS17', 'Visual C++ 2022'],
-            '16' => ['VS16', 'Visual C++ 2019'],
-            default => ['unknown', 'unknown'],
-        };
+        if ($vc === false) {
+            $vc_matches = ['unknown', 'unknown'];
+        } else {
+            $vc_matches = match ($vc['major_version']) {
+                '17' => ['VS17', 'Visual C++ 2022'],
+                '16' => ['VS16', 'Visual C++ 2019'],
+                default => ['unknown', 'unknown'],
+            };
+        }
         // patch php-src/win32/build/confutils.js
         FileSystem::replaceFileStr(
             "{$package->getSourceDir()}\\win32\\build\\confutils.js",
