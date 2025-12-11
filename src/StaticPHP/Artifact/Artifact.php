@@ -171,7 +171,7 @@ class Artifact
         $target_path = $extract_config['path'];
 
         // Check if target is a file or directory
-        $is_file_target = !is_dir($target_path) && str_contains($target_path, '.');
+        $is_file_target = !is_dir($target_path) && (pathinfo($target_path, PATHINFO_EXTENSION) !== '');
 
         if ($is_file_target) {
             // For single file extraction (e.g., vswhere.exe)
