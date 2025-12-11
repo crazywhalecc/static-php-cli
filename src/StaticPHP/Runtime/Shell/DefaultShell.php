@@ -186,7 +186,7 @@ class DefaultShell extends Shell
         $extname = FileSystem::extname($archive_path);
         match ($extname) {
             'tar' => $this->executeTarExtract($archive_path, $target_path, 'none'),
-            'gz', 'tgz', 'xz', 'txz', 'bz2' => $run("{$_7z} x -so {$archive_arg} | tar tar -f - -x -C {$target_arg} --strip-components 1"),
+            'gz', 'tgz', 'xz', 'txz', 'bz2' => $run("{$_7z} x -so {$archive_arg} | tar -f - -x -C {$target_arg} --strip-components 1"),
             default => $run("{$_7z} x {$archive_arg} -o{$target_arg} -y{$mute}"),
         };
 

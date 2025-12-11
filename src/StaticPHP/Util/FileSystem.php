@@ -267,6 +267,9 @@ class FileSystem
                 if ($auto_require && !class_exists($class_name, false)) {
                     require_once $file_path;
                 }
+                if (class_exists($class_name, false) === false) {
+                    continue;
+                }
 
                 if (is_string($return_path_value)) {
                     $classes[$class_name] = $return_path_value . '/' . $v;
