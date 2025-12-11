@@ -98,7 +98,7 @@ trait windows
     #[Stage]
     public function makeCliForWindows(TargetPackage $package, PackageBuilder $builder): void
     {
-        InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('nmake php-cli'));
+        InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('php.exe'));
 
         // extra lib
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
@@ -215,14 +215,14 @@ trait windows
             'php-cgi' => ["{$package->getSourceDir()}\\x64\\{$rel_type}{$ts}", 'php-cgi.exe', 'php-cgi.pdb'],
             default => throw new SPCInternalException("Deployment does not accept type {$sapi}"),
         };
-        $src = "{$src[0]}\\{$src[1]}";
-        $dst = BUILD_BIN_PATH . '\\' . basename($src);
+        $src_file = "{$src[0]}\\{$src[1]}";
+        $dst_file = BUILD_BIN_PATH . '\\' . basename($src_file);
 
-        $builder->deployBinary($src, $dst);
+        $builder->deployBinary($src_file, $dst_file);
 
         // make debug info file path
         if ($builder->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
-            cmd()->exec('copy ' . escapeshellarg("{$src[0]}\\{$src[2]}") . ' ' . escapeshellarg($debug_dir));
+            FileSystem::copy("{$src[0]}\\{$src[2]}", "{$debug_dir}\\{$src[2]}");
         }
     }
 }
