@@ -171,7 +171,7 @@ abstract class Shell
         } else {
             $env = null;
         }
-        $process = proc_open($cmd, $descriptors, $pipes, $cwd, env_vars: $env);
+        $process = proc_open($cmd, $descriptors, $pipes, $cwd, env_vars: $env, options: PHP_OS_FAMILY === 'Windows' ? ['create_process_group' => true] : null);
 
         $output_value = '';
         try {
