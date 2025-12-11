@@ -23,6 +23,7 @@ class InteractiveTerm
             logger()->notice(strip_ansi_colors($message));
         } else {
             $output->writeln(($no_ansi ? 'strip_ansi_colors' : 'strval')(ConsoleColor::cyan(($indent ? '  ' : '') . '▶ ') . $message));
+            logger()->debug(strip_ansi_colors($message));
         }
     }
 
@@ -34,15 +35,22 @@ class InteractiveTerm
             logger()->info(strip_ansi_colors($message));
         } else {
             $output->writeln(($no_ansi ? 'strip_ansi_colors' : 'strval')(ConsoleColor::green(($indent ? '  ' : '') . '✔ ') . $message));
+            logger()->debug(strip_ansi_colors($message));
         }
     }
 
-    public static function plain(string $message): void
+    public static function plain(string $message, string $level = 'info'): void
     {
         $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
         $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
         if ($output->isVerbose()) {
-            logger()->info(strip_ansi_colors($message));
+            match ($level) {
+                'debug' => logger()->debug(strip_ansi_colors($message)),
+                'notice' => logger()->notice(strip_ansi_colors($message)),
+                'warning' => logger()->warning(strip_ansi_colors($message)),
+                'error' => logger()->error(strip_ansi_colors($message)),
+                default => logger()->info(strip_ansi_colors($message)),
+            };
         } else {
             $output->writeln(($no_ansi ? 'strip_ansi_colors' : 'strval')($message));
         }
@@ -66,6 +74,7 @@ class InteractiveTerm
             logger()->error(strip_ansi_colors($message));
         } else {
             $output->writeln(($no_ansi ? 'strip_ansi_colors' : 'strval')(ConsoleColor::red(($indent ? '  ' : '') . '✘ ' . $message)));
+            logger()->debug(strip_ansi_colors($message));
         }
     }
 
@@ -78,6 +87,7 @@ class InteractiveTerm
     {
         $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
         self::$indicator?->setMessage(($no_ansi ? 'strip_ansi_colors' : 'strval')($message));
+        logger()->debug(strip_ansi_colors($message));
     }
 
     public static function finish(string $message, bool $status = true): void
@@ -117,6 +127,7 @@ class InteractiveTerm
             self::$indicator->advance();
             return;
         }
+        logger()->debug(strip_ansi_colors($message));
         // if no ansi, use a dot instead of spinner
         if ($no_ansi) {
             self::$indicator = new ProgressIndicator(ApplicationContext::get(OutputInterface::class), 'verbose', 100, [' •', ' •']);
