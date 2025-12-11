@@ -399,7 +399,7 @@
         "binary": "hosted",
         "source": {
             "type": "git",
-            "rev": "v1.75.x",
+            "regex": "v(?<version>1.\\d+).x",
             "url": "https://github.com/grpc/grpc.git"
         }
     },
