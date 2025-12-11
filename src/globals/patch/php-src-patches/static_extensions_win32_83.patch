@@ -1,0 +1,31 @@
+diff --git a/ext/fileinfo/config.w32 b/ext/fileinfo/config.w32
+index e42f1ce3f7..db28a68676 100644
+--- a/ext/fileinfo/config.w32
++++ b/ext/fileinfo/config.w32
+@@ -10,6 +10,6 @@ if (PHP_FILEINFO != 'no') {
+ 			readcdf.c softmagic.c der.c \
+ 			strcasestr.c buffer.c is_csv.c";
+ 
+-	EXTENSION('fileinfo', 'fileinfo.c php_libmagic.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
++	EXTENSION('fileinfo', 'fileinfo.c php_libmagic.c', PHP_FILEINFO_SHARED, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
+ 	ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
+ }
+diff --git a/ext/openssl/config.w32 b/ext/openssl/config.w32
+index 9187d6bfc2..f1acc2e8b5 100644
+--- a/ext/openssl/config.w32
++++ b/ext/openssl/config.w32
+@@ -1,12 +1,12 @@
+ // vim:ft=javascript
+ 
+-ARG_WITH("openssl", "OpenSSL support", "no,shared");
++ARG_WITH("openssl", "OpenSSL support", "no");
+ 
+ if (PHP_OPENSSL != "no") {
+ 	var ret = SETUP_OPENSSL("openssl", PHP_OPENSSL);
+ 
+ 	if (ret > 0) {
+-		EXTENSION("openssl", "openssl.c xp_ssl.c");
++		EXTENSION("openssl", "openssl.c xp_ssl.c", PHP_OPENSSL_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+ 		AC_DEFINE("HAVE_OPENSSL_EXT", PHP_OPENSSL_SHARED ? 0 : 1, "Have openssl");
+ 		AC_DEFINE("HAVE_OPENSSL", 1);
+ 	}

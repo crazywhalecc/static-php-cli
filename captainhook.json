@@ -3,7 +3,7 @@
         "enabled": true,
         "actions": [
             {
-                "action": "composer analyse"
+                "action": "php vendor/bin/phpstan analyse --memory-limit 300M"
             }
         ]
     },
@@ -11,7 +11,7 @@
         "enabled": true,
         "actions": [
             {
-                "action": "composer cs-fix -- --config=.php-cs-fixer.php --dry-run --diff {$STAGED_FILES|of-type:php}",
+                "action": "php vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff {$STAGED_FILES|of-type:php} --sequential",
                 "conditions": [
                     {
                         "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\OfType",
