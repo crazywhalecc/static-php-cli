@@ -14,7 +14,7 @@ use StaticPHP\Util\FileSystem;
 #[Library('imap')]
 class imap
 {
-    #[AfterStage('php', [php::class, 'patchEmbedScripts'], 'imap')]
+    #[AfterStage('php', [php::class, 'patchUnixEmbedScripts'], 'imap')]
     #[PatchDescription('Fix missing -lcrypt in php-config libs on glibc systems')]
     public function afterPatchScripts(): void
     {
