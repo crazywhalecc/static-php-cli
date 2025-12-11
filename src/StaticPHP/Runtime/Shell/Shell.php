@@ -151,9 +151,6 @@ abstract class Shell
         bool $throw_on_error = true,
         ?string $cwd = null
     ): array {
-        if ($cwd !== null) {
-            $cwd = $cwd;
-        }
         $file_res = null;
         if ($this->enable_log_file) {
             // write executed command to the log file using fwrite
