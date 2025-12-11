@@ -15,7 +15,7 @@ class EnvCommand extends BaseCommand
 {
     public function configure(): void
     {
-        $this->addArgument('env', InputArgument::REQUIRED, 'The environment variable to show, if not set, all will be shown');
+        $this->addArgument('env', InputArgument::OPTIONAL, 'The environment variable to show, if not set, all will be shown');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
@@ -30,6 +30,12 @@ class EnvCommand extends BaseCommand
         if (($val = getenv($env)) === false) {
             $this->output->writeln("<error>Environment variable '{$env}' is not set.</error>");
             return static::FAILURE;
+        }
+        if (is_array($val)) {
+            foreach ($val as $k => $v) {
+                $this->output->writeln("<info>{$k}={$v}</info>");
+            }
+            return static::SUCCESS;
         }
         $this->output->writeln("<info>{$val}</info>");
         return static::SUCCESS;
