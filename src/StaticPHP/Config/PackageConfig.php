@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace StaticPHP\Config;
 
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Registry\Registry;
 use StaticPHP\Runtime\SystemTarget;
 
 class PackageConfig
@@ -15,7 +16,7 @@ class PackageConfig
      * Load package configurations from a specified directory.
      * It will look for files matching the pattern 'pkg.*.json' and 'pkg.json'.
      */
-    public static function loadFromDir(string $dir): void
+    public static function loadFromDir(string $dir, string $registry_name): void
     {
         if (!is_dir($dir)) {
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load pkg.json config.");
@@ -23,11 +24,11 @@ class PackageConfig
         $files = glob("{$dir}/pkg.*.json");
         if (is_array($files)) {
             foreach ($files as $file) {
-                self::loadFromFile($file);
+                self::loadFromFile($file, $registry_name);
             }
         }
         if (file_exists("{$dir}/pkg.json")) {
-            self::loadFromFile("{$dir}/pkg.json");
+            self::loadFromFile("{$dir}/pkg.json", $registry_name);
         }
     }
 
@@ -36,7 +37,7 @@ class PackageConfig
      *
      * @param string $file the path to the json package configuration file
      */
-    public static function loadFromFile(string $file): void
+    public static function loadFromFile(string $file, string $registry_name): void
     {
         $content = file_get_contents($file);
         if ($content === false) {
@@ -49,6 +50,7 @@ class PackageConfig
         ConfigValidator::validateAndLintPackages(basename($file), $data);
         foreach ($data as $pkg_name => $config) {
             self::$package_configs[$pkg_name] = $config;
+            Registry::_bindPackageConfigFile($pkg_name, $registry_name, $file);
         }
     }
 

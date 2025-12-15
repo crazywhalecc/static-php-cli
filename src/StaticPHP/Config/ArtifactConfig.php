@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace StaticPHP\Config;
 
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Registry\Registry;
 
 class ArtifactConfig
 {
     private static array $artifact_configs = [];
 
-    public static function loadFromDir(string $dir): void
+    public static function loadFromDir(string $dir, string $registry_name): void
     {
         if (!is_dir($dir)) {
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load artifact config.");
@@ -18,18 +19,18 @@ class ArtifactConfig
         $files = glob("{$dir}/artifact.*.json");
         if (is_array($files)) {
             foreach ($files as $file) {
-                self::loadFromFile($file);
+                self::loadFromFile($file, $registry_name);
             }
         }
         if (file_exists("{$dir}/artifact.json")) {
-            self::loadFromFile("{$dir}/artifact.json");
+            self::loadFromFile("{$dir}/artifact.json", $registry_name);
         }
     }
 
     /**
      * Load artifact configurations from a specified JSON file.
      */
-    public static function loadFromFile(string $file): void
+    public static function loadFromFile(string $file, string $registry_name): void
     {
         $content = file_get_contents($file);
         if ($content === false) {
@@ -42,6 +43,7 @@ class ArtifactConfig
         ConfigValidator::validateAndLintArtifacts(basename($file), $data);
         foreach ($data as $artifact_name => $config) {
             self::$artifact_configs[$artifact_name] = $config;
+            Registry::_bindArtifactConfigFile($artifact_name, $registry_name, $file);
         }
     }
 

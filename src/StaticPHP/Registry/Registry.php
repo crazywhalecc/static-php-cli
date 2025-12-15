@@ -13,8 +13,12 @@ use Symfony\Component\Yaml\Yaml;
 
 class Registry
 {
-    /** @var string[] List of loaded registry names */
+    /** @var array<string, Registry> List of loaded registries */
     private static array $loaded_registries = [];
+
+    /** @var array<string, array{registry: string, config: string}> Maps of package and artifact names to their registry config file paths (for reverse lookup) */
+    private static array $package_reversed_registry_files = [];
+    private static array $artifact_reversed_registry_files = [];
 
     /**
      * Load a registry from file path.
@@ -85,9 +89,9 @@ class Registry
             foreach ($data['package']['config'] as $path) {
                 $path = self::fullpath($path, dirname($registry_file));
                 if (is_file($path)) {
-                    PackageConfig::loadFromFile($path);
+                    PackageConfig::loadFromFile($path, $registry_name);
                 } elseif (is_dir($path)) {
-                    PackageConfig::loadFromDir($path);
+                    PackageConfig::loadFromDir($path, $registry_name);
                 }
             }
         }
@@ -97,9 +101,9 @@ class Registry
             foreach ($data['artifact']['config'] as $path) {
                 $path = self::fullpath($path, dirname($registry_file));
                 if (is_file($path)) {
-                    ArtifactConfig::loadFromFile($path);
+                    ArtifactConfig::loadFromFile($path, $registry_name);
                 } elseif (is_dir($path)) {
-                    ArtifactConfig::loadFromDir($path);
+                    ArtifactConfig::loadFromDir($path, $registry_name);
                 }
             }
         }
@@ -187,7 +191,12 @@ class Registry
         }
     }
 
-    public static function checkLoadedRegistries(): void
+    /**
+     * Resolve loaded registries.
+     * This method finalizes the loading process by registering default stages
+     * and validating stage events.
+     */
+    public static function resolve(): void
     {
         // Register default stages for all PhpExtensionPackage instances
         // This must be done after all registries are loaded to ensure custom stages take precedence
@@ -215,6 +224,42 @@ class Registry
     public static function reset(): void
     {
         self::$loaded_registries = [];
+    }
+
+    /**
+     * Bind a package name to its registry config file for reverse lookup.
+     *
+     * @internal
+     */
+    public static function _bindPackageConfigFile(string $package_name, string $registry_name, string $config_file): void
+    {
+        self::$package_reversed_registry_files[$package_name] = [
+            'registry' => $registry_name,
+            'config' => $config_file,
+        ];
+    }
+
+    /**
+     * Bind an artifact name to its registry config file for reverse lookup.
+     *
+     * @internal
+     */
+    public static function _bindArtifactConfigFile(string $artifact_name, string $registry_name, string $config_file): void
+    {
+        self::$artifact_reversed_registry_files[$artifact_name] = [
+            'registry' => $registry_name,
+            'config' => $config_file,
+        ];
+    }
+
+    public static function getPackageConfigInfo(string $package_name): ?array
+    {
+        return self::$package_reversed_registry_files[$package_name] ?? null;
+    }
+
+    public static function getArtifactConfigInfo(string $artifact_name): ?array
+    {
+        return self::$artifact_reversed_registry_files[$artifact_name] ?? null;
     }
 
     /**

@@ -8,6 +8,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
+use StaticPHP\Attribute\Artifact\CustomSource;
 use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Runtime\SystemTarget;
 
