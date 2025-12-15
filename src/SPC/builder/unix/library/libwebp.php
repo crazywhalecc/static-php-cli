@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\util\executor\UnixCMakeExecutor;
-use SPC\util\SPCTarget;
 
 trait libwebp
 {
     protected function build(): void
     {
+        $code = 'int main() { return _mm256_cvtsi256_si32(_mm256_setzero_si256()); }';
+        $cc = getenv('CC') ?: 'gcc';
+        [$ret] = shell()->execWithResult("echo '{$code}' | {$cc} -x c -mavx2 -o /dev/null - 2>&1");
+        $disableAvx2 = $ret !== 0 && GNU_ARCH === 'x86_64';
+
         UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DWEBP_BUILD_EXTRAS=OFF',
@@ -23,7 +27,7 @@ trait libwebp
                 '-DWEBP_BUILD_WEBPINFO=OFF',
                 '-DWEBP_BUILD_WEBPMUX=OFF',
                 '-DWEBP_BUILD_FUZZTEST=OFF',
-                SPCTarget::getLibcVersion() === '2.31' && GNU_ARCH === 'x86_64' ? '-DWEBP_ENABLE_SIMD=OFF' : '' // fix an edge bug for debian 11 with gcc 10
+                $disableAvx2 ? '-DWEBP_ENABLE_SIMD=OFF' : ''
             )
             ->build();
         // patch pkgconfig
