@@ -43,4 +43,9 @@ EOF
         );
         return true;
     }
+
+    protected function getExtraEnv(): array
+    {
+        return ['CFLAGS' => '-std=c17'];
+    }
 }
