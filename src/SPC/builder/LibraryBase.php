@@ -195,6 +195,9 @@ abstract class LibraryBase
             $this->getBuilder()->emitPatchPoint('before-library[ ' . static::NAME . ']-build');
             $this->build();
             $this->installLicense();
+            if (getenv('CI')) {
+                FileSystem::removeDir($this->source_dir);
+            }
             $this->getBuilder()->emitPatchPoint('after-library[ ' . static::NAME . ']-build');
             return LIB_STATUS_OK;
         }
