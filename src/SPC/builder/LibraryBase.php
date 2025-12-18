@@ -357,11 +357,11 @@ abstract class LibraryBase
         }
         foreach ($license_files as $index => $license) {
             if ($license['type'] === 'text') {
-                FileSystem::writeFile(BUILD_ROOT_PATH . '/source-licenses/' . $this->getName() . "/{$index}.txt", $license['text']);
+                FileSystem::writeFile(BUILD_ROOT_PATH . "/source-licenses/{$source}/{$index}.txt", $license['text']);
                 continue;
             }
             if ($license['type'] === 'file') {
-                copy($this->source_dir . '/' . $license['path'], BUILD_ROOT_PATH . '/source-licenses/' . $this->getName() . "/{$index}.txt");
+                copy($this->source_dir . '/' . $license['path'], BUILD_ROOT_PATH . "/source-licenses/{$source}/{$index}.txt");
             }
         }
     }
