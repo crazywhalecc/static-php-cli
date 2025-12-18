@@ -1,6 +1,7 @@
 parameters:
   reportUnmatchedIgnoredErrors: false
   level: 4
+  phpVersion: 80400
   paths:
     - ./src/
   ignoreErrors:

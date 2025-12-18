@@ -11,6 +11,31 @@ use StaticPHP\Runtime\Shell\WindowsCmd;
 use ZM\Logger\ConsoleLogger;
 
 /**
+ * Get the current SPC loading mode. If passed a mode to check, will return whether current mode matches the given mode.
+ */
+function spc_mode(?int $check_mode = null): bool|int
+{
+    $mode = SPC_MODE_SOURCE;
+    // if current file is in phar, then it's phar mode
+    if (str_starts_with(__FILE__, 'phar://') && Phar::running()) {
+        // judge whether it's vendor mode (inside vendor/) or source mode (inside src/)
+        if (basename(dirname(__FILE__, 3)) === 'static-php-cli' && basename(dirname(__FILE__, 5)) === 'vendor') {
+            $mode = SPC_MODE_VENDOR_PHAR;
+        } else {
+            $mode = SPC_MODE_PHAR;
+        }
+    } elseif (basename(dirname(__FILE__, 3)) === 'static-php-cli' && basename(dirname(__FILE__, 5)) === 'vendor') {
+        $mode = SPC_MODE_VENDOR;
+    }
+
+    if ($check_mode === null) {
+        return $mode;
+    }
+    // use bitwise AND to check mode
+    return ($mode & $check_mode) !== 0;
+}
+
+/**
  * Judge if an array is an associative array
  */
 function is_assoc_array(mixed $array): bool

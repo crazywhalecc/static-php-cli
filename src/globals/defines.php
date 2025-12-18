@@ -96,13 +96,32 @@ const SPC_STATUS_ALREADY_BUILT = 1;
 
 const SPC_DOWNLOAD_TYPE_DISPLAY_NAME = [
     'bitbuckettag' => 'BitBucket',
-    'filelist' => 'website',
+    'filelist' => 'File index website',
     'git' => 'git',
     'ghrel' => 'GitHub release',
-    'ghtar', 'ghtagtar' => 'GitHub tarball',
+    'ghtar' => 'GitHub release tarball',
+    'ghtagtar' => 'GitHub tag tarball',
     'local' => 'local dir',
-    'pie' => 'PHP Installer for Extensions',
+    'pie' => 'PHP Installer for Extensions (PIE)',
     'url' => 'url',
     'php-release' => 'php.net',
     'custom' => 'custom downloader',
 ];
+
+const SUPPORTED_OS_CATEGORY = [
+    'unix',
+    'windows',
+    'linux',
+    'macos',
+];
+
+const SUPPORTED_OS_FAMILY = [
+    'Linux',
+    'Darwin',
+    'Windows',
+];
+
+const SPC_MODE_SOURCE = 1;
+const SPC_MODE_VENDOR = 2;
+const SPC_MODE_PHAR = 4;
+const SPC_MODE_VENDOR_PHAR = SPC_MODE_VENDOR | SPC_MODE_PHAR;

@@ -11,26 +11,30 @@ class ArtifactConfig
 {
     private static array $artifact_configs = [];
 
-    public static function loadFromDir(string $dir, string $registry_name): void
+    public static function loadFromDir(string $dir, string $registry_name): array
     {
         if (!is_dir($dir)) {
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load artifact config.");
         }
+        $loaded = [];
         $files = glob("{$dir}/artifact.*.json");
         if (is_array($files)) {
             foreach ($files as $file) {
                 self::loadFromFile($file, $registry_name);
+                $loaded[] = $file;
             }
         }
         if (file_exists("{$dir}/artifact.json")) {
             self::loadFromFile("{$dir}/artifact.json", $registry_name);
+            $loaded[] = "{$dir}/artifact.json";
         }
+        return $loaded;
     }
 
     /**
      * Load artifact configurations from a specified JSON file.
      */
-    public static function loadFromFile(string $file, string $registry_name): void
+    public static function loadFromFile(string $file, string $registry_name): string
     {
         $content = file_get_contents($file);
         if ($content === false) {
@@ -45,6 +49,7 @@ class ArtifactConfig
             self::$artifact_configs[$artifact_name] = $config;
             Registry::_bindArtifactConfigFile($artifact_name, $registry_name, $file);
         }
+        return $file;
     }
 
     /**

@@ -472,6 +472,23 @@ class FileSystem
         return file_put_contents($file, implode('', $lines));
     }
 
+    /**
+     * Return full path, resolving relative paths against a base path.
+     *
+     * @param string $path               Input path (relative or absolute)
+     * @param string $relative_path_base Base path for relative paths
+     */
+    public static function fullpath(string $path, string $relative_path_base): string
+    {
+        if (FileSystem::isRelativePath($path)) {
+            $path = $relative_path_base . DIRECTORY_SEPARATOR . $path;
+        }
+        if (!file_exists($path)) {
+            throw new FileSystemException("Path does not exist: {$path}");
+        }
+        return FileSystem::convertPath($path);
+    }
+
     private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): false|int
     {
         logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);

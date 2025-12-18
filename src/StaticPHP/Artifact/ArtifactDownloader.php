@@ -329,8 +329,7 @@ class ArtifactDownloader
                 }
                 if ($interactive) {
                     $skip_msg = !empty($skipped) ? ' (Skipped ' . count($skipped) . ' artifacts for being already downloaded)' : '';
-                    InteractiveTerm::success("Downloaded all {$count} artifacts.{$skip_msg}", true);
-                    echo PHP_EOL;
+                    InteractiveTerm::success("Downloaded all {$count} artifacts.{$skip_msg}\n", true);
                 }
             }
         } catch (SPCException $e) {

@@ -133,9 +133,8 @@ class PackageInstaller
             // show install or build options in terminal with beautiful output
             $this->printInstallerInfo();
 
-            InteractiveTerm::notice('Build process will start after 2s ...');
+            InteractiveTerm::notice('Build process will start after 2s ...' . PHP_EOL);
             sleep(2);
-            echo PHP_EOL;
         }
 
         // Early validation: check if packages can be built or installed before downloading

@@ -16,20 +16,24 @@ class PackageConfig
      * Load package configurations from a specified directory.
      * It will look for files matching the pattern 'pkg.*.json' and 'pkg.json'.
      */
-    public static function loadFromDir(string $dir, string $registry_name): void
+    public static function loadFromDir(string $dir, string $registry_name): array
     {
         if (!is_dir($dir)) {
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load pkg.json config.");
         }
+        $loaded = [];
         $files = glob("{$dir}/pkg.*.json");
         if (is_array($files)) {
             foreach ($files as $file) {
                 self::loadFromFile($file, $registry_name);
+                $loaded[] = $file;
             }
         }
         if (file_exists("{$dir}/pkg.json")) {
             self::loadFromFile("{$dir}/pkg.json", $registry_name);
+            $loaded[] = "{$dir}/pkg.json";
         }
+        return $loaded;
     }
 
     /**
@@ -37,7 +41,7 @@ class PackageConfig
      *
      * @param string $file the path to the json package configuration file
      */
-    public static function loadFromFile(string $file, string $registry_name): void
+    public static function loadFromFile(string $file, string $registry_name): string
     {
         $content = file_get_contents($file);
         if ($content === false) {
@@ -52,6 +56,7 @@ class PackageConfig
             self::$package_configs[$pkg_name] = $config;
             Registry::_bindPackageConfigFile($pkg_name, $registry_name, $file);
         }
+        return $file;
     }
 
     /**

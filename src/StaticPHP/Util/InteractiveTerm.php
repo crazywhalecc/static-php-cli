@@ -52,6 +52,7 @@ class InteractiveTerm
                 default => logger()->info(strip_ansi_colors($message)),
             };
         } else {
+            $output = $level === 'error' && $output instanceof ConsoleOutput ? $output->getErrorOutput() : $output;
             $output->writeln(($no_ansi ? 'strip_ansi_colors' : 'strval')($message));
         }
     }
