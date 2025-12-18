@@ -385,6 +385,9 @@ class Extension
                 logger()->info('Shared extension [' . $this->getName() . '] was already built, skipping (' . $this->getName() . '.so)');
                 return;
             }
+            if (Config::getExt($this->getName(), 'type') === 'addon') {
+                return;
+            }
             logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
             foreach ($this->dependencies as $dependency) {
                 if (!$dependency instanceof Extension) {
