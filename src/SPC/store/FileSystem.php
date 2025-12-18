@@ -408,13 +408,13 @@ class FileSystem
                 continue;
             }
             $sub_file = self::convertPath($dir . '/' . $v);
-            if (is_dir($sub_file)) {
-                # 如果是 目录 且 递推 , 则递推添加下级文件
-                if (!self::removeDir($sub_file)) {
+            if (is_link($sub_file) || is_file($sub_file)) {
+                if (!unlink($sub_file)) {
                     return false;
                 }
-            } elseif (is_link($sub_file) || is_file($sub_file)) {
-                if (!unlink($sub_file)) {
+            } elseif (is_dir($sub_file)) {
+                # 如果是 目录 且 递推 , 则递推添加下级文件
+                if (!self::removeDir($sub_file)) {
                     return false;
                 }
             }
