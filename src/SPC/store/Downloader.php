@@ -108,6 +108,9 @@ class Downloader
             if (($rel['prerelease'] ?? false) === true && ($source['prefer-stable'] ?? false)) {
                 continue;
             }
+            if (($rel['draft'] ?? false) === true && (($source['prefer-stable'] ?? false) || !$rel['tarball_url'])) {
+                continue;
+            }
             if (!($source['match'] ?? null)) {
                 $url = $rel['tarball_url'] ?? null;
                 break;
