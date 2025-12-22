@@ -1,4 +1,4 @@
-name: "CI on Unix"
+name: "CI on Unix aarch64"
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       os:
         required: true
         description: Build target OS
-        default: 'linux-x86_64'
+        default: 'linux-aarch64'
         type: choice
         options:
           - 'linux-x86_64'
@@ -58,7 +58,7 @@ on:
       os:
         required: true
         description: Build target OS
-        default: 'linux-x86_64'
+        default: 'linux-aarch64'
         type: string
       php-version:
         required: true
