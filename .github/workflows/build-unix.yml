@@ -1,4 +1,4 @@
-name: "CI on Unix aarch64"
+name: "CI on Unix"
 
 on:
   workflow_dispatch:
