@@ -104,7 +104,11 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y upx-ucl
           
-          # 1. Strip: Menghapus simbol yang tidak perlu
+          # AMBIL ALIH KEPEMILIKAN FOLDER
+          # Ini agar GitHub Runner punya izin tulis di folder yang dibuat Docker
+          sudo chown -R $USER:$USER buildroot
+          
+          # 1. Strip: Menghapus simbol debug
           if [ "${{ inputs.no-strip }}" == "false" ]; then
             strip buildroot/bin/php 2>/dev/null || true
             echo "Strip completed."
@@ -112,6 +116,7 @@ jobs:
           
           # 2. UPX: Kompresi maksimal
           if [ "${{ inputs.use-upx }}" == "true" ] && [ -f "buildroot/bin/php" ]; then
+            # Gunakan sudo jika diperlukan, tapi chown di atas biasanya sudah cukup
             upx --brute buildroot/bin/php
             echo "UPX Compression completed."
           fi
