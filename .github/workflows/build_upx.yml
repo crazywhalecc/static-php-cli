@@ -1,0 +1,123 @@
+name: "Build PHP Static Optimized (UPX)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        required: true
+        description: Target Arsitektur (Pilih linux-aarch64 untuk Android)
+        default: 'linux-aarch64'
+        type: choice
+        options:
+          - 'linux-x86_64'
+          - 'linux-aarch64'
+          - 'linux-x86_64-glibc'
+          - 'linux-aarch64-glibc'
+      php-version:
+        required: true
+        description: Versi PHP
+        default: '8.3'
+        type: choice
+        options:
+          - '8.4'
+          - '8.3'
+          - '8.2'
+          - '8.1'
+      extensions:
+        description: Daftar Ekstensi (pisahkan dengan koma)
+        required: true
+        default: 'ctype,curl,filter,mbstring,openssl,pcntl,pdo,pdo_sqlite,posix,session,sockets,sqlite3,tokenizer,zlib,opcache'
+        type: string
+      use-upx:
+        description: Kompres binary dengan UPX?
+        default: true
+        type: boolean
+      no-strip:
+        description: Jangan hapus simbol debug (bikin file jadi besar)
+        default: false
+        type: boolean
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  define-build:
+    name: "Initialize Configuration"
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.gendef.outputs.run }}
+      download: ${{ steps.gendef.outputs.download }}
+      build: ${{ steps.gendef.outputs.build }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Generate Commands"
+        id: gendef
+        run: |
+          case "${{ inputs.os }}" in
+            linux-x86_64)
+              DOWN_CMD="./bin/spc-alpine-docker download"
+              BUILD_CMD="./bin/spc-alpine-docker build"
+              RUNS_ON="ubuntu-latest"
+              ;;
+            linux-aarch64)
+              DOWN_CMD="./bin/spc-alpine-docker download"
+              BUILD_CMD="./bin/spc-alpine-docker build"
+              RUNS_ON="ubuntu-24.04-arm"
+              ;;
+            *)
+              echo "OS not supported for this optimized build" && exit 1
+              ;;
+          esac
+          
+          # Tambahkan argumen dasar
+          DOWN_CMD="$DOWN_CMD --with-php=${{ inputs.php-version }} --for-extensions=${{ inputs.extensions }} --prefer-pre-built"
+          BUILD_CMD="$BUILD_CMD ${{ inputs.extensions }} --build-cli"
+          
+          echo 'download='"$DOWN_CMD" >> "$GITHUB_OUTPUT"
+          echo 'build='"$BUILD_CMD" >> "$GITHUB_OUTPUT"
+          echo 'run='"$RUNS_ON" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: "Building PHP ${{ inputs.php-version }} for ${{ inputs.os }}"
+    needs: define-build
+    runs-on: ${{ needs.define-build.outputs.run }}
+    steps:
+      - name: "Checkout Source"
+        uses: actions/checkout@v4
+
+      - name: "Setup Runner PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer
+          extensions: curl, openssl, mbstring
+
+      - name: "Download PHP Source & Libs"
+        run: ${{ needs.define-build.outputs.download }}
+
+      - name: "Compile PHP Static"
+        run: ${{ needs.define-build.outputs.build }}
+
+      - name: "Optimization: Strip & UPX"
+        run: |
+          sudo apt-get update && sudo apt-get install -y upx-ucl
+          
+          # 1. Strip: Menghapus simbol yang tidak perlu
+          if [ "${{ inputs.no-strip }}" == "false" ]; then
+            strip buildroot/bin/php 2>/dev/null || true
+            echo "Strip completed."
+          fi
+          
+          # 2. UPX: Kompresi maksimal
+          if [ "${{ inputs.use-upx }}" == "true" ] && [ -f "buildroot/bin/php" ]; then
+            upx --brute buildroot/bin/php
+            echo "UPX Compression completed."
+          fi
+
+      - name: "Upload Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-${{ inputs.php-version }}-${{ inputs.os }}-static
+          path: buildroot/bin/php
