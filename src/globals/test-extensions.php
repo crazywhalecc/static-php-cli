@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
-    // '8.2',
-    // '8.3',
+    // '8.1',
+    '8.2',
+    '8.3',
     '8.4',
     '8.5',
     // 'git',
@@ -50,13 +50,13 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'swoole,imagick',
+    'Linux', 'Darwin' => 'mysqli',
     'Windows' => 'bcmath',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => '',
+    'Linux' => 'mysqlnd_parsec,mysqlnd_ed25519',
     'Darwin' => '',
     'Windows' => '',
 };

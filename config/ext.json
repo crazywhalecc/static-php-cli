@@ -487,6 +487,36 @@
             "zlib"
         ]
     },
+    "mysqlnd_ed25519": {
+        "type": "external",
+        "source": "mysqlnd_ed25519",
+        "arg-type": "enable",
+        "target": [
+            "shared"
+        ],
+        "ext-depends": [
+            "mysqlnd"
+        ],
+        "lib-depends": [
+            "libsodium",
+            "openssl"
+        ]
+    },
+    "mysqlnd_parsec": {
+        "type": "external",
+        "source": "mysqlnd_parsec",
+        "arg-type": "enable",
+        "target": [
+            "shared"
+        ],
+        "ext-depends": [
+            "mysqlnd"
+        ],
+        "lib-depends": [
+            "libsodium",
+            "openssl"
+        ]
+    },
     "oci8": {
         "type": "wip",
         "support": {
