@@ -56,7 +56,7 @@ $extensions = match (PHP_OS_FAMILY) {
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'mysqlnd_parsec,mysqlnd_ed25519',
+    'Linux' => 'grpc,mysqlnd_parsec,mysqlnd_ed25519',
     'Darwin' => '',
     'Windows' => '',
 };
