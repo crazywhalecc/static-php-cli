@@ -375,8 +375,17 @@ abstract class LibraryBase
                 return false;
             }
         }
+        $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+        $search_paths = array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path));
         foreach (Config::getLib(static::NAME, 'pkg-configs', []) as $name) {
-            if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$name}.pc")) {
+            $found = false;
+            foreach ($search_paths as $path) {
+                if (file_exists($path . "/{$name}.pc")) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
                 return false;
             }
         }
