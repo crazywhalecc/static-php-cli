@@ -232,7 +232,7 @@
             "BSD": "wip"
         },
         "type": "external",
-        "source": "grpc",
+        "source": "ext-grpc",
         "arg-type-unix": "enable-path",
         "cpp-extension": true,
         "lib-depends": [
