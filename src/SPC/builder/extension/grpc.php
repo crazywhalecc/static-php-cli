@@ -21,9 +21,14 @@ class grpc extends Extension
         if ($this->builder instanceof WindowsBuilder) {
             throw new ValidationException('grpc extension does not support windows yet');
         }
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/src/php/ext/grpc/call.c',
+            'zend_exception_get_default(TSRMLS_C),',
+            'zend_ce_exception,',
+        );
         if (SPCTarget::getTargetOS() === 'Darwin') {
             FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/ext/grpc/config.m4',
+                $this->source_dir . '/config.m4',
                 '/GRPC_LIBDIR=.*$/m',
                 'GRPC_LIBDIR=' . BUILD_LIB_PATH . "\n" . 'LDFLAGS="$LDFLAGS -framework CoreFoundation"'
             );
