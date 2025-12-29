@@ -145,11 +145,10 @@ abstract class UnixBuilderBase extends BuilderBase
             throw new SPCInternalException("Deploy failed. Cannot find file after copy: {$dst}");
         }
 
-        // extract debug info
-        $this->extractDebugInfo($dst);
-
-        // strip
         if (!$this->getOption('no-strip')) {
+            // extract debug info
+            $this->extractDebugInfo($dst);
+            // extra strip
             $this->stripBinary($dst);
         }
 
