@@ -280,8 +280,9 @@ class DownloadCommand extends BaseCommand
                     logger()->warning("Pre-built content not found for {$source}, fallback to source download");
                 }
                 logger()->info("[{$ni}/{$cnt}] Downloading source {$source}");
+                $force_download = $force_all || in_array($source, $force_list) || str_starts_with($source, 'php-src-') && in_array('php-src', $force_list);
                 try {
-                    Downloader::downloadSource($source, $config, $force_all || in_array($source, $force_list));
+                    Downloader::downloadSource($source, $config, $force_download);
                 } catch (SPCException $e) {
                     // if `--no-alt` option is set, we will not download alternative sources
                     if ($this->getOption('no-alt')) {
@@ -299,7 +300,7 @@ class DownloadCommand extends BaseCommand
                         logger()->notice("Trying to download alternative sources for {$source}");
                         $alt_config = array_merge($config, $alt_sources);
                     }
-                    Downloader::downloadSource($source, $alt_config, $force_all || in_array($source, $force_list));
+                    Downloader::downloadSource($source, $alt_config, $force_download);
                 }
             }
         }

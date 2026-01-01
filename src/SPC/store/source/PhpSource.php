@@ -7,6 +7,7 @@ namespace SPC\store\source;
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\store\Downloader;
+use SPC\store\LockFile;
 
 class PhpSource extends CustomSourceBase
 {
@@ -27,6 +28,10 @@ class PhpSource extends CustomSourceBase
             Downloader::downloadSource($source_name, ['type' => 'git', 'url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $force);
         } else {
             Downloader::downloadSource($source_name, $this->getLatestPHPInfo($major), $force);
+        }
+
+        if ($source_name !== 'php-src') {
+            LockFile::put('php-src', LockFile::get($source_name));
         }
     }
 

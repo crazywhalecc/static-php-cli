@@ -134,10 +134,6 @@ class BuildPHPCommand extends BuildCommand
                     // Use version-specific php-src
                     f_putenv("SPC_PHP_SRC_NAME={$version_specific_name}");
                     logger()->info("Building with PHP {$php_version} (using {$version_specific_name})");
-                } elseif (isset($lock_content['php-src'])) {
-                    // Fall back to regular php-src
-                    f_putenv('SPC_PHP_SRC_NAME=php-src');
-                    logger()->warning("php-src-{$php_version} not found, using default php-src");
                 } else {
                     logger()->error('No php-src found in downloads. Please run download command first.');
                     return static::FAILURE;
@@ -147,7 +143,6 @@ class BuildPHPCommand extends BuildCommand
                 return static::FAILURE;
             }
         } else {
-            // No version specified, use default php-src
             f_putenv('SPC_PHP_SRC_NAME=php-src');
         }
 
