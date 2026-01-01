@@ -519,6 +519,11 @@ class DownloadCommand extends BaseCommand
             // Write updated sources to file
             $date = date('Y-m-d');
             $update_file = DOWNLOAD_PATH . '/.update-' . $date . '.txt';
+            if (file_exists($update_file)) {
+                $existing_content = file_get_contents($update_file);
+                $existing_sources = array_map('trim', explode(',', $existing_content));
+                $updated_sources = array_unique(array_merge($existing_sources, $updated_sources));
+            }
             $content = implode(',', $updated_sources);
             file_put_contents($update_file, $content);
             logger()->debug("Updated sources written to: {$update_file}");
