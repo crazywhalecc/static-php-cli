@@ -9,7 +9,9 @@ use SPC\exception\DownloaderException;
 use SPC\exception\SPCException;
 use SPC\store\Config;
 use SPC\store\Downloader;
+use SPC\store\FileSystem;
 use SPC\store\LockFile;
+use SPC\store\source\CustomSourceBase;
 use SPC\util\DependencyUtil;
 use SPC\util\SPCTarget;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,7 +29,7 @@ class DownloadCommand extends BaseCommand
 
     public function configure(): void
     {
-        $this->addArgument('sources', InputArgument::REQUIRED, 'The sources will be compiled, comma separated');
+        $this->addArgument('sources', InputArgument::OPTIONAL, 'The sources will be compiled, comma separated');
         $this->addOption('shallow-clone', null, null, 'Clone shallow');
         $this->addOption('with-openssl11', null, null, 'Use openssl 1.1');
         $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'version in major.minor format, comma-separated for multiple versions (default 8.4)', '8.4');
@@ -43,10 +45,31 @@ class DownloadCommand extends BaseCommand
         $this->addOption('retry', 'R', InputOption::VALUE_REQUIRED, 'Set retry time when downloading failed (default: 0)', '0');
         $this->addOption('prefer-pre-built', 'P', null, 'Download pre-built libraries when available');
         $this->addOption('no-alt', null, null, 'Do not download alternative sources');
+        $this->addOption('update', null, null, 'Check and update downloaded sources');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
     {
+        // mode: --update
+        if ($input->getOption('update') && empty($input->getArgument('sources')) && empty($input->getOption('for-extensions')) && empty($input->getOption('for-libs'))) {
+            if (!file_exists(LockFile::LOCK_FILE)) {
+                parent::initialize($input, $output);
+                return;
+            }
+            $lock_content = json_decode(file_get_contents(LockFile::LOCK_FILE), true);
+            if (is_array($lock_content)) {
+                // Filter out pre-built sources
+                $sources_to_check = array_filter($lock_content, function ($name) {
+                    return
+                        !str_contains($name, '-Linux-') &&
+                        !str_contains($name, '-Windows-') &&
+                        !str_contains($name, '-Darwin-');
+                });
+                $input->setArgument('sources', implode(',', array_keys($sources_to_check)));
+            }
+            parent::initialize($input, $output);
+            return;
+        }
         // mode: --all
         if ($input->getOption('all')) {
             $input->setArgument('sources', implode(',', array_keys(Config::getSources())));
@@ -92,6 +115,10 @@ class DownloadCommand extends BaseCommand
         // --from-zip
         if ($path = $this->getOption('from-zip')) {
             return $this->downloadFromZip($path);
+        }
+
+        if ($this->getOption('update')) {
+            return $this->handleUpdate();
         }
 
         // Define PHP major version(s)
@@ -392,5 +419,287 @@ class DownloadCommand extends BaseCommand
             f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
         }
         return static::FAILURE;
+    }
+
+    private function handleUpdate(): int
+    {
+        logger()->info('Checking sources for updates...');
+
+        // Get lock file content
+        $lock_file_path = LockFile::LOCK_FILE;
+        if (!file_exists($lock_file_path)) {
+            logger()->warning('No lock file found. Please download sources first using "bin/spc download"');
+            return static::FAILURE;
+        }
+
+        $lock_content = json_decode(file_get_contents($lock_file_path), true);
+        if ($lock_content === null || !is_array($lock_content)) {
+            logger()->error('Failed to parse lock file');
+            return static::FAILURE;
+        }
+
+        // Filter sources to check
+        $sources_arg = $this->getArgument('sources');
+        if (!empty($sources_arg)) {
+            $requested_sources = array_map('trim', array_filter(explode(',', $sources_arg)));
+            $sources_to_check = [];
+            foreach ($requested_sources as $source) {
+                if (isset($lock_content[$source])) {
+                    $sources_to_check[$source] = $lock_content[$source];
+                } else {
+                    logger()->warning("Source '{$source}' not found in lock file, skipping");
+                }
+            }
+        } else {
+            $sources_to_check = $lock_content;
+        }
+
+        // Filter out pre-built sources (they are derivatives)
+        $sources_to_check = array_filter($sources_to_check, function ($lock_item, $name) {
+            // Skip pre-built sources (they contain OS/arch in the name)
+            if (str_contains($name, '-Linux-') || str_contains($name, '-Windows-') || str_contains($name, '-Darwin-')) {
+                logger()->debug("Skipping pre-built source: {$name}");
+                return false;
+            }
+            return true;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        if (empty($sources_to_check)) {
+            logger()->warning('No sources to check');
+            return static::FAILURE;
+        }
+
+        $total = count($sources_to_check);
+        $current = 0;
+        $updated_sources = [];
+
+        foreach ($sources_to_check as $name => $lock_item) {
+            ++$current;
+            try {
+                // Handle version-specific php-src (php-src-8.2, php-src-8.3, etc.)
+                if (preg_match('/^php-src-[\d.]+$/', $name)) {
+                    $config = Config::getSource('php-src');
+                } else {
+                    $config = Config::getSource($name);
+                }
+
+                if ($config === null) {
+                    logger()->warning("[{$current}/{$total}] Source '{$name}' not found in source config, skipping");
+                    continue;
+                }
+
+                // Check and update based on source type
+                $source_type = $lock_item['source_type'] ?? 'unknown';
+
+                if ($source_type === SPC_SOURCE_ARCHIVE) {
+                    if ($this->checkArchiveSourceUpdate($name, $lock_item, $config, $current, $total)) {
+                        $updated_sources[] = $name;
+                    }
+                } elseif ($source_type === SPC_SOURCE_GIT) {
+                    if ($this->checkGitSourceUpdate($name, $lock_item, $config, $current, $total)) {
+                        $updated_sources[] = $name;
+                    }
+                } elseif ($source_type === SPC_SOURCE_LOCAL) {
+                    logger()->debug("[{$current}/{$total}] Source '{$name}' is local, skipping");
+                } else {
+                    logger()->warning("[{$current}/{$total}] Unknown source type '{$source_type}' for '{$name}', skipping");
+                }
+            } catch (\Throwable $e) {
+                logger()->error("[{$current}/{$total}] Error checking '{$name}': {$e->getMessage()}");
+                continue;
+            }
+        }
+
+        // Output summary
+        if (empty($updated_sources)) {
+            logger()->info('All sources are up to date.');
+        } else {
+            logger()->info('Updated sources: ' . implode(', ', $updated_sources));
+
+            // Write updated sources to file
+            $date = date('Y-m-d');
+            $update_file = DOWNLOAD_PATH . '/.update-' . $date . '.txt';
+            $content = implode(',', $updated_sources);
+            file_put_contents($update_file, $content);
+            logger()->debug("Updated sources written to: {$update_file}");
+        }
+
+        return static::SUCCESS;
+    }
+
+    private function checkCustomSourceUpdate(string $name, array $lock, array $config, int $current, int $total): bool
+    {
+        $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
+        foreach ($classes as $class) {
+            // Support php-src and php-src-X.Y patterns
+            $matches = ($class::NAME === $name) ||
+                ($class::NAME === 'php-src' && preg_match('/^php-src(-[\d.]+)?$/', $name));
+            if (is_a($class, CustomSourceBase::class, true) && $matches) {
+                try {
+                    $config['source_name'] = $name;
+                    $updated = (new $class())->update($lock, $config);
+                    if ($updated) {
+                        logger()->info("[{$current}/{$total}] Source '{$name}' updated");
+                    } else {
+                        logger()->info("[{$current}/{$total}] Source '{$name}' is up to date");
+                    }
+                    return $updated;
+                } catch (\Throwable $e) {
+                    logger()->warning("[{$current}/{$total}] Failed to check '{$name}': {$e->getMessage()}");
+                    return false;
+                }
+            }
+        }
+        logger()->warning("[{$current}/{$total}] Custom source handler for '{$name}' not found");
+        return false;
+    }
+
+    /**
+     * Check and update an archive source
+     *
+     * @param  string $name    Source name
+     * @param  array  $lock    Lock file entry
+     * @param  array  $config  Source configuration
+     * @param  int    $current Current progress number
+     * @param  int    $total   Total sources to check
+     * @return bool   True if updated, false otherwise
+     */
+    private function checkArchiveSourceUpdate(string $name, array $lock, array $config, int $current, int $total): bool
+    {
+        $type = $config['type'] ?? 'unknown';
+        $locked_filename = $lock['filename'] ?? '';
+
+        // Skip local types that don't support version detection
+        if (in_array($type, ['url', 'local', 'unknown'])) {
+            logger()->debug("[{$current}/{$total}] Source '{$name}' (type: {$type}) doesn't support version detection, skipping");
+            return false;
+        }
+
+        try {
+            // Get latest version info
+            $latest_info = match ($type) {
+                'ghtar' => Downloader::getLatestGithubTarball($name, $config),
+                'ghtagtar' => Downloader::getLatestGithubTarball($name, $config, 'tags'),
+                'ghrel' => Downloader::getLatestGithubRelease($name, $config),
+                'pie' => Downloader::getPIEInfo($name, $config),
+                'bitbuckettag' => Downloader::getLatestBitbucketTag($name, $config),
+                'filelist' => Downloader::getFromFileList($name, $config),
+                'url' => Downloader::getLatestUrlInfo($name, $config),
+                'custom' => $this->checkCustomSourceUpdate($name, $lock, $config, $current, $total),
+                default => null,
+            };
+
+            if ($latest_info === null) {
+                logger()->warning("[{$current}/{$total}] Could not get version info for '{$name}' (type: {$type})");
+                return false;
+            }
+
+            $latest_filename = $latest_info[1] ?? '';
+
+            // Compare filenames
+            if ($locked_filename !== $latest_filename) {
+                logger()->info("[{$current}/{$total}] Update available for '{$name}': {$locked_filename} → {$latest_filename}");
+                $this->downloadSourceForUpdate($name, $config, $current, $total);
+                return true;
+            }
+
+            logger()->info("[{$current}/{$total}] Source '{$name}' is up to date");
+            return false;
+        } catch (DownloaderException $e) {
+            logger()->warning("[{$current}/{$total}] Failed to check '{$name}': {$e->getMessage()}");
+            return false;
+        }
+    }
+
+    /**
+     * Check and update a git source
+     *
+     * @param  string $name    Source name
+     * @param  array  $lock    Lock file entry
+     * @param  array  $config  Source configuration
+     * @param  int    $current Current progress number
+     * @param  int    $total   Total sources to check
+     * @return bool   True if updated, false otherwise
+     */
+    private function checkGitSourceUpdate(string $name, array $lock, array $config, int $current, int $total): bool
+    {
+        $locked_hash = $lock['hash'] ?? '';
+        $url = $config['url'] ?? '';
+        $branch = $config['rev'] ?? 'main';
+
+        if (empty($url)) {
+            logger()->warning("[{$current}/{$total}] No URL found for git source '{$name}'");
+            return false;
+        }
+
+        try {
+            $remote_hash = $this->getRemoteGitCommit($url, $branch);
+
+            if ($remote_hash === null) {
+                logger()->warning("[{$current}/{$total}] Could not fetch remote commit for '{$name}'");
+                return false;
+            }
+
+            // Compare hashes (use first 7 chars for display)
+            $locked_short = substr($locked_hash, 0, 7);
+            $remote_short = substr($remote_hash, 0, 7);
+
+            if ($locked_hash !== $remote_hash) {
+                logger()->info("[{$current}/{$total}] Update available for '{$name}': {$locked_short} → {$remote_short}");
+                $this->downloadSourceForUpdate($name, $config, $current, $total);
+                return true;
+            }
+
+            logger()->info("[{$current}/{$total}] Source '{$name}' is up to date");
+            return false;
+        } catch (\Throwable $e) {
+            logger()->warning("[{$current}/{$total}] Failed to check '{$name}': {$e->getMessage()}");
+            return false;
+        }
+    }
+
+    /**
+     * Download a source after removing old lock entry
+     *
+     * @param string $name    Source name
+     * @param array  $config  Source configuration
+     * @param int    $current Current progress number
+     * @param int    $total   Total sources to check
+     */
+    private function downloadSourceForUpdate(string $name, array $config, int $current, int $total): void
+    {
+        logger()->info("[{$current}/{$total}] Downloading '{$name}'...");
+
+        // Remove old lock entry (this triggers cleanup of old files)
+        LockFile::put($name, null);
+
+        // Download new version
+        Downloader::downloadSource($name, $config, true);
+    }
+
+    /**
+     * Get remote git commit hash without cloning
+     *
+     * @param  string      $url    Git repository URL
+     * @param  string      $branch Branch or tag to check
+     * @return null|string Remote commit hash or null on failure
+     */
+    private function getRemoteGitCommit(string $url, string $branch): ?string
+    {
+        try {
+            $cmd = SPC_GIT_EXEC . ' ls-remote ' . escapeshellarg($url) . ' ' . escapeshellarg($branch);
+            f_exec($cmd, $output, $ret);
+
+            if ($ret !== 0 || empty($output)) {
+                return null;
+            }
+
+            // Output format: "commit_hash\trefs/heads/branch" or "commit_hash\tHEAD"
+            $parts = preg_split('/\s+/', $output[0]);
+            return $parts[0] ?? null;
+        } catch (\Throwable $e) {
+            logger()->debug("Failed to fetch remote git commit: {$e->getMessage()}");
+            return null;
+        }
     }
 }

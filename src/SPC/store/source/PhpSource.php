@@ -30,6 +30,33 @@ class PhpSource extends CustomSourceBase
         }
     }
 
+    public function update(array $lock, ?array $config = null): bool
+    {
+        $source_name = $config['source_name'] ?? 'php-src';
+
+        // Try to extract version from source name (e.g., "php-src-8.2" -> "8.2")
+        if (preg_match('/^php-src-([\d.]+)$/', $source_name, $matches)) {
+            $major = $matches[1];
+        } else {
+            $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.4';
+        }
+
+        if ($major === 'git') {
+            return false;
+        }
+
+        $latest_php = $this->getLatestPHPInfo($major);
+        $latest_url = $latest_php['url'];
+        $locked_url = $lock['url'] ?? '';
+
+        if ($locked_url !== $latest_url) {
+            Downloader::downloadSource($source_name, $latest_php, true);
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * 获取 PHP x.y 的具体版本号，例如通过 8.1 来获取 8.1.10
      */

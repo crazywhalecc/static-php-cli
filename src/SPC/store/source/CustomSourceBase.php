@@ -25,4 +25,13 @@ abstract class CustomSourceBase
      * @param int        $lock_as Lock type constant
      */
     abstract public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_DOWNLOAD_SOURCE): void;
+
+    /**
+     * Update the source from its repository
+     *
+     * @param  array $lock   Lock file entry
+     * @param  array $config Optional configuration array
+     * @return bool  True if updated, false otherwise
+     */
+    abstract public function update(array $lock, ?array $config = null): bool;
 }

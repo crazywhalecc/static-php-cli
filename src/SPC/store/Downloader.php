@@ -221,6 +221,39 @@ class Downloader
     }
 
     /**
+     * Get latest version from direct URL (detect redirect and filename)
+     *
+     * @param  string             $name   Source name
+     * @param  array              $source Source meta info: [url]
+     * @return array<int, string> [url, filename]
+     */
+    public static function getLatestUrlInfo(string $name, array $source): array
+    {
+        logger()->debug("finding {$name} source from direct url");
+        $url = $source['url'];
+        $headers = self::curlExec(
+            url: $url,
+            method: 'HEAD',
+            retries: self::getRetryAttempts()
+        );
+
+        // Find redirect location if any
+        if (preg_match('/^location:\s+(?<url>.+)$/im', $headers, $matches)) {
+            $url = trim($matches['url']);
+            // If it's a relative URL, we need to handle it, but usually it's absolute for downloads
+        }
+
+        // Find filename from content-disposition
+        if (preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+)\1/im', $headers, $matches)) {
+            $filename = trim($matches['filename']);
+        } else {
+            $filename = $source['filename'] ?? basename($url);
+        }
+
+        return [$url, $filename];
+    }
+
+    /**
      * Download file from URL
      *
      * @param string      $name        Download name
