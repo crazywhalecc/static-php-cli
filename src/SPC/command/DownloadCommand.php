@@ -30,7 +30,7 @@ class DownloadCommand extends BaseCommand
         $this->addArgument('sources', InputArgument::REQUIRED, 'The sources will be compiled, comma separated');
         $this->addOption('shallow-clone', null, null, 'Clone shallow');
         $this->addOption('with-openssl11', null, null, 'Use openssl 1.1');
-        $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'version in major.minor format (default 8.4)', '8.4');
+        $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'version in major.minor format, comma-separated for multiple versions (default 8.4)', '8.4');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
@@ -94,16 +94,24 @@ class DownloadCommand extends BaseCommand
             return $this->downloadFromZip($path);
         }
 
-        // Define PHP major version
-        $ver = $this->php_major_ver = $this->getOption('with-php');
-        define('SPC_BUILD_PHP_VERSION', $ver);
-        if ($ver !== 'git' && !preg_match('/^\d+\.\d+$/', $ver)) {
-            // If not git, we need to check the version format
-            if (!preg_match('/^\d+\.\d+(\.\d+)?$/', $ver)) {
-                logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
-                return static::FAILURE;
+        // Define PHP major version(s)
+        $php_versions_str = $this->getOption('with-php');
+        $php_versions = array_map('trim', explode(',', $php_versions_str));
+
+        // Validate all versions
+        foreach ($php_versions as $ver) {
+            if ($ver !== 'git' && !preg_match('/^\d+\.\d+$/', $ver)) {
+                // If not git, we need to check the version format
+                if (!preg_match('/^\d+\.\d+(\.\d+)?$/', $ver)) {
+                    logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
+                    return static::FAILURE;
+                }
             }
         }
+
+        // Set the first version as the default for backward compatibility
+        $this->php_major_ver = $php_versions[0];
+        define('SPC_BUILD_PHP_VERSION', $this->php_major_ver);
 
         // retry
         $retry = (int) $this->getOption('retry');
@@ -124,6 +132,20 @@ class DownloadCommand extends BaseCommand
         }
 
         $chosen_sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
+
+        // Handle multiple PHP versions
+        // If php-src is in the sources, replace it with version-specific sources
+        if (in_array('php-src', $chosen_sources)) {
+            // Remove php-src from the list
+            $chosen_sources = array_diff($chosen_sources, ['php-src']);
+            // Add version-specific php-src for each version
+            foreach ($php_versions as $ver) {
+                $version_specific_name = "php-src-{$ver}";
+                $chosen_sources[] = $version_specific_name;
+                // Store the version for this specific php-src
+                f_putenv("SPC_PHP_VERSION_{$version_specific_name}={$ver}");
+            }
+        }
 
         $sss = $this->getOption('ignore-cache-sources');
         if ($sss === false) {
@@ -201,7 +223,16 @@ class DownloadCommand extends BaseCommand
                 logger()->info("[{$ni}/{$cnt}] Downloading source {$source} from custom git: {$new_config['url']}");
                 Downloader::downloadSource($source, $new_config, true);
             } else {
-                $config = Config::getSource($source);
+                // Handle version-specific php-src (php-src-8.2, php-src-8.3, etc.)
+                if (preg_match('/^php-src-[\d.]+$/', $source)) {
+                    $config = Config::getSource('php-src');
+                    if ($config === null) {
+                        logger()->error('php-src configuration not found in source.json');
+                        return static::FAILURE;
+                    }
+                } else {
+                    $config = Config::getSource($source);
+                }
                 // Prefer pre-built, we need to search pre-built library
                 if ($this->getOption('prefer-pre-built') && ($config['provide-pre-built'] ?? false) === true) {
                     // We need to replace pattern

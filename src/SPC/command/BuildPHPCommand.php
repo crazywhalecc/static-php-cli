@@ -49,6 +49,7 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('with-micro-logo', null, InputOption::VALUE_REQUIRED, 'Use custom .ico for micro.sfx (windows only)');
         $this->addOption('enable-micro-win32', null, null, 'Enable win32 mode for phpmicro (Windows only)');
         $this->addOption('with-frankenphp-app', null, InputOption::VALUE_REQUIRED, 'Path to a folder to be embedded in FrankenPHP');
+        $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'PHP version to build (e.g., 8.2, 8.3, 8.4). Uses php-src-X.Y if available, otherwise php-src');
     }
 
     public function handle(): int
@@ -120,6 +121,36 @@ class BuildPHPCommand extends BuildCommand
                 logger()->warning('Some cases micro.sfx cannot be packed via UPX due to dynamic size bug, be aware!');
             }
         }
+
+        // Determine which php-src to use based on --with-php option
+        $php_version = $this->getOption('with-php');
+        if ($php_version !== null) {
+            // Check if version-specific php-src exists in lock file
+            $version_specific_name = "php-src-{$php_version}";
+            $lock_file_path = DOWNLOAD_PATH . '/.lock.json';
+            if (file_exists($lock_file_path)) {
+                $lock_content = json_decode(file_get_contents($lock_file_path), true);
+                if (isset($lock_content[$version_specific_name])) {
+                    // Use version-specific php-src
+                    f_putenv("SPC_PHP_SRC_NAME={$version_specific_name}");
+                    logger()->info("Building with PHP {$php_version} (using {$version_specific_name})");
+                } elseif (isset($lock_content['php-src'])) {
+                    // Fall back to regular php-src
+                    f_putenv('SPC_PHP_SRC_NAME=php-src');
+                    logger()->warning("php-src-{$php_version} not found, using default php-src");
+                } else {
+                    logger()->error('No php-src found in downloads. Please run download command first.');
+                    return static::FAILURE;
+                }
+            } else {
+                logger()->error('Lock file not found. Please download sources first.');
+                return static::FAILURE;
+            }
+        } else {
+            // No version specified, use default php-src
+            f_putenv('SPC_PHP_SRC_NAME=php-src');
+        }
+
         // create builder
         $builder = BuilderProvider::makeBuilderByInput($this->input);
         $include_suggest_ext = $this->getOption('with-suggested-exts');

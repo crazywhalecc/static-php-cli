@@ -39,7 +39,14 @@ class SourceManager
 
         // start check
         foreach ($sources_extracted as $source => $item) {
-            if (Config::getSource($source) === null) {
+            $extract_dir_name = $source;
+            // Handle version-specific php-src (php-src-8.2, php-src-8.3, etc.)
+            $source_config = Config::getSource($source);
+            if ($source_config === null && preg_match('/^php-src-[\d.]+$/', $source)) {
+                $source_config = Config::getSource('php-src');
+                $extract_dir_name = 'php-src';
+            }
+            if ($source_config === null) {
                 throw new WrongUsageException("Source [{$source}] does not exist, please check the name and correct it !");
             }
             // check source downloaded
@@ -56,12 +63,12 @@ class SourceManager
             $lock_content = LockFile::get($lock_name);
 
             // check source dir exist
-            $check = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $source);
+            $check = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $extract_dir_name);
             // $check = $lock[$lock_name]['move_path'] === null ? (SOURCE_PATH . '/' . $source) : (SOURCE_PATH . '/' . $lock[$lock_name]['move_path']);
             if (!is_dir($check)) {
                 logger()->debug("Extracting source [{$source}] to {$check} ...");
                 $filename = LockFile::getLockFullPath($lock_content);
-                FileSystem::extractSource($source, $lock_content['source_type'], $filename, $check);
+                FileSystem::extractSource($extract_dir_name, $lock_content['source_type'], $filename, $check);
                 LockFile::putLockSourceHash($lock_content, $check);
                 continue;
             }
@@ -89,7 +96,7 @@ class SourceManager
             logger()->notice("Source [{$source}] hash mismatch, removing old source dir and extracting again ...");
             FileSystem::removeDir($check);
             $filename = LockFile::getLockFullPath($lock_content);
-            $move_path = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $source);
+            $move_path = LockFile::getExtractPath($lock_name, SOURCE_PATH . '/' . $extract_dir_name);
             FileSystem::extractSource($source, $lock_content['source_type'], $filename, $move_path);
             LockFile::putLockSourceHash($lock_content, $check);
         }

@@ -682,7 +682,11 @@ class Downloader
                         ...FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg'),
                     ];
                     foreach ($classes as $class) {
-                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
+                        // Support php-src and php-src-X.Y patterns
+                        $matches = ($class::NAME === $name) ||
+                                   ($class::NAME === 'php-src' && preg_match('/^php-src(-[\d.]+)?$/', $name));
+                        if (is_a($class, CustomSourceBase::class, true) && $matches) {
+                            $conf['source_name'] = $name; // Pass the actual source name
                             (new $class())->fetch($force, $conf, $download_as);
                             break;
                         }
