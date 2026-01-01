@@ -64,7 +64,7 @@ class DownloadCommand extends BaseCommand
                         !str_contains($name, '-Linux-') &&
                         !str_contains($name, '-Windows-') &&
                         !str_contains($name, '-Darwin-');
-                });
+                }, ARRAY_FILTER_USE_KEY);
                 $input->setArgument('sources', implode(',', array_keys($sources_to_check)));
             }
             parent::initialize($input, $output);
