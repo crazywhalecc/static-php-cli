@@ -30,7 +30,7 @@ class PhpSource extends CustomSourceBase
         }
     }
 
-    public function update(array $lock, ?array $config = null): bool
+    public function update(array $lock, ?array $config = null): ?array
     {
         $source_name = $config['source_name'] ?? 'php-src';
 
@@ -42,19 +42,14 @@ class PhpSource extends CustomSourceBase
         }
 
         if ($major === 'git') {
-            return false;
+            return null;
         }
 
         $latest_php = $this->getLatestPHPInfo($major);
         $latest_url = $latest_php['url'];
-        $locked_url = $lock['url'] ?? '';
+        $filename = basename($latest_url);
 
-        if ($locked_url !== $latest_url) {
-            Downloader::downloadSource($source_name, $latest_php, true);
-            return true;
-        }
-
-        return false;
+        return [$latest_url, $filename];
     }
 
     /**

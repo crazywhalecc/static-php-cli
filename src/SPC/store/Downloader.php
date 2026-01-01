@@ -280,7 +280,7 @@ class Downloader
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
             $name = self::getPreBuiltLockName($name);
         }
-        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
+        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_ARCHIVE, 'url' => $url, 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
     }
 
     /**
@@ -339,7 +339,7 @@ class Downloader
         }
         // Lock
         logger()->debug("Locking git source {$name}");
-        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_GIT, 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
+        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_GIT, 'url' => $url, 'rev' => $branch, 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
 
         /*
         // 复制目录过去
@@ -700,6 +700,7 @@ class Downloader
                     LockFile::lockSource($name, [
                         'source_type' => SPC_SOURCE_LOCAL,
                         'dirname' => $conf['dirname'],
+                        'path' => $conf['path'] ?? null,
                         'move_path' => $conf['path'] ?? $conf['extract'] ?? null,
                         'lock_as' => $download_as,
                     ]);

@@ -527,7 +527,7 @@ class DownloadCommand extends BaseCommand
         return static::SUCCESS;
     }
 
-    private function checkCustomSourceUpdate(string $name, array $lock, array $config, int $current, int $total): bool
+    private function checkCustomSourceUpdate(string $name, array $lock, array $config, int $current, int $total): ?array
     {
         $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
         foreach ($classes as $class) {
@@ -537,21 +537,15 @@ class DownloadCommand extends BaseCommand
             if (is_a($class, CustomSourceBase::class, true) && $matches) {
                 try {
                     $config['source_name'] = $name;
-                    $updated = (new $class())->update($lock, $config);
-                    if ($updated) {
-                        logger()->info("[{$current}/{$total}] Source '{$name}' updated");
-                    } else {
-                        logger()->info("[{$current}/{$total}] Source '{$name}' is up to date");
-                    }
-                    return $updated;
+                    return (new $class())->update($lock, $config);
                 } catch (\Throwable $e) {
                     logger()->warning("[{$current}/{$total}] Failed to check '{$name}': {$e->getMessage()}");
-                    return false;
+                    return null;
                 }
             }
         }
-        logger()->warning("[{$current}/{$total}] Custom source handler for '{$name}' not found");
-        return false;
+        logger()->debug("[{$current}/{$total}] Custom source handler for '{$name}' not found");
+        return null;
     }
 
     /**
@@ -570,13 +564,12 @@ class DownloadCommand extends BaseCommand
         $locked_filename = $lock['filename'] ?? '';
 
         // Skip local types that don't support version detection
-        if (in_array($type, ['url', 'local', 'unknown'])) {
+        if (in_array($type, ['local', 'unknown'])) {
             logger()->debug("[{$current}/{$total}] Source '{$name}' (type: {$type}) doesn't support version detection, skipping");
             return false;
         }
 
         try {
-            // Get latest version info
             $latest_info = match ($type) {
                 'ghtar' => Downloader::getLatestGithubTarball($name, $config),
                 'ghtagtar' => Downloader::getLatestGithubTarball($name, $config, 'tags'),
@@ -670,7 +663,7 @@ class DownloadCommand extends BaseCommand
     {
         logger()->info("[{$current}/{$total}] Downloading '{$name}'...");
 
-        // Remove old lock entry (this triggers cleanup of old files)
+        // Remove old lock entry
         LockFile::put($name, null);
 
         // Download new version

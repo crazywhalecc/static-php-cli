@@ -29,9 +29,9 @@ abstract class CustomSourceBase
     /**
      * Update the source from its repository
      *
-     * @param  array $lock   Lock file entry
-     * @param  array $config Optional configuration array
-     * @return bool  True if updated, false otherwise
+     * @param  array      $lock   Lock file entry
+     * @param  array      $config Optional configuration array
+     * @return null|array Latest version info [url, filename], or null if no update needed
      */
-    abstract public function update(array $lock, ?array $config = null): bool;
+    abstract public function update(array $lock, ?array $config = null): ?array;
 }
