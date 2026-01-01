@@ -689,8 +689,7 @@ class Downloader
                     self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
                     break;
                 case 'url': // Direct download URL
-                    $url = $conf['url'];
-                    $filename = $conf['filename'] ?? basename($conf['url']);
+                    [$url, $filename] = self::getLatestUrlInfo($name, $conf);
                     self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
                     break;
                 case 'git': // Git repo
@@ -700,6 +699,7 @@ class Downloader
                     LockFile::lockSource($name, [
                         'source_type' => SPC_SOURCE_LOCAL,
                         'dirname' => $conf['dirname'],
+                        'url' => null,
                         'path' => $conf['path'] ?? null,
                         'move_path' => $conf['path'] ?? $conf['extract'] ?? null,
                         'lock_as' => $download_as,
