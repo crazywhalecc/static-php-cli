@@ -80,7 +80,6 @@ class SPCConfigUtil
         $libs = $this->getLibsString($libraries, !$this->absolute_libs);
 
         // additional OS-specific libraries (e.g. macOS -lresolv)
-        // embed
         if ($extra_libs = SPCTarget::getRuntimeLibs()) {
             $libs .= " {$extra_libs}";
         }
