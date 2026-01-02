@@ -51,6 +51,8 @@ class openssl extends LinuxLibraryBase
             $zlib_extra = '';
         }
 
+        $openssl_conf = getenv('OPENSSL_CONF');
+        $openssl_dir = $openssl_conf ? dirname($openssl_conf) : '/etc/ssl';
         $ex_lib = trim($ex_lib);
 
         shell()->cd($this->source_dir)->initializeEnv($this)
@@ -58,7 +60,7 @@ class openssl extends LinuxLibraryBase
                 "{$env} ./Configure no-shared {$extra} " .
                 '--prefix=' . BUILD_ROOT_PATH . ' ' .
                 '--libdir=' . BUILD_LIB_PATH . ' ' .
-                '--openssldir=/etc/ssl ' .
+                "--openssldir={$openssl_dir} " .
                 "{$zlib_extra}" .
                 'enable-pie ' .
                 'no-legacy ' .
