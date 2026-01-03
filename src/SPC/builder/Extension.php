@@ -546,6 +546,7 @@ class Extension
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
+            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
