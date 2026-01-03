@@ -455,12 +455,17 @@ class Extension
 
         // process *.so file
         $soFile = BUILD_MODULES_PATH . '/' . $this->getName() . '.so';
+        $soDest = $soFile;
+        preg_match('/-release\s+(\S*)/', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $matches);
+        if (!empty($matches[1])) {
+            $soDest = str_replace('.so', '-' . $matches[1] . '.so', $soFile);
+        }
         if (!file_exists($soFile)) {
             throw new ValidationException("extension {$this->getName()} build failed: {$soFile} not found", validation_module: "Extension {$this->getName()} build");
         }
         /** @var UnixBuilderBase $builder */
         $builder = $this->builder;
-        $builder->deployBinary($soFile, $soFile, false);
+        $builder->deployBinary($soFile, $soDest, false);
     }
 
     /**
