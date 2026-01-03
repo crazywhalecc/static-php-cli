@@ -262,7 +262,7 @@ abstract class UnixBuilderBase extends BuilderBase
             if ($ret !== 0) {
                 throw new ValidationException(
                     'embed failed to build. Error message: ' . implode("\n", $out),
-                    validation_module: $embedType . 'libphp embed build sanity check'
+                    validation_module: $embedType . ' libphp embed build sanity check'
                 );
             }
             [$ret, $output] = shell()->cd($sample_file_path)->execWithResult($ext_path . './embed');
