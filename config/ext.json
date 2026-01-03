@@ -410,8 +410,7 @@
         "ext-depends": [
             "zlib",
             "session"
-        ],
-        "build-with-php": true
+        ]
     },
     "memcached": {
         "support": {

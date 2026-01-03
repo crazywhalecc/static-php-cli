@@ -18,6 +18,9 @@ class memcache extends Extension
 
     public function patchBeforeBuildconf(): bool
     {
+        if (!$this->isBuildStatic()) {
+            return false;
+        }
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
             'if test -d $abs_srcdir/src ; then',
@@ -40,6 +43,38 @@ extern zend_module_entry memcache_module_entry;
 
 #endif
 EOF
+        );
+        return true;
+    }
+
+    public function patchBeforeSharedConfigure(): bool
+    {
+        if (!$this->isBuildShared()) {
+            return false;
+        }
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
+            'if test -d $abs_srcdir/main ; then',
+            'if test -d $abs_srcdir/src ; then',
+        );
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
+            'export CPPFLAGS="$CPPFLAGS $INCLUDES -I$abs_srcdir/main"',
+            'export CPPFLAGS="$CPPFLAGS $INCLUDES"',
+        );
+        // add for in-tree building
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/memcache/php_memcache.h',
+            <<<'EOF'
+#ifndef PHP_MEMCACHE_H
+#define PHP_MEMCACHE_H
+
+extern zend_module_entry memcache_module_entry;
+#define phpext_memcache_ptr &memcache_module_entry
+
+#endif
+EOF,
+            ''
         );
         return true;
     }
