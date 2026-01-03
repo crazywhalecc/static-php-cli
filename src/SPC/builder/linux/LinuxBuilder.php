@@ -284,8 +284,6 @@ class LinuxBuilder extends UnixBuilderBase
         // process libphp.so for shared embed
         $libphpSo = BUILD_LIB_PATH . '/libphp.so';
         if (file_exists($libphpSo)) {
-            // post actions: rename libphp.so to libphp-<release>.so if -release is set in LDFLAGS
-            $this->processLibphpSoFile($libphpSo);
             // deploy libphp.so
             $this->deployBinary($libphpSo, $libphpSo, false);
         }
@@ -319,38 +317,9 @@ class LinuxBuilder extends UnixBuilderBase
         return array_filter([
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => $config['libs'],
-            'EXTRA_LDFLAGS' => preg_replace('/-release\s+(\S+)/', '', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS')),
+            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => "-L{$lib} {$static} -pie",
         ]);
-    }
-
-    private function processLibphpSoFile(string $libphpSo): void
-    {
-        $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '';
-        $libDir = BUILD_LIB_PATH;
-        $cwd = getcwd();
-
-        if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
-            $release = $matches[1];
-            $releaseName = "libphp-{$release}.so";
-            $libphpRelease = "{$libDir}/{$releaseName}";
-            if (!file_exists($libphpRelease) && file_exists($libphpSo)) {
-                rename($libphpSo, $libphpRelease);
-            }
-            if (file_exists($libphpRelease)) {
-                chdir($libDir);
-                if (file_exists($libphpSo)) {
-                    unlink($libphpSo);
-                }
-                symlink($releaseName, 'libphp.so');
-                shell()->exec(sprintf(
-                    'patchelf --set-soname %s %s',
-                    escapeshellarg($releaseName),
-                    escapeshellarg($libphpRelease)
-                ));
-            }
-            chdir($cwd);
-        }
     }
 
     /**
