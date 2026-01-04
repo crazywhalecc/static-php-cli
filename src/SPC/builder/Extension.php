@@ -401,10 +401,12 @@ class Extension
             if (Config::getExt($this->getName(), 'type') === 'addon') {
                 return;
             }
+            $this->builder->emitPatchPoint('before-shared-ext[' . $this->getName() . ']-build');
             match (PHP_OS_FAMILY) {
                 'Darwin', 'Linux' => $this->buildUnixShared(),
                 default => throw new WrongUsageException(PHP_OS_FAMILY . ' build shared extensions is not supported yet'),
             };
+            $this->builder->emitPatchPoint('after-shared-ext[' . $this->getName() . ']-build');
         } catch (SPCException $e) {
             $e->bindExtensionInfo(['extension_name' => $this->getName()]);
             throw $e;
