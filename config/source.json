@@ -712,7 +712,7 @@
     "libsodium": {
         "type": "ghrel",
         "repo": "jedisct1/libsodium",
-        "match": "libsodium-\\d+(\\.\\d+)*\\.tar\\.gz",
+        "match": "libsodium-(?!1\\.0\\.21)\\d+(\\.\\d+)*\\.tar\\.gz",
         "prefer-stable": true,
         "provide-pre-built": true,
         "license": {
