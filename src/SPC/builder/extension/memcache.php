@@ -18,6 +18,9 @@ class memcache extends Extension
 
     public function patchBeforeBuildconf(): bool
     {
+        if (!$this->isBuildStatic()) {
+            return false;
+        }
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
             'if test -d $abs_srcdir/src ; then',
@@ -40,6 +43,24 @@ extern zend_module_entry memcache_module_entry;
 
 #endif
 EOF
+        );
+        return true;
+    }
+
+    public function patchBeforeSharedConfigure(): bool
+    {
+        if (!$this->isBuildShared()) {
+            return false;
+        }
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
+            'if test -d $abs_srcdir/main ; then',
+            'if test -d $abs_srcdir/src ; then',
+        );
+        FileSystem::replaceFileStr(
+            SOURCE_PATH . '/php-src/ext/memcache/config9.m4',
+            'export CPPFLAGS="$CPPFLAGS $INCLUDES -I$abs_srcdir/main"',
+            'export CPPFLAGS="$CPPFLAGS $INCLUDES"',
         );
         return true;
     }

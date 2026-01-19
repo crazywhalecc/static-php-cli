@@ -14,7 +14,9 @@ trait gmp
             ->appendEnv([
                 'CFLAGS' => '-std=c17',
             ])
-            ->configure()
+            ->configure(
+                '--enable-fat'
+            )
             ->make();
         $this->patchPkgconfPrefix(['gmp.pc']);
     }

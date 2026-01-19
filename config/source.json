@@ -161,6 +161,18 @@
             "path": "LICENSE"
         }
     },
+    "ext-grpc": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/grpc",
+        "path": "php-src/ext/grpc",
+        "filename": "grpc.tgz",
+        "license": {
+            "type": "file",
+            "path": [
+                "LICENSE"
+            ]
+        }
+    },
     "ext-imagick": {
         "type": "url",
         "url": "https://pecl.php.net/get/imagick",
@@ -680,9 +692,10 @@
         }
     },
     "libpng": {
-        "type": "git",
-        "url": "https://github.com/glennrp/libpng.git",
-        "rev": "libpng16",
+        "type": "ghtagtar",
+        "repo": "pnggroup/libpng",
+        "match": "v1\\.6\\.\\d+",
+        "query": "?per_page=150",
         "provide-pre-built": true,
         "license": {
             "type": "file",
@@ -690,9 +703,9 @@
         }
     },
     "librabbitmq": {
-        "type": "git",
-        "url": "https://github.com/alanxz/rabbitmq-c.git",
-        "rev": "master",
+        "type": "ghtar",
+        "repo": "alanxz/rabbitmq-c",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -709,7 +722,7 @@
     "libsodium": {
         "type": "ghrel",
         "repo": "jedisct1/libsodium",
-        "match": "libsodium-\\d+(\\.\\d+)*\\.tar\\.gz",
+        "match": "libsodium-(?!1\\.0\\.21)\\d+(\\.\\d+)*\\.tar\\.gz",
         "prefer-stable": true,
         "provide-pre-built": true,
         "license": {
@@ -876,6 +889,24 @@
         "url": "https://pecl.php.net/get/msgpack",
         "path": "php-src/ext/msgpack",
         "filename": "msgpack.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "mysqlnd_ed25519": {
+        "type": "pie",
+        "repo": "mariadb/mysqlnd_ed25519",
+        "path": "php-src/ext/mysqlnd_ed25519",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "mysqlnd_parsec": {
+        "type": "pie",
+        "repo": "mariadb/mysqlnd_parsec",
+        "path": "php-src/ext/mysqlnd_parsec",
         "license": {
             "type": "file",
             "path": "LICENSE"
