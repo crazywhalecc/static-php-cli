@@ -499,7 +499,9 @@
             "mysqlnd"
         ],
         "lib-depends": [
-            "libsodium",
+            "libsodium"
+        ],
+        "lib-suggests": [
             "openssl"
         ]
     },
@@ -514,7 +516,9 @@
             "mysqlnd"
         ],
         "lib-depends": [
-            "libsodium",
+            "libsodium"
+        ],
+        "lib-suggests": [
             "openssl"
         ]
     },

@@ -398,9 +398,6 @@ class Extension
                     $dependency->buildShared([...$visited, $this->getName()]);
                 }
             }
-            if (Config::getExt($this->getName(), 'type') === 'addon') {
-                return;
-            }
             $this->builder->emitPatchPoint('before-shared-ext[' . $this->getName() . ']-build');
             match (PHP_OS_FAMILY) {
                 'Darwin', 'Linux' => $this->buildUnixShared(),
