@@ -221,6 +221,39 @@ class Downloader
     }
 
     /**
+     * Get latest version from direct URL (detect redirect and filename)
+     *
+     * @param  string             $name   Source name
+     * @param  array              $source Source meta info: [url]
+     * @return array<int, string> [url, filename]
+     */
+    public static function getLatestUrlInfo(string $name, array $source): array
+    {
+        logger()->debug("finding {$name} source from direct url");
+        $url = $source['url'];
+        $headers = self::curlExec(
+            url: $url,
+            method: 'HEAD',
+            retries: self::getRetryAttempts()
+        );
+
+        // Find redirect location if any
+        if (preg_match('/^location:\s+(?<url>.+)$/im', $headers, $matches)) {
+            $url = trim($matches['url']);
+            // If it's a relative URL, we need to handle it, but usually it's absolute for downloads
+        }
+
+        // Find filename from content-disposition
+        if (preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+)\1/im', $headers, $matches)) {
+            $filename = trim($matches['filename']);
+        } else {
+            $filename = $source['filename'] ?? basename($url);
+        }
+
+        return [$url, $filename];
+    }
+
+    /**
      * Download file from URL
      *
      * @param string      $name        Download name
@@ -247,7 +280,7 @@ class Downloader
         if ($download_as === SPC_DOWNLOAD_PRE_BUILT) {
             $name = self::getPreBuiltLockName($name);
         }
-        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_ARCHIVE, 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
+        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_ARCHIVE, 'url' => $url, 'filename' => $filename, 'move_path' => $move_path, 'lock_as' => $download_as]);
     }
 
     /**
@@ -306,7 +339,7 @@ class Downloader
         }
         // Lock
         logger()->debug("Locking git source {$name}");
-        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_GIT, 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
+        LockFile::lockSource($name, ['source_type' => SPC_SOURCE_GIT, 'url' => $url, 'rev' => $branch, 'dirname' => $name, 'move_path' => $move_path, 'lock_as' => $lock_as]);
 
         /*
         // 复制目录过去
@@ -656,8 +689,7 @@ class Downloader
                     self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
                     break;
                 case 'url': // Direct download URL
-                    $url = $conf['url'];
-                    $filename = $conf['filename'] ?? basename($conf['url']);
+                    [$url, $filename] = self::getLatestUrlInfo($name, $conf);
                     self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
                     break;
                 case 'git': // Git repo
@@ -667,6 +699,8 @@ class Downloader
                     LockFile::lockSource($name, [
                         'source_type' => SPC_SOURCE_LOCAL,
                         'dirname' => $conf['dirname'],
+                        'url' => null,
+                        'path' => $conf['path'] ?? null,
                         'move_path' => $conf['path'] ?? $conf['extract'] ?? null,
                         'lock_as' => $download_as,
                     ]);
@@ -682,7 +716,11 @@ class Downloader
                         ...FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/pkg', 'SPC\store\pkg'),
                     ];
                     foreach ($classes as $class) {
-                        if (is_a($class, CustomSourceBase::class, true) && $class::NAME === $name) {
+                        // Support php-src and php-src-X.Y patterns
+                        $matches = ($class::NAME === $name) ||
+                                   ($class::NAME === 'php-src' && preg_match('/^php-src(-[\d.]+)?$/', $name));
+                        if (is_a($class, CustomSourceBase::class, true) && $matches) {
+                            $conf['source_name'] = $name; // Pass the actual source name
                             (new $class())->fetch($force, $conf, $download_as);
                             break;
                         }

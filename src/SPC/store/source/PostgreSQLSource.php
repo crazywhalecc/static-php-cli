@@ -15,6 +15,13 @@ class PostgreSQLSource extends CustomSourceBase
         Downloader::downloadSource('postgresql', self::getLatestInfo(), $force);
     }
 
+    public function update(array $lock, ?array $config = null): ?array
+    {
+        $latest = $this->getLatestInfo();
+        $filename = basename($latest['url']);
+        return [$latest['url'], $filename];
+    }
+
     public function getLatestInfo(): array
     {
         [, $filename, $version] = Downloader::getFromFileList('postgresql', [

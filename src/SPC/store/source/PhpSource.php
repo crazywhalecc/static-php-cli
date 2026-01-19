@@ -7,6 +7,7 @@ namespace SPC\store\source;
 use JetBrains\PhpStorm\ArrayShape;
 use SPC\exception\DownloaderException;
 use SPC\store\Downloader;
+use SPC\store\LockFile;
 
 class PhpSource extends CustomSourceBase
 {
@@ -14,12 +15,46 @@ class PhpSource extends CustomSourceBase
 
     public function fetch(bool $force = false, ?array $config = null, int $lock_as = SPC_DOWNLOAD_SOURCE): void
     {
-        $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.4';
-        if ($major === 'git') {
-            Downloader::downloadSource('php-src', ['type' => 'git', 'url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $force);
+        $source_name = $config['source_name'] ?? 'php-src';
+
+        // Try to extract version from source name (e.g., "php-src-8.2" -> "8.2")
+        if (preg_match('/^php-src-([\d.]+)$/', $source_name, $matches)) {
+            $major = $matches[1];
         } else {
-            Downloader::downloadSource('php-src', $this->getLatestPHPInfo($major), $force);
+            $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.4';
         }
+
+        if ($major === 'git') {
+            Downloader::downloadSource($source_name, ['type' => 'git', 'url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $force);
+        } else {
+            Downloader::downloadSource($source_name, $this->getLatestPHPInfo($major), $force);
+        }
+
+        if ($source_name !== 'php-src') {
+            LockFile::put('php-src', LockFile::get($source_name));
+        }
+    }
+
+    public function update(array $lock, ?array $config = null): ?array
+    {
+        $source_name = $config['source_name'] ?? 'php-src';
+
+        // Try to extract version from source name (e.g., "php-src-8.2" -> "8.2")
+        if (preg_match('/^php-src-([\d.]+)$/', $source_name, $matches)) {
+            $major = $matches[1];
+        } else {
+            $major = defined('SPC_BUILD_PHP_VERSION') ? SPC_BUILD_PHP_VERSION : '8.4';
+        }
+
+        if ($major === 'git') {
+            return null;
+        }
+
+        $latest_php = $this->getLatestPHPInfo($major);
+        $latest_url = $latest_php['url'];
+        $filename = basename($latest_url);
+
+        return [$latest_url, $filename];
     }
 
     /**

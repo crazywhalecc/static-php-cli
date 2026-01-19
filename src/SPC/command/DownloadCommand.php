@@ -9,7 +9,9 @@ use SPC\exception\DownloaderException;
 use SPC\exception\SPCException;
 use SPC\store\Config;
 use SPC\store\Downloader;
+use SPC\store\FileSystem;
 use SPC\store\LockFile;
+use SPC\store\source\CustomSourceBase;
 use SPC\util\DependencyUtil;
 use SPC\util\SPCTarget;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,10 +29,10 @@ class DownloadCommand extends BaseCommand
 
     public function configure(): void
     {
-        $this->addArgument('sources', InputArgument::REQUIRED, 'The sources will be compiled, comma separated');
+        $this->addArgument('sources', InputArgument::OPTIONAL, 'The sources will be compiled, comma separated');
         $this->addOption('shallow-clone', null, null, 'Clone shallow');
         $this->addOption('with-openssl11', null, null, 'Use openssl 1.1');
-        $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'version in major.minor format (default 8.4)', '8.4');
+        $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'version in major.minor format, comma-separated for multiple versions (default 8.4)', '8.4');
         $this->addOption('clean', null, null, 'Clean old download cache and source before fetch');
         $this->addOption('all', 'A', null, 'Fetch all sources that static-php-cli needed');
         $this->addOption('custom-url', 'U', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Specify custom source download url, e.g "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"');
@@ -43,10 +45,31 @@ class DownloadCommand extends BaseCommand
         $this->addOption('retry', 'R', InputOption::VALUE_REQUIRED, 'Set retry time when downloading failed (default: 0)', '0');
         $this->addOption('prefer-pre-built', 'P', null, 'Download pre-built libraries when available');
         $this->addOption('no-alt', null, null, 'Do not download alternative sources');
+        $this->addOption('update', null, null, 'Check and update downloaded sources');
     }
 
     public function initialize(InputInterface $input, OutputInterface $output): void
     {
+        // mode: --update
+        if ($input->getOption('update') && empty($input->getArgument('sources')) && empty($input->getOption('for-extensions')) && empty($input->getOption('for-libs'))) {
+            if (!file_exists(LockFile::LOCK_FILE)) {
+                parent::initialize($input, $output);
+                return;
+            }
+            $lock_content = json_decode(file_get_contents(LockFile::LOCK_FILE), true);
+            if (is_array($lock_content)) {
+                // Filter out pre-built sources
+                $sources_to_check = array_filter($lock_content, function ($name) {
+                    return
+                        !str_contains($name, '-Linux-') &&
+                        !str_contains($name, '-Windows-') &&
+                        !str_contains($name, '-Darwin-');
+                }, ARRAY_FILTER_USE_KEY);
+                $input->setArgument('sources', implode(',', array_keys($sources_to_check)));
+            }
+            parent::initialize($input, $output);
+            return;
+        }
         // mode: --all
         if ($input->getOption('all')) {
             $input->setArgument('sources', implode(',', array_keys(Config::getSources())));
@@ -94,16 +117,28 @@ class DownloadCommand extends BaseCommand
             return $this->downloadFromZip($path);
         }
 
-        // Define PHP major version
-        $ver = $this->php_major_ver = $this->getOption('with-php');
-        define('SPC_BUILD_PHP_VERSION', $ver);
-        if ($ver !== 'git' && !preg_match('/^\d+\.\d+$/', $ver)) {
-            // If not git, we need to check the version format
-            if (!preg_match('/^\d+\.\d+(\.\d+)?$/', $ver)) {
-                logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
-                return static::FAILURE;
+        if ($this->getOption('update')) {
+            return $this->handleUpdate();
+        }
+
+        // Define PHP major version(s)
+        $php_versions_str = $this->getOption('with-php');
+        $php_versions = array_map('trim', explode(',', $php_versions_str));
+
+        // Validate all versions
+        foreach ($php_versions as $ver) {
+            if ($ver !== 'git' && !preg_match('/^\d+\.\d+$/', $ver)) {
+                // If not git, we need to check the version format
+                if (!preg_match('/^\d+\.\d+(\.\d+)?$/', $ver)) {
+                    logger()->error("bad version arg: {$ver}, x.y or x.y.z required!");
+                    return static::FAILURE;
+                }
             }
         }
+
+        // Set the first version as the default for backward compatibility
+        $this->php_major_ver = $php_versions[0];
+        define('SPC_BUILD_PHP_VERSION', $this->php_major_ver);
 
         // retry
         $retry = (int) $this->getOption('retry');
@@ -124,6 +159,20 @@ class DownloadCommand extends BaseCommand
         }
 
         $chosen_sources = array_map('trim', array_filter(explode(',', $this->getArgument('sources'))));
+
+        // Handle multiple PHP versions
+        // If php-src is in the sources, replace it with version-specific sources
+        if (in_array('php-src', $chosen_sources)) {
+            // Remove php-src from the list
+            $chosen_sources = array_diff($chosen_sources, ['php-src']);
+            // Add version-specific php-src for each version
+            foreach ($php_versions as $ver) {
+                $version_specific_name = "php-src-{$ver}";
+                $chosen_sources[] = $version_specific_name;
+                // Store the version for this specific php-src
+                f_putenv("SPC_PHP_VERSION_{$version_specific_name}={$ver}");
+            }
+        }
 
         $sss = $this->getOption('ignore-cache-sources');
         if ($sss === false) {
@@ -201,7 +250,16 @@ class DownloadCommand extends BaseCommand
                 logger()->info("[{$ni}/{$cnt}] Downloading source {$source} from custom git: {$new_config['url']}");
                 Downloader::downloadSource($source, $new_config, true);
             } else {
-                $config = Config::getSource($source);
+                // Handle version-specific php-src (php-src-8.2, php-src-8.3, etc.)
+                if (preg_match('/^php-src-[\d.]+$/', $source)) {
+                    $config = Config::getSource('php-src');
+                    if ($config === null) {
+                        logger()->error('php-src configuration not found in source.json');
+                        return static::FAILURE;
+                    }
+                } else {
+                    $config = Config::getSource($source);
+                }
                 // Prefer pre-built, we need to search pre-built library
                 if ($this->getOption('prefer-pre-built') && ($config['provide-pre-built'] ?? false) === true) {
                     // We need to replace pattern
@@ -222,8 +280,9 @@ class DownloadCommand extends BaseCommand
                     logger()->warning("Pre-built content not found for {$source}, fallback to source download");
                 }
                 logger()->info("[{$ni}/{$cnt}] Downloading source {$source}");
+                $force_download = $force_all || in_array($source, $force_list) || str_starts_with($source, 'php-src-') && in_array('php-src', $force_list);
                 try {
-                    Downloader::downloadSource($source, $config, $force_all || in_array($source, $force_list));
+                    Downloader::downloadSource($source, $config, $force_download);
                 } catch (SPCException $e) {
                     // if `--no-alt` option is set, we will not download alternative sources
                     if ($this->getOption('no-alt')) {
@@ -241,7 +300,7 @@ class DownloadCommand extends BaseCommand
                         logger()->notice("Trying to download alternative sources for {$source}");
                         $alt_config = array_merge($config, $alt_sources);
                     }
-                    Downloader::downloadSource($source, $alt_config, $force_all || in_array($source, $force_list));
+                    Downloader::downloadSource($source, $alt_config, $force_download);
                 }
             }
         }
@@ -361,5 +420,285 @@ class DownloadCommand extends BaseCommand
             f_passthru('rm -rf ' . BUILD_ROOT_PATH . '/*');
         }
         return static::FAILURE;
+    }
+
+    private function handleUpdate(): int
+    {
+        logger()->info('Checking sources for updates...');
+
+        // Get lock file content
+        $lock_file_path = LockFile::LOCK_FILE;
+        if (!file_exists($lock_file_path)) {
+            logger()->warning('No lock file found. Please download sources first using "bin/spc download"');
+            return static::FAILURE;
+        }
+
+        $lock_content = json_decode(file_get_contents($lock_file_path), true);
+        if ($lock_content === null || !is_array($lock_content)) {
+            logger()->error('Failed to parse lock file');
+            return static::FAILURE;
+        }
+
+        // Filter sources to check
+        $sources_arg = $this->getArgument('sources');
+        if (!empty($sources_arg)) {
+            $requested_sources = array_map('trim', array_filter(explode(',', $sources_arg)));
+            $sources_to_check = [];
+            foreach ($requested_sources as $source) {
+                if (isset($lock_content[$source])) {
+                    $sources_to_check[$source] = $lock_content[$source];
+                } else {
+                    logger()->warning("Source '{$source}' not found in lock file, skipping");
+                }
+            }
+        } else {
+            $sources_to_check = $lock_content;
+        }
+
+        // Filter out pre-built sources (they are derivatives)
+        $sources_to_check = array_filter($sources_to_check, function ($lock_item, $name) {
+            // Skip pre-built sources (they contain OS/arch in the name)
+            if (str_contains($name, '-Linux-') || str_contains($name, '-Windows-') || str_contains($name, '-Darwin-')) {
+                logger()->debug("Skipping pre-built source: {$name}");
+                return false;
+            }
+            return true;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        if (empty($sources_to_check)) {
+            logger()->warning('No sources to check');
+            return static::FAILURE;
+        }
+
+        $total = count($sources_to_check);
+        $current = 0;
+        $updated_sources = [];
+
+        foreach ($sources_to_check as $name => $lock_item) {
+            ++$current;
+            try {
+                // Handle version-specific php-src (php-src-8.2, php-src-8.3, etc.)
+                if (preg_match('/^php-src-[\d.]+$/', $name)) {
+                    $config = Config::getSource('php-src');
+                } else {
+                    $config = Config::getSource($name);
+                }
+
+                if ($config === null) {
+                    logger()->warning("[{$current}/{$total}] Source '{$name}' not found in source config, skipping");
+                    continue;
+                }
+
+                // Check and update based on source type
+                $source_type = $lock_item['source_type'] ?? 'unknown';
+
+                if ($source_type === SPC_SOURCE_ARCHIVE) {
+                    if ($this->checkArchiveSourceUpdate($name, $lock_item, $config, $current, $total)) {
+                        $updated_sources[] = $name;
+                    }
+                } elseif ($source_type === SPC_SOURCE_GIT) {
+                    if ($this->checkGitSourceUpdate($name, $lock_item, $config, $current, $total)) {
+                        $updated_sources[] = $name;
+                    }
+                } elseif ($source_type === SPC_SOURCE_LOCAL) {
+                    logger()->debug("[{$current}/{$total}] Source '{$name}' is local, skipping");
+                } else {
+                    logger()->warning("[{$current}/{$total}] Unknown source type '{$source_type}' for '{$name}', skipping");
+                }
+            } catch (\Throwable $e) {
+                logger()->error("[{$current}/{$total}] Error checking '{$name}': {$e->getMessage()}");
+                continue;
+            }
+        }
+
+        // Output summary
+        if (empty($updated_sources)) {
+            logger()->info('All sources are up to date.');
+        } else {
+            logger()->info('Updated sources: ' . implode(', ', $updated_sources));
+
+            // Write updated sources to file
+            $date = date('Y-m-d');
+            $update_file = DOWNLOAD_PATH . '/.update-' . $date . '.txt';
+            if (file_exists($update_file)) {
+                $existing_content = file_get_contents($update_file);
+                $existing_sources = array_map('trim', explode(',', $existing_content));
+                $updated_sources = array_unique(array_merge($existing_sources, $updated_sources));
+            }
+            $content = implode(',', $updated_sources);
+            file_put_contents($update_file, $content);
+            logger()->debug("Updated sources written to: {$update_file}");
+        }
+
+        return static::SUCCESS;
+    }
+
+    private function checkCustomSourceUpdate(string $name, array $lock, array $config, int $current, int $total): ?array
+    {
+        $classes = FileSystem::getClassesPsr4(ROOT_DIR . '/src/SPC/store/source', 'SPC\store\source');
+        foreach ($classes as $class) {
+            // Support php-src and php-src-X.Y patterns
+            $matches = ($class::NAME === $name) ||
+                ($class::NAME === 'php-src' && preg_match('/^php-src(-[\d.]+)?$/', $name));
+            if (is_a($class, CustomSourceBase::class, true) && $matches) {
+                try {
+                    $config['source_name'] = $name;
+                    return (new $class())->update($lock, $config);
+                } catch (\Throwable $e) {
+                    logger()->warning("[{$current}/{$total}] Failed to check '{$name}': {$e->getMessage()}");
+                    return null;
+                }
+            }
+        }
+        logger()->debug("[{$current}/{$total}] Custom source handler for '{$name}' not found");
+        return null;
+    }
+
+    /**
+     * Check and update an archive source
+     *
+     * @param  string $name    Source name
+     * @param  array  $lock    Lock file entry
+     * @param  array  $config  Source configuration
+     * @param  int    $current Current progress number
+     * @param  int    $total   Total sources to check
+     * @return bool   True if updated, false otherwise
+     */
+    private function checkArchiveSourceUpdate(string $name, array $lock, array $config, int $current, int $total): bool
+    {
+        $type = $config['type'] ?? 'unknown';
+        $locked_filename = $lock['filename'] ?? '';
+
+        // Skip local types that don't support version detection
+        if (in_array($type, ['local', 'unknown'])) {
+            logger()->debug("[{$current}/{$total}] Source '{$name}' (type: {$type}) doesn't support version detection, skipping");
+            return false;
+        }
+
+        try {
+            $latest_info = match ($type) {
+                'ghtar' => Downloader::getLatestGithubTarball($name, $config),
+                'ghtagtar' => Downloader::getLatestGithubTarball($name, $config, 'tags'),
+                'ghrel' => Downloader::getLatestGithubRelease($name, $config),
+                'pie' => Downloader::getPIEInfo($name, $config),
+                'bitbuckettag' => Downloader::getLatestBitbucketTag($name, $config),
+                'filelist' => Downloader::getFromFileList($name, $config),
+                'url' => Downloader::getLatestUrlInfo($name, $config),
+                'custom' => $this->checkCustomSourceUpdate($name, $lock, $config, $current, $total),
+                default => null,
+            };
+
+            if ($latest_info === null) {
+                logger()->warning("[{$current}/{$total}] Could not get version info for '{$name}' (type: {$type})");
+                return false;
+            }
+
+            $latest_filename = $latest_info[1] ?? '';
+
+            // Compare filenames
+            if ($locked_filename !== $latest_filename) {
+                logger()->info("[{$current}/{$total}] Update available for '{$name}': {$locked_filename} → {$latest_filename}");
+                $this->downloadSourceForUpdate($name, $config, $current, $total);
+                return true;
+            }
+
+            logger()->info("[{$current}/{$total}] Source '{$name}' is up to date");
+            return false;
+        } catch (DownloaderException $e) {
+            logger()->warning("[{$current}/{$total}] Failed to check '{$name}': {$e->getMessage()}");
+            return false;
+        }
+    }
+
+    /**
+     * Check and update a git source
+     *
+     * @param  string $name    Source name
+     * @param  array  $lock    Lock file entry
+     * @param  array  $config  Source configuration
+     * @param  int    $current Current progress number
+     * @param  int    $total   Total sources to check
+     * @return bool   True if updated, false otherwise
+     */
+    private function checkGitSourceUpdate(string $name, array $lock, array $config, int $current, int $total): bool
+    {
+        $locked_hash = $lock['hash'] ?? '';
+        $url = $config['url'] ?? '';
+        $branch = $config['rev'] ?? 'main';
+
+        if (empty($url)) {
+            logger()->warning("[{$current}/{$total}] No URL found for git source '{$name}'");
+            return false;
+        }
+
+        try {
+            $remote_hash = $this->getRemoteGitCommit($url, $branch);
+
+            if ($remote_hash === null) {
+                logger()->warning("[{$current}/{$total}] Could not fetch remote commit for '{$name}'");
+                return false;
+            }
+
+            // Compare hashes (use first 7 chars for display)
+            $locked_short = substr($locked_hash, 0, 7);
+            $remote_short = substr($remote_hash, 0, 7);
+
+            if ($locked_hash !== $remote_hash) {
+                logger()->info("[{$current}/{$total}] Update available for '{$name}': {$locked_short} → {$remote_short}");
+                $this->downloadSourceForUpdate($name, $config, $current, $total);
+                return true;
+            }
+
+            logger()->info("[{$current}/{$total}] Source '{$name}' is up to date");
+            return false;
+        } catch (\Throwable $e) {
+            logger()->warning("[{$current}/{$total}] Failed to check '{$name}': {$e->getMessage()}");
+            return false;
+        }
+    }
+
+    /**
+     * Download a source after removing old lock entry
+     *
+     * @param string $name    Source name
+     * @param array  $config  Source configuration
+     * @param int    $current Current progress number
+     * @param int    $total   Total sources to check
+     */
+    private function downloadSourceForUpdate(string $name, array $config, int $current, int $total): void
+    {
+        logger()->info("[{$current}/{$total}] Downloading '{$name}'...");
+
+        // Remove old lock entry
+        LockFile::put($name, null);
+
+        // Download new version
+        Downloader::downloadSource($name, $config, true);
+    }
+
+    /**
+     * Get remote git commit hash without cloning
+     *
+     * @param  string      $url    Git repository URL
+     * @param  string      $branch Branch or tag to check
+     * @return null|string Remote commit hash or null on failure
+     */
+    private function getRemoteGitCommit(string $url, string $branch): ?string
+    {
+        try {
+            $cmd = SPC_GIT_EXEC . ' ls-remote ' . escapeshellarg($url) . ' ' . escapeshellarg($branch);
+            f_exec($cmd, $output, $ret);
+
+            if ($ret !== 0 || empty($output)) {
+                return null;
+            }
+
+            // Output format: "commit_hash\trefs/heads/branch" or "commit_hash\tHEAD"
+            $parts = preg_split('/\s+/', $output[0]);
+            return $parts[0] ?? null;
+        } catch (\Throwable $e) {
+            logger()->debug("Failed to fetch remote git commit: {$e->getMessage()}");
+            return null;
+        }
     }
 }
