@@ -126,8 +126,18 @@
     },
     "ext-event": {
         "type": "url",
-        "url": "https://bitbucket.org/osmanov/pecl-event/get/3.0.8.tar.gz",
+        "url": "https://bitbucket.org/osmanov/pecl-event/get/3.1.4.tar.gz",
         "path": "php-src/ext/event",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-excimer": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/excimer",
+        "path": "php-src/ext/excimer",
+        "filename": "excimer.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"

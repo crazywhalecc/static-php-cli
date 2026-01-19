@@ -127,6 +127,14 @@
             "sockets"
         ]
     },
+    "excimer": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-excimer"
+    },
     "exif": {
         "type": "builtin"
     },
