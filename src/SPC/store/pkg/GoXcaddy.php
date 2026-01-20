@@ -48,10 +48,10 @@ class GoXcaddy extends CustomPackage
             'macos' => 'darwin',
             default => throw new \InvalidArgumentException('Unsupported OS: ' . $name),
         };
-        $go_version = '1.25.0';
+        [$go_version] = explode("\n", Downloader::curlExec('https://go.dev/VERSION?m=text'));
         $config = [
             'type' => 'url',
-            'url' => "https://go.dev/dl/go{$go_version}.{$os}-{$arch}.tar.gz",
+            'url' => "https://go.dev/dl/{$go_version}.{$os}-{$arch}.tar.gz",
         ];
         Downloader::downloadPackage($name, $config, $force);
     }
