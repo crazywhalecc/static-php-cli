@@ -9,7 +9,6 @@ use StaticPHP\Command\BuildTargetCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\ShellCommand;
-use StaticPHP\Command\Dev\SkeletonCommand;
 use StaticPHP\Command\Dev\SortConfigCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
@@ -61,7 +60,6 @@ class ConsoleApplication extends Application
             new ShellCommand(),
             new IsInstalledCommand(),
             new EnvCommand(),
-            new SkeletonCommand(),
             new SortConfigCommand(),
         ]);
 
