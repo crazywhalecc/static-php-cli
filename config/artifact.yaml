@@ -31,3 +31,22 @@ bzip2:
   metadata:
     license-files: ['{registry_root}/src/globals/licenses/bzip2.txt']
     license: bzip2-1.0.6
+
+fastlz:
+  source:
+    type: git
+    url: 'https://github.com/ariya/FastLZ.git'
+    rev: master
+  metadata:
+    license-files: ['LICENSE.MIT']
+    license: MIT
+
+zlib:
+  source:
+    type: ghrel
+    repo: madler/zlib
+    match: 'zlib.+\.tar\.gz'
+  binary: hosted
+  metadata:
+    license-files: ['{registry_root}/src/globals/licenses/zlib.txt']
+    license: Zlib-Custom

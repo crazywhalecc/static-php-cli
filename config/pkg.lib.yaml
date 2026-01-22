@@ -19,3 +19,20 @@ bzip2:
   headers:
     - bzlib.h
   artifact: bzip2
+
+fastlz:
+  type: library
+  static-libs@unix:
+    - libfastlz.a
+  headers:
+    - fastlz.h
+  artifact: fastlz
+
+zlib:
+  type: library
+  static-libs@unix:
+    - libz.a
+  headers:
+    - zlib.h
+    - zconf.h
+  artifact: zlib
