@@ -16,6 +16,7 @@ trait ncurses
 
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
+                'CFLAGS' => '-std=c17',
                 'LDFLAGS' => SPCTarget::isStatic() ? '-static' : '',
             ])
             ->configure(
@@ -29,7 +30,7 @@ trait ncurses
                 '--without-tests',
                 '--without-dlsym',
                 '--without-debug',
-                '-enable-symlinks',
+                '--enable-symlinks',
                 "--bindir={$this->getBinDir()}",
                 "--includedir={$this->getIncludeDir()}",
                 "--libdir={$this->getLibDir()}",

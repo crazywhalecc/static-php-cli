@@ -385,6 +385,9 @@ class Extension
                 logger()->info('Shared extension [' . $this->getName() . '] was already built, skipping (' . $this->getName() . '.so)');
                 return;
             }
+            if ((string) Config::getExt($this->getName(), 'type') === 'addon') {
+                return;
+            }
             logger()->info('Building extension [' . $this->getName() . '] as shared extension (' . $this->getName() . '.so)');
             foreach ($this->dependencies as $dependency) {
                 if (!$dependency instanceof Extension) {
@@ -395,13 +398,12 @@ class Extension
                     $dependency->buildShared([...$visited, $this->getName()]);
                 }
             }
-            if (Config::getExt($this->getName(), 'type') === 'addon') {
-                return;
-            }
+            $this->builder->emitPatchPoint('before-shared-ext[' . $this->getName() . ']-build');
             match (PHP_OS_FAMILY) {
                 'Darwin', 'Linux' => $this->buildUnixShared(),
                 default => throw new WrongUsageException(PHP_OS_FAMILY . ' build shared extensions is not supported yet'),
             };
+            $this->builder->emitPatchPoint('after-shared-ext[' . $this->getName() . ']-build');
         } catch (SPCException $e) {
             $e->bindExtensionInfo(['extension_name' => $this->getName()]);
             throw $e;
@@ -452,12 +454,17 @@ class Extension
 
         // process *.so file
         $soFile = BUILD_MODULES_PATH . '/' . $this->getName() . '.so';
+        $soDest = $soFile;
+        preg_match('/-release\s+(\S*)/', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $matches);
+        if (!empty($matches[1])) {
+            $soDest = str_replace('.so', '-' . $matches[1] . '.so', $soFile);
+        }
         if (!file_exists($soFile)) {
             throw new ValidationException("extension {$this->getName()} build failed: {$soFile} not found", validation_module: "Extension {$this->getName()} build");
         }
         /** @var UnixBuilderBase $builder */
         $builder = $this->builder;
-        $builder->deployBinary($soFile, $soFile, false);
+        $builder->deployBinary($soFile, $soDest, false);
     }
 
     /**
@@ -543,6 +550,7 @@ class Extension
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
+            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];

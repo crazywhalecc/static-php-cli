@@ -1,0 +1,21 @@
+diff --git a/build/php.m4 b/build/php.m4
+index e45b22b766..506be904f1 100644
+--- a/build/php.m4
++++ b/build/php.m4
+@@ -1821,15 +1821,12 @@ AC_DEFUN([PHP_SETUP_ICONV], [
+ 
+   dnl Check libc first if no path is provided in --with-iconv.
+   AS_VAR_IF([PHP_ICONV], [yes], [
+-    dnl Reset LIBS temporarily as it may have already been included -liconv in.
+-    LIBS_save=$LIBS
+-    LIBS=
++    LIBS="$LIBS -liconv"
+     AC_CHECK_FUNC([iconv], [found_iconv=yes],
+       [AC_CHECK_FUNC([libiconv], [
+         AC_DEFINE([HAVE_LIBICONV], [1])
+         found_iconv=yes
+       ])])
+-    LIBS=$LIBS_save
+   ])
+ 
+   dnl Check external libs for iconv funcs.

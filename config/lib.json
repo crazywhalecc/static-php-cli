@@ -361,6 +361,9 @@
         "source": "libargon2",
         "static-libs-unix": [
             "libargon2.a"
+        ],
+        "lib-suggests": [
+            "libsodium"
         ]
     },
     "libavif": {

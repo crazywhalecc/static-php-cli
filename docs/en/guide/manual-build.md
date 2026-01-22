@@ -549,22 +549,24 @@ otherwise it will be executed repeatedly in other events.
 
 The following are the supported `patch_point` event names and corresponding locations:
 
-| Event name                   | Event description                                                                                  |
-|------------------------------|----------------------------------------------------------------------------------------------------|
-| before-libs-extract          | Triggered before the dependent libraries extracted                                                 |
-| after-libs-extract           | Triggered after the compiled dependent libraries extracted                                         |
-| before-php-extract           | Triggered before PHP source code extracted                                                         |
-| after-php-extract            | Triggered after PHP source code extracted                                                          |
-| before-micro-extract         | Triggered before phpmicro extract                                                                  |
-| after-micro-extract          | Triggered after phpmicro extracted                                                                 |
-| before-exts-extract          | Triggered before the extension (to be compiled) extracted to the PHP source directory              |
-| after-exts-extract           | Triggered after the extension extracted to the PHP source directory                                |
-| before-library[*name*]-build | Triggered before the library named `name` is compiled (such as `before-library[postgresql]-build`) |
-| after-library[*name*]-build  | Triggered after the library named `name` is compiled                                               |
-| before-php-buildconf         | Triggered before compiling PHP command `./buildconf`                                               |
-| before-php-configure         | Triggered before compiling PHP command `./configure`                                               |
-| before-php-make              | Triggered before compiling PHP command `make`                                                      |
-| before-sanity-check          | Triggered after compiling PHP but before running extended checks                                   |
+| Event name                      | Event description                                                                                  |
+|---------------------------------|----------------------------------------------------------------------------------------------------|
+| before-libs-extract             | Triggered before the dependent libraries extracted                                                 |
+| after-libs-extract              | Triggered after the compiled dependent libraries extracted                                         |
+| before-php-extract              | Triggered before PHP source code extracted                                                         |
+| after-php-extract               | Triggered after PHP source code extracted                                                          |
+| before-micro-extract            | Triggered before phpmicro extract                                                                  |
+| after-micro-extract             | Triggered after phpmicro extracted                                                                 |
+| before-exts-extract             | Triggered before the extension (to be compiled) extracted to the PHP source directory              |
+| after-exts-extract              | Triggered after the extension extracted to the PHP source directory                                |
+| before-library[*name*]-build    | Triggered before the library named `name` is compiled (such as `before-library[postgresql]-build`) |
+| after-library[*name*]-build     | Triggered after the library named `name` is compiled                                               |
+| after-shared-ext[*name*]-build  | Triggered after the shared extension named `name` is compiled                                      |
+| before-shared-ext[*name*]-build | Triggered before the shared extension named `name` is compiled                                     |
+| before-php-buildconf            | Triggered before compiling PHP command `./buildconf`                                               |
+| before-php-configure            | Triggered before compiling PHP command `./configure`                                               |
+| before-php-make                 | Triggered before compiling PHP command `make`                                                      |
+| before-sanity-check             | Triggered after compiling PHP but before running extended checks                                   |
 
 The following is a simple example of temporarily modifying the PHP source code. 
 Enable the CLI function to search for the `php.ini` configuration in the current working directory:

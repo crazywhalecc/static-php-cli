@@ -50,7 +50,7 @@ trait postgresql
         $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs', false));
 
         $env_vars = [
-            'CFLAGS' => $config['cflags'],
+            'CFLAGS' => $config['cflags'] . ' -std=c17',
             'CPPFLAGS' => '-DPIC',
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => $config['libs'],
