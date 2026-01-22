@@ -6,6 +6,7 @@ namespace StaticPHP\Config;
 
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\Registry;
+use Symfony\Component\Yaml\Yaml;
 
 class ArtifactConfig
 {
@@ -40,7 +41,11 @@ class ArtifactConfig
         if ($content === false) {
             throw new WrongUsageException("Failed to read artifact config file: {$file}");
         }
-        $data = json_decode($content, true);
+        $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
+            'json' => json_decode($content, true),
+            'yml', 'yaml' => Yaml::parse($content),
+            default => throw new WrongUsageException("Unsupported artifact config file format: {$file}"),
+        };
         if (!is_array($data)) {
             throw new WrongUsageException("Invalid JSON format in artifact config file: {$file}");
         }
