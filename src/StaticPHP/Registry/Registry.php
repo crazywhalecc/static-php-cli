@@ -13,8 +13,38 @@ use Symfony\Component\Yaml\Yaml;
 
 class Registry
 {
-    /** @var string[] List of loaded registry names */
+    /** @var string[] List of loaded registries */
     private static array $loaded_registries = [];
+
+    /** @var array<string, array> Loaded registry configs */
+    private static array $registry_configs = [];
+
+    private static array $loaded_package_configs = [];
+
+    private static array $loaded_artifact_configs = [];
+
+    /** @var array<string, array{registry: string, config: string}> Maps of package and artifact names to their registry config file paths (for reverse lookup) */
+    private static array $package_reversed_registry_files = [];
+
+    private static array $artifact_reversed_registry_files = [];
+
+    /**
+     * Get the current registry configuration.
+     * "Current" depends on SPC load mode
+     */
+    public static function getRegistryConfig(?string $registry_name = null): array
+    {
+        if ($registry_name === null && spc_mode(SPC_MODE_SOURCE)) {
+            return self::$registry_configs['internal'];
+        }
+        if ($registry_name !== null && isset(self::$registry_configs[$registry_name])) {
+            return self::$registry_configs[$registry_name];
+        }
+        if ($registry_name === null) {
+            throw new RegistryException('No registry name specified.');
+        }
+        throw new RegistryException("Registry '{$registry_name}' is not loaded.");
+    }
 
     /**
      * Load a registry from file path.
@@ -48,12 +78,14 @@ class Registry
             return;
         }
         self::$loaded_registries[] = $registry_name;
+        self::$registry_configs[$registry_name] = $data;
+        self::$registry_configs[$registry_name]['_file'] = $registry_file;
 
         logger()->debug("Loading registry '{$registry_name}' from file: {$registry_file}");
 
         // Load composer autoload if specified (for external registries with their own dependencies)
         if (isset($data['autoload']) && is_string($data['autoload'])) {
-            $autoload_path = self::fullpath($data['autoload'], dirname($registry_file));
+            $autoload_path = FileSystem::fullpath($data['autoload'], dirname($registry_file));
             if (file_exists($autoload_path)) {
                 logger()->debug("Loading external autoload from: {$autoload_path}");
                 require_once $autoload_path;
@@ -65,7 +97,7 @@ class Registry
         // load doctor items from PSR-4 directories
         if (isset($data['doctor']['psr-4']) && is_assoc_array($data['doctor']['psr-4'])) {
             foreach ($data['doctor']['psr-4'] as $namespace => $path) {
-                $path = self::fullpath($path, dirname($registry_file));
+                $path = FileSystem::fullpath($path, dirname($registry_file));
                 DoctorLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
             }
         }
@@ -83,11 +115,11 @@ class Registry
         // load package configs
         if (isset($data['package']['config']) && is_array($data['package']['config'])) {
             foreach ($data['package']['config'] as $path) {
-                $path = self::fullpath($path, dirname($registry_file));
+                $path = FileSystem::fullpath($path, dirname($registry_file));
                 if (is_file($path)) {
-                    PackageConfig::loadFromFile($path);
+                    self::$loaded_package_configs[] = PackageConfig::loadFromFile($path, $registry_name);
                 } elseif (is_dir($path)) {
-                    PackageConfig::loadFromDir($path);
+                    self::$loaded_package_configs = array_merge(self::$loaded_package_configs, PackageConfig::loadFromDir($path, $registry_name));
                 }
             }
         }
@@ -95,11 +127,11 @@ class Registry
         // load artifact configs
         if (isset($data['artifact']['config']) && is_array($data['artifact']['config'])) {
             foreach ($data['artifact']['config'] as $path) {
-                $path = self::fullpath($path, dirname($registry_file));
+                $path = FileSystem::fullpath($path, dirname($registry_file));
                 if (is_file($path)) {
-                    ArtifactConfig::loadFromFile($path);
+                    self::$loaded_artifact_configs[] = ArtifactConfig::loadFromFile($path, $registry_name);
                 } elseif (is_dir($path)) {
-                    ArtifactConfig::loadFromDir($path);
+                    self::$loaded_package_configs = array_merge(self::$loaded_package_configs, ArtifactConfig::loadFromDir($path, $registry_name));
                 }
             }
         }
@@ -107,7 +139,7 @@ class Registry
         // load packages from PSR-4 directories
         if (isset($data['package']['psr-4']) && is_assoc_array($data['package']['psr-4'])) {
             foreach ($data['package']['psr-4'] as $namespace => $path) {
-                $path = self::fullpath($path, dirname($registry_file));
+                $path = FileSystem::fullpath($path, dirname($registry_file));
                 PackageLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
             }
         }
@@ -125,7 +157,7 @@ class Registry
         // load artifacts from PSR-4 directories
         if (isset($data['artifact']['psr-4']) && is_assoc_array($data['artifact']['psr-4'])) {
             foreach ($data['artifact']['psr-4'] as $namespace => $path) {
-                $path = self::fullpath($path, dirname($registry_file));
+                $path = FileSystem::fullpath($path, dirname($registry_file));
                 ArtifactLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
             }
         }
@@ -143,7 +175,7 @@ class Registry
         // load additional commands from PSR-4 directories
         if (isset($data['command']['psr-4']) && is_assoc_array($data['command']['psr-4'])) {
             foreach ($data['command']['psr-4'] as $namespace => $path) {
-                $path = self::fullpath($path, dirname($registry_file));
+                $path = FileSystem::fullpath($path, dirname($registry_file));
                 $classes = FileSystem::getClassesPsr4($path, $namespace, auto_require: $auto_require);
                 $instances = array_map(fn ($x) => new $x(), $classes);
                 ConsoleApplication::_addAdditionalCommands($instances);
@@ -187,7 +219,12 @@ class Registry
         }
     }
 
-    public static function checkLoadedRegistries(): void
+    /**
+     * Resolve loaded registries.
+     * This method finalizes the loading process by registering default stages
+     * and validating stage events.
+     */
+    public static function resolve(): void
     {
         // Register default stages for all PhpExtensionPackage instances
         // This must be done after all registries are loaded to ensure custom stages take precedence
@@ -215,6 +252,52 @@ class Registry
     public static function reset(): void
     {
         self::$loaded_registries = [];
+    }
+
+    /**
+     * Bind a package name to its registry config file for reverse lookup.
+     *
+     * @internal
+     */
+    public static function _bindPackageConfigFile(string $package_name, string $registry_name, string $config_file): void
+    {
+        self::$package_reversed_registry_files[$package_name] = [
+            'registry' => $registry_name,
+            'config' => $config_file,
+        ];
+    }
+
+    /**
+     * Bind an artifact name to its registry config file for reverse lookup.
+     *
+     * @internal
+     */
+    public static function _bindArtifactConfigFile(string $artifact_name, string $registry_name, string $config_file): void
+    {
+        self::$artifact_reversed_registry_files[$artifact_name] = [
+            'registry' => $registry_name,
+            'config' => $config_file,
+        ];
+    }
+
+    public static function getPackageConfigInfo(string $package_name): ?array
+    {
+        return self::$package_reversed_registry_files[$package_name] ?? null;
+    }
+
+    public static function getArtifactConfigInfo(string $artifact_name): ?array
+    {
+        return self::$artifact_reversed_registry_files[$artifact_name] ?? null;
+    }
+
+    public static function getLoadedPackageConfigs(): array
+    {
+        return self::$loaded_package_configs;
+    }
+
+    public static function getLoadedArtifactConfigs(): array
+    {
+        return self::$loaded_artifact_configs;
     }
 
     /**
@@ -253,7 +336,7 @@ class Registry
 
         // If file path is provided, require it
         if ($file_path !== null) {
-            $full_path = self::fullpath($file_path, $base_path);
+            $full_path = FileSystem::fullpath($file_path, $base_path);
             require_once $full_path;
             return;
         }
@@ -265,22 +348,5 @@ class Registry
             "  2. Use 'psr-4' instead of 'classes' for auto-discovery\n" .
             "  3. Provide file path in classes map: \"{$class}\": \"path/to/file.php\""
         );
-    }
-
-    /**
-     * Return full path, resolving relative paths against a base path.
-     *
-     * @param string $path               Input path (relative or absolute)
-     * @param string $relative_path_base Base path for relative paths
-     */
-    private static function fullpath(string $path, string $relative_path_base): string
-    {
-        if (FileSystem::isRelativePath($path)) {
-            $path = $relative_path_base . DIRECTORY_SEPARATOR . $path;
-        }
-        if (!file_exists($path)) {
-            throw new RegistryException("Path does not exist: {$path}");
-        }
-        return FileSystem::convertPath($path);
     }
 }

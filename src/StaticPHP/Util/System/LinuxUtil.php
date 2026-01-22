@@ -12,7 +12,6 @@ class LinuxUtil extends UnixUtil
     /**
      * Get current linux distro name and version.
      *
-     * @noinspection PhpMissingBreakStatementInspection
      * @return array{dist: string, ver: string, family: string} Linux distro info (unknown if not found)
      */
     public static function getOSRelease(): array
@@ -22,42 +21,39 @@ class LinuxUtil extends UnixUtil
             'ver' => 'unknown',
             'family' => 'unknown',
         ];
-        switch (true) {
-            case file_exists('/etc/centos-release'):
-                $lines = file('/etc/centos-release');
-                $centos = true;
-                goto rh;
-            case file_exists('/etc/redhat-release'):
-                $lines = file('/etc/redhat-release');
-                $centos = false;
-                rh:
-                foreach ($lines as $line) {
-                    if (preg_match('/release\s+(\d*(\.\d+)*)/', $line, $matches)) {
-                        /* @phpstan-ignore-next-line */
-                        $ret['dist'] = $centos ? 'centos' : 'redhat';
-                        $ret['ver'] = $matches[1];
-                    }
+
+        if (file_exists('/etc/centos-release') || file_exists('/etc/redhat-release')) {
+            $is_centos = file_exists('/etc/centos-release');
+            $file = $is_centos ? '/etc/centos-release' : '/etc/redhat-release';
+            $lines = file($file);
+
+            foreach ($lines as $line) {
+                if (preg_match('/release\s+(\d*(\.\d+)*)/', $line, $matches)) {
+                    $ret['dist'] = $is_centos ? 'centos' : 'redhat';
+                    $ret['ver'] = $matches[1];
                 }
-                break;
-            case file_exists('/etc/os-release'):
-                $lines = file('/etc/os-release');
-                foreach ($lines as $line) {
-                    if (preg_match('/^ID=(.*)$/', $line, $matches)) {
-                        $ret['dist'] = $matches[1];
-                    }
-                    if (preg_match('/^ID_LIKE=(.*)$/', $line, $matches)) {
-                        $ret['family'] = $matches[1];
-                    }
-                    if (preg_match('/^VERSION_ID=(.*)$/', $line, $matches)) {
-                        $ret['ver'] = $matches[1];
-                    }
+            }
+        } elseif (file_exists('/etc/os-release')) {
+            $lines = file('/etc/os-release');
+
+            foreach ($lines as $line) {
+                if (preg_match('/^ID=(.*)$/', $line, $matches)) {
+                    $ret['dist'] = $matches[1];
                 }
-                $ret['dist'] = trim($ret['dist'], '"\'');
-                $ret['ver'] = trim($ret['ver'], '"\'');
-                if (strcasecmp($ret['dist'], 'centos') === 0) {
-                    $ret['dist'] = 'redhat';
+                if (preg_match('/^ID_LIKE=(.*)$/', $line, $matches)) {
+                    $ret['family'] = $matches[1];
                 }
-                break;
+                if (preg_match('/^VERSION_ID=(.*)$/', $line, $matches)) {
+                    $ret['ver'] = $matches[1];
+                }
+            }
+
+            $ret['dist'] = trim($ret['dist'], '"\'');
+            $ret['ver'] = trim($ret['ver'], '"\'');
+
+            if (strcasecmp($ret['dist'], 'centos') === 0) {
+                $ret['dist'] = 'redhat';
+            }
         }
         return $ret;
     }

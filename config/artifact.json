@@ -1,135 +1,4 @@
 {
-    "vswhere": {
-        "binary": {
-            "windows-x86_64": {
-                "type": "url",
-                "url": "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe",
-                "extract": "{pkg_root_path}/bin/vswhere.exe"
-            }
-        }
-    },
-    "musl-wrapper": {
-        "source": "https://musl.libc.org/releases/musl-1.2.5.tar.gz"
-    },
-    "php-src": {
-        "source": {
-            "type": "php-release"
-        }
-    },
-    "php-sdk-binary-tools": {
-        "binary": {
-            "windows-x86_64": {
-                "type": "git",
-                "rev": "master",
-                "url": "https://github.com/php/php-sdk-binary-tools.git",
-                "extract": "{php_sdk_path}"
-            }
-        }
-    },
-    "go-xcaddy": {
-        "binary": "custom"
-    },
-    "musl-toolchain": {
-        "binary": {
-            "linux-x86_64": {
-                "type": "url",
-                "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz",
-                "extract": "{pkg_root_path}/musl-toolchain"
-            },
-            "linux-aarch64": {
-                "type": "url",
-                "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz",
-                "extract": "{pkg_root_path}/musl-toolchain"
-            }
-        }
-    },
-    "pkg-config": {
-        "source": "https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz",
-        "binary": {
-            "linux-x86_64": {
-                "type": "ghrel",
-                "repo": "static-php/static-php-cli-hosted",
-                "match": "pkg-config-aarch64-linux-musl-1.2.5.txz",
-                "extract": {
-                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
-                }
-            },
-            "linux-aarch64": {
-                "type": "ghrel",
-                "repo": "static-php/static-php-cli-hosted",
-                "match": "pkg-config-x86_64-linux-musl-1.2.5.txz",
-                "extract": {
-                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
-                }
-            },
-            "macos-x86_64": {
-                "type": "ghrel",
-                "repo": "static-php/static-php-cli-hosted",
-                "match": "pkg-config-x86_64-darwin.txz",
-                "extract": {
-                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
-                }
-            },
-            "macos-aarch64": {
-                "type": "ghrel",
-                "repo": "static-php/static-php-cli-hosted",
-                "match": "pkg-config-aarch64-darwin.txz",
-                "extract": "{pkg_root_path}"
-            }
-        }
-    },
-    "strawberry-perl": {
-        "binary": {
-            "windows-x86_64": {
-                "type": "url",
-                "url": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip",
-                "extract": "{pkg_root_path}/strawberry-perl"
-            }
-        }
-    },
-    "upx": {
-        "binary": {
-            "linux-x86_64": {
-                "type": "ghrel",
-                "repo": "upx/upx",
-                "match": "upx.+-amd64_linux\\.tar\\.xz",
-                "extract": {
-                    "upx": "{pkg_root_path}/bin/upx"
-                }
-            },
-            "linux-aarch64": {
-                "type": "ghrel",
-                "repo": "upx/upx",
-                "match": "upx.+-arm64_linux\\.tar\\.xz",
-                "extract": {
-                    "upx": "{pkg_root_path}/bin/upx"
-                }
-            },
-            "windows-x86_64": {
-                "type": "ghrel",
-                "repo": "upx/upx",
-                "match": "upx.+-win64\\.zip",
-                "extract": {
-                    "upx.exe": "{pkg_root_path}/bin/upx.exe"
-                }
-            }
-        }
-    },
-    "zig": {
-        "binary": "custom"
-    },
-    "nasm": {
-        "binary": {
-            "windows-x86_64": {
-                "type": "url",
-                "url": "https://dl.static-php.dev/static-php-cli/deps/nasm/nasm-2.16.01-win64.zip",
-                "extract": {
-                    "nasm.exe": "{php_sdk_path}/bin/nasm.exe",
-                    "ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
-                }
-            }
-        }
-    },
     "amqp": {
         "source": {
             "type": "url",
@@ -394,6 +263,9 @@
             "type": "ghtar",
             "repo": "guanzhi/GmSSL"
         }
+    },
+    "go-xcaddy": {
+        "binary": "custom"
     },
     "grpc": {
         "binary": "hosted",
@@ -733,19 +605,19 @@
             "extract": "php-src/ext/memcached"
         }
     },
-    "mimalloc": {
-        "source": {
-            "type": "ghtagtar",
-            "repo": "microsoft/mimalloc",
-            "match": "v2\\.\\d\\.[^3].*"
-        }
-    },
     "micro": {
         "source": {
             "type": "git",
             "extract": "php-src/sapi/micro",
             "rev": "master",
             "url": "https://github.com/static-php/phpmicro"
+        }
+    },
+    "mimalloc": {
+        "source": {
+            "type": "ghtagtar",
+            "repo": "microsoft/mimalloc",
+            "match": "v2\\.\\d\\.[^3].*"
         }
     },
     "mongodb": {
@@ -763,6 +635,35 @@
             "url": "https://pecl.php.net/get/msgpack",
             "filename": "msgpack.tgz",
             "extract": "php-src/ext/msgpack"
+        }
+    },
+    "musl-toolchain": {
+        "binary": {
+            "linux-x86_64": {
+                "type": "url",
+                "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz",
+                "extract": "{pkg_root_path}/musl-toolchain"
+            },
+            "linux-aarch64": {
+                "type": "url",
+                "url": "https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz",
+                "extract": "{pkg_root_path}/musl-toolchain"
+            }
+        }
+    },
+    "musl-wrapper": {
+        "source": "https://musl.libc.org/releases/musl-1.2.5.tar.gz"
+    },
+    "nasm": {
+        "binary": {
+            "windows-x86_64": {
+                "type": "url",
+                "url": "https://dl.static-php.dev/static-php-cli/deps/nasm/nasm-2.16.01-win64.zip",
+                "extract": {
+                    "nasm.exe": "{php_sdk_path}/bin/nasm.exe",
+                    "ndisasm.exe": "{php_sdk_path}/bin/ndisasm.exe"
+                }
+            }
         }
     },
     "ncurses": {
@@ -849,6 +750,56 @@
             "filename": "pdo_sqlsrv.tgz",
             "extract": "php-src/ext/pdo_sqlsrv"
         }
+    },
+    "php-sdk-binary-tools": {
+        "binary": {
+            "windows-x86_64": {
+                "type": "git",
+                "rev": "master",
+                "url": "https://github.com/php/php-sdk-binary-tools.git",
+                "extract": "{php_sdk_path}"
+            }
+        }
+    },
+    "php-src": {
+        "source": {
+            "type": "php-release"
+        }
+    },
+    "pkg-config": {
+        "binary": {
+            "linux-x86_64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-aarch64-linux-musl-1.2.5.txz",
+                "extract": {
+                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+                }
+            },
+            "linux-aarch64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-x86_64-linux-musl-1.2.5.txz",
+                "extract": {
+                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+                }
+            },
+            "macos-x86_64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-x86_64-darwin.txz",
+                "extract": {
+                    "bin/pkg-config": "{pkg_root_path}/bin/pkg-config"
+                }
+            },
+            "macos-aarch64": {
+                "type": "ghrel",
+                "repo": "static-php/static-php-cli-hosted",
+                "match": "pkg-config-aarch64-darwin.txz",
+                "extract": "{pkg_root_path}"
+            }
+        },
+        "source": "https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz"
     },
     "postgresql": {
         "source": {
@@ -950,6 +901,15 @@
             "extract": "php-src/ext/sqlsrv"
         }
     },
+    "strawberry-perl": {
+        "binary": {
+            "windows-x86_64": {
+                "type": "url",
+                "url": "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip",
+                "extract": "{pkg_root_path}/strawberry-perl"
+            }
+        }
+    },
     "swoole": {
         "source": {
             "type": "ghtar",
@@ -980,6 +940,43 @@
             "type": "url",
             "url": "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz",
             "version": "2.3.12"
+        }
+    },
+    "upx": {
+        "binary": {
+            "linux-x86_64": {
+                "type": "ghrel",
+                "repo": "upx/upx",
+                "match": "upx.+-amd64_linux\\.tar\\.xz",
+                "extract": {
+                    "upx": "{pkg_root_path}/bin/upx"
+                }
+            },
+            "linux-aarch64": {
+                "type": "ghrel",
+                "repo": "upx/upx",
+                "match": "upx.+-arm64_linux\\.tar\\.xz",
+                "extract": {
+                    "upx": "{pkg_root_path}/bin/upx"
+                }
+            },
+            "windows-x86_64": {
+                "type": "ghrel",
+                "repo": "upx/upx",
+                "match": "upx.+-win64\\.zip",
+                "extract": {
+                    "upx.exe": "{pkg_root_path}/bin/upx.exe"
+                }
+            }
+        }
+    },
+    "vswhere": {
+        "binary": {
+            "windows-x86_64": {
+                "type": "url",
+                "url": "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe",
+                "extract": "{pkg_root_path}/bin/vswhere.exe"
+            }
         }
     },
     "watcher": {
@@ -1040,6 +1037,9 @@
             "url": "https://github.com/php/pecl-file_formats-yaml",
             "extract": "php-src/ext/yaml"
         }
+    },
+    "zig": {
+        "binary": "custom"
     },
     "zlib": {
         "binary": "hosted",

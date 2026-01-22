@@ -108,8 +108,7 @@ RUN apk update; \
         wget \
         xz \
         gettext-dev \
-        binutils-gold \
-        patchelf
+        binutils-gold
 
 RUN curl -#fSL https://dl.static-php.dev/static-php-cli/bulk/php-8.4.4-cli-linux-\$(uname -m).tar.gz | tar -xz -C /usr/local/bin && \
     chmod +x /usr/local/bin/php

@@ -1,58 +1,5 @@
 {
-    "vswhere": {
-        "type": "target",
-        "artifact": "vswhere",
-        "static-bins@windows": [
-            "vswhere.exe"
-        ]
-    },
-    "pkg-config": {
-        "type": "target",
-        "static-bins": [
-            "pkg-config"
-        ],
-        "artifact": "pkg-config"
-    },
-    "php": {
-        "type": "target",
-        "artifact": "php-src",
-        "depends@macos": [
-            "libxml2"
-        ]
-    },
-    "php-cli": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-micro": {
-        "type": "virtual-target",
-        "artifact": "micro",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-cgi": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-fpm": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-embed": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
     "frankenphp": {
-        "type": "virtual-target",
         "artifact": "frankenphp",
         "depends": [
             "php-embed",
@@ -62,37 +9,90 @@
             "php-embed",
             "go-xcaddy",
             "libxml2"
-        ]
+        ],
+        "type": "virtual-target"
     },
     "go-xcaddy": {
-        "type": "target",
         "artifact": "go-xcaddy",
         "static-bins": [
             "xcaddy"
-        ]
+        ],
+        "type": "target"
     },
     "musl-toolchain": {
-        "type": "target",
-        "artifact": "musl-toolchain"
-    },
-    "strawberry-perl": {
-        "type": "target",
-        "artifact": "strawberry-perl"
-    },
-    "upx": {
-        "type": "target",
-        "artifact": "upx"
-    },
-    "zig": {
-        "type": "target",
-        "artifact": "zig"
+        "artifact": "musl-toolchain",
+        "type": "target"
     },
     "nasm": {
-        "type": "target",
-        "artifact": "nasm"
+        "artifact": "nasm",
+        "type": "target"
+    },
+    "php": {
+        "artifact": "php-src",
+        "depends@macos": [
+            "libxml2"
+        ],
+        "type": "target"
+    },
+    "php-cgi": {
+        "depends": [
+            "php"
+        ],
+        "type": "virtual-target"
+    },
+    "php-cli": {
+        "depends": [
+            "php"
+        ],
+        "type": "virtual-target"
+    },
+    "php-embed": {
+        "depends": [
+            "php"
+        ],
+        "type": "virtual-target"
+    },
+    "php-fpm": {
+        "depends": [
+            "php"
+        ],
+        "type": "virtual-target"
+    },
+    "php-micro": {
+        "artifact": "micro",
+        "depends": [
+            "php"
+        ],
+        "type": "virtual-target"
     },
     "php-sdk-binary-tools": {
-        "type": "target",
-        "artifact": "php-sdk-binary-tools"
+        "artifact": "php-sdk-binary-tools",
+        "type": "target"
+    },
+    "pkg-config": {
+        "artifact": "pkg-config",
+        "static-bins": [
+            "pkg-config"
+        ],
+        "type": "target"
+    },
+    "strawberry-perl": {
+        "artifact": "strawberry-perl",
+        "type": "target"
+    },
+    "upx": {
+        "artifact": "upx",
+        "type": "target"
+    },
+    "vswhere": {
+        "artifact": "vswhere",
+        "static-bins@windows": [
+            "vswhere.exe"
+        ],
+        "type": "target"
+    },
+    "zig": {
+        "artifact": "zig",
+        "type": "target"
     }
 }

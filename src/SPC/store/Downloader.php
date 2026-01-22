@@ -97,8 +97,9 @@ class Downloader
     public static function getLatestGithubTarball(string $name, array $source, string $type = 'releases'): array
     {
         logger()->debug("finding {$name} source from github {$type} tarball");
+        $source['query'] ??= '';
         $data = json_decode(self::curlExec(
-            url: "https://api.github.com/repos/{$source['repo']}/{$type}",
+            url: "https://api.github.com/repos/{$source['repo']}/{$type}{$source['query']}",
             hooks: [[CurlHook::class, 'setupGithubToken']],
             retries: self::getRetryAttempts()
         ), true, 512, JSON_THROW_ON_ERROR);
@@ -106,6 +107,9 @@ class Downloader
         $url = null;
         foreach ($data as $rel) {
             if (($rel['prerelease'] ?? false) === true && ($source['prefer-stable'] ?? false)) {
+                continue;
+            }
+            if (($rel['draft'] ?? false) === true && (($source['prefer-stable'] ?? false) || !$rel['tarball_url'])) {
                 continue;
             }
             if (!($source['match'] ?? null)) {

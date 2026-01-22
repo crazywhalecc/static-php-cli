@@ -9,6 +9,7 @@ use StaticPHP\Command\BuildTargetCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\ShellCommand;
+use StaticPHP\Command\Dev\SortConfigCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
 use StaticPHP\Command\ExtractCommand;
@@ -27,12 +28,12 @@ class ConsoleApplication extends Application
 
     public function __construct()
     {
-        parent::__construct('static-php-cli', self::VERSION);
+        parent::__construct('StaticPHP', self::VERSION);
 
         require_once ROOT_DIR . '/src/bootstrap.php';
 
-        // check registry
-        Registry::checkLoadedRegistries();
+        // resolve registry
+        Registry::resolve();
 
         /**
          * @var string        $name
@@ -59,6 +60,7 @@ class ConsoleApplication extends Application
             new ShellCommand(),
             new IsInstalledCommand(),
             new EnvCommand(),
+            new SortConfigCommand(),
         ]);
 
         // add additional commands from registries

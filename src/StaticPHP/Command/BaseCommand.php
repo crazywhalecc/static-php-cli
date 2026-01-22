@@ -23,7 +23,6 @@ abstract class BaseCommand extends Command
 \___ \| __/ _` | __| |/ __| |_) | |_| | |_) |
  ___) | || (_| | |_| | (__|  __/|  _  |  __/
 |____/ \__\__,_|\__|_|\___|_|   |_| |_|_|    {version}
-
 ';
 
     protected bool $no_motd = false;
@@ -71,7 +70,7 @@ abstract class BaseCommand extends Command
         $version = $this->getVersionWithCommit();
         if (!$this->no_motd) {
             $str = str_replace('{version}', '' . ConsoleColor::none("v{$version}"), '' . ConsoleColor::magenta(self::$motd));
-            echo $this->input->getOption('no-ansi') ? strip_ansi_colors($str) : $str;
+            $this->output->writeln($this->input->getOption('no-ansi') ? strip_ansi_colors($str) : $str);
         }
     }
 

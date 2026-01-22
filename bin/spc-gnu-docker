@@ -92,11 +92,6 @@ RUN echo "source scl_source enable devtoolset-10" >> /etc/bashrc
 RUN source /etc/bashrc
 RUN yum install -y which
 
-RUN curl -fsSL -o patchelf.tgz https://github.com/NixOS/patchelf/releases/download/0.18.0/patchelf-0.18.0-$SPC_USE_ARCH.tar.gz && \
-    mkdir -p /patchelf && \
-    tar -xzf patchelf.tgz -C /patchelf --strip-components=1 && \
-    cp /patchelf/bin/patchelf /usr/bin/
-
 RUN curl -o cmake.tgz -#fSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$SPC_USE_ARCH.tar.gz && \
     mkdir /cmake && \
     tar -xzf cmake.tgz -C /cmake --strip-components 1

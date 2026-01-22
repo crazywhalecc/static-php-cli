@@ -500,6 +500,8 @@ bin/spc dev:sort-config ext
 | after-exts-extract           | 在要编译的扩展解压到 PHP 源码目录后触发                                    |
 | before-library[*name*]-build | 在名称为 `name` 的库编译前触发（如 `before-library[postgresql]-build`） |
 | after-library[*name*]-build  | 在名称为 `name` 的库编译后触发                                       |
+| after-shared-ext[*name*]-build | 在名称为 `name` 的共享扩展编译后触发（如 `after-shared-ext[redis]-build`）   |
+| before-shared-ext[*name*]-build | 在名称为 `name` 的共享扩展编译前触发                                    |
 | before-php-buildconf         | 在编译 PHP 命令 `./buildconf` 前触发                              |
 | before-php-configure         | 在编译 PHP 命令 `./configure` 前触发                              |
 | before-php-make              | 在编译 PHP 命令 `make` 前触发                                     |
