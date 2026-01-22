@@ -7,6 +7,7 @@ namespace StaticPHP\Config;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\Registry;
 use StaticPHP\Runtime\SystemTarget;
+use Symfony\Component\Yaml\Yaml;
 
 class PackageConfig
 {
@@ -47,10 +48,12 @@ class PackageConfig
         if ($content === false) {
             throw new WrongUsageException("Failed to read package config file: {$file}");
         }
-        $data = json_decode($content, true);
-        if (!is_array($data)) {
-            throw new WrongUsageException("Invalid JSON format in package config file: {$file}");
-        }
+        // judge extension
+        $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
+            'json' => json_decode($content, true),
+            'yml', 'yaml' => Yaml::parse($content),
+            default => throw new WrongUsageException("Unsupported package config file format: {$file}"),
+        };
         ConfigValidator::validateAndLintPackages(basename($file), $data);
         foreach ($data as $pkg_name => $config) {
             self::$package_configs[$pkg_name] = $config;
