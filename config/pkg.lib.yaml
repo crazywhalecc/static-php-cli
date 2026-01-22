@@ -1,0 +1,21 @@
+attr:
+  type: library
+  static-libs@unix:
+    - libattr.a
+  artifact: attr
+brotli:
+  type: library
+  pkg-configs:
+    - libbrotlicommon
+    - libbrotlidec
+    - libbrotlienc
+  headers:
+    - brotli
+  artifact: brotli
+bzip2:
+  type: library
+  static-libs@unix:
+    - libbz2.a
+  headers:
+    - bzlib.h
+  artifact: bzip2
