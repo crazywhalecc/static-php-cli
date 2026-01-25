@@ -63,7 +63,7 @@ class LicenseDumper
             }
         }
 
-        // Generate LICENSE-SUMMARY.json (read-modify-write)
+        // Generate SUMMARY.json (read-modify-write)
         $this->generateSummary($target_dir, $license_summary);
 
         logger()->info("Successfully dumped {$dumped_count} license(s) to: {$target_dir}");
@@ -190,7 +190,7 @@ class LicenseDumper
     }
 
     /**
-     * Generate LICENSE-SUMMARY.json file with read-modify-write support.
+     * Generate SUMMARY.json file with read-modify-write support.
      *
      * @param string               $target_dir      Target directory
      * @param array<string, array> $license_summary License summary data (license_type => [artifacts])
@@ -202,14 +202,14 @@ class LicenseDumper
             return;
         }
 
-        $summary_file = "{$target_dir}/LICENSE-SUMMARY.json";
+        $summary_file = "{$target_dir}/SUMMARY.json";
 
         // Read existing summary if exists
         $existing_data = [];
         if (file_exists($summary_file)) {
             $content = file_get_contents($summary_file);
             $existing_data = json_decode($content, true) ?? [];
-            logger()->debug('Loaded existing LICENSE-SUMMARY.json');
+            logger()->debug('Loaded existing SUMMARY.json');
         }
 
         // Initialize structure
@@ -217,7 +217,7 @@ class LicenseDumper
             $existing_data['artifacts'] = [];
         }
         if (!isset($existing_data['summary'])) {
-            $existing_data['summary'] = ['license_types' => []];
+            $existing_data['summary'] = ['license-types' => []];
         }
 
         // Merge new license information
@@ -226,30 +226,30 @@ class LicenseDumper
                 // Add/update artifact info
                 $existing_data['artifacts'][$artifact_name] = [
                     'license' => $license_type,
-                    'dumped_at' => date('Y-m-d H:i:s'),
+                    'dumped-at' => date('Y-m-d H:i:s'),
                 ];
 
                 // Update license_types summary
-                if (!isset($existing_data['summary']['license_types'][$license_type])) {
-                    $existing_data['summary']['license_types'][$license_type] = [];
+                if (!isset($existing_data['summary']['license-types'][$license_type])) {
+                    $existing_data['summary']['license-types'][$license_type] = [];
                 }
-                if (!in_array($artifact_name, $existing_data['summary']['license_types'][$license_type])) {
-                    $existing_data['summary']['license_types'][$license_type][] = $artifact_name;
+                if (!in_array($artifact_name, $existing_data['summary']['license-types'][$license_type])) {
+                    $existing_data['summary']['license-types'][$license_type][] = $artifact_name;
                 }
             }
         }
 
         // Sort license types and artifacts
-        ksort($existing_data['summary']['license_types']);
-        foreach ($existing_data['summary']['license_types'] as &$artifacts) {
+        ksort($existing_data['summary']['license-types']);
+        foreach ($existing_data['summary']['license-types'] as &$artifacts) {
             sort($artifacts);
         }
         ksort($existing_data['artifacts']);
 
         // Update totals
-        $existing_data['summary']['total_artifacts'] = count($existing_data['artifacts']);
-        $existing_data['summary']['total_license_types'] = count($existing_data['summary']['license_types']);
-        $existing_data['summary']['last_updated'] = date('Y-m-d H:i:s');
+        $existing_data['summary']['total-artifacts'] = count($existing_data['artifacts']);
+        $existing_data['summary']['total-license-types'] = count($existing_data['summary']['license-types']);
+        $existing_data['summary']['last-updated'] = date('Y-m-d H:i:s');
 
         // Write JSON file
         file_put_contents(
@@ -257,6 +257,6 @@ class LicenseDumper
             json_encode($existing_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
-        logger()->info('Generated LICENSE-SUMMARY.json with ' . $existing_data['summary']['total_artifacts'] . ' artifact(s)');
+        logger()->info('Generated SUMMARY.json with ' . $existing_data['summary']['total-artifacts'] . ' artifact(s)');
     }
 }
