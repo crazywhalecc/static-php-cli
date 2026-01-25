@@ -12,13 +12,13 @@
         },
         "config": [
             "config/pkg.ext.json",
-            "config/pkg.lib.yaml",
+            "config/pkg.lib.yml",
             "config/pkg.target.json"
         ]
     },
     "artifact": {
         "config": [
-            "config/artifact.yaml"
+            "config/artifact.yml"
         ],
         "psr-4": {
             "Package\\Artifact": "src/Package/Artifact"
