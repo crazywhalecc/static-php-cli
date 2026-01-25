@@ -12,6 +12,7 @@ use StaticPHP\Command\Dev\ShellCommand;
 use StaticPHP\Command\Dev\SortConfigCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
+use StaticPHP\Command\DumpLicenseCommand;
 use StaticPHP\Command\ExtractCommand;
 use StaticPHP\Command\InstallPackageCommand;
 use StaticPHP\Command\SPCConfigCommand;
@@ -55,6 +56,7 @@ class ConsoleApplication extends Application
             new BuildLibsCommand(),
             new ExtractCommand(),
             new SPCConfigCommand(),
+            new DumpLicenseCommand(),
 
             // dev commands
             new ShellCommand(),

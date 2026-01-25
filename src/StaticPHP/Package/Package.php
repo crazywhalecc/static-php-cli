@@ -136,6 +136,22 @@ abstract class Package
     }
 
     /**
+     * Get the PackageBuilder instance for this package.
+     */
+    public function getBuilder(): PackageBuilder
+    {
+        return ApplicationContext::get(PackageBuilder::class);
+    }
+
+    /**
+     * Get the PackageInstaller instance for this package.
+     */
+    public function getInstaller(): PackageInstaller
+    {
+        return ApplicationContext::get(PackageInstaller::class);
+    }
+
+    /**
      * Get the name of the package.
      */
     public function getName(): string

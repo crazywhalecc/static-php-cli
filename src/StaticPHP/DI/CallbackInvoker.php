@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace StaticPHP\DI;
 
 use DI\Container;
+use StaticPHP\Exception\SkipException;
 use StaticPHP\Exception\SPCInternalException;
 
 /**
@@ -92,7 +93,12 @@ readonly class CallbackInvoker
             );
         }
 
-        return $callback(...$args);
+        try {
+            return $callback(...$args);
+        } catch (SkipException $e) {
+            logger()->debug("Skipped invocation: {$e->getMessage()}");
+            return null;
+        }
     }
 
     /**
