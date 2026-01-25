@@ -332,6 +332,20 @@ function spc_container(): DI\Container
 }
 
 /**
+ * Skip the current operation if the condition is true.
+ * You should ALWAYS use this function inside an attribute callback.
+ *
+ * @param bool   $condition Condition to evaluate
+ * @param string $message   Optional message for the skip exception
+ */
+function spc_skip_if(bool $condition, string $message = ''): void
+{
+    if ($condition) {
+        throw new StaticPHP\Exception\SkipException($message);
+    }
+}
+
+/**
  * Parse extension list from string, replace alias and filter internal extensions.
  *
  * @param  null|array|string $ext_list Extension list, can be array or comma-separated string
