@@ -28,6 +28,16 @@ fastlz:
     - fastlz.h
   artifact: fastlz
 
+openssl:
+  type: library
+  static-libs@unix:
+    - libssl.a
+    - libcrypto.a
+  headers: ['openssl']
+  depends:
+    - zlib
+  artifact: openssl
+
 zlib:
   type: library
   static-libs@unix:

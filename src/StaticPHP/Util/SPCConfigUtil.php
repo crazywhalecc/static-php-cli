@@ -209,18 +209,21 @@ class SPCConfigUtil
         $frameworks = [];
 
         foreach ($packages as $package) {
-            // add pkg-configs libs
-            $pkg_configs = PackageConfig::get($package, 'pkg-configs', []);
-            foreach ($pkg_configs as $pkg_config) {
-                if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$pkg_config}.pc")) {
-                    throw new WrongUsageException("pkg-config file '{$pkg_config}.pc' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "/pkgconfig'. Please build it first.");
+            // parse pkg-configs only for unix systems
+            if (SystemTarget::isUnix()) {
+                // add pkg-configs libs
+                $pkg_configs = PackageConfig::get($package, 'pkg-configs', []);
+                foreach ($pkg_configs as $pkg_config) {
+                    if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$pkg_config}.pc")) {
+                        throw new WrongUsageException("pkg-config file '{$pkg_config}.pc' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "/pkgconfig'. Please build it first.");
+                    }
                 }
-            }
-            $pkg_configs = implode(' ', $pkg_configs);
-            if ($pkg_configs !== '') {
-                // static libs with dependencies come in reverse order, so reverse this too
-                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs));
-                $lib_names = [...$lib_names, ...$pc_libs];
+                $pkg_configs = implode(' ', $pkg_configs);
+                if ($pkg_configs !== '') {
+                    // static libs with dependencies come in reverse order, so reverse this too
+                    $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs));
+                    $lib_names = [...$lib_names, ...$pc_libs];
+                }
             }
             // convert all static-libs to short names
             $libs = array_reverse(PackageConfig::get($package, 'static-libs', []));
