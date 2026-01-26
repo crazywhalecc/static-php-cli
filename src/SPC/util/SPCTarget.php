@@ -27,10 +27,10 @@ class SPCTarget
             return true;
         }
         if (ToolchainManager::getToolchainClass() === GccNativeToolchain::class) {
-            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist();
+            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist() && !getenv('SPC_MUSL_DYNAMIC');
         }
         if (ToolchainManager::getToolchainClass() === ClangNativeToolchain::class) {
-            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist();
+            return PHP_OS_FAMILY === 'Linux' && SystemUtil::isMuslDist() && !getenv('SPC_MUSL_DYNAMIC');
         }
         // if SPC_LIBC is set, it means the target is static, remove it when 3.0 is released
         if ($target = getenv('SPC_TARGET')) {
