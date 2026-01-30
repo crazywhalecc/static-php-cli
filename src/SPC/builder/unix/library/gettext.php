@@ -16,7 +16,11 @@ trait gettext
             ->addConfigureArgs(
                 '--disable-java',
                 '--disable-c++',
-                '--with-included-gettext',
+                '--disable-d',
+                '--disable-rpath',
+                '--disable-modula2',
+                '--disable-libasprintf',
+                '--with-included-libintl',
                 "--with-iconv-prefix={$this->getBuildRootPath()}",
             );
 
