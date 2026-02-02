@@ -1,0 +1,24 @@
+ngtcp2:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: ngtcp2/ngtcp2
+      match: ngtcp2.+\.tar\.xz
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+      license: MIT
+  depends:
+    - openssl
+  suggests:
+    - nghttp3
+    - brotli
+  headers:
+    - ngtcp2
+  static-libs@unix:
+    - libngtcp2.a
+    - libngtcp2_crypto_ossl.a
+  pkg-configs:
+    - libngtcp2
+    - libngtcp2_crypto_ossl

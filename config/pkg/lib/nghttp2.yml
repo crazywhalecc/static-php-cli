@@ -1,0 +1,24 @@
+nghttp2:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: nghttp2/nghttp2
+      match: nghttp2.+\.tar\.xz
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+  depends:
+    - zlib
+    - openssl
+  suggests:
+    - libxml2
+    - nghttp3
+    - ngtcp2
+    - brotli
+  headers:
+    - nghttp2
+  static-libs@unix:
+    - libnghttp2.a
+  pkg-configs:
+    - libnghttp2
