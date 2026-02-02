@@ -1,0 +1,23 @@
+libcares:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: c-ares/c-ares
+      match: c-ares-.+\.tar\.gz
+      prefer-stable: true
+    source-mirror:
+      type: filelist
+      url: 'https://c-ares.org/download/'
+      regex: '/href="\/download\/(?<file>c-ares-(?<version>[^"]+)\.tar\.gz)"/'
+    binary: hosted
+    metadata:
+      license-files: [LICENSE.md]
+  headers@unix:
+    - ares.h
+    - ares_dns.h
+    - ares_nameser.h
+  static-libs@unix:
+    - libcares.a
+  pkg-configs:
+    - libcares
