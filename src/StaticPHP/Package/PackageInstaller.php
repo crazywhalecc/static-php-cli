@@ -17,6 +17,7 @@ use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\LicenseDumper;
 use StaticPHP\Util\V2CompatLayer;
 use ZM\Logger\ConsoleColor;
 
@@ -207,6 +208,11 @@ class PackageInstaller
                     InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
                 }
             }
+        }
+
+        $this->dumpLicenseFiles($this->packages);
+        if ($interactive) {
+            InteractiveTerm::success('Exported package licenses', true);
         }
     }
 
@@ -458,6 +464,21 @@ class PackageInstaller
             return $pkg;
         }
         return null;
+    }
+
+    /**
+     * @param Package[] $packages
+     */
+    private function dumpLicenseFiles(array $packages): void
+    {
+        $dumper = new LicenseDumper();
+        foreach ($packages as $package) {
+            $artifact = $package->getArtifact();
+            if ($artifact !== null) {
+                $dumper->addArtifacts([$artifact->getName()]);
+            }
+        }
+        $dumper->dump(BUILD_ROOT_PATH . '/license');
     }
 
     /**
