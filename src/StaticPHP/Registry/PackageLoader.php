@@ -12,6 +12,7 @@ use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\Package\Info;
 use StaticPHP\Attribute\Package\InitPackage;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Attribute\Package\ResolveBuild;
 use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Attribute\Package\Target;
@@ -196,6 +197,8 @@ class PackageLoader
                     match ($method_attribute->getName()) {
                         // #[BuildFor(PHP_OS_FAMILY)]
                         BuildFor::class => self::addBuildFunction($pkg, $method_instance, [$instance_class, $method->getName()]),
+                        // #[BeforeBuild]
+                        PatchBeforeBuild::class => self::addPatchBeforeBuildFunction($pkg, [$instance_class, $method->getName()]),
                         // #[CustomPhpConfigureArg(PHP_OS_FAMILY)]
                         CustomPhpConfigureArg::class => self::bindCustomPhpConfigureArg($pkg, $method_attribute->newInstance(), [$instance_class, $method->getName()]),
                         // #[Stage('stage_name')]
@@ -330,6 +333,11 @@ class PackageLoader
     private static function addBuildFunction(Package $pkg, object $attr, callable $fn): void
     {
         $pkg->addBuildFunction($attr->os, $fn);
+    }
+
+    private static function addPatchBeforeBuildFunction(Package $pkg, callable $fn): void
+    {
+        $pkg->addPatchBeforeBuildCallback($fn);
     }
 
     private static function addStage(\ReflectionMethod $method, Package $pkg, object $instance_class, object $method_instance): void
