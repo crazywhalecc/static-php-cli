@@ -1,16 +1,16 @@
 zlib:
   type: library
-  static-libs@unix:
-    - libz.a
-  headers:
-    - zlib.h
-    - zconf.h
   artifact:
     source:
       type: ghrel
       repo: madler/zlib
-      match: 'zlib.+\.tar\.gz'
+      match: zlib.+\.tar\.gz
     binary: hosted
     metadata:
       license-files: ['{registry_root}/src/globals/licenses/zlib.txt']
       license: Zlib-Custom
+  headers:
+    - zlib.h
+    - zconf.h
+  static-libs@unix:
+    - libz.a

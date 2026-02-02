@@ -1,9 +1,5 @@
 bzip2:
   type: library
-  static-libs@unix:
-    - libbz2.a
-  headers:
-    - bzlib.h
   artifact:
     source:
       type: url
@@ -16,3 +12,7 @@ bzip2:
     metadata:
       license-files: ['{registry_root}/src/globals/licenses/bzip2.txt']
       license: bzip2-1.0.6
+  headers:
+    - bzlib.h
+  static-libs@unix:
+    - libbz2.a

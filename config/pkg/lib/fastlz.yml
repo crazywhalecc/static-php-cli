@@ -1,14 +1,14 @@
 fastlz:
   type: library
-  static-libs@unix:
-    - libfastlz.a
-  headers:
-    - fastlz.h
   artifact:
     source:
       type: git
       url: 'https://github.com/ariya/FastLZ.git'
       rev: master
     metadata:
-      license-files: ['LICENSE.MIT']
+      license-files: [LICENSE.MIT]
       license: MIT
+  headers:
+    - fastlz.h
+  static-libs@unix:
+    - libfastlz.a
