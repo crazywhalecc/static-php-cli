@@ -49,6 +49,6 @@ class GccNativeToolchain implements UnixToolchainInterface
 
     public function isStatic(): bool
     {
-        return PHP_OS_FAMILY === 'Linux' && LinuxUtil::isMuslDist();
+        return PHP_OS_FAMILY === 'Linux' && LinuxUtil::isMuslDist() && !getenv('SPC_MUSL_DYNAMIC');
     }
 }
