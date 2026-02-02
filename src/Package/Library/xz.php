@@ -9,8 +9,8 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 
-#[Library('libiconv')]
-class libiconv
+#[Library('xz')]
+class xz
 {
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
@@ -18,11 +18,13 @@ class libiconv
     {
         UnixAutoconfExecutor::create($lib)
             ->configure(
-                '--enable-extra-encodings',
-                '--enable-year2038',
+                '--disable-scripts',
+                '--disable-doc',
+                '--with-libiconv',
+                '--bindir=/tmp/xz', // xz binary will corrupt `tar` command, that's really strange.
             )
-            ->make('install-lib', with_install: false)
-            ->make('install-lib', with_install: false, dir: $lib->getSourceDir() . '/libcharset');
+            ->make();
+        $lib->patchPkgconfPrefix(['liblzma.pc']);
         $lib->patchLaDependencyPrefix();
     }
 }

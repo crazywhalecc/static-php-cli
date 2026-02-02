@@ -7,10 +7,10 @@ namespace StaticPHP\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
-#[AsCommand('build:libs')]
+#[AsCommand('build:libs', 'Build specified library packages')]
 class BuildLibsCommand extends BaseCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this->addArgument('libraries', InputArgument::REQUIRED, 'The library packages will be compiled, comma separated');
     }

@@ -1,0 +1,22 @@
+libssh2:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: libssh2/libssh2
+      match: libssh2.+\.tar\.gz
+      prefer-stable: true
+    binary: hosted
+    metadata:
+      license-files: [COPYING]
+      license: BSD-3-Clause
+  depends:
+    - openssl
+  headers:
+    - libssh2.h
+    - libssh2_publickey.h
+    - libssh2_sftp.h
+  static-libs@unix:
+    - libssh2.a
+  pkg-configs:
+    - libssh2
