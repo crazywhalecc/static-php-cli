@@ -402,9 +402,62 @@ class PackageInstaller
         return SPC_STATUS_INSTALLED;
     }
 
+    /**
+     * @internal internally calling only, for users, please use specific getter, such as 'getLibraryPackage', 'getTaretPackage', etc
+     * @param string $package_name Package name
+     */
     public function getPackage(string $package_name): ?Package
     {
         return $this->packages[$package_name] ?? null;
+    }
+
+    /**
+     * Get a library package by name.
+     *
+     * @param  string              $package_name Package name
+     * @return null|LibraryPackage The library package instance or null if not found
+     */
+    public function getLibraryPackage(string $package_name): ?LibraryPackage
+    {
+        $pkg = $this->getPackage($package_name);
+        if ($pkg instanceof LibraryPackage) {
+            return $pkg;
+        }
+        return null;
+    }
+
+    /**
+     * Get a target package by name.
+     *
+     * @param  string             $package_name Package name
+     * @return null|TargetPackage The target package instance or null if not found
+     */
+    public function getTargetPackage(string $package_name): ?TargetPackage
+    {
+        $pkg = $this->getPackage($package_name);
+        if ($pkg instanceof TargetPackage) {
+            return $pkg;
+        }
+        return null;
+    }
+
+    /**
+     * Get a PHP extension by name.
+     *
+     * @param  string                   $package_or_ext_name Extension name
+     * @return null|PhpExtensionPackage The target package instance or null if not found
+     */
+    public function getPhpExtensionPackage(string $package_or_ext_name): ?PhpExtensionPackage
+    {
+        $pkg = $this->getPackage($package_or_ext_name);
+        if ($pkg instanceof PhpExtensionPackage) {
+            return $pkg;
+        }
+        $pkg = $this->getPackage("ext-{$package_or_ext_name}");
+        if ($pkg instanceof PhpExtensionPackage) {
+            return $pkg;
+        }
+        return null;
     }
 
     /**

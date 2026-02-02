@@ -7,6 +7,7 @@ namespace StaticPHP\Package;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\Exception\PatchException;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SPCConfigUtil;
 
 /**
  * Represents a library package with platform-specific build functions.
@@ -157,6 +158,16 @@ class LibraryPackage extends Package
             $file = ($patch_option & PKGCONF_PATCH_CUSTOM) === PKGCONF_PATCH_CUSTOM && $custom_replace !== null ? preg_replace($custom_replace[0], $custom_replace[1], $file) : $file;
             FileSystem::writeFile($realpath, $file);
         }
+    }
+
+    /**
+     * Get static library files for current package and its dependencies.
+     */
+    public function getStaticLibFiles(): string
+    {
+        $config = new SPCConfigUtil(['libs_only_deps' => true, 'absolute_libs' => true]);
+        $res = $config->config([$this->getName()]);
+        return $res['libs'];
     }
 
     /**
