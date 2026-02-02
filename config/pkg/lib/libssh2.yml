@@ -16,7 +16,7 @@ libssh2:
     - libssh2.h
     - libssh2_publickey.h
     - libssh2_sftp.h
-  static-libs@unix:
-    - libssh2.a
   pkg-configs:
     - libssh2
+  static-libs@unix:
+    - libssh2.a

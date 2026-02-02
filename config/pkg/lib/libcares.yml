@@ -17,7 +17,7 @@ libcares:
     - ares.h
     - ares_dns.h
     - ares_nameser.h
-  static-libs@unix:
-    - libcares.a
   pkg-configs:
     - libcares
+  static-libs@unix:
+    - libcares.a

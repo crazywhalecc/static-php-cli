@@ -13,7 +13,7 @@ nghttp3:
     - openssl
   headers:
     - nghttp3
-  static-libs@unix:
-    - libnghttp3.a
   pkg-configs:
     - libnghttp3
+  static-libs@unix:
+    - libnghttp3.a

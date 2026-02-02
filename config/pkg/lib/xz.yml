@@ -14,7 +14,7 @@ xz:
     - libiconv
   headers@unix:
     - lzma
-  static-libs@unix:
-    - liblzma.a
   pkg-configs:
     - liblzma
+  static-libs@unix:
+    - liblzma.a

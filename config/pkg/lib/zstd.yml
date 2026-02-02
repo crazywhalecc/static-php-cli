@@ -13,7 +13,7 @@ zstd:
     - zdict.h
     - zstd.h
     - zstd_errors.h
-  static-libs@unix:
-    - libzstd.a
   pkg-configs:
     - libzstd
+  static-libs@unix:
+    - libzstd.a

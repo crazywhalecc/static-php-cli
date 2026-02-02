@@ -11,14 +11,14 @@ nghttp2:
   depends:
     - zlib
     - openssl
+  headers:
+    - nghttp2
+  pkg-configs:
+    - libnghttp2
+  static-libs@unix:
+    - libnghttp2.a
   suggests:
     - libxml2
     - nghttp3
     - ngtcp2
     - brotli
-  headers:
-    - nghttp2
-  static-libs@unix:
-    - libnghttp2.a
-  pkg-configs:
-    - libnghttp2

@@ -1,0 +1,17 @@
+ldap:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://www.openldap.org/software/download/OpenLDAP/openldap-release/'
+      regex: '/href="(?<file>openldap-(?<version>[^"]+)\.tgz)"/'
+    metadata:
+      license-files: [LICENSE]
+  depends:
+    - openssl
+    - zlib
+    - gmp
+    - libsodium
+  pkg-configs:
+    - ldap
+    - lber
