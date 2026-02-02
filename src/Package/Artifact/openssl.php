@@ -27,9 +27,9 @@ class openssl
         spc_skip_if(!file_exists("{$target_path}/openssl/test/v3ext.c"), 'v3ext.c not found, skipping patch.');
 
         FileSystem::replaceFileStr(
-            SOURCE_PATH . '/openssl/test/v3ext.c',
+            "{$target_path}/openssl/test/v3ext.c",
             '#include <stdio.h>',
-            '#include <stdio.h>' . PHP_EOL . '#include <string.h>'
+            "#include <stdio.h>\n#include <string.h>"
         );
     }
 }

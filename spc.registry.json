@@ -1,5 +1,5 @@
 {
-    "name": "internal",
+    "name": "core",
     "autoload": "vendor/autoload.php",
     "doctor": {
         "psr-4": {
@@ -12,14 +12,11 @@
         },
         "config": [
             "config/pkg.ext.json",
-            "config/pkg.lib.yaml",
+            "config/pkg/lib",
             "config/pkg.target.json"
         ]
     },
     "artifact": {
-        "config": [
-            "config/artifact.yaml"
-        ],
         "psr-4": {
             "Package\\Artifact": "src/Package/Artifact"
         }

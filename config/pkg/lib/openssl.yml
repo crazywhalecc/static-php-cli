@@ -1,0 +1,22 @@
+openssl:
+  type: library
+  static-libs@unix:
+    - libssl.a
+    - libcrypto.a
+  headers: ['openssl']
+  depends:
+    - zlib
+  artifact:
+    source:
+      type: ghrel
+      repo: openssl/openssl
+      match: 'openssl.+\.tar\.gz'
+      prefer-stable: true
+    source-mirror:
+      type: filelist
+      url: 'https://www.openssl.org/source/'
+      regex: '/href="(?<file>openssl-(?<version>[^"]+)\.tar\.gz)"/'
+    binary: hosted
+    metadata:
+      license-files: ['LICENSE.txt']
+      license: OpenSSL

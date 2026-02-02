@@ -163,18 +163,26 @@ class LicenseDumper
     {
         $artifact_name = $artifact->getName();
 
-        // Try source directory first (if extracted)
-        if ($artifact->isSourceExtracted()) {
-            $source_dir = $artifact->getSourceDir();
-            $full_path = "{$source_dir}/{$license_file_path}";
+        // replace
+        if (str_starts_with($license_file_path, '@/')) {
+            $license_file_path = str_replace('@/', ROOT_DIR . '/src/globals/licenses/', $license_file_path);
+        }
 
+        $source_dir = $artifact->getSourceDir();
+        if (FileSystem::isRelativePath($license_file_path)) {
+            $full_path = "{$source_dir}/{$license_file_path}";
+        } else {
+            $full_path = $license_file_path;
+        }
+        // Try source directory first (if extracted)
+        if ($artifact->isSourceExtracted() || file_exists($full_path)) {
             logger()->debug("Checking license file: {$full_path}");
             if (file_exists($full_path)) {
                 logger()->info("Reading license from source: {$full_path}");
                 return file_get_contents($full_path);
             }
         } else {
-            logger()->debug("Artifact source not extracted: {$artifact_name}");
+            logger()->warning("Artifact source not extracted: {$artifact_name}");
         }
 
         // Fallback: try SOURCE_PATH directly

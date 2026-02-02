@@ -1,0 +1,19 @@
+gmp:
+  type: library
+  static-libs@unix:
+    - libgmp.a
+  headers:
+    - gmp.h
+  pkg-configs:
+    - gmp
+  artifact:
+    source:
+      type: filelist
+      url: 'https://gmplib.org/download/gmp/'
+      regex: '/href="(?<file>gmp-(?<version>[^"]+)\.tar\.xz)"/'
+    source-mirror:
+      type: url
+      url: 'https://dl.static-php.dev/static-php-cli/deps/gmp/gmp-6.3.0.tar.xz'
+    metadata:
+      license-files: ['@/gmp.txt']
+      license: Custom

@@ -175,8 +175,21 @@ abstract class Package
     public function getArtifact(): ?Artifact
     {
         // find config
-        $artifact_name = PackageConfig::get($this->name, 'artifact');
-        return $artifact_name !== null ? ArtifactLoader::getArtifactInstance($artifact_name) : null;
+        $artifact_field = PackageConfig::get($this->name, 'artifact');
+
+        if ($artifact_field === null) {
+            return null;
+        }
+
+        if (is_string($artifact_field)) {
+            return ArtifactLoader::getArtifactInstance($artifact_field);
+        }
+
+        if (is_array($artifact_field)) {
+            return ArtifactLoader::getArtifactInstance($this->name);
+        }
+
+        return null;
     }
 
     /**

@@ -77,4 +77,19 @@ class ArtifactConfig
     {
         return self::$artifact_configs[$artifact_name] ?? null;
     }
+
+    /**
+     * Register an inline artifact configuration.
+     * Used when artifact is defined inline within a package configuration.
+     *
+     * @param string $artifact_name Artifact name (usually same as package name)
+     * @param array  $config        Artifact configuration
+     * @param string $registry_name Registry name
+     * @param string $source_info   Source info for debugging
+     */
+    public static function registerInlineArtifact(string $artifact_name, array $config, string $registry_name, string $source_info = 'inline'): void
+    {
+        self::$artifact_configs[$artifact_name] = $config;
+        Registry::_bindArtifactConfigFile($artifact_name, $registry_name, $source_info);
+    }
 }
