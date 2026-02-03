@@ -6,16 +6,16 @@ idn2:
       url: 'https://ftp.gnu.org/gnu/libidn/'
       regex: '/href="(?<file>libidn2-(?<version>[^"]+)\.tar\.gz)"/'
     metadata:
-      license-files: ['COPYING.LESSERv3']
+      license-files: [COPYING.LESSERv3]
       license: LGPL-3.0-or-later
-  pkg-configs:
-    - libidn2
+  depends@macos:
+    - libiconv
+    - gettext
   headers:
     - idn2.h
+  pkg-configs:
+    - libidn2
   suggests@unix:
     - libiconv
     - gettext
     - libunistring
-  depends@macos:
-    - libiconv
-    - gettext

@@ -7,7 +7,7 @@ zlib:
       match: zlib.+\.tar\.gz
     binary: hosted
     metadata:
-      license-files: ['{registry_root}/src/globals/licenses/zlib.txt']
+      license-files: ['@/zlib.txt']
       license: Zlib-Custom
   headers:
     - zlib.h

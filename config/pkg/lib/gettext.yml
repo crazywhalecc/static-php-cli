@@ -8,12 +8,12 @@ gettext:
     metadata:
       license-files: [gettext-runtime/intl/COPYING.LIB]
       license: LGPL-2.1-or-later
-  static-libs@unix:
-    - libintl.a
   depends:
     - libiconv
+  frameworks:
+    - CoreFoundation
+  static-libs@unix:
+    - libintl.a
   suggests:
     - ncurses
     - libxml2
-  frameworks:
-    - CoreFoundation

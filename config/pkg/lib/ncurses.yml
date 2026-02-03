@@ -7,6 +7,6 @@ ncurses:
       regex: '/href="(?<file>ncurses-(?<version>[^"]+)\.tar\.gz)"/'
     binary: hosted
     metadata:
-      license-files: ['COPYING']
+      license-files: [COPYING]
   static-libs@unix:
     - libncurses.a

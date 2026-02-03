@@ -7,9 +7,9 @@ libedit:
       regex: '/href="(?<file>libedit-(?<version>[^"]+)\.tar\.gz)"/'
     binary: hosted
     metadata:
-      license-files: ['COPYING']
+      license-files: [COPYING]
       license: BSD-3-Clause
-  static-libs@unix:
-    - libedit.a
   depends:
     - ncurses
+  static-libs@unix:
+    - libedit.a
