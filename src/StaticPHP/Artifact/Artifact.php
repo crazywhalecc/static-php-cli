@@ -269,6 +269,19 @@ class Artifact
     }
 
     /**
+     * Get source build root directory.
+     * It's only worked when 'source-root' is defined in artifact config.
+     * Normally it's equal to source dir.
+     */
+    public function getSourceRoot(): string
+    {
+        if (isset($this->config['metadata']['source-root'])) {
+            return $this->getSourceDir() . '/' . ltrim($this->config['metadata']['source-root'], '/');
+        }
+        return $this->getSourceDir();
+    }
+
+    /**
      * Get binary extraction directory and mode.
      *
      * Rules:

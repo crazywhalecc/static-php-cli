@@ -169,7 +169,7 @@ class UnixAutoconfExecutor extends Executor
      */
     private function initShell(): void
     {
-        $this->shell = shell()->cd($this->package->getSourceDir())->initializeEnv($this->package)->appendEnv([
+        $this->shell = shell()->cd($this->package->getSourceRoot())->initializeEnv($this->package)->appendEnv([
             'CFLAGS' => "-I{$this->package->getIncludeDir()}",
             'CXXFLAGS' => "-I{$this->package->getIncludeDir()}",
             'LDFLAGS' => "-L{$this->package->getLibDir()}",
@@ -185,12 +185,12 @@ class UnixAutoconfExecutor extends Executor
             $callable();
             return $this;
         } catch (SPCException $e) {
-            if (file_exists("{$this->package->getSourceDir()}/config.log")) {
-                logger()->debug("Config log file found: {$this->package->getSourceDir()}/config.log");
+            if (file_exists("{$this->package->getSourceRoot()}/config.log")) {
+                logger()->debug("Config log file found: {$this->package->getSourceRoot()}/config.log");
                 $log_file = "lib.{$this->package->getName()}.console.log";
                 logger()->debug('Saved config log file to: ' . SPC_LOGS_DIR . "/{$log_file}");
                 $e->addExtraLogFile("{$this->package->getName()} library config.log", $log_file);
-                copy("{$this->package->getSourceDir()}/config.log", SPC_LOGS_DIR . "/{$log_file}");
+                copy("{$this->package->getSourceRoot()}/config.log", SPC_LOGS_DIR . "/{$log_file}");
             }
             throw $e;
         }

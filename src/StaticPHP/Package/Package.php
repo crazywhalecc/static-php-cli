@@ -213,6 +213,19 @@ abstract class Package
     }
 
     /**
+     * Get source build root directory.
+     * It's only worked when 'source-root' is defined in artifact config.
+     * Normally it's equal to source dir.
+     */
+    public function getSourceRoot(): string
+    {
+        if (($artifact = $this->getArtifact()) && $artifact->hasSource()) {
+            return $artifact->getSourceRoot();
+        }
+        throw new SPCInternalException("Source root for package {$this->name} is not available because the source artifact is missing.");
+    }
+
+    /**
      * Check if the package has a binary available for current OS and architecture.
      */
     public function hasLocalBinary(): bool
