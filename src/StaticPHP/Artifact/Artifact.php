@@ -164,7 +164,14 @@ class Artifact
 
         // For selective mode, cannot reliably check extraction status
         if ($mode === 'selective') {
-            return false;
+            // check files existence
+            foreach ($extract_config['files'] as $target_file) {
+                $target_file = FileSystem::replacePathVariable($target_file);
+                if (!file_exists($target_file)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         // For standalone mode, check directory or file and hash
