@@ -56,6 +56,58 @@ class DependencyResolver
     }
 
     /**
+     * Get all dependencies of a specific package within a resolved package set.
+     * This is useful when you need to get build flags for a specific library and its deps.
+     *
+     * The method will only include dependencies that exist in the resolved set,
+     * which properly handles optional dependencies (suggests) - only those that
+     * were actually resolved will be included.
+     *
+     * @param  string   $package_name      The package to get dependencies for
+     * @param  string[] $resolved_packages The resolved package list (from resolve())
+     * @param  bool     $include_suggests  Whether to include suggests that are in resolved set
+     * @return string[] Dependencies of the package (NOT including itself), ordered for building
+     */
+    public static function getSubDependencies(string $package_name, array $resolved_packages, bool $include_suggests = false): array
+    {
+        // Create a lookup set for O(1) membership check
+        $resolved_set = array_flip($resolved_packages);
+
+        // Verify the target package is in the resolved set
+        if (!isset($resolved_set[$package_name])) {
+            return [];
+        }
+
+        // Build dependency map from config
+        $dep_map = [];
+        foreach ($resolved_packages as $pkg) {
+            $dep_map[$pkg] = [
+                'depends' => PackageConfig::get($pkg, 'depends', []),
+                'suggests' => PackageConfig::get($pkg, 'suggests', []),
+            ];
+        }
+
+        // Collect all sub-dependencies recursively (excluding the package itself)
+        $visited = [];
+        $sorted = [];
+
+        // Get dependencies to process for the target package
+        $deps = $dep_map[$package_name]['depends'] ?? [];
+        if ($include_suggests) {
+            $deps = array_merge($deps, $dep_map[$package_name]['suggests'] ?? []);
+        }
+
+        // Only visit dependencies that are in the resolved set
+        foreach ($deps as $dep) {
+            if (isset($resolved_set[$dep])) {
+                self::visitSubDeps($dep, $dep_map, $resolved_set, $include_suggests, $visited, $sorted);
+            }
+        }
+
+        return $sorted;
+    }
+
+    /**
      * Build a reverse dependency map for the resolved packages.
      * For each package that is depended upon, list which packages depend on it.
      *
@@ -87,6 +139,39 @@ class DependencyResolver
         }
 
         return $why;
+    }
+
+    /**
+     * Recursive helper for getSubDependencies.
+     * Visits dependencies in topological order (dependencies first).
+     */
+    private static function visitSubDeps(
+        string $pkg_name,
+        array $dep_map,
+        array $resolved_set,
+        bool $include_suggests,
+        array &$visited,
+        array &$sorted
+    ): void {
+        if (isset($visited[$pkg_name])) {
+            return;
+        }
+        $visited[$pkg_name] = true;
+
+        // Get dependencies to process
+        $deps = $dep_map[$pkg_name]['depends'] ?? [];
+        if ($include_suggests) {
+            $deps = array_merge($deps, $dep_map[$pkg_name]['suggests'] ?? []);
+        }
+
+        // Only visit dependencies that are in the resolved set
+        foreach ($deps as $dep) {
+            if (isset($resolved_set[$dep])) {
+                self::visitSubDeps($dep, $dep_map, $resolved_set, $include_suggests, $visited, $sorted);
+            }
+        }
+
+        $sorted[] = $pkg_name;
     }
 
     /**

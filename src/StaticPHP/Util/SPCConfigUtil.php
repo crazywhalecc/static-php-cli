@@ -149,6 +149,117 @@ class SPCConfigUtil
         return $ret;
     }
 
+    /**
+     * Get build configuration for a package and its sub-dependencies within a resolved set.
+     *
+     * This is useful when you need to statically link something against a specific
+     * library and all its transitive dependencies. It properly handles optional
+     * dependencies by only including those that were actually resolved.
+     *
+     * @param string   $package_name      The package to get config for
+     * @param string[] $resolved_packages The full resolved package list
+     * @param bool     $include_suggests  Whether to include resolved suggests
+     * @return array{
+     *     cflags: string,
+     *     ldflags: string,
+     *     libs: string
+     * }
+     */
+    public function getPackageDepsConfig(string $package_name, array $resolved_packages, bool $include_suggests = false): array
+    {
+        // Get sub-dependencies within the resolved set
+        $sub_deps = DependencyResolver::getSubDependencies($package_name, $resolved_packages, $include_suggests);
+
+        if (empty($sub_deps)) {
+            return [
+                'cflags' => '',
+                'ldflags' => '',
+                'libs' => '',
+            ];
+        }
+
+        // Use libs_only_deps mode and no_php for library linking
+        $save_no_php = $this->no_php;
+        $save_libs_only_deps = $this->libs_only_deps;
+        $this->no_php = true;
+        $this->libs_only_deps = true;
+
+        $ret = $this->configWithResolvedPackages($sub_deps);
+
+        $this->no_php = $save_no_php;
+        $this->libs_only_deps = $save_libs_only_deps;
+
+        return $ret;
+    }
+
+    /**
+     * Get configuration using already-resolved packages (skip dependency resolution).
+     *
+     * @param string[] $resolved_packages Already resolved package names in build order
+     * @return array{
+     *     cflags: string,
+     *     ldflags: string,
+     *     libs: string
+     * }
+     */
+    public function configWithResolvedPackages(array $resolved_packages): array
+    {
+        $ldflags = $this->getLdflagsString();
+        $cflags = $this->getIncludesString($resolved_packages);
+        $libs = $this->getLibsString($resolved_packages, !$this->absolute_libs);
+
+        // additional OS-specific libraries (e.g. macOS -lresolv)
+        if ($extra_libs = SystemTarget::getRuntimeLibs()) {
+            $libs .= " {$extra_libs}";
+        }
+
+        $extra_env = getenv('SPC_EXTRA_LIBS');
+        if (is_string($extra_env) && !empty($extra_env)) {
+            $libs .= " {$extra_env}";
+        }
+
+        // package frameworks
+        if (SystemTarget::getTargetOS() === 'Darwin') {
+            $libs .= " {$this->getFrameworksString($resolved_packages)}";
+        }
+
+        // C++
+        if ($this->hasCpp($resolved_packages)) {
+            $libcpp = SystemTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
+            $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+        }
+
+        if ($this->libs_only_deps) {
+            // mimalloc must come first
+            if (in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+                $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
+            }
+            return [
+                'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
+                'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+                'libs' => clean_spaces(getenv('LIBS') . ' ' . $libs),
+            ];
+        }
+
+        // embed
+        if (!$this->no_php) {
+            $libs = "-lphp {$libs} -lc";
+        }
+
+        $allLibs = getenv('LIBS') . ' ' . $libs;
+
+        // mimalloc must come first
+        if (in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+            $allLibs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $allLibs);
+        }
+
+        return [
+            'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
+            'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+            'libs' => clean_spaces($allLibs),
+        ];
+    }
+
     private function hasCpp(array $packages): bool
     {
         foreach ($packages as $package) {
