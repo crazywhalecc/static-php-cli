@@ -438,7 +438,7 @@ class ArtifactDownloader
                 break;
             }
         }
-        $vvv = ApplicationContext::isDebug() ? "\nIf the problem persists, consider using `-vvv` to enable verbose mode, and disable parallel downloading for more details." : '';
+        $vvv = !ApplicationContext::isDebug() ? "\nIf the problem persists, consider using `-vvv` to enable verbose mode, or disable parallel downloading for more details." : '';
         throw new DownloaderException("Download artifact '{$artifact->getName()}' failed. Please check your internet connection and try again.{$vvv}");
     }
 
