@@ -169,7 +169,7 @@ class PackageLoader
                 }
             }
 
-            $pkg = self::$packages[$attribute_instance->name];
+            $pkg = self::$packages[$attribute_instance->name] ?? null;
 
             // Use the package instance if it's a Package subclass, otherwise create a new instance
             $instance_class = is_a($class_name, Package::class, true) ? $pkg : $refClass->newInstance();
@@ -184,7 +184,7 @@ class PackageLoader
             if (!in_array($package_type, $pkg_type_attr, true)) {
                 throw new RegistryException("Package [{$attribute_instance->name}] type mismatch: config type is [{$package_type}], but attribute type is [" . implode('|', $pkg_type_attr) . '].');
             }
-            if ($pkg !== null && !PackageConfig::isPackageExists($pkg->getName())) {
+            if ($pkg instanceof Package && !PackageConfig::isPackageExists($pkg->getName())) {
                 throw new RegistryException("Package [{$pkg->getName()}] config not found for class {$class}");
             }
 
@@ -355,7 +355,7 @@ class PackageLoader
         $stage = $method_instance->stage;
         $stage = match (true) {
             is_string($stage) => $stage,
-            is_array($stage) && count($stage) === 2 => $stage[1],
+            count($stage) === 2 => $stage[1],
             default => throw new RegistryException('Invalid stage definition in BeforeStage attribute.'),
         };
         if ($method_instance->package_name === '' && $pkg === null) {

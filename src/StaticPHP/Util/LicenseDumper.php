@@ -75,7 +75,7 @@ class LicenseDumper
      *
      * @param  Artifact             $artifact         Artifact instance
      * @param  string               $target_dir       Target directory
-     * @param  array<string, array> &$license_summary Summary data to populate
+     * @param  array                &$license_summary Summary data to populate
      * @return bool                 True if dumped
      * @throws SPCInternalException
      */

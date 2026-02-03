@@ -312,7 +312,7 @@ class ArtifactDownloader
                 FileSystem::createDir(DOWNLOAD_PATH);
             }
             logger()->info('Downloading' . implode(', ', array_map(fn ($x) => " '{$x->getName()}'", $this->artifacts)) . " with concurrency {$this->parallel} ...");
-            // Download artifacts parallely
+            // Download artifacts parallelly
             if ($this->parallel > 1) {
                 $this->downloadWithConcurrency();
             } else {
