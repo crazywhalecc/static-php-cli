@@ -155,6 +155,7 @@ class LockFile
      * @param string $name Source name
      * @param array{
      *     source_type: string,
+     *     url: ?string,
      *     dirname?: ?string,
      *     filename?: ?string,
      *     move_path: ?string,
