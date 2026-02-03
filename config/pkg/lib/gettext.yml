@@ -1,0 +1,19 @@
+gettext:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://ftp.gnu.org/pub/gnu/gettext/'
+      regex: '/href="(?<file>gettext-(?<version>[^"]+)\.tar\.xz)"/'
+    metadata:
+      license-files: [gettext-runtime/intl/COPYING.LIB]
+      license: LGPL-2.1-or-later
+  static-libs@unix:
+    - libintl.a
+  depends:
+    - libiconv
+  suggests:
+    - ncurses
+    - libxml2
+  frameworks:
+    - CoreFoundation
