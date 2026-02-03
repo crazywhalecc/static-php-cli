@@ -11,11 +11,11 @@ idn2:
   depends@macos:
     - libiconv
     - gettext
-  headers:
-    - idn2.h
-  pkg-configs:
-    - libidn2
   suggests@unix:
     - libiconv
     - gettext
     - libunistring
+  headers:
+    - idn2.h
+  pkg-configs:
+    - libidn2

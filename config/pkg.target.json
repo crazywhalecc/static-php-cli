@@ -1,5 +1,6 @@
 {
     "frankenphp": {
+        "type": "virtual-target",
         "artifact": "frankenphp",
         "depends": [
             "php-embed",
@@ -9,90 +10,78 @@
             "php-embed",
             "go-xcaddy",
             "libxml2"
-        ],
-        "type": "virtual-target"
+        ]
     },
     "go-xcaddy": {
+        "type": "target",
         "artifact": "go-xcaddy",
         "static-bins": [
             "xcaddy"
-        ],
-        "type": "target"
+        ]
     },
     "musl-toolchain": {
-        "artifact": "musl-toolchain",
-        "type": "target"
+        "type": "target",
+        "artifact": "musl-toolchain"
     },
     "nasm": {
-        "artifact": "nasm",
-        "type": "target"
+        "type": "target",
+        "artifact": "nasm"
     },
     "php": {
+        "type": "target",
         "artifact": "php-src",
         "depends@macos": [
             "libxml2"
-        ],
-        "type": "target"
+        ]
     },
     "php-cgi": {
+        "type": "virtual-target",
         "depends": [
             "php"
-        ],
-        "type": "virtual-target"
+        ]
     },
     "php-cli": {
+        "type": "virtual-target",
         "depends": [
             "php"
-        ],
-        "type": "virtual-target"
+        ]
     },
     "php-embed": {
+        "type": "virtual-target",
         "depends": [
             "php"
-        ],
-        "type": "virtual-target"
+        ]
     },
     "php-fpm": {
+        "type": "virtual-target",
         "depends": [
             "php"
-        ],
-        "type": "virtual-target"
+        ]
     },
     "php-micro": {
+        "type": "virtual-target",
         "artifact": "micro",
         "depends": [
             "php"
-        ],
-        "type": "virtual-target"
+        ]
     },
     "php-sdk-binary-tools": {
-        "artifact": "php-sdk-binary-tools",
-        "type": "target"
-    },
-    "pkg-config": {
-        "artifact": "pkg-config",
-        "static-bins": [
-            "pkg-config"
-        ],
-        "type": "target"
+        "type": "target",
+        "artifact": "php-sdk-binary-tools"
     },
     "strawberry-perl": {
-        "artifact": "strawberry-perl",
-        "type": "target"
+        "type": "target",
+        "artifact": "strawberry-perl"
     },
     "upx": {
-        "artifact": "upx",
-        "type": "target"
+        "type": "target",
+        "artifact": "upx"
     },
     "vswhere": {
+        "type": "target",
         "artifact": "vswhere",
         "static-bins@windows": [
             "vswhere.exe"
-        ],
-        "type": "target"
-    },
-    "zig": {
-        "artifact": "zig",
-        "type": "target"
+        ]
     }
 }

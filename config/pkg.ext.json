@@ -1,5 +1,6 @@
 {
     "ext-amqp": {
+        "type": "php-extension",
         "artifact": "amqp",
         "depends": [
             "librabbitmq"
@@ -16,29 +17,29 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-apcu": {
+        "type": "php-extension",
         "artifact": "apcu",
         "license": {
             "type": "file",
             "path": "LICENSE"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-ast": {
+        "type": "php-extension",
         "artifact": "ast",
         "license": {
             "type": "file",
             "path": "LICENSE"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-bcmath": {
         "type": "php-extension"
     },
     "ext-brotli": {
+        "type": "php-extension",
         "artifact": "ext-brotli",
         "depends": [
             "brotli"
@@ -49,18 +50,17 @@
         },
         "php-extension": {
             "arg-type": "enable"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-bz2": {
+        "type": "php-extension",
         "depends": [
             "bzip2"
         ],
         "php-extension": {
             "arg-type@windows": "with",
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-calendar": {
         "type": "php-extension"
@@ -69,6 +69,7 @@
         "type": "php-extension"
     },
     "ext-curl": {
+        "type": "php-extension",
         "depends": [
             "curl"
         ],
@@ -79,19 +80,19 @@
         "php-extension": {
             "arg-type": "with",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-dba": {
-        "php-extension": {
-            "arg-type": "custom"
-        },
+        "type": "php-extension",
         "suggests": [
             "qdbm"
         ],
-        "type": "php-extension"
+        "php-extension": {
+            "arg-type": "custom"
+        }
     },
     "ext-dio": {
+        "type": "php-extension",
         "artifact": "dio",
         "license": {
             "type": "file",
@@ -101,10 +102,10 @@
             "support": {
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-dom": {
+        "type": "php-extension",
         "depends": [
             "libxml2",
             "zlib"
@@ -118,18 +119,18 @@
             },
             "arg-type": "custom",
             "arg-type@windows": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-ds": {
+        "type": "php-extension",
         "artifact": "ext-ds",
         "license": {
             "type": "file",
             "path": "LICENSE"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-enchant": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "Windows": "wip",
@@ -137,10 +138,10 @@
                 "Darwin": "wip",
                 "Linux": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-ev": {
+        "type": "php-extension",
         "artifact": "ev",
         "depends": [
             "ext-sockets"
@@ -151,14 +152,17 @@
         },
         "php-extension": {
             "arg-type@windows": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-event": {
+        "type": "php-extension",
         "artifact": "ext-event",
         "depends": [
             "libevent",
             "ext-openssl"
+        ],
+        "suggests": [
+            "ext-sockets"
         ],
         "license": {
             "type": "file",
@@ -171,16 +175,13 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "suggests": [
-            "ext-sockets"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-exif": {
         "type": "php-extension"
     },
     "ext-ffi": {
+        "type": "php-extension",
         "depends": [
             "libffi"
         ],
@@ -194,8 +195,7 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-fileinfo": {
         "type": "php-extension"
@@ -204,16 +204,23 @@
         "type": "php-extension"
     },
     "ext-ftp": {
+        "type": "php-extension",
         "suggests": [
             "openssl"
-        ],
-        "type": "php-extension"
+        ]
     },
     "ext-gd": {
+        "type": "php-extension",
         "depends": [
             "zlib",
             "libpng",
             "ext-zlib"
+        ],
+        "suggests": [
+            "libavif",
+            "libwebp",
+            "libjpeg",
+            "freetype"
         ],
         "php-extension": {
             "support": {
@@ -222,16 +229,10 @@
             "arg-type": "custom",
             "arg-type@windows": "with",
             "notes": true
-        },
-        "suggests": [
-            "libavif",
-            "libwebp",
-            "libjpeg",
-            "freetype"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-gettext": {
+        "type": "php-extension",
         "depends": [
             "gettext"
         ],
@@ -241,10 +242,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-glfw": {
+        "type": "php-extension",
         "artifact": "ext-glfw",
         "depends": [
             "glfw"
@@ -262,10 +263,10 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-gmp": {
+        "type": "php-extension",
         "depends": [
             "gmp"
         ],
@@ -275,10 +276,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-gmssl": {
+        "type": "php-extension",
         "artifact": "ext-gmssl",
         "depends": [
             "gmssl"
@@ -291,10 +292,10 @@
             "support": {
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-grpc": {
+        "type": "php-extension",
         "artifact": "grpc",
         "depends": [
             "grpc"
@@ -310,10 +311,10 @@
                 "BSD": "wip"
             },
             "arg-type": "enable-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-iconv": {
+        "type": "php-extension",
         "depends": [
             "libiconv"
         ],
@@ -326,11 +327,15 @@
             },
             "arg-type": "with-path",
             "arg-type@windows": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-igbinary": {
+        "type": "php-extension",
         "artifact": "igbinary",
+        "suggests": [
+            "ext-session",
+            "ext-apcu"
+        ],
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -339,14 +344,10 @@
             "support": {
                 "BSD": "wip"
             }
-        },
-        "suggests": [
-            "ext-session",
-            "ext-apcu"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-imagick": {
+        "type": "php-extension",
         "artifact": "ext-imagick",
         "depends": [
             "imagemagick"
@@ -362,13 +363,16 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-imap": {
+        "type": "php-extension",
         "artifact": "ext-imap",
         "depends": [
             "imap"
+        ],
+        "suggests": [
+            "ext-openssl"
         ],
         "license": {
             "type": "file",
@@ -383,13 +387,10 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "suggests": [
-            "ext-openssl"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-inotify": {
+        "type": "php-extension",
         "artifact": "inotify",
         "license": {
             "type": "file",
@@ -401,10 +402,10 @@
                 "BSD": "wip",
                 "Darwin": "no"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-intl": {
+        "type": "php-extension",
         "depends": [
             "icu"
         ],
@@ -415,12 +416,17 @@
             "support": {
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-ldap": {
+        "type": "php-extension",
         "depends": [
             "ldap"
+        ],
+        "suggests": [
+            "gmp",
+            "libsodium",
+            "ext-openssl"
         ],
         "php-extension": {
             "support": {
@@ -428,15 +434,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with-path"
-        },
-        "suggests": [
-            "gmp",
-            "libsodium",
-            "ext-openssl"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-libxml": {
+        "type": "php-extension",
         "depends": [
             "ext-xml"
         ],
@@ -448,10 +449,10 @@
             "build-shared": false,
             "build-static": true,
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-lz4": {
+        "type": "php-extension",
         "artifact": "ext-lz4",
         "depends": [
             "liblz4"
@@ -468,10 +469,10 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-mbregex": {
+        "type": "php-extension",
         "depends": [
             "onig",
             "ext-mbstring"
@@ -480,16 +481,16 @@
             "arg-type": "custom",
             "build-shared": false,
             "build-static": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-mbstring": {
+        "type": "php-extension",
         "php-extension": {
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-mcrypt": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "Windows": "no",
@@ -498,10 +499,10 @@
                 "Linux": "no"
             },
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-memcache": {
+        "type": "php-extension",
         "artifact": "ext-memcache",
         "depends": [
             "ext-zlib",
@@ -518,16 +519,22 @@
             },
             "arg-type": "custom",
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-memcached": {
+        "type": "php-extension",
         "artifact": "memcached",
         "depends": [
             "libmemcached",
             "fastlz",
             "ext-session",
             "ext-zlib"
+        ],
+        "suggests": [
+            "zstd",
+            "ext-igbinary",
+            "ext-msgpack",
+            "ext-session"
         ],
         "lang": "cpp",
         "license": {
@@ -540,17 +547,17 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "suggests": [
-            "zstd",
-            "ext-igbinary",
-            "ext-msgpack",
-            "ext-session"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-mongodb": {
+        "type": "php-extension",
         "artifact": "mongodb",
+        "suggests": [
+            "icu",
+            "openssl",
+            "zstd",
+            "zlib"
+        ],
         "frameworks": [
             "CoreFoundation",
             "Security"
@@ -565,16 +572,10 @@
                 "Windows": "wip"
             },
             "arg-type": "custom"
-        },
-        "suggests": [
-            "icu",
-            "openssl",
-            "zstd",
-            "zlib"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-msgpack": {
+        "type": "php-extension",
         "artifact": "msgpack",
         "depends": [
             "ext-session"
@@ -589,30 +590,30 @@
             },
             "arg-type@windows": "enable",
             "arg-type": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-mysqli": {
+        "type": "php-extension",
         "depends": [
             "ext-mysqlnd"
         ],
         "php-extension": {
             "arg-type": "with",
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-mysqlnd": {
+        "type": "php-extension",
         "depends": [
             "zlib"
         ],
         "php-extension": {
             "arg-type@windows": "with",
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-oci8": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "Windows": "wip",
@@ -621,10 +622,10 @@
                 "Linux": "no"
             },
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-odbc": {
+        "type": "php-extension",
         "depends": [
             "unixodbc"
         ],
@@ -634,18 +635,18 @@
                 "Windows": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-opcache": {
+        "type": "php-extension",
         "php-extension": {
             "arg-type@windows": "enable",
             "arg-type": "custom",
             "zend-extension": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-openssl": {
+        "type": "php-extension",
         "depends": [
             "openssl",
             "zlib",
@@ -656,10 +657,10 @@
             "arg-type@windows": "with",
             "build-with-php": true,
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-opentelemetry": {
+        "type": "php-extension",
         "artifact": "opentelemetry",
         "license": {
             "type": "file",
@@ -669,10 +670,10 @@
             "support": {
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-parallel": {
+        "type": "php-extension",
         "artifact": "parallel",
         "depends@windows": [
             "pthreads4w"
@@ -687,10 +688,10 @@
             },
             "arg-type@windows": "with",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-password-argon2": {
+        "type": "php-extension",
         "depends": [
             "libargon2",
             "openssl"
@@ -702,31 +703,31 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-pcntl": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "Windows": "no"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-pdo": {
         "type": "php-extension"
     },
     "ext-pdo_mysql": {
+        "type": "php-extension",
         "depends": [
             "ext-pdo",
             "ext-mysqlnd"
         ],
         "php-extension": {
             "arg-type": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-pdo_odbc": {
+        "type": "php-extension",
         "depends": [
             "unixodbc",
             "ext-pdo",
@@ -737,10 +738,10 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-pdo_pgsql": {
+        "type": "php-extension",
         "depends": [
             "postgresql",
             "ext-pdo",
@@ -755,10 +756,10 @@
             },
             "arg-type": "with-path",
             "arg-type@windows": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-pdo_sqlite": {
+        "type": "php-extension",
         "depends": [
             "sqlite",
             "ext-pdo",
@@ -769,10 +770,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-pdo_sqlsrv": {
+        "type": "php-extension",
         "artifact": "pdo_sqlsrv",
         "depends": [
             "ext-pdo",
@@ -787,10 +788,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-pgsql": {
+        "type": "php-extension",
         "depends": [
             "postgresql"
         ],
@@ -803,24 +804,24 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-phar": {
+        "type": "php-extension",
         "depends": [
             "ext-zlib"
-        ],
-        "type": "php-extension"
+        ]
     },
     "ext-posix": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "Windows": "no"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-protobuf": {
+        "type": "php-extension",
         "artifact": "protobuf",
         "license": {
             "type": "file",
@@ -831,10 +832,10 @@
                 "Windows": "wip",
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-rar": {
+        "type": "php-extension",
         "artifact": "rar",
         "lang": "cpp",
         "license": {
@@ -847,10 +848,10 @@
                 "Darwin": "partial"
             },
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-rdkafka": {
+        "type": "php-extension",
         "artifact": "ext-rdkafka",
         "depends": [
             "librdkafka"
@@ -866,10 +867,10 @@
                 "Windows": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-readline": {
+        "type": "php-extension",
         "depends": [
             "libedit"
         ],
@@ -881,11 +882,18 @@
             "arg-type": "with-path",
             "build-shared": false,
             "build-static": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-redis": {
+        "type": "php-extension",
         "artifact": "redis",
+        "suggests": [
+            "zstd",
+            "liblz4",
+            "ext-session",
+            "ext-igbinary",
+            "ext-msgpack"
+        ],
         "license": {
             "type": "file",
             "path": [
@@ -898,38 +906,31 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "suggests": [
-            "zstd",
-            "liblz4",
-            "ext-session",
-            "ext-igbinary",
-            "ext-msgpack"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-session": {
+        "type": "php-extension",
         "php-extension": {
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-shmop": {
+        "type": "php-extension",
         "php-extension": {
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-simdjson": {
+        "type": "php-extension",
         "artifact": "ext-simdjson",
         "lang": "cpp",
         "license": {
             "type": "file",
             "path": "LICENSE"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-simplexml": {
+        "type": "php-extension",
         "depends": [
             "libxml2"
         ],
@@ -942,13 +943,16 @@
             },
             "arg-type": "custom",
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-snappy": {
+        "type": "php-extension",
         "artifact": "ext-snappy",
         "depends": [
             "snappy"
+        ],
+        "suggests": [
+            "ext-apcu"
         ],
         "lang": "cpp",
         "license": {
@@ -961,13 +965,10 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "suggests": [
-            "ext-apcu"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-snmp": {
+        "type": "php-extension",
         "depends": [
             "net-snmp"
         ],
@@ -978,10 +979,10 @@
             },
             "arg-type@windows": "with",
             "arg-type": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-soap": {
+        "type": "php-extension",
         "depends": [
             "ext-libxml",
             "ext-session"
@@ -991,13 +992,13 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-sockets": {
         "type": "php-extension"
     },
     "ext-sodium": {
+        "type": "php-extension",
         "depends": [
             "libsodium"
         ],
@@ -1006,10 +1007,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-spx": {
+        "type": "php-extension",
         "artifact": "spx",
         "depends": [
             "zlib"
@@ -1025,10 +1026,10 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-sqlite3": {
+        "type": "php-extension",
         "depends": [
             "sqlite"
         ],
@@ -1039,10 +1040,10 @@
             "arg-type": "with-path",
             "arg-type@windows": "with",
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-sqlsrv": {
+        "type": "php-extension",
         "artifact": "sqlsrv",
         "depends": [
             "unixodbc"
@@ -1059,10 +1060,10 @@
             "support": {
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-ssh2": {
+        "type": "php-extension",
         "artifact": "ext-ssh2",
         "depends": [
             "libssh2",
@@ -1079,10 +1080,10 @@
             },
             "arg-type": "with-path",
             "arg-type@windows": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-swoole": {
+        "type": "php-extension",
         "artifact": "swoole",
         "depends": [
             "libcares",
@@ -1091,6 +1092,18 @@
             "zlib",
             "ext-openssl",
             "ext-curl"
+        ],
+        "suggests": [
+            "zstd",
+            "ext-sockets",
+            "ext-swoole-hook-pgsql",
+            "ext-swoole-hook-mysql",
+            "ext-swoole-hook-sqlite",
+            "ext-swoole-hook-odbc"
+        ],
+        "suggests@linux": [
+            "zstd",
+            "liburing"
         ],
         "lang": "cpp",
         "license": {
@@ -1104,27 +1117,18 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "suggests": [
-            "zstd",
-            "ext-sockets",
-            "ext-swoole-hook-pgsql",
-            "ext-swoole-hook-mysql",
-            "ext-swoole-hook-sqlite",
-            "ext-swoole-hook-odbc"
-        ],
-        "suggests@linux": [
-            "zstd",
-            "liburing"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-swoole-hook-mysql": {
+        "type": "php-extension",
         "depends": [
             "ext-mysqlnd",
             "ext-pdo",
             "ext-pdo_mysql",
             "ext-swoole"
+        ],
+        "suggests": [
+            "ext-mysqli"
         ],
         "php-extension": {
             "support": {
@@ -1133,13 +1137,10 @@
             },
             "arg-type": "none",
             "notes": true
-        },
-        "suggests": [
-            "ext-mysqli"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-swoole-hook-odbc": {
+        "type": "php-extension",
         "depends": [
             "unixodbc",
             "ext-pdo",
@@ -1152,10 +1153,10 @@
             },
             "arg-type": "none",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-swoole-hook-pgsql": {
+        "type": "php-extension",
         "depends": [
             "ext-pgsql",
             "ext-pdo",
@@ -1169,10 +1170,10 @@
             },
             "arg-type": "none",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-swoole-hook-sqlite": {
+        "type": "php-extension",
         "depends": [
             "ext-sqlite3",
             "ext-pdo",
@@ -1185,11 +1186,17 @@
             },
             "arg-type": "none",
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-swow": {
+        "type": "php-extension",
         "artifact": "swow",
+        "suggests": [
+            "openssl",
+            "curl",
+            "ext-openssl",
+            "ext-curl"
+        ],
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -1200,42 +1207,36 @@
             },
             "arg-type": "custom",
             "notes": true
-        },
-        "suggests": [
-            "openssl",
-            "curl",
-            "ext-openssl",
-            "ext-curl"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-sysvmsg": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "Windows": "no",
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-sysvsem": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "Windows": "no",
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-sysvshm": {
+        "type": "php-extension",
         "php-extension": {
             "support": {
                 "BSD": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-tidy": {
+        "type": "php-extension",
         "depends": [
             "tidy"
         ],
@@ -1245,16 +1246,16 @@
                 "BSD": "wip"
             },
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-tokenizer": {
+        "type": "php-extension",
         "php-extension": {
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-trader": {
+        "type": "php-extension",
         "artifact": "ext-trader",
         "license": {
             "type": "file",
@@ -1265,10 +1266,10 @@
                 "BSD": "wip",
                 "Windows": "wip"
             }
-        },
-        "type": "php-extension"
+        }
     },
     "ext-uuid": {
+        "type": "php-extension",
         "artifact": "ext-uuid",
         "depends": [
             "libuuid"
@@ -1283,10 +1284,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-uv": {
+        "type": "php-extension",
         "artifact": "ext-uv",
         "depends": [
             "libuv",
@@ -1302,10 +1303,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-xdebug": {
+        "type": "php-extension",
         "artifact": "xdebug",
         "license": {
             "type": "file",
@@ -1322,10 +1323,10 @@
             "build-static": false,
             "notes": true,
             "zend-extension": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-xhprof": {
+        "type": "php-extension",
         "artifact": "xhprof",
         "depends": [
             "ext-ctype"
@@ -1341,14 +1342,17 @@
             },
             "build-with-php": true,
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-xlswriter": {
+        "type": "php-extension",
         "artifact": "xlswriter",
         "depends": [
             "ext-zlib",
             "ext-zip"
+        ],
+        "suggests": [
+            "openssl"
         ],
         "license": {
             "type": "file",
@@ -1359,13 +1363,10 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "suggests": [
-            "openssl"
-        ],
-        "type": "php-extension"
+        }
     },
     "ext-xml": {
+        "type": "php-extension",
         "depends": [
             "libxml2"
         ],
@@ -1380,10 +1381,10 @@
             "arg-type@windows": "with",
             "build-with-php": true,
             "notes": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-xmlreader": {
+        "type": "php-extension",
         "depends": [
             "libxml2"
         ],
@@ -1397,10 +1398,10 @@
             },
             "arg-type": "custom",
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-xmlwriter": {
+        "type": "php-extension",
         "depends": [
             "libxml2"
         ],
@@ -1413,10 +1414,10 @@
             },
             "arg-type": "custom",
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-xsl": {
+        "type": "php-extension",
         "depends": [
             "libxslt",
             "ext-xml",
@@ -1428,10 +1429,10 @@
                 "BSD": "wip"
             },
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-xz": {
+        "type": "php-extension",
         "artifact": "ext-xz",
         "depends": [
             "xz"
@@ -1442,10 +1443,10 @@
         },
         "php-extension": {
             "arg-type": "with"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-yac": {
+        "type": "php-extension",
         "artifact": "yac",
         "depends": [
             "fastlz",
@@ -1460,10 +1461,10 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-yaml": {
+        "type": "php-extension",
         "artifact": "yaml",
         "depends": [
             "libyaml"
@@ -1478,10 +1479,10 @@
             },
             "arg-type@windows": "with",
             "arg-type": "with-path"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-zip": {
+        "type": "php-extension",
         "artifact": "ext-zip",
         "depends": [
             "libzip"
@@ -1504,10 +1505,10 @@
             },
             "arg-type": "custom",
             "arg-type@windows": "enable"
-        },
-        "type": "php-extension"
+        }
     },
     "ext-zlib": {
+        "type": "php-extension",
         "depends": [
             "zlib"
         ],
@@ -1517,10 +1518,10 @@
             "build-shared": false,
             "build-static": true,
             "build-with-php": true
-        },
-        "type": "php-extension"
+        }
     },
     "ext-zstd": {
+        "type": "php-extension",
         "artifact": "ext-zstd",
         "depends": [
             "zstd"
@@ -1535,7 +1536,6 @@
                 "BSD": "wip"
             },
             "arg-type": "custom"
-        },
-        "type": "php-extension"
+        }
     }
 }

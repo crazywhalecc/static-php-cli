@@ -13,6 +13,7 @@
         "config": [
             "config/pkg.ext.json",
             "config/pkg/lib",
+            "config/pkg/target",
             "config/pkg.target.json"
         ]
     },

@@ -11,6 +11,9 @@ krb5:
       source-root: src
   depends:
     - openssl
+  suggests:
+    - ldap
+    - libedit
   frameworks:
     - Kerberos
   headers:
@@ -18,6 +21,3 @@ krb5:
     - gssapi/gssapi.h
   pkg-configs:
     - krb5-gssapi
-  suggests:
-    - ldap
-    - libedit

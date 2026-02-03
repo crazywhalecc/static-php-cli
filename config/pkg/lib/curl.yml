@@ -4,15 +4,11 @@ curl:
     source:
       type: ghrel
       repo: curl/curl
-      match: 'curl.+\.tar\.xz'
+      match: curl.+\.tar\.xz
       prefer-stable: true
     metadata:
       license-files: [COPYING]
       license: curl
-  static-libs@unix:
-    - libcurl.a
-  headers:
-    - curl
   depends@unix:
     - openssl
     - zlib
@@ -31,3 +27,7 @@ curl:
     - CoreFoundation
     - CoreServices
     - SystemConfiguration
+  headers:
+    - curl
+  static-libs@unix:
+    - libcurl.a

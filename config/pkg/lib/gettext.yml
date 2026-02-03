@@ -10,10 +10,10 @@ gettext:
       license: LGPL-2.1-or-later
   depends:
     - libiconv
+  suggests:
+    - ncurses
+    - libxml2
   frameworks:
     - CoreFoundation
   static-libs@unix:
     - libintl.a
-  suggests:
-    - ncurses
-    - libxml2

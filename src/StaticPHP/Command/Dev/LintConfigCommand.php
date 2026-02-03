@@ -56,7 +56,7 @@ class LintConfigCommand extends BaseCommand
     public function packageSortKey(string $a, string $b): int
     {
         // sort by predefined order, other not matching keys go to the end alphabetically
-        $order = ['type', 'artifact'];
+        $order = ['type', 'artifact', 'depends', 'suggests', 'frameworks'];
 
         // Handle suffix patterns (e.g., 'depends@unix', 'static-libs@windows')
         $base_a = preg_replace('/@(unix|windows|macos|linux|freebsd|bsd)$/', '', $a);

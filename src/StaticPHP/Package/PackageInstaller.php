@@ -259,7 +259,7 @@ class PackageInstaller
         if ($this->isBuildPackage($package)) {
             return $package->isInstalled();
         }
-        if ($package instanceof LibraryPackage && $package->getArtifact()->shouldUseBinary()) {
+        if ($package->getArtifact() !== null && $package->getArtifact()->shouldUseBinary()) {
             $artifact = $package->getArtifact();
             return $artifact->isBinaryExtracted();
         }
