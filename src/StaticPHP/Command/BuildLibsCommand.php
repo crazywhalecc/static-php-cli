@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Command;
 
+use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Util\V2CompatLayer;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,6 +24,8 @@ class BuildLibsCommand extends BaseCommand
             new InputOption('no-download', null, null, 'Skip downloading artifacts (use existing cached files)'),
             ...V2CompatLayer::getLegacyBuildOptions(),
         ]);
+        // Downloader options (with 'dl-' prefix to avoid conflicts)
+        $this->getDefinition()->addOptions(DownloaderOptions::getConsoleOptions('dl'));
     }
 
     public function handle(): int
