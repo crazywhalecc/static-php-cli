@@ -233,7 +233,7 @@ class UnixCMakeExecutor extends Executor
     private function initBuildDir(): void
     {
         if ($this->build_dir === null) {
-            $this->build_dir = "{$this->package->getSourceDir()}/build";
+            $this->build_dir = "{$this->package->getSourceRoot()}/build";
         }
     }
 
@@ -295,7 +295,7 @@ CMAKE;
      */
     private function initShell(): void
     {
-        $this->shell = shell()->cd($this->package->getSourceDir())->initializeEnv($this->package)->appendEnv([
+        $this->shell = shell()->cd($this->package->getSourceRoot())->initializeEnv($this->package)->appendEnv([
             'CFLAGS' => "-I{$this->package->getIncludeDir()}",
             'CXXFLAGS' => "-I{$this->package->getIncludeDir()}",
             'LDFLAGS' => "-L{$this->package->getLibDir()}",

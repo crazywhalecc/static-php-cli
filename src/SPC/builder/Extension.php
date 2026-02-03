@@ -542,7 +542,7 @@ class Extension
      */
     protected function getSharedExtensionEnv(): array
     {
-        $config = (new SPCConfigUtil($this->builder))->getExtensionConfig($this);
+        $config = (new SPCConfigUtil($this->builder, ['no_php' => true]))->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
         $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';

@@ -25,7 +25,7 @@
         "captainhook/hook-installer": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.60",
         "humbug/box": "^4.5.0 || ^4.6.0",
-        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.3 || ^9.5"
     },
     "autoload": {

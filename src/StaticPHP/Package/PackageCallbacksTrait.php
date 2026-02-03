@@ -16,7 +16,7 @@ trait PackageCallbacksTrait
 
     protected mixed $validate_callback = null;
 
-    protected mixed $patch_before_build_callback = null;
+    protected mixed $patch_before_build_callbacks = null;
 
     public function setInfoCallback(callable $callback): void
     {
@@ -48,9 +48,9 @@ trait PackageCallbacksTrait
         $this->validate_callback = $callback;
     }
 
-    public function setPatchBeforeBuildCallback(callable $callback): void
+    public function addPatchBeforeBuildCallback(callable $callback): void
     {
-        $this->patch_before_build_callback = $callback;
+        $this->patch_before_build_callbacks[] = $callback;
     }
 
     public function patchBeforeBuild(): void
@@ -58,16 +58,18 @@ trait PackageCallbacksTrait
         if (file_exists("{$this->getSourceDir()}/.spc-patched")) {
             return;
         }
-        if ($this->patch_before_build_callback === null) {
+        if ($this->patch_before_build_callbacks === null) {
             return;
         }
         // Use CallbackInvoker with current package as context
-        $ret = ApplicationContext::invoke($this->patch_before_build_callback, [
-            Package::class => $this,
-            static::class => $this,
-        ]);
-        if ($ret === true) {
-            FileSystem::writeFile("{$this->getSourceDir()}/.spc-patched", 'PATCHED!!!');
+        foreach ($this->patch_before_build_callbacks as $callback) {
+            $ret = ApplicationContext::invoke($callback, [
+                Package::class => $this,
+                static::class => $this,
+            ]);
+            if ($ret === true) {
+                FileSystem::writeFile("{$this->getSourceDir()}/.spc-patched", 'PATCHED!!!');
+            }
         }
     }
 

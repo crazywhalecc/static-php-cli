@@ -1,0 +1,21 @@
+idn2:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://ftp.gnu.org/gnu/libidn/'
+      regex: '/href="(?<file>libidn2-(?<version>[^"]+)\.tar\.gz)"/'
+    metadata:
+      license-files: [COPYING.LESSERv3]
+      license: LGPL-3.0-or-later
+  depends@macos:
+    - libiconv
+    - gettext
+  suggests@unix:
+    - libiconv
+    - gettext
+    - libunistring
+  headers:
+    - idn2.h
+  pkg-configs:
+    - libidn2

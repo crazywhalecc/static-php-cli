@@ -1,0 +1,33 @@
+curl:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: curl/curl
+      match: curl.+\.tar\.xz
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+      license: curl
+  depends@unix:
+    - openssl
+    - zlib
+  suggests@unix:
+    - libssh2
+    - brotli
+    - nghttp2
+    - nghttp3
+    - ngtcp2
+    - zstd
+    - libcares
+    - ldap
+    - idn2
+    - krb5
+  frameworks:
+    - CoreFoundation
+    - CoreServices
+    - SystemConfiguration
+  headers:
+    - curl
+  static-libs@unix:
+    - libcurl.a

@@ -44,7 +44,7 @@ abstract class UnixUtil
                 continue;
             }
             $name = preg_replace('/@.*$/', '', $name);
-            if ($name !== '' && $name !== false) {
+            if (!empty($name)) {
                 $defined[] = $name;
             }
         }

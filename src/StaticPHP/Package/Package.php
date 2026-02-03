@@ -175,8 +175,21 @@ abstract class Package
     public function getArtifact(): ?Artifact
     {
         // find config
-        $artifact_name = PackageConfig::get($this->name, 'artifact');
-        return $artifact_name !== null ? ArtifactLoader::getArtifactInstance($artifact_name) : null;
+        $artifact_field = PackageConfig::get($this->name, 'artifact');
+
+        if ($artifact_field === null) {
+            return null;
+        }
+
+        if (is_string($artifact_field)) {
+            return ArtifactLoader::getArtifactInstance($artifact_field);
+        }
+
+        if (is_array($artifact_field)) {
+            return ArtifactLoader::getArtifactInstance($this->name);
+        }
+
+        return null;
     }
 
     /**
@@ -197,6 +210,19 @@ abstract class Package
             return $artifact->getSourceDir();
         }
         throw new SPCInternalException("Source directory for package {$this->name} is not available because the source artifact is missing.");
+    }
+
+    /**
+     * Get source build root directory.
+     * It's only worked when 'source-root' is defined in artifact config.
+     * Normally it's equal to source dir.
+     */
+    public function getSourceRoot(): string
+    {
+        if (($artifact = $this->getArtifact()) && $artifact->hasSource()) {
+            return $artifact->getSourceRoot();
+        }
+        throw new SPCInternalException("Source root for package {$this->name} is not available because the source artifact is missing.");
     }
 
     /**

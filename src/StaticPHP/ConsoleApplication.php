@@ -8,8 +8,8 @@ use StaticPHP\Command\BuildLibsCommand;
 use StaticPHP\Command\BuildTargetCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
+use StaticPHP\Command\Dev\LintConfigCommand;
 use StaticPHP\Command\Dev\ShellCommand;
-use StaticPHP\Command\Dev\SortConfigCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
 use StaticPHP\Command\DumpLicenseCommand;
@@ -62,7 +62,7 @@ class ConsoleApplication extends Application
             new ShellCommand(),
             new IsInstalledCommand(),
             new EnvCommand(),
-            new SortConfigCommand(),
+            new LintConfigCommand(),
         ]);
 
         // add additional commands from registries

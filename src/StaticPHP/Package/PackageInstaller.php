@@ -17,6 +17,7 @@ use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\LicenseDumper;
 use StaticPHP\Util\V2CompatLayer;
 use ZM\Logger\ConsoleColor;
 
@@ -208,6 +209,11 @@ class PackageInstaller
                 }
             }
         }
+
+        $this->dumpLicenseFiles($this->packages);
+        if ($interactive) {
+            InteractiveTerm::success('Exported package licenses', true);
+        }
     }
 
     public function isBuildPackage(Package|string $package): bool
@@ -253,7 +259,7 @@ class PackageInstaller
         if ($this->isBuildPackage($package)) {
             return $package->isInstalled();
         }
-        if ($package instanceof LibraryPackage && $package->getArtifact()->shouldUseBinary()) {
+        if ($package->getArtifact() !== null && $package->getArtifact()->shouldUseBinary()) {
             $artifact = $package->getArtifact();
             return $artifact->isBinaryExtracted();
         }
@@ -458,6 +464,21 @@ class PackageInstaller
             return $pkg;
         }
         return null;
+    }
+
+    /**
+     * @param Package[] $packages
+     */
+    private function dumpLicenseFiles(array $packages): void
+    {
+        $dumper = new LicenseDumper();
+        foreach ($packages as $package) {
+            $artifact = $package->getArtifact();
+            if ($artifact !== null) {
+                $dumper->addArtifacts([$artifact->getName()]);
+            }
+        }
+        $dumper->dump(BUILD_ROOT_PATH . '/license');
     }
 
     /**

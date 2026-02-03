@@ -18,7 +18,7 @@ class ConfigValidator
         'type' => ConfigType::STRING,
         'depends' => ConfigType::LIST_ARRAY, // @
         'suggests' => ConfigType::LIST_ARRAY, // @
-        'artifact' => ConfigType::STRING,
+        'artifact' => [self::class, 'validateArtifactField'], // STRING or OBJECT
         'license' => [ConfigType::class, 'validateLicenseField'],
         'lang' => ConfigType::STRING,
         'frameworks' => ConfigType::LIST_ARRAY, // @
@@ -102,7 +102,14 @@ class ConfigValidator
         if (!is_array($data)) {
             throw new ValidationException("{$config_file_name} is broken");
         }
+
+        // Define allowed artifact fields
+        $allowed_artifact_fields = ['source', 'source-mirror', 'binary', 'binary-mirror', 'metadata'];
+
         foreach ($data as $name => $artifact) {
+            // First pass: validate unknown fields
+            self::validateNoInvalidFields('artifact', $name, $artifact, $allowed_artifact_fields);
+
             foreach ($artifact as $k => $v) {
                 // check source field
                 if ($k === 'source' || $k === 'source-mirror') {
@@ -202,6 +209,11 @@ class ConfigValidator
                 throw new ValidationException("Package [{$name}] in {$config_file_name} of type '{$pkg['type']}' must have an 'artifact' field");
             }
 
+            // validate and lint inline artifact object if present
+            if (isset($pkg['artifact']) && is_array($pkg['artifact'])) {
+                self::validateAndLintInlineArtifact($name, $data[$name]['artifact']);
+            }
+
             // check if "php-extension" package has php-extension specific fields and validate inside
             if ($pkg['type'] === 'php-extension') {
                 self::validatePhpExtensionFields($name, $pkg);
@@ -232,6 +244,19 @@ class ConfigValidator
         if (!in_array($arch, $valid_arch)) {
             throw new ValidationException("Invalid platform architecture '{$arch}' in platform '{$platform}'");
         }
+    }
+
+    /**
+     * Validate artifact field - can be string (reference) or object (inline).
+     *
+     * @param mixed $value Field value
+     */
+    public static function validateArtifactField(mixed $value): bool
+    {
+        if (!is_string($value) && !is_assoc_array($value)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -372,5 +397,20 @@ class ConfigValidator
                 throw new ValidationException("{$config_type} [{$item_name}] has invalid field [{$base_k}]");
             }
         }
+    }
+
+    /**
+     * Validate and lint inline artifact object structure.
+     *
+     * @param string $pkg_name Package name
+     * @param array  $artifact Inline artifact configuration (passed by reference to apply linting)
+     */
+    private static function validateAndLintInlineArtifact(string $pkg_name, array &$artifact): void
+    {
+        // Validate and lint as if it's a standalone artifact
+        $temp_data = [$pkg_name => $artifact];
+        self::validateAndLintArtifacts("inline artifact in package '{$pkg_name}'", $temp_data);
+        // Write back the linted artifact configuration
+        $artifact = $temp_data[$pkg_name];
     }
 }

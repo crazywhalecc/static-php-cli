@@ -241,7 +241,6 @@ class php extends TargetPackage
     {
         $arg = [];
         foreach ($installer->getResolvedPackages() as $package) {
-            /** @var PhpExtensionPackage $package */
             if ($package->getType() !== 'php-extension' || !$package instanceof PhpExtensionPackage) {
                 continue;
             }

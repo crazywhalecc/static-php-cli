@@ -23,7 +23,7 @@ class PackageConfig
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load pkg.json config.");
         }
         $loaded = [];
-        $files = glob("{$dir}/pkg.*.json");
+        $files = glob("{$dir}/*");
         if (is_array($files)) {
             foreach ($files as $file) {
                 self::loadFromFile($file, $registry_name);
@@ -58,8 +58,37 @@ class PackageConfig
         foreach ($data as $pkg_name => $config) {
             self::$package_configs[$pkg_name] = $config;
             Registry::_bindPackageConfigFile($pkg_name, $registry_name, $file);
+
+            // Register inline artifact if present
+            if (isset($config['artifact']) && is_array($config['artifact'])) {
+                ArtifactConfig::registerInlineArtifact(
+                    $pkg_name,
+                    $config['artifact'],
+                    $registry_name,
+                    "inline in {$file}"
+                );
+            }
         }
         return $file;
+    }
+
+    public static function loadFromArray(array $data, string $registry_name): void
+    {
+        ConfigValidator::validateAndLintPackages('array_input', $data);
+        foreach ($data as $pkg_name => $config) {
+            self::$package_configs[$pkg_name] = $config;
+            Registry::_bindPackageConfigFile($pkg_name, $registry_name, 'array_input');
+
+            // Register inline artifact if present
+            if (isset($config['artifact']) && is_array($config['artifact'])) {
+                ArtifactConfig::registerInlineArtifact(
+                    $pkg_name,
+                    $config['artifact'],
+                    $registry_name,
+                    'inline in array_input'
+                );
+            }
+        }
     }
 
     /**
