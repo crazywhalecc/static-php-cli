@@ -13,6 +13,14 @@
             "openssl"
         ]
     },
+    "com_dotnet": {
+        "support": {
+            "BSD": "no",
+            "Linux": "no",
+            "Darwin": "no"
+        },
+        "type": "builtin"
+    },
     "apcu": {
         "type": "external",
         "source": "apcu"
