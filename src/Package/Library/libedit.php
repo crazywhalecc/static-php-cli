@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Package\Library;
 
-use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Util\FileSystem;
@@ -14,7 +14,7 @@ use StaticPHP\Util\FileSystem;
 #[Library('libedit')]
 class libedit extends LibraryPackage
 {
-    #[BeforeStage(stage: 'build')]
+    #[PatchBeforeBuild]
     public function patchBeforeBuild(): void
     {
         FileSystem::replaceFileRegex(
