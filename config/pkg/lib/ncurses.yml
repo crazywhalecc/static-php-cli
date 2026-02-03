@@ -1,0 +1,12 @@
+ncurses:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://ftp.gnu.org/pub/gnu/ncurses/'
+      regex: '/href="(?<file>ncurses-(?<version>[^"]+)\.tar\.gz)"/'
+    binary: hosted
+    metadata:
+      license-files: ['COPYING']
+  static-libs@unix:
+    - libncurses.a
