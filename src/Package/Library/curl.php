@@ -22,9 +22,9 @@ class curl
     {
         shell()->cd($lib->getSourceDir())->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ./CMakeLists.txt');
         if (SystemTarget::getTargetOS() === 'Darwin') {
-            FileSystem::replaceFileRegex("{$lib->getSourceDir()}/curl/CMakeLists.txt", '/NOT COREFOUNDATION_FRAMEWORK/m', 'FALSE');
-            FileSystem::replaceFileRegex("{$lib->getSourceDir()}/curl/CMakeLists.txt", '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m', 'FALSE');
-            FileSystem::replaceFileRegex("{$lib->getSourceDir()}/curl/CMakeLists.txt", '/NOT CORESERVICES_FRAMEWORK/m', 'FALSE');
+            FileSystem::replaceFileRegex("{$lib->getSourceDir()}/CMakeLists.txt", '/NOT COREFOUNDATION_FRAMEWORK/m', 'FALSE');
+            FileSystem::replaceFileRegex("{$lib->getSourceDir()}/CMakeLists.txt", '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m', 'FALSE');
+            FileSystem::replaceFileRegex("{$lib->getSourceDir()}/CMakeLists.txt", '/NOT CORESERVICES_FRAMEWORK/m', 'FALSE');
         }
         return true;
     }
