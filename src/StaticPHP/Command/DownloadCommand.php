@@ -6,11 +6,13 @@ namespace StaticPHP\Command;
 
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
+use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -19,7 +21,17 @@ class DownloadCommand extends BaseCommand
 {
     public function configure(): void
     {
-        $this->addArgument('artifacts', InputArgument::OPTIONAL, 'Specific artifacts to download, comma separated, e.g "php-src,openssl,curl"');
+        $this->addArgument(
+            'artifacts',
+            InputArgument::OPTIONAL,
+            'Specific artifacts to download, comma separated, e.g "php-src,openssl,curl"',
+            suggestedValues: function (CompletionInput $input) {
+                $input_val = $input->getCompletionValue();
+                $all_names = ArtifactLoader::getLoadedArtifactNames();
+                // filter by input value
+                return array_filter($all_names, fn ($name) => str_starts_with($name, $input_val));
+            },
+        );
 
         // 2.x compatible options
         $this->addOption('shallow-clone', null, null, '(deprecated) Clone shallowly repositories when downloading sources');
