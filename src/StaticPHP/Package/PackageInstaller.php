@@ -325,6 +325,7 @@ class PackageInstaller
      */
     public function extractSourceArtifacts(bool $interactive = true): void
     {
+        FileSystem::createDir(SOURCE_PATH);
         $packages = array_values($this->packages);
 
         $cache = ApplicationContext::get(ArtifactCache::class);
