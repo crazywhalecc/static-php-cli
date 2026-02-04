@@ -18,7 +18,7 @@ class ArtifactConfig
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load artifact config.");
         }
         $loaded = [];
-        $files = glob("{$dir}/artifact.*.json");
+        $files = glob("{$dir}/*");
         if (is_array($files)) {
             foreach ($files as $file) {
                 self::loadFromFile($file, $registry_name);
