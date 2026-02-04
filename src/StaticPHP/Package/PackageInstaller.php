@@ -526,8 +526,7 @@ class PackageInstaller
     {
         // process 'php' target
         if ($package->getName() === 'php') {
-            logger()->warning("Building 'php' target is deprecated, please use specific targets like 'build:php-cli' instead.");
-
+            // logger()->warning("Building 'php' target is deprecated, please use specific targets like 'build:php-cli' instead.");
             $added = false;
 
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-cli')) {

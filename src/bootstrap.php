@@ -58,7 +58,7 @@ if (filter_var(getenv('SPC_ENABLE_LOG_FILE'), FILTER_VALIDATE_BOOLEAN)) {
     });
 }
 
-// load internal registry
+// load core registry
 Registry::loadRegistry(ROOT_DIR . '/spc.registry.json');
 // load registries from environment variable SPC_REGISTRIES
 Registry::loadFromEnvOrOption();

@@ -100,6 +100,9 @@ class PackageBuilder
         // ignore copy to self
         if (realpath($src) !== realpath($dst)) {
             FileSystem::copy($src, $dst);
+            if ($executable) {
+                chmod($dst, 0755);
+            }
         }
 
         // file exist
