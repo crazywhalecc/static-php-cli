@@ -134,9 +134,11 @@ trait unix
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make cli'));
         $concurrency = $builder->concurrency;
+        $vars = $this->makeVars($installer);
+        $makeArgs = $this->makeVarsToArgs($vars);
         shell()->cd($package->getSourceDir())
-            ->setEnv($this->makeVars($installer))
-            ->exec("make -j{$concurrency} cli");
+            ->setEnv($vars)
+            ->exec("make -j{$concurrency} {$makeArgs} cli");
 
         $builder->deployBinary("{$package->getSourceDir()}/sapi/cli/php", BUILD_BIN_PATH . '/php');
         $package->setOutput('Binary path for cli SAPI', BUILD_BIN_PATH . '/php');
@@ -147,9 +149,11 @@ trait unix
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make cgi'));
         $concurrency = $builder->concurrency;
+        $vars = $this->makeVars($installer);
+        $makeArgs = $this->makeVarsToArgs($vars);
         shell()->cd($package->getSourceDir())
-            ->setEnv($this->makeVars($installer))
-            ->exec("make -j{$concurrency} cgi");
+            ->setEnv($vars)
+            ->exec("make -j{$concurrency} {$makeArgs} cgi");
 
         $builder->deployBinary("{$package->getSourceDir()}/sapi/cgi/php-cgi", BUILD_BIN_PATH . '/php-cgi');
         $package->setOutput('Binary path for cgi SAPI', BUILD_BIN_PATH . '/php-cgi');
@@ -160,9 +164,11 @@ trait unix
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make fpm'));
         $concurrency = $builder->concurrency;
+        $vars = $this->makeVars($installer);
+        $makeArgs = $this->makeVarsToArgs($vars);
         shell()->cd($package->getSourceDir())
-            ->setEnv($this->makeVars($installer))
-            ->exec("make -j{$concurrency} fpm");
+            ->setEnv($vars)
+            ->exec("make -j{$concurrency} {$makeArgs} fpm");
 
         $builder->deployBinary("{$package->getSourceDir()}/sapi/fpm/php-fpm", BUILD_BIN_PATH . '/php-fpm');
         $package->setOutput('Binary path for fpm SAPI', BUILD_BIN_PATH . '/php-fpm');
@@ -182,10 +188,11 @@ trait unix
             // apply --with-micro-fake-cli option
             $vars = $this->makeVars($installer);
             $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+            $makeArgs = $this->makeVarsToArgs($vars);
             // build
             shell()->cd($package->getSourceDir())
                 ->setEnv($vars)
-                ->exec("make -j{$builder->concurrency} micro");
+                ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
 
             $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', BUILD_BIN_PATH . '/micro.sfx');
             $package->setOutput('Binary path for micro SAPI', BUILD_BIN_PATH . '/micro.sfx');
@@ -440,11 +447,30 @@ trait unix
         $static = ApplicationContext::get(ToolchainInterface::class)->isStatic() ? '-all-static' : '';
         $pie = SystemTarget::getTargetOS() === 'Linux' ? '-pie' : '';
 
+        // Append SPC_EXTRA_LIBS to libs for dynamic linking support (e.g., X11)
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+        $libs = trim($config['libs'] . ' ' . $extra_libs);
+
         return array_filter([
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') . "{$config['ldflags']} {$static} {$pie}",
             'EXTRA_LDFLAGS' => $config['ldflags'],
-            'EXTRA_LIBS' => $config['libs'],
+            'EXTRA_LIBS' => $libs,
         ]);
+    }
+
+    /**
+     * Convert make variables array to command line argument string.
+     * This is needed because make command line arguments have higher priority than environment variables.
+     */
+    private function makeVarsToArgs(array $vars): string
+    {
+        $args = [];
+        foreach ($vars as $key => $value) {
+            if (trim($value) !== '') {
+                $args[] = $key . '=' . escapeshellarg($value);
+            }
+        }
+        return implode(' ', $args);
     }
 }

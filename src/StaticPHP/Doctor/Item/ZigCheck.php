@@ -25,11 +25,7 @@ class ZigCheck
     #[CheckItem('if zig is installed', level: 800)]
     public function checkZig(): CheckResult
     {
-        $installer = new PackageInstaller();
-        $package = 'zig';
-        $installer->addInstallPackage($package);
-        $installed = $installer->isPackageInstalled($package);
-        if ($installed) {
+        if (new PackageInstaller()->addInstallPackage('zig')->isPackageInstalled('zig')) {
             return CheckResult::ok();
         }
         return CheckResult::fail('zig is not installed', 'install-zig');

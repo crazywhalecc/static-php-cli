@@ -244,27 +244,6 @@
             "arg-type": "with-path"
         }
     },
-    "ext-glfw": {
-        "type": "php-extension",
-        "artifact": "ext-glfw",
-        "depends": [
-            "glfw"
-        ],
-        "depends@windows": [],
-        "license": {
-            "type": "file",
-            "path": "LICENSE"
-        },
-        "php-extension": {
-            "support": {
-                "Windows": "wip",
-                "BSD": "no",
-                "Linux": "no"
-            },
-            "arg-type": "custom",
-            "notes": true
-        }
-    },
     "ext-gmp": {
         "type": "php-extension",
         "depends": [

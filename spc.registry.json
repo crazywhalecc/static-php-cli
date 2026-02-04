@@ -12,12 +12,16 @@
         },
         "config": [
             "config/pkg.ext.json",
-            "config/pkg/lib",
-            "config/pkg/target",
+            "config/pkg/lib/",
+            "config/pkg/target/",
+            "config/pkg/ext/",
             "config/pkg.target.json"
         ]
     },
     "artifact": {
+        "config": [
+            "config/artifact/"
+        ],
         "psr-4": {
             "Package\\Artifact": "src/Package/Artifact"
         }

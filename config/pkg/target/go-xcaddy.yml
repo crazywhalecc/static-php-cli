@@ -1,0 +1,6 @@
+go-xcaddy:
+  type: target
+  artifact:
+    binary: custom
+  static-bins:
+    - xcaddy

@@ -1,69 +1,7 @@
 {
-    "frankenphp": {
-        "type": "virtual-target",
-        "artifact": "frankenphp",
-        "depends": [
-            "php-embed",
-            "go-xcaddy"
-        ],
-        "depends@macos": [
-            "php-embed",
-            "go-xcaddy",
-            "libxml2"
-        ]
-    },
-    "go-xcaddy": {
-        "type": "target",
-        "artifact": "go-xcaddy",
-        "static-bins": [
-            "xcaddy"
-        ]
-    },
-    "musl-toolchain": {
-        "type": "target",
-        "artifact": "musl-toolchain"
-    },
     "nasm": {
         "type": "target",
         "artifact": "nasm"
-    },
-    "php": {
-        "type": "target",
-        "artifact": "php-src",
-        "depends@macos": [
-            "libxml2"
-        ]
-    },
-    "php-cgi": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-cli": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-embed": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-fpm": {
-        "type": "virtual-target",
-        "depends": [
-            "php"
-        ]
-    },
-    "php-micro": {
-        "type": "virtual-target",
-        "artifact": "micro",
-        "depends": [
-            "php"
-        ]
     },
     "php-sdk-binary-tools": {
         "type": "target",
@@ -72,10 +10,6 @@
     "strawberry-perl": {
         "type": "target",
         "artifact": "strawberry-perl"
-    },
-    "upx": {
-        "type": "target",
-        "artifact": "upx"
     },
     "vswhere": {
         "type": "target",
