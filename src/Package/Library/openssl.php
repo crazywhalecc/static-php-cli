@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\System\LinuxUtil;
 
 #[Library('openssl')]
 class openssl
@@ -48,8 +49,7 @@ class openssl
             '--with-zlib-lib=' . BUILD_LIB_PATH . ' ';
 
         $openssl_dir = getenv('OPENSSLDIR') ?: null;
-        // TODO: in v3 use the following: $openssl_dir ??= SystemUtil::getOSRelease()['dist'] === 'redhat' ? '/etc/pki/tls' : '/etc/ssl';
-        $openssl_dir ??= '/etc/ssl';
+        $openssl_dir ??= LinuxUtil::getOSRelease()['dist'] === 'redhat' ? '/etc/pki/tls' : '/etc/ssl';
         $ex_lib = trim($ex_lib);
 
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
