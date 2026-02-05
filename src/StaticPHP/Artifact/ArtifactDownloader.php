@@ -294,7 +294,7 @@ class ArtifactDownloader
                         FileSystem::removeFileIfExists($path);
                     }
                 }
-                exit(2);
+                exit(130);
             });
         }
 
