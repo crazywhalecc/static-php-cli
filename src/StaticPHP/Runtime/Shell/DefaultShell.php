@@ -104,7 +104,7 @@ class DefaultShell extends Shell
                 $submodule_cmd = clean_spaces("{$git} submodule update --init {$depth_flag} {$submodule}");
                 $this->logCommandInfo($submodule_cmd);
                 logger()->debug("[GIT SUBMODULE] {$submodule_cmd}");
-                $this->passthru($submodule_cmd, $this->console_putput, cwd: $path_arg);
+                $this->passthru($submodule_cmd, $this->console_putput, cwd: $path);
             }
         }
     }
