@@ -1,12 +1,8 @@
 attr:
   type: library
   artifact:
-    source:
-      type: url
-      url: 'https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.gz'
-    source-mirror:
-      type: url
-      url: 'https://mirror.souseiseki.middlendian.com/nongnu/attr/attr-2.5.2.tar.gz'
+    source: 'https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.gz'
+    source-mirror: 'https://mirror.souseiseki.middlendian.com/nongnu/attr/attr-2.5.2.tar.gz'
     metadata:
       license-files: [doc/COPYING.LGPL]
       license: LGPL-2.1-or-later

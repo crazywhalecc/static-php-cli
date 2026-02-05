@@ -7,3 +7,4 @@ ext-mbregex:
     arg-type: custom
     build-shared: false
     build-static: true
+    display-name: mbstring
