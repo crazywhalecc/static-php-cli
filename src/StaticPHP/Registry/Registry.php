@@ -237,6 +237,9 @@ class Registry
 
         // check BeforeStage, AfterStage is valid
         PackageLoader::checkLoadedStageEvents();
+
+        // Validate package dependencies
+        self::validatePackageDependencies();
     }
 
     /**
@@ -308,6 +311,54 @@ class Registry
     public static function getCurrentRegistryName(): ?string
     {
         return self::$current_registry_name;
+    }
+
+    /**
+     * Validate package dependencies to ensure all referenced dependencies exist.
+     * This helps catch configuration errors early in the registry loading process.
+     *
+     * @throws RegistryException
+     */
+    private static function validatePackageDependencies(): void
+    {
+        $all_packages = PackageConfig::getAll();
+        $errors = [];
+
+        foreach ($all_packages as $pkg_name => $pkg_config) {
+            // Check depends field
+            $depends = PackageConfig::get($pkg_name, 'depends', []);
+            if (!is_array($depends)) {
+                $errors[] = "Package '{$pkg_name}' has invalid 'depends' field (expected array, got " . gettype($depends) . ')';
+                continue;
+            }
+
+            foreach ($depends as $dep) {
+                if (!isset($all_packages[$dep])) {
+                    $config_info = self::getPackageConfigInfo($pkg_name);
+                    $location = $config_info ? " (defined in {$config_info['config']})" : '';
+                    $errors[] = "Package '{$pkg_name}'{$location} depends on '{$dep}' which does not exist in any loaded registry";
+                }
+            }
+
+            // Check suggests field
+            $suggests = PackageConfig::get($pkg_name, 'suggests', []);
+            if (!is_array($suggests)) {
+                $errors[] = "Package '{$pkg_name}' has invalid 'suggests' field (expected array, got " . gettype($suggests) . ')';
+                continue;
+            }
+
+            foreach ($suggests as $suggest) {
+                if (!isset($all_packages[$suggest])) {
+                    $config_info = self::getPackageConfigInfo($pkg_name);
+                    $location = $config_info ? " (defined in {$config_info['config']})" : '';
+                    $errors[] = "Package '{$pkg_name}'{$location} suggests '{$suggest}' which does not exist in any loaded registry";
+                }
+            }
+        }
+
+        if (!empty($errors)) {
+            throw new RegistryException("Package dependency validation failed:\n  - " . implode("\n  - ", $errors));
+        }
     }
 
     /**

@@ -58,7 +58,7 @@ class PackageBuilder
 
         if ($package->getType() !== 'virtual-target') {
             // patch before build
-            $package->patchBeforeBuild();
+            $package->emitPatchBeforeBuild();
         }
 
         // build

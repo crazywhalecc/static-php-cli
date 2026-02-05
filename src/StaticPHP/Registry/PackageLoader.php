@@ -159,7 +159,7 @@ class PackageLoader
             }
             $package_type = PackageConfig::get($attribute_instance->name, 'type');
             if ($package_type === null) {
-                throw new RegistryException("Package [{$attribute_instance->name}] not defined in config, please check your config files.");
+                throw new RegistryException("Package [{$attribute_instance->name}] not defined in config, but referenced from class {$class}, please check your config files.");
             }
 
             // if class has parent class and matches the attribute instance, use custom class
@@ -276,6 +276,8 @@ class PackageLoader
     {
         foreach (self::$packages as $pkg) {
             if ($pkg instanceof PhpExtensionPackage) {
+                $pkg->registerDefaultStages();
+            } elseif ($pkg instanceof LibraryPackage) {
                 $pkg->registerDefaultStages();
             }
         }

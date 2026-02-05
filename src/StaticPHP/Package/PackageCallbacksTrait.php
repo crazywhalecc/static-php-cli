@@ -53,7 +53,7 @@ trait PackageCallbacksTrait
         $this->patch_before_build_callbacks[] = $callback;
     }
 
-    public function patchBeforeBuild(): void
+    public function emitPatchBeforeBuild(): void
     {
         if (file_exists("{$this->getSourceDir()}/.spc-patched")) {
             return;

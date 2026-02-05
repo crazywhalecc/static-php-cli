@@ -219,8 +219,8 @@ class DependencyResolver
             return;
         }
         $visited[$pkg_name] = true;
-        // 遍历该依赖的所有依赖（此处的 getLib 如果检测到当前库不存在的话，会抛出异常）
-        foreach (array_merge($dep_list[$pkg_name]['depends'], $dep_list[$pkg_name]['suggests']) as $dep) {
+        // 遍历该依赖的所有依赖
+        foreach (array_merge($dep_list[$pkg_name]['depends'] ?? [], $dep_list[$pkg_name]['suggests'] ?? []) as $dep) {
             self::visitPlatAllDeps($dep, $dep_list, $visited, $sorted);
         }
         $sorted[] = $pkg_name;
@@ -233,11 +233,11 @@ class DependencyResolver
             return;
         }
         $visited[$pkg_name] = true;
-        // 遍历该依赖的所有依赖（此处的 getLib 如果检测到当前库不存在的话，会抛出异常）
+        // 遍历该依赖的所有依赖
         if (!isset($dep_list[$pkg_name])) {
             throw new WrongUsageException("{$pkg_name} not exist !");
         }
-        foreach ($dep_list[$pkg_name]['depends'] as $dep) {
+        foreach ($dep_list[$pkg_name]['depends'] ?? [] as $dep) {
             self::visitPlatDeps($dep, $dep_list, $visited, $sorted);
         }
         $sorted[] = $pkg_name;
