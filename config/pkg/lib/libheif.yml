@@ -1,0 +1,18 @@
+libheif:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: strukturag/libheif
+      match: libheif-.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+  depends:
+    - libde265
+    - libwebp
+    - libaom
+    - zlib
+    - brotli
+  static-libs@unix:
+    - libheif.a

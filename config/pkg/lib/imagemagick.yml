@@ -1,0 +1,32 @@
+imagemagick:
+  type: library
+  artifact:
+    source: {
+      "type": "ghtar",
+      "repo": "ImageMagick/ImageMagick"
+    }
+    metadata:
+      license-files: [LICENSE]
+  lang: cpp
+  pkg-configs: [
+    "Magick++-7.Q16HDRI",
+    "MagickCore-7.Q16HDRI",
+    "MagickWand-7.Q16HDRI"
+  ]
+  depends:
+    - zlib
+    - libjpeg
+    - libjxl
+    - libpng
+    - libwebp
+    - freetype
+    - libtiff
+    - libheif
+    - bzip2
+  suggests:
+    - zstd
+    - xz
+    - libzip
+    - libxml2
+
+
