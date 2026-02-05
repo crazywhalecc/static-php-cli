@@ -10,7 +10,7 @@ bzip2:
       regex: '/href="(?<file>bzip2-(?<version>[^"]+)\.tar\.gz)"/'
     binary: hosted
     metadata:
-      license-files: ['{registry_root}/src/globals/licenses/bzip2.txt']
+      license-files: ['@/bzip2.txt']
       license: bzip2-1.0.6
   headers:
     - bzlib.h
