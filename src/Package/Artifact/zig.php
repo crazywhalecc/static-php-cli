@@ -25,8 +25,10 @@ class zig
         $index_json = json_decode($index_json ?: '', true);
         $latest_version = null;
         foreach ($index_json as $version => $data) {
-            $latest_version = $version;
-            break;
+            if ($version !== 'master') {
+                $latest_version = $version;
+                break;
+            }
         }
 
         if (!$latest_version) {

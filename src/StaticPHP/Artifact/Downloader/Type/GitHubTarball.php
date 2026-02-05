@@ -23,9 +23,10 @@ class GitHubTarball implements DownloadTypeInterface
      * If match_url is provided, only return the tarball that matches the regex.
      * Otherwise, return the first tarball found.
      */
-    public function getGitHubTarballInfo(string $name, string $repo, string $rel_type, bool $prefer_stable = true, ?string $match_url = null, ?string $basename = null): array
+    public function getGitHubTarballInfo(string $name, string $repo, string $rel_type, bool $prefer_stable = true, ?string $match_url = null, ?string $basename = null, ?string $query = null): array
     {
         $url = str_replace(['{repo}', '{rel_type}'], [$repo, $rel_type], self::API_URL);
+        $url .= ($query ?? '');
         $data = default_shell()->executeCurl($url, headers: $this->getGitHubTokenHeaders());
         $data = json_decode($data ?: '', true);
         if (!is_array($data)) {
@@ -33,7 +34,10 @@ class GitHubTarball implements DownloadTypeInterface
         }
         $url = null;
         foreach ($data as $rel) {
-            if (($rel['prerelease'] ?? false) === true && $prefer_stable) {
+            $prerelease = $rel['prerelease'] ?? false;
+            $draft = $rel['draft'] ?? false;
+            $tarball_url = $rel['tarball_url'] ?? null;
+            if ($prerelease && $prefer_stable || $draft && $prefer_stable || !$tarball_url) {
                 continue;
             }
             if ($match_url === null) {
@@ -70,7 +74,7 @@ class GitHubTarball implements DownloadTypeInterface
             'ghtagtar' => 'tags',
             default => throw new DownloaderException("Invalid GitHubTarball type for {$name}"),
         };
-        [$url, $filename] = $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name);
+        [$url, $filename] = $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name, $config['query'] ?? null);
         $path = DOWNLOAD_PATH . "/{$filename}";
         default_shell()->executeCurlDownload($url, $path, headers: $this->getGitHubTokenHeaders());
         return DownloadResult::archive($filename, $config, $config['extract'] ?? null, version: $this->version);

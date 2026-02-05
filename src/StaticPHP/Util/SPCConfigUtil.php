@@ -291,9 +291,18 @@ class SPCConfigUtil
         // parse pkg-configs
         foreach ($packages as $package) {
             $pc = PackageConfig::get($package, 'pkg-configs', []);
+            $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+            $search_paths = array_filter(explode(SystemTarget::isUnix() ? ':' : ';', $pkg_config_path));
             foreach ($pc as $file) {
-                if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$file}.pc")) {
-                    throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "/pkgconfig'. Please build it first.");
+                $found = false;
+                foreach ($search_paths as $path) {
+                    if (file_exists($path . "/{$file}.pc")) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$package}] does not exist. Please build it first.");
                 }
             }
             $pc_cflags = implode(' ', $pc);
@@ -324,9 +333,18 @@ class SPCConfigUtil
             if (SystemTarget::isUnix()) {
                 // add pkg-configs libs
                 $pkg_configs = PackageConfig::get($package, 'pkg-configs', []);
+                $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+                $search_paths = array_filter(explode(':', $pkg_config_path));
                 foreach ($pkg_configs as $pkg_config) {
-                    if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$pkg_config}.pc")) {
-                        throw new WrongUsageException("pkg-config file '{$pkg_config}.pc' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "/pkgconfig'. Please build it first.");
+                    $found = false;
+                    foreach ($search_paths as $path) {
+                        if (file_exists($path . "/{$pkg_config}.pc")) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        throw new WrongUsageException("pkg-config file '{$pkg_config}.pc' for lib [{$package}] does not exist. Please build it first.");
                     }
                 }
                 $pkg_configs = implode(' ', $pkg_configs);
