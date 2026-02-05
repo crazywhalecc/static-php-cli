@@ -189,7 +189,7 @@ class LibraryPackage extends Package
     public function packPrebuilt(): void
     {
         $target_dir = WORKING_DIR . '/dist';
-        $placeholder_file = BUILD_ROOT_PATH . '/.spc-extract-placeholder.json';
+        $postinstall_file = BUILD_ROOT_PATH . '/.package.' . $this->getName() . '.postinstall.json';
 
         if (!ApplicationContext::has(DirDiff::class)) {
             throw new SPCInternalException('pack-dirdiff context not found for packPrebuilt stage. You cannot call "packPrebuilt" function manually.');
@@ -212,28 +212,39 @@ class LibraryPackage extends Package
         }
 
         $origin_files = [];
+        $postinstall_files = [];
 
-        // get pack placehoder defines
-        $placehoder = get_pack_replace();
+        // get pack placeholder defines
+        $placeholder = get_pack_replace();
 
-        // patch pkg-config and la files with absolute path
+        // patch pkg-config and la files with placeholder paths
         foreach ($increase_files as $file) {
             if (str_ends_with($file, '.pc') || str_ends_with($file, '.la')) {
                 $content = FileSystem::readFile(BUILD_ROOT_PATH . '/' . $file);
                 $origin_files[$file] = $content;
-                // replace relative paths with absolute paths
+                // replace actual paths with placeholders
                 $content = str_replace(
-                    array_keys($placehoder),
-                    array_values($placehoder),
+                    array_keys($placeholder),
+                    array_values($placeholder),
                     $content
                 );
                 FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
+                // record files that need postinstall path replacement
+                $postinstall_files[] = $file;
             }
         }
 
-        // add .spc-extract-placeholder.json in BUILD_ROOT_PATH
-        file_put_contents($placeholder_file, json_encode(array_keys($origin_files), JSON_PRETTY_PRINT));
-        $increase_files[] = '.spc-extract-placeholder.json';
+        // generate postinstall action file if there are files to process
+        if ($postinstall_files !== []) {
+            $postinstall_actions = [
+                [
+                    'action' => 'replace-path',
+                    'files' => $postinstall_files,
+                ],
+            ];
+            FileSystem::writeFile($postinstall_file, json_encode($postinstall_actions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $increase_files[] = '.package.' . $this->getName() . '.postinstall.json';
+        }
 
         // every file mapped with BUILD_ROOT_PATH
         // get BUILD_ROOT_PATH last dir part
@@ -262,11 +273,13 @@ class LibraryPackage extends Package
         f_passthru("tar {$tar_option} {$filename} -T " . WORKING_DIR . '/packlib_files.txt');
         logger()->info('Pack library ' . $this->getName() . ' to ' . $filename . ' complete.');
 
-        // remove temp files
-        unlink($placeholder_file);
+        // remove postinstall temp file
+        if (file_exists($postinstall_file)) {
+            unlink($postinstall_file);
+        }
 
+        // restore original files
         foreach ($origin_files as $file => $content) {
-            // restore original files
             if (file_exists(BUILD_ROOT_PATH . '/' . $file)) {
                 FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
             }
