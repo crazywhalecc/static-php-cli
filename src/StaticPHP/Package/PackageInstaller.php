@@ -14,6 +14,7 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\DependencyResolver;
+use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
@@ -70,6 +71,9 @@ class PackageInstaller
         }
         if (!$package->hasStage('build')) {
             throw new WrongUsageException("Target package '{$package->getName()}' does not define build process for current OS: " . PHP_OS_FAMILY . '.');
+        }
+        if (($this->options['pack-mode'] ?? false) === true && !empty($this->build_packages)) {
+            throw new WrongUsageException("In 'pack-mode', only one package can be built at a time. Cannot add package '{$package->getName()}' to build list.");
         }
         $this->build_packages[$package->getName()] = $package;
         return $this;
@@ -195,8 +199,16 @@ class PackageInstaller
                     InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
+                    if ($is_to_build && ($this->options['pack-mode'] ?? false) === true) {
+                        $dirdiff = new DirDiff(BUILD_ROOT_PATH, false);
+                        ApplicationContext::set(DirDiff::class, $dirdiff);
+                    }
                     /** @var LibraryPackage $package */
                     $status = $builder->buildPackage($package, $this->isBuildPackage($package));
+
+                    if ($is_to_build && ($this->options['pack-mode'] ?? false) === true) {
+                        $package->runStage('packPrebuilt');
+                    }
                 } catch (\Throwable $e) {
                     if ($interactive) {
                         InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);

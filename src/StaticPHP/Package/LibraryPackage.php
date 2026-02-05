@@ -5,7 +5,13 @@ declare(strict_types=1);
 namespace StaticPHP\Package;
 
 use StaticPHP\Config\PackageConfig;
+use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\PatchException;
+use StaticPHP\Exception\SPCInternalException;
+use StaticPHP\Exception\ValidationException;
+use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\DependencyResolver;
+use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SPCConfigUtil;
 
@@ -161,6 +167,114 @@ class LibraryPackage extends Package
     }
 
     /**
+     * Register default stages if not already defined by attributes.
+     * This is called after all attributes have been loaded.
+     *
+     * @internal Called by PackageLoader after loading attributes
+     */
+    public function registerDefaultStages(): void
+    {
+        if (!$this->hasStage('packPrebuilt')) {
+            $this->addStage('packPrebuilt', [$this, 'packPrebuilt']);
+        }
+        // counting files before build stage
+    }
+
+    /**
+     * Pack the prebuilt library into an archive.
+     *
+     * @internal this function is intended to be called by the dev:pack-lib command only
+     */
+    public function packPrebuilt(): void
+    {
+        $target_dir = WORKING_DIR . '/dist';
+        $placeholder_file = BUILD_ROOT_PATH . '/.spc-extract-placeholder.json';
+
+        if (!ApplicationContext::has(DirDiff::class)) {
+            throw new SPCInternalException('pack-dirdiff context not found for packPrebuilt stage. You cannot call "packPrebuilt" function manually.');
+        }
+        // check whether this library has correctly installed files
+        if (!$this->isInstalled()) {
+            throw new ValidationException("Cannot pack prebuilt library [{$this->getName()}] because it is not fully installed.");
+        }
+        // get after-build buildroot file list
+        $increase_files = ApplicationContext::get(DirDiff::class)->getIncrementFiles(true);
+
+        FileSystem::createDir($target_dir);
+
+        // before pack, check if the dependency tree contains lib-suggests
+        $libraries = DependencyResolver::resolve([$this], include_suggests: true);
+        foreach ($libraries as $lib) {
+            if (PackageConfig::get($lib, 'suggests', []) !== []) {
+                throw new ValidationException("The library {$lib} has lib-suggests, packing [{$this->name}] is not safe, abort !");
+            }
+        }
+
+        $origin_files = [];
+
+        // get pack placehoder defines
+        $placehoder = get_pack_replace();
+
+        // patch pkg-config and la files with absolute path
+        foreach ($increase_files as $file) {
+            if (str_ends_with($file, '.pc') || str_ends_with($file, '.la')) {
+                $content = FileSystem::readFile(BUILD_ROOT_PATH . '/' . $file);
+                $origin_files[$file] = $content;
+                // replace relative paths with absolute paths
+                $content = str_replace(
+                    array_keys($placehoder),
+                    array_values($placehoder),
+                    $content
+                );
+                FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
+            }
+        }
+
+        // add .spc-extract-placeholder.json in BUILD_ROOT_PATH
+        file_put_contents($placeholder_file, json_encode(array_keys($origin_files), JSON_PRETTY_PRINT));
+        $increase_files[] = '.spc-extract-placeholder.json';
+
+        // every file mapped with BUILD_ROOT_PATH
+        // get BUILD_ROOT_PATH last dir part
+        $buildroot_part = basename(BUILD_ROOT_PATH);
+        $increase_files = array_map(fn ($file) => $buildroot_part . '/' . $file, $increase_files);
+        // write list to packlib_files.txt
+        FileSystem::writeFile(WORKING_DIR . '/packlib_files.txt', implode("\n", $increase_files));
+        // pack
+        $filename = match (SystemTarget::getTargetOS()) {
+            'Windows' => '{name}-{arch}-{os}.tgz',
+            'Darwin' => '{name}-{arch}-{os}.txz',
+            'Linux' => '{name}-{arch}-{os}-{libc}-{libcver}.txz',
+        };
+        $replace = [
+            '{name}' => $this->getName(),
+            '{arch}' => arch2gnu(php_uname('m')),
+            '{os}' => strtolower(PHP_OS_FAMILY),
+            '{libc}' => SystemTarget::getLibc() ?? 'default',
+            '{libcver}' => SystemTarget::getLibcVersion() ?? 'default',
+        ];
+        // detect suffix, for proper tar option
+        $tar_option = $this->getTarOptionFromSuffix($filename);
+        $filename = str_replace(array_keys($replace), array_values($replace), $filename);
+        $filename = $target_dir . '/' . $filename;
+        f_passthru("tar {$tar_option} {$filename} -T " . WORKING_DIR . '/packlib_files.txt');
+        logger()->info('Pack library ' . $this->getName() . ' to ' . $filename . ' complete.');
+
+        // remove temp files
+        unlink($placeholder_file);
+
+        foreach ($origin_files as $file => $content) {
+            // restore original files
+            if (file_exists(BUILD_ROOT_PATH . '/' . $file)) {
+                FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
+            }
+        }
+
+        // remove dirdiff
+        ApplicationContext::set(DirDiff::class, null);
+    }
+
+    /**
      * Get static library files for current package and its dependencies.
      */
     public function getStaticLibFiles(): string
@@ -214,5 +328,31 @@ class LibraryPackage extends Package
     public function getBinDir(): string
     {
         return BUILD_BIN_PATH;
+    }
+
+    /**
+     * Get tar compress options from suffix
+     *
+     * @param  string $name Package file name
+     * @return string Tar options for packaging libs
+     */
+    private function getTarOptionFromSuffix(string $name): string
+    {
+        if (str_ends_with($name, '.tar')) {
+            return '-cf';
+        }
+        if (str_ends_with($name, '.tar.gz') || str_ends_with($name, '.tgz')) {
+            return '-czf';
+        }
+        if (str_ends_with($name, '.tar.bz2') || str_ends_with($name, '.tbz2')) {
+            return '-cjf';
+        }
+        if (str_ends_with($name, '.tar.xz') || str_ends_with($name, '.txz')) {
+            return '-cJf';
+        }
+        if (str_ends_with($name, '.tar.lz') || str_ends_with($name, '.tlz')) {
+            return '-c --lzma -f';
+        }
+        return '-cf';
     }
 }

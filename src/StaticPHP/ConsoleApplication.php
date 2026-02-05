@@ -9,6 +9,7 @@ use StaticPHP\Command\BuildTargetCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\LintConfigCommand;
+use StaticPHP\Command\Dev\PackLibCommand;
 use StaticPHP\Command\Dev\ShellCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
@@ -63,6 +64,7 @@ class ConsoleApplication extends Application
             new IsInstalledCommand(),
             new EnvCommand(),
             new LintConfigCommand(),
+            new PackLibCommand(),
         ]);
 
         // add additional commands from registries
