@@ -9,6 +9,7 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\PatchException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\ValidationException;
+use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\DirDiff;
@@ -245,6 +246,7 @@ class LibraryPackage extends Package
             'Windows' => '{name}-{arch}-{os}.tgz',
             'Darwin' => '{name}-{arch}-{os}.txz',
             'Linux' => '{name}-{arch}-{os}-{libc}-{libcver}.txz',
+            default => throw new WrongUsageException('Unsupported OS for packing prebuilt library: ' . SystemTarget::getTargetOS()),
         };
         $replace = [
             '{name}' => $this->getName(),
