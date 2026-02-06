@@ -6,7 +6,7 @@ libacl:
     metadata:
       license-files: [doc/COPYING.LGPL]
       license: LGPL-2.1-or-later
-  static-libs@unix:
-    - libacl.a
   depends:
     - attr
+  static-libs@unix:
+    - libacl.a
