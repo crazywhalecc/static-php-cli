@@ -50,7 +50,7 @@ class ArtifactConfigTest extends TestCase
         $this->expectException(WrongUsageException::class);
         $this->expectExceptionMessage('Directory /nonexistent/path does not exist, cannot load artifact config.');
 
-        ArtifactConfig::loadFromDir('/nonexistent/path');
+        ArtifactConfig::loadFromDir('/nonexistent/path', 'test');
     }
 
     public function testLoadFromDirWithValidArtifactJson(): void
@@ -63,7 +63,7 @@ class ArtifactConfigTest extends TestCase
 
         file_put_contents($this->tempDir . '/artifact.json', $artifactContent);
 
-        ArtifactConfig::loadFromDir($this->tempDir);
+        ArtifactConfig::loadFromDir($this->tempDir, 'test');
 
         $config = ArtifactConfig::get('test-artifact');
         $this->assertIsArray($config);
@@ -88,7 +88,7 @@ class ArtifactConfigTest extends TestCase
         file_put_contents($this->tempDir . '/artifact.lib.json', $artifact2Content);
         file_put_contents($this->tempDir . '/artifact.json', json_encode(['artifact-3' => ['source' => 'custom']]));
 
-        ArtifactConfig::loadFromDir($this->tempDir);
+        ArtifactConfig::loadFromDir($this->tempDir, 'test');
 
         $this->assertNotNull(ArtifactConfig::get('artifact-1'));
         $this->assertNotNull(ArtifactConfig::get('artifact-2'));
@@ -100,7 +100,7 @@ class ArtifactConfigTest extends TestCase
         $this->expectException(WrongUsageException::class);
         $this->expectExceptionMessage('Failed to read artifact config file:');
 
-        ArtifactConfig::loadFromFile('/nonexistent/file.json');
+        ArtifactConfig::loadFromFile('/nonexistent/file.json', 'test');
     }
 
     public function testLoadFromFileThrowsExceptionWhenJsonIsInvalid(): void
@@ -111,7 +111,7 @@ class ArtifactConfigTest extends TestCase
         $this->expectException(WrongUsageException::class);
         $this->expectExceptionMessage('Invalid JSON format in artifact config file:');
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
     }
 
     public function testLoadFromFileWithValidJson(): void
@@ -127,7 +127,7 @@ class ArtifactConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
 
         $config = ArtifactConfig::get('my-artifact');
         $this->assertIsArray($config);
@@ -144,7 +144,7 @@ class ArtifactConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
 
         $all = ArtifactConfig::getAll();
         $this->assertIsArray($all);
@@ -170,7 +170,7 @@ class ArtifactConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
 
         $config = ArtifactConfig::get('test-artifact');
         $this->assertIsArray($config);
@@ -188,7 +188,7 @@ class ArtifactConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
 
         $config = ArtifactConfig::get('test-artifact');
         $this->assertIsArray($config);
@@ -208,7 +208,7 @@ class ArtifactConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
 
         $config = ArtifactConfig::get('test-artifact');
         $this->assertIsArray($config['binary']);
@@ -228,7 +228,7 @@ class ArtifactConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
 
         $config = ArtifactConfig::get('test-artifact');
         $this->assertIsArray($config['binary']);
@@ -253,7 +253,7 @@ class ArtifactConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        ArtifactConfig::loadFromFile($file);
+        ArtifactConfig::loadFromFile($file, 'test');
 
         $config = ArtifactConfig::get('test-artifact');
         $this->assertIsArray($config['binary']);
@@ -266,7 +266,7 @@ class ArtifactConfigTest extends TestCase
     public function testLoadFromDirWithEmptyDirectory(): void
     {
         // Empty directory should not throw exception
-        ArtifactConfig::loadFromDir($this->tempDir);
+        ArtifactConfig::loadFromDir($this->tempDir, 'test');
 
         $this->assertEquals([], ArtifactConfig::getAll());
     }
@@ -279,8 +279,8 @@ class ArtifactConfigTest extends TestCase
         file_put_contents($file1, json_encode(['art1' => ['source' => 'custom']]));
         file_put_contents($file2, json_encode(['art2' => ['source' => 'custom']]));
 
-        ArtifactConfig::loadFromFile($file1);
-        ArtifactConfig::loadFromFile($file2);
+        ArtifactConfig::loadFromFile($file1, 'test');
+        ArtifactConfig::loadFromFile($file2, 'test');
 
         $all = ArtifactConfig::getAll();
         $this->assertCount(2, $all);

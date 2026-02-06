@@ -7,6 +7,7 @@ namespace StaticPHP\Registry;
 use StaticPHP\Config\ArtifactConfig;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\ConsoleApplication;
+use StaticPHP\Exception\FileSystemException;
 use StaticPHP\Exception\RegistryException;
 use StaticPHP\Util\FileSystem;
 use Symfony\Component\Yaml\Yaml;
@@ -87,116 +88,121 @@ class Registry
 
         self::$current_registry_name = $registry_name;
 
-        // Load composer autoload if specified (for external registries with their own dependencies)
-        if (isset($data['autoload']) && is_string($data['autoload'])) {
-            $autoload_path = FileSystem::fullpath($data['autoload'], dirname($registry_file));
-            if (file_exists($autoload_path)) {
-                logger()->debug("Loading external autoload from: {$autoload_path}");
-                require_once $autoload_path;
-            } else {
-                logger()->warning("Autoload file not found: {$autoload_path}");
-            }
-        }
-
-        // load package configs
-        if (isset($data['package']['config']) && is_array($data['package']['config'])) {
-            foreach ($data['package']['config'] as $path) {
-                $path = FileSystem::fullpath($path, dirname($registry_file));
-                if (is_file($path)) {
-                    self::$loaded_package_configs[] = PackageConfig::loadFromFile($path, $registry_name);
-                } elseif (is_dir($path)) {
-                    self::$loaded_package_configs = array_merge(self::$loaded_package_configs, PackageConfig::loadFromDir($path, $registry_name));
+        try {
+            // Load composer autoload if specified (for external registries with their own dependencies)
+            if (isset($data['autoload']) && is_string($data['autoload'])) {
+                $autoload_path = FileSystem::fullpath($data['autoload'], dirname($registry_file));
+                if (file_exists($autoload_path)) {
+                    logger()->debug("Loading external autoload from: {$autoload_path}");
+                    require_once $autoload_path;
+                } else {
+                    logger()->warning("Autoload file not found: {$autoload_path}");
                 }
             }
-        }
 
-        // load artifact configs
-        if (isset($data['artifact']['config']) && is_array($data['artifact']['config'])) {
-            foreach ($data['artifact']['config'] as $path) {
-                $path = FileSystem::fullpath($path, dirname($registry_file));
-                if (is_file($path)) {
-                    self::$loaded_artifact_configs[] = ArtifactConfig::loadFromFile($path, $registry_name);
-                } elseif (is_dir($path)) {
-                    self::$loaded_package_configs = array_merge(self::$loaded_package_configs, ArtifactConfig::loadFromDir($path, $registry_name));
+            // load package configs
+            if (isset($data['package']['config']) && is_array($data['package']['config'])) {
+                foreach ($data['package']['config'] as $path) {
+                    $path = FileSystem::fullpath($path, dirname($registry_file));
+                    if (is_file($path)) {
+                        self::$loaded_package_configs[] = PackageConfig::loadFromFile($path, $registry_name);
+                    } elseif (is_dir($path)) {
+                        self::$loaded_package_configs = array_merge(self::$loaded_package_configs, PackageConfig::loadFromDir($path, $registry_name));
+                    }
                 }
             }
-        }
 
-        // load doctor items from PSR-4 directories
-        if (isset($data['doctor']['psr-4']) && is_assoc_array($data['doctor']['psr-4'])) {
-            foreach ($data['doctor']['psr-4'] as $namespace => $path) {
-                $path = FileSystem::fullpath($path, dirname($registry_file));
-                DoctorLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
+            // load artifact configs
+            if (isset($data['artifact']['config']) && is_array($data['artifact']['config'])) {
+                foreach ($data['artifact']['config'] as $path) {
+                    $path = FileSystem::fullpath($path, dirname($registry_file));
+                    if (is_file($path)) {
+                        self::$loaded_artifact_configs[] = ArtifactConfig::loadFromFile($path, $registry_name);
+                    } elseif (is_dir($path)) {
+                        self::$loaded_package_configs = array_merge(self::$loaded_package_configs, ArtifactConfig::loadFromDir($path, $registry_name));
+                    }
+                }
             }
-        }
 
-        // load doctor items from specific classes
-        // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
-        if (isset($data['doctor']['classes']) && is_array($data['doctor']['classes'])) {
-            foreach ($data['doctor']['classes'] as $key => $value) {
-                [$class, $file] = self::parseClassEntry($key, $value);
-                self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
-                DoctorLoader::loadFromClass($class);
+            // load doctor items from PSR-4 directories
+            if (isset($data['doctor']['psr-4']) && is_assoc_array($data['doctor']['psr-4'])) {
+                foreach ($data['doctor']['psr-4'] as $namespace => $path) {
+                    $path = FileSystem::fullpath($path, dirname($registry_file));
+                    DoctorLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
+                }
             }
-        }
 
-        // load packages from PSR-4 directories
-        if (isset($data['package']['psr-4']) && is_assoc_array($data['package']['psr-4'])) {
-            foreach ($data['package']['psr-4'] as $namespace => $path) {
-                $path = FileSystem::fullpath($path, dirname($registry_file));
-                PackageLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
+            // load doctor items from specific classes
+            // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
+            if (isset($data['doctor']['classes']) && is_array($data['doctor']['classes'])) {
+                foreach ($data['doctor']['classes'] as $key => $value) {
+                    [$class, $file] = self::parseClassEntry($key, $value);
+                    self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
+                    DoctorLoader::loadFromClass($class);
+                }
             }
-        }
 
-        // load packages from specific classes
-        // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
-        if (isset($data['package']['classes']) && is_array($data['package']['classes'])) {
-            foreach ($data['package']['classes'] as $key => $value) {
-                [$class, $file] = self::parseClassEntry($key, $value);
-                self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
-                PackageLoader::loadFromClass($class);
+            // load packages from PSR-4 directories
+            if (isset($data['package']['psr-4']) && is_assoc_array($data['package']['psr-4'])) {
+                foreach ($data['package']['psr-4'] as $namespace => $path) {
+                    $path = FileSystem::fullpath($path, dirname($registry_file));
+                    PackageLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
+                }
             }
-        }
 
-        // load artifacts from PSR-4 directories
-        if (isset($data['artifact']['psr-4']) && is_assoc_array($data['artifact']['psr-4'])) {
-            foreach ($data['artifact']['psr-4'] as $namespace => $path) {
-                $path = FileSystem::fullpath($path, dirname($registry_file));
-                ArtifactLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
+            // load packages from specific classes
+            // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
+            if (isset($data['package']['classes']) && is_array($data['package']['classes'])) {
+                foreach ($data['package']['classes'] as $key => $value) {
+                    [$class, $file] = self::parseClassEntry($key, $value);
+                    self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
+                    PackageLoader::loadFromClass($class);
+                }
             }
-        }
 
-        // load artifacts from specific classes
-        // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
-        if (isset($data['artifact']['classes']) && is_array($data['artifact']['classes'])) {
-            foreach ($data['artifact']['classes'] as $key => $value) {
-                [$class, $file] = self::parseClassEntry($key, $value);
-                self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
-                ArtifactLoader::loadFromClass($class);
+            // load artifacts from PSR-4 directories
+            if (isset($data['artifact']['psr-4']) && is_assoc_array($data['artifact']['psr-4'])) {
+                foreach ($data['artifact']['psr-4'] as $namespace => $path) {
+                    $path = FileSystem::fullpath($path, dirname($registry_file));
+                    ArtifactLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
+                }
             }
-        }
 
-        // load additional commands from PSR-4 directories
-        if (isset($data['command']['psr-4']) && is_assoc_array($data['command']['psr-4'])) {
-            foreach ($data['command']['psr-4'] as $namespace => $path) {
-                $path = FileSystem::fullpath($path, dirname($registry_file));
-                $classes = FileSystem::getClassesPsr4($path, $namespace, auto_require: $auto_require);
-                $instances = array_map(fn ($x) => new $x(), $classes);
+            // load artifacts from specific classes
+            // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
+            if (isset($data['artifact']['classes']) && is_array($data['artifact']['classes'])) {
+                foreach ($data['artifact']['classes'] as $key => $value) {
+                    [$class, $file] = self::parseClassEntry($key, $value);
+                    self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
+                    ArtifactLoader::loadFromClass($class);
+                }
+            }
+
+            // load additional commands from PSR-4 directories
+            if (isset($data['command']['psr-4']) && is_assoc_array($data['command']['psr-4'])) {
+                foreach ($data['command']['psr-4'] as $namespace => $path) {
+                    $path = FileSystem::fullpath($path, dirname($registry_file));
+                    $classes = FileSystem::getClassesPsr4($path, $namespace, auto_require: $auto_require);
+                    $instances = array_map(fn ($x) => new $x(), $classes);
+                    ConsoleApplication::_addAdditionalCommands($instances);
+                }
+            }
+
+            // load additional commands from specific classes
+            // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
+            if (isset($data['command']['classes']) && is_array($data['command']['classes'])) {
+                $instances = [];
+                foreach ($data['command']['classes'] as $key => $value) {
+                    [$class, $file] = self::parseClassEntry($key, $value);
+                    self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
+                    $instances[] = new $class();
+                }
                 ConsoleApplication::_addAdditionalCommands($instances);
             }
+        } catch (FileSystemException $e) {
+            throw new RegistryException($e->getMessage(), 0, $e);
         }
 
-        // load additional commands from specific classes
-        // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
-        if (isset($data['command']['classes']) && is_array($data['command']['classes'])) {
-            $instances = [];
-            foreach ($data['command']['classes'] as $key => $value) {
-                [$class, $file] = self::parseClassEntry($key, $value);
-                self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
-                $instances[] = new $class();
-            }
-            ConsoleApplication::_addAdditionalCommands($instances);
-        }
         self::$current_registry_name = null;
     }
 
