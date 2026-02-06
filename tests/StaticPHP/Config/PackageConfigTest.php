@@ -6,6 +6,7 @@ namespace Tests\StaticPHP\Config;
 
 use PHPUnit\Framework\TestCase;
 use StaticPHP\Config\PackageConfig;
+use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\SystemTarget;
 
@@ -49,7 +50,7 @@ class PackageConfigTest extends TestCase
         $this->expectException(WrongUsageException::class);
         $this->expectExceptionMessage('Directory /nonexistent/path does not exist, cannot load pkg.json config.');
 
-        PackageConfig::loadFromDir('/nonexistent/path');
+        PackageConfig::loadFromDir('/nonexistent/path', 'test');
     }
 
     public function testLoadFromDirWithValidPkgJson(): void
@@ -63,7 +64,7 @@ class PackageConfigTest extends TestCase
 
         file_put_contents($this->tempDir . '/pkg.json', $packageContent);
 
-        PackageConfig::loadFromDir($this->tempDir);
+        PackageConfig::loadFromDir($this->tempDir, 'test');
 
         $this->assertTrue(PackageConfig::isPackageExists('test-pkg'));
     }
@@ -87,7 +88,7 @@ class PackageConfigTest extends TestCase
         file_put_contents($this->tempDir . '/pkg.lib.json', $pkg2Content);
         file_put_contents($this->tempDir . '/pkg.json', json_encode(['pkg-3' => ['type' => 'virtual-target']]));
 
-        PackageConfig::loadFromDir($this->tempDir);
+        PackageConfig::loadFromDir($this->tempDir, 'test');
 
         $this->assertTrue(PackageConfig::isPackageExists('pkg-1'));
         $this->assertTrue(PackageConfig::isPackageExists('pkg-2'));
@@ -99,7 +100,7 @@ class PackageConfigTest extends TestCase
         $this->expectException(WrongUsageException::class);
         $this->expectExceptionMessage('Failed to read package config file:');
 
-        PackageConfig::loadFromFile('/nonexistent/file.json');
+        PackageConfig::loadFromFile('/nonexistent/file.json', 'test');
     }
 
     public function testLoadFromFileThrowsExceptionWhenJsonIsInvalid(): void
@@ -107,10 +108,10 @@ class PackageConfigTest extends TestCase
         $file = $this->tempDir . '/invalid.json';
         file_put_contents($file, 'not valid json{');
 
-        $this->expectException(WrongUsageException::class);
-        $this->expectExceptionMessage('Invalid JSON format in package config file:');
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('invalid.json is broken');
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
     }
 
     public function testLoadFromFileWithValidJson(): void
@@ -124,7 +125,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $this->assertTrue(PackageConfig::isPackageExists('my-pkg'));
     }
@@ -145,7 +146,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $this->assertTrue(PackageConfig::isPackageExists('test-pkg'));
     }
@@ -160,7 +161,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $all = PackageConfig::getAll();
         $this->assertIsArray($all);
@@ -189,7 +190,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $result = PackageConfig::get('test-pkg');
         $this->assertIsArray($result);
@@ -208,7 +209,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $result = PackageConfig::get('test-pkg', 'artifact');
         $this->assertEquals('test-artifact', $result);
@@ -225,7 +226,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $result = PackageConfig::get('test-pkg', 'non-existent-field', 'default');
         $this->assertEquals('default', $result);
@@ -251,7 +252,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         // The get method will check SystemTarget::getTargetOS()
         // On real Linux systems, it should return 'depends@linux' first
@@ -273,7 +274,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $result = PackageConfig::get('test-pkg', 'depends');
         $this->assertEquals(['base-dep'], $result);
@@ -291,7 +292,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         // 'artifact' is not in SUFFIX_ALLOWED_FIELDS, so it won't check suffixes
         $result = PackageConfig::get('test-pkg', 'artifact');
@@ -314,7 +315,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         // These are all suffix-allowed fields
         $pkg = PackageConfig::get('test-pkg');
@@ -328,7 +329,7 @@ class PackageConfigTest extends TestCase
     public function testLoadFromDirWithEmptyDirectory(): void
     {
         // Empty directory should not throw exception
-        PackageConfig::loadFromDir($this->tempDir);
+        PackageConfig::loadFromDir($this->tempDir, 'test');
 
         $this->assertEquals([], PackageConfig::getAll());
     }
@@ -341,8 +342,8 @@ class PackageConfigTest extends TestCase
         file_put_contents($file1, json_encode(['pkg1' => ['type' => 'virtual-target']]));
         file_put_contents($file2, json_encode(['pkg2' => ['type' => 'virtual-target']]));
 
-        PackageConfig::loadFromFile($file1);
-        PackageConfig::loadFromFile($file2);
+        PackageConfig::loadFromFile($file1, 'test');
+        PackageConfig::loadFromFile($file2, 'test');
 
         $all = PackageConfig::getAll();
         $this->assertCount(2, $all);
@@ -366,7 +367,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $phpExt = PackageConfig::get('test-ext', 'php-extension');
         $this->assertIsArray($phpExt);
@@ -384,7 +385,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $result = PackageConfig::get('test-pkg', 'non-existent');
         $this->assertNull($result);
@@ -411,7 +412,7 @@ class PackageConfigTest extends TestCase
         ]);
         file_put_contents($file, $content);
 
-        PackageConfig::loadFromFile($file);
+        PackageConfig::loadFromFile($file, 'test');
 
         $this->assertTrue(PackageConfig::isPackageExists('library-pkg'));
         $this->assertTrue(PackageConfig::isPackageExists('extension-pkg'));

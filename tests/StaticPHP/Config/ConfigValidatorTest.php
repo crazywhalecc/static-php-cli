@@ -582,7 +582,7 @@ class ConfigValidatorTest extends TestCase
     public function testValidateAndLintPackagesThrowsExceptionForWrongTypeString(): void
     {
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Package test-pkg [artifact] must be string');
+        $this->expectExceptionMessage('Package test-pkg [artifact] has invalid type specification');
 
         $data = [
             'test-pkg' => [
