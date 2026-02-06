@@ -1,0 +1,17 @@
+brotli:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: google/brotli
+      match: 'v1\.\d.*'
+    binary: hosted
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  headers:
+    - brotli
+  pkg-configs:
+    - libbrotlicommon
+    - libbrotlidec
+    - libbrotlienc

@@ -131,7 +131,9 @@ class Artifact
     public function isBinaryExtracted(?string $target_os = null, bool $compare_hash = false): bool
     {
         $target_os = $target_os ?? SystemTarget::getCurrentPlatformString();
-        $extract_config = $this->getBinaryExtractConfig();
+        // Get cache info first for custom binary support (extract path may be stored in cache)
+        $cache_info = ApplicationContext::get(ArtifactCache::class)->getBinaryInfo($this->name, $target_os);
+        $extract_config = $this->getBinaryExtractConfig($cache_info ?? []);
         $mode = $extract_config['mode'];
 
         // For merge mode, check marker file
@@ -164,7 +166,14 @@ class Artifact
 
         // For selective mode, cannot reliably check extraction status
         if ($mode === 'selective') {
-            return false;
+            // check files existence
+            foreach ($extract_config['files'] as $target_file) {
+                $target_file = FileSystem::replacePathVariable($target_file);
+                if (!file_exists($target_file)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         // For standalone mode, check directory or file and hash
@@ -266,6 +275,19 @@ class Artifact
 
         // Relative path: based on SOURCE_PATH
         return FileSystem::convertPath(SOURCE_PATH . '/' . $path);
+    }
+
+    /**
+     * Get source build root directory.
+     * It's only worked when 'source-root' is defined in artifact config.
+     * Normally it's equal to source dir.
+     */
+    public function getSourceRoot(): string
+    {
+        if (isset($this->config['metadata']['source-root'])) {
+            return $this->getSourceDir() . '/' . ltrim($this->config['metadata']['source-root'], '/');
+        }
+        return $this->getSourceDir();
     }
 
     /**

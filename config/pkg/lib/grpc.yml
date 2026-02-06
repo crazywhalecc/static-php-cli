@@ -1,0 +1,19 @@
+grpc:
+  type: library
+  artifact:
+    source:
+      type: git
+      rev: v1.75.x
+      url: 'https://github.com/grpc/grpc.git'
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  depends:
+    - zlib
+    - openssl
+    - libcares
+  frameworks:
+    - CoreFoundation
+  lang: cpp
+  pkg-configs:
+    - grpc

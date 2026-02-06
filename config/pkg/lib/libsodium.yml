@@ -1,0 +1,15 @@
+libsodium:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: jedisct1/libsodium
+      match: 'libsodium-(?!1\.0\.21)\d+(\.\d+)*\.tar\.gz'
+      prefer-stable: true
+    binary: hosted
+    metadata:
+      license-files: [LICENSE]
+  pkg-configs:
+    - libsodium
+  static-libs@unix:
+    - libsodium.a

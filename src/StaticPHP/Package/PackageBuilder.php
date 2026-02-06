@@ -11,11 +11,14 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\System\LinuxUtil;
 
 class PackageBuilder
 {
+    use GlobalPathTrait;
+
     /** @var int make jobs count */
     public readonly int $concurrency;
 
@@ -58,7 +61,7 @@ class PackageBuilder
 
         if ($package->getType() !== 'virtual-target') {
             // patch before build
-            $package->patchBeforeBuild();
+            $package->emitPatchBeforeBuild();
         }
 
         // build
@@ -100,6 +103,9 @@ class PackageBuilder
         // ignore copy to self
         if (realpath($src) !== realpath($dst)) {
             FileSystem::copy($src, $dst);
+            if ($executable) {
+                chmod($dst, 0755);
+            }
         }
 
         // file exist

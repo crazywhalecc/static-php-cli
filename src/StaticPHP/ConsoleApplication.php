@@ -8,12 +8,15 @@ use StaticPHP\Command\BuildLibsCommand;
 use StaticPHP\Command\BuildTargetCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
+use StaticPHP\Command\Dev\LintConfigCommand;
+use StaticPHP\Command\Dev\PackLibCommand;
 use StaticPHP\Command\Dev\ShellCommand;
-use StaticPHP\Command\Dev\SortConfigCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
+use StaticPHP\Command\DumpLicenseCommand;
 use StaticPHP\Command\ExtractCommand;
 use StaticPHP\Command\InstallPackageCommand;
+use StaticPHP\Command\ResetCommand;
 use StaticPHP\Command\SPCConfigCommand;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Registry\PackageLoader;
@@ -55,12 +58,15 @@ class ConsoleApplication extends Application
             new BuildLibsCommand(),
             new ExtractCommand(),
             new SPCConfigCommand(),
+            new DumpLicenseCommand(),
+            new ResetCommand(),
 
             // dev commands
             new ShellCommand(),
             new IsInstalledCommand(),
             new EnvCommand(),
-            new SortConfigCommand(),
+            new LintConfigCommand(),
+            new PackLibCommand(),
         ]);
 
         // add additional commands from registries

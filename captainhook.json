@@ -18,6 +18,15 @@
                         "args": ["php"]
                     }
                 ]
+            },
+            {
+                "action": "bin/spc dev:lint-config --check",
+                "conditions": [
+                    {
+                        "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\InDirectory",
+                        "args": ["config"]
+                    }
+                ]
             }
         ]
     },

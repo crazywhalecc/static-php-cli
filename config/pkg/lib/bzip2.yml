@@ -1,0 +1,18 @@
+bzip2:
+  type: library
+  artifact:
+    source:
+      type: url
+      url: 'https://dl.static-php.dev/static-php-cli/deps/bzip2/bzip2-1.0.8.tar.gz'
+    source-mirror:
+      type: filelist
+      url: 'https://sourceware.org/pub/bzip2/'
+      regex: '/href="(?<file>bzip2-(?<version>[^"]+)\.tar\.gz)"/'
+    binary: hosted
+    metadata:
+      license-files: ['@/bzip2.txt']
+      license: bzip2-1.0.6
+  headers:
+    - bzlib.h
+  static-libs@unix:
+    - libbz2.a

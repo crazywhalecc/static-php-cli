@@ -1,0 +1,22 @@
+libzip:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: nih-at/libzip
+      match: libzip.+\.tar\.xz
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+  depends@unix:
+    - zlib
+  suggests@unix:
+    - bzip2
+    - xz
+    - zstd
+    - openssl
+  headers:
+    - zip.h
+    - zipconf.h
+  static-libs@unix:
+    - libzip.a

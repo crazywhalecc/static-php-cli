@@ -146,7 +146,8 @@ readonly class Doctor
         foreach (DoctorLoader::getDoctorItems() as [$item, $optional]) {
             /* @var CheckItem $item */
             // optional check
-            if ($optional !== null && !call_user_func($optional)) {
+            /* @phpstan-ignore-next-line */
+            if (is_callable($optional) && !call_user_func($optional)) {
                 continue; // skip this when the optional check is false
             }
             // limit_os check

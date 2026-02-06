@@ -47,7 +47,7 @@ class go_xcaddy
         }
 
         $version_regex = str_replace('.', '\.', $version);
-        $pattern = "/href=\"\\/dl\\/{$version_regex}\\.{$os}-{$arch}\\.tar\\.gz\">.*?<tt>([a-f0-9]{64})<\\/tt>/s";
+        $pattern = "/class=\"download\" href=\"\\/dl\\/{$version_regex}\\.{$os}-{$arch}\\.tar\\.gz\">.*?<tt>([a-f0-9]{64})<\\/tt>/s";
         if (preg_match($pattern, $page, $matches)) {
             $hash = $matches[1];
         } else {

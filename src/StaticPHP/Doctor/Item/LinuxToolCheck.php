@@ -19,7 +19,6 @@ class LinuxToolCheck
         'bzip2', 'cmake', 'gcc',
         'g++', 'patch', 'binutils-gold',
         'libtoolize', 'which',
-        'patchelf',
     ];
 
     public const TOOLS_DEBIAN = [
@@ -28,7 +27,6 @@ class LinuxToolCheck
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch',
         'xz', 'libtoolize', 'which',
-        'patchelf',
     ];
 
     public const TOOLS_RHEL = [
@@ -36,8 +34,7 @@ class LinuxToolCheck
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch', 'which',
-        'xz', 'libtool', 'gettext-devel',
-        'patchelf', 'file',
+        'xz', 'libtool', 'gettext-devel', 'file',
     ];
 
     public const TOOLS_ARCH = [

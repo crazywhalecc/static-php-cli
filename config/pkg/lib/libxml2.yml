@@ -1,0 +1,19 @@
+libxml2:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: GNOME/libxml2
+      match: v2\.\d+\.\d+$
+    metadata:
+      license-files: [Copyright]
+      license: MIT
+  depends@unix:
+    - libiconv
+  suggests@unix:
+    - xz
+    - zlib
+  headers:
+    - libxml2
+  pkg-configs:
+    - libxml-2.0

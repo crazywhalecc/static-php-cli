@@ -28,7 +28,12 @@ class PkgConfigUtil
         ];
         $found = null;
         foreach ($find_list as $file) {
-            if (file_exists($file) && is_executable($file)) {
+            $exists = file_exists($file);
+            $executable = is_executable($file);
+            if (!$exists) {
+                continue;
+            }
+            if (!$executable && chmod($file, 0755) || $executable) {
                 $found = $file;
                 break;
             }

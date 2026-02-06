@@ -20,6 +20,7 @@ class FileList implements DownloadTypeInterface
             throw new DownloaderException("Failed to get {$name} file list from {$config['url']}");
         }
         $versions = [];
+        logger()->debug('Matched ' . count($matches['version']) . " versions for {$name}");
         foreach ($matches['version'] as $i => $version) {
             $lower = strtolower($version);
             foreach (['alpha', 'beta', 'rc', 'pre', 'nightly', 'snapshot', 'dev'] as $beta) {

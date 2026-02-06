@@ -25,7 +25,7 @@
         "captainhook/hook-installer": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.60",
         "humbug/box": "^4.5.0 || ^4.6.0",
-        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.3 || ^9.5"
     },
     "autoload": {
@@ -50,6 +50,7 @@
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",
         "cs-fix": "php-cs-fixer fix",
+        "lint-config": "bin/spc dev:lint-config",
         "test": "vendor/bin/phpunit tests/ --no-coverage",
         "build:phar": "vendor/bin/box compile"
     },

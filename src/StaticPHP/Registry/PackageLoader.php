@@ -12,6 +12,7 @@ use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\Package\Info;
 use StaticPHP\Attribute\Package\InitPackage;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Attribute\Package\ResolveBuild;
 use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Attribute\Package\Target;
@@ -158,7 +159,7 @@ class PackageLoader
             }
             $package_type = PackageConfig::get($attribute_instance->name, 'type');
             if ($package_type === null) {
-                throw new RegistryException("Package [{$attribute_instance->name}] not defined in config, please check your config files.");
+                throw new RegistryException("Package [{$attribute_instance->name}] not defined in config, but referenced from class {$class}, please check your config files.");
             }
 
             // if class has parent class and matches the attribute instance, use custom class
@@ -168,7 +169,7 @@ class PackageLoader
                 }
             }
 
-            $pkg = self::$packages[$attribute_instance->name];
+            $pkg = self::$packages[$attribute_instance->name] ?? null;
 
             // Use the package instance if it's a Package subclass, otherwise create a new instance
             $instance_class = is_a($class_name, Package::class, true) ? $pkg : $refClass->newInstance();
@@ -183,7 +184,7 @@ class PackageLoader
             if (!in_array($package_type, $pkg_type_attr, true)) {
                 throw new RegistryException("Package [{$attribute_instance->name}] type mismatch: config type is [{$package_type}], but attribute type is [" . implode('|', $pkg_type_attr) . '].');
             }
-            if ($pkg !== null && !PackageConfig::isPackageExists($pkg->getName())) {
+            if ($pkg instanceof Package && !PackageConfig::isPackageExists($pkg->getName())) {
                 throw new RegistryException("Package [{$pkg->getName()}] config not found for class {$class}");
             }
 
@@ -196,6 +197,8 @@ class PackageLoader
                     match ($method_attribute->getName()) {
                         // #[BuildFor(PHP_OS_FAMILY)]
                         BuildFor::class => self::addBuildFunction($pkg, $method_instance, [$instance_class, $method->getName()]),
+                        // #[BeforeBuild]
+                        PatchBeforeBuild::class => self::addPatchBeforeBuildFunction($pkg, [$instance_class, $method->getName()]),
                         // #[CustomPhpConfigureArg(PHP_OS_FAMILY)]
                         CustomPhpConfigureArg::class => self::bindCustomPhpConfigureArg($pkg, $method_attribute->newInstance(), [$instance_class, $method->getName()]),
                         // #[Stage('stage_name')]
@@ -274,6 +277,8 @@ class PackageLoader
         foreach (self::$packages as $pkg) {
             if ($pkg instanceof PhpExtensionPackage) {
                 $pkg->registerDefaultStages();
+            } elseif ($pkg instanceof LibraryPackage) {
+                $pkg->registerDefaultStages();
             }
         }
     }
@@ -332,6 +337,11 @@ class PackageLoader
         $pkg->addBuildFunction($attr->os, $fn);
     }
 
+    private static function addPatchBeforeBuildFunction(Package $pkg, callable $fn): void
+    {
+        $pkg->addPatchBeforeBuildCallback($fn);
+    }
+
     private static function addStage(\ReflectionMethod $method, Package $pkg, object $instance_class, object $method_instance): void
     {
         $name = $method_instance->function;
@@ -347,7 +357,7 @@ class PackageLoader
         $stage = $method_instance->stage;
         $stage = match (true) {
             is_string($stage) => $stage,
-            is_array($stage) && count($stage) === 2 => $stage[1],
+            count($stage) === 2 => $stage[1],
             default => throw new RegistryException('Invalid stage definition in BeforeStage attribute.'),
         };
         if ($method_instance->package_name === '' && $pkg === null) {

@@ -27,25 +27,25 @@ class LinuxMuslCheck
     public static function optionalCheck(): bool
     {
         $toolchain = ApplicationContext::get(ToolchainInterface::class);
-        return $toolchain instanceof MuslToolchain || $toolchain instanceof ZigToolchain && !LinuxUtil::isMuslDist();
+        return $toolchain instanceof MuslToolchain || $toolchain instanceof ZigToolchain && !LinuxUtil::isMuslDist() && !str_contains(getenv('SPC_TARGET') ?: '', 'gnu');
     }
 
     /** @noinspection PhpUnused */
     #[CheckItem('if musl-wrapper is installed', limit_os: 'Linux', level: 800)]
-    public function checkMusl(): CheckResult
+    public function checkMusl(): ?CheckResult
     {
         $musl_wrapper_lib = sprintf('/lib/ld-musl-%s.so.1', php_uname('m'));
         if (file_exists($musl_wrapper_lib) && (file_exists('/usr/local/musl/lib/libc.a') || getenv('SPC_TOOLCHAIN') === ZigToolchain::class)) {
-            return CheckResult::ok();
+            return null;
         }
         return CheckResult::fail('musl-wrapper is not installed on your system', 'fix-musl-wrapper');
     }
 
     #[CheckItem('if musl-cross-make is installed', limit_os: 'Linux', level: 799)]
-    public function checkMuslCrossMake(): CheckResult
+    public function checkMuslCrossMake(): ?CheckResult
     {
         if (getenv('SPC_TOOLCHAIN') === ZigToolchain::class && !LinuxUtil::isMuslDist()) {
-            return CheckResult::ok();
+            return null;
         }
         $arch = arch2gnu(php_uname('m'));
         $cross_compile_lib = "/usr/local/musl/{$arch}-linux-musl/lib/libc.a";

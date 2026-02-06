@@ -6,6 +6,7 @@ namespace StaticPHP\Config;
 
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\Registry;
+use Symfony\Component\Yaml\Yaml;
 
 class ArtifactConfig
 {
@@ -17,7 +18,7 @@ class ArtifactConfig
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load artifact config.");
         }
         $loaded = [];
-        $files = glob("{$dir}/artifact.*.json");
+        $files = glob("{$dir}/*");
         if (is_array($files)) {
             foreach ($files as $file) {
                 self::loadFromFile($file, $registry_name);
@@ -40,7 +41,11 @@ class ArtifactConfig
         if ($content === false) {
             throw new WrongUsageException("Failed to read artifact config file: {$file}");
         }
-        $data = json_decode($content, true);
+        $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
+            'json' => json_decode($content, true),
+            'yml', 'yaml' => Yaml::parse($content),
+            default => throw new WrongUsageException("Unsupported artifact config file format: {$file}"),
+        };
         if (!is_array($data)) {
             throw new WrongUsageException("Invalid JSON format in artifact config file: {$file}");
         }
@@ -71,5 +76,20 @@ class ArtifactConfig
     public static function get(string $artifact_name): ?array
     {
         return self::$artifact_configs[$artifact_name] ?? null;
+    }
+
+    /**
+     * Register an inline artifact configuration.
+     * Used when artifact is defined inline within a package configuration.
+     *
+     * @param string $artifact_name Artifact name (usually same as package name)
+     * @param array  $config        Artifact configuration
+     * @param string $registry_name Registry name
+     * @param string $source_info   Source info for debugging
+     */
+    public static function registerInlineArtifact(string $artifact_name, array $config, string $registry_name, string $source_info = 'inline'): void
+    {
+        self::$artifact_configs[$artifact_name] = $config;
+        Registry::_bindArtifactConfigFile($artifact_name, $registry_name, $source_info);
     }
 }

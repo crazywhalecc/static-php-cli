@@ -1,0 +1,11 @@
+libavif:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: AOMediaCodec/libavif
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  static-libs@unix:
+    - libavif.a

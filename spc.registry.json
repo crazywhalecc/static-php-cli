@@ -1,6 +1,9 @@
 {
-    "name": "internal",
+    "name": "core",
     "autoload": "vendor/autoload.php",
+    "scripts": [
+        "ext/"
+    ],
     "doctor": {
         "psr-4": {
             "StaticPHP\\Doctor\\Item": "src/StaticPHP/Doctor/Item"
@@ -11,14 +14,14 @@
             "Package": "src/Package"
         },
         "config": [
-            "config/pkg.ext.json",
-            "config/pkg.lib.json",
-            "config/pkg.target.json"
+            "config/pkg/lib/",
+            "config/pkg/target/",
+            "config/pkg/ext/"
         ]
     },
     "artifact": {
         "config": [
-            "config/artifact.json"
+            "config/artifact/"
         ],
         "psr-4": {
             "Package\\Artifact": "src/Package/Artifact"

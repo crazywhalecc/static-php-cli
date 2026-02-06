@@ -1,0 +1,15 @@
+jbig:
+  type: library
+  artifact:
+    source: 'https://dl.static-php.dev/static-php-cli/deps/jbig/jbigkit-2.1.tar.gz'
+    source-mirror: 'https://www.cl.cam.ac.uk/~mgk25/jbigkit/download/jbigkit-2.1.tar.gz'
+    metadata:
+      license-files: [COPYING]
+      license: GPL-2.0-or-later
+  headers:
+    - jbig.h
+    - jbig85.h
+    - jbig_ar.h
+  static-libs@unix:
+    - libjbig.a
+    - libjbig85.a

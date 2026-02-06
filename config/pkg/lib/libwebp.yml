@@ -1,0 +1,16 @@
+libwebp:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: webmproject/libwebp
+      match: v1\.\d+\.\d+$
+    metadata:
+      license-files: [COPYING]
+      license: BSD-3-Clause
+  pkg-configs:
+    - libwebp
+    - libwebpdecoder
+    - libwebpdemux
+    - libwebpmux
+    - libsharpyuv

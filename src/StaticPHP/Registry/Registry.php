@@ -13,6 +13,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class Registry
 {
+    private static ?string $current_registry_name = null;
+
     /** @var string[] List of loaded registries */
     private static array $loaded_registries = [];
 
@@ -35,7 +37,7 @@ class Registry
     public static function getRegistryConfig(?string $registry_name = null): array
     {
         if ($registry_name === null && spc_mode(SPC_MODE_SOURCE)) {
-            return self::$registry_configs['internal'];
+            return self::$registry_configs['core'];
         }
         if ($registry_name !== null && isset(self::$registry_configs[$registry_name])) {
             return self::$registry_configs[$registry_name];
@@ -83,6 +85,8 @@ class Registry
 
         logger()->debug("Loading registry '{$registry_name}' from file: {$registry_file}");
 
+        self::$current_registry_name = $registry_name;
+
         // Load composer autoload if specified (for external registries with their own dependencies)
         if (isset($data['autoload']) && is_string($data['autoload'])) {
             $autoload_path = FileSystem::fullpath($data['autoload'], dirname($registry_file));
@@ -91,24 +95,6 @@ class Registry
                 require_once $autoload_path;
             } else {
                 logger()->warning("Autoload file not found: {$autoload_path}");
-            }
-        }
-
-        // load doctor items from PSR-4 directories
-        if (isset($data['doctor']['psr-4']) && is_assoc_array($data['doctor']['psr-4'])) {
-            foreach ($data['doctor']['psr-4'] as $namespace => $path) {
-                $path = FileSystem::fullpath($path, dirname($registry_file));
-                DoctorLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
-            }
-        }
-
-        // load doctor items from specific classes
-        // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
-        if (isset($data['doctor']['classes']) && is_array($data['doctor']['classes'])) {
-            foreach ($data['doctor']['classes'] as $key => $value) {
-                [$class, $file] = self::parseClassEntry($key, $value);
-                self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
-                DoctorLoader::loadFromClass($class);
             }
         }
 
@@ -133,6 +119,24 @@ class Registry
                 } elseif (is_dir($path)) {
                     self::$loaded_package_configs = array_merge(self::$loaded_package_configs, ArtifactConfig::loadFromDir($path, $registry_name));
                 }
+            }
+        }
+
+        // load doctor items from PSR-4 directories
+        if (isset($data['doctor']['psr-4']) && is_assoc_array($data['doctor']['psr-4'])) {
+            foreach ($data['doctor']['psr-4'] as $namespace => $path) {
+                $path = FileSystem::fullpath($path, dirname($registry_file));
+                DoctorLoader::loadFromPsr4Dir($path, $namespace, $auto_require);
+            }
+        }
+
+        // load doctor items from specific classes
+        // Supports both array format ["ClassName"] and map format {"ClassName": "path/to/file.php"}
+        if (isset($data['doctor']['classes']) && is_array($data['doctor']['classes'])) {
+            foreach ($data['doctor']['classes'] as $key => $value) {
+                [$class, $file] = self::parseClassEntry($key, $value);
+                self::requireClassFile($class, $file, dirname($registry_file), $auto_require);
+                DoctorLoader::loadFromClass($class);
             }
         }
 
@@ -193,6 +197,7 @@ class Registry
             }
             ConsoleApplication::_addAdditionalCommands($instances);
         }
+        self::$current_registry_name = null;
     }
 
     /**
@@ -232,6 +237,9 @@ class Registry
 
         // check BeforeStage, AfterStage is valid
         PackageLoader::checkLoadedStageEvents();
+
+        // Validate package dependencies
+        self::validatePackageDependencies();
     }
 
     /**
@@ -298,6 +306,59 @@ class Registry
     public static function getLoadedArtifactConfigs(): array
     {
         return self::$loaded_artifact_configs;
+    }
+
+    public static function getCurrentRegistryName(): ?string
+    {
+        return self::$current_registry_name;
+    }
+
+    /**
+     * Validate package dependencies to ensure all referenced dependencies exist.
+     * This helps catch configuration errors early in the registry loading process.
+     *
+     * @throws RegistryException
+     */
+    private static function validatePackageDependencies(): void
+    {
+        $all_packages = PackageConfig::getAll();
+        $errors = [];
+
+        foreach ($all_packages as $pkg_name => $pkg_config) {
+            // Check depends field
+            $depends = PackageConfig::get($pkg_name, 'depends', []);
+            if (!is_array($depends)) {
+                $errors[] = "Package '{$pkg_name}' has invalid 'depends' field (expected array, got " . gettype($depends) . ')';
+                continue;
+            }
+
+            foreach ($depends as $dep) {
+                if (!isset($all_packages[$dep])) {
+                    $config_info = self::getPackageConfigInfo($pkg_name);
+                    $location = $config_info ? " (defined in {$config_info['config']})" : '';
+                    $errors[] = "Package '{$pkg_name}'{$location} depends on '{$dep}' which does not exist in any loaded registry";
+                }
+            }
+
+            // Check suggests field
+            $suggests = PackageConfig::get($pkg_name, 'suggests', []);
+            if (!is_array($suggests)) {
+                $errors[] = "Package '{$pkg_name}' has invalid 'suggests' field (expected array, got " . gettype($suggests) . ')';
+                continue;
+            }
+
+            foreach ($suggests as $suggest) {
+                if (!isset($all_packages[$suggest])) {
+                    $config_info = self::getPackageConfigInfo($pkg_name);
+                    $location = $config_info ? " (defined in {$config_info['config']})" : '';
+                    $errors[] = "Package '{$pkg_name}'{$location} suggests '{$suggest}' which does not exist in any loaded registry";
+                }
+            }
+        }
+
+        if (!empty($errors)) {
+            throw new RegistryException("Package dependency validation failed:\n  - " . implode("\n  - ", $errors));
+        }
     }
 
     /**

@@ -1,0 +1,10 @@
+ext-mbregex:
+  type: php-extension
+  depends:
+    - onig
+    - ext-mbstring
+  php-extension:
+    arg-type: custom
+    build-shared: false
+    build-static: true
+    display-name: mbstring

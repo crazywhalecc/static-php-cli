@@ -1,0 +1,19 @@
+nghttp3:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: ngtcp2/nghttp3
+      match: nghttp3.+\.tar\.xz
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+      license: MIT
+  depends:
+    - openssl
+  headers:
+    - nghttp3
+  pkg-configs:
+    - libnghttp3
+  static-libs@unix:
+    - libnghttp3.a

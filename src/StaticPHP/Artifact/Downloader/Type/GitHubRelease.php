@@ -21,10 +21,11 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
 
     private ?string $version = null;
 
-    public function getGitHubReleases(string $name, string $repo, bool $prefer_stable = true): array
+    public function getGitHubReleases(string $name, string $repo, bool $prefer_stable = true, ?string $query = null): array
     {
         logger()->debug("Fetching {$name} GitHub releases from {$repo}");
         $url = str_replace('{repo}', $repo, self::API_URL);
+        $url .= ($query ?? '');
         $headers = $this->getGitHubTokenHeaders();
         $data2 = default_shell()->executeCurl($url, headers: $headers);
         $data = json_decode($data2 ?: '', true);
@@ -45,9 +46,10 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
      * Get the latest GitHub release assets for a given repository.
      * match_asset is provided, only return the asset that matches the regex.
      */
-    public function getLatestGitHubRelease(string $name, string $repo, bool $prefer_stable, string $match_asset): array
+    public function getLatestGitHubRelease(string $name, string $repo, bool $prefer_stable, string $match_asset, ?string $query = null): array
     {
         $url = str_replace('{repo}', $repo, self::API_URL);
+        $url .= ($query ?? '');
         $headers = $this->getGitHubTokenHeaders();
         $data2 = default_shell()->executeCurl($url, headers: $headers);
         $data = json_decode($data2 ?: '', true);
@@ -81,7 +83,7 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
         if (!isset($config['match'])) {
             throw new DownloaderException("GitHubRelease downloader requires 'match' config for {$name}");
         }
-        $rel = $this->getLatestGitHubRelease($name, $config['repo'], $config['prefer-stable'] ?? true, $config['match']);
+        $rel = $this->getLatestGitHubRelease($name, $config['repo'], $config['prefer-stable'] ?? true, $config['match'], $config['query'] ?? null);
 
         // download file using curl
         $asset_url = str_replace(['{repo}', '{id}'], [$config['repo'], $rel['id']], self::ASSET_URL);

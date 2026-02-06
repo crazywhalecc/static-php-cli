@@ -88,8 +88,6 @@ class SystemTarget
     /**
      * Returns the target architecture, e.g. x86_64, aarch64.
      * Currently, we only support 'x86_64' and 'aarch64' and both can only be built natively.
-     *
-     * @return 'aarch64'|'x86_64'
      */
     public static function getTargetArch(): string
     {

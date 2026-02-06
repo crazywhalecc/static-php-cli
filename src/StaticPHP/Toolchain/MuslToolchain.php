@@ -14,10 +14,10 @@ class MuslToolchain implements UnixToolchainInterface
     {
         $arch = getenv('GNU_ARCH');
         // Set environment variables for musl toolchain
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_CC={$arch}-linux-musl-gcc");
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_CXX={$arch}-linux-musl-g++");
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_AR={$arch}-linux-musl-ar");
-        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_LD={$arch}-linux-musl-ld");
+        GlobalEnvManager::putenv("SPC_DEFAULT_CC={$arch}-linux-musl-gcc");
+        GlobalEnvManager::putenv("SPC_DEFAULT_CXX={$arch}-linux-musl-g++");
+        GlobalEnvManager::putenv("SPC_DEFAULT_AR={$arch}-linux-musl-ar");
+        GlobalEnvManager::putenv("SPC_DEFAULT_LD={$arch}-linux-musl-ld");
         GlobalEnvManager::addPathIfNotExists('/usr/local/musl/bin');
         GlobalEnvManager::addPathIfNotExists("/usr/local/musl/{$arch}-linux-musl/bin");
 
@@ -40,7 +40,7 @@ class MuslToolchain implements UnixToolchainInterface
 
     public function getCompilerInfo(): ?string
     {
-        $compiler = getenv('CC') ?: getenv('SPC_LINUX_DEFAULT_CC');
+        $compiler = getenv('CC') ?: getenv('SPC_DEFAULT_CC');
         $version = shell(false)->execWithResult("{$compiler} --version", false);
         $head = pathinfo($compiler, PATHINFO_BASENAME);
         if ($version[0] === 0 && preg_match('/linux-musl-cc.*(\d+.\d+.\d+)/', $version[1][0], $match)) {

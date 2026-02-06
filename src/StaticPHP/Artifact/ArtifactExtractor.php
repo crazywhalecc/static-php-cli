@@ -247,6 +247,7 @@ class ArtifactExtractor
         $artifact->emitAfterBinaryExtract($target_path, $platform);
         logger()->debug("Emitted after-binary-extract hooks for [{$name}]");
 
+        /* @phpstan-ignore-next-line */
         if ($hash !== null && $cache_info['cache_type'] !== 'file') {
             FileSystem::writeFile("{$target_path}/.spc-hash", $hash);
         }

@@ -70,6 +70,17 @@ class ArtifactLoader
     }
 
     /**
+     * Get names of all loaded artifacts.
+     *
+     * @return string[]
+     */
+    public static function getLoadedArtifactNames(): array
+    {
+        self::initArtifactInstances();
+        return array_keys(self::$artifacts ?? []);
+    }
+
+    /**
      * Process #[CustomSource] attribute.
      */
     private static function processCustomSourceAttribute(\ReflectionClass $ref, \ReflectionMethod $method, object $class_instance): void

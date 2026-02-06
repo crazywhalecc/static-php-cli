@@ -13,10 +13,13 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\BuildRootTracker;
 use StaticPHP\Util\DependencyResolver;
+use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\LicenseDumper;
 use StaticPHP\Util\V2CompatLayer;
 use ZM\Logger\ConsoleColor;
 
@@ -40,6 +43,9 @@ class PackageInstaller
     /** @var bool Whether to download missing sources automatically */
     protected bool $download = true;
 
+    /** @var null|BuildRootTracker buildroot file tracker for debugging purpose */
+    protected ?BuildRootTracker $tracker = null;
+
     public function __construct(protected array $options = [])
     {
         ApplicationContext::set(PackageInstaller::class, $this);
@@ -50,6 +56,11 @@ class PackageInstaller
         // Check for no-download option
         if (!empty($options['no-download'])) {
             $this->download = false;
+        }
+
+        // Initialize BuildRootTracker if tracking is enabled (default: enabled unless --no-tracker)
+        if (empty($options['no-tracker'])) {
+            $this->tracker = new BuildRootTracker();
         }
     }
 
@@ -69,6 +80,9 @@ class PackageInstaller
         }
         if (!$package->hasStage('build')) {
             throw new WrongUsageException("Target package '{$package->getName()}' does not define build process for current OS: " . PHP_OS_FAMILY . '.');
+        }
+        if (($this->options['pack-mode'] ?? false) === true && !empty($this->build_packages)) {
+            throw new WrongUsageException("In 'pack-mode', only one package can be built at a time. Cannot add package '{$package->getName()}' to build list.");
         }
         $this->build_packages[$package->getName()] = $package;
         return $this;
@@ -104,6 +118,16 @@ class PackageInstaller
     {
         $this->download = $download;
         return $this;
+    }
+
+    /**
+     * Get the BuildRootTracker instance.
+     *
+     * @return null|BuildRootTracker The tracker instance or null if tracking is disabled
+     */
+    public function getTracker(): ?BuildRootTracker
+    {
+        return $this->tracker;
     }
 
     public function printBuildPackageOutputs(): void
@@ -178,8 +202,14 @@ class PackageInstaller
                     InteractiveTerm::indicateProgress('Installing package: ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
+                    // Start tracking for binary installation
+                    $this->tracker?->startTracking($package, 'install');
                     $status = $this->installBinary($package);
+                    // Stop tracking and record changes
+                    $this->tracker?->stopTracking();
                 } catch (\Throwable $e) {
+                    // Stop tracking on error
+                    $this->tracker?->stopTracking();
                     if ($interactive) {
                         InteractiveTerm::finish('Installing binary package failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
@@ -194,9 +224,25 @@ class PackageInstaller
                     InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
+                    // Start tracking for build
+                    $this->tracker?->startTracking($package, 'build');
+
+                    if ($is_to_build && ($this->options['pack-mode'] ?? false) === true) {
+                        $dirdiff = new DirDiff(BUILD_ROOT_PATH, false);
+                        ApplicationContext::set(DirDiff::class, $dirdiff);
+                    }
                     /** @var LibraryPackage $package */
                     $status = $builder->buildPackage($package, $this->isBuildPackage($package));
+
+                    if ($is_to_build && ($this->options['pack-mode'] ?? false) === true) {
+                        $package->runStage('packPrebuilt');
+                    }
+
+                    // Stop tracking and record changes
+                    $this->tracker?->stopTracking();
                 } catch (\Throwable $e) {
+                    // Stop tracking on error
+                    $this->tracker?->stopTracking();
                     if ($interactive) {
                         InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
@@ -207,6 +253,11 @@ class PackageInstaller
                     InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
                 }
             }
+        }
+
+        $this->dumpLicenseFiles($this->packages);
+        if ($interactive) {
+            InteractiveTerm::success('Exported package licenses', true);
         }
     }
 
@@ -253,7 +304,7 @@ class PackageInstaller
         if ($this->isBuildPackage($package)) {
             return $package->isInstalled();
         }
-        if ($package instanceof LibraryPackage && $package->getArtifact()->shouldUseBinary()) {
+        if ($package->getArtifact() !== null && $package->getArtifact()->shouldUseBinary()) {
             $artifact = $package->getArtifact();
             return $artifact->isBinaryExtracted();
         }
@@ -319,6 +370,7 @@ class PackageInstaller
      */
     public function extractSourceArtifacts(bool $interactive = true): void
     {
+        FileSystem::createDir(SOURCE_PATH);
         $packages = array_values($this->packages);
 
         $cache = ApplicationContext::get(ArtifactCache::class);
@@ -402,9 +454,77 @@ class PackageInstaller
         return SPC_STATUS_INSTALLED;
     }
 
+    /**
+     * @internal internally calling only, for users, please use specific getter, such as 'getLibraryPackage', 'getTaretPackage', etc
+     * @param string $package_name Package name
+     */
     public function getPackage(string $package_name): ?Package
     {
         return $this->packages[$package_name] ?? null;
+    }
+
+    /**
+     * Get a library package by name.
+     *
+     * @param  string              $package_name Package name
+     * @return null|LibraryPackage The library package instance or null if not found
+     */
+    public function getLibraryPackage(string $package_name): ?LibraryPackage
+    {
+        $pkg = $this->getPackage($package_name);
+        if ($pkg instanceof LibraryPackage) {
+            return $pkg;
+        }
+        return null;
+    }
+
+    /**
+     * Get a target package by name.
+     *
+     * @param  string             $package_name Package name
+     * @return null|TargetPackage The target package instance or null if not found
+     */
+    public function getTargetPackage(string $package_name): ?TargetPackage
+    {
+        $pkg = $this->getPackage($package_name);
+        if ($pkg instanceof TargetPackage) {
+            return $pkg;
+        }
+        return null;
+    }
+
+    /**
+     * Get a PHP extension by name.
+     *
+     * @param  string                   $package_or_ext_name Extension name
+     * @return null|PhpExtensionPackage The target package instance or null if not found
+     */
+    public function getPhpExtensionPackage(string $package_or_ext_name): ?PhpExtensionPackage
+    {
+        $pkg = $this->getPackage($package_or_ext_name);
+        if ($pkg instanceof PhpExtensionPackage) {
+            return $pkg;
+        }
+        $pkg = $this->getPackage("ext-{$package_or_ext_name}");
+        if ($pkg instanceof PhpExtensionPackage) {
+            return $pkg;
+        }
+        return null;
+    }
+
+    /**
+     * @param Package[] $packages
+     */
+    private function dumpLicenseFiles(array $packages): void
+    {
+        $dumper = new LicenseDumper();
+        foreach ($packages as $package) {
+            $artifact = $package->getArtifact();
+            if ($artifact !== null) {
+                $dumper->addArtifacts([$artifact->getName()]);
+            }
+        }
+        $dumper->dump(BUILD_ROOT_PATH . '/license');
     }
 
     /**
@@ -414,7 +534,7 @@ class PackageInstaller
     {
         // target and library must have at least source or platform binary
         if (in_array($package->getType(), ['library', 'target']) && !$package->getArtifact()?->hasSource() && !$package->getArtifact()?->hasPlatformBinary()) {
-            throw new WrongUsageException("Validation failed: Target package '{$package->getName()}' has no source or platform binary defined.");
+            throw new WrongUsageException("Validation failed: Target package '{$package->getName()}' has no source or current platform (" . SystemTarget::getCurrentPlatformString() . ') binary defined.');
         }
     }
 
@@ -451,8 +571,7 @@ class PackageInstaller
     {
         // process 'php' target
         if ($package->getName() === 'php') {
-            logger()->warning("Building 'php' target is deprecated, please use specific targets like 'build:php-cli' instead.");
-
+            // logger()->warning("Building 'php' target is deprecated, please use specific targets like 'build:php-cli' instead.");
             $added = false;
 
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-cli')) {

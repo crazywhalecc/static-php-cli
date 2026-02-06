@@ -1,0 +1,13 @@
+liblz4:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: lz4/lz4
+      match: lz4-.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  static-libs@unix:
+    - liblz4.a

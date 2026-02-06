@@ -43,6 +43,14 @@
     "calendar": {
         "type": "builtin"
     },
+    "com_dotnet": {
+        "support": {
+            "BSD": "no",
+            "Linux": "no",
+            "Darwin": "no"
+        },
+        "type": "builtin"
+    },
     "ctype": {
         "type": "builtin"
     },

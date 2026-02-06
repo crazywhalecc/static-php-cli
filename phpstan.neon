@@ -11,11 +11,13 @@ parameters:
     - '#Function Swoole\\Coroutine\\run not found.#'
     - '#Static call to instance method ZM\\Logger\\ConsoleColor#'
     - '#Constant GNU_ARCH not found#'
+    -
+      identifiers:
+        - 'if.alwaysFalse'
   dynamicConstantNames:
     - PHP_OS_FAMILY
   excludePaths:
       analyseAndScan:
-            - ./src/globals/ext-tests/swoole.php
-            - ./src/globals/ext-tests/swoole.phpt
+            - ./src/globals/ext-tests/
             - ./src/globals/test-extensions.php
             - ./src/SPC/

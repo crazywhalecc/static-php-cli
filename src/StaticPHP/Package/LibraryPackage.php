@@ -5,14 +5,31 @@ declare(strict_types=1);
 namespace StaticPHP\Package;
 
 use StaticPHP\Config\PackageConfig;
+use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\PatchException;
+use StaticPHP\Exception\SPCInternalException;
+use StaticPHP\Exception\ValidationException;
+use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\DependencyResolver;
+use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalPathTrait;
+use StaticPHP\Util\SPCConfigUtil;
 
 /**
  * Represents a library package with platform-specific build functions.
  */
 class LibraryPackage extends Package
 {
+    use GlobalPathTrait;
+
+    /**
+     * Custom postinstall actions for this package.
+     * @var array<array>
+     */
+    private array $customPostinstallActions = [];
+
     public function isInstalled(): bool
     {
         foreach (PackageConfig::get($this->getName(), 'static-libs', []) as $lib) {
@@ -42,6 +59,24 @@ class LibraryPackage extends Package
             }
         }
         return true;
+    }
+
+    /**
+     * Add a custom postinstall action for this package.
+     * Available actions:
+     * - replace-path: Replace placeholders with actual paths
+     *   Example: ['action' => 'replace-path', 'files' => ['lib/cmake/xxx.cmake']]
+     * - replace-to-env: Replace string with environment variable value
+     *   Example: ['action' => 'replace-to-env', 'file' => 'bin/xxx-config', 'search' => 'XXX', 'replace-env' => 'BUILD_ROOT_PATH']
+     *
+     * @param array $action Action array with 'action' key and other required keys
+     */
+    public function addPostinstallAction(array $action): void
+    {
+        if (!isset($action['action'])) {
+            throw new WrongUsageException('Postinstall action must have "action" key.');
+        }
+        $this->customPostinstallActions[] = $action;
     }
 
     public function patchLaDependencyPrefix(?array $files = null): void
@@ -160,6 +195,173 @@ class LibraryPackage extends Package
     }
 
     /**
+     * Register default stages if not already defined by attributes.
+     * This is called after all attributes have been loaded.
+     *
+     * @internal Called by PackageLoader after loading attributes
+     */
+    public function registerDefaultStages(): void
+    {
+        if (!$this->hasStage('packPrebuilt')) {
+            $this->addStage('packPrebuilt', [$this, 'packPrebuilt']);
+        }
+        // counting files before build stage
+    }
+
+    /**
+     * Pack the prebuilt library into an archive.
+     *
+     * @internal this function is intended to be called by the dev:pack-lib command only
+     */
+    public function packPrebuilt(): void
+    {
+        $target_dir = WORKING_DIR . '/dist';
+        $postinstall_file = BUILD_ROOT_PATH . '/.package.' . $this->getName() . '.postinstall.json';
+
+        if (!ApplicationContext::has(DirDiff::class)) {
+            throw new SPCInternalException('pack-dirdiff context not found for packPrebuilt stage. You cannot call "packPrebuilt" function manually.');
+        }
+        // check whether this library has correctly installed files
+        if (!$this->isInstalled()) {
+            throw new ValidationException("Cannot pack prebuilt library [{$this->getName()}] because it is not fully installed.");
+        }
+        // get after-build buildroot file list
+        $increase_files = ApplicationContext::get(DirDiff::class)->getIncrementFiles(true);
+
+        FileSystem::createDir($target_dir);
+
+        // before pack, check if the dependency tree contains lib-suggests
+        $libraries = DependencyResolver::resolve([$this], include_suggests: true);
+        foreach ($libraries as $lib) {
+            if (PackageConfig::get($lib, 'suggests', []) !== []) {
+                throw new ValidationException("The library {$lib} has lib-suggests, packing [{$this->name}] is not safe, abort !");
+            }
+        }
+
+        $origin_files = [];
+        $postinstall_files = [];
+
+        // get pack placeholder defines
+        $placeholder = get_pack_replace();
+
+        // patch pkg-config and la files with placeholder paths
+        foreach ($increase_files as $file) {
+            if (str_ends_with($file, '.pc') || str_ends_with($file, '.la')) {
+                $content = FileSystem::readFile(BUILD_ROOT_PATH . '/' . $file);
+                $origin_files[$file] = $content;
+                // replace actual paths with placeholders
+                $content = str_replace(
+                    array_keys($placeholder),
+                    array_values($placeholder),
+                    $content
+                );
+                FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
+                // record files that need postinstall path replacement
+                $postinstall_files[] = $file;
+            }
+        }
+
+        // collect all postinstall actions
+        $postinstall_actions = [];
+
+        // add default replace-path action if there are .pc/.la files
+        if ($postinstall_files !== []) {
+            $postinstall_actions[] = [
+                'action' => 'replace-path',
+                'files' => $postinstall_files,
+            ];
+        }
+
+        // merge custom postinstall actions and handle files for replace-path actions
+        foreach ($this->customPostinstallActions as $action) {
+            // if action is replace-path, process the files with placeholder replacement
+            if ($action['action'] === 'replace-path') {
+                $files = $action['files'] ?? [];
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+                foreach ($files as $file) {
+                    if (file_exists(BUILD_ROOT_PATH . '/' . $file)) {
+                        $content = FileSystem::readFile(BUILD_ROOT_PATH . '/' . $file);
+                        $origin_files[$file] = $content;
+                        // replace actual paths with placeholders
+                        $content = str_replace(
+                            array_keys($placeholder),
+                            array_values($placeholder),
+                            $content
+                        );
+                        FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
+                        // ensure this file is included in the package
+                        if (!in_array($file, $increase_files, true)) {
+                            $increase_files[] = $file;
+                        }
+                    }
+                }
+            }
+            // add custom action to postinstall actions
+            $postinstall_actions[] = $action;
+        }
+
+        // generate postinstall action file if there are actions to process
+        if ($postinstall_actions !== []) {
+            FileSystem::writeFile($postinstall_file, json_encode($postinstall_actions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $increase_files[] = '.package.' . $this->getName() . '.postinstall.json';
+        }
+
+        // every file mapped with BUILD_ROOT_PATH
+        // get BUILD_ROOT_PATH last dir part
+        $buildroot_part = basename(BUILD_ROOT_PATH);
+        $increase_files = array_map(fn ($file) => $buildroot_part . '/' . $file, $increase_files);
+        // write list to packlib_files.txt
+        FileSystem::writeFile(WORKING_DIR . '/packlib_files.txt', implode("\n", $increase_files));
+        // pack
+        $filename = match (SystemTarget::getTargetOS()) {
+            'Windows' => '{name}-{arch}-{os}.tgz',
+            'Darwin' => '{name}-{arch}-{os}.txz',
+            'Linux' => '{name}-{arch}-{os}-{libc}-{libcver}.txz',
+            default => throw new WrongUsageException('Unsupported OS for packing prebuilt library: ' . SystemTarget::getTargetOS()),
+        };
+        $replace = [
+            '{name}' => $this->getName(),
+            '{arch}' => arch2gnu(php_uname('m')),
+            '{os}' => strtolower(PHP_OS_FAMILY),
+            '{libc}' => SystemTarget::getLibc() ?? 'default',
+            '{libcver}' => SystemTarget::getLibcVersion() ?? 'default',
+        ];
+        // detect suffix, for proper tar option
+        $tar_option = $this->getTarOptionFromSuffix($filename);
+        $filename = str_replace(array_keys($replace), array_values($replace), $filename);
+        $filename = $target_dir . '/' . $filename;
+        f_passthru("tar {$tar_option} {$filename} -T " . WORKING_DIR . '/packlib_files.txt');
+        logger()->info('Pack library ' . $this->getName() . ' to ' . $filename . ' complete.');
+
+        // remove postinstall temp file
+        if (file_exists($postinstall_file)) {
+            unlink($postinstall_file);
+        }
+
+        // restore original files
+        foreach ($origin_files as $file => $content) {
+            if (file_exists(BUILD_ROOT_PATH . '/' . $file)) {
+                FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
+            }
+        }
+
+        // remove dirdiff
+        ApplicationContext::set(DirDiff::class, null);
+    }
+
+    /**
+     * Get static library files for current package and its dependencies.
+     */
+    public function getStaticLibFiles(): string
+    {
+        $config = new SPCConfigUtil(['libs_only_deps' => true, 'absolute_libs' => true]);
+        $res = $config->config([$this->getName()]);
+        return $res['libs'];
+    }
+
+    /**
      * Get extra LIBS for current package.
      * You need to define the environment variable in the format of {LIBRARY_NAME}_LIBS
      * where {LIBRARY_NAME} is the snake_case name of the library.
@@ -171,37 +373,28 @@ class LibraryPackage extends Package
     }
 
     /**
-     * Get the build root path for the package.
+     * Get tar compress options from suffix
      *
-     * TODO: Can be changed to support per-package build root path in the future.
+     * @param  string $name Package file name
+     * @return string Tar options for packaging libs
      */
-    public function getBuildRootPath(): string
+    private function getTarOptionFromSuffix(string $name): string
     {
-        return BUILD_ROOT_PATH;
-    }
-
-    /**
-     * Get the include directory for the package.
-     *
-     * TODO: Can be changed to support per-package include directory in the future.
-     */
-    public function getIncludeDir(): string
-    {
-        return BUILD_INCLUDE_PATH;
-    }
-
-    /**
-     * Get the library directory for the package.
-     *
-     * TODO: Can be changed to support per-package library directory in the future.
-     */
-    public function getLibDir(): string
-    {
-        return BUILD_LIB_PATH;
-    }
-
-    public function getBinDir(): string
-    {
-        return BUILD_BIN_PATH;
+        if (str_ends_with($name, '.tar')) {
+            return '-cf';
+        }
+        if (str_ends_with($name, '.tar.gz') || str_ends_with($name, '.tgz')) {
+            return '-czf';
+        }
+        if (str_ends_with($name, '.tar.bz2') || str_ends_with($name, '.tbz2')) {
+            return '-cjf';
+        }
+        if (str_ends_with($name, '.tar.xz') || str_ends_with($name, '.txz')) {
+            return '-cJf';
+        }
+        if (str_ends_with($name, '.tar.lz') || str_ends_with($name, '.tlz')) {
+            return '-c --lzma -f';
+        }
+        return '-cf';
     }
 }

@@ -18,10 +18,10 @@ class ClangNativeToolchain implements UnixToolchainInterface
 {
     public function initEnv(): void
     {
-        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CC=clang');
-        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CXX=clang++');
-        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=ar');
-        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=ld');
+        GlobalEnvManager::putenv('SPC_DEFAULT_CC=clang');
+        GlobalEnvManager::putenv('SPC_DEFAULT_CXX=clang++');
+        GlobalEnvManager::putenv('SPC_DEFAULT_AR=ar');
+        GlobalEnvManager::putenv('SPC_DEFAULT_LD=ld');
     }
 
     public function afterInit(): void
@@ -52,6 +52,6 @@ class ClangNativeToolchain implements UnixToolchainInterface
 
     public function isStatic(): bool
     {
-        return PHP_OS_FAMILY === 'Linux' && LinuxUtil::isMuslDist();
+        return PHP_OS_FAMILY === 'Linux' && LinuxUtil::isMuslDist() && !getenv('SPC_MUSL_DYNAMIC');
     }
 }

@@ -18,22 +18,22 @@ class SourcePatcher
     public static function init(): void
     {
         // FileSystem::addSourceExtractHook('swow', [__CLASS__, 'patchSwow']);
-        FileSystem::addSourceExtractHook('openssl', [__CLASS__, 'patchOpenssl11Darwin']);
+        FileSystem::addSourceExtractHook('openssl', [__CLASS__, 'patchOpenssl11Darwin']); // migrated
         FileSystem::addSourceExtractHook('swoole', [__CLASS__, 'patchSwoole']);
-        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']);
-        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']);
-        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']); // migrated
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']); // migrated
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']); // migrated
         FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVPhp85']);
         FileSystem::addSourceExtractHook('yaml', [__CLASS__, 'patchYamlWin32']);
-        FileSystem::addSourceExtractHook('libyaml', [__CLASS__, 'patchLibYaml']);
-        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchImapLicense']);
+        FileSystem::addSourceExtractHook('libyaml', [__CLASS__, 'patchLibYaml']); // removed
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchImapLicense']); // migrated
         FileSystem::addSourceExtractHook('ext-imagick', [__CLASS__, 'patchImagickWith84']);
-        FileSystem::addSourceExtractHook('libaom', [__CLASS__, 'patchLibaomForAlpine']);
-        FileSystem::addSourceExtractHook('pkg-config', [__CLASS__, 'patchPkgConfigForGcc15']);
-        FileSystem::addSourceExtractHook('attr', [__CLASS__, 'patchAttrForAlpine']);
-        FileSystem::addSourceExtractHook('gmssl', [__CLASS__, 'patchGMSSL']);
+        FileSystem::addSourceExtractHook('libaom', [__CLASS__, 'patchLibaomForAlpine']); // migrated
+        FileSystem::addSourceExtractHook('pkg-config', [__CLASS__, 'patchPkgConfigForGcc15']); // migrated
+        FileSystem::addSourceExtractHook('attr', [__CLASS__, 'patchAttrForAlpine']); // migrated
+        FileSystem::addSourceExtractHook('gmssl', [__CLASS__, 'patchGMSSL']); // migrated
     }
 
     public static function patchBeforeBuildconf(BuilderBase $builder): void
