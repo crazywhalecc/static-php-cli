@@ -321,17 +321,6 @@ function get_display_path(string $path): string
 }
 
 /**
- * Get the global DI container instance.
- *
- * @deprecated Use ApplicationContext::getContainer() or dependency injection instead.
- *             This function is kept for backward compatibility during the migration period.
- */
-function spc_container(): DI\Container
-{
-    return \StaticPHP\DI\ApplicationContext::getContainer();
-}
-
-/**
  * Skip the current operation if the condition is true.
  * You should ALWAYS use this function inside an attribute callback.
  *
@@ -343,6 +332,18 @@ function spc_skip_if(bool $condition, string $message = ''): void
     if ($condition) {
         throw new StaticPHP\Exception\SkipException($message);
     }
+}
+
+/**
+ * Skip the current operation unless the condition is true.
+ * You should ALWAYS use this function inside an attribute callback.
+ *
+ * @param bool   $condition Condition to evaluate
+ * @param string $message   Optional message for the skip exception
+ */
+function spc_skip_unless(bool $condition, string $message = ''): void
+{
+    spc_skip_if(!$condition, $message);
 }
 
 /**

@@ -7,6 +7,7 @@ namespace Package\Artifact;
 use StaticPHP\Artifact\Artifact;
 use StaticPHP\Attribute\Artifact\AfterSourceExtract;
 use StaticPHP\Attribute\PatchDescription;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\System\LinuxUtil;
 
@@ -16,8 +17,7 @@ class attr
     #[PatchDescription('Patch attr for Alpine Linux (musl) and macOS - gethostname declaration')]
     public function patchAttrForAlpine(Artifact $artifact): void
     {
-        if (PHP_OS_FAMILY === 'Darwin' || PHP_OS_FAMILY === 'Linux' && LinuxUtil::isMuslDist()) {
-            SourcePatcher::patchFile('attr_alpine_gethostname.patch', $artifact->getSourceDir());
-        }
+        spc_skip_unless(SystemTarget::getTargetOS() === 'Darwin' || SystemTarget::getTargetOS() === 'Linux' && !LinuxUtil::isMuslDist(), 'Only for Alpine Linux (musl) and macOS');
+        SourcePatcher::patchFile('attr_alpine_gethostname.patch', $artifact->getSourceDir());
     }
 }
