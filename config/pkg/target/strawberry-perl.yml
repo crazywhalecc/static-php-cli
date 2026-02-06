@@ -1,0 +1,5 @@
+strawberry-perl:
+  type: target
+  artifact:
+    binary:
+      windows-x86_64: { type: url, url: 'https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip', extract: '{pkg_root_path}/strawberry-perl' }

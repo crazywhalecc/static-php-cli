@@ -534,7 +534,7 @@ class PackageInstaller
     {
         // target and library must have at least source or platform binary
         if (in_array($package->getType(), ['library', 'target']) && !$package->getArtifact()?->hasSource() && !$package->getArtifact()?->hasPlatformBinary()) {
-            throw new WrongUsageException("Validation failed: Target package '{$package->getName()}' has no source or platform binary defined.");
+            throw new WrongUsageException("Validation failed: Target package '{$package->getName()}' has no source or current platform (" . SystemTarget::getCurrentPlatformString() . ') binary defined.');
         }
     }
 

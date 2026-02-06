@@ -16,8 +16,7 @@
         "config": [
             "config/pkg/lib/",
             "config/pkg/target/",
-            "config/pkg/ext/",
-            "config/pkg.target.json"
+            "config/pkg/ext/"
         ]
     },
     "artifact": {
