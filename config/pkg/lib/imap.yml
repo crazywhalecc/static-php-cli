@@ -1,0 +1,14 @@
+imap:
+  type: library
+  artifact:
+    source: {
+      "type": "git",
+      "url": "https://github.com/static-php/imap.git",
+      "rev": "master"
+    }
+    metadata:
+      license-files: [LICENSE]
+  static-libs@unix:
+    - libc-client.a
+  suggests@unix:
+    - openssl

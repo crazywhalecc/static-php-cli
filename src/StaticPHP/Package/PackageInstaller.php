@@ -13,6 +13,7 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\BuildRootTracker;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
@@ -42,6 +43,9 @@ class PackageInstaller
     /** @var bool Whether to download missing sources automatically */
     protected bool $download = true;
 
+    /** @var null|BuildRootTracker buildroot file tracker for debugging purpose */
+    protected ?BuildRootTracker $tracker = null;
+
     public function __construct(protected array $options = [])
     {
         ApplicationContext::set(PackageInstaller::class, $this);
@@ -52,6 +56,11 @@ class PackageInstaller
         // Check for no-download option
         if (!empty($options['no-download'])) {
             $this->download = false;
+        }
+
+        // Initialize BuildRootTracker if tracking is enabled (default: enabled unless --no-tracker)
+        if (empty($options['no-tracker'])) {
+            $this->tracker = new BuildRootTracker();
         }
     }
 
@@ -109,6 +118,16 @@ class PackageInstaller
     {
         $this->download = $download;
         return $this;
+    }
+
+    /**
+     * Get the BuildRootTracker instance.
+     *
+     * @return null|BuildRootTracker The tracker instance or null if tracking is disabled
+     */
+    public function getTracker(): ?BuildRootTracker
+    {
+        return $this->tracker;
     }
 
     public function printBuildPackageOutputs(): void
@@ -183,8 +202,14 @@ class PackageInstaller
                     InteractiveTerm::indicateProgress('Installing package: ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
+                    // Start tracking for binary installation
+                    $this->tracker?->startTracking($package, 'install');
                     $status = $this->installBinary($package);
+                    // Stop tracking and record changes
+                    $this->tracker?->stopTracking();
                 } catch (\Throwable $e) {
+                    // Stop tracking on error
+                    $this->tracker?->stopTracking();
                     if ($interactive) {
                         InteractiveTerm::finish('Installing binary package failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
@@ -199,6 +224,9 @@ class PackageInstaller
                     InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
+                    // Start tracking for build
+                    $this->tracker?->startTracking($package, 'build');
+
                     if ($is_to_build && ($this->options['pack-mode'] ?? false) === true) {
                         $dirdiff = new DirDiff(BUILD_ROOT_PATH, false);
                         ApplicationContext::set(DirDiff::class, $dirdiff);
@@ -209,7 +237,12 @@ class PackageInstaller
                     if ($is_to_build && ($this->options['pack-mode'] ?? false) === true) {
                         $package->runStage('packPrebuilt');
                     }
+
+                    // Stop tracking and record changes
+                    $this->tracker?->stopTracking();
                 } catch (\Throwable $e) {
+                    // Stop tracking on error
+                    $this->tracker?->stopTracking();
                     if ($interactive) {
                         InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
