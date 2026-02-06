@@ -21,6 +21,12 @@ use StaticPHP\Util\SPCConfigUtil;
  */
 class LibraryPackage extends Package
 {
+    /**
+     * Custom postinstall actions for this package.
+     * @var array<array>
+     */
+    private array $customPostinstallActions = [];
+
     public function isInstalled(): bool
     {
         foreach (PackageConfig::get($this->getName(), 'static-libs', []) as $lib) {
@@ -50,6 +56,24 @@ class LibraryPackage extends Package
             }
         }
         return true;
+    }
+
+    /**
+     * Add a custom postinstall action for this package.
+     * Available actions:
+     * - replace-path: Replace placeholders with actual paths
+     *   Example: ['action' => 'replace-path', 'files' => ['lib/cmake/xxx.cmake']]
+     * - replace-to-env: Replace string with environment variable value
+     *   Example: ['action' => 'replace-to-env', 'file' => 'bin/xxx-config', 'search' => 'XXX', 'replace-env' => 'BUILD_ROOT_PATH']
+     *
+     * @param array $action Action array with 'action' key and other required keys
+     */
+    public function addPostinstallAction(array $action): void
+    {
+        if (!isset($action['action'])) {
+            throw new WrongUsageException('Postinstall action must have "action" key.');
+        }
+        $this->customPostinstallActions[] = $action;
     }
 
     public function patchLaDependencyPrefix(?array $files = null): void
@@ -234,14 +258,49 @@ class LibraryPackage extends Package
             }
         }
 
-        // generate postinstall action file if there are files to process
+        // collect all postinstall actions
+        $postinstall_actions = [];
+
+        // add default replace-path action if there are .pc/.la files
         if ($postinstall_files !== []) {
-            $postinstall_actions = [
-                [
-                    'action' => 'replace-path',
-                    'files' => $postinstall_files,
-                ],
+            $postinstall_actions[] = [
+                'action' => 'replace-path',
+                'files' => $postinstall_files,
             ];
+        }
+
+        // merge custom postinstall actions and handle files for replace-path actions
+        foreach ($this->customPostinstallActions as $action) {
+            // if action is replace-path, process the files with placeholder replacement
+            if ($action['action'] === 'replace-path') {
+                $files = $action['files'] ?? [];
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+                foreach ($files as $file) {
+                    if (file_exists(BUILD_ROOT_PATH . '/' . $file)) {
+                        $content = FileSystem::readFile(BUILD_ROOT_PATH . '/' . $file);
+                        $origin_files[$file] = $content;
+                        // replace actual paths with placeholders
+                        $content = str_replace(
+                            array_keys($placeholder),
+                            array_values($placeholder),
+                            $content
+                        );
+                        FileSystem::writeFile(BUILD_ROOT_PATH . '/' . $file, $content);
+                        // ensure this file is included in the package
+                        if (!in_array($file, $increase_files, true)) {
+                            $increase_files[] = $file;
+                        }
+                    }
+                }
+            }
+            // add custom action to postinstall actions
+            $postinstall_actions[] = $action;
+        }
+
+        // generate postinstall action file if there are actions to process
+        if ($postinstall_actions !== []) {
             FileSystem::writeFile($postinstall_file, json_encode($postinstall_actions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             $increase_files[] = '.package.' . $this->getName() . '.postinstall.json';
         }
