@@ -7,6 +7,7 @@ namespace StaticPHP\Command\Dev;
 use StaticPHP\Command\BaseCommand;
 use StaticPHP\Registry\Registry;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Yaml\Yaml;
 
 #[AsCommand('dev:lint-config', 'Lint configuration file format', ['dev:sort-config'])]
@@ -14,15 +15,28 @@ class LintConfigCommand extends BaseCommand
 {
     public function handle(): int
     {
+        $checkOnly = $this->input->getOption('check');
+        $hasChanges = false;
+
         // get loaded configs
         $loded_configs = Registry::getLoadedArtifactConfigs();
         foreach ($loded_configs as $file) {
-            $this->sortConfigFile($file, 'artifact');
+            if ($this->sortConfigFile($file, 'artifact', $checkOnly)) {
+                $hasChanges = true;
+            }
         }
         $loaded_pkg_configs = Registry::getLoadedPackageConfigs();
         foreach ($loaded_pkg_configs as $file) {
-            $this->sortConfigFile($file, 'package');
+            if ($this->sortConfigFile($file, 'package', $checkOnly)) {
+                $hasChanges = true;
+            }
         }
+
+        if ($checkOnly && $hasChanges) {
+            $this->output->writeln('<error>Some config files need sorting. Run "bin/spc dev:lint-config" to fix them.</error>');
+            return static::FAILURE;
+        }
+
         return static::SUCCESS;
     }
 
@@ -88,22 +102,27 @@ class LintConfigCommand extends BaseCommand
         return $a <=> $b;
     }
 
-    private function sortConfigFile(mixed $file, string $config_type): void
+    protected function configure(): void
+    {
+        $this->addOption('check', null, InputOption::VALUE_NONE, 'Check if config files need sorting without modifying them');
+    }
+
+    private function sortConfigFile(mixed $file, string $config_type, bool $checkOnly): bool
     {
         // read file content with different extensions
         $content = file_get_contents($file);
         if ($content === false) {
-            $this->output->writeln("Failed to read artifact config file: {$file}");
-            return;
+            $this->output->writeln("Failed to read config file: {$file}");
+            return false;
         }
         $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
             'json' => json_decode($content, true),
-            'yml', 'yaml' => Yaml::parse($content), // skip yaml files for now
+            'yml', 'yaml' => Yaml::parse($content),
             default => null,
         };
         if (!is_array($data)) {
-            $this->output->writeln("Invalid JSON format in artifact config file: {$file}");
-            return;
+            $this->output->writeln("Invalid format in config file: {$file}");
+            return false;
         }
         ksort($data);
         foreach ($data as $artifact_name => &$config) {
@@ -115,7 +134,18 @@ class LintConfigCommand extends BaseCommand
             'yml', 'yaml' => Yaml::dump($data, 4, 2),
             default => null,
         };
-        file_put_contents($file, $new_content);
-        $this->output->writeln("Sorted artifact config file: {$file}");
+
+        // Check if content has changed
+        if ($content !== $new_content) {
+            if ($checkOnly) {
+                $this->output->writeln("<comment>File needs sorting: {$file}</comment>");
+                return true;
+            }
+            file_put_contents($file, $new_content);
+            $this->output->writeln("Sorted config file: {$file}");
+            return true;
+        }
+
+        return false;
     }
 }

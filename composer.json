@@ -50,6 +50,7 @@
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",
         "cs-fix": "php-cs-fixer fix",
+        "lint-config": "bin/spc dev:lint-config",
         "test": "vendor/bin/phpunit tests/ --no-coverage",
         "build:phar": "vendor/bin/box compile"
     },
