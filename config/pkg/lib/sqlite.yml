@@ -1,0 +1,12 @@
+sqlite:
+  type: library
+  artifact:
+    source: 'https://www.sqlite.org/2024/sqlite-autoconf-3450200.tar.gz'
+    metadata:
+      license-files: ['@/sqlite.txt']
+      license: Unlicense
+  headers:
+    - sqlite3.h
+    - sqlite3ext.h
+  static-libs@unix:
+    - libsqlite3.a
