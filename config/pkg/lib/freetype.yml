@@ -1,0 +1,22 @@
+freetype:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: freetype/freetype
+      match: VER-2-\d+-\d+
+    metadata:
+      license-files: [LICENSE.TXT]
+      license: FTL
+  depends:
+    - zlib
+  suggests:
+    - bzip2
+    - brotli
+  headers@unix:
+    - freetype2/freetype/freetype.h
+    - freetype2/ft2build.h
+  static-libs@unix:
+    - libfreetype.a
+  static-libs@windows:
+    - libfreetype_a.lib

@@ -1,0 +1,18 @@
+ext-amqp:
+  type: php-extension
+  artifact:
+    source:
+      type: url
+      url: 'https://pecl.php.net/get/amqp'
+      extract: php-src/ext/amqp
+      filename: amqp.tgz
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - librabbitmq
+  depends@windows:
+    - ext-openssl
+  php-extension:
+    arg-type: '--with-amqp@shared_suffix@ --with-librabbitmq-dir=@build_root_path@'
+    arg-type@windows: '--with-amqp'

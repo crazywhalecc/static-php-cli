@@ -1,0 +1,19 @@
+zstd:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: facebook/zstd
+      match: zstd.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
+  headers@unix:
+    - zdict.h
+    - zstd.h
+    - zstd_errors.h
+  pkg-configs:
+    - libzstd
+  static-libs@unix:
+    - libzstd.a

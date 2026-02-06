@@ -1,0 +1,21 @@
+ext-bcmath:
+  type: php-extension
+ext-openssl:
+  type: php-extension
+  depends:
+    - openssl
+    - zlib
+    - ext-zlib
+  php-extension:
+    arg-type: custom
+    arg-type@windows: with
+    build-with-php: true
+ext-zlib:
+  type: php-extension
+  depends:
+    - zlib
+  php-extension:
+    arg-type: custom
+    arg-type@windows: with
+    build-with-php: true
+    build-shared: false

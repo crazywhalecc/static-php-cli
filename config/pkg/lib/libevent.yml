@@ -1,0 +1,18 @@
+libevent:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: libevent/libevent
+      match: libevent.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
+  depends@unix:
+    - openssl
+  static-libs@unix:
+    - libevent.a
+    - libevent_core.a
+    - libevent_extra.a
+    - libevent_openssl.a

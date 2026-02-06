@@ -1,0 +1,13 @@
+unixodbc:
+  type: library
+  artifact:
+    source: 'https://www.unixodbc.org/unixODBC-2.3.12.tar.gz'
+    metadata:
+      license-files: [COPYING]
+      license: LGPL-2.1-only
+  depends:
+    - libiconv
+  static-libs@unix:
+    - libodbc.a
+    - libodbccr.a
+    - libodbcinst.a

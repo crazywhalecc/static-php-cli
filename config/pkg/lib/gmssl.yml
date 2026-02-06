@@ -1,0 +1,15 @@
+gmssl:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: guanzhi/GmSSL
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  frameworks:
+    - Security
+  static-libs@unix:
+    - libgmssl.a
+  static-libs@windows:
+    - gmssl.lib

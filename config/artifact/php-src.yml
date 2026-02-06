@@ -1,0 +1,7 @@
+php-src:
+  metadata:
+    license-files:
+      - LICENSE
+    license: PHP-3.01
+  source:
+    type: php-release

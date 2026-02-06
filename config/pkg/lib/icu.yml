@@ -1,0 +1,16 @@
+icu:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: unicode-org/icu
+      match: icu4c.+-src\.tgz
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: ICU
+  lang: cpp
+  pkg-configs:
+    - icu-uc
+    - icu-i18n
+    - icu-io

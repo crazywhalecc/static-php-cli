@@ -1,0 +1,16 @@
+libffi:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: libffi/libffi
+      match: libffi.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  headers@unix:
+    - ffi.h
+    - ffitarget.h
+  static-libs@unix:
+    - libffi.a

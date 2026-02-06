@@ -80,7 +80,6 @@ class SPCConfigUtil
         $libs = $this->getLibsString($libraries, !$this->absolute_libs);
 
         // additional OS-specific libraries (e.g. macOS -lresolv)
-        // embed
         if ($extra_libs = SPCTarget::getRuntimeLibs()) {
             $libs .= " {$extra_libs}";
         }
@@ -226,9 +225,17 @@ class SPCConfigUtil
         // parse pkg-configs
         foreach ($libraries as $library) {
             $pc = Config::getLib($library, 'pkg-configs', []);
+            $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+            $search_paths = array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path));
             foreach ($pc as $file) {
-                if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$file}.pc")) {
-                    throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "/pkgconfig'. Please build it first.");
+                $found = false;
+                foreach ($search_paths as $path) {
+                    if (file_exists($path . "/{$file}.pc")) {
+                        $found = true;
+                    }
+                }
+                if (!$found) {
+                    throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$library}] does not exist. Please build it first.");
                 }
             }
             $pc_cflags = implode(' ', $pc);
@@ -257,9 +264,17 @@ class SPCConfigUtil
         foreach ($libraries as $library) {
             // add pkg-configs libs
             $pkg_configs = Config::getLib($library, 'pkg-configs', []);
-            foreach ($pkg_configs as $pkg_config) {
-                if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$pkg_config}.pc")) {
-                    throw new WrongUsageException("pkg-config file '{$pkg_config}.pc' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "/pkgconfig'. Please build it first.");
+            $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+            $search_paths = array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path));
+            foreach ($pkg_configs as $file) {
+                $found = false;
+                foreach ($search_paths as $path) {
+                    if (file_exists($path . "/{$file}.pc")) {
+                        $found = true;
+                    }
+                }
+                if (!$found) {
+                    throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$library}] does not exist. Please build it first.");
                 }
             }
             $pkg_configs = implode(' ', $pkg_configs);

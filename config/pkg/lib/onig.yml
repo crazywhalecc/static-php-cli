@@ -1,0 +1,15 @@
+onig:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: kkos/oniguruma
+      match: onig-.+\.tar\.gz
+    metadata:
+      license-files: [COPYING]
+      license: Custom
+  headers:
+    - oniggnu.h
+    - oniguruma.h
+  static-libs@unix:
+    - libonig.a

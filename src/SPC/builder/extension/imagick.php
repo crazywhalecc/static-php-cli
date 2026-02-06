@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\CustomExt;
 
 #[CustomExt('imagick')]
@@ -19,7 +21,9 @@ class imagick extends Extension
     protected function splitLibsIntoStaticAndShared(string $allLibs): array
     {
         [$static, $shared] = parent::splitLibsIntoStaticAndShared($allLibs);
-        if (str_contains(getenv('PATH'), 'rh/devtoolset') || str_contains(getenv('PATH'), 'rh/gcc-toolset')) {
+        if (ToolchainManager::getToolchainClass() !== ZigToolchain::class &&
+            (str_contains(getenv('PATH'), 'rh/devtoolset') || str_contains(getenv('PATH'), 'rh/gcc-toolset'))
+        ) {
             $static .= ' -l:libstdc++.a';
             $shared = str_replace('-lstdc++', '', $shared);
         }

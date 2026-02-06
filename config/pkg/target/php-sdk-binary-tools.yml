@@ -1,0 +1,5 @@
+php-sdk-binary-tools:
+  type: target
+  artifact:
+    binary:
+      windows-x86_64: { type: git, rev: master, url: 'https://github.com/php/php-sdk-binary-tools.git', extract: '{php_sdk_path}' }

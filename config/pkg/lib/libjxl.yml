@@ -1,0 +1,21 @@
+libjxl:
+  type: library
+  artifact:
+    source:
+      type: git
+      url: 'https://github.com/libjxl/libjxl'
+      rev: main
+      submodules: [third_party/highway, third_party/libjpeg-turbo, third_party/sjpeg, third_party/skcms]
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
+  depends:
+    - brotli
+    - libjpeg
+    - libpng
+    - libwebp
+  pkg-configs:
+    - libjxl
+    - libjxl_cms
+    - libjxl_threads
+    - libhwy

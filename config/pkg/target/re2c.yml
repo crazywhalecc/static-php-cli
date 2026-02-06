@@ -1,0 +1,14 @@
+re2c:
+  type: target
+  artifact:
+    source:
+      type: ghrel
+      repo: skvadrik/re2c
+      match: re2c.+\.tar\.xz
+      prefer-stable: true
+    source-mirror: 'https://dl.static-php.dev/static-php-cli/deps/re2c/re2c-4.3.tar.xz'
+    metadata:
+      license-files: [LICENSE]
+      license: 'MIT OR Apache-2.0'
+  static-bins@unix:
+    - re2c

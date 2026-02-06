@@ -1,0 +1,9 @@
+pkg-config:
+  type: target
+  artifact:
+    source: 'https://dl.static-php.dev/static-php-cli/deps/pkg-config/pkg-config-0.29.2.tar.gz'
+    binary:
+      linux-x86_64: { type: ghrel, repo: static-php/static-php-cli-hosted, match: pkg-config-x86_64-linux-musl-1.2.5.txz, extract: { bin/pkg-config: '{pkg_root_path}/bin/pkg-config' } }
+      linux-aarch64: { type: ghrel, repo: static-php/static-php-cli-hosted, match: pkg-config-aarch64-linux-musl-1.2.5.txz, extract: { bin/pkg-config: '{pkg_root_path}/bin/pkg-config' } }
+      macos-x86_64: { type: ghrel, repo: static-php/static-php-cli-hosted, match: pkg-config-x86_64-darwin.txz, extract: { bin/pkg-config: '{pkg_root_path}/bin/pkg-config' } }
+      macos-aarch64: { type: ghrel, repo: static-php/static-php-cli-hosted, match: pkg-config-aarch64-darwin.txz, extract: { bin/pkg-config: '{pkg_root_path}/bin/pkg-config' } }

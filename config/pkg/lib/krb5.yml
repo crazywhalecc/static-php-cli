@@ -1,0 +1,23 @@
+krb5:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: krb5/krb5
+      match: krb5.+-final
+    metadata:
+      license-files: [NOTICE]
+      license: BSD-3-Clause
+      source-root: src
+  depends:
+    - openssl
+  suggests:
+    - ldap
+    - libedit
+  frameworks:
+    - Kerberos
+  headers:
+    - krb5.h
+    - gssapi/gssapi.h
+  pkg-configs:
+    - krb5-gssapi

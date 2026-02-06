@@ -1,0 +1,14 @@
+librabbitmq:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: alanxz/rabbitmq-c
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - openssl
+  static-libs@unix:
+    - librabbitmq.a
