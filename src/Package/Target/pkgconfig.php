@@ -40,6 +40,6 @@ class pkgconfig
             )
             ->make(with_install: 'install-exec');
 
-        shell()->exec('strip ' . BUILD_ROOT_PATH . '/bin/pkg-config');
+        shell()->exec("strip {$package->getBinDir()}/pkg-config");
     }
 }

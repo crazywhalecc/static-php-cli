@@ -15,10 +15,6 @@ class bzip2
     #[PatchDescription('Patch bzip2 Makefile to add -fPIC flag for position-independent code')]
     public function patchBzip2Makefile(Artifact $artifact): void
     {
-        FileSystem::replaceFileStr(
-            $artifact->getSourceDir() . '/Makefile',
-            'CFLAGS=-Wall',
-            'CFLAGS=-fPIC -Wall'
-        );
+        FileSystem::replaceFileStr("{$artifact->getSourceDir()}/Makefile", 'CFLAGS=-Wall', 'CFLAGS=-fPIC -Wall');
     }
 }

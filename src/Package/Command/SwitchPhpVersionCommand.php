@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Package\Command;
 
+use Package\Target\php;
 use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
@@ -25,7 +26,7 @@ class SwitchPhpVersionCommand extends BaseCommand
         $this->addArgument(
             'php-version',
             InputArgument::REQUIRED,
-            'PHP version (e.g., 8.4, 8.3, 8.2, 8.1, 8.0, 7.4, or specific like 8.4.5)',
+            'PHP version (e.g., ' . implode(', ', php::SUPPORTED_MAJOR_VERSIONS) . ' or specific like 8.4.5)',
         );
 
         // Downloader options
@@ -42,7 +43,7 @@ class SwitchPhpVersionCommand extends BaseCommand
         // Validate version format
         if (!$this->isValidPhpVersion($php_ver)) {
             $this->output->writeln("<error>Invalid PHP version '{$php_ver}'!</error>");
-            $this->output->writeln('<comment>Supported formats: 7.4, 8.0, 8.1, 8.2, 8.3, 8.4, or specific version like 8.4.5</comment>');
+            $this->output->writeln('<comment>Supported formats: ' . implode(', ', php::SUPPORTED_MAJOR_VERSIONS) . ', or specific version like 8.4.5</comment>');
             return static::FAILURE;
         }
 
@@ -101,13 +102,13 @@ class SwitchPhpVersionCommand extends BaseCommand
      * Validate PHP version format.
      *
      * Accepts:
-     * - Major.Minor format: 7.4, 8.0, 8.1, 8.2, 8.3, 8.4
-     * - Full version format: 8.4.5, 8.3.12, etc.
+     * - Major.Minor format, e.g. 7.4
+     * - Full version format, e.g. 8.4.5, 8.3.12, etc.
      */
     private function isValidPhpVersion(string $version): bool
     {
         // Check major.minor format (e.g., 8.4)
-        if (in_array($version, ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4'], true)) {
+        if (in_array($version, php::SUPPORTED_MAJOR_VERSIONS, true)) {
             return true;
         }
 

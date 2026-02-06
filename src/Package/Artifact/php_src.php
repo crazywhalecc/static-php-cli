@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Package\Artifact;
 
+use Package\Target\php;
 use StaticPHP\Attribute\Artifact\AfterSourceExtract;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Runtime\SystemTarget;
@@ -16,9 +17,8 @@ class php_src
     #[PatchDescription('Patch PHP source for libxml2 2.12 compatibility on Alpine Linux')]
     public function patchPhpLibxml212(): void
     {
-        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
-        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
-            $ver_id = intval($match[1]);
+        $ver_id = php::getPHPVersionID(return_null_if_failed: true);
+        if ($ver_id) {
             if ($ver_id < 80000) {
                 SourcePatcher::patchFile('spc_fix_alpine_build_php80.patch', SOURCE_PATH . '/php-src');
                 return;
@@ -39,9 +39,8 @@ class php_src
     #[PatchDescription('Patch GD extension for Windows builds')]
     public function patchGDWin32(): void
     {
-        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
-        if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
-            $ver_id = intval($match[1]);
+        $ver_id = php::getPHPVersionID(return_null_if_failed: true);
+        if ($ver_id) {
             if ($ver_id < 80200) {
                 // see: https://github.com/php/php-src/commit/243966177e39eb71822935042c3f13fa6c5b9eed
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gd/libgd/gdft.c', '#ifndef MSWIN32', '#ifndef _WIN32');
@@ -58,9 +57,8 @@ class php_src
     public function patchFfiCentos7FixO3strncmp(): void
     {
         spc_skip_if(!($ver = SystemTarget::getLibcVersion()) || version_compare($ver, '2.17', '>'));
-        spc_skip_if(!file_exists(SOURCE_PATH . '/php-src/main/php_version.h'));
-        $file = file_get_contents(SOURCE_PATH . '/php-src/main/php_version.h');
-        spc_skip_if(preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0 && intval($match[1]) < 80316);
+        $ver_id = php::getPHPVersionID(return_null_if_failed: true);
+        spc_skip_if($ver_id === null || $ver_id < 80316);
         SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
     }
 

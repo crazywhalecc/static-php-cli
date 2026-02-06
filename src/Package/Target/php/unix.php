@@ -262,7 +262,7 @@ trait unix
         UnixUtil::exportDynamicSymbols($libphp_a);
 
         // deploy embed php scripts
-        $package->runStage([$this, 'patchEmbedScripts']);
+        $package->runStage([$this, 'patchUnixEmbedScripts']);
     }
 
     #[Stage]

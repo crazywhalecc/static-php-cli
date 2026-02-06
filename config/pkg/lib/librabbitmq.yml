@@ -10,3 +10,5 @@ librabbitmq:
       license: MIT
   depends:
     - openssl
+  static-libs@unix:
+    - librabbitmq.a

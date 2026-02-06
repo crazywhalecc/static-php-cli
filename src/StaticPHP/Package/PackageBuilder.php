@@ -11,11 +11,14 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\System\LinuxUtil;
 
 class PackageBuilder
 {
+    use GlobalPathTrait;
+
     /** @var int make jobs count */
     public readonly int $concurrency;
 

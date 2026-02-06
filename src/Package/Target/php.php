@@ -43,18 +43,34 @@ class php extends TargetPackage
     use unix;
     use windows;
 
-    public static function getPHPVersionID(): int
+    /** @var string[] Supported major PHP versions */
+    public const array SUPPORTED_MAJOR_VERSIONS = ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
+
+    /**
+     * Get PHP version ID from php_version.h
+     *
+     * @param  null|string $from_custom_source    Where to read php_version.h from custom source
+     * @param  bool        $return_null_if_failed Whether to return null if failed to get version ID
+     * @return null|int    PHP version ID (e.g., 80400 for PHP 8.4.0) or null if failed
+     */
+    public static function getPHPVersionID(?string $from_custom_source = null, bool $return_null_if_failed = false): ?int
     {
-        $artifact = ArtifactLoader::getArtifactInstance('php-src');
-        if (!file_exists("{$artifact->getSourceDir()}/main/php_version.h")) {
+        $source_dir = $from_custom_source ?? ArtifactLoader::getArtifactInstance('php-src')->getSourceDir();
+        if (!file_exists("{$source_dir}/main/php_version.h")) {
+            if ($return_null_if_failed) {
+                return null;
+            }
             throw new WrongUsageException('PHP source files are not available, you need to download them first');
         }
 
-        $file = file_get_contents("{$artifact->getSourceDir()}/main/php_version.h");
+        $file = file_get_contents("{$source_dir}/main/php_version.h");
         if (preg_match('/PHP_VERSION_ID (\d+)/', $file, $match) !== 0) {
             return intval($match[1]);
         }
 
+        if ($return_null_if_failed) {
+            return null;
+        }
         throw new WrongUsageException('PHP version file format is malformed, please remove "./source/php-src" dir and download/extract again');
     }
 
