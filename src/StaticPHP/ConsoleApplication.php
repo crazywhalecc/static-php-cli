@@ -16,6 +16,7 @@ use StaticPHP\Command\DownloadCommand;
 use StaticPHP\Command\DumpLicenseCommand;
 use StaticPHP\Command\ExtractCommand;
 use StaticPHP\Command\InstallPackageCommand;
+use StaticPHP\Command\ResetCommand;
 use StaticPHP\Command\SPCConfigCommand;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Registry\PackageLoader;
@@ -58,6 +59,7 @@ class ConsoleApplication extends Application
             new ExtractCommand(),
             new SPCConfigCommand(),
             new DumpLicenseCommand(),
+            new ResetCommand(),
 
             // dev commands
             new ShellCommand(),
