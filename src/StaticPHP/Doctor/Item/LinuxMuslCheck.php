@@ -73,10 +73,14 @@ class LinuxMuslCheck
             $prefix = 'sudo ';
             logger()->warning('Current user is not root, using sudo for running command');
         }
-        shell()->cd(SOURCE_PATH . '/musl-wrapper')
+        $shell = shell()->cd(SOURCE_PATH . '/musl-wrapper')
             ->exec('CC=gcc CXX=g++ AR=ar LD=ld ./configure --disable-gcc-wrapper')
-            ->exec('CC=gcc CXX=g++ AR=ar LD=ld make -j')
-            ->exec("CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
+            ->exec('CC=gcc CXX=g++ AR=ar LD=ld make -j');
+        if ($prefix !== '') {
+            f_passthru('cd ' . SOURCE_PATH . "/musl-wrapper && CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
+        } else {
+            $shell->exec("CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
+        }
         return true;
     }
 
@@ -97,7 +101,7 @@ class LinuxMuslCheck
         $downloader->add('musl-toolchain')->download(false);
         $extractor->extract('musl-toolchain');
         $pkg_root = PKG_ROOT_PATH . '/musl-toolchain';
-        shell()->exec("{$prefix}cp -rf {$pkg_root}/* /usr/local/musl");
+        f_passthru("{$prefix}cp -rf {$pkg_root}/* /usr/local/musl");
         FileSystem::removeDir($pkg_root);
         return true;
     }

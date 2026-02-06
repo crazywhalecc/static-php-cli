@@ -71,7 +71,7 @@ class LinuxToolCheck
             }
         }
         if (!empty($missing)) {
-            return CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', [$distro, $missing]);
+            return CheckResult::fail(implode(', ', $missing) . ' not installed on your system', 'install-linux-tools', ['distro' => $distro, 'missing' => $missing]);
         }
         return CheckResult::ok();
     }
@@ -96,7 +96,7 @@ class LinuxToolCheck
         if (LinuxUtil::isMuslDist()) {
             // check linux-headers installation
             if (!file_exists('/usr/include/linux/mman.h')) {
-                return CheckResult::fail('linux-headers not installed on your system', 'install-linux-tools', [LinuxUtil::getOSRelease(), ['linux-headers']]);
+                return CheckResult::fail('linux-headers not installed on your system', 'install-linux-tools', ['distro' => LinuxUtil::getOSRelease(), 'missing' => ['linux-headers']]);
             }
         }
         return CheckResult::ok();
@@ -137,7 +137,7 @@ class LinuxToolCheck
         $to_install = $is_debian ? str_replace('xz', 'xz-utils', $missing) : $missing;
         // debian, alpine libtool -> libtoolize
         $to_install = str_replace('libtoolize', 'libtool', $to_install);
-        shell()->exec($prefix . $install_cmd . ' ' . implode(' ', $to_install));
+        f_passthru($prefix . $install_cmd . ' ' . implode(' ', $to_install));
 
         return true;
     }

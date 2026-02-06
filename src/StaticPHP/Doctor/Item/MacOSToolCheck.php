@@ -53,7 +53,7 @@ class MacOSToolCheck
             }
         }
         if (!empty($missing)) {
-            return CheckResult::fail('missing system commands: ' . implode(', ', $missing), 'build-tools', [$missing]);
+            return CheckResult::fail('missing system commands: ' . implode(', ', $missing), 'build-tools', ['missing' => $missing]);
         }
         return CheckResult::ok();
     }
@@ -63,7 +63,7 @@ class MacOSToolCheck
     {
         // if the bison command is /usr/bin/bison, it is the system bison that may be too old
         if (($bison = MacOSUtil::findCommand('bison', $command_path)) === null) {
-            return CheckResult::fail('bison is not installed or too old', 'build-tools', [['bison']]);
+            return CheckResult::fail('bison is not installed or too old', 'build-tools', ['missing' => ['bison']]);
         }
         // check version: bison (GNU Bison) x.y(.z)
         $version = shell()->execWithResult("{$bison} --version", false);
