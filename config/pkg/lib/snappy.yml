@@ -1,0 +1,20 @@
+snappy:
+  type: library
+  artifact:
+    source:
+      type: git
+      rev: main
+      url: 'https://github.com/google/snappy'
+    metadata:
+      license-files: [COPYING]
+      license: BSD-3-Clause
+  depends:
+    - zlib
+  headers@unix:
+    - snappy.h
+    - snappy-c.h
+    - snappy-sinksource.h
+    - snappy-stubs-public.h
+  lang: cpp
+  static-libs@unix:
+    - libsnappy.a
