@@ -1,0 +1,11 @@
+libuv:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: libuv/libuv
+    metadata:
+      license-files: [LICENSE, LICENSE-extra]
+      license: MIT
+  static-libs@unix:
+    - libuv.a
