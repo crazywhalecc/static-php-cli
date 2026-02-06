@@ -79,7 +79,7 @@ class PhpExtensionPackage extends Package
             return ApplicationContext::invoke($callback, ['shared' => $shared, static::class => $this, Package::class => $this]);
         }
         $escapedPath = str_replace("'", '', escapeshellarg(BUILD_ROOT_PATH)) !== BUILD_ROOT_PATH || str_contains(BUILD_ROOT_PATH, ' ') ? escapeshellarg(BUILD_ROOT_PATH) : BUILD_ROOT_PATH;
-        $name = str_replace('_', '-', $this->getExtensionName());
+        $name = str_replace('_', '-', $this->getName());
         $ext_config = PackageConfig::get($name, 'php-extension', []);
 
         $arg_type = match (SystemTarget::getTargetOS()) {
@@ -89,13 +89,22 @@ class PhpExtensionPackage extends Package
             default => $ext_config['arg-type'] ?? 'enable',
         };
 
-        return match ($arg_type) {
+        $arg = match ($arg_type) {
             'enable' => $shared ? "--enable-{$name}=shared" : "--enable-{$name}",
             'enable-path' => $shared ? "--enable-{$name}=shared,{$escapedPath}" : "--enable-{$name}={$escapedPath}",
             'with' => $shared ? "--with-{$name}=shared" : "--with-{$name}",
             'with-path' => $shared ? "--with-{$name}=shared,{$escapedPath}" : "--with-{$name}={$escapedPath}",
-            default => throw new WrongUsageException("Unknown argument type '{$arg_type}' for PHP extension '{$name}'"),
+            'custom' => '',
+            default => $arg_type,
         };
+        // customize argument from config string
+        $replace = get_pack_replace();
+        $arg = str_replace(array_values($replace), array_keys($replace), $arg);
+        $replace = [
+            '@shared_suffix@' => $shared ? '=shared' : '',
+            '@shared_path_suffix@' => $shared ? "=shared,{$escapedPath}" : "={$escapedPath}",
+        ];
+        return str_replace(array_keys($replace), array_values($replace), $arg);
     }
 
     public function setBuildShared(bool $build_shared = true): void
@@ -233,7 +242,7 @@ class PhpExtensionPackage extends Package
     {
         // Add build stages for shared build on Unix-like systems
         // TODO: Windows shared build support
-        if ($this->build_shared && in_array(SystemTarget::getTargetOS(), ['Linux', 'Darwin'])) {
+        if ((PackageConfig::get($this->getName(), 'php-extension')['build-shared'] ?? true) && in_array(SystemTarget::getTargetOS(), ['Linux', 'Darwin'])) {
             if (!$this->hasStage('build')) {
                 $this->addBuildFunction(SystemTarget::getTargetOS(), [$this, 'buildSharedForUnix']);
             }
