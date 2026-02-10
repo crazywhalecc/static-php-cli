@@ -614,8 +614,13 @@ class PackageInstaller
             }
         } else {
             // process specific php sapi targets
-            $this->build_packages['php'] = PackageLoader::getPackage('php');
-            $this->install_packages[$package->getName()] = $package;
+            if ($package->getName() === 'frankenphp') {
+                $this->build_packages['php'] = PackageLoader::getPackage('php');
+                $this->build_packages['frankenphp'] = PackageLoader::getPackage('frankenphp');
+            } else {
+                $this->install_packages[$package->getName()] = $package;
+                $this->build_packages['php'] = PackageLoader::getPackage('php');
+            }
         }
     }
 

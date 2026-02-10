@@ -1,16 +1,3 @@
-frankenphp:
-  type: virtual-target
-  artifact:
-    source:
-      type: ghtar
-      repo: php/frankenphp
-      prefer-stable: true
-    metadata:
-      license-files: [LICENSE]
-      license: MIT
-  depends:
-    - php-embed
-    - go-xcaddy
 php:
   type: target
   artifact: php-src
@@ -32,6 +19,8 @@ php-fpm:
   type: virtual-target
   depends:
     - php
+  suggests@linux:
+    - libacl
 php-micro:
   type: virtual-target
   artifact:

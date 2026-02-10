@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Package\Target;
 
+use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\InitPackage;
 use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Util\GlobalEnvManager;
@@ -12,6 +13,7 @@ use StaticPHP\Util\GlobalEnvManager;
 class go_xcaddy
 {
     #[InitPackage]
+    #[BeforeStage('frankenphp', 'build', 'go-xcaddy')]
     public function init(): void
     {
         if (is_dir(PKG_ROOT_PATH . '/go-xcaddy/bin')) {

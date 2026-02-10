@@ -1,0 +1,4 @@
+ext-phar:
+  type: php-extension
+  depends:
+    - zlib

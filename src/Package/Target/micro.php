@@ -19,4 +19,11 @@ class micro
     {
         FileSystem::replaceFileStr("{$package->getSourceDir()}/Makefile", 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
     }
+
+    #[BeforeStage('php', [php::class, 'makeForUnix'], 'php-micro')]
+    #[PatchDescription('Patch Makefile to skip installing micro binary')]
+    public function patchMakefileBeforeUnixMake(TargetPackage $package): void
+    {
+        FileSystem::replaceFileStr("{$package->getSourceDir()}/Makefile", 'install-micro', '');
+    }
 }
