@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Package\Target\php;
 
+use Package\Target\php;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\PatchException;
 use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\PackageBuilder;
@@ -20,7 +22,6 @@ use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
-use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
 use StaticPHP\Util\System\UnixUtil;
 use StaticPHP\Util\V2CompatLayer;
@@ -28,6 +29,8 @@ use ZM\Logger\ConsoleColor;
 
 trait unix
 {
+    use frankenphp;
+
     #[BeforeStage('php', [self::class, 'buildconfForUnix'], 'php')]
     #[PatchDescription('Patch configure.ac for musl and musl-toolchain')]
     #[PatchDescription('Let php m4 tools use static pkg-config')]
@@ -46,11 +49,47 @@ trait unix
         FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
     }
 
+    #[BeforeStage('php', [php::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch TSRM for musl TLS symbol visibility issue')]
+    #[PatchDescription('Patch ext/standard/info.c for configure command info')]
+    public function patchTSRMBeforeUnixMake(ToolchainInterface $toolchain): void
+    {
+        if (!$toolchain->isStatic() && SystemTarget::getLibc() === 'musl') {
+            // we need to patch the symbol to global visibility, otherwise extensions with `initial-exec` TLS model will fail to load
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        } else {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        }
+
+        if (str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), '-release')) {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef CONFIGURE_COMMAND',
+                '#ifdef NO_CONFIGURE_COMMAND',
+            );
+        } else {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef NO_CONFIGURE_COMMAND',
+                '#ifdef CONFIGURE_COMMAND',
+            );
+        }
+    }
+
     #[Stage]
     public function buildconfForUnix(TargetPackage $package): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./buildconf'));
         V2CompatLayer::emitPatchPoint('before-php-buildconf');
+        // run ./buildconf
         shell()->cd($package->getSourceDir())->exec(getenv('SPC_CMD_PREFIX_PHP_BUILDCONF'));
     }
 
@@ -112,18 +151,23 @@ trait unix
         logger()->info('cleaning up php-src build files');
         shell()->cd($package->getSourceDir())->exec('make clean');
 
+        // cli
         if ($installer->isPackageResolved('php-cli')) {
             $package->runStage([self::class, 'makeCliForUnix']);
         }
+        // cgi
         if ($installer->isPackageResolved('php-cgi')) {
             $package->runStage([self::class, 'makeCgiForUnix']);
         }
+        // fpm
         if ($installer->isPackageResolved('php-fpm')) {
             $package->runStage([self::class, 'makeFpmForUnix']);
         }
+        // micro
         if ($installer->isPackageResolved('php-micro')) {
             $package->runStage([self::class, 'makeMicroForUnix']);
         }
+        // embed
         if ($installer->isPackageResolved('php-embed')) {
             $package->runStage([self::class, 'makeEmbedForUnix']);
         }
@@ -175,32 +219,44 @@ trait unix
     }
 
     #[Stage]
-    #[PatchDescription('Patch phar extension for micro SAPI to support compressed phar')]
+    #[PatchDescription('Patch micro.sfx after UPX compression')]
     public function makeMicroForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
-        $phar_patched = false;
-        try {
-            if ($installer->isPackageResolved('ext-phar')) {
-                $phar_patched = true;
-                SourcePatcher::patchMicroPhar(self::getPHPVersionID());
-            }
-            InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
-            // apply --with-micro-fake-cli option
-            $vars = $this->makeVars($installer);
-            $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-            $makeArgs = $this->makeVarsToArgs($vars);
-            // build
-            shell()->cd($package->getSourceDir())
-                ->setEnv($vars)
-                ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
+        InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
+        // apply --with-micro-fake-cli option
+        $vars = $this->makeVars($installer);
+        $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+        $makeArgs = $this->makeVarsToArgs($vars);
+        // build
+        shell()->cd($package->getSourceDir())
+            ->setEnv($vars)
+            ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
 
-            $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', BUILD_BIN_PATH . '/micro.sfx');
-            $package->setOutput('Binary path for micro SAPI', BUILD_BIN_PATH . '/micro.sfx');
-        } finally {
-            if ($phar_patched) {
-                SourcePatcher::unpatchMicroPhar();
+        $dst = BUILD_BIN_PATH . '/micro.sfx';
+        $builder->deployBinary("{$package->getSourceDir()}/sapi/micro/micro.sfx", $dst);
+
+        /*
+         * Patch micro.sfx after UPX compression.
+         * micro needs special section handling in LinuxBuilder.
+         * The micro.sfx does not support UPX directly, but we can remove UPX
+         * info segment to adapt.
+         * This will also make micro.sfx with upx-packed more like a malware fore antivirus
+         */
+        if ($package->getBuildOption('with-upx-pack') && SystemTarget::getTargetOS() === 'Linux') {
+            // strip first
+            // cut binary with readelf
+            [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \$1, \$2, \$3, \$4, \$6, \$7}'");
+            $out[1] = explode(' ', $out[1]);
+            $offset = $out[1][0];
+            if ($ret !== 0 || !str_starts_with($offset, '0x')) {
+                throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
             }
+            $offset = hexdec($offset);
+            // remove upx extra wastes
+            file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
         }
+
+        $package->setOutput('Binary path for micro SAPI', BUILD_BIN_PATH . '/micro.sfx');
     }
 
     #[Stage]
@@ -229,13 +285,18 @@ trait unix
         // process libphp.so for shared embed
         $suffix = SystemTarget::getTargetOS() === 'Darwin' ? 'dylib' : 'so';
         $libphp_so = "{$package->getLibDir()}/libphp.{$suffix}";
+        $libphp_so_dst = $libphp_so;
         if (file_exists($libphp_so)) {
             // rename libphp.so if -release is set
             if (SystemTarget::getTargetOS() === 'Linux') {
-                $this->processLibphpSoFile($libphp_so, $installer);
+                // deploy libphp.so
+                preg_match('/-release\s+(\S*)/', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $matches);
+                if (!empty($matches[1])) {
+                    $libphp_so_dst = str_replace('.so', '-' . $matches[1] . '.so', $libphp_so);
+                }
             }
             // deploy
-            $builder->deployBinary($libphp_so, $libphp_so, false);
+            $builder->deployBinary($libphp_so, $libphp_so_dst, false);
             $package->setOutput('Library path for embed SAPI', $libphp_so);
         }
 
@@ -312,7 +373,11 @@ trait unix
     public function build(TargetPackage $package): void
     {
         // virtual target, do nothing
-        if ($package->getName() !== 'php') {
+        if (in_array($package->getName(), ['php-cli', 'php-fpm', 'php-cgi', 'php-micro', 'php-embed'], true)) {
+            return;
+        }
+        if ($package->getName() === 'frankenphp') {
+            $package->runStage([$this, 'buildFrankenphpUnix']);
             return;
         }
 

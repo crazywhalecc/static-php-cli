@@ -113,11 +113,10 @@ class PackageBuilder
             throw new SPCInternalException("Deploy failed. Cannot find file after copy: {$dst}");
         }
 
-        // extract debug info
-        $this->extractDebugInfo($dst);
-
-        // strip
         if (!$this->getOption('no-strip') && SystemTarget::isUnix()) {
+            // extract debug info
+            $this->extractDebugInfo($dst);
+            // strip binary
             $this->stripBinary($dst);
         }
 
@@ -145,13 +144,12 @@ class PackageBuilder
     public function extractDebugInfo(string $binary_path): string
     {
         $target_dir = BUILD_ROOT_PATH . '/debug';
+        FileSystem::createDir($target_dir);
         $basename = basename($binary_path);
         $debug_file = "{$target_dir}/{$basename}" . (SystemTarget::getTargetOS() === 'Darwin' ? '.dwarf' : '.debug');
         if (SystemTarget::getTargetOS() === 'Darwin') {
-            FileSystem::createDir($target_dir);
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
-            FileSystem::createDir($target_dir);
             if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
                 shell()
                     ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
@@ -176,6 +174,7 @@ class PackageBuilder
         shell()->exec(match (SystemTarget::getTargetOS()) {
             'Darwin' => "strip -S {$binary_path}",
             'Linux' => "strip --strip-unneeded {$binary_path}",
+            'Windows' => 'echo "Skip strip on Windows"', // Windows strip is not available for now
             default => throw new SPCInternalException('stripBinary is only supported on Linux and macOS'),
         });
     }
