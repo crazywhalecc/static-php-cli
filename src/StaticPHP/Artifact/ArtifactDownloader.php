@@ -6,16 +6,9 @@ namespace StaticPHP\Artifact;
 
 use Psr\Log\LogLevel;
 use StaticPHP\Artifact\Downloader\DownloadResult;
-use StaticPHP\Artifact\Downloader\Type\BitBucketTag;
 use StaticPHP\Artifact\Downloader\Type\DownloadTypeInterface;
-use StaticPHP\Artifact\Downloader\Type\FileList;
 use StaticPHP\Artifact\Downloader\Type\Git;
-use StaticPHP\Artifact\Downloader\Type\GitHubRelease;
-use StaticPHP\Artifact\Downloader\Type\GitHubTarball;
-use StaticPHP\Artifact\Downloader\Type\HostedPackageBin;
 use StaticPHP\Artifact\Downloader\Type\LocalDir;
-use StaticPHP\Artifact\Downloader\Type\PhpRelease;
-use StaticPHP\Artifact\Downloader\Type\PIE;
 use StaticPHP\Artifact\Downloader\Type\Url;
 use StaticPHP\Artifact\Downloader\Type\ValidatorInterface;
 use StaticPHP\DI\ApplicationContext;
@@ -38,19 +31,7 @@ use ZM\Logger\ConsoleColor;
 class ArtifactDownloader
 {
     /** @var array<string, class-string<DownloadTypeInterface>> */
-    public const array DOWNLOADERS = [
-        'bitbuckettag' => BitBucketTag::class,
-        'filelist' => FileList::class,
-        'git' => Git::class,
-        'ghrel' => GitHubRelease::class,
-        'ghtar' => GitHubTarball::class,
-        'ghtagtar' => GitHubTarball::class,
-        'local' => LocalDir::class,
-        'pie' => PIE::class,
-        'url' => Url::class,
-        'php-release' => PhpRelease::class,
-        'hosted' => HostedPackageBin::class,
-    ];
+    protected array $downloaders = [];
 
     /** @var array<string, Artifact> Artifact objects */
     protected array $artifacts = [];
@@ -214,6 +195,9 @@ class ArtifactDownloader
 
         // read downloads dir
         $this->_before_files = FileSystem::scanDirFiles(DOWNLOAD_PATH, false, true, true) ?: [];
+
+        // load downloaders
+        $this->downloaders = require ROOT_DIR . '/config/downloader.php';
     }
 
     /**
@@ -371,7 +355,7 @@ class ArtifactDownloader
         foreach ($queue as $item) {
             try {
                 $instance = null;
-                $call = self::DOWNLOADERS[$item['config']['type']] ?? null;
+                $call = $this->downloaders[$item['config']['type']] ?? null;
                 $type_display_name = match (true) {
                     $item['lock'] === 'source' && ($callback = $artifact->getCustomSourceCallback()) !== null => 'user defined source downloader',
                     $item['lock'] === 'binary' && ($callback = $artifact->getCustomBinaryCallback()) !== null => 'user defined binary downloader',

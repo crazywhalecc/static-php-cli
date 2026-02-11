@@ -74,6 +74,34 @@ class php extends TargetPackage
         throw new WrongUsageException('PHP version file format is malformed, please remove "./source/php-src" dir and download/extract again');
     }
 
+    /**
+     * Get PHP version from php_version.h
+     *
+     * @param  null|string $from_custom_source    Where to read php_version.h from custom source
+     * @param  bool        $return_null_if_failed Whether to return null if failed to get version
+     * @return null|string PHP version (e.g., "8.4.0") or null if failed
+     */
+    public static function getPHPVersion(?string $from_custom_source = null, bool $return_null_if_failed = false): ?string
+    {
+        $source_dir = $from_custom_source ?? ArtifactLoader::getArtifactInstance('php-src')->getSourceDir();
+        if (!file_exists("{$source_dir}/main/php_version.h")) {
+            if ($return_null_if_failed) {
+                return null;
+            }
+            throw new WrongUsageException('PHP source files are not available, you need to download them first');
+        }
+
+        $file = file_get_contents("{$source_dir}/main/php_version.h");
+        if (preg_match('/PHP_VERSION "(.*)"/', $file, $match) !== 0) {
+            return $match[1];
+        }
+
+        if ($return_null_if_failed) {
+            return null;
+        }
+        throw new WrongUsageException('PHP version file format is malformed, please remove "./source/php-src" dir and download/extract again');
+    }
+
     #[InitPackage]
     public function init(TargetPackage $package): void
     {
@@ -222,6 +250,8 @@ class php extends TargetPackage
             'Static Extensions (' . count($static_extensions) . ')' => implode(',', array_map(fn ($x) => substr($x->getName(), 4), $static_extensions)),
             'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
             'Install Packages (' . count($install_packages) . ')' => implode(',', array_map(fn ($x) => $x->getName(), $install_packages)),
+            'Strip Binaries' => $package->getBuildOption('no-strip') ? 'No' : 'Yes',
+            'Enable ZTS' => $package->getBuildOption('enable-zts') ? 'Yes' : 'No',
         ];
     }
 
@@ -236,7 +266,7 @@ class php extends TargetPackage
             logger()->info("Adding hardcoded INI [{$source_name} = {$ini_value}]");
         }
         if (!empty($custom_ini)) {
-            SourcePatcher::patchHardcodedINI($package->getSourceDir(), $custom_ini);
+            ApplicationContext::invoke([SourcePatcher::class, 'patchHardcodedINI'], [$package->getSourceDir(), $custom_ini]);
         }
 
         // Patch StaticPHP version
