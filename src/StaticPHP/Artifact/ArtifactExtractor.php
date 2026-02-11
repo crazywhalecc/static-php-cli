@@ -428,6 +428,9 @@ class ArtifactExtractor
             FileSystem::copyDir($src, $dst);
         } else {
             copy($src, $dst);
+            // copy permissions
+            $perms = fileperms($src) & 0x1FF; // Get rwxrwxrwx bits
+            chmod($dst, $perms);
         }
 
         logger()->debug("Copied {$src} -> {$dst}");
