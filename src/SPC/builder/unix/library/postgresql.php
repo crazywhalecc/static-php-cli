@@ -17,7 +17,7 @@ trait postgresql
         // fix aarch64 build on glibc 2.17 (e.g. CentOS 7)
         if (SPCTarget::getLibcVersion() === '2.17' && GNU_ARCH === 'aarch64') {
             try {
-                FileSystem::replaceFileStr("{$this->source_dir}/src/port/pg_popcount_aarch64.c", 'HWCAP_SVE', '0');
+                // FileSystem::replaceFileStr("{$this->source_dir}/src/port/pg_popcount_aarch64.c", 'HWCAP_SVE', '0');
                 FileSystem::replaceFileStr(
                     "{$this->source_dir}/src/port/pg_crc32c_armv8_choose.c",
                     '#if defined(__linux__) && !defined(__aarch64__) && !defined(HWCAP2_CRC32)',
