@@ -120,7 +120,7 @@ jobs:
         with:
           files: dist/${{ matrix.operating-system.filename }}
 
-      - name: "Deploy to self-hosted OSS"
+      - name: "Deploy to self-hosted OSS (nightly)"
         # only run this step if the repository is static-php-cli and the branch is main
         if: github.repository == 'crazywhalecc/static-php-cli' && github.ref == 'refs/heads/main'
         uses: static-php/upload-s3-action@v1.0.0
@@ -130,6 +130,18 @@ jobs:
           aws_bucket: ${{ secrets.AWS_BUCKET }}
           source_dir: "dist/"
           destination_dir: static-php-cli/spc-bin/nightly/
+          endpoint: ${{ secrets.AWS_ENDPOINT }}
+
+      - name: "Deploy to self-hosted OSS (release)"
+        # only run this step if the repository is static-php-cli and release tag
+        if: github.repository == 'crazywhalecc/static-php-cli' && startsWith(github.ref, 'refs/tags/')
+        uses: static-php/upload-s3-action@v1.0.0
+        with:
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
+          source_dir: "dist/"
+          destination_dir: static-php-cli/spc-bin/${{ github.event.release.tag_name }}/
           endpoint: ${{ secrets.AWS_ENDPOINT }}
 
       - name: "Upload Artifact"
