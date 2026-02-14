@@ -7,6 +7,7 @@ namespace StaticPHP\Config;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\Registry;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\FileSystem;
 use Symfony\Component\Yaml\Yaml;
 
 class PackageConfig
@@ -23,7 +24,7 @@ class PackageConfig
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load pkg.json config.");
         }
         $loaded = [];
-        $files = glob("{$dir}/*");
+        $files = FileSystem::scanDirFiles($dir, false);
         if (is_array($files)) {
             foreach ($files as $file) {
                 self::loadFromFile($file, $registry_name);
