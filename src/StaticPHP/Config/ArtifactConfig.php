@@ -6,6 +6,7 @@ namespace StaticPHP\Config;
 
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\Registry;
+use StaticPHP\Util\FileSystem;
 use Symfony\Component\Yaml\Yaml;
 
 class ArtifactConfig
@@ -18,7 +19,7 @@ class ArtifactConfig
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load artifact config.");
         }
         $loaded = [];
-        $files = glob("{$dir}/*");
+        $files = FileSystem::scanDirFiles($dir, false);
         if (is_array($files)) {
             foreach ($files as $file) {
                 self::loadFromFile($file, $registry_name);
