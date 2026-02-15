@@ -14,7 +14,6 @@ use StaticPHP\Artifact\Downloader\Type\ValidatorInterface;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Exception\ExecutionException;
-use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\ArtifactLoader;
@@ -316,9 +315,6 @@ class ArtifactDownloader
                     InteractiveTerm::success("Downloaded all {$count} artifacts.{$skip_msg}\n", true);
                 }
             }
-        } catch (SPCException $e) {
-            array_map(fn ($x) => InteractiveTerm::error($x), explode("\n", $e->getMessage()));
-            throw new WrongUsageException();
         } finally {
             if ($interactive) {
                 Shell::passthruCallback(null);
