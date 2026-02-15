@@ -13,7 +13,6 @@
         "ext-mbstring": "*",
         "ext-zlib": "*",
         "laravel/prompts": "~0.1",
-        "nette/php-generator": "^4.2",
         "php-di/php-di": "^7.1",
         "symfony/console": "^5.4 || ^6 || ^7",
         "symfony/process": "^7.2",
