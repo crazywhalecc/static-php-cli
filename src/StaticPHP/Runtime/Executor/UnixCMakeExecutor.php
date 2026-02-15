@@ -311,6 +311,17 @@ CMAKE;
             $callable();
             return $this;
         } catch (SPCException $e) {
+            // CMake configure log (CMake 3.26+)
+            $cmake_configure_log = "{$this->build_dir}/CMakeFiles/CMakeConfigureLog.yaml";
+            if (file_exists($cmake_configure_log)) {
+                logger()->debug("CMake configure log file found: {$cmake_configure_log}");
+                $log_file = "lib.{$this->package->getName()}.cmake-configure.log";
+                logger()->debug('Saved CMake configure log file to: ' . SPC_LOGS_DIR . "/{$log_file}");
+                $e->addExtraLogFile("{$this->package->getName()} library CMakeConfigureLog.yaml", $log_file);
+                copy($cmake_configure_log, SPC_LOGS_DIR . "/{$log_file}");
+            }
+
+            // CMake error log
             $cmake_log = "{$this->build_dir}/CMakeFiles/CMakeError.log";
             if (file_exists($cmake_log)) {
                 logger()->debug("CMake error log file found: {$cmake_log}");
@@ -319,6 +330,8 @@ CMAKE;
                 $e->addExtraLogFile("{$this->package->getName()} library CMakeError.log", $log_file);
                 copy($cmake_log, SPC_LOGS_DIR . "/{$log_file}");
             }
+
+            // CMake output log
             $cmake_output = "{$this->build_dir}/CMakeFiles/CMakeOutput.log";
             if (file_exists($cmake_output)) {
                 logger()->debug("CMake output log file found: {$cmake_output}");
