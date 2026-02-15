@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace StaticPHP\Exception;
 
-use SPC\builder\Extension;
-
 /**
  * Exception thrown for validation errors in SPC.
  *
@@ -23,12 +21,6 @@ class ValidationException extends SPCException
         // init validation module
         if ($validation_module === null) {
             foreach ($this->getTrace() as $trace) {
-                // Extension validate() => "Extension validator"
-                if (is_a($trace['class'] ?? null, Extension::class, true) && $trace['function'] === 'validate') {
-                    $this->validation_module = 'Extension validator';
-                    break;
-                }
-
                 // Other => "ClassName::functionName"
                 $this->validation_module = [
                     'class' => $trace['class'] ?? null,

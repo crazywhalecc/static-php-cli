@@ -34,7 +34,7 @@ class LintConfigCommand extends BaseCommand
 
         if ($checkOnly && $hasChanges) {
             $this->output->writeln('<error>Some config files need sorting. Run "bin/spc dev:lint-config" to fix them.</error>');
-            return static::FAILURE;
+            return static::VALIDATION_ERROR;
         }
 
         return static::SUCCESS;
@@ -125,7 +125,7 @@ class LintConfigCommand extends BaseCommand
             return false;
         }
         ksort($data);
-        foreach ($data as $artifact_name => &$config) {
+        foreach ($data as &$config) {
             uksort($config, $config_type === 'artifact' ? [$this, 'artifactSortKey'] : [$this, 'packageSortKey']);
         }
         unset($config);

@@ -28,6 +28,6 @@ class ShellCommand extends BaseCommand
             return $code;
         }
         $this->output->writeln('<error>Unsupported OS for shell command.</error>');
-        return static::FAILURE;
+        return static::ENVIRONMENT_ERROR;
     }
 }

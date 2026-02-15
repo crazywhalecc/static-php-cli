@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace StaticPHP\Exception;
 
-use SPC\builder\BuilderBase;
-use SPC\builder\freebsd\library\BSDLibraryBase;
-use SPC\builder\LibraryBase;
-use SPC\builder\linux\library\LinuxLibraryBase;
-use SPC\builder\macos\library\MacOSLibraryBase;
-use SPC\builder\windows\library\WindowsLibraryBase;
+use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\Package;
+use StaticPHP\Package\PackageBuilder;
+use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Package\TargetPackage;
 
 /**
  * Base class for SPC exceptions.
@@ -20,11 +20,17 @@ use SPC\builder\windows\library\WindowsLibraryBase;
  */
 abstract class SPCException extends \Exception
 {
-    private ?array $library_info = null;
+    /** @var null|array Package information */
+    private ?array $package_info = null;
 
-    private ?array $extension_info = null;
+    /** @var null|array Package builder information */
+    private ?array $package_builder_info = null;
 
-    private ?array $build_php_info = null;
+    /** @var null|array Package installer information */
+    private ?array $package_installer_info = null;
+
+    /** @var array Stage execution call stack */
+    private array $stage_stack = [];
 
     private array $extra_log_files = [];
 
@@ -34,9 +40,38 @@ abstract class SPCException extends \Exception
         $this->loadStackTraceInfo();
     }
 
-    public function bindExtensionInfo(array $extension_info): void
+    /**
+     * Bind package information manually.
+     *
+     * @param array $package_info Package information array
+     */
+    public function bindPackageInfo(array $package_info): void
     {
-        $this->extension_info = $extension_info;
+        $this->package_info = $package_info;
+    }
+
+    /**
+     * Add stage to the call stack.
+     * This builds a call chain like: build -> configure -> compile
+     *
+     * @param string $stage_name Stage name being executed
+     * @param array  $context    Stage context (optional)
+     */
+    public function addStageToStack(string $stage_name, array $context = []): void
+    {
+        $this->stage_stack[] = [
+            'stage_name' => $stage_name,
+            'context_keys' => array_keys($context),
+        ];
+    }
+
+    /**
+     * Legacy method for backward compatibility.
+     * @deprecated Use addStageToStack() instead
+     */
+    public function bindStageInfo(string $stage_name, array $context = []): void
+    {
+        $this->addStageToStack($stage_name, $context);
     }
 
     public function addExtraLogFile(string $key, string $filename): void
@@ -45,52 +80,74 @@ abstract class SPCException extends \Exception
     }
 
     /**
-     * Returns an array containing information about the SPC module.
-     *
-     * This method can be overridden by subclasses to provide specific module information.
+     * Returns package information.
      *
      * @return null|array{
-     *     library_name: string,
-     *     library_class: string,
-     *     os: string,
+     *     package_name: string,
+     *     package_type: string,
+     *     package_class: string,
      *     file: null|string,
      *     line: null|int,
-     * } an array containing module information
+     * } Package information or null
      */
-    public function getLibraryInfo(): ?array
+    public function getPackageInfo(): ?array
     {
-        return $this->library_info;
+        return $this->package_info;
     }
 
     /**
-     * Returns an array containing information about the PHP build process.
+     * Returns package builder information.
      *
      * @return null|array{
-     *     builder_function: string,
      *     file: null|string,
      *     line: null|int,
-     * } an array containing PHP build information
+     *     method: null|string,
+     * } Package builder information or null
      */
-    public function getBuildPHPInfo(): ?array
+    public function getPackageBuilderInfo(): ?array
     {
-        return $this->build_php_info;
+        return $this->package_builder_info;
     }
 
     /**
-     * Returns an array containing information about the SPC extension.
-     *
-     * This method can be overridden by subclasses to provide specific extension information.
+     * Returns package installer information.
      *
      * @return null|array{
-     *     extension_name: string,
-     *     extension_class: string,
      *     file: null|string,
      *     line: null|int,
-     * } an array containing extension information
+     *     method: null|string,
+     * } Package installer information or null
      */
-    public function getExtensionInfo(): ?array
+    public function getPackageInstallerInfo(): ?array
     {
-        return $this->extension_info;
+        return $this->package_installer_info;
+    }
+
+    /**
+     * Returns the stage call stack.
+     *
+     * @return array<array{
+     *     stage_name: string,
+     *     context_keys: array<string>,
+     * }> Stage call stack (empty array if no stages)
+     */
+    public function getStageStack(): array
+    {
+        return $this->stage_stack;
+    }
+
+    /**
+     * Returns the innermost (actual failing) stage information.
+     * Legacy method for backward compatibility.
+     *
+     * @return null|array{
+     *     stage_name: string,
+     *     context_keys: array<string>,
+     * } Stage information or null
+     */
+    public function getStageInfo(): ?array
+    {
+        return empty($this->stage_stack) ? null : end($this->stage_stack);
     }
 
     public function getExtraLogFiles(): array
@@ -98,6 +155,9 @@ abstract class SPCException extends \Exception
         return $this->extra_log_files;
     }
 
+    /**
+     * Load stack trace information to detect Package, Builder, and Installer context.
+     */
     private function loadStackTraceInfo(): void
     {
         $trace = $this->getTrace();
@@ -106,40 +166,48 @@ abstract class SPCException extends \Exception
                 continue;
             }
 
-            // Check if the class is a subclass of LibraryBase
-            if (!$this->library_info && is_a($frame['class'], LibraryBase::class, true)) {
+            // Check if the class is a Package subclass
+            if (!$this->package_info && is_a($frame['class'], Package::class, true)) {
                 try {
-                    $reflection = new \ReflectionClass($frame['class']);
-                    if ($reflection->hasConstant('NAME')) {
-                        $name = $reflection->getConstant('NAME');
-                        if ($name !== 'unknown') {
-                            $this->library_info = [
-                                'library_name' => $name,
-                                'library_class' => $frame['class'],
-                                'os' => match (true) {
-                                    is_a($frame['class'], BSDLibraryBase::class, true) => 'BSD',
-                                    is_a($frame['class'], LinuxLibraryBase::class, true) => 'Linux',
-                                    is_a($frame['class'], MacOSLibraryBase::class, true) => 'macOS',
-                                    is_a($frame['class'], WindowsLibraryBase::class, true) => 'Windows',
-                                    default => 'Unknown',
-                                },
-                                'file' => $frame['file'] ?? null,
-                                'line' => $frame['line'] ?? null,
-                            ];
-                            continue;
-                        }
+                    // Try to get package information from object if available
+                    if (isset($frame['object']) && $frame['object'] instanceof Package) {
+                        $package = $frame['object'];
+                        $package_type = match (true) {
+                            $package instanceof LibraryPackage => 'library',
+                            $package instanceof PhpExtensionPackage => 'php-extension',
+                            $package instanceof TargetPackage => 'target',
+                            default => 'package',
+                        };
+                        $this->package_info = [
+                            'package_name' => $package->name,
+                            'package_type' => $package_type,
+                            'package_class' => $frame['class'],
+                            'file' => $frame['file'] ?? null,
+                            'line' => $frame['line'] ?? null,
+                        ];
+                        continue;
                     }
-                } catch (\ReflectionException) {
-                    continue;
+                } catch (\Throwable) {
+                    // Ignore reflection errors
                 }
             }
 
-            // Check if the class is a subclass of BuilderBase and the method is buildPHP
-            if (!$this->build_php_info && is_a($frame['class'], BuilderBase::class, true)) {
-                $this->build_php_info = [
-                    'builder_function' => $frame['function'],
+            // Check if the class is PackageBuilder
+            if (!$this->package_builder_info && is_a($frame['class'], PackageBuilder::class, true)) {
+                $this->package_builder_info = [
                     'file' => $frame['file'] ?? null,
                     'line' => $frame['line'] ?? null,
+                    'method' => $frame['function'] ?? null,
+                ];
+                continue;
+            }
+
+            // Check if the class is PackageInstaller
+            if (!$this->package_installer_info && is_a($frame['class'], PackageInstaller::class, true)) {
+                $this->package_installer_info = [
+                    'file' => $frame['file'] ?? null,
+                    'line' => $frame['line'] ?? null,
+                    'method' => $frame['function'] ?? null,
                 ];
             }
         }

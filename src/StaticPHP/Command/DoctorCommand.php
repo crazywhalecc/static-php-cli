@@ -30,6 +30,6 @@ class DoctorCommand extends BaseCommand
             return static::SUCCESS;
         }
 
-        return static::FAILURE;
+        return static::ENVIRONMENT_ERROR;
     }
 }
