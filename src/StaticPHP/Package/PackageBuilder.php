@@ -6,6 +6,7 @@ namespace StaticPHP\Package;
 
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\Shell;
@@ -59,19 +60,33 @@ class PackageBuilder
             InteractiveTerm::advance();
         });
 
-        if ($package->getType() !== 'virtual-target') {
-            // patch before build
-            $package->emitPatchBeforeBuild();
-        }
-
-        // build
-        $package->runStage('build');
-
-        if ($package->getType() !== 'virtual-target') {
-            // install license
-            if (($license = PackageConfig::get($package->getName(), 'license')) !== null) {
-                $this->installLicense($package, $license);
+        try {
+            if ($package->getType() !== 'virtual-target') {
+                // patch before build
+                $package->emitPatchBeforeBuild();
             }
+
+            // build
+            $package->runStage('build');
+
+            if ($package->getType() !== 'virtual-target') {
+                // install license
+                if (($license = PackageConfig::get($package->getName(), 'license')) !== null) {
+                    $this->installLicense($package, $license);
+                }
+            }
+        } catch (SPCException $e) {
+            // Ensure package information is bound if not already
+            if ($e->getPackageInfo() === null) {
+                $e->bindPackageInfo([
+                    'package_name' => $package->name,
+                    'package_type' => $package->type,
+                    'package_class' => get_class($package),
+                    'file' => null,
+                    'line' => null,
+                ]);
+            }
+            throw $e;
         }
         return SPC_STATUS_BUILT;
     }

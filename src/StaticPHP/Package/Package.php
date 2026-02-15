@@ -7,6 +7,7 @@ namespace StaticPHP\Package;
 use StaticPHP\Artifact\Artifact;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Registry\PackageLoader;
@@ -63,13 +64,29 @@ abstract class Package
             static::class => $this,
         ], $context);
 
-        // emit BeforeStage
-        $this->emitBeforeStage($name, $stageContext);
+        try {
+            // emit BeforeStage
+            $this->emitBeforeStage($name, $stageContext);
 
-        $ret = ApplicationContext::invoke($this->stages[$name], $stageContext);
-        // emit AfterStage
-        $this->emitAfterStage($name, $stageContext, $ret);
-        return $ret;
+            $ret = ApplicationContext::invoke($this->stages[$name], $stageContext);
+            // emit AfterStage
+            $this->emitAfterStage($name, $stageContext, $ret);
+            return $ret;
+        } catch (SPCException $e) {
+            // Bind package information only if not already bound
+            if ($e->getPackageInfo() === null) {
+                $e->bindPackageInfo([
+                    'package_name' => $this->name,
+                    'package_type' => $this->type,
+                    'package_class' => static::class,
+                    'file' => null,
+                    'line' => null,
+                ]);
+            }
+            // Always add current stage to the stack to build call chain
+            $e->addStageToStack($name, $stageContext);
+            throw $e;
+        }
     }
 
     public function setOutput(string $key, string $value): static

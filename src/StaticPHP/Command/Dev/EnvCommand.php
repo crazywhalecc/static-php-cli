@@ -29,7 +29,7 @@ class EnvCommand extends BaseCommand
         $env = $this->getArgument('env');
         if (($val = getenv($env)) === false) {
             $this->output->writeln("<error>Environment variable '{$env}' is not set.</error>");
-            return static::FAILURE;
+            return static::USER_ERROR;
         }
         if (is_array($val)) {
             foreach ($val as $k => $v) {

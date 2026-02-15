@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace StaticPHP\Exception;
 
-use SPC\util\shell\UnixShell;
-use SPC\util\shell\WindowsCmd;
+use StaticPHP\Runtime\Shell\UnixShell;
+use StaticPHP\Runtime\Shell\WindowsCmd;
 
 /**
  * Exception thrown when an error occurs during execution of shell command.

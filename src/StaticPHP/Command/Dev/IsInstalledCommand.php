@@ -29,6 +29,6 @@ class IsInstalledCommand extends BaseCommand
             return static::SUCCESS;
         }
         $this->output->writeln("<error>Package [{$package}] is not installed.</error>");
-        return static::FAILURE;
+        return static::USER_ERROR;
     }
 }

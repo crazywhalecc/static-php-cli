@@ -21,10 +21,8 @@ if (PHP_VERSION_ID < 80400) {
 try {
     (new ConsoleApplication())->run();
 } catch (SPCException $e) {
-    ExceptionHandler::handleSPCException($e);
-    exit(1);
+    exit(ExceptionHandler::handleSPCException($e));
 } catch (\Throwable $e) {
-    ExceptionHandler::handleDefaultException($e);
-    exit(1);
+    exit(ExceptionHandler::handleDefaultException($e));
 }
 

@@ -53,6 +53,6 @@ class SPCConfigCommand extends BaseCommand
             default => "{$config['cflags']} {$config['ldflags']} {$config['libs']}",
         });
 
-        return 0;
+        return static::SUCCESS;
     }
 }

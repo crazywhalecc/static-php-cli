@@ -47,7 +47,7 @@ class ExtractCommand extends BaseCommand
                 $artifact = ArtifactLoader::getArtifactInstance($name);
                 if ($artifact === null) {
                     $this->output->writeln("<error>Artifact '{$name}' not found.</error>");
-                    return static::FAILURE;
+                    return static::USER_ERROR;
                 }
                 $artifacts[$name] = $artifact;
             }

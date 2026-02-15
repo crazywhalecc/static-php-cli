@@ -71,7 +71,7 @@ class DumpLicenseCommand extends BaseCommand
             $this->output->writeln('  - --for-extensions: <info>dump-license --for-extensions=openssl,mbstring</info>');
             $this->output->writeln('  - --for-libs: <info>dump-license --for-libs=openssl,zlib</info>');
             $this->output->writeln('  - --for-packages: <info>dump-license --for-packages=php,libssl</info>');
-            return self::FAILURE;
+            return static::USER_ERROR;
         }
 
         // Deduplicate artifacts
@@ -90,11 +90,11 @@ class DumpLicenseCommand extends BaseCommand
             InteractiveTerm::success('Licenses dumped successfully: ' . $dump_dir);
             // $this->output->writeln("<info>✓ Successfully dumped licenses to: {$dump_dir}</info>");
             // $this->output->writeln("<comment>  Total artifacts: " . count($artifacts_to_dump) . '</comment>');
-            return self::SUCCESS;
+            return static::SUCCESS;
         }
 
         $this->output->writeln('<error>Failed to dump licenses</error>');
-        return self::FAILURE;
+        return static::INTERNAL_ERROR;
     }
 
     /**

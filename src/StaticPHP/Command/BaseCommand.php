@@ -14,6 +14,8 @@ use ZM\Logger\ConsoleColor;
 
 abstract class BaseCommand extends Command
 {
+    use ReturnCode;
+
     /**
      * The message of the day (MOTD) displayed when the command is run.
      * You can customize this to show your application's name and version if you are using SPC in vendor mode.
@@ -101,12 +103,10 @@ abstract class BaseCommand extends Command
             return $this->handle();
         } /* @noinspection PhpRedundantCatchClauseInspection */ catch (SPCException $e) {
             // Handle SPCException and log it
-            ExceptionHandler::handleSPCException($e);
-            return static::FAILURE;
+            return ExceptionHandler::handleSPCException($e);
         } catch (\Throwable $e) {
             // Handle any other exceptions
-            ExceptionHandler::handleDefaultException($e);
-            return static::FAILURE;
+            return ExceptionHandler::handleDefaultException($e);
         }
     }
 
@@ -129,7 +129,8 @@ abstract class BaseCommand extends Command
 
         // Don't show commit ID when running in phar
         if (\Phar::running()) {
-            return $version;
+            $stable = file_exists(ROOT_DIR . '/src/.release') ? 'stable' : 'unstable';
+            return "{$version} ({$stable})";
         }
 
         $commitId = $this->getGitCommitShortId();
