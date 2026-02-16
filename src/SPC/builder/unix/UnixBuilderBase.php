@@ -411,10 +411,17 @@ abstract class UnixBuilderBase extends BuilderBase
         $nowatcher = $this->getLib('watcher') === null ? ',nowatcher' : '';
         $xcaddyModules = getenv('SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES');
         $frankenphpSourceDir = getenv('FRANKENPHP_SOURCE_PATH') ?: SOURCE_PATH . '/frankenphp';
+        FileSystem::replaceFileStr(
+            $frankenphpSourceDir . '/caddy/php-server.go',
+            'config, _, err := caddycmd.LoadConfig',
+            'config, _, _, err := caddycmd.LoadConfig'
+        );
 
         $xcaddyModules = preg_replace('#--with github.com/dunglas/frankenphp\S*#', '', $xcaddyModules);
         $xcaddyModules = "--with github.com/dunglas/frankenphp={$frankenphpSourceDir} " .
-            "--with github.com/dunglas/frankenphp/caddy={$frankenphpSourceDir}/caddy {$xcaddyModules}";
+            "--with github.com/dunglas/frankenphp/caddy={$frankenphpSourceDir}/caddy " .
+            "--with github.com/caddyserver/caddy/v2=github.com/henderkes/caddy/v2@master " .
+            "{$xcaddyModules}";
         if ($this->getLib('brotli') === null && str_contains($xcaddyModules, '--with github.com/dunglas/caddy-cbrotli')) {
             logger()->warning('caddy-cbrotli module is enabled, but brotli library is not built. Disabling caddy-cbrotli.');
             $xcaddyModules = str_replace('--with github.com/dunglas/caddy-cbrotli', '', $xcaddyModules);
