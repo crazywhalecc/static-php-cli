@@ -46,6 +46,10 @@ on:
         description: Prefer pre-built binaries (reduce build time)
         type: boolean
         default: true
+      with-suggested-libs:
+        description: Build with suggested libs
+        type: boolean
+        default: false
       debug:
         description: Show full build logs
         type: boolean
@@ -86,6 +90,10 @@ on:
         description: Prefer pre-built binaries (reduce build time)
         type: boolean
         default: true
+      with-suggested-libs:
+        description: Include suggested libs
+        type: boolean
+        default: false
       debug:
         description: Show full build logs
         type: boolean
@@ -157,6 +165,9 @@ jobs:
           if [ ${{ inputs.prefer-pre-built }} == true ]; then
               DOWN_CMD="$DOWN_CMD --prefer-pre-built"
           fi
+          if [ ${{ inputs.with-suggested-libs }} == true ]; then
+              BUILD_CMD="$BUILD_CMD --with-suggested-libs"
+          fi
           if [ ${{ inputs.build-cli }} == true ]; then
               BUILD_CMD="$BUILD_CMD --build-cli"
           fi
@@ -201,6 +212,14 @@ jobs:
 #      - name: Setup tmate session
 #        if: ${{ failure() }}
 #        uses: mxschmitt/action-tmate@v3
+
+      # Upload debug logs
+      - if: ${{ inputs.debug && failure() }}
+        name: "Upload build logs on failure"
+        uses: actions/upload-artifact@v4
+        with:
+          name: spc-logs-${{ inputs.php-version }}-${{ inputs.os }}
+          path: log/*.log
 
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
