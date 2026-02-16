@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\store\pkg;
 
+use InvalidArgumentException;
 use SPC\builder\linux\SystemUtil;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
@@ -30,10 +31,10 @@ class GoXcaddy extends CustomPackage
     public function fetch(string $name, bool $force = false, ?array $config = null): void
     {
         $pkgroot = PKG_ROOT_PATH;
-        $go_exec = "{$pkgroot}/{$name}/bin/go";
-        $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        $go_exec = "{$pkgroot}/go-xcaddy/bin/go";
+        $xcaddy_exec = "{$pkgroot}/go-xcaddy/bin/xcaddy";
         if ($force) {
-            FileSystem::removeDir("{$pkgroot}/{$name}");
+            FileSystem::removeDir("{$pkgroot}/go-xcaddy");
         }
         if (file_exists($go_exec) && file_exists($xcaddy_exec)) {
             return;
@@ -41,12 +42,12 @@ class GoXcaddy extends CustomPackage
         $arch = match (explode('-', $name)[2]) {
             'x86_64' => 'amd64',
             'aarch64' => 'arm64',
-            default => throw new \InvalidArgumentException('Unsupported architecture: ' . $name),
+            default => throw new InvalidArgumentException('Unsupported architecture: ' . $name),
         };
         $os = match (explode('-', $name)[3]) {
             'linux' => 'linux',
             'macos' => 'darwin',
-            default => throw new \InvalidArgumentException('Unsupported OS: ' . $name),
+            default => throw new InvalidArgumentException('Unsupported OS: ' . $name),
         };
         [$go_version] = explode("\n", Downloader::curlExec('https://go.dev/VERSION?m=text'));
         $config = [
@@ -78,6 +79,18 @@ class GoXcaddy extends CustomPackage
         }
 
         // install xcaddy without using musl tools, xcaddy build requires dynamic linking
+        // Clone the fork and install from local clone to avoid module path conflicts
+        $xcaddyClonePath = "{$pkgroot}/go/src/github.com/henderkes/xcaddy";
+        if (!is_dir($xcaddyClonePath)) {
+            shell()
+                ->appendEnv([
+                    'PATH' => "{$pkgroot}/go-xcaddy/bin:" . $sanitizedPath,
+                ])
+                ->exec("git clone https://github.com/henderkes/xcaddy {$xcaddyClonePath}");
+        } else {
+            shell()->cd($xcaddyClonePath)->exec('git fetch && git pull');
+        }
+
         shell()
             ->appendEnv([
                 'PATH' => "{$pkgroot}/go-xcaddy/bin:" . $sanitizedPath,
@@ -85,7 +98,8 @@ class GoXcaddy extends CustomPackage
                 'GOBIN' => "{$pkgroot}/go-xcaddy/bin",
                 'GOPATH' => "{$pkgroot}/go",
             ])
-            ->exec('CC=cc go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest');
+            ->cd($xcaddyClonePath)
+            ->exec('CC=cc go install ./cmd/xcaddy');
     }
 
     public static function getEnvironment(): array
