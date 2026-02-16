@@ -460,7 +460,7 @@ abstract class UnixBuilderBase extends BuilderBase
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => clean_spaces($cflags),
             'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$libs}",
-            'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
+            'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie -trimpath ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
                 "v{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
