@@ -218,7 +218,7 @@ jobs:
         name: "Upload build logs on failure"
         uses: actions/upload-artifact@v4
         with:
-          name: php-cli-logs-${{ inputs.php-version }}-${{ inputs.os }}
+          name: spc-logs-${{ inputs.php-version }}-${{ inputs.os }}
           path: log/*.log
 
       # Upload cli executable
