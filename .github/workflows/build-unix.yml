@@ -213,6 +213,14 @@ jobs:
 #        if: ${{ failure() }}
 #        uses: mxschmitt/action-tmate@v3
 
+      # Upload debug logs
+      - if: ${{ inputs.debug && failure() }}
+        name: "Upload build logs on failure"
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-cli-logs-${{ inputs.php-version }}-${{ inputs.os }}
+          path: log/*.log
+
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
         name: "Upload PHP cli SAPI"
