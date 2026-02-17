@@ -365,6 +365,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $frankenphpAppPath = $this->getOption('with-frankenphp-app');
 
         if ($frankenphpAppPath) {
+            $frankenphpAppPath = trim($frankenphpAppPath, "\"'");
             if (!is_dir($frankenphpAppPath)) {
                 throw new WrongUsageException("The path provided to --with-frankenphp-app is not a valid directory: {$frankenphpAppPath}");
             }
