@@ -175,6 +175,7 @@ abstract class SPCException extends \Exception
                         $package_type = match (true) {
                             $package instanceof LibraryPackage => 'library',
                             $package instanceof PhpExtensionPackage => 'php-extension',
+                            /* @phpstan-ignore-next-line */
                             $package instanceof TargetPackage => 'target',
                             default => 'package',
                         };
@@ -197,6 +198,7 @@ abstract class SPCException extends \Exception
                 $this->package_builder_info = [
                     'file' => $frame['file'] ?? null,
                     'line' => $frame['line'] ?? null,
+                    /* @phpstan-ignore-next-line */
                     'method' => $frame['function'] ?? null,
                 ];
                 continue;
@@ -207,6 +209,7 @@ abstract class SPCException extends \Exception
                 $this->package_installer_info = [
                     'file' => $frame['file'] ?? null,
                     'line' => $frame['line'] ?? null,
+                    /* @phpstan-ignore-next-line */
                     'method' => $frame['function'] ?? null,
                 ];
             }

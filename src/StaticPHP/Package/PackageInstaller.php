@@ -629,7 +629,11 @@ class PackageInstaller
         InteractiveTerm::notice('Installation summary:');
         $summary['Packages to be built'] = implode(',', array_map(fn ($x) => $x->getName(), array_values($this->build_packages)));
         $summary['Packages to be installed'] = implode(',', array_map(fn ($x) => $x->getName(), array_values($this->packages)));
-        $summary['Artifacts to be downloaded'] = implode(',', array_map(fn ($x) => $x->getName(), $this->getArtifacts()));
+        if (!($this->options['no-download'] ?? false)) {
+            $summary['Artifacts to be downloaded'] = implode(',', array_map(fn ($x) => $x->getName(), $this->getArtifacts()));
+        } else {
+            $summary['Artifacts to be downloaded'] = 'none (--no-download option enabled)';
+        }
         $this->printArrayInfo(array_filter($summary));
         echo PHP_EOL;
 
