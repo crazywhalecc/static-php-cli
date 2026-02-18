@@ -93,7 +93,7 @@ class LinuxBuilder extends UnixBuilderBase
         $php_configure_env = SystemUtil::makeEnvVarString([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH, // . ' -Dsomethinghere', // . $musl_flag,
-            'LDFLAGS' => '-L' . BUILD_LIB_PATH,
+            'LDFLAGS' => clean_spaces("{$this->arch_ld_flags} -L" . BUILD_LIB_PATH),
             // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
 

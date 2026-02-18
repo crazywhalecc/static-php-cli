@@ -967,10 +967,10 @@
     },
     "unixodbc": {
         "source": "unixodbc",
-        "static-libs-unix": [
-            "libodbc.a",
-            "libodbccr.a",
-            "libodbcinst.a"
+        "pkg-configs": [
+            "odbc",
+            "odbccr",
+            "odbcinst"
         ],
         "lib-depends": [
             "libiconv"
