@@ -13,10 +13,10 @@ trait zstd
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/build/cmake/build")
             ->addConfigureArgs(
-                '-DZSTD_BUILD_STATIC=ON',
-                '-DZSTD_BUILD_SHARED=OFF',
+                '-DZSTD_BUILD_STATIC=' . (getenv('SPC_STATIC_LIBS') ? 'ON' : 'OFF'),
+                '-DZSTD_BUILD_SHARED='. (getenv('SPC_STATIC_LIBS') ? 'OFF' : 'ON'),
             )
             ->build();
-        $this->patchPkgconfPrefix(['libzstd.pc']);
+        $this->patchPkgconfPrefix();
     }
 }
