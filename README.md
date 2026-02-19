@@ -1,4 +1,4 @@
-# static-php-cli
+# StaticPHP
 
 [![Chinese readme](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%20%F0%9F%87%A8%F0%9F%87%B3-moccasin?style=flat-square)](README-zh.md)
 [![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
@@ -6,8 +6,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
 
-**static-php-cli** is a powerful tool designed for building static, standalone PHP runtime
-with popular extensions.
+**StaticPHP** is a powerful tool designed for building portable executables including PHP, extensions, and more.
 
 ## Features
 
@@ -81,7 +80,7 @@ Run command:
 
 ### 3. Static PHP usage
 
-Now you can copy binaries built by static-php-cli to another machine and run with no dependencies:
+Now you can copy binaries built by StaticPHP to another machine and run with no dependencies:
 
 ```
 # php-cli
@@ -98,7 +97,7 @@ buildroot/bin/php-fpm -v
 
 ## Documentation
 
-The current README contains basic usage. For all the features of static-php-cli,
+The current README contains basic usage. For all the features of StaticPHP,
 see <https://static-php.dev> .
 
 ## Direct Download

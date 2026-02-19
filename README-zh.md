@@ -1,4 +1,4 @@
-# static-php-cli
+# StaticPHP
 
 [![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
 [![Chinese readme](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%20%F0%9F%87%A8%F0%9F%87%B3-moccasin?style=flat-square)](README-zh.md)
@@ -6,7 +6,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
 
-**static-php-cli** 是一个用于构建静态、独立 PHP 运行时的强大工具，支持众多流行扩展。
+**StaticPHP** 是一个用于构建静态编译可执行文件（包括 PHP、扩展等）的强大工具。
 
 ## 特性
 
@@ -80,7 +80,7 @@ download-options:
 
 ### 3. 静态 PHP 使用
 
-现在您可以将 static-php-cli 构建的二进制文件复制到另一台机器上，无需依赖即可运行：
+现在您可以将 StaticPHP 构建的二进制文件复制到另一台机器上，无需依赖即可运行：
 
 ```
 # php-cli
@@ -97,7 +97,7 @@ buildroot/bin/php-fpm -v
 
 ## 文档
 
-当前 README 包含基本用法。有关 static-php-cli 的所有功能，
+当前 README 包含基本用法。有关 StaticPHP 的所有功能，
 请访问 <https://static-php.dev>。
 
 ## 直接下载
