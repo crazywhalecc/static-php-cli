@@ -17,12 +17,6 @@ trait libargon2
 
         $this->patchPkgconfPrefix(['libargon2.pc']);
 
-        foreach (FileSystem::scanDirFiles(BUILD_ROOT_PATH . '/lib/', false, true) as $filename) {
-            if (str_starts_with($filename, 'libargon2') && (str_contains($filename, '.so') || str_ends_with($filename, '.dylib'))) {
-                unlink(BUILD_ROOT_PATH . '/lib/' . $filename);
-            }
-        }
-
         if (file_exists(BUILD_BIN_PATH . '/argon2')) {
             unlink(BUILD_BIN_PATH . '/argon2');
         }

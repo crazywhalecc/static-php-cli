@@ -43,7 +43,9 @@ class openssl extends MacOSLibraryBase
 
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
-                "./Configure no-shared {$extra} " .
+                "./Configure " .
+                (getenv('SPC_STATIC_LIBS') ? 'no-shared' : '') .
+                " {$extra} " .
                 '--prefix=' . BUILD_ROOT_PATH . ' ' . // use prefix=/
                 '--libdir=lib ' .
                 '--openssldir=/etc/ssl ' .

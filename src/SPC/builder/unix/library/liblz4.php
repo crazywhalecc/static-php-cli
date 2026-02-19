@@ -27,11 +27,5 @@ trait liblz4
             ->exec("make install PREFIX='' DESTDIR=" . BUILD_ROOT_PATH);
 
         $this->patchPkgconfPrefix(['liblz4.pc']);
-
-        foreach (FileSystem::scanDirFiles(BUILD_ROOT_PATH . '/lib/', false, true) as $filename) {
-            if (str_starts_with($filename, 'liblz4') && (str_contains($filename, '.so') || str_ends_with($filename, '.dylib'))) {
-                unlink(BUILD_ROOT_PATH . '/lib/' . $filename);
-            }
-        }
     }
 }

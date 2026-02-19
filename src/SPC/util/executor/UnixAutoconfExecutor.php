@@ -133,8 +133,8 @@ class UnixAutoconfExecutor extends Executor
     private function getDefaultConfigureArgs(): array
     {
         return [
-            '--disable-shared',
-            '--enable-static',
+            getenv('SPC_STATIC_LIBS') ? '--disable-shared' : '--enable-shared',
+            getenv('SPC_STATIC_LIBS') ? '--enable-static' : '--disable-static',
             "--prefix={$this->library->getBuildRootPath()}",
             '--with-pic',
             '--enable-pic',
