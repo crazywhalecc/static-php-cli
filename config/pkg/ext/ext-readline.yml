@@ -1,0 +1,11 @@
+ext-readline:
+  type: php-extension
+  depends:
+    - libedit
+  php-extension:
+    support:
+      Windows: wip
+      BSD: wip
+    arg-type: with-path
+    build-shared: false
+    build-static: true

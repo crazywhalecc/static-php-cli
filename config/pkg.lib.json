@@ -1,0 +1,992 @@
+{
+    "attr": {
+        "artifact": "attr",
+        "license": {
+            "type": "file",
+            "path": "doc/COPYING.LGPL"
+        },
+        "type": "library"
+    },
+    "brotli": {
+        "artifact": "brotli",
+        "headers": [
+            "brotli"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "pkg-configs": [
+            "libbrotlicommon",
+            "libbrotlidec",
+            "libbrotlienc"
+        ],
+        "type": "library"
+    },
+    "bzip2": {
+        "artifact": "bzip2",
+        "headers": [
+            "bzlib.h"
+        ],
+        "license": {
+            "type": "text",
+            "text": "This program, \"bzip2\", the associated library \"libbzip2\", and all documentation, are copyright (C) 1996-2010 Julian R Seward. All rights reserved. \n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n    2. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.\n    3. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.\n    4. The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nJulian Seward, jseward@bzip.org bzip2/libbzip2 version 1.0.6 of 6 September 2010\n\nPATENTS: To the best of my knowledge, bzip2 and libbzip2 do not use any patented algorithms. However, I do not have the resources to carry out a patent search. Therefore I cannot give any guarantee of the above statement."
+        },
+        "type": "library"
+    },
+    "curl": {
+        "artifact": "curl",
+        "depends": [
+            "openssl",
+            "zlib"
+        ],
+        "depends@windows": [
+            "zlib",
+            "libssh2",
+            "nghttp2"
+        ],
+        "frameworks": [
+            "CoreFoundation",
+            "CoreServices",
+            "SystemConfiguration"
+        ],
+        "headers": [
+            "curl"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "suggests": [
+            "libssh2",
+            "brotli",
+            "nghttp2",
+            "nghttp3",
+            "ngtcp2",
+            "zstd",
+            "libcares",
+            "ldap"
+        ],
+        "suggests@windows": [
+            "brotli",
+            "zstd"
+        ],
+        "type": "library"
+    },
+    "fastlz": {
+        "artifact": "fastlz",
+        "headers": [
+            "fastlz/fastlz.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE.MIT"
+        },
+        "type": "library"
+    },
+    "freetype": {
+        "artifact": "freetype",
+        "depends": [
+            "zlib"
+        ],
+        "headers": [
+            "freetype2/freetype/freetype.h",
+            "freetype2/ft2build.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE.TXT"
+        },
+        "suggests": [
+            "libpng",
+            "bzip2",
+            "brotli"
+        ],
+        "type": "library"
+    },
+    "gettext": {
+        "artifact": "gettext",
+        "depends": [
+            "libiconv"
+        ],
+        "frameworks": [
+            "CoreFoundation"
+        ],
+        "license": {
+            "type": "file",
+            "path": "gettext-runtime/intl/COPYING.LIB"
+        },
+        "suggests": [
+            "ncurses",
+            "libxml2"
+        ],
+        "type": "library"
+    },
+    "glfw": {
+        "artifact": "ext-glfw",
+        "frameworks": [
+            "CoreVideo",
+            "OpenGL",
+            "Cocoa",
+            "IOKit"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "gmp": {
+        "artifact": "gmp",
+        "headers": [
+            "gmp.h"
+        ],
+        "license": {
+            "type": "text",
+            "text": "Since version 6, GMP is distributed under the dual licenses, GNU LGPL v3 and GNU GPL v2. These licenses make the library free to use, share, and improve, and allow you to pass on the result. The GNU licenses give freedoms, but also set firm restrictions on the use with non-free programs."
+        },
+        "type": "library"
+    },
+    "gmssl": {
+        "artifact": "gmssl",
+        "frameworks": [
+            "Security"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "grpc": {
+        "artifact": "grpc",
+        "depends": [
+            "zlib",
+            "openssl",
+            "libcares"
+        ],
+        "frameworks": [
+            "CoreFoundation"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "pkg-configs": [
+            "grpc"
+        ],
+        "type": "library"
+    },
+    "icu": {
+        "artifact": "icu",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "pkg-configs": [
+            "icu-uc",
+            "icu-i18n",
+            "icu-io"
+        ],
+        "type": "library"
+    },
+    "icu-static-win": {
+        "artifact": "icu-static-win",
+        "headers@windows": [
+            "unicode"
+        ],
+        "license": {
+            "type": "text",
+            "text": "none"
+        },
+        "type": "library"
+    },
+    "imagemagick": {
+        "artifact": "imagemagick",
+        "depends": [
+            "zlib",
+            "libjpeg",
+            "libjxl",
+            "libpng",
+            "libwebp",
+            "freetype",
+            "libtiff",
+            "libheif",
+            "bzip2"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "pkg-configs": [
+            "Magick++-7.Q16HDRI",
+            "MagickCore-7.Q16HDRI",
+            "MagickWand-7.Q16HDRI"
+        ],
+        "suggests": [
+            "zstd",
+            "xz",
+            "libzip",
+            "libxml2"
+        ],
+        "type": "library"
+    },
+    "imap": {
+        "artifact": "imap",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "suggests": [
+            "openssl"
+        ],
+        "type": "library"
+    },
+    "jbig": {
+        "artifact": "jbig",
+        "headers": [
+            "jbig.h",
+            "jbig85.h",
+            "jbig_ar.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "ldap": {
+        "artifact": "ldap",
+        "depends": [
+            "openssl",
+            "zlib",
+            "gmp",
+            "libsodium"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "pkg-configs": [
+            "ldap",
+            "lber"
+        ],
+        "type": "library"
+    },
+    "lerc": {
+        "artifact": "lerc",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libacl": {
+        "artifact": "libacl",
+        "depends": [
+            "attr"
+        ],
+        "license": {
+            "type": "file",
+            "path": "doc/COPYING.LGPL"
+        },
+        "type": "library"
+    },
+    "libaom": {
+        "artifact": "libaom",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libargon2": {
+        "artifact": "libargon2",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libavif": {
+        "artifact": "libavif",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libcares": {
+        "artifact": "libcares",
+        "headers": [
+            "ares.h",
+            "ares_dns.h",
+            "ares_nameser.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
+        },
+        "type": "library"
+    },
+    "libde265": {
+        "artifact": "libde265",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "libedit": {
+        "artifact": "libedit",
+        "depends": [
+            "ncurses"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "libevent": {
+        "artifact": "libevent",
+        "depends": [
+            "openssl"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libffi": {
+        "artifact": "libffi",
+        "headers": [
+            "ffi.h",
+            "ffitarget.h"
+        ],
+        "headers@windows": [
+            "ffi.h",
+            "fficonfig.h",
+            "ffitarget.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libffi-win": {
+        "artifact": "libffi-win",
+        "headers@windows": [
+            "ffi.h",
+            "ffitarget.h",
+            "fficonfig.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libheif": {
+        "artifact": "libheif",
+        "depends": [
+            "libde265",
+            "libwebp",
+            "libaom",
+            "zlib",
+            "brotli"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "libiconv": {
+        "artifact": "libiconv",
+        "headers": [
+            "iconv.h",
+            "libcharset.h",
+            "localcharset.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING.LIB"
+        },
+        "type": "library"
+    },
+    "libiconv-win": {
+        "artifact": "libiconv-win",
+        "license": {
+            "type": "file",
+            "path": "source/COPYING"
+        },
+        "type": "library"
+    },
+    "libjpeg": {
+        "artifact": "libjpeg",
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
+        },
+        "suggests@windows": [
+            "zlib"
+        ],
+        "type": "library"
+    },
+    "libjxl": {
+        "artifact": "libjxl",
+        "depends": [
+            "brotli",
+            "libjpeg",
+            "libpng",
+            "libwebp"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "pkg-configs": [
+            "libjxl",
+            "libjxl_cms",
+            "libjxl_threads",
+            "libhwy"
+        ],
+        "type": "library"
+    },
+    "liblz4": {
+        "artifact": "liblz4",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libmemcached": {
+        "artifact": "libmemcached",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libpng": {
+        "artifact": "libpng",
+        "depends": [
+            "zlib"
+        ],
+        "headers": [
+            "png.h",
+            "pngconf.h",
+            "pnglibconf.h"
+        ],
+        "headers@windows": [
+            "png.h",
+            "pngconf.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "librabbitmq": {
+        "artifact": "librabbitmq",
+        "depends": [
+            "openssl"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "librdkafka": {
+        "artifact": "librdkafka",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "pkg-configs": [
+            "rdkafka++-static",
+            "rdkafka-static"
+        ],
+        "suggests": [
+            "curl",
+            "liblz4",
+            "openssl",
+            "zlib",
+            "zstd"
+        ],
+        "type": "library"
+    },
+    "libsodium": {
+        "artifact": "libsodium",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "libssh2": {
+        "artifact": "libssh2",
+        "depends": [
+            "openssl"
+        ],
+        "headers": [
+            "libssh2.h",
+            "libssh2_publickey.h",
+            "libssh2_sftp.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "libtiff": {
+        "artifact": "libtiff",
+        "depends": [
+            "zlib",
+            "libjpeg"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE.md"
+        },
+        "suggests": [
+            "lerc",
+            "libwebp",
+            "jbig",
+            "xz",
+            "zstd"
+        ],
+        "type": "library"
+    },
+    "liburing": {
+        "artifact": "liburing",
+        "headers@linux": [
+            "liburing/",
+            "liburing.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "pkg-configs": [
+            "liburing",
+            "liburing-ffi"
+        ],
+        "type": "library"
+    },
+    "libuuid": {
+        "artifact": "libuuid",
+        "headers": [
+            "uuid/uuid.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "libuv": {
+        "artifact": "libuv",
+        "license": [
+            {
+                "type": "file",
+                "path": "LICENSE"
+            },
+            {
+                "type": "file",
+                "path": "LICENSE-extra"
+            }
+        ],
+        "type": "library"
+    },
+    "libwebp": {
+        "artifact": "libwebp",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "pkg-configs": [
+            "libwebp",
+            "libwebpdecoder",
+            "libwebpdemux",
+            "libwebpmux",
+            "libsharpyuv"
+        ],
+        "type": "library"
+    },
+    "libxml2": {
+        "artifact": "libxml2",
+        "depends": [
+            "libiconv"
+        ],
+        "depends@windows": [
+            "libiconv-win"
+        ],
+        "headers": [
+            "libxml2"
+        ],
+        "license": {
+            "type": "file",
+            "path": "Copyright"
+        },
+        "pkg-configs": [
+            "libxml-2.0"
+        ],
+        "suggests": [
+            "xz",
+            "zlib"
+        ],
+        "suggests@windows": [
+            "zlib"
+        ],
+        "type": "library"
+    },
+    "libxslt": {
+        "artifact": "libxslt",
+        "depends": [
+            "libxml2"
+        ],
+        "license": {
+            "type": "file",
+            "path": "Copyright"
+        },
+        "type": "library"
+    },
+    "libyaml": {
+        "artifact": "libyaml",
+        "headers": [
+            "yaml.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "License"
+        },
+        "type": "library"
+    },
+    "libzip": {
+        "artifact": "libzip",
+        "depends": [
+            "zlib"
+        ],
+        "depends@windows": [
+            "zlib",
+            "bzip2",
+            "xz"
+        ],
+        "headers": [
+            "zip.h",
+            "zipconf.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "suggests": [
+            "bzip2",
+            "xz",
+            "zstd",
+            "openssl"
+        ],
+        "suggests@windows": [
+            "zstd",
+            "openssl"
+        ],
+        "type": "library"
+    },
+    "mimalloc": {
+        "artifact": "mimalloc",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "ncurses": {
+        "artifact": "ncurses",
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "static-libs@unix": [
+            "libncurses.a"
+        ],
+        "type": "library"
+    },
+    "net-snmp": {
+        "artifact": "net-snmp",
+        "depends": [
+            "openssl",
+            "zlib"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "pkg-configs": [
+            "netsnmp",
+            "netsnmp-agent"
+        ],
+        "type": "library"
+    },
+    "nghttp2": {
+        "artifact": "nghttp2",
+        "depends": [
+            "zlib",
+            "openssl"
+        ],
+        "headers": [
+            "nghttp2"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "suggests": [
+            "libxml2",
+            "nghttp3",
+            "ngtcp2"
+        ],
+        "type": "library"
+    },
+    "nghttp3": {
+        "artifact": "nghttp3",
+        "depends": [
+            "openssl"
+        ],
+        "headers": [
+            "nghttp3"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "ngtcp2": {
+        "artifact": "ngtcp2",
+        "depends": [
+            "openssl"
+        ],
+        "headers": [
+            "ngtcp2"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "suggests": [
+            "nghttp3",
+            "brotli"
+        ],
+        "type": "library"
+    },
+    "onig": {
+        "artifact": "onig",
+        "headers": [
+            "oniggnu.h",
+            "oniguruma.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "openssl": {
+        "artifact": "openssl",
+        "depends": [
+            "zlib"
+        ],
+        "headers": [
+            "openssl"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE.txt"
+        },
+        "type": "library"
+    },
+    "postgresql": {
+        "artifact": "postgresql",
+        "depends": [
+            "libiconv",
+            "libxml2",
+            "openssl",
+            "zlib",
+            "libedit"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYRIGHT"
+        },
+        "pkg-configs": [
+            "libpq"
+        ],
+        "suggests": [
+            "icu",
+            "libxslt",
+            "ldap",
+            "zstd"
+        ],
+        "type": "library"
+    },
+    "postgresql-win": {
+        "artifact": "postgresql-win",
+        "license": {
+            "type": "text",
+            "text": "PostgreSQL Database Management System\n(also known as Postgres, formerly as Postgres95)\n\nPortions Copyright (c) 1996-2025, The PostgreSQL Global Development Group\n\nPortions Copyright (c) 1994, The Regents of the University of California\n\nPermission to use, copy, modify, and distribute this software and its\ndocumentation for any purpose, without fee, and without a written\nagreement is hereby granted, provided that the above copyright notice\nand this paragraph and the following two paragraphs appear in all\ncopies.\n\nIN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY\nFOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES,\nINCLUDING LOST PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS\nDOCUMENTATION, EVEN IF THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF\nTHE POSSIBILITY OF SUCH DAMAGE.\n\nTHE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,\nINCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY\nAND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS\nON AN \"AS IS\" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATIONS\nTO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+        },
+        "type": "library"
+    },
+    "pthreads4w": {
+        "artifact": "pthreads4w",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "qdbm": {
+        "artifact": "qdbm",
+        "headers@windows": [
+            "depot.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "re2c": {
+        "artifact": "re2c",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    },
+    "readline": {
+        "artifact": "readline",
+        "depends": [
+            "ncurses"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "snappy": {
+        "artifact": "snappy",
+        "depends": [
+            "zlib"
+        ],
+        "headers": [
+            "snappy.h",
+            "snappy-c.h",
+            "snappy-sinksource.h",
+            "snappy-stubs-public.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "sqlite": {
+        "artifact": "sqlite",
+        "headers": [
+            "sqlite3.h",
+            "sqlite3ext.h"
+        ],
+        "license": {
+            "type": "text",
+            "text": "The author disclaims copyright to this source code.  In place of\na legal notice, here is a blessing:\n\n  *   May you do good and not evil.\n  *   May you find forgiveness for yourself and forgive others.\n  *   May you share freely, never taking more than you give."
+        },
+        "type": "library"
+    },
+    "tidy": {
+        "artifact": "tidy",
+        "license": {
+            "type": "file",
+            "path": "README/LICENSE.md"
+        },
+        "type": "library"
+    },
+    "unixodbc": {
+        "artifact": "unixodbc",
+        "depends": [
+            "libiconv"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "watcher": {
+        "artifact": "watcher",
+        "headers": [
+            "wtr/watcher-c.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "license"
+        },
+        "type": "library"
+    },
+    "xz": {
+        "artifact": "xz",
+        "depends": [
+            "libiconv"
+        ],
+        "headers": [
+            "lzma"
+        ],
+        "headers@windows": [
+            "lzma",
+            "lzma.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "COPYING"
+        },
+        "type": "library"
+    },
+    "zlib": {
+        "artifact": "zlib",
+        "headers": [
+            "zlib.h",
+            "zconf.h"
+        ],
+        "license": {
+            "type": "text",
+            "text": "(C) 1995-2022 Jean-loup Gailly and Mark Adler\n\nThis software is provided 'as-is', without any express or implied\nwarranty.  In no event will the authors be held liable for any damages\narising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\n claim that you wrote the original software. If you use this software\n in a product, an acknowledgment in the product documentation would be\n appreciated but is not required.\n2. Altered source versions must be plainly marked as such, and must not be\n misrepresented as being the original software.\n3. This notice may not be removed or altered from any source distribution.\n\nJean-loup Gailly        Mark Adler\njloup@gzip.org          madler@alumni.caltech.edu"
+        },
+        "type": "library"
+    },
+    "zstd": {
+        "artifact": "zstd",
+        "headers": [
+            "zdict.h",
+            "zstd.h",
+            "zstd_errors.h"
+        ],
+        "headers@windows": [
+            "zstd.h",
+            "zstd_errors.h"
+        ],
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        },
+        "type": "library"
+    }
+}

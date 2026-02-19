@@ -2,15 +2,38 @@
 
 declare(strict_types=1);
 
-use Psr\Log\LoggerInterface;
-use SPC\builder\BuilderBase;
-use SPC\builder\BuilderProvider;
-use SPC\exception\ExecutionException;
-use SPC\exception\InterruptException;
-use SPC\exception\WrongUsageException;
-use SPC\util\shell\UnixShell;
-use SPC\util\shell\WindowsCmd;
+use StaticPHP\Exception\ExecutionException;
+use StaticPHP\Exception\InterruptException;
+use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Runtime\Shell\DefaultShell;
+use StaticPHP\Runtime\Shell\UnixShell;
+use StaticPHP\Runtime\Shell\WindowsCmd;
 use ZM\Logger\ConsoleLogger;
+
+/**
+ * Get the current SPC loading mode. If passed a mode to check, will return whether current mode matches the given mode.
+ */
+function spc_mode(?int $check_mode = null): bool|int
+{
+    $mode = SPC_MODE_SOURCE;
+    // if current file is in phar, then it's phar mode
+    if (str_starts_with(__FILE__, 'phar://') && Phar::running()) {
+        // judge whether it's vendor mode (inside vendor/) or source mode (inside src/)
+        if (basename(dirname(__FILE__, 3)) === 'static-php-cli' && basename(dirname(__FILE__, 5)) === 'vendor') {
+            $mode = SPC_MODE_VENDOR_PHAR;
+        } else {
+            $mode = SPC_MODE_PHAR;
+        }
+    } elseif (basename(dirname(__FILE__, 3)) === 'static-php-cli' && basename(dirname(__FILE__, 5)) === 'vendor') {
+        $mode = SPC_MODE_VENDOR;
+    }
+
+    if ($check_mode === null) {
+        return $mode;
+    }
+    // use bitwise AND to check mode
+    return ($mode & $check_mode) !== 0;
+}
 
 /**
  * Judge if an array is an associative array
@@ -31,18 +54,13 @@ function is_list_array(mixed $array): bool
 /**
  * Return a logger instance
  */
-function logger(): LoggerInterface
+function logger(): ConsoleLogger
 {
     global $ob_logger;
     if ($ob_logger === null) {
         return new ConsoleLogger();
     }
     return $ob_logger;
-}
-
-function is_unix(): bool
-{
-    return in_array(PHP_OS_FAMILY, ['Linux', 'Darwin', 'BSD']);
 }
 
 /**
@@ -84,36 +102,16 @@ function quote(string $str, string $quote = '"'): string
     return $quote . $str . $quote;
 }
 
-/**
- * Get Family name of current OS.
- */
-function osfamily2dir(): string
-{
-    return match (PHP_OS_FAMILY) {
-        /* @phpstan-ignore-next-line */
-        'Windows', 'WINNT', 'Cygwin' => 'windows',
-        'Darwin' => 'macos',
-        'Linux' => 'linux',
-        'BSD' => 'freebsd',
-        default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
-    };
-}
-
-function osfamily2shortname(): string
-{
-    return match (PHP_OS_FAMILY) {
-        'Windows' => 'win',
-        'Darwin' => 'macos',
-        'Linux' => 'linux',
-        'BSD' => 'bsd',
-        default => throw new WrongUsageException('Not support os: ' . PHP_OS_FAMILY),
-    };
-}
-
 function shell(?bool $debug = null): UnixShell
 {
     /* @noinspection PhpUnhandledExceptionInspection */
     return new UnixShell($debug);
+}
+
+function default_shell(): DefaultShell
+{
+    /* @noinspection PhpUnhandledExceptionInspection */
+    return new DefaultShell();
 }
 
 function cmd(?bool $debug = null): WindowsCmd
@@ -123,19 +121,15 @@ function cmd(?bool $debug = null): WindowsCmd
 }
 
 /**
- * Get current builder.
- */
-function builder(): BuilderBase
-{
-    return BuilderProvider::getBuilder();
-}
-
-/**
  * Get current patch point.
  */
 function patch_point(): string
 {
-    return BuilderProvider::getBuilder()->getPatchPoint();
+    if (StaticPHP\DI\ApplicationContext::has('patch_point')) {
+        /* @phpstan-ignore-next-line */
+        return StaticPHP\DI\ApplicationContext::get('patch_point');
+    }
+    return '';
 }
 
 function patch_point_interrupt(int $retcode, string $msg = ''): InterruptException
@@ -272,6 +266,8 @@ function keyboard_interrupt_register(callable $callback): void
     if (PHP_OS_FAMILY === 'Windows') {
         sapi_windows_set_ctrl_handler($callback);
     } elseif (extension_loaded('pcntl')) {
+        global $_previous_sigint_handler;
+        $_previous_sigint_handler = pcntl_signal_get_handler(SIGINT);
         pcntl_signal(SIGINT, $callback);
     }
 }
@@ -287,6 +283,12 @@ function keyboard_interrupt_unregister(): void
     if (PHP_OS_FAMILY === 'Windows') {
         sapi_windows_set_ctrl_handler(null);
     } elseif (extension_loaded('pcntl')) {
+        global $_previous_sigint_handler;
+        if ($_previous_sigint_handler !== null) {
+            pcntl_signal(SIGINT, $_previous_sigint_handler);
+            $_previous_sigint_handler = null;
+            return;
+        }
         pcntl_signal(SIGINT, SIG_IGN);
     }
 }
@@ -294,11 +296,11 @@ function keyboard_interrupt_unregister(): void
 /**
  * Strip ANSI color codes from a string.
  */
-function strip_ansi_colors(string $text): string
+function strip_ansi_colors(string|Stringable $text): string
 {
     // Regular expression to match ANSI escape sequences
     // Including color codes, cursor control, clear screen and other control sequences
-    return preg_replace('/\e\[[0-9;]*[a-zA-Z]/', '', $text);
+    return preg_replace('/\e\[[0-9;]*[a-zA-Z]/', '', strval($text));
 }
 
 /**
@@ -316,4 +318,77 @@ function get_display_path(string $path): string
         return $deploy_root . substr($path, strlen($cwd));
     }
     throw new WrongUsageException("Cannot convert path: {$path}");
+}
+
+/**
+ * Skip the current operation if the condition is true.
+ * You should ALWAYS use this function inside an attribute callback.
+ *
+ * @param bool   $condition Condition to evaluate
+ * @param string $message   Optional message for the skip exception
+ */
+function spc_skip_if(bool $condition, string $message = ''): void
+{
+    if ($condition) {
+        throw new StaticPHP\Exception\SkipException($message);
+    }
+}
+
+/**
+ * Skip the current operation unless the condition is true.
+ * You should ALWAYS use this function inside an attribute callback.
+ *
+ * @param bool   $condition Condition to evaluate
+ * @param string $message   Optional message for the skip exception
+ */
+function spc_skip_unless(bool $condition, string $message = ''): void
+{
+    spc_skip_if(!$condition, $message);
+}
+
+/**
+ * Parse extension list from string, replace alias and filter internal extensions.
+ *
+ * @param  null|array|string $ext_list Extension list, can be array or comma-separated string
+ * @return string[]          List of extension names
+ */
+function parse_extension_list(array|string|null $ext_list): array
+{
+    // standardize and trim
+    $ext_list = parse_comma_list($ext_list);
+    // replace alias
+    $ls = array_map(function ($x) {
+        $lower = strtolower(trim($x));
+        if (isset(SPC_EXTENSION_ALIAS[$lower])) {
+            logger()->debug("Extension [{$lower}] is an alias of [" . SPC_EXTENSION_ALIAS[$lower] . '], it will be replaced.');
+            return SPC_EXTENSION_ALIAS[$lower];
+        }
+        return $lower;
+    }, $ext_list);
+    // filter internals
+    return array_values(array_filter($ls, function ($x) {
+        if (in_array($x, SPC_INTERNAL_EXTENSIONS)) {
+            logger()->debug("Extension [{$x}] is an builtin extension, it will be ignored.");
+            return false;
+        }
+        return true;
+    }));
+}
+
+/**
+ * Parse comma list from string.
+ *
+ * @param  null|array|string $package_list Comma list, can be array or comma-separated string
+ * @return string[]          List of items
+ */
+function parse_comma_list(array|string|null $package_list): array
+{
+    if (is_string($package_list)) {
+        $package_list = array_map('trim', array_filter(explode(',', $package_list)));
+    }
+    if (is_array($package_list)) {
+        // remove duplicates
+        return array_values(array_unique($package_list));
+    }
+    return [];
 }

@@ -1,0 +1,146 @@
+diff --git a/build/order_by_dep.awk b/build/order_by_dep.awk
+index 1e71ea20..3da32d88 100644
+--- a/build/order_by_dep.awk
++++ b/build/order_by_dep.awk
+@@ -37,6 +37,11 @@ function get_module_index(name,  i)
+ function do_deps(mod_idx,        module_name, mod_name_len, dep, ext, val, depidx)
+ {
+ 	module_name = mods[mod_idx];
++	# TODO: real skip zend extension
++	if (module_name == "opcache") {
++		delete mods[mod_idx];
++		return;
++	}
+ 	mod_name_len = length(module_name);
+
+ 	for (ext in mod_deps) {
+diff --git a/ext/opcache/ZendAccelerator.c b/ext/opcache/ZendAccelerator.c
+index 3e8bdea9..4a784945 100644
+--- a/ext/opcache/ZendAccelerator.c
++++ b/ext/opcache/ZendAccelerator.c
+@@ -97,7 +97,10 @@ typedef int gid_t;
+ #include <immintrin.h>
+ #endif
+
++#ifdef COMPILE_DL_OPCACHE
++// micro: avoid symbol conflict
+ ZEND_EXTENSION();
++#endif
+
+ #ifndef ZTS
+ zend_accel_globals accel_globals;
+@@ -4828,7 +4831,11 @@ static zend_result accel_finish_startup(void)
+ #endif /* ZEND_WIN32 */
+ }
+
++#ifdef COMPILE_DL_OPCACHE
+ ZEND_EXT_API zend_extension zend_extension_entry = {
++#else
++zend_extension opcache_zend_extension_entry = {
++#endif
+ 	ACCELERATOR_PRODUCT_NAME,               /* name */
+ 	PHP_VERSION,							/* version */
+ 	"Zend Technologies",					/* author */
+diff --git a/ext/opcache/config.m4 b/ext/opcache/config.m4
+index 8f6d5ab7..19530321 100644
+--- a/ext/opcache/config.m4
++++ b/ext/opcache/config.m4
+@@ -26,8 +26,8 @@ PHP_ARG_WITH([capstone],
+   [no])
+
+ if test "$PHP_OPCACHE" != "no"; then
+-  dnl Always build as shared extension.
+-  ext_shared=yes
++  dnl Always build as shared extension. (micro patches: no, we need static)
++  dnl ext_shared=yes
+
+   AS_VAR_IF([PHP_HUGE_CODE_PAGES], [yes],
+     [AC_DEFINE([HAVE_HUGE_CODE_PAGES], [1],
+@@ -343,6 +343,7 @@ int main(void) {
+     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
+     [yes])
+
++  AC_DEFINE(HAVE_OPCACHE, 1, [opcache enabled])
+   PHP_ADD_EXTENSION_DEP(opcache, date)
+   PHP_ADD_EXTENSION_DEP(opcache, pcre)
+
+diff --git a/ext/opcache/config.w32 b/ext/opcache/config.w32
+index d0af7258..a054e6c8 100644
+--- a/ext/opcache/config.w32
++++ b/ext/opcache/config.w32
+@@ -16,8 +16,9 @@ if (PHP_OPCACHE != "no") {
+ 		zend_persist_calc.c \
+ 		zend_file_cache.c \
+ 		zend_shared_alloc.c \
+-		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
++		shared_alloc_win32.c", PHP_OPCACHE_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
++	AC_DEFINE('HAVE_OPCACHE', 1, 'opcache enabled');
+ 	ADD_EXTENSION_DEP('opcache', 'date');
+ 	ADD_EXTENSION_DEP('opcache', 'hash');
+ 	ADD_EXTENSION_DEP('opcache', 'pcre');
+diff --git a/ext/opcache/jit/ir/ir_gdb.c b/ext/opcache/jit/ir/ir_gdb.c
+index ecaf8803..a8275466 100644
+--- a/ext/opcache/jit/ir/ir_gdb.c
++++ b/ext/opcache/jit/ir/ir_gdb.c
+@@ -504,11 +504,11 @@ typedef struct _ir_gdbjit_descriptor {
+ extern ir_gdbjit_descriptor __jit_debug_descriptor;
+ void __jit_debug_register_code(void);
+ #else
+-ir_gdbjit_descriptor __jit_debug_descriptor = {
++static ir_gdbjit_descriptor __jit_debug_descriptor = {
+ 	1, IR_GDBJIT_NOACTION, NULL, NULL
+ };
+
+-IR_NEVER_INLINE void __jit_debug_register_code(void)
++static IR_NEVER_INLINE void __jit_debug_register_code(void)
+ {
+ 	__asm__ __volatile__("");
+ }
+diff --git a/main/main.c b/main/main.c
+index 0b38f303..b2cb9d4a 100644
+--- a/main/main.c
++++ b/main/main.c
+@@ -2099,6 +2099,18 @@ void dummy_invalid_parameter_handler(
+ }
+ #endif
+
++// this can be moved to other place
++#if defined(HAVE_OPCACHE) && !defined(COMPILE_DL_OPCACHE)
++extern zend_extension opcache_zend_extension_entry;
++extern void zend_register_extension(zend_extension *new_extension, void *handle);
++
++int zend_load_static_extensions(void)
++{
++	zend_register_extension(&opcache_zend_extension_entry, NULL /*opcache cannot be unloaded*/);
++	return 0;
++}
++#endif
++
+ /* {{{ php_module_startup */
+ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module)
+ {
+@@ -2283,6 +2295,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
+ 	   ahead of all other internals
+ 	 */
+ 	php_ini_register_extensions();
++#if defined(HAVE_OPCACHE) && !defined(COMPILE_DL_OPCACHE)
++	zend_load_static_extensions();
++#endif
+ 	zend_startup_modules();
+
+ 	/* start Zend extensions */
+diff --git a/win32/build/confutils.js b/win32/build/confutils.js
+index 1a4ddbff..f47090b7 100644
+--- a/win32/build/confutils.js
++++ b/win32/build/confutils.js
+@@ -1531,7 +1531,8 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
+ 				}
+ 			}
+ 		}
+-
++        // micro: skip zend opcache
++        if (extname != 'opcache')
+ 		extension_module_ptrs += '\tphpext_' + extname + '_ptr,\r\n';
+
+ 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');

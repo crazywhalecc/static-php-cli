@@ -1,0 +1,18 @@
+libiconv:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://ftp.gnu.org/gnu/libiconv/'
+      regex: '/href="(?<file>libiconv-(?<version>[^"]+)\.tar\.gz)"/'
+    binary: hosted
+    metadata:
+      license-files: [COPYING.LIB]
+      license: LGPL-2.0-or-later
+  headers:
+    - iconv.h
+    - libcharset.h
+    - localcharset.h
+  static-libs@unix:
+    - libiconv.a
+    - libcharset.a

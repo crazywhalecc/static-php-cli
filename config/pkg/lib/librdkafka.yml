@@ -1,0 +1,19 @@
+librdkafka:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: confluentinc/librdkafka
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  suggests:
+    - curl
+    - liblz4
+    - openssl
+    - zlib
+    - zstd
+  lang: cpp
+  pkg-configs:
+    - rdkafka++-static
+    - rdkafka-static

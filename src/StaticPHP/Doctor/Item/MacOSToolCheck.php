@@ -1,0 +1,106 @@
+<?php
+
+declare(strict_types=1);
+
+namespace StaticPHP\Doctor\Item;
+
+use StaticPHP\Attribute\Doctor\CheckItem;
+use StaticPHP\Attribute\Doctor\FixItem;
+use StaticPHP\Doctor\CheckResult;
+use StaticPHP\Util\System\MacOSUtil;
+
+class MacOSToolCheck
+{
+    public const array REQUIRED_COMMANDS = [
+        'curl',
+        'make',
+        'bison',
+        're2c',
+        'flex',
+        'pkg-config',
+        'git',
+        'autoconf',
+        'automake',
+        'tar',
+        'libtool',
+        'unzip',
+        'xz',
+        'gzip',
+        'bzip2',
+        'cmake',
+        'glibtoolize',
+    ];
+
+    #[CheckItem('if homebrew has installed', limit_os: 'Darwin', level: 998)]
+    public function checkBrew(): ?CheckResult
+    {
+        if (($path = MacOSUtil::findCommand('brew')) === null) {
+            return CheckResult::fail('Homebrew is not installed', 'brew');
+        }
+        if ($path !== '/opt/homebrew/bin/brew' && getenv('GNU_ARCH') === 'aarch64') {
+            return CheckResult::fail('Current homebrew (/usr/local/bin/homebrew) is not installed for M1 Mac, please re-install homebrew in /opt/homebrew/ !');
+        }
+        return CheckResult::ok();
+    }
+
+    #[CheckItem('if necessary tools are installed', limit_os: 'Darwin')]
+    public function checkCliTools(): ?CheckResult
+    {
+        $missing = [];
+        foreach (self::REQUIRED_COMMANDS as $cmd) {
+            if (MacOSUtil::findCommand($cmd) === null) {
+                $missing[] = $cmd;
+            }
+        }
+        if (!empty($missing)) {
+            return CheckResult::fail('missing system commands: ' . implode(', ', $missing), 'build-tools', ['missing' => $missing]);
+        }
+        return CheckResult::ok();
+    }
+
+    #[CheckItem('if bison version is 3.0 or later', limit_os: 'Darwin')]
+    public function checkBisonVersion(array $command_path = []): ?CheckResult
+    {
+        // if the bison command is /usr/bin/bison, it is the system bison that may be too old
+        if (($bison = MacOSUtil::findCommand('bison', $command_path)) === null) {
+            return CheckResult::fail('bison is not installed or too old', 'build-tools', ['missing' => ['bison']]);
+        }
+        // check version: bison (GNU Bison) x.y(.z)
+        $version = shell()->execWithResult("{$bison} --version", false);
+        if (preg_match('/bison \(GNU Bison\) (\d+)\.(\d+)(?:\.(\d+))?/', $version[1][0], $matches)) {
+            $major = (int) $matches[1];
+            // major should be 3 or later
+            if ($major < 3) {
+                // find homebrew keg-only bison
+                if ($command_path !== []) {
+                    return CheckResult::fail("Current {$bison} version is too old: " . $matches[0]);
+                }
+                return $this->checkBisonVersion(['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin']);
+            }
+            return CheckResult::ok($matches[0]);
+        }
+        return CheckResult::fail('bison version cannot be determined');
+    }
+
+    #[FixItem('brew')]
+    public function fixBrew(): bool
+    {
+        shell(true)->exec('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"');
+        return true;
+    }
+
+    #[FixItem('build-tools')]
+    public function fixBuildTools(array $missing): bool
+    {
+        $replacement = [
+            'glibtoolize' => 'libtool',
+        ];
+        foreach ($missing as $cmd) {
+            if (isset($replacement[$cmd])) {
+                $cmd = $replacement[$cmd];
+            }
+            shell()->exec('brew install --formula ' . escapeshellarg($cmd));
+        }
+        return true;
+    }
+}

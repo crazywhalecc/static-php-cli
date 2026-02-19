@@ -1,0 +1,11 @@
+--- php-8.0.0/configure.ac	2020-11-25 01:04:03.000000000 +0800
++++ php-8.0.0-micro/configure.ac	2020-11-29 20:00:13.256181206 +0800
+@@ -1005,7 +1005,7 @@ dnl Extensions post-config.
+ dnl ----------------------------------------------------------------------------
+ 
+ dnl Align segments on huge page boundary
+-case $host_alias in
++case nope in
+   i[[3456]]86-*-linux-* | x86_64-*-linux-*)
+ 	AC_MSG_CHECKING(linker support for -zcommon-page-size=2097152)
+     save_LDFLAGS=$LDFLAGS

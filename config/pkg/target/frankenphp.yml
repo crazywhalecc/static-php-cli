@@ -1,0 +1,18 @@
+frankenphp:
+  type: target
+  artifact:
+    source:
+      type: ghtar
+      repo: php/frankenphp
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - php-embed
+    - go-xcaddy
+  suggests@unix:
+    - brotli
+    - watcher
+  static-bins@unix:
+    - frankenphp

@@ -1,0 +1,12 @@
+tidy:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: htacg/tidy-html5
+      prefer-stable: true
+    metadata:
+      license-files: [README/LICENSE.md]
+      license: W3C
+  static-libs@unix:
+    - libtidy.a

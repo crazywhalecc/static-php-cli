@@ -9,26 +9,29 @@
         }
     ],
     "require": {
-        "php": ">= 8.3",
+        "php": ">=8.4",
         "ext-mbstring": "*",
         "ext-zlib": "*",
-        "laravel/prompts": "^0.1.12",
+        "laravel/prompts": "~0.1",
+        "php-di/php-di": "^7.1",
         "symfony/console": "^5.4 || ^6 || ^7",
         "symfony/process": "^7.2",
         "symfony/yaml": "^7.2",
-        "zhamao/logger": "^1.1.3"
+        "zhamao/logger": "^1.1.4"
     },
     "require-dev": {
         "captainhook/captainhook-phar": "^5.23",
         "captainhook/hook-installer": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.60",
         "humbug/box": "^4.5.0 || ^4.6.0",
-        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.3 || ^9.5"
     },
     "autoload": {
         "psr-4": {
-            "SPC\\": "src/SPC"
+            "SPC\\": "src/SPC",
+            "StaticPHP\\": "src/StaticPHP",
+            "Package\\": "src/Package"
         },
         "files": [
             "src/globals/defines.php",
@@ -37,7 +40,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "SPC\\Tests\\": "tests/SPC"
+            "Tests\\StaticPHP\\": "tests/StaticPHP"
         }
     },
     "bin": [
@@ -46,6 +49,7 @@
     "scripts": {
         "analyse": "phpstan analyse --memory-limit 300M",
         "cs-fix": "php-cs-fixer fix",
+        "lint-config": "bin/spc dev:lint-config",
         "test": "vendor/bin/phpunit tests/ --no-coverage",
         "build:phar": "vendor/bin/box compile"
     },

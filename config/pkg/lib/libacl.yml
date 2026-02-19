@@ -1,0 +1,12 @@
+libacl:
+  type: library
+  artifact:
+    source: 'https://download.savannah.nongnu.org/releases/acl/acl-2.3.2.tar.gz'
+    source-mirror: 'https://mirror.souseiseki.middlendian.com/nongnu/acl/acl-2.3.2.tar.gz'
+    metadata:
+      license-files: [doc/COPYING.LGPL]
+      license: LGPL-2.1-or-later
+  depends:
+    - attr
+  static-libs@unix:
+    - libacl.a

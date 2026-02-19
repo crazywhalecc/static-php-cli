@@ -145,11 +145,10 @@ abstract class UnixBuilderBase extends BuilderBase
             throw new SPCInternalException("Deploy failed. Cannot find file after copy: {$dst}");
         }
 
-        // extract debug info
-        $this->extractDebugInfo($dst);
-
-        // strip
         if (!$this->getOption('no-strip')) {
+            // extract debug info
+            $this->extractDebugInfo($dst);
+            // extra strip
             $this->stripBinary($dst);
         }
 
@@ -236,8 +235,10 @@ abstract class UnixBuilderBase extends BuilderBase
                 $lens .= ' -static';
             }
             $dynamic_exports = '';
+            $embedType = 'static';
             // if someone changed to EMBED_TYPE=shared, we need to add LD_LIBRARY_PATH
             if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
+                $embedType = 'shared';
                 if (PHP_OS_FAMILY === 'Darwin') {
                     $ext_path = 'DYLD_LIBRARY_PATH=' . BUILD_LIB_PATH . ':$DYLD_LIBRARY_PATH ';
                 } else {
@@ -256,18 +257,19 @@ abstract class UnixBuilderBase extends BuilderBase
                 }
             }
             $cc = getenv('CC');
+
             [$ret, $out] = shell()->cd($sample_file_path)->execWithResult("{$cc} -o embed embed.c {$lens} {$dynamic_exports}");
             if ($ret !== 0) {
                 throw new ValidationException(
-                    'embed failed sanity check: build failed. Error message: ' . implode("\n", $out),
-                    validation_module: 'static libphp.a sanity check'
+                    'embed failed to build. Error message: ' . implode("\n", $out),
+                    validation_module: $embedType . ' libphp embed build sanity check'
                 );
             }
             [$ret, $output] = shell()->cd($sample_file_path)->execWithResult($ext_path . './embed');
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new ValidationException(
-                    'embed failed sanity check: run failed. Error message: ' . implode("\n", $output),
-                    validation_module: 'static libphp.a sanity check'
+                    'embed failed to run. Error message: ' . implode("\n", $output),
+                    validation_module: $embedType . ' libphp embed run sanity check'
                 );
             }
         }

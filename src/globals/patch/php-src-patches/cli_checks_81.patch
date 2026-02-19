@@ -1,0 +1,183 @@
+diff --git a/TSRM/tsrm_win32.c b/TSRM/tsrm_win32.c
+index cfe344e377..7e1a5ca54f 100644
+--- a/TSRM/tsrm_win32.c
++++ b/TSRM/tsrm_win32.c
+@@ -531,7 +531,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd,
+ 	}
+ 
+ 	dwCreateFlags = NORMAL_PRIORITY_CLASS;
+-	if (strcmp(sapi_module.name, "cli") != 0) {
++	if (strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "micro") != 0) {
+ 		dwCreateFlags |= CREATE_NO_WINDOW;
+ 	}
+ 
+diff --git a/ext/ffi/ffi.c b/ext/ffi/ffi.c
+index 8f05686367..c155028233 100644
+--- a/ext/ffi/ffi.c
++++ b/ext/ffi/ffi.c
+@@ -5247,7 +5247,7 @@ ZEND_MINIT_FUNCTION(ffi)
+ {
+ 	REGISTER_INI_ENTRIES();
+ 
+-	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0;
++	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0 || strcmp(sapi_module.name, "micro") == 1;
+ 
+ 	zend_ffi_exception_ce = register_class_FFI_Exception(zend_ce_error);
+ 
+diff --git a/ext/opcache/ZendAccelerator.c b/ext/opcache/ZendAccelerator.c
+index 5f6b854d47..2b8362c412 100644
+--- a/ext/opcache/ZendAccelerator.c
++++ b/ext/opcache/ZendAccelerator.c
+@@ -2830,7 +2830,7 @@ static inline int accel_find_sapi(void)
+ 		}
+ 		if (ZCG(accel_directives).enable_cli && (
+ 		    strcmp(sapi_module.name, "cli") == 0
+-		  || strcmp(sapi_module.name, "phpdbg") == 0)) {
++		  || strcmp(sapi_module.name, "phpdbg") == 0 || strcmp(sapi_module.name, "micro") == 0)) {
+ 			return SUCCESS;
+ 		}
+ 	}
+@@ -3128,7 +3128,7 @@ static int accel_startup(zend_extension *extension)
+ 
+ #ifdef HAVE_HUGE_CODE_PAGES
+ 	if (ZCG(accel_directives).huge_code_pages &&
+-	    (strcmp(sapi_module.name, "cli") == 0 ||
++	    (strcmp(sapi_module.name, "cli") == 0 || strcmp(sapi_module.name, "micro") == 0 ||
+ 	     strcmp(sapi_module.name, "cli-server") == 0 ||
+ 		 strcmp(sapi_module.name, "cgi-fcgi") == 0 ||
+ 		 strcmp(sapi_module.name, "fpm-fcgi") == 0)) {
+@@ -3140,7 +3140,7 @@ static int accel_startup(zend_extension *extension)
+ 	if (accel_find_sapi() == FAILURE) {
+ 		accel_startup_ok = 0;
+ 		if (!ZCG(accel_directives).enable_cli &&
+-		    strcmp(sapi_module.name, "cli") == 0) {
++		    (strcmp(sapi_module.name, "cli") == 0 || strcmp(sapi_module.name, "micro") == 0)) {
+ 			zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb);
+ 		} else {
+ 			zps_startup_failure("Opcode Caching is only supported in Apache, FPM, FastCGI and LiteSpeed SAPIs", NULL, accelerator_remove_cb);
+diff --git a/ext/pcre/php_pcre.c b/ext/pcre/php_pcre.c
+index a8d3559ef5..1b40f94643 100644
+--- a/ext/pcre/php_pcre.c
++++ b/ext/pcre/php_pcre.c
+@@ -291,7 +291,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
+ 
+ 	/* If we're on the CLI SAPI, there will only be one request, so we don't need the
+ 	 * cache to survive after RSHUTDOWN. */
+-	pcre_globals->per_request_cache = strcmp(sapi_module.name, "cli") == 0;
++	pcre_globals->per_request_cache = strcmp(sapi_module.name, "cli") == 0 || strcmp(sapi_module.name, "micro") == 0;
+ 	if (!pcre_globals->per_request_cache) {
+ 		zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
+ 	}
+diff --git a/ext/readline/readline_cli.c b/ext/readline/readline_cli.c
+index 8bf5d23df7..9af99ada0b 100644
+--- a/ext/readline/readline_cli.c
++++ b/ext/readline/readline_cli.c
+@@ -735,7 +735,7 @@ typedef cli_shell_callbacks_t *(__cdecl *get_cli_shell_callbacks)(void);
+ 		get_cli_shell_callbacks get_callbacks; \
+ 		HMODULE hMod = GetModuleHandle("php.exe"); \
+ 		(cb) = NULL; \
+-		if (strlen(sapi_module.name) >= 3 && 0 == strncmp("cli", sapi_module.name, 3)) { \
++		if ((strlen(sapi_module.name) >= 3 && 0 == strncmp("cli", sapi_module.name, 3)) || 0 == strcmp("micro", sapi_module.name)) { \
+ 			get_callbacks = (get_cli_shell_callbacks)GetProcAddress(hMod, "php_cli_get_shell_callbacks"); \
+ 			if (get_callbacks) { \
+ 				(cb) = get_callbacks(); \
+diff --git a/ext/sqlite3/sqlite3.c b/ext/sqlite3/sqlite3.c
+index 007eef7a74..86d75103c8 100644
+--- a/ext/sqlite3/sqlite3.c
++++ b/ext/sqlite3/sqlite3.c
+@@ -399,7 +399,7 @@ PHP_METHOD(SQLite3, loadExtension)
+ 
+ #ifdef ZTS
+ 	if ((strncmp(sapi_module.name, "cgi", 3) != 0) &&
+-		(strcmp(sapi_module.name, "cli") != 0) &&
++		(strcmp(sapi_module.name, "cli") != 0) && (strcmp(sapi_module.name, "micro") != 0) &&
+ 		(strncmp(sapi_module.name, "embed", 5) != 0)
+ 	) {		php_sqlite3_error(db_obj, "Not supported in multithreaded Web servers");
+ 		RETURN_FALSE;
+diff --git a/ext/standard/php_fopen_wrapper.c b/ext/standard/php_fopen_wrapper.c
+index 4287045511..eab0311d07 100644
+--- a/ext/standard/php_fopen_wrapper.c
++++ b/ext/standard/php_fopen_wrapper.c
+@@ -242,7 +242,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
+ 			}
+ 			return NULL;
+ 		}
+-		if (!strcmp(sapi_module.name, "cli")) {
++		if (!strcmp(sapi_module.name, "cli") && !strcmp(sapi_module.name, "micro")) {
+ 			static int cli_in = 0;
+ 			fd = STDIN_FILENO;
+ 			if (cli_in) {
+@@ -258,7 +258,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
+ 		pipe_requested = 1;
+ #endif
+ 	} else if (!strcasecmp(path, "stdout")) {
+-		if (!strcmp(sapi_module.name, "cli")) {
++		if (!strcmp(sapi_module.name, "cli") && !strcmp(sapi_module.name, "micro")) {
+ 			static int cli_out = 0;
+ 			fd = STDOUT_FILENO;
+ 			if (cli_out++) {
+@@ -274,7 +274,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
+ 		pipe_requested = 1;
+ #endif
+ 	} else if (!strcasecmp(path, "stderr")) {
+-		if (!strcmp(sapi_module.name, "cli")) {
++		if (!strcmp(sapi_module.name, "cli") && !strcmp(sapi_module.name, "micro")) {
+ 			static int cli_err = 0;
+ 			fd = STDERR_FILENO;
+ 			if (cli_err++) {
+@@ -295,7 +295,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
+ 		zend_long  fildes_ori;
+ 		int		   dtablesize;
+ 
+-		if (strcmp(sapi_module.name, "cli")) {
++		if (strcmp(sapi_module.name, "cli") || strcmp(sapi_module.name, "micro")) {
+ 			if (options & REPORT_ERRORS) {
+ 				php_error_docref(NULL, E_WARNING, "Direct access to file descriptors is only available from command-line PHP");
+ 			}
+diff --git a/ext/standard/proc_open.c b/ext/standard/proc_open.c
+index a57e66bd97..e9044cd34e 100644
+--- a/ext/standard/proc_open.c
++++ b/ext/standard/proc_open.c
+@@ -1135,7 +1135,7 @@ PHP_FUNCTION(proc_open)
+ 	}
+ 
+ 	dwCreateFlags = NORMAL_PRIORITY_CLASS;
+-	if(strcmp(sapi_module.name, "cli") != 0) {
++	if(strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "micro") != 0) {
+ 		dwCreateFlags |= CREATE_NO_WINDOW;
+ 	}
+ 	if (create_process_group) {
+diff --git a/main/main.c b/main/main.c
+index dc705fcdbd..a206aa11e4 100644
+--- a/main/main.c
++++ b/main/main.c
+@@ -475,7 +475,7 @@ static PHP_INI_DISP(display_errors_mode)
+ 	mode = php_get_display_errors_mode(temporary_value);
+ 
+ 	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
+-	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg"));
++	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg") || !strcmp(sapi_module.name, "micro"));
+ 
+ 	switch (mode) {
+ 		case PHP_DISPLAY_ERRORS_STDERR:
+@@ -1340,7 +1340,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
+ 					}
+ 				} else {
+ 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
+-					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg")) &&
++					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg") || !strcmp(sapi_module.name, "micro")) &&
+ 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
+ 					) {
+ 						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno);
+diff --git a/win32/console.c b/win32/console.c
+index 9b48561088..a2b764cdb5 100644
+--- a/win32/console.c
++++ b/win32/console.c
+@@ -111,6 +111,6 @@ PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
+ 
+ PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void)
+ {/*{{{*/
+-	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
++	return (strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1)) || 0 == strcmp(sapi_module.name, "micro");
+ }/*}}}*/
+ 

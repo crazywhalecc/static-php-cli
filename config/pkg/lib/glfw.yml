@@ -1,0 +1,6 @@
+glfw:
+  type: library
+  artifact: glfw
+  lang: cpp
+  static-libs@unix:
+    - libglfw3.a

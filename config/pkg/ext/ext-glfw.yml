@@ -1,0 +1,5 @@
+ext-glfw:
+  type: php-extension
+  artifact: glfw
+  depends:
+    - glfw
