@@ -316,7 +316,7 @@ class LinuxBuilder extends UnixBuilderBase
      */
     private function getMakeExtraVars(): array
     {
-        $config = (new SPCConfigUtil($this, ['libs_only_deps' => true, 'absolute_libs' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
+        $config = (new SPCConfigUtil($this, ['libs_only_deps' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
         $static = SPCTarget::isStatic() ? '-all-static' : '';
         $lib = BUILD_LIB_PATH;
         return array_filter([

@@ -20,13 +20,10 @@ class SPCConfigUtil
 
     private bool $libs_only_deps;
 
-    private bool $absolute_libs;
-
     /**
      * @param array{
      *     no_php?: bool,
-     *     libs_only_deps?: bool,
-     *     absolute_libs?: bool
+     *     libs_only_deps?: bool
      * } $options Options pass to spc-config
      */
     public function __construct(?BuilderBase $builder = null, array $options = [])
@@ -36,7 +33,6 @@ class SPCConfigUtil
         }
         $this->no_php = $options['no_php'] ?? false;
         $this->libs_only_deps = $options['libs_only_deps'] ?? false;
-        $this->absolute_libs = $options['absolute_libs'] ?? false;
     }
 
     /**
@@ -77,7 +73,7 @@ class SPCConfigUtil
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $cflags = $this->getIncludesString($libraries);
-        $libs = $this->getLibsString($libraries, !$this->absolute_libs);
+        $libs = $this->getLibsString($libraries);
 
         // additional OS-specific libraries (e.g. macOS -lresolv)
         if ($extra_libs = SPCTarget::getRuntimeLibs()) {
@@ -256,7 +252,7 @@ class SPCConfigUtil
         return '-L' . BUILD_LIB_PATH;
     }
 
-    private function getLibsString(array $libraries, bool $use_short_libs = true): string
+    private function getLibsString(array $libraries): string
     {
         $lib_names = [];
         $frameworks = [];
@@ -316,8 +312,8 @@ class SPCConfigUtil
         if (in_array('imap', $libraries) && SPCTarget::getLibc() === 'glibc') {
             $lib_names[] = '-lcrypt';
         }
-        if (!$use_short_libs) {
-            $lib_names = array_map(fn ($l) => $this->getFullLibName($l), $lib_names);
+        if (getenv('SPC_STATIC_LIBS')) {
+            $lib_names = array_map(fn ($l) => $this->getStaticLibname($l), $lib_names);
         }
         return implode(' ', $lib_names);
     }
@@ -331,7 +327,7 @@ class SPCConfigUtil
         return '-l' . substr($lib, 3, -2);
     }
 
-    private function getFullLibName(string $lib)
+    private function getStaticLibname(string $lib)
     {
         if (!str_starts_with($lib, '-l')) {
             return $lib;
@@ -339,7 +335,7 @@ class SPCConfigUtil
         $libname = substr($lib, 2);
         $staticLib = BUILD_LIB_PATH . '/' . "lib{$libname}.a";
         if (file_exists($staticLib)) {
-            return $staticLib;
+            return "-l:lib{$libname}.a";
         }
         return $lib;
     }
