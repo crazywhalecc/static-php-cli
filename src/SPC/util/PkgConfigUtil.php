@@ -63,7 +63,7 @@ class PkgConfigUtil
     {
         $static = getenv('SPC_STATIC_LIBS') ? '--static' : '';
         // get other things
-        $result = self::execWithResult("pkg-config $static --cflags-only-other {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config {$static} --cflags-only-other {$pkg_config_str}");
         return trim($result);
     }
 
@@ -80,11 +80,11 @@ class PkgConfigUtil
     {
         // Use this instead of shell() to avoid unnecessary outputs
         $static = getenv('SPC_STATIC_LIBS') ? '--static' : '';
-        $result = self::execWithResult("pkg-config $static --libs-only-l {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config {$static} --libs-only-l {$pkg_config_str}");
         $libs = explode(' ', trim($result));
 
         // get other things
-        $result = self::execWithResult("pkg-config $static --libs-only-other {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config {$static} --libs-only-other {$pkg_config_str}");
         // convert libxxx.a to -L{path} -lxxx
         $exp = explode(' ', trim($result));
         foreach ($exp as $item) {

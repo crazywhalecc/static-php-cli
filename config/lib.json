@@ -470,11 +470,6 @@
         "static-libs-unix": [
             "libiconv.a",
             "libcharset.a"
-        ],
-        "headers": [
-            "iconv.h",
-            "libcharset.h",
-            "localcharset.h"
         ]
     },
     "libiconv-win": {
@@ -1011,32 +1006,21 @@
     },
     "zlib": {
         "source": "zlib",
-        "static-libs-unix": [
-            "libz.a"
+        "pkg-configs": [
+            "zlib"
         ],
         "static-libs-windows": [
             "zlib_a.lib"
-        ],
-        "headers": [
-            "zlib.h",
-            "zconf.h"
         ]
     },
     "zstd": {
         "source": "zstd",
-        "static-libs-unix": [
-            "libzstd.a"
+        "pkg-configs": [
+            "libzstd"
         ],
         "static-libs-windows": [
-            [
-                "zstd.lib",
-                "zstd_static.lib"
-            ]
-        ],
-        "headers-unix": [
-            "zdict.h",
-            "zstd.h",
-            "zstd_errors.h"
+            "zstd.lib",
+            "zstd_static.lib"
         ],
         "headers-windows": [
             "zstd.h",
