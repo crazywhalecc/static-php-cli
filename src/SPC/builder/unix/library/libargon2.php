@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
-use SPC\store\FileSystem;
-
 trait libargon2
 {
     protected function build()
