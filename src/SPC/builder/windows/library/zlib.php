@@ -31,10 +31,6 @@ class zlib extends WindowsLibraryBase
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
-        // zlib 1.3.2 changed cmake output names on Windows (see #1039):
-        //   zlibstatic.lib -> zs.lib
-        //   zlib.lib       -> z.lib
-        //   zlib.dll       -> z.dll
         unlink(BUILD_ROOT_PATH . '\bin\z.dll');
         unlink(BUILD_LIB_PATH . '\z.lib');
     }
