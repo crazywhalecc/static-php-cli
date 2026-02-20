@@ -40,6 +40,16 @@ trait krb5
             ->appendEnv($extraEnv)
             ->optionalLib('ldap', '--with-ldap', '--without-ldap')
             ->optionalLib('libedit', '--with-libedit', '--without-libedit')
+            ->removeConfigureArgs(
+                '--enable-static',
+                '--disable-static',
+                '--enable-shared',
+                '--disable-shared'
+            )
+            ->addConfigureArgs(
+                '--enable-static',
+                '--disable-shared'
+            )
             ->configure(...$args)
             ->make();
         $this->patchPkgconfPrefix([
