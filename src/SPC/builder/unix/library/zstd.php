@@ -14,7 +14,7 @@ trait zstd
             ->setBuildDir("{$this->source_dir}/build/cmake/build")
             ->addConfigureArgs(
                 '-DZSTD_BUILD_STATIC=ON',
-                '-DZSTD_BUILD_SHARED=ON',
+                '-DZSTD_BUILD_SHARED=' . (getenv('SPC_LINK_STATIC') ? 'OFF' : 'ON'),
             )
             ->build();
         $this->patchPkgconfPrefix();
