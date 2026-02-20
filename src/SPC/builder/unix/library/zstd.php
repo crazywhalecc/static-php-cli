@@ -13,8 +13,8 @@ trait zstd
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/build/cmake/build")
             ->addConfigureArgs(
-                '-DZSTD_BUILD_STATIC=ON', // otherwise zstd util fails to build
-                '-DZSTD_BUILD_SHARED='. (getenv('SPC_STATIC_LIBS') ? 'OFF' : 'ON'),
+                '-DZSTD_BUILD_STATIC=ON',
+                '-DZSTD_BUILD_SHARED=ON',
             )
             ->build();
         $this->patchPkgconfPrefix();

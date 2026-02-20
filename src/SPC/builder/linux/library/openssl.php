@@ -59,9 +59,8 @@ class openssl extends LinuxLibraryBase
 
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
-                "./Configure " .
-                (getenv('SPC_STATIC_LIBS') ? 'no-shared' : '') .
-                " {$extra} " .                '--prefix=' . BUILD_ROOT_PATH . ' ' .
+                "./Configure {$extra} " .
+                '--prefix=' . BUILD_ROOT_PATH . ' ' .
                 '--libdir=' . BUILD_LIB_PATH . ' ' .
                 "--openssldir={$openssl_dir} " .
                 "{$zlib_extra}" .

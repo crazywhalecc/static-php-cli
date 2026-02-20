@@ -312,7 +312,7 @@ class SPCConfigUtil
         if (in_array('imap', $libraries) && SPCTarget::getLibc() === 'glibc') {
             $lib_names[] = '-lcrypt';
         }
-        if (getenv('SPC_STATIC_LIBS')) {
+        if (getenv('SPC_LINK_STATIC')) {
             $lib_names = array_map(fn ($l) => $this->getStaticLibname($l), $lib_names);
         }
         return implode(' ', $lib_names);

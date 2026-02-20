@@ -61,7 +61,7 @@ class PkgConfigUtil
      */
     public static function getCflags(string $pkg_config_str): string
     {
-        $static = getenv('SPC_STATIC_LIBS') ? '--static' : '';
+        $static = getenv('SPC_LINK_STATIC') ? '--static' : '';
         // get other things
         $result = self::execWithResult("pkg-config {$static} --cflags-only-other {$pkg_config_str}");
         return trim($result);
@@ -79,7 +79,7 @@ class PkgConfigUtil
     public static function getLibsArray(string $pkg_config_str): array
     {
         // Use this instead of shell() to avoid unnecessary outputs
-        $static = getenv('SPC_STATIC_LIBS') ? '--static' : '';
+        $static = getenv('SPC_LINK_STATIC') ? '--static' : '';
         $result = self::execWithResult("pkg-config {$static} --libs-only-l {$pkg_config_str}");
         $libs = explode(' ', trim($result));
 
