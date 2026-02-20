@@ -283,7 +283,7 @@ class SPCConfigUtil
             $libs = array_reverse(Config::getLib($library, 'static-libs', []));
             foreach ($libs as $lib) {
                 // check file existence
-                if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
+                if (!file_exists(BUILD_LIB_PATH . "/{$lib}") && getenv('SPC_LINK_STATIC')) {
                     throw new WrongUsageException("Library file '{$lib}' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
                 }
                 $lib_names[] = $this->getShortLibName($lib);
