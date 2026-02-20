@@ -12,6 +12,9 @@ trait postgresql
 {
     public function patchBeforeBuild(): bool
     {
+        if (!getenv('SPC_LINK_STATIC')) {
+            return false;
+        }
         // skip the test on platforms where libpq infrastructure may be provided by statically-linked libraries
         FileSystem::replaceFileStr("{$this->source_dir}/src/interfaces/libpq/Makefile", 'invokes exit\'; exit 1;', 'invokes exit\';');
         // disable shared libs build
@@ -92,9 +95,11 @@ trait postgresql
             ->exec('make -C src/interfaces/libpq install');
 
         // remove dynamic libs
-        shell()->cd($this->source_dir . '/build')
-            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.dylib");
-
+        if (getenv('SPC_LINK_STATIC')) {
+            shell()->cd($this->source_dir . '/build')
+                ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so*")
+                ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.dylib");
+        }
         FileSystem::replaceFileStr("{$this->getLibDir()}/pkgconfig/libpq.pc", '-lldap', '-lldap -llber');
     }
 }
