@@ -10,7 +10,14 @@ trait xz
 {
     public function build(): void
     {
-        UnixAutoconfExecutor::create($this)
+        $make = UnixAutoconfExecutor::create($this);
+        if (!getenv('SPC_LINK_STATIC')) {
+            // liblzma can only build one of static or shared at a time
+            $make
+                ->removeConfigureArgs('--enable-static')
+                ->addConfigureArgs('--disable-static');
+        }
+        $make
             ->configure(
                 '--disable-scripts',
                 '--disable-doc',
