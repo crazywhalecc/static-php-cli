@@ -154,7 +154,8 @@ abstract class LibraryBase
                 FileSystem::extractPackage($install_file, $lock['source_type'], DOWNLOAD_PATH . '/' . $install_file, BUILD_ROOT_PATH);
                 $this->install();
                 return LIB_STATUS_OK;
-            } catch (SPCException $e) {
+            }
+            catch (SPCException $e) {
                 logger()->error('Failed to extract pre-built library [' . static::NAME . ']: ' . $e->getMessage());
                 return LIB_STATUS_INSTALL_FAILED;
             }
@@ -365,6 +366,25 @@ abstract class LibraryBase
 
     protected function isLibraryInstalled(): bool
     {
+        $pkg_configs = Config::getLib(static::NAME, 'pkg-configs', []);
+        if (count($pkg_configs) !== 0) {
+            $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+            $search_paths = array_unique(array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path)));
+
+            foreach ($pkg_configs as $name) {
+                $found = false;
+                foreach ($search_paths as $path) {
+                    if (file_exists($path . "/{$name}.pc")) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    return false;
+                }
+            }
+            return true; // allow using system dependencies if pkg_config_path is explicitly defined
+        }
         foreach (Config::getLib(static::NAME, 'static-libs', []) as $name) {
             if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
                 return false;
@@ -372,20 +392,6 @@ abstract class LibraryBase
         }
         foreach (Config::getLib(static::NAME, 'headers', []) as $name) {
             if (!file_exists(BUILD_INCLUDE_PATH . "/{$name}")) {
-                return false;
-            }
-        }
-        $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
-        $search_paths = array_unique(array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path)));
-        foreach (Config::getLib(static::NAME, 'pkg-configs', []) as $name) {
-            $found = false;
-            foreach ($search_paths as $path) {
-                if (file_exists($path . "/{$name}.pc")) {
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
                 return false;
             }
         }

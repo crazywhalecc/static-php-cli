@@ -470,6 +470,11 @@
         "static-libs-unix": [
             "libiconv.a",
             "libcharset.a"
+        ],
+        "headers": [
+            "iconv.h",
+            "libcharset.h",
+            "localcharset.h"
         ]
     },
     "libiconv-win": {
@@ -860,9 +865,16 @@
         "pkg-configs": [
             "openssl"
         ],
+        "static-libs-unix": [
+            "libssl.a",
+            "libcrypto.a"
+        ],
         "static-libs-windows": [
             "libssl.lib",
             "libcrypto.lib"
+        ],
+        "headers": [
+            "openssl"
         ],
         "lib-depends": [
             "zlib"
@@ -970,6 +982,11 @@
             "odbccr",
             "odbcinst"
         ],
+        "static-libs-unix": [
+            "libodbc.a",
+            "libodbccr.a",
+            "libodbcinst.a"
+        ],
         "lib-depends": [
             "libiconv"
         ]
@@ -1014,6 +1031,10 @@
         ],
         "static-libs-windows": [
             "zlib_a.lib"
+        ],
+        "headers": [
+            "zlib.h",
+            "zconf.h"
         ]
     },
     "zstd": {
@@ -1021,9 +1042,17 @@
         "pkg-configs": [
             "libzstd"
         ],
+        "static-libs-unix": [
+            "libzstd.a"
+        ],
         "static-libs-windows": [
             "zstd.lib",
             "zstd_static.lib"
+        ],
+        "headers-unix": [
+            "zdict.h",
+            "zstd.h",
+            "zstd_errors.h"
         ],
         "headers-windows": [
             "zstd.h",
