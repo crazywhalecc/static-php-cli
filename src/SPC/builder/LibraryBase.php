@@ -154,8 +154,7 @@ abstract class LibraryBase
                 FileSystem::extractPackage($install_file, $lock['source_type'], DOWNLOAD_PATH . '/' . $install_file, BUILD_ROOT_PATH);
                 $this->install();
                 return LIB_STATUS_OK;
-            }
-            catch (SPCException $e) {
+            } catch (SPCException $e) {
                 logger()->error('Failed to extract pre-built library [' . static::NAME . ']: ' . $e->getMessage());
                 return LIB_STATUS_INSTALL_FAILED;
             }
