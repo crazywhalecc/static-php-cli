@@ -39,7 +39,6 @@ class SPCConfigCommand extends BaseCommand
         $util = new SPCConfigUtil(options: [
             'no_php' => $this->getOption('no-php'),
             'libs_only_deps' => $this->getOption('libs-only-deps'),
-            'absolute_libs' => $this->getOption('absolute-libs'),
         ]);
         $config = $util->config($extensions, $libraries, $include_suggest_ext, $include_suggest_lib);
 

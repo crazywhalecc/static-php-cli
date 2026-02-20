@@ -14,7 +14,7 @@ trait tidy
             ->setBuildDir("{$this->source_dir}/build-dir")
             ->addConfigureArgs(
                 '-DSUPPORT_CONSOLE_APP=OFF',
-                '-DBUILD_SHARED_LIB=ON'
+                '-DBUILD_SHARED_LIB=' . (getenv('SPC_LINK_STATIC') ? 'OFF' : 'ON')
             );
         if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
             $cmake->addConfigureArgs('-DCMAKE_POLICY_VERSION_MINIMUM=3.5');

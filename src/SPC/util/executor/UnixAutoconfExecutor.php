@@ -134,7 +134,7 @@ class UnixAutoconfExecutor extends Executor
     {
         return [
             '--enable-static',
-            '--enable-shared',
+            (getenv('SPC_LINK_STATIC') ? '--disable-shared' : '--enable-shared'),
             "--prefix={$this->library->getBuildRootPath()}",
             '--with-pic',
             '--enable-pic',

@@ -15,7 +15,7 @@ trait UnixLibraryTrait
     {
         $libs = $include_self ? [$this] : [];
         array_unshift($libs, ...array_values($this->getDependencies(recursive: true)));
-        $config = new SPCConfigUtil($this->builder, options: ['libs_only_deps' => true, 'absolute_libs' => true]);
+        $config = new SPCConfigUtil($this->builder, options: ['libs_only_deps' => true]);
         $res = $config->config(libraries: array_map(fn ($x) => $x->getName(), $libs));
         return $res['libs'];
     }
