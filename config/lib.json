@@ -1009,6 +1009,9 @@
         "pkg-configs": [
             "zlib"
         ],
+        "static-libs": [
+            "libz.a"
+        ],
         "static-libs-windows": [
             "zlib_a.lib"
         ]
