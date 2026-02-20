@@ -10,7 +10,7 @@ trait zlib
 {
     protected function build(): void
     {
-        $static = getenv('SPC_STATIC_LIBS') ? '--static' : '';
+        $static = getenv('SPC_LINK_STATIC') ? '--static' : '';
         UnixAutoconfExecutor::create($this)->exec("./configure {$static} --prefix={$this->getBuildRootPath()}")->make();
         $this->patchPkgconfPrefix(['zlib.pc']);
     }

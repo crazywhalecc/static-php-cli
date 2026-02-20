@@ -42,9 +42,8 @@ class openssl extends BSDLibraryBase
 
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
-                "./Configure " .
-                (getenv('SPC_STATIC_LIBS') ? 'no-shared' : '') .
-                " {$extra} " .                '--prefix=/ ' . // use prefix=/
+                "./Configure {$extra} " .
+                '--prefix=/ ' . // use prefix=/
                 "--libdir={$lib} " .
                 '--openssldir=/etc/ssl ' .
                 'BSD-' . arch2gnu($this->builder->getOption('arch'))
