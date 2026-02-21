@@ -75,7 +75,7 @@ $with_libs = match (PHP_OS_FAMILY) {
 // note: combination is only available for *nix platform. Windows must use `none` combination
 $base_combination = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'minimal',
-    'Windows' => 'none',
+    'Windows' => 'common',
 };
 
 // -------------------------- code area, do not modify --------------------------
