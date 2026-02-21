@@ -22,12 +22,11 @@ trait libxml2
             'AX_APPEND_FLAG([-Wl,--version-script=], [VERSION_SCRIPT_FLAGS])',
             '',
         );
-        $patched = $patched || FileSystem::replaceFileStr(
+        return $patched || FileSystem::replaceFileStr(
             $this->source_dir . '/CMakeLists.txt',
             'target_link_options(LibXml2 PRIVATE "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libxml2.syms")',
             '',
         );
-        return $patched;
     }
 
     public function build(): void
