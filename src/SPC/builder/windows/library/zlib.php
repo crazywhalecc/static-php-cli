@@ -33,5 +33,6 @@ class zlib extends WindowsLibraryBase
             );
         unlink(BUILD_ROOT_PATH . '\bin\z.dll');
         unlink(BUILD_LIB_PATH . '\z.lib');
+        copy(BUILD_LIB_PATH . '\zs.lib', BUILD_LIB_PATH . '\zlib_a.lib');
     }
 }
