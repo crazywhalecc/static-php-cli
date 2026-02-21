@@ -384,11 +384,13 @@ abstract class LibraryBase
             }
             return true; // allow using system dependencies if pkg_config_path is explicitly defined
         }
-        if (getenv('SPC_LINK_STATIC')) {
-            foreach (Config::getLib(static::NAME, 'static-libs', []) as $name) {
-                if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
-                    return false;
+        foreach (Config::getLib(static::NAME, 'static-libs', []) as $name) {
+            if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
+                $sharedLib = str_replace('.a', '.so', $name);
+                if (!getenv('SPC_LINK_STATIC') && file_exists(BUILD_LIB_PATH . "/{$sharedLib}")) {
+                    continue;
                 }
+                return false;
             }
         }
         foreach (Config::getLib(static::NAME, 'headers', []) as $name) {
