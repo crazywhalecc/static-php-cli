@@ -26,12 +26,12 @@ $test_os = [
     // 'macos-15-intel', // bin/spc for x86_64
     // 'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
-    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
-    'ubuntu-24.04', // bin/spc for x86_64
-    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
-    'ubuntu-24.04-arm', // bin/spc for arm64
-    // 'windows-2022', // .\bin\spc.ps1
-    // 'windows-2025',
+    // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    // 'ubuntu-24.04', // bin/spc for x86_64
+    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    // 'ubuntu-24.04-arm', // bin/spc for arm64
+    'windows-2022', // .\bin\spc.ps1
+    'windows-2025',
 ];
 
 // whether enable thread safe
@@ -50,7 +50,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'pgsql',
+    'Linux', 'Darwin' => 'zlib',
     'Windows' => 'com_dotnet',
 };
 
