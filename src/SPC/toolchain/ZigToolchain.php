@@ -58,6 +58,10 @@ class ZigToolchain implements ToolchainInterface
         GlobalEnvManager::putenv("SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS={$extraCflags}");
         GlobalEnvManager::putenv('RANLIB=zig-ranlib');
         GlobalEnvManager::putenv('OBJCOPY=zig-objcopy');
+        $defaultLdFlags = getenv('SPC_DEFAULT_LD_FLAGS') ?: '';
+        if (!str_contains($defaultLdFlags, '-Wl,--undefined-version') && !getenv('SPC_LINK_STATIC')) {
+            GlobalEnvManager::putenv("SPC_DEFAULT_LD_FLAGS={$defaultLdFlags} -Wl,--undefined-version");
+        }
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if (!str_contains($extra_libs, '-lunwind')) {
             // Add unwind library if not already present
