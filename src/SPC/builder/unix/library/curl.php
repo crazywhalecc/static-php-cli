@@ -17,7 +17,7 @@ trait curl
         if ($this->builder->getLib('krb5') && !getenv('SPC_LINK_STATIC')) {
             $util = new SPCConfigUtil($this->builder, ['libs_only_deps' => true]);
             $config = $util->config(libraries: ['krb5']);
-            $linkerFlags = $config['LDFLAGS'] . ' -Wl,--whole-archive -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err -lkrb5support -Wl,--no-whole-archive -Wl,--no-undefined';
+            $linkerFlags = $config['ldflags'] . ' -Wl,--whole-archive -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err -lkrb5support -Wl,--no-whole-archive -Wl,--no-undefined';
         }
 
         UnixCMakeExecutor::create($this)
