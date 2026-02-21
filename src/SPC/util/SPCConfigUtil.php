@@ -235,7 +235,8 @@ class SPCConfigUtil
                 }
             }
             $pc_cflags = implode(' ', $pc);
-            if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags)) !== '') {
+            $static = getenv('SPC_LINK_STATIC') ? '--static' : '';
+            if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags, $static)) !== '') {
                 $arr = explode(' ', $pc_cflags);
                 $arr = array_unique($arr);
                 $arr = array_filter($arr, fn ($x) => !str_starts_with($x, 'SHELL:-Xarch_'));
@@ -260,6 +261,11 @@ class SPCConfigUtil
         foreach ($libraries as $library) {
             // add pkg-configs libs
             $pkg_configs = Config::getLib($library, 'pkg-configs', []);
+            $static = getenv('SPC_LINK_STATIC') ? '--static' : null;
+            if (!$static) {
+                $target = Config::getLib($library, 'target');
+                $static = $target && !in_array('shared', $target) ? '--static' : '';
+            }
             $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
             $search_paths = array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path));
             foreach ($pkg_configs as $file) {
@@ -276,7 +282,7 @@ class SPCConfigUtil
             $pkg_configs = implode(' ', $pkg_configs);
             if ($pkg_configs !== '') {
                 // static libs with dependencies come in reverse order, so reverse this too
-                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs));
+                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($static, $pkg_configs));
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
             // convert all static-libs to short names

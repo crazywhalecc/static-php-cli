@@ -59,11 +59,10 @@ class PkgConfigUtil
      * @param  string $pkg_config_str .pc file string, accepts multiple files
      * @return string CFLAGS string, e.g. "-Wno-implicit-int-float-conversion ..."
      */
-    public static function getCflags(string $pkg_config_str): string
+    public static function getCflags(string $pkg_config_str, string $extra = '--static'): string
     {
-        $static = getenv('SPC_LINK_STATIC') ? '--static' : '';
         // get other things
-        $result = self::execWithResult("pkg-config {$static} --cflags-only-other {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config {$extra} --cflags-only-other {$pkg_config_str}");
         return trim($result);
     }
 
@@ -76,15 +75,14 @@ class PkgConfigUtil
      * @param  string $pkg_config_str .pc file string, accepts multiple files
      * @return array  Unique libs array, e.g. [-lz, -lxml, ...]
      */
-    public static function getLibsArray(string $pkg_config_str): array
+    public static function getLibsArray(string $pkg_config_str, string $extra = '--static'): array
     {
         // Use this instead of shell() to avoid unnecessary outputs
-        $static = getenv('SPC_LINK_STATIC') ? '--static' : '';
-        $result = self::execWithResult("pkg-config {$static} --libs-only-l {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config {$extra} --libs-only-l {$pkg_config_str}");
         $libs = explode(' ', trim($result));
 
         // get other things
-        $result = self::execWithResult("pkg-config {$static} --libs-only-other {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config {$extra} --libs-only-other {$pkg_config_str}");
         // convert libxxx.a to -L{path} -lxxx
         $exp = explode(' ', trim($result));
         foreach ($exp as $item) {
