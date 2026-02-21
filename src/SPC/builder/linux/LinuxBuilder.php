@@ -94,6 +94,7 @@ class LinuxBuilder extends UnixBuilderBase
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH, // . ' -Dsomethinghere', // . $musl_flag,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
+            'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
             // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
         ]);
 
