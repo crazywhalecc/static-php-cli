@@ -39,8 +39,10 @@ class GlobalEnvManager
         // Define env vars for unix
         if (is_unix()) {
             if (!getenv('SPC_LINK_STATIC')) {
-                $ldLibPath= getenv('LD_LIBRARY_PATH=' . BUILD_LIB_PATH);
-                if ($ldLibPath) $ldLibPath = ":{$ldLibPath}";
+                $ldLibPath = getenv('LD_LIBRARY_PATH=' . BUILD_LIB_PATH);
+                if ($ldLibPath) {
+                    $ldLibPath = ":{$ldLibPath}";
+                }
                 self::putenv('LD_LIBRARY_PATH=' . BUILD_LIB_PATH . $ldLibPath);
             }
             self::addPathIfNotExists(BUILD_BIN_PATH);
