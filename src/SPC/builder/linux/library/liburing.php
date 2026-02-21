@@ -35,10 +35,13 @@ class liburing extends LinuxLibraryBase
             ]);
         }
 
+        $shared = getenv('SPC_LINK_STATIC') ? 'ENABLE_SHARED=0' : 'ENABLE_SHARED=1';
         $make
             ->removeConfigureArgs(
-                '--disable-shared',
                 '--enable-static',
+                '--disable-static',
+                '--enable-shared',
+                '--disable-shared',
                 '--with-pic',
                 '--enable-pic',
             )
@@ -46,7 +49,7 @@ class liburing extends LinuxLibraryBase
                 $use_libc ? '--use-libc' : '',
             )
             ->configure()
-            ->make('library ENABLE_SHARED=0', 'install ENABLE_SHARED=0', with_clean: false);
+            ->make("library {$shared}", "install {$shared}", with_clean: false);
 
         $this->patchPkgconfPrefix();
     }
