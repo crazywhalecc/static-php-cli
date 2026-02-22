@@ -51,7 +51,7 @@ $prefer_pre_built = false;
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
     'Linux', 'Darwin' => 'zlib',
-    'Windows' => 'amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,ds,exif,ffi,fileinfo,filter,ftp,gd,iconv,igbinary,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,rar,redis,session,shmop,simdjson,simplexml,soap,sockets,sqlite3,sqlsrv,ssh2,sysvshm,tokenizer,xml,xmlreader,xmlwriter,yac,yaml,zip,zlib',
+    'Windows' => 'amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,ds,exif,ffi,fileinfo,filter,ftp,iconv,igbinary,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,rar,redis,session,shmop,simdjson,simplexml,soap,sockets,sqlite3,sqlsrv,ssh2,sysvshm,tokenizer,xml,xmlreader,xmlwriter,yac,yaml,zip,zlib',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
