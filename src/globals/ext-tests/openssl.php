@@ -31,6 +31,6 @@ if (file_exists('/etc/ssl/openssl.cnf')) {
     }
     assert($valid);
 }
-if (PHP_VERSION_ID >= 80500 && defined('PHP_ZTS') && PHP_ZTS === 0 && defined('OPENSSL_VERSION_NUMBER') && OPENSSL_VERSION_NUMBER >= 0x30200000) {
+if (PHP_VERSION_ID >= 80500 && defined('OPENSSL_VERSION_NUMBER') && OPENSSL_VERSION_NUMBER >= 0x30200000) {
     assert(function_exists('openssl_password_hash'));
 }

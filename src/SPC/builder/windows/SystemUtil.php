@@ -96,7 +96,6 @@ SET(CMAKE_CXX_FLAGS_DEBUG "{$cflags}")
 SET(CMAKE_EXE_LINKER_FLAGS "{$ldflags}")
 SET(CMAKE_FIND_ROOT_PATH "{$buildroot}")
 SET(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
-SET(ZLIB_LIBRARY "{$buildroot}/lib/zs.lib")
 CMAKE;
         if (!is_dir(SOURCE_PATH)) {
             FileSystem::createDir(SOURCE_PATH);
