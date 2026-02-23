@@ -160,7 +160,7 @@ abstract class BuilderBase
         }
         if (!$skip_extract) {
             $this->emitPatchPoint('before-php-extract');
-            SourceManager::initSource(sources: ['php-src'], source_only: true);
+            SourceManager::initSource(sources: [$this->getPhpSrcName()], source_only: true);
             $this->emitPatchPoint('after-php-extract');
             if ($this->getPHPVersionID() >= 80000) {
                 $this->emitPatchPoint('before-micro-extract');
@@ -319,7 +319,7 @@ abstract class BuilderBase
     public function getPHPVersionFromArchive(?string $file = null): false|string
     {
         if ($file === null) {
-            $lock = LockFile::get('php-src');
+            $lock = LockFile::get($this->getPhpSrcName());
             if ($lock === null) {
                 return false;
             }
@@ -496,6 +496,14 @@ abstract class BuilderBase
                 throw new WrongUsageException('FrankenPHP SAPI for macOS requires libxml2 library, please include the `xml` extension in your build.');
             }
         }
+    }
+
+    /**
+     * Get the php-src name to use for lock file lookups (supports version-specific names like php-src-8.2)
+     */
+    protected function getPhpSrcName(): string
+    {
+        return getenv('SPC_PHP_SRC_NAME') ?: 'php-src';
     }
 
     /**
