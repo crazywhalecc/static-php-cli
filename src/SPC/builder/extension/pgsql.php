@@ -25,8 +25,8 @@ class pgsql extends Extension
     {
         if ($this->builder->getPHPVersionID() >= 80400) {
             $libfiles = $this->getLibFilesString();
-            $libfiles = str_replace(BUILD_LIB_PATH . '/lib', '-l', $libfiles);
-            $libfiles = str_replace('.a', '', $libfiles);
+            $libfiles = deduplicate_flags($libfiles);
+            $libfiles = clean_spaces($libfiles);
             return '--with-pgsql' . ($shared ? '=shared' : '') .
                 ' PGSQL_CFLAGS=-I' . BUILD_INCLUDE_PATH .
                 ' PGSQL_LIBS="-L' . BUILD_LIB_PATH . ' ' . $libfiles . '"';

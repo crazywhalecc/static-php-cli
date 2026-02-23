@@ -11,7 +11,7 @@ trait libuv
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->addConfigureArgs('-DLIBUV_BUILD_SHARED=OFF')
+            ->addConfigureArgs('-DLIBUV_BUILD_SHARED=' . (getenv('SPC_LINK_STATIC') ? 'OFF' : 'ON'))
             ->build();
         // patch pkgconfig
         $this->patchPkgconfPrefix(['libuv-static.pc']);

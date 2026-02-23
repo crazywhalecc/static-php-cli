@@ -56,10 +56,11 @@ class openssl extends LinuxLibraryBase
         // TODO: in v3 use the following: $openssl_dir ??= SystemUtil::getOSRelease()['dist'] === 'redhat' ? '/etc/pki/tls' : '/etc/ssl';
         $openssl_dir ??= '/etc/ssl';
         $ex_lib = trim($ex_lib);
+        $noShared = getenv('SPC_LINK_STATIC') ? 'no-shared' : '';
 
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
-                "{$env} ./Configure no-shared {$extra} " .
+                "./Configure {$noShared} {$extra} " .
                 '--prefix=' . BUILD_ROOT_PATH . ' ' .
                 '--libdir=' . BUILD_LIB_PATH . ' ' .
                 "--openssldir={$openssl_dir} " .

@@ -16,12 +16,11 @@ class UnixAutoconfExecutor extends Executor
 
     protected array $configure_args = [];
 
-    protected array $ignore_args = [];
-
     public function __construct(protected BSDLibraryBase|LinuxLibraryBase|MacOSLibraryBase $library)
     {
         parent::__construct($library);
         $this->initShell();
+        $this->configure_args = $this->getDefaultConfigureArgs();
     }
 
     /**
@@ -29,17 +28,10 @@ class UnixAutoconfExecutor extends Executor
      */
     public function configure(...$args): static
     {
-        // remove all the ignored args
-        $args = array_merge($args, $this->getDefaultConfigureArgs(), $this->configure_args);
-        $args = array_diff($args, $this->ignore_args);
+        $args = array_merge($args, $this->configure_args);
         $configure_args = implode(' ', $args);
 
         return $this->seekLogFileOnException(fn () => $this->shell->exec("./configure {$configure_args}"));
-    }
-
-    public function getConfigureArgsString(): string
-    {
-        return implode(' ', array_merge($this->getDefaultConfigureArgs(), $this->configure_args));
     }
 
     /**
@@ -111,7 +103,7 @@ class UnixAutoconfExecutor extends Executor
      */
     public function removeConfigureArgs(...$args): static
     {
-        $this->ignore_args = [...$this->ignore_args, ...$args];
+        $this->configure_args = array_diff($this->configure_args, $args);
         return $this;
     }
 
@@ -133,8 +125,8 @@ class UnixAutoconfExecutor extends Executor
     private function getDefaultConfigureArgs(): array
     {
         return [
-            '--disable-shared',
             '--enable-static',
+            getenv('SPC_LINK_STATIC') ? '--disable-shared' : '--enable-shared',
             "--prefix={$this->library->getBuildRootPath()}",
             '--with-pic',
             '--enable-pic',

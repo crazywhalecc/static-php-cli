@@ -33,7 +33,6 @@ class openssl extends WindowsLibraryBase
             ->execWithWrapper(
                 $this->builder->makeSimpleWrapper($this->perl),
                 'Configure zlib VC-WIN64A ' .
-                'no-shared ' .
                 '--prefix=' . quote(BUILD_ROOT_PATH) . ' ' .
                 '--with-zlib-lib=' . quote(BUILD_LIB_PATH) . ' ' .
                 '--with-zlib-include=' . quote(BUILD_INCLUDE_PATH) . ' ' .

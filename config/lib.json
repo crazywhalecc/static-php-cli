@@ -303,6 +303,9 @@
     },
     "krb5": {
         "source": "krb5",
+        "target": [
+            "static"
+        ],
         "pkg-configs": [
             "krb5-gssapi"
         ],
@@ -862,6 +865,9 @@
     },
     "openssl": {
         "source": "openssl",
+        "pkg-configs": [
+            "openssl"
+        ],
         "static-libs-unix": [
             "libssl.a",
             "libcrypto.a"
@@ -974,6 +980,11 @@
     },
     "unixodbc": {
         "source": "unixodbc",
+        "pkg-configs": [
+            "odbc",
+            "odbccr",
+            "odbcinst"
+        ],
         "static-libs-unix": [
             "libodbc.a",
             "libodbccr.a",
@@ -1015,7 +1026,10 @@
     },
     "zlib": {
         "source": "zlib",
-        "static-libs-unix": [
+        "pkg-configs": [
+            "zlib"
+        ],
+        "static-libs": [
             "libz.a"
         ],
         "static-libs-windows": [
@@ -1028,14 +1042,15 @@
     },
     "zstd": {
         "source": "zstd",
+        "pkg-configs": [
+            "libzstd"
+        ],
         "static-libs-unix": [
             "libzstd.a"
         ],
         "static-libs-windows": [
-            [
-                "zstd.lib",
-                "zstd_static.lib"
-            ]
+            "zstd.lib",
+            "zstd_static.lib"
         ],
         "headers-unix": [
             "zdict.h",

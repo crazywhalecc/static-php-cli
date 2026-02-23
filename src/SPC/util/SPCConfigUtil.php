@@ -20,13 +20,10 @@ class SPCConfigUtil
 
     private bool $libs_only_deps;
 
-    private bool $absolute_libs;
-
     /**
      * @param array{
      *     no_php?: bool,
-     *     libs_only_deps?: bool,
-     *     absolute_libs?: bool
+     *     libs_only_deps?: bool
      * } $options Options pass to spc-config
      */
     public function __construct(?BuilderBase $builder = null, array $options = [])
@@ -36,7 +33,6 @@ class SPCConfigUtil
         }
         $this->no_php = $options['no_php'] ?? false;
         $this->libs_only_deps = $options['libs_only_deps'] ?? false;
-        $this->absolute_libs = $options['absolute_libs'] ?? false;
     }
 
     /**
@@ -77,7 +73,7 @@ class SPCConfigUtil
         ob_get_clean();
         $ldflags = $this->getLdflagsString();
         $cflags = $this->getIncludesString($libraries);
-        $libs = $this->getLibsString($libraries, !$this->absolute_libs);
+        $libs = $this->getLibsString($libraries);
 
         // additional OS-specific libraries (e.g. macOS -lresolv)
         if ($extra_libs = SPCTarget::getRuntimeLibs()) {
@@ -239,7 +235,8 @@ class SPCConfigUtil
                 }
             }
             $pc_cflags = implode(' ', $pc);
-            if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags)) !== '') {
+            $static = getenv('SPC_LINK_STATIC') ? '--static' : '';
+            if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags, $static)) !== '') {
                 $arr = explode(' ', $pc_cflags);
                 $arr = array_unique($arr);
                 $arr = array_filter($arr, fn ($x) => !str_starts_with($x, 'SHELL:-Xarch_'));
@@ -256,7 +253,7 @@ class SPCConfigUtil
         return '-L' . BUILD_LIB_PATH;
     }
 
-    private function getLibsString(array $libraries, bool $use_short_libs = true): string
+    private function getLibsString(array $libraries): string
     {
         $lib_names = [];
         $frameworks = [];
@@ -264,6 +261,11 @@ class SPCConfigUtil
         foreach ($libraries as $library) {
             // add pkg-configs libs
             $pkg_configs = Config::getLib($library, 'pkg-configs', []);
+            $static = getenv('SPC_LINK_STATIC') ? '--static' : null;
+            if (!$static) {
+                $target = Config::getLib($library, 'target');
+                $static = $target && !in_array('shared', $target) ? '--static' : '';
+            }
             $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
             $search_paths = array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path));
             foreach ($pkg_configs as $file) {
@@ -280,14 +282,14 @@ class SPCConfigUtil
             $pkg_configs = implode(' ', $pkg_configs);
             if ($pkg_configs !== '') {
                 // static libs with dependencies come in reverse order, so reverse this too
-                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($pkg_configs));
+                $pc_libs = array_reverse(PkgConfigUtil::getLibsArray($static, $pkg_configs));
                 $lib_names = [...$lib_names, ...$pc_libs];
             }
             // convert all static-libs to short names
             $libs = array_reverse(Config::getLib($library, 'static-libs', []));
             foreach ($libs as $lib) {
                 // check file existence
-                if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
+                if (!file_exists(BUILD_LIB_PATH . "/{$lib}") && getenv('SPC_LINK_STATIC')) {
                     throw new WrongUsageException("Library file '{$lib}' for lib [{$library}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
                 }
                 $lib_names[] = $this->getShortLibName($lib);
@@ -316,8 +318,8 @@ class SPCConfigUtil
         if (in_array('imap', $libraries) && SPCTarget::getLibc() === 'glibc') {
             $lib_names[] = '-lcrypt';
         }
-        if (!$use_short_libs) {
-            $lib_names = array_map(fn ($l) => $this->getFullLibName($l), $lib_names);
+        if (getenv('SPC_LINK_STATIC')) {
+            $lib_names = array_map(fn ($l) => $this->getStaticLibname($l), $lib_names);
         }
         return implode(' ', $lib_names);
     }
@@ -331,7 +333,7 @@ class SPCConfigUtil
         return '-l' . substr($lib, 3, -2);
     }
 
-    private function getFullLibName(string $lib)
+    private function getStaticLibname(string $lib)
     {
         if (!str_starts_with($lib, '-l')) {
             return $lib;
@@ -339,7 +341,7 @@ class SPCConfigUtil
         $libname = substr($lib, 2);
         $staticLib = BUILD_LIB_PATH . '/' . "lib{$libname}.a";
         if (file_exists($staticLib)) {
-            return $staticLib;
+            return "-l:lib{$libname}.a";
         }
         return $lib;
     }
