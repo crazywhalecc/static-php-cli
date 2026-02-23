@@ -13,6 +13,8 @@ use Symfony\Component\Yaml\Yaml;
 #[AsCommand('dev:lint-config', 'Lint configuration file format', ['dev:sort-config'])]
 class LintConfigCommand extends BaseCommand
 {
+    protected bool $no_motd = true;
+
     public function handle(): int
     {
         $checkOnly = $this->input->getOption('check');
@@ -37,6 +39,9 @@ class LintConfigCommand extends BaseCommand
             return static::VALIDATION_ERROR;
         }
 
+        if (!$hasChanges) {
+            $this->output->writeln('<info>No changes.</info>');
+        }
         return static::SUCCESS;
     }
 
