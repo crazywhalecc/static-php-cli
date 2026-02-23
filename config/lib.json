@@ -1019,7 +1019,7 @@
             "libz.a"
         ],
         "static-libs-windows": [
-            "zlib_a.lib"
+            "zs.lib"
         ],
         "headers": [
             "zlib.h",
