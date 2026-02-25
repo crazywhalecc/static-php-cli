@@ -9,7 +9,7 @@ if (PHP_GD != "no") {
     }
 
     // zlib ext support (required)
-    if (!CHECK_LIB("zs.lib", "gd", PHP_GD)) {
+    if (!CHECK_LIB("zlib_a.lib;zlib.lib", "gd", PHP_GD)) {
         ERROR("gd not enabled; zlib not enabled");
     }
 
