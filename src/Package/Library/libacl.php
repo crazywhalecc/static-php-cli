@@ -8,6 +8,7 @@ use Package\Target\php;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Util\FileSystem;
@@ -16,6 +17,7 @@ use StaticPHP\Util\FileSystem;
 class libacl
 {
     #[BeforeStage('php', [php::class, 'makeForUnix'], 'libacl')]
+    #[PatchDescription('Fix FPM_EXTRA_LIBS to avoid linking with acl on Unix')]
     public function patchBeforeMakePhpUnix(LibraryPackage $lib): void
     {
         $file_path = SOURCE_PATH . '/php-src/Makefile';
