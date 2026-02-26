@@ -373,6 +373,15 @@
         ],
         "static-libs-windows": [
             "avif.lib"
+        ],
+        "lib-depends": [
+            "libaom"
+        ],
+        "lib-suggests": [
+            "libwebp",
+            "libjpeg",
+            "libxml2",
+            "libpng"
         ]
     },
     "libcares": {

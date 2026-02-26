@@ -34,7 +34,7 @@ use Symfony\Component\Console\Application;
  */
 final class ConsoleApplication extends Application
 {
-    public const string VERSION = '2.8.0';
+    public const string VERSION = '2.8.3';
 
     public function __construct()
     {

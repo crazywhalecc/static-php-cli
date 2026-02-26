@@ -526,7 +526,7 @@
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",
-        "provide-pre-built": true,
+        "provide-pre-built": false,
         "license": {
             "type": "file",
             "path": "LICENSE"

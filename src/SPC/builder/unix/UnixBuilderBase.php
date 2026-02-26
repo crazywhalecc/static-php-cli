@@ -365,6 +365,7 @@ abstract class UnixBuilderBase extends BuilderBase
         $frankenphpAppPath = $this->getOption('with-frankenphp-app');
 
         if ($frankenphpAppPath) {
+            $frankenphpAppPath = trim($frankenphpAppPath, "\"'");
             if (!is_dir($frankenphpAppPath)) {
                 throw new WrongUsageException("The path provided to --with-frankenphp-app is not a valid directory: {$frankenphpAppPath}");
             }
@@ -455,6 +456,7 @@ abstract class UnixBuilderBase extends BuilderBase
             'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$libs}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
+                '-X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
                 "v{$frankenPhpVersion} PHP {$libphpVersion} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
