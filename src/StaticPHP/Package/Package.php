@@ -129,6 +129,16 @@ abstract class Package
     }
 
     /**
+     * Get all defined stages for this package.
+     *
+     * @return array<string, callable>
+     */
+    public function getStages(): array
+    {
+        return $this->stages;
+    }
+
+    /**
      * Check if the package has a specific stage defined.
      *
      * @param mixed $name Stage name

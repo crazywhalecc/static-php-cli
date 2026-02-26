@@ -6,6 +6,7 @@ namespace StaticPHP;
 
 use StaticPHP\Command\BuildLibsCommand;
 use StaticPHP\Command\BuildTargetCommand;
+use StaticPHP\Command\Dev\DumpStagesCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\LintConfigCommand;
@@ -67,6 +68,7 @@ class ConsoleApplication extends Application
             new EnvCommand(),
             new LintConfigCommand(),
             new PackLibCommand(),
+            new DumpStagesCommand(),
         ]);
 
         // add additional commands from registries
