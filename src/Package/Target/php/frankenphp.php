@@ -7,6 +7,7 @@ namespace Package\Target\php;
 use Package\Target\php;
 use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Exception\SPCInternalException;
+use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
@@ -22,7 +23,7 @@ use ZM\Logger\ConsoleColor;
 trait frankenphp
 {
     #[Stage]
-    public function buildFrankenphpUnix(TargetPackage $package, PackageInstaller $installer, ToolchainInterface $toolchain, PackageBuilder $builder): void
+    public function buildFrankenphpForUnix(TargetPackage $package, PackageInstaller $installer, ToolchainInterface $toolchain, PackageBuilder $builder): void
     {
         if (getenv('GOROOT') === false) {
             throw new SPCInternalException('go-xcaddy is not initialized properly. GOROOT is not set.');
@@ -89,6 +90,7 @@ trait frankenphp
             'CGO_LDFLAGS' => "{$package->getLibExtraLdFlags()} {$staticFlags} {$config['ldflags']} {$libs}",
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
+                '-X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
                 "v{$frankenphp_version} PHP {$libphp_version} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$no_brotli}{$no_watcher}",
@@ -101,6 +103,29 @@ trait frankenphp
 
         $builder->deployBinary(BUILD_LIB_PATH . '/frankenphp', BUILD_BIN_PATH . '/frankenphp');
         $package->setOutput('Binary path for FrankenPHP SAPI', BUILD_BIN_PATH . '/frankenphp');
+    }
+
+    #[Stage]
+    public function smokeTestFrankenphpForUnix(): void
+    {
+        InteractiveTerm::setMessage('Running FrankenPHP smoke test');
+        $frankenphp = BUILD_BIN_PATH . '/frankenphp';
+        if (!file_exists($frankenphp)) {
+            throw new ValidationException(
+                "FrankenPHP binary not found: {$frankenphp}",
+                validation_module: 'FrankenPHP smoke test'
+            );
+        }
+        $prefix = PHP_OS_FAMILY === 'Darwin' ? 'DYLD_' : 'LD_';
+        [$ret, $output] = shell()
+            ->setEnv(["{$prefix}LIBRARY_PATH" => BUILD_LIB_PATH])
+            ->execWithResult("{$frankenphp} version");
+        if ($ret !== 0 || !str_contains(implode('', $output), 'FrankenPHP')) {
+            throw new ValidationException(
+                'FrankenPHP failed smoke test: ret[' . $ret . ']. out[' . implode('', $output) . ']',
+                validation_module: 'FrankenPHP smoke test'
+            );
+        }
     }
 
     /**

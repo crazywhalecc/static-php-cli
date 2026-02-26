@@ -79,7 +79,7 @@ class PhpExtensionPackage extends Package
             return ApplicationContext::invoke($callback, ['shared' => $shared, static::class => $this, Package::class => $this]);
         }
         $escapedPath = str_replace("'", '', escapeshellarg(BUILD_ROOT_PATH)) !== BUILD_ROOT_PATH || str_contains(BUILD_ROOT_PATH, ' ') ? escapeshellarg(BUILD_ROOT_PATH) : BUILD_ROOT_PATH;
-        $name = str_replace('_', '-', $this->getName());
+        $name = str_replace('_', '-', $this->getExtensionName());
         $ext_config = PackageConfig::get($name, 'php-extension', []);
 
         $arg_type = match (SystemTarget::getTargetOS()) {
@@ -143,6 +143,54 @@ class PhpExtensionPackage extends Package
             $this->runStage('build');
         } else {
             throw new WrongUsageException("Extension [{$this->getExtensionName()}] cannot build shared target yet.");
+        }
+    }
+
+    /**
+     * Get the dist name used for `--ri` check in smoke test.
+     * Reads from config `dist-name` field, defaults to extension name.
+     */
+    public function getDistName(): string
+    {
+        return $this->extension_config['dist-name'] ?? $this->getExtensionName();
+    }
+
+    /**
+     * Run smoke test for the extension on Unix CLI.
+     * Override this method in a subclass。
+     */
+    public function runSmokeTestCliUnix(): void
+    {
+        if (($this->extension_config['smoke-test'] ?? true) === false) {
+            return;
+        }
+
+        $distName = $this->getDistName();
+        // empty dist-name → no --ri check (e.g. password_argon2)
+        if ($distName === '') {
+            return;
+        }
+
+        $sharedExtensions = $this->getSharedExtensionLoadString();
+        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $distName . '"', false);
+        if ($ret !== 0) {
+            throw new ValidationException(
+                "extension {$this->getName()} failed compile check: php-cli returned {$ret}",
+                validation_module: 'Extension ' . $this->getName() . ' sanity check'
+            );
+        }
+
+        $test_file = ROOT_DIR . '/src/globals/ext-tests/' . $this->getExtensionName() . '.php';
+        if (file_exists($test_file)) {
+            // Trim additional content & escape special characters to allow inline usage
+            $test = self::escapeInlineTest(file_get_contents($test_file));
+            [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
+            if ($ret !== 0) {
+                throw new ValidationException(
+                    "extension {$this->getName()} failed sanity check. Code: {$ret}, output: " . implode("\n", $out),
+                    validation_module: 'Extension ' . $this->getName() . ' function check'
+                );
+            }
         }
     }
 
@@ -283,5 +331,46 @@ class PhpExtensionPackage extends Package
             }
         }
         return [trim($staticLibString), trim($sharedLibString)];
+    }
+
+    /**
+     * Builds the `-d extension_dir=... -d extension=...` string for all resolved shared extensions.
+     * Used in CLI smoke test to load shared extension dependencies at runtime.
+     */
+    private function getSharedExtensionLoadString(): string
+    {
+        $sharedExts = array_filter(
+            $this->getInstaller()->getResolvedPackages(PhpExtensionPackage::class),
+            fn (PhpExtensionPackage $ext) => $ext->isBuildShared() && !$ext->isBuildWithPhp()
+        );
+
+        if (empty($sharedExts)) {
+            return '';
+        }
+
+        $ret = ' -d "extension_dir=' . BUILD_MODULES_PATH . '"';
+        foreach ($sharedExts as $ext) {
+            $extConfig = PackageConfig::get($ext->getName(), 'php-extension', []);
+            if ($extConfig['zend-extension'] ?? false) {
+                $ret .= ' -d "zend_extension=' . $ext->getExtensionName() . '"';
+            } else {
+                $ret .= ' -d "extension=' . $ext->getExtensionName() . '"';
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Escape PHP test file content for inline `-r` usage.
+     * Strips <?php / declare, replaces newlines and special shell characters.
+     */
+    private static function escapeInlineTest(string $code): string
+    {
+        return str_replace(
+            ['<?php', 'declare(strict_types=1);', "\n", '"', '$', '!'],
+            ['', '', '', '\"', '\$', '"\'!\'"'],
+            $code
+        );
     }
 }
