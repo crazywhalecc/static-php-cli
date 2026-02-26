@@ -27,8 +27,11 @@ class postgresql extends LibraryPackage
     #[PatchDescription('Patch to avoid explicit_bzero detection issues on some systems')]
     public function patchBeforePHPConfigure(TargetPackage $package): void
     {
-        shell()->cd($package->getSourceDir())
-            ->exec('sed -i.backup "s/ac_cv_func_explicit_bzero\" = xyes/ac_cv_func_explicit_bzero\" = x_fake_yes/" ./configure');
+        if (SystemTarget::getTargetOS() === 'Darwin') {
+            // on macOS, explicit_bzero is available but causes build failure due to detection issues, so we fake it as unavailable
+            shell()->cd($package->getSourceDir())
+                ->exec('sed -i.backup "s/ac_cv_func_explicit_bzero\" = xyes/ac_cv_func_explicit_bzero\" = x_fake_yes/" ./configure');
+        }
     }
 
     #[PatchBeforeBuild]
