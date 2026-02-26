@@ -29,6 +29,7 @@ trait frankenphp
         }
 
         // process --with-frankenphp-app option
+        InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('processing --with-frankenphp-app option'));
         $package->runStage([$this, 'processFrankenphpApp']);
 
         // modules
@@ -114,7 +115,6 @@ trait frankenphp
         $frankenphpAppPath = $package->getBuildOption('with-frankenphp-app');
 
         if ($frankenphpAppPath) {
-            InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('processing --with-frankenphp-app option'));
             if (!is_dir($frankenphpAppPath)) {
                 throw new WrongUsageException("The path provided to --with-frankenphp-app is not a valid directory: {$frankenphpAppPath}");
             }
