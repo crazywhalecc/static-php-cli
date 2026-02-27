@@ -106,8 +106,19 @@ trait frankenphp
     }
 
     #[Stage]
-    public function smokeTestFrankenphpForUnix(): void
+    public function smokeTestFrankenphpForUnix(PackageBuilder $builder): void
     {
+        // analyse --no-smoke-test option
+        $no_smoke_test = $builder->getOption('no-smoke-test', false);
+        $option = match ($no_smoke_test) {
+            false => false, // default value, run all smoke tests
+            null => 'all', // --no-smoke-test without value, skip all smoke tests
+            default => parse_comma_list($no_smoke_test), // --no-smoke-test=frankenphp,...
+        };
+        if ($option === 'all' || (is_array($option) && in_array('frankenphp', $option, true))) {
+            return;
+        }
+
         InteractiveTerm::setMessage('Running FrankenPHP smoke test');
         $frankenphp = BUILD_BIN_PATH . '/frankenphp';
         if (!file_exists($frankenphp)) {
