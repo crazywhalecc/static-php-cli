@@ -139,6 +139,16 @@ abstract class Package
     }
 
     /**
+     * Get the list of OS families that have a registered build function (via #[BuildFor]).
+     *
+     * @return string[] e.g. ['Linux', 'Darwin']
+     */
+    public function getBuildForOSList(): array
+    {
+        return array_keys($this->build_functions);
+    }
+
+    /**
      * Check if the package has a specific stage defined.
      *
      * @param mixed $name Stage name

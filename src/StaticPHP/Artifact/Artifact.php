@@ -237,6 +237,39 @@ class Artifact
         return isset($this->config['binary'][$target]) || isset($this->custom_binary_callbacks[$target]);
     }
 
+    /**
+     * Get all platform strings for which a binary is declared (config or custom callback).
+     *
+     * For platforms where the binary type is "custom", a registered custom_binary_callback
+     * is required to consider it truly installable.
+     *
+     * @return string[] e.g. ['linux-x86_64', 'linux-aarch64', 'macos-aarch64']
+     */
+    public function getBinaryPlatforms(): array
+    {
+        $platforms = [];
+        if (isset($this->config['binary']) && is_array($this->config['binary'])) {
+            foreach ($this->config['binary'] as $platform => $platformConfig) {
+                $type = is_array($platformConfig) ? ($platformConfig['type'] ?? '') : '';
+                if ($type === 'custom') {
+                    // Only installable if a custom callback has been registered
+                    if (isset($this->custom_binary_callbacks[$platform])) {
+                        $platforms[] = $platform;
+                    }
+                } else {
+                    $platforms[] = $platform;
+                }
+            }
+        }
+        // Include custom callbacks for platforms not listed in config at all
+        foreach (array_keys($this->custom_binary_callbacks) as $platform) {
+            if (!in_array($platform, $platforms, true)) {
+                $platforms[] = $platform;
+            }
+        }
+        return $platforms;
+    }
+
     public function getDownloadConfig(string $type): mixed
     {
         return $this->config[$type] ?? null;

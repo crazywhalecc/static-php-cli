@@ -61,3 +61,6 @@ log/
 # spc.phar
 spc.phar
 spc.exe
+
+# dumped files from StaticPHP v3
+/dump-*.json

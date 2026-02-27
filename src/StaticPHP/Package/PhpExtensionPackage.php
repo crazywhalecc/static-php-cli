@@ -281,6 +281,27 @@ class PhpExtensionPackage extends Package
     }
 
     /**
+     * Get per-OS build support status for this php-extension.
+     *
+     * Rules (same as v2):
+     * - OS not listed in 'support' config  => 'yes' (fully supported)
+     * - OS listed with 'wip'               => 'wip'
+     * - OS listed with 'partial'           => 'partial'
+     * - OS listed with 'no'               => 'no'
+     *
+     * @return array<string, string> e.g. ['Linux' => 'yes', 'Darwin' => 'partial', 'Windows' => 'no']
+     */
+    public function getBuildSupportStatus(): array
+    {
+        $exceptions = $this->extension_config['support'] ?? [];
+        $result = [];
+        foreach (['Linux', 'Darwin', 'Windows'] as $os) {
+            $result[$os] = $exceptions[$os] ?? 'yes';
+        }
+        return $result;
+    }
+
+    /**
      * Register default stages if not already defined by attributes.
      * This is called after all attributes have been loaded.
      *
