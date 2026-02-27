@@ -157,7 +157,7 @@ class PhpExtensionPackage extends Package
 
     /**
      * Run smoke test for the extension on Unix CLI.
-     * Override this method in a subclass。
+     * Override this method in a subclass.
      */
     public function runSmokeTestCliUnix(): void
     {
