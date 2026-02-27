@@ -49,7 +49,7 @@ on:
       with-suggested-libs:
         description: Build with suggested libs
         type: boolean
-        default: false
+        default: true
       debug:
         description: Show full build logs
         type: boolean

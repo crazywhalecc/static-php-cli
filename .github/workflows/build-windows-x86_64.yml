@@ -29,6 +29,10 @@ on:
         description: prefer pre-built binaries (reduce build time)
         type: boolean
         default: true
+      with-suggested-libs:
+        description: Build with suggested libs
+        type: boolean
+        default: true
       debug:
         description: enable debug logs
         type: boolean
