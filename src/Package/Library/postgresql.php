@@ -10,7 +10,6 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Attribute\PatchDescription;
-use StaticPHP\Exception\FileSystemException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
@@ -38,20 +37,6 @@ class postgresql extends LibraryPackage
     #[PatchDescription('Various patches before building PostgreSQL')]
     public function patchBeforeBuild(): bool
     {
-        // fix aarch64 build on glibc 2.17 (e.g. CentOS 7)
-        if (SystemTarget::getLibcVersion() === '2.17' && SystemTarget::getTargetArch() === 'aarch64') {
-            try {
-                FileSystem::replaceFileStr("{$this->getSourceDir()}/src/port/pg_popcount_aarch64.c", 'HWCAP_SVE', '0');
-                FileSystem::replaceFileStr(
-                    "{$this->getSourceDir()}/src/port/pg_crc32c_armv8_choose.c",
-                    '#if defined(__linux__) && !defined(__aarch64__) && !defined(HWCAP2_CRC32)',
-                    '#if defined(__linux__) && !defined(HWCAP_CRC32)'
-                );
-            } catch (FileSystemException) {
-                // allow file not-existence to make it compatible with old and new version
-            }
-        }
-
         // skip the test on platforms where libpq infrastructure may be provided by statically-linked libraries
         FileSystem::replaceFileStr("{$this->getSourceDir()}/src/interfaces/libpq/Makefile", 'invokes exit\'; exit 1;', 'invokes exit\';');
         // disable shared libs build
