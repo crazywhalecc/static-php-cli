@@ -116,6 +116,26 @@ trait unix
         ])->exec("{$cmd} {$args} {$static_extension_str}"), $package->getSourceDir());
     }
 
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch TSRM.h to fix musl TLS symbol visibility for non-static builds')]
+    public function beforeMakeUnix(ToolchainInterface $toolchain): void
+    {
+        if (!$toolchain->isStatic() && SystemTarget::getLibc() === 'musl') {
+            // we need to patch the symbol to global visibility, otherwise extensions with `initial-exec` TLS model will fail to load
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        } else {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        }
+    }
+
     #[Stage]
     public function makeForUnix(TargetPackage $package, PackageInstaller $installer): void
     {
