@@ -148,10 +148,11 @@ class DumpStagesCommand extends BaseCommand
 
     private function toRelativePath(string $absolutePath): string
     {
+        $normalized = realpath($absolutePath) ?: $absolutePath;
         $root = rtrim(ROOT_DIR, '/') . '/';
-        if (str_starts_with($absolutePath, $root)) {
-            return substr($absolutePath, strlen($root));
+        if (str_starts_with($normalized, $root)) {
+            return substr($normalized, strlen($root));
         }
-        return $absolutePath;
+        return $normalized;
     }
 }
