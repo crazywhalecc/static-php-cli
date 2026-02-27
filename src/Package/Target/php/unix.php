@@ -136,6 +136,18 @@ trait unix
         }
     }
 
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch Makefile to fix //lib path for Linux builds')]
+    public function tryPatchMakefileUnix(): void
+    {
+        if (SystemTarget::getTargetOS() !== 'Linux') {
+            return;
+        }
+
+        // replace //lib with /lib in Makefile
+        shell()->cd(SOURCE_PATH . '/php-src')->exec('sed -i "s|//lib|/lib|g" Makefile');
+    }
+
     #[Stage]
     public function makeForUnix(TargetPackage $package, PackageInstaller $installer): void
     {
@@ -168,9 +180,6 @@ trait unix
         $concurrency = $builder->concurrency;
         $vars = $this->makeVars($installer);
         $makeArgs = $this->makeVarsToArgs($vars);
-        if (SystemTarget::getTargetOS() === 'Linux') {
-            shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
-        }
         shell()->cd($package->getSourceDir())
             ->setEnv($vars)
             ->exec("make -j{$concurrency} {$makeArgs} cli");
@@ -186,9 +195,6 @@ trait unix
         $concurrency = $builder->concurrency;
         $vars = $this->makeVars($installer);
         $makeArgs = $this->makeVarsToArgs($vars);
-        if (SystemTarget::getTargetOS() === 'Linux') {
-            shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
-        }
         shell()->cd($package->getSourceDir())
             ->setEnv($vars)
             ->exec("make -j{$concurrency} {$makeArgs} cgi");
@@ -204,9 +210,6 @@ trait unix
         $concurrency = $builder->concurrency;
         $vars = $this->makeVars($installer);
         $makeArgs = $this->makeVarsToArgs($vars);
-        if (SystemTarget::getTargetOS() === 'Linux') {
-            shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
-        }
         shell()->cd($package->getSourceDir())
             ->setEnv($vars)
             ->exec("make -j{$concurrency} {$makeArgs} fpm");
@@ -231,9 +234,6 @@ trait unix
             $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
             $makeArgs = $this->makeVarsToArgs($vars);
             // build
-            if (SystemTarget::getTargetOS() === 'Linux') {
-                shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
-            }
             shell()->cd($package->getSourceDir())
                 ->setEnv($vars)
                 ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
