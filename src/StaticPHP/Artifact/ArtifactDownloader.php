@@ -356,14 +356,14 @@ class ArtifactDownloader
             $downloader = new $cls();
             return $downloader->checkUpdate($artifact_name, $info['config'], $info['version'], $this);
         }
-        // custom source: delegate to registered check-update callback
+
         if (($info['lock_type'] ?? null) === 'source' && ($callback = $artifact->getCustomSourceCheckUpdateCallback()) !== null) {
             return ApplicationContext::invoke($callback, [
                 ArtifactDownloader::class => $this,
                 'old_version' => $info['version'],
             ]);
         }
-        // custom binary: delegate to registered check-update callback
+
         if (($callback = $artifact->getCustomBinaryCheckUpdateCallback()) !== null) {
             return ApplicationContext::invoke($callback, [
                 ArtifactDownloader::class => $this,
