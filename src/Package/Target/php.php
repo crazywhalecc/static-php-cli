@@ -7,6 +7,7 @@ namespace Package\Target;
 use Package\Target\php\frankenphp;
 use Package\Target\php\unix;
 use Package\Target\php\windows;
+use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\Info;
 use StaticPHP\Attribute\Package\InitPackage;
@@ -102,6 +103,24 @@ class php extends TargetPackage
             return null;
         }
         throw new WrongUsageException('PHP version file format is malformed, please remove "./source/php-src" dir and download/extract again');
+    }
+
+    /**
+     * Get PHP version from source archive filename
+     *
+     * @return null|string PHP version (e.g., "8.4.0")
+     */
+    public static function getPHPVersionFromArchive(bool $return_null_if_failed = false): ?string
+    {
+        $archives = ApplicationContext::get(ArtifactCache::class)->getSourceInfo('php-src');
+        $filename = $archives['filename'] ?? '';
+        if (!preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+|alpha\d+|beta\d+)?)\.tar\.(?:gz|bz2|xz)/', $filename, $match)) {
+            if ($return_null_if_failed) {
+                return null;
+            }
+            throw new WrongUsageException('PHP source archive filename format is malformed (got: ' . $filename . ')');
+        }
+        return $match[1];
     }
 
     #[InitPackage]
@@ -255,6 +274,7 @@ class php extends TargetPackage
             'Build Target' => getenv('SPC_TARGET') ?: '',
             'Build Toolchain' => ToolchainManager::getToolchainClass(),
             'Build SAPI' => implode(', ', $sapis),
+            'PHP Version' => self::getPHPVersion(return_null_if_failed: true) ?? self::getPHPVersionFromArchive(return_null_if_failed: true) ?? 'Unknown',
             'Static Extensions (' . count($static_extensions) . ')' => implode(',', array_map(fn ($x) => substr($x->getName(), 4), $static_extensions)),
             'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
             'Install Packages (' . count($install_packages) . ')' => implode(',', array_map(fn ($x) => $x->getName(), $install_packages)),

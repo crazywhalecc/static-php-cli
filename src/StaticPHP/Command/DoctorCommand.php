@@ -26,6 +26,7 @@ class DoctorCommand extends BaseCommand
         };
         $doctor = new Doctor($this->output, $fix_policy);
         if ($doctor->checkAll()) {
+            Doctor::markPassed();
             $this->output->writeln('<info>Doctor check complete !</info>');
             return static::SUCCESS;
         }

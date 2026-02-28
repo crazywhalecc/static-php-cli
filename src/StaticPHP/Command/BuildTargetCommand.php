@@ -37,6 +37,8 @@ class BuildTargetCommand extends BaseCommand
 
     public function handle(): int
     {
+        $this->checkDoctorCache();
+
         // resolve legacy options to new options
         V2CompatLayer::convertOptions($this->input);
 
