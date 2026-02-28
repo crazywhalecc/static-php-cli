@@ -163,7 +163,7 @@ class ArtifactCache
             throw new SPCInternalException("Invalid lock type '{$lock_type}' for artifact {$artifact_name}");
         }
         // save cache to file
-        file_put_contents($this->cache_file, json_encode($this->cache, JSON_PRETTY_PRINT));
+        file_put_contents($this->cache_file, json_encode($this->cache, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -281,7 +281,7 @@ class ArtifactCache
      */
     public function save(): void
     {
-        file_put_contents($this->cache_file, json_encode($this->cache, JSON_PRETTY_PRINT));
+        file_put_contents($this->cache_file, json_encode($this->cache, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     private function isObjectDownloaded(?array $object, bool $compare_hash = false): bool
