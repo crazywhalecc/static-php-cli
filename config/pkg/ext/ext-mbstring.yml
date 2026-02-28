@@ -1,4 +1,0 @@
-ext-mbstring:
-  type: php-extension
-  php-extension:
-    arg-type: custom
