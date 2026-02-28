@@ -21,7 +21,8 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
         // direct branch clone
         if (isset($config['rev'])) {
             default_shell()->executeGitClone($config['url'], $config['rev'], $path, $shallow, $config['submodules'] ?? null);
-            $hash_result = shell(false)->execWithResult(SPC_GIT_EXEC . ' -C ' . escapeshellarg($path) . ' rev-parse HEAD');
+            $shell = PHP_OS_FAMILY === 'Windows' ? cmd(false) : shell(false);
+            $hash_result = $shell->execWithResult(SPC_GIT_EXEC . ' -C ' . escapeshellarg($path) . ' rev-parse HEAD');
             $hash = ($hash_result[0] === 0 && !empty($hash_result[1])) ? trim($hash_result[1][0]) : '';
             $version = $hash !== '' ? "dev-{$config['rev']}+{$hash}" : "dev-{$config['rev']}";
             return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);

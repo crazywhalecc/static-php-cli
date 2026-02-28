@@ -13,7 +13,7 @@ interface CheckUpdateInterface
      *
      * @param string             $name        the name of the artifact
      * @param array              $config      the configuration for the artifact
-     * @param string             $old_version old version or identifier of the artifact to compare against
+     * @param null|string        $old_version old version or identifier of the artifact to compare against
      * @param ArtifactDownloader $downloader  the artifact downloader instance
      */
     public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult;
