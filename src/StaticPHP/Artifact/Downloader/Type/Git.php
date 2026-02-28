@@ -10,7 +10,7 @@ use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Util\FileSystem;
 
 /** git */
-class Git implements DownloadTypeInterface
+class Git implements DownloadTypeInterface, CheckUpdateInterface
 {
     public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
     {
@@ -21,8 +21,10 @@ class Git implements DownloadTypeInterface
         // direct branch clone
         if (isset($config['rev'])) {
             default_shell()->executeGitClone($config['url'], $config['rev'], $path, $shallow, $config['submodules'] ?? null);
-            $version = "dev-{$config['rev']}";
-            return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version);
+            $hash_result = shell(false)->execWithResult(SPC_GIT_EXEC . ' -C ' . escapeshellarg($path) . ' rev-parse HEAD');
+            $hash = ($hash_result[0] === 0 && !empty($hash_result[1])) ? trim($hash_result[1][0]) : '';
+            $version = $hash !== '' ? "dev-{$config['rev']}+{$hash}" : "dev-{$config['rev']}";
+            return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
         }
         if (!isset($config['regex'])) {
             throw new DownloaderException('Either "rev" or "regex" must be specified for git download type.');
@@ -64,8 +66,62 @@ class Git implements DownloadTypeInterface
             $branch = $matched_version_branch[$version];
             logger()->info("Matched version {$version} from branch {$branch} for {$name}");
             default_shell()->executeGitClone($config['url'], $branch, $path, $shallow, $config['submodules'] ?? null);
-            return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version);
+            return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
         }
         throw new DownloaderException("No matching branch found for regex {$config['regex']} (checked {$matched_count} branches).");
+    }
+
+    public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        if (isset($config['rev'])) {
+            $shell = PHP_OS_FAMILY === 'Windows' ? cmd(false) : shell(false);
+            $result = $shell->execWithResult(SPC_GIT_EXEC . ' ls-remote ' . escapeshellarg($config['url']) . ' ' . escapeshellarg('refs/heads/' . $config['rev']));
+            if ($result[0] !== 0 || empty($result[1])) {
+                throw new DownloaderException("Failed to ls-remote from {$config['url']}");
+            }
+            $new_hash = substr($result[1][0], 0, 40);
+            $new_version = "dev-{$config['rev']}+{$new_hash}";
+            // Extract stored hash from "dev-{rev}+{hash}", null if bare mode or old format without hash
+            $old_hash = ($old_version !== null && str_contains($old_version, '+')) ? substr(strrchr($old_version, '+'), 1) : null;
+            return new CheckUpdateResult(
+                old: $old_version,
+                new: $new_version,
+                needUpdate: $old_hash === null || $new_hash !== $old_hash,
+            );
+        }
+        if (!isset($config['regex'])) {
+            throw new DownloaderException('Either "rev" or "regex" must be specified for git download type.');
+        }
+
+        $shell = PHP_OS_FAMILY === 'Windows' ? cmd(false) : shell(false);
+        $result = $shell->execWithResult(SPC_GIT_EXEC . ' ls-remote ' . escapeshellarg($config['url']));
+        if ($result[0] !== 0) {
+            throw new DownloaderException("Failed to ls-remote from {$config['url']}");
+        }
+        $refs = $result[1];
+        $matched_version_branch = [];
+
+        $regex = '/^' . $config['regex'] . '$/';
+        foreach ($refs as $ref) {
+            $matches = null;
+            if (preg_match('/^[0-9a-f]{40}\s+refs\/heads\/(.+)$/', $ref, $matches)) {
+                $branch = $matches[1];
+                if (preg_match($regex, $branch, $vermatch) && isset($vermatch['version'])) {
+                    $matched_version_branch[$vermatch['version']] = $vermatch[0];
+                }
+            }
+        }
+        uksort($matched_version_branch, function ($a, $b) {
+            return version_compare($b, $a);
+        });
+        if (!empty($matched_version_branch)) {
+            $version = array_key_first($matched_version_branch);
+            return new CheckUpdateResult(
+                old: $old_version,
+                new: $version,
+                needUpdate: $old_version === null || version_compare($version, $old_version, '>'),
+            );
+        }
+        throw new DownloaderException("No matching branch found for regex {$config['regex']}.");
     }
 }

@@ -8,7 +8,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Exception\DownloaderException;
 
-class PhpRelease implements DownloadTypeInterface, ValidatorInterface
+class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpdateInterface
 {
     public const string PHP_API = 'https://www.php.net/releases/index.php?json&version={version}';
 
@@ -24,16 +24,7 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface
             $this->sha256 = null;
             return (new Git())->download($name, ['url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $downloader);
         }
-
-        // Fetch PHP release info first
-        $info = default_shell()->executeCurl(str_replace('{version}', $phpver, self::PHP_API), retries: $downloader->getRetry());
-        if ($info === false) {
-            throw new DownloaderException("Failed to fetch PHP release info for version {$phpver}");
-        }
-        $info = json_decode($info, true);
-        if (!is_array($info) || !isset($info['version'])) {
-            throw new DownloaderException("Invalid PHP release info received for version {$phpver}");
-        }
+        $info = $this->fetchPhpReleaseInfo($name, $downloader);
         $version = $info['version'];
         foreach ($info['source'] as $source) {
             if (str_ends_with($source['filename'], '.tar.xz')) {
@@ -49,7 +40,7 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface
         logger()->debug("Downloading PHP release {$version} from {$url}");
         $path = DOWNLOAD_PATH . "/{$filename}";
         default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
-        return DownloadResult::archive($filename, config: $config, extract: $config['extract'] ?? null, version: $version);
+        return DownloadResult::archive($filename, config: $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
     }
 
     public function validate(string $name, array $config, ArtifactDownloader $downloader, DownloadResult $result): bool
@@ -72,5 +63,42 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface
         }
         logger()->debug("SHA256 checksum validated successfully for {$name}.");
         return true;
+    }
+
+    public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        $phpver = $downloader->getOption('with-php', '8.4');
+        if ($phpver === 'git') {
+            // git version: delegate to Git checkUpdate with master branch
+            return (new Git())->checkUpdate($name, ['url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $old_version, $downloader);
+        }
+        $info = $this->fetchPhpReleaseInfo($name, $downloader);
+        $new_version = $info['version'];
+        return new CheckUpdateResult(
+            old: $old_version,
+            new: $new_version,
+            needUpdate: $old_version === null || $new_version !== $old_version,
+        );
+    }
+
+    protected function fetchPhpReleaseInfo(string $name, ArtifactDownloader $downloader): array
+    {
+        $phpver = $downloader->getOption('with-php', '8.4');
+        // Handle 'git' version to clone from php-src repository
+        if ($phpver === 'git') {
+            // cannot fetch release info for git version, return empty info to skip validation
+            throw new DownloaderException("Cannot fetch PHP release info for 'git' version.");
+        }
+
+        // Fetch PHP release info first
+        $info = default_shell()->executeCurl(str_replace('{version}', $phpver, self::PHP_API), retries: $downloader->getRetry());
+        if ($info === false) {
+            throw new DownloaderException("Failed to fetch PHP release info for version {$phpver}");
+        }
+        $info = json_decode($info, true);
+        if (!is_array($info) || !isset($info['version'])) {
+            throw new DownloaderException("Invalid PHP release info received for version {$phpver}");
+        }
+        return $info;
     }
 }

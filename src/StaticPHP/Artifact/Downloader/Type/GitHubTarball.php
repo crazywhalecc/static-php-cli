@@ -10,7 +10,7 @@ use StaticPHP\Exception\DownloaderException;
 
 /** ghtar */
 /** ghtagtar */
-class GitHubTarball implements DownloadTypeInterface
+class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
 {
     use GitHubTokenSetupTrait;
 
@@ -77,6 +77,22 @@ class GitHubTarball implements DownloadTypeInterface
         [$url, $filename] = $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name, $config['query'] ?? null);
         $path = DOWNLOAD_PATH . "/{$filename}";
         default_shell()->executeCurlDownload($url, $path, headers: $this->getGitHubTokenHeaders());
-        return DownloadResult::archive($filename, $config, $config['extract'] ?? null, version: $this->version);
+        return DownloadResult::archive($filename, $config, $config['extract'] ?? null, version: $this->version, downloader: static::class);
+    }
+
+    public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        $rel_type = match ($config['type']) {
+            'ghtar' => 'releases',
+            'ghtagtar' => 'tags',
+            default => throw new DownloaderException("Invalid GitHubTarball type for {$name}"),
+        };
+        $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name, $config['query'] ?? null);
+        $new_version = $this->version ?? $old_version ?? '';
+        return new CheckUpdateResult(
+            old: $old_version,
+            new: $new_version,
+            needUpdate: $old_version === null || $new_version !== $old_version,
+        );
     }
 }

@@ -17,6 +17,7 @@ class DownloadResult
      * @param bool        $verified   Whether the download has been verified (hash check)
      * @param null|string $version    Version of the downloaded artifact (e.g., "1.2.3", "v2.0.0")
      * @param array       $metadata   Additional metadata (e.g., commit hash, release notes, etc.)
+     * @param null|string $downloader Class name of the downloader that performed this download
      */
     private function __construct(
         public readonly string $cache_type,
@@ -27,6 +28,7 @@ class DownloadResult
         public bool $verified = false,
         public readonly ?string $version = null,
         public readonly array $metadata = [],
+        public readonly ?string $downloader = null,
     ) {
         switch ($this->cache_type) {
             case 'archive':
@@ -59,11 +61,12 @@ class DownloadResult
         mixed $extract = null,
         bool $verified = false,
         ?string $version = null,
-        array $metadata = []
+        array $metadata = [],
+        ?string $downloader = null,
     ): DownloadResult {
         // judge if it is archive or just a pure file
         $cache_type = self::isArchiveFile($filename) ? 'archive' : 'file';
-        return new self($cache_type, config: $config, filename: $filename, extract: $extract, verified: $verified, version: $version, metadata: $metadata);
+        return new self($cache_type, config: $config, filename: $filename, extract: $extract, verified: $verified, version: $version, metadata: $metadata, downloader: $downloader);
     }
 
     public static function file(
@@ -71,10 +74,11 @@ class DownloadResult
         array $config,
         bool $verified = false,
         ?string $version = null,
-        array $metadata = []
+        array $metadata = [],
+        ?string $downloader = null,
     ): DownloadResult {
         $cache_type = self::isArchiveFile($filename) ? 'archive' : 'file';
-        return new self($cache_type, config: $config, filename: $filename, verified: $verified, version: $version, metadata: $metadata);
+        return new self($cache_type, config: $config, filename: $filename, verified: $verified, version: $version, metadata: $metadata, downloader: $downloader);
     }
 
     /**
@@ -85,9 +89,9 @@ class DownloadResult
      * @param null|string $version  Version string (tag, branch, or commit)
      * @param array       $metadata Additional metadata (e.g., commit hash)
      */
-    public static function git(string $dirname, array $config, mixed $extract = null, ?string $version = null, array $metadata = []): DownloadResult
+    public static function git(string $dirname, array $config, mixed $extract = null, ?string $version = null, array $metadata = [], ?string $downloader = null): DownloadResult
     {
-        return new self('git', config: $config, dirname: $dirname, extract: $extract, version: $version, metadata: $metadata);
+        return new self('git', config: $config, dirname: $dirname, extract: $extract, version: $version, metadata: $metadata, downloader: $downloader);
     }
 
     /**
@@ -98,9 +102,9 @@ class DownloadResult
      * @param null|string $version  Version string if known
      * @param array       $metadata Additional metadata
      */
-    public static function local(string $dirname, array $config, mixed $extract = null, ?string $version = null, array $metadata = []): DownloadResult
+    public static function local(string $dirname, array $config, mixed $extract = null, ?string $version = null, array $metadata = [], ?string $downloader = null): DownloadResult
     {
-        return new self('local', config: $config, dirname: $dirname, extract: $extract, version: $version, metadata: $metadata);
+        return new self('local', config: $config, dirname: $dirname, extract: $extract, version: $version, metadata: $metadata, downloader: $downloader);
     }
 
     /**
@@ -136,7 +140,8 @@ class DownloadResult
             $this->extract,
             $this->verified,
             $version,
-            $this->metadata
+            $this->metadata,
+            $this->downloader,
         );
     }
 
@@ -154,7 +159,8 @@ class DownloadResult
             $this->extract,
             $this->verified,
             $this->version,
-            array_merge($this->metadata, [$key => $value])
+            array_merge($this->metadata, [$key => $value]),
+            $this->downloader,
         );
     }
 

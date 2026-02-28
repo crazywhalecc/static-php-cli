@@ -6,6 +6,8 @@ namespace StaticPHP\Artifact;
 
 use Psr\Log\LogLevel;
 use StaticPHP\Artifact\Downloader\DownloadResult;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateInterface;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
 use StaticPHP\Artifact\Downloader\Type\DownloadTypeInterface;
 use StaticPHP\Artifact\Downloader\Type\Git;
 use StaticPHP\Artifact\Downloader\Type\LocalDir;
@@ -321,6 +323,43 @@ class ArtifactDownloader
                 keyboard_interrupt_unregister();
             }
         }
+    }
+
+    public function checkUpdate(string $artifact_name, bool $prefer_source = false, bool $bare = false): CheckUpdateResult
+    {
+        $artifact = ArtifactLoader::getArtifactInstance($artifact_name);
+        if ($artifact === null) {
+            throw new WrongUsageException("Artifact '{$artifact_name}' not found, please check the name.");
+        }
+        if ($bare) {
+            $config = $artifact->getDownloadConfig('source');
+            if (!is_array($config)) {
+                throw new WrongUsageException("Artifact '{$artifact_name}' has no source config for bare update check.");
+            }
+            $cls = $this->downloaders[$config['type']] ?? null;
+            if (!is_a($cls, CheckUpdateInterface::class, true)) {
+                throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking.");
+            }
+            /** @var CheckUpdateInterface $downloader */
+            $downloader = new $cls();
+            return $downloader->checkUpdate($artifact_name, $config, null, $this);
+        }
+        $cache = ApplicationContext::get(ArtifactCache::class);
+        if ($prefer_source) {
+            $info = $cache->getSourceInfo($artifact_name) ?? $cache->getBinaryInfo($artifact_name, SystemTarget::getCurrentPlatformString());
+        } else {
+            $info = $cache->getBinaryInfo($artifact_name, SystemTarget::getCurrentPlatformString()) ?? $cache->getSourceInfo($artifact_name);
+        }
+        if ($info === null) {
+            throw new WrongUsageException("Artifact '{$artifact_name}' is not downloaded yet, cannot check update.");
+        }
+        if (is_a($info['downloader'] ?? null, CheckUpdateInterface::class, true)) {
+            $cls = $info['downloader'];
+            /** @var CheckUpdateInterface $downloader */
+            $downloader = new $cls();
+            return $downloader->checkUpdate($artifact_name, $info['config'], $info['version'], $this);
+        }
+        throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking, exit.");
     }
 
     public function getRetry(): int

@@ -9,9 +9,34 @@ use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Exception\DownloaderException;
 
 /** filelist */
-class FileList implements DownloadTypeInterface
+class FileList implements DownloadTypeInterface, CheckUpdateInterface
 {
     public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
+    {
+        [$filename, $version, $versions] = $this->fetchFileList($name, $config, $downloader);
+        if (isset($config['download-url'])) {
+            $url = str_replace(['{file}', '{version}'], [$filename, $version], $config['download-url']);
+        } else {
+            $url = $config['url'] . $filename;
+        }
+        $filename = end($versions);
+        $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
+        logger()->debug("Downloading {$name} from URL: {$url}");
+        default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
+        return DownloadResult::archive($filename, $config, $config['extract'] ?? null, version: $version, downloader: static::class);
+    }
+
+    public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        [, $version] = $this->fetchFileList($name, $config, $downloader);
+        return new CheckUpdateResult(
+            old: $old_version,
+            new: $version,
+            needUpdate: $old_version === null || version_compare($version, $old_version, '>'),
+        );
+    }
+
+    protected function fetchFileList(string $name, array $config, ArtifactDownloader $downloader): array
     {
         logger()->debug("Fetching file list from {$config['url']}");
         $page = default_shell()->executeCurl($config['url'], retries: $downloader->getRetry());
@@ -33,15 +58,6 @@ class FileList implements DownloadTypeInterface
         uksort($versions, 'version_compare');
         $filename = end($versions);
         $version = array_key_last($versions);
-        if (isset($config['download-url'])) {
-            $url = str_replace(['{file}', '{version}'], [$filename, $version], $config['download-url']);
-        } else {
-            $url = $config['url'] . $filename;
-        }
-        $filename = end($versions);
-        $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
-        logger()->debug("Downloading {$name} from URL: {$url}");
-        default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
-        return DownloadResult::archive($filename, $config, $config['extract'] ?? null);
+        return [$filename, $version, $versions];
     }
 }
