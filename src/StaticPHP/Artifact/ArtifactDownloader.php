@@ -364,7 +364,8 @@ class ArtifactDownloader
                 ArtifactDownloader::class => $this,
                 'old_version' => $info['version'],
             ]);
-        }        throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking, exit.");
+        }
+        throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking, exit.");
     }
 
     public function getRetry(): int
