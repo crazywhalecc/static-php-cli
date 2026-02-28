@@ -18,7 +18,8 @@ class ArtifactCache
      *         filename?: string,
      *         dirname?: string,
      *         extract: null|'&custom'|string,
-     *         hash: null|string
+     *         hash: null|string,
+     *         downloader: null|string
      *     },
      *     binary: array{
      *         windows-x86_64?: null|array{
@@ -28,7 +29,8 @@ class ArtifactCache
      *             dirname?: string,
      *             extract: null|'&custom'|string,
      *             hash: null|string,
-     *             version?: null|string
+     *             version?: null|string,
+     *             downloader: null|string
      *         }
      *     }
      * }>
@@ -108,6 +110,7 @@ class ArtifactCache
                 'hash' => sha1_file(DOWNLOAD_PATH . '/' . $download_result->filename),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         } elseif ($download_result->cache_type === 'file') {
             $obj = [
@@ -118,6 +121,7 @@ class ArtifactCache
                 'hash' => sha1_file(DOWNLOAD_PATH . '/' . $download_result->filename),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         } elseif ($download_result->cache_type === 'git') {
             $obj = [
@@ -128,6 +132,7 @@ class ArtifactCache
                 'hash' => trim(exec('cd ' . escapeshellarg(DOWNLOAD_PATH . '/' . $download_result->dirname) . ' && ' . SPC_GIT_EXEC . ' rev-parse HEAD')),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         } elseif ($download_result->cache_type === 'local') {
             $obj = [
@@ -138,6 +143,7 @@ class ArtifactCache
                 'hash' => null,
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         }
         if ($obj === null) {

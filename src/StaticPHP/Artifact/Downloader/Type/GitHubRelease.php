@@ -9,7 +9,7 @@ use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Exception\DownloaderException;
 
 /** ghrel */
-class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
+class GitHubRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpdateInterface
 {
     use GitHubTokenSetupTrait;
 
@@ -48,6 +48,7 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
      */
     public function getLatestGitHubRelease(string $name, string $repo, bool $prefer_stable, string $match_asset, ?string $query = null): array
     {
+        logger()->debug("Fetching {$name} GitHub release from {$repo}");
         $url = str_replace('{repo}', $repo, self::API_URL);
         $url .= ($query ?? '');
         $headers = $this->getGitHubTokenHeaders();
@@ -95,7 +96,7 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
         $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
         logger()->debug("Downloading {$name} asset from URL: {$asset_url}");
         default_shell()->executeCurlDownload($asset_url, $path, headers: $headers, retries: $downloader->getRetry());
-        return DownloadResult::archive($filename, $config, extract: $config['extract'] ?? null, version: $this->version);
+        return DownloadResult::archive($filename, $config, extract: $config['extract'] ?? null, version: $this->version, downloader: static::class);
     }
 
     public function validate(string $name, array $config, ArtifactDownloader $downloader, DownloadResult $result): bool
@@ -116,5 +117,19 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface
         }
         logger()->debug("No sha256 digest found for GitHub release asset of {$name}, skipping hash validation");
         return true;
+    }
+
+    public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        if (!isset($config['match'])) {
+            throw new DownloaderException("GitHubRelease downloader requires 'match' config for {$name}");
+        }
+        $this->getLatestGitHubRelease($name, $config['repo'], $config['prefer-stable'] ?? true, $config['match'], $config['query'] ?? null);
+        $new_version = $this->version ?? $old_version ?? '';
+        return new CheckUpdateResult(
+            old: $old_version,
+            new: $new_version,
+            needUpdate: $old_version === null || $new_version !== $old_version,
+        );
     }
 }
