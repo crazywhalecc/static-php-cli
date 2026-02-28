@@ -51,8 +51,9 @@ class CheckUpdateCommand extends BaseCommand
                     $this->output->writeln("Artifact <info>{$artifact}</info> is already up to date (version: {$result->new})");
                 } else {
                     $this->output->writeln("<comment>Update available for artifact: {$artifact}</comment>");
-                    $this->output->writeln("  Old version: <error>{$result->old}</error>");
-                    $this->output->writeln("  New version: <info>{$result->new}</info>");
+                    [$old, $new] = [$result->old ?? 'unavailable', $result->new ?? 'unknown'];
+                    $this->output->writeln("  Old version: <error>{$old}</error>");
+                    $this->output->writeln("  New version: <info>{$new}</info>");
                 }
             }
             return static::OK;
