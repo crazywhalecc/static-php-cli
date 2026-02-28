@@ -27,7 +27,7 @@ class PIE implements DownloadTypeInterface, CheckUpdateInterface
         $filename = "{$name}-{$version}." . ($dist_type === 'zip' ? 'zip' : 'tar.gz');
         $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
         default_shell()->executeCurlDownload($dist_url, $path, retries: $downloader->getRetry());
-        return DownloadResult::archive($filename, $config, $config['extract'] ?? null, downloader: static::class);
+        return DownloadResult::archive($filename, $config, $config['extract'] ?? null, version: $version, downloader: static::class);
     }
 
     public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
