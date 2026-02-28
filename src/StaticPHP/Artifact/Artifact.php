@@ -27,6 +27,9 @@ class Artifact
     /** @var null|callable Bind custom source fetcher callback */
     protected mixed $custom_source_callback = null;
 
+    /** @var null|callable Bind custom source check-update callback */
+    protected mixed $custom_source_check_update_callback = null;
+
     /** @var array<string, callable> Bind custom binary fetcher callbacks */
     protected mixed $custom_binary_callbacks = [];
 
@@ -406,6 +409,19 @@ class Artifact
     public function getCustomSourceCallback(): ?callable
     {
         return $this->custom_source_callback ?? null;
+    }
+
+    /**
+     * Set custom source check-update callback.
+     */
+    public function setCustomSourceCheckUpdateCallback(callable $callback): void
+    {
+        $this->custom_source_check_update_callback = $callback;
+    }
+
+    public function getCustomSourceCheckUpdateCallback(): ?callable
+    {
+        return $this->custom_source_check_update_callback ?? null;
     }
 
     public function getCustomBinaryCallback(): ?callable

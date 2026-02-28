@@ -11,6 +11,7 @@ use StaticPHP\Attribute\Artifact\BinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Attribute\Artifact\CustomSource;
+use StaticPHP\Attribute\Artifact\CustomSourceCheckUpdate;
 use StaticPHP\Attribute\Artifact\SourceExtract;
 use StaticPHP\Config\ArtifactConfig;
 use StaticPHP\Exception\ValidationException;
@@ -62,6 +63,7 @@ class ArtifactLoader
 
         foreach ($ref->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
             self::processCustomSourceAttribute($ref, $method, $class_instance);
+            self::processCustomSourceCheckUpdateAttribute($ref, $method, $class_instance);
             self::processCustomBinaryAttribute($ref, $method, $class_instance);
             self::processCustomBinaryCheckUpdateAttribute($ref, $method, $class_instance);
             self::processSourceExtractAttribute($ref, $method, $class_instance);
@@ -96,6 +98,24 @@ class ArtifactLoader
                 self::$artifacts[$artifact_name]->setCustomSourceCallback([$class_instance, $method->getName()]);
             } else {
                 throw new ValidationException("Artifact '{$artifact_name}' not found for #[CustomSource] on '{$ref->getName()}::{$method->getName()}'");
+            }
+        }
+    }
+
+    /**
+     * Process #[CustomSourceCheckUpdate] attribute.
+     */
+    private static function processCustomSourceCheckUpdateAttribute(\ReflectionClass $ref, \ReflectionMethod $method, object $class_instance): void
+    {
+        $attributes = $method->getAttributes(CustomSourceCheckUpdate::class);
+        foreach ($attributes as $attribute) {
+            /** @var CustomSourceCheckUpdate $instance */
+            $instance = $attribute->newInstance();
+            $artifact_name = $instance->artifact_name;
+            if (isset(self::$artifacts[$artifact_name])) {
+                self::$artifacts[$artifact_name]->setCustomSourceCheckUpdateCallback([$class_instance, $method->getName()]);
+            } else {
+                throw new ValidationException("Artifact '{$artifact_name}' not found for #[CustomSourceCheckUpdate] on '{$ref->getName()}::{$method->getName()}'");
             }
         }
     }

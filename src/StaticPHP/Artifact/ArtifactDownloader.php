@@ -332,17 +332,14 @@ class ArtifactDownloader
             throw new WrongUsageException("Artifact '{$artifact_name}' not found, please check the name.");
         }
         if ($bare) {
-            $config = $artifact->getDownloadConfig('source');
-            if (!is_array($config)) {
-                throw new WrongUsageException("Artifact '{$artifact_name}' has no source config for bare update check.");
+            [$first, $second] = $prefer_source
+                ? [fn () => $this->probeSourceCheckUpdate($artifact, $artifact_name), fn () => $this->probeBinaryCheckUpdate($artifact, $artifact_name)]
+                : [fn () => $this->probeBinaryCheckUpdate($artifact, $artifact_name), fn () => $this->probeSourceCheckUpdate($artifact, $artifact_name)];
+            $result = $first() ?? $second();
+            if ($result !== null) {
+                return $result;
             }
-            $cls = $this->downloaders[$config['type']] ?? null;
-            if (!is_a($cls, CheckUpdateInterface::class, true)) {
-                throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking.");
-            }
-            /** @var CheckUpdateInterface $downloader */
-            $downloader = new $cls();
-            return $downloader->checkUpdate($artifact_name, $config, null, $this);
+            throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking.");
         }
         $cache = ApplicationContext::get(ArtifactCache::class);
         if ($prefer_source) {
@@ -358,7 +355,15 @@ class ArtifactDownloader
             /** @var CheckUpdateInterface $downloader */
             $downloader = new $cls();
             return $downloader->checkUpdate($artifact_name, $info['config'], $info['version'], $this);
-        }        // custom binary: delegate to registered check-update callback
+        }
+        // custom source: delegate to registered check-update callback
+        if (($info['lock_type'] ?? null) === 'source' && ($callback = $artifact->getCustomSourceCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => $info['version'],
+            ]);
+        }
+        // custom binary: delegate to registered check-update callback
         if (($callback = $artifact->getCustomBinaryCheckUpdateCallback()) !== null) {
             return ApplicationContext::invoke($callback, [
                 ArtifactDownloader::class => $this,
@@ -381,6 +386,50 @@ class ArtifactDownloader
     public function getOption(string $name, mixed $default = null): mixed
     {
         return $this->options[$name] ?? $default;
+    }
+
+    private function probeSourceCheckUpdate(Artifact $artifact, string $artifact_name): ?CheckUpdateResult
+    {
+        if (($callback = $artifact->getCustomSourceCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => null,
+            ]);
+        }
+        $config = $artifact->getDownloadConfig('source');
+        if (!is_array($config)) {
+            return null;
+        }
+        $cls = $this->downloaders[$config['type']] ?? null;
+        if (!is_a($cls, CheckUpdateInterface::class, true)) {
+            return null;
+        }
+        /** @var CheckUpdateInterface $dl */
+        $dl = new $cls();
+        return $dl->checkUpdate($artifact_name, $config, null, $this);
+    }
+
+    private function probeBinaryCheckUpdate(Artifact $artifact, string $artifact_name): ?CheckUpdateResult
+    {
+        // custom binary callback takes precedence over config-based binary
+        if (($callback = $artifact->getCustomBinaryCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => null,
+            ]);
+        }
+        $binary_config = $artifact->getDownloadConfig('binary');
+        $platform_config = is_array($binary_config) ? ($binary_config[SystemTarget::getCurrentPlatformString()] ?? null) : null;
+        if (!is_array($platform_config)) {
+            return null;
+        }
+        $cls = $this->downloaders[$platform_config['type']] ?? null;
+        if (!is_a($cls, CheckUpdateInterface::class, true)) {
+            return null;
+        }
+        /** @var CheckUpdateInterface $dl */
+        $dl = new $cls();
+        return $dl->checkUpdate($artifact_name, $platform_config, null, $this);
     }
 
     private function downloadWithType(Artifact $artifact, int $current, int $total, bool $parallel = false, bool $interactive = true): int
