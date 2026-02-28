@@ -87,6 +87,14 @@ abstract class BaseCommand extends Command
                 OutputInterface::VERBOSITY_VERY_VERBOSE, OutputInterface::VERBOSITY_DEBUG => 'debug',
                 default => 'warning',
             };
+            $isDebug = false;
+            // if '--debug' is set, override log level to debug
+            if ($this->input->getOption('debug')) {
+                $level = 'debug';
+                logger()->warning('The --debug option is deprecated and will be removed in future versions. Please use -vv or -vvv to enable debug mode.');
+                $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
+                $isDebug = true;
+            }
             logger()->setLevel($level);
 
             // ansi
@@ -95,7 +103,7 @@ abstract class BaseCommand extends Command
             }
 
             // Set debug mode in ApplicationContext
-            $isDebug = $this->output->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG;
+            $isDebug = $isDebug ?: $this->output->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG;
             ApplicationContext::setDebug($isDebug);
 
             // show raw argv list for logger()->debug
