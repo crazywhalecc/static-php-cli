@@ -358,8 +358,13 @@ class ArtifactDownloader
             /** @var CheckUpdateInterface $downloader */
             $downloader = new $cls();
             return $downloader->checkUpdate($artifact_name, $info['config'], $info['version'], $this);
-        }
-        throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking, exit.");
+        }        // custom binary: delegate to registered check-update callback
+        if (($callback = $artifact->getCustomBinaryCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => $info['version'],
+            ]);
+        }        throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking, exit.");
     }
 
     public function getRetry(): int

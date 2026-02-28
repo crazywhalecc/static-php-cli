@@ -6,8 +6,10 @@ namespace Package\Artifact;
 
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
+use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\GlobalEnvManager;
@@ -63,6 +65,25 @@ class go_xcaddy
             throw new DownloaderException("Hash mismatch for downloaded go-xcaddy binary. Expected {$hash}, got {$file_hash}");
         }
         return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $version], extract: "{$pkgroot}/go-xcaddy", verified: true, version: $version);
+    }
+
+    #[CustomBinaryCheckUpdate('go-xcaddy', [
+        'linux-x86_64',
+        'linux-aarch64',
+        'macos-x86_64',
+        'macos-aarch64',
+    ])]
+    public function checkUpdateBinary(?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        [$version] = explode("\n", default_shell()->executeCurl('https://go.dev/VERSION?m=text') ?: '');
+        if ($version === '') {
+            throw new \RuntimeException('Failed to get latest Go version from https://go.dev/VERSION?m=text');
+        }
+        return new CheckUpdateResult(
+            old: $old_version,
+            new: $version,
+            needUpdate: $old_version === null || $version !== $old_version,
+        );
     }
 
     #[AfterBinaryExtract('go-xcaddy', [
