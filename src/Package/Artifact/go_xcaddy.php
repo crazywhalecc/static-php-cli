@@ -77,7 +77,7 @@ class go_xcaddy
     {
         [$version] = explode("\n", default_shell()->executeCurl('https://go.dev/VERSION?m=text') ?: '');
         if ($version === '') {
-            throw new \RuntimeException('Failed to get latest Go version from https://go.dev/VERSION?m=text');
+            throw new DownloaderException('Failed to get latest Go version from https://go.dev/VERSION?m=text');
         }
         return new CheckUpdateResult(
             old: $old_version,
