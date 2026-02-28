@@ -240,6 +240,26 @@ class PackageLoader
         }
     }
 
+    /**
+     * Get all registered before-stage callbacks (raw).
+     *
+     * @return array<string, array<string, list<array{0: callable, 1: ?string}>>>
+     */
+    public static function getAllBeforeStages(): array
+    {
+        return self::$before_stages;
+    }
+
+    /**
+     * Get all registered after-stage callbacks (raw).
+     *
+     * @return array<string, array<string, list<array{0: callable, 1: ?string}>>>
+     */
+    public static function getAllAfterStages(): array
+    {
+        return self::$after_stages;
+    }
+
     public static function getBeforeStageCallbacks(string $package_name, string $stage): iterable
     {
         // match condition

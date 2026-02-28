@@ -56,6 +56,8 @@ class DownloadCommand extends BaseCommand
             return $this->handleClean();
         }
 
+        $this->checkDoctorCache();
+
         $downloader = new ArtifactDownloader(DownloaderOptions::extractFromConsoleOptions($this->input->getOptions()));
 
         // arguments

@@ -33,6 +33,9 @@ packlib_files.txt
 .php-cs-fixer.cache
 .phpunit.result.cache
 
+# doctor cache fallback (when ~/.cache/spc/ is not writable)
+.spc-doctor.lock
+
 # exclude self-runtime
 /bin/*
 !/bin/spc*
@@ -61,3 +64,6 @@ log/
 # spc.phar
 spc.phar
 spc.exe
+
+# dumped files from StaticPHP v3
+/dump-*.json

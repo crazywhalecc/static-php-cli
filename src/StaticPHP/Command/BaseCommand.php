@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace StaticPHP\Command;
 
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Doctor\Doctor;
 use StaticPHP\Exception\ExceptionHandler;
 use StaticPHP\Exception\SPCException;
 use Symfony\Component\Console\Command\Command;
@@ -87,6 +88,14 @@ abstract class BaseCommand extends Command
                 OutputInterface::VERBOSITY_VERY_VERBOSE, OutputInterface::VERBOSITY_DEBUG => 'debug',
                 default => 'warning',
             };
+            $isDebug = false;
+            // if '--debug' is set, override log level to debug
+            if ($this->input->getOption('debug')) {
+                $level = 'debug';
+                logger()->warning('The --debug option is deprecated and will be removed in future versions. Please use -vv or -vvv to enable debug mode.');
+                $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
+                $isDebug = true;
+            }
             logger()->setLevel($level);
 
             // ansi
@@ -95,7 +104,7 @@ abstract class BaseCommand extends Command
             }
 
             // Set debug mode in ApplicationContext
-            $isDebug = $this->output->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG;
+            $isDebug = $isDebug ?: $this->output->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG;
             ApplicationContext::setDebug($isDebug);
 
             // show raw argv list for logger()->debug
@@ -108,6 +117,21 @@ abstract class BaseCommand extends Command
             // Handle any other exceptions
             return ExceptionHandler::handleDefaultException($e);
         }
+    }
+
+    /**
+     * Warn the user if doctor has not been run (or is outdated).
+     * Set SPC_SKIP_DOCTOR_CHECK=1 to suppress.
+     */
+    protected function checkDoctorCache(): void
+    {
+        if (getenv('SPC_SKIP_DOCTOR_CHECK') || Doctor::isHealthy()) {
+            return;
+        }
+        $this->output->writeln('');
+        $this->output->writeln('<comment>[WARNING] Please run `spc doctor` first to verify your build environment.</comment>');
+        $this->output->writeln('');
+        sleep(2);
     }
 
     protected function getOption(string $name): mixed

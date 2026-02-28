@@ -1,0 +1,11 @@
+ext-apcu:
+  type: php-extension
+  artifact:
+    source:
+      type: url
+      url: 'https://pecl.php.net/get/APCu'
+      extract: php-src/ext/apcu
+      filename: apcu.tgz
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01

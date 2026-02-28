@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Package\Target;
 
+use Package\Target\php\frankenphp;
 use Package\Target\php\unix;
 use Package\Target\php\windows;
+use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\Info;
 use StaticPHP\Attribute\Package\InitPackage;
@@ -42,6 +44,7 @@ class php extends TargetPackage
 {
     use unix;
     use windows;
+    use frankenphp;
 
     /** @var string[] Supported major PHP versions */
     public const array SUPPORTED_MAJOR_VERSIONS = ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
@@ -102,6 +105,24 @@ class php extends TargetPackage
         throw new WrongUsageException('PHP version file format is malformed, please remove "./source/php-src" dir and download/extract again');
     }
 
+    /**
+     * Get PHP version from source archive filename
+     *
+     * @return null|string PHP version (e.g., "8.4.0")
+     */
+    public static function getPHPVersionFromArchive(bool $return_null_if_failed = false): ?string
+    {
+        $archives = ApplicationContext::get(ArtifactCache::class)->getSourceInfo('php-src');
+        $filename = $archives['filename'] ?? '';
+        if (!preg_match('/php-(\d+\.\d+\.\d+(?:RC\d+|alpha\d+|beta\d+)?)\.tar\.(?:gz|bz2|xz)/', $filename, $match)) {
+            if ($return_null_if_failed) {
+                return null;
+            }
+            throw new WrongUsageException('PHP source archive filename format is malformed (got: ' . $filename . ')');
+        }
+        return $match[1];
+    }
+
     #[InitPackage]
     public function init(TargetPackage $package): void
     {
@@ -119,6 +140,7 @@ class php extends TargetPackage
         $package->addBuildOption('with-config-file-scan-dir', null, InputOption::VALUE_REQUIRED, 'Set the directory to scan for .ini files after reading php.ini', PHP_OS_FAMILY === 'Windows' ? null : '/usr/local/etc/php/conf.d');
         $package->addBuildOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
         $package->addBuildOption('enable-zts', null, null, 'Enable thread safe support');
+        $package->addBuildOption('no-smoke-test', null, InputOption::VALUE_OPTIONAL, 'Disable smoke test for specific SAPIs, or all if no value provided', false);
 
         // phpmicro build options
         if ($package->getName() === 'php' || $package->getName() === 'php-micro') {
@@ -198,6 +220,11 @@ class php extends TargetPackage
             $installer->addBuildPackage('php-embed');
         }
 
+        // frankenphp depends on embed SAPI (libphp.a)
+        if ($package->getName() === 'frankenphp') {
+            $installer->addBuildPackage('php-embed');
+        }
+
         return [...$extensions_pkg, ...$additional_packages];
     }
 
@@ -209,7 +236,7 @@ class php extends TargetPackage
             if (!$package->getBuildOption('enable-zts')) {
                 throw new WrongUsageException('FrankenPHP SAPI requires ZTS enabled PHP, build with `--enable-zts`!');
             }
-            // frankenphp doesn't support windows, BSD is currently not supported by static-php-cli
+            // frankenphp doesn't support windows, BSD is currently not supported by StaticPHP
             if (!in_array(PHP_OS_FAMILY, ['Linux', 'Darwin'])) {
                 throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
             }
@@ -247,6 +274,7 @@ class php extends TargetPackage
             'Build Target' => getenv('SPC_TARGET') ?: '',
             'Build Toolchain' => ToolchainManager::getToolchainClass(),
             'Build SAPI' => implode(', ', $sapis),
+            'PHP Version' => self::getPHPVersion(return_null_if_failed: true) ?? self::getPHPVersionFromArchive(return_null_if_failed: true) ?? 'Unknown',
             'Static Extensions (' . count($static_extensions) . ')' => implode(',', array_map(fn ($x) => substr($x->getName(), 4), $static_extensions)),
             'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
             'Install Packages (' . count($install_packages) . ')' => implode(',', array_map(fn ($x) => $x->getName(), $install_packages)),
@@ -272,10 +300,10 @@ class php extends TargetPackage
         // Patch StaticPHP version
         // detect patch (remove this when 8.3 deprecated)
         $file = FileSystem::readFile("{$package->getSourceDir()}/main/main.c");
-        if (!str_contains($file, 'static-php-cli.version')) {
+        if (!str_contains($file, 'StaticPHP.version')) {
             $version = SPC_VERSION;
-            logger()->debug('Inserting static-php-cli.version to php-src');
-            $file = str_replace('PHP_INI_BEGIN()', "PHP_INI_BEGIN()\n\tPHP_INI_ENTRY(\"static-php-cli.version\",\t\"{$version}\",\tPHP_INI_ALL,\tNULL)", $file);
+            logger()->debug('Inserting StaticPHP.version to php-src');
+            $file = str_replace('PHP_INI_BEGIN()', "PHP_INI_BEGIN()\n\tPHP_INI_ENTRY(\"StaticPHP.version\",\t\"{$version}\",\tPHP_INI_ALL,\tNULL)", $file);
             FileSystem::writeFile("{$package->getSourceDir()}/main/main.c", $file);
         }
 
