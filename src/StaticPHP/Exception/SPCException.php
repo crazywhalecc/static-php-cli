@@ -20,6 +20,8 @@ use StaticPHP\Package\TargetPackage;
  */
 abstract class SPCException extends \Exception
 {
+    protected bool $simple_output = false;
+
     /** @var null|array Package information */
     private ?array $package_info = null;
 
@@ -153,6 +155,16 @@ abstract class SPCException extends \Exception
     public function getExtraLogFiles(): array
     {
         return $this->extra_log_files;
+    }
+
+    public function isSimpleOutput(): bool
+    {
+        return $this->simple_output;
+    }
+
+    public function setSimpleOutput(bool $simple_output = true): void
+    {
+        $this->simple_output = $simple_output;
     }
 
     /**
