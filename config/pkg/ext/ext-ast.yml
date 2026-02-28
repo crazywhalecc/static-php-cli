@@ -1,0 +1,6 @@
+ext-ast:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: ast

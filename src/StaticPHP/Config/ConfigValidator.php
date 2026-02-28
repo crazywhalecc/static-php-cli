@@ -89,6 +89,7 @@ class ConfigValidator
         'bitbuckettag' => [['repo'], ['extract']],
         'local' => [['dirname'], ['extract']],
         'pie' => [['repo'], ['extract']],
+        'pecl' => [['name'], ['extract']],
         'php-release' => [[], ['extract']],
         'custom' => [[], ['func']],
     ];
