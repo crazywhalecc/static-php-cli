@@ -90,7 +90,7 @@ class ConfigValidator
         'local' => [['dirname'], ['extract']],
         'pie' => [['repo'], ['extract']],
         'pecl' => [['name'], ['extract']],
-        'php-release' => [[], ['extract']],
+        'php-release' => [['domain'], ['extract']],
         'custom' => [[], ['func']],
     ];
 

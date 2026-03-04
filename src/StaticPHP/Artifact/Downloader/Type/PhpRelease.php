@@ -10,9 +10,15 @@ use StaticPHP\Exception\DownloaderException;
 
 class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpdateInterface
 {
-    public const string PHP_API = 'https://www.php.net/releases/index.php?json&version={version}';
+    public const string DEFAULT_PHP_DOMAIN = 'https://www.php.net';
 
-    public const string DOWNLOAD_URL = 'https://www.php.net/distributions/php-{version}.tar.xz';
+    public const string API_URL = '/releases/index.php?json&version={version}';
+
+    public const string DOWNLOAD_URL = '/distributions/php-{version}.tar.xz';
+
+    public const string GIT_URL = 'https://github.com/php/php-src.git';
+
+    public const string GIT_REV = 'master';
 
     private ?string $sha256 = '';
 
@@ -22,9 +28,9 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
         // Handle 'git' version to clone from php-src repository
         if ($phpver === 'git') {
             $this->sha256 = null;
-            return (new Git())->download($name, ['url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $downloader);
+            return (new Git())->download($name, ['url' => self::GIT_URL, 'rev' => self::GIT_REV], $downloader);
         }
-        $info = $this->fetchPhpReleaseInfo($name, $downloader);
+        $info = $this->fetchPhpReleaseInfo($name, $config, $downloader);
         $version = $info['version'];
         foreach ($info['source'] as $source) {
             if (str_ends_with($source['filename'], '.tar.xz')) {
@@ -36,7 +42,8 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
         if (!isset($filename)) {
             throw new DownloaderException("No suitable source tarball found for PHP version {$version}");
         }
-        $url = str_replace('{version}', $version, self::DOWNLOAD_URL);
+        $url = $config['domain'] ?? self::DEFAULT_PHP_DOMAIN;
+        $url .= str_replace('{version}', $version, self::DOWNLOAD_URL);
         logger()->debug("Downloading PHP release {$version} from {$url}");
         $path = DOWNLOAD_PATH . "/{$filename}";
         default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
@@ -72,7 +79,7 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
             // git version: delegate to Git checkUpdate with master branch
             return (new Git())->checkUpdate($name, ['url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $old_version, $downloader);
         }
-        $info = $this->fetchPhpReleaseInfo($name, $downloader);
+        $info = $this->fetchPhpReleaseInfo($name, $config, $downloader);
         $new_version = $info['version'];
         return new CheckUpdateResult(
             old: $old_version,
@@ -81,7 +88,7 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
         );
     }
 
-    protected function fetchPhpReleaseInfo(string $name, ArtifactDownloader $downloader): array
+    protected function fetchPhpReleaseInfo(string $name, array $config, ArtifactDownloader $downloader): array
     {
         $phpver = $downloader->getOption('with-php', '8.4');
         // Handle 'git' version to clone from php-src repository
@@ -90,8 +97,13 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
             throw new DownloaderException("Cannot fetch PHP release info for 'git' version.");
         }
 
+        $url = $config['domain'] ?? self::DEFAULT_PHP_DOMAIN;
+        $url .= self::API_URL;
+        $url = str_replace('{version}', $phpver, $url);
+        logger()->debug("Fetching PHP release info for version {$phpver} from {$url}");
+
         // Fetch PHP release info first
-        $info = default_shell()->executeCurl(str_replace('{version}', $phpver, self::PHP_API), retries: $downloader->getRetry());
+        $info = default_shell()->executeCurl($url, retries: $downloader->getRetry());
         if ($info === false) {
             throw new DownloaderException("Failed to fetch PHP release info for version {$phpver}");
         }
