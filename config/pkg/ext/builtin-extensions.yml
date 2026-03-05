@@ -1,5 +1,19 @@
 ext-bcmath:
   type: php-extension
+ext-mbregex:
+  type: php-extension
+  depends:
+    - onig
+    - ext-mbstring
+  php-extension:
+    arg-type: custom
+    build-shared: false
+    build-static: true
+    display-name: mbstring
+ext-mbstring:
+  type: php-extension
+  php-extension:
+    arg-type: custom
 ext-openssl:
   type: php-extension
   depends:
@@ -10,6 +24,21 @@ ext-openssl:
     arg-type: custom
     arg-type@windows: with
     build-with-php: true
+ext-phar:
+  type: php-extension
+  depends:
+    - zlib
+ext-readline:
+  type: php-extension
+  depends:
+    - libedit
+  php-extension:
+    support:
+      Windows: wip
+      BSD: wip
+    arg-type: with-path
+    build-shared: false
+    build-static: true
 ext-zlib:
   type: php-extension
   depends:

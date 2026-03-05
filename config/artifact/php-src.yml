@@ -5,3 +5,7 @@ php-src:
     license: PHP-3.01
   source:
     type: php-release
+    domain: 'https://www.php.net'
+  source-mirror:
+    type: php-release
+    domain: 'https://phpmirror.static-php.dev'

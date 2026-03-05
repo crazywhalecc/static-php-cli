@@ -10,6 +10,7 @@ use StaticPHP\Artifact\Downloader\Type\GitHubRelease;
 use StaticPHP\Artifact\Downloader\Type\GitHubTarball;
 use StaticPHP\Artifact\Downloader\Type\HostedPackageBin;
 use StaticPHP\Artifact\Downloader\Type\LocalDir;
+use StaticPHP\Artifact\Downloader\Type\PECL;
 use StaticPHP\Artifact\Downloader\Type\PhpRelease;
 use StaticPHP\Artifact\Downloader\Type\PIE;
 use StaticPHP\Artifact\Downloader\Type\Url;
@@ -24,6 +25,7 @@ return [
     'ghtagtar' => GitHubTarball::class,
     'local' => LocalDir::class,
     'pie' => PIE::class,
+    'pecl' => PECL::class,
     'url' => Url::class,
     'php-release' => PhpRelease::class,
     'hosted' => HostedPackageBin::class,
