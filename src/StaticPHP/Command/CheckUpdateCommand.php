@@ -48,12 +48,10 @@ class CheckUpdateCommand extends BaseCommand
             foreach ($artifacts as $artifact) {
                 $result = $downloader->checkUpdate($artifact, bare: $bare);
                 if (!$result->needUpdate) {
-                    $this->output->writeln("Artifact <info>{$artifact}</info> is already up to date (version: {$result->new})");
+                    $this->output->writeln("Artifact <info>{$artifact}</info> is already up to date (<comment>{$result->new}</comment>)");
                 } else {
-                    $this->output->writeln("<comment>Update available for artifact: {$artifact}</comment>");
                     [$old, $new] = [$result->old ?? 'unavailable', $result->new ?? 'unknown'];
-                    $this->output->writeln("  Old version: <error>{$old}</error>");
-                    $this->output->writeln("  New version: <info>{$new}</info>");
+                    $this->output->writeln("Update available for <info>{$artifact}</info>: <comment>{$old}</comment> -> <comment>{$new}</comment>");
                 }
             }
             return static::OK;
