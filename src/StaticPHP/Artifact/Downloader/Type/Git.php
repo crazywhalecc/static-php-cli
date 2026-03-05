@@ -120,7 +120,7 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
             return new CheckUpdateResult(
                 old: $old_version,
                 new: $version,
-                needUpdate: $old_version === null || version_compare($version, $old_version, '>'),
+                needUpdate: $old_version === null || $version !== $old_version,
             );
         }
         throw new DownloaderException("No matching branch found for regex {$config['regex']}.");

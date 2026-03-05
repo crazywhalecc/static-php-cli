@@ -72,6 +72,9 @@ class zig
         $index_json = default_shell()->executeCurl('https://ziglang.org/download/index.json', retries: $downloader->getRetry());
         $index_json = json_decode($index_json ?: '', true);
         $latest_version = null;
+        if (!is_array($index_json)) {
+            throw new DownloaderException('Failed to fetch Zig version index for update check');
+        }
         foreach ($index_json as $version => $data) {
             if ($version !== 'master') {
                 $latest_version = $version;
@@ -84,7 +87,7 @@ class zig
         return new CheckUpdateResult(
             old: $old_version,
             new: $latest_version,
-            needUpdate: $old_version === null || version_compare($latest_version, $old_version, '>'),
+            needUpdate: $old_version === null || $latest_version !== $old_version,
         );
     }
 

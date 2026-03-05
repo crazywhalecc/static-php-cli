@@ -40,7 +40,7 @@ class PIE implements DownloadTypeInterface, CheckUpdateInterface
         return new CheckUpdateResult(
             old: $old_version,
             new: $new_version,
-            needUpdate: $old_version === null || version_compare($new_version, $old_version, '>'),
+            needUpdate: $old_version === null || $new_version !== $old_version,
         );
     }
 
