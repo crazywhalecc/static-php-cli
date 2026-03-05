@@ -17,17 +17,13 @@ class libxml2
     public function buildForLinux(LibraryPackage $lib): void
     {
         UnixCMakeExecutor::create($lib)
-            ->optionalPackage(
-                'zlib',
-                '-DLIBXML2_WITH_ZLIB=ON ' .
-                "-DZLIB_LIBRARY={$lib->getLibDir()}/libz.a " .
-                "-DZLIB_INCLUDE_DIR={$lib->getIncludeDir()}",
-                '-DLIBXML2_WITH_ZLIB=OFF',
-            )
-            ->optionalPackage('xz', ...cmake_boolean_args('LIBXML2_WITH_LZMA'))
             ->addConfigureArgs(
                 '-DLIBXML2_WITH_ICONV=ON',
                 '-DIconv_IS_BUILT_IN=OFF',
+                '-DLIBXML2_WITH_ZLIB=ON',
+                "-DZLIB_LIBRARY={$lib->getLibDir()}/libz.a",
+                "-DZLIB_INCLUDE_DIR={$lib->getIncludeDir()}",
+                '-DLIBXML2_WITH_LZMA=ON',
                 '-DLIBXML2_WITH_ICU=OFF', // optional, but discouraged: https://gitlab.gnome.org/GNOME/libxml2/-/blob/master/README.md
                 '-DLIBXML2_WITH_PYTHON=OFF',
                 '-DLIBXML2_WITH_PROGRAMS=OFF',

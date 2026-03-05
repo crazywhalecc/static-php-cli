@@ -10,9 +10,8 @@ libxml2:
       license: MIT
   depends@unix:
     - libiconv
-  suggests@unix:
-    - xz
     - zlib
+    - xz
   headers:
     - libxml2
   pkg-configs:

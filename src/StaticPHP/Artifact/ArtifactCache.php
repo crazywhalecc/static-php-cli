@@ -19,6 +19,7 @@ class ArtifactCache
      *         dirname?: string,
      *         extract: null|'&custom'|string,
      *         hash: null|string,
+     *         time: int,
      *         downloader: null|string
      *     },
      *     binary: array{
@@ -29,6 +30,7 @@ class ArtifactCache
      *             dirname?: string,
      *             extract: null|'&custom'|string,
      *             hash: null|string,
+     *             time: int,
      *             version?: null|string,
      *             downloader: null|string
      *         }
@@ -108,6 +110,7 @@ class ArtifactCache
                 'filename' => $download_result->filename,
                 'extract' => $download_result->extract,
                 'hash' => sha1_file(DOWNLOAD_PATH . '/' . $download_result->filename),
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
                 'downloader' => $download_result->downloader,
@@ -119,6 +122,7 @@ class ArtifactCache
                 'filename' => $download_result->filename,
                 'extract' => $download_result->extract,
                 'hash' => sha1_file(DOWNLOAD_PATH . '/' . $download_result->filename),
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
                 'downloader' => $download_result->downloader,
@@ -130,6 +134,7 @@ class ArtifactCache
                 'dirname' => $download_result->dirname,
                 'extract' => $download_result->extract,
                 'hash' => trim(exec('cd ' . escapeshellarg(DOWNLOAD_PATH . '/' . $download_result->dirname) . ' && ' . SPC_GIT_EXEC . ' rev-parse HEAD')),
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
                 'downloader' => $download_result->downloader,
@@ -141,6 +146,7 @@ class ArtifactCache
                 'dirname' => $download_result->dirname,
                 'extract' => $download_result->extract,
                 'hash' => null,
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
                 'downloader' => $download_result->downloader,
