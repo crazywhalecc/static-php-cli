@@ -52,7 +52,7 @@ if (filter_var(getenv('SPC_ENABLE_LOG_FILE'), FILTER_VALIDATE_BOOLEAN)) {
     $log_file_fd = fopen(SPC_OUTPUT_LOG, 'a');
     $ob_logger->addLogCallback(function ($level, $output) use ($log_file_fd) {
         if ($log_file_fd) {
-            fwrite($log_file_fd, strip_ansi_colors($output) . "\n");
+            spc_write_log($log_file_fd, strip_ansi_colors($output) . "\n");
         }
         return true;
     });

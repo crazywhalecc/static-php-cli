@@ -115,7 +115,7 @@ class ExceptionHandler
         $msg = explode("\n", (string) $message);
         foreach ($msg as $v) {
             $line = str_pad($v, strlen($v) + $indent_space, ' ', STR_PAD_LEFT);
-            fwrite($spc_log, strip_ansi_colors($line) . PHP_EOL);
+            spc_write_log($spc_log, strip_ansi_colors($line) . PHP_EOL);
             if ($output_log) {
                 InteractiveTerm::plain(ConsoleColor::$color($line) . '', 'error');
             }
