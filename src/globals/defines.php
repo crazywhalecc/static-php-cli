@@ -104,7 +104,7 @@ const SPC_DOWNLOAD_TYPE_DISPLAY_NAME = [
     'local' => 'local dir',
     'pie' => 'PHP Installer for Extensions (PIE)',
     'url' => 'url',
-    'php-release' => 'php.net',
+    'php-release' => 'PHP website release',
     'custom' => 'custom downloader',
 ];
 

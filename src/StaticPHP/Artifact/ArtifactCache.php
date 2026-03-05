@@ -283,6 +283,16 @@ class ArtifactCache
     }
 
     /**
+     * Get the names of all artifacts that have at least one downloaded entry (source or binary).
+     *
+     * @return array<string> Artifact names
+     */
+    public function getCachedArtifactNames(): array
+    {
+        return array_keys($this->cache);
+    }
+
+    /**
      * Save cache to file.
      */
     public function save(): void

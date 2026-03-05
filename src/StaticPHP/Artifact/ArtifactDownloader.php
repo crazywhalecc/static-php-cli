@@ -362,7 +362,8 @@ class ArtifactDownloader
             if ($result !== null) {
                 return $result;
             }
-            throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking.");
+            // logger()->warning("Artifact '{$artifact_name}' downloader does not support update checking, skipping.");
+            return new CheckUpdateResult(old: null, new: null, needUpdate: false, unsupported: true);
         }
         $cache = ApplicationContext::get(ArtifactCache::class);
         if ($prefer_source) {
@@ -393,7 +394,33 @@ class ArtifactDownloader
                 'old_version' => $info['version'],
             ]);
         }
-        throw new WrongUsageException("Artifact '{$artifact_name}' downloader does not support update checking, exit.");
+        // logger()->warning("Artifact '{$artifact_name}' downloader does not support update checking, skipping.");
+        return new CheckUpdateResult(old: null, new: null, needUpdate: false, unsupported: true);
+    }
+
+    /**
+     * Check updates for multiple artifacts, with optional parallel processing.
+     *
+     * @param  array<string>                    $artifact_names Artifact names to check
+     * @param  bool                             $prefer_source  Whether to prefer source over binary
+     * @param  bool                             $bare           Check without requiring artifact to be downloaded first
+     * @param  null|callable                    $onResult       Called immediately with (string $name, CheckUpdateResult) as each result arrives
+     * @return array<string, CheckUpdateResult> Results keyed by artifact name
+     */
+    public function checkUpdates(array $artifact_names, bool $prefer_source = false, bool $bare = false, ?callable $onResult = null): array
+    {
+        if ($this->parallel > 1 && count($artifact_names) > 1) {
+            return $this->checkUpdatesWithConcurrency($artifact_names, $prefer_source, $bare, $onResult);
+        }
+        $results = [];
+        foreach ($artifact_names as $name) {
+            $result = $this->checkUpdate($name, $prefer_source, $bare);
+            $results[$name] = $result;
+            if ($onResult !== null) {
+                ($onResult)($name, $result);
+            }
+        }
+        return $results;
     }
 
     public function getRetry(): int
@@ -409,6 +436,61 @@ class ArtifactDownloader
     public function getOption(string $name, mixed $default = null): mixed
     {
         return $this->options[$name] ?? $default;
+    }
+
+    private function checkUpdatesWithConcurrency(array $artifact_names, bool $prefer_source, bool $bare, ?callable $onResult): array
+    {
+        $results = [];
+        $fiber_pool = [];
+        $remaining = $artifact_names;
+
+        Shell::passthruCallback(function () {
+            \Fiber::suspend();
+        });
+
+        try {
+            while (!empty($remaining) || !empty($fiber_pool)) {
+                // fill pool
+                while (count($fiber_pool) < $this->parallel && !empty($remaining)) {
+                    $name = array_shift($remaining);
+                    $fiber = new \Fiber(function () use ($name, $prefer_source, $bare) {
+                        return [$name, $this->checkUpdate($name, $prefer_source, $bare)];
+                    });
+                    $fiber->start();
+                    $fiber_pool[$name] = $fiber;
+                }
+                // check pool
+                foreach ($fiber_pool as $fiber_name => $fiber) {
+                    if ($fiber->isTerminated()) {
+                        // getReturn() re-throws if the fiber threw — propagates immediately
+                        [$artifact_name, $result] = $fiber->getReturn();
+                        $results[$artifact_name] = $result;
+                        if ($onResult !== null) {
+                            ($onResult)($artifact_name, $result);
+                        }
+                        unset($fiber_pool[$fiber_name]);
+                    } else {
+                        $fiber->resume();
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // terminate all still-suspended fibers so their curl processes don't hang
+            foreach ($fiber_pool as $fiber) {
+                if (!$fiber->isTerminated()) {
+                    try {
+                        $fiber->throw($e);
+                    } catch (\Throwable) {
+                        // ignore — we only care about stopping them
+                    }
+                }
+            }
+            throw $e;
+        } finally {
+            Shell::passthruCallback(null);
+        }
+
+        return $results;
     }
 
     private function probeSourceCheckUpdate(Artifact $artifact, string $artifact_name): ?CheckUpdateResult

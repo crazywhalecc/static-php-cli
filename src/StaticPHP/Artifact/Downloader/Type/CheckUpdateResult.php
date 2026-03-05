@@ -8,7 +8,8 @@ readonly class CheckUpdateResult
 {
     public function __construct(
         public ?string $old,
-        public string $new,
+        public ?string $new,
         public bool $needUpdate,
+        public bool $unsupported = false,
     ) {}
 }
