@@ -80,7 +80,7 @@ class PhpExtensionPackage extends Package
         }
         $escapedPath = str_replace("'", '', escapeshellarg(BUILD_ROOT_PATH)) !== BUILD_ROOT_PATH || str_contains(BUILD_ROOT_PATH, ' ') ? escapeshellarg(BUILD_ROOT_PATH) : BUILD_ROOT_PATH;
         $name = str_replace('_', '-', $this->getExtensionName());
-        $ext_config = PackageConfig::get($name, 'php-extension', []);
+        $ext_config = PackageConfig::get($this->getName(), 'php-extension', []);
 
         $arg_type = match (SystemTarget::getTargetOS()) {
             'Windows' => $ext_config['arg-type@windows'] ?? $ext_config['arg-type'] ?? 'enable',
