@@ -7,6 +7,7 @@ namespace SPC\builder\traits;
 use SPC\exception\ExecutionException;
 use SPC\exception\SPCInternalException;
 use SPC\exception\WrongUsageException;
+use SPC\store\pkg\Zig;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\SPCTarget;
@@ -73,6 +74,10 @@ trait UnixSystemUtilTrait
             throw new SPCInternalException("The symbol file {$symbol_file} does not exist, please check if nm command is available.");
         }
         // macOS/zig
+        // https://github.com/ziglang/zig/issues/24662
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            return '-Wl,--export-dynamic'; // needs release 0.16, can be removed then
+        }
         if (SPCTarget::getTargetOS() !== 'Linux' || ToolchainManager::getToolchainClass() === ZigToolchain::class) {
             return "-Wl,-exported_symbols_list,{$symbol_file}";
         }

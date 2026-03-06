@@ -13,6 +13,7 @@ trait libuuid
     {
         UnixCMakeExecutor::create($this)->toStep(2)->build();
         copy($this->source_dir . '/build/libuuid.a', BUILD_LIB_PATH . '/libuuid.a');
+        copy($this->source_dir . '/build/libuuid.so', BUILD_LIB_PATH . '/libuuid.so');
         FileSystem::createDir(BUILD_INCLUDE_PATH . '/uuid');
         copy($this->source_dir . '/uuid.h', BUILD_INCLUDE_PATH . '/uuid/uuid.h');
         $pc = FileSystem::readFile($this->source_dir . '/uuid.pc.in');

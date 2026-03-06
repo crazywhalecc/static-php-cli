@@ -42,7 +42,7 @@ class openssl extends BSDLibraryBase
 
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
-                "./Configure no-shared {$extra} " .
+                "./Configure {$extra} " .
                 '--prefix=/ ' . // use prefix=/
                 "--libdir={$lib} " .
                 '--openssldir=/etc/ssl ' .
