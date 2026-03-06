@@ -7,6 +7,8 @@ ext-bz2:
   php-extension:
     arg-type@unix: with-path
     arg-type@windows: with
+ext-calendar:
+  type: php-extension
 ext-mbregex:
   type: php-extension
   depends:
