@@ -1,5 +1,12 @@
 ext-bcmath:
   type: php-extension
+ext-bz2:
+  type: php-extension
+  depends:
+    - bzip2
+  php-extension:
+    arg-type@unix: with-path
+    arg-type@windows: with
 ext-mbregex:
   type: php-extension
   depends:
