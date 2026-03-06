@@ -42,13 +42,13 @@ class openssl extends WindowsLibraryBase
             );
 
         // patch zlib
-        FileSystem::replaceFileStr($this->source_dir . '\Makefile', 'ZLIB1', 'zlibstatic.lib');
+        FileSystem::replaceFileStr($this->source_dir . '\Makefile', 'ZLIB1', 'zs.lib');
         // patch debug: https://stackoverflow.com/questions/18486243/how-do-i-build-openssl-statically-linked-against-windows-runtime
         FileSystem::replaceFileStr($this->source_dir . '\Makefile', '/debug', '/incremental:no /opt:icf /dynamicbase /nxcompat /ltcg /nodefaultlib:msvcrt');
         cmd()->cd($this->source_dir)->execWithWrapper(
             $this->builder->makeSimpleWrapper('nmake'),
             'install_dev ' .
-            'CNF_LDFLAGS="/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:msvcrt /NODEFAULTLIB:msvcrtd /DEFAULTLIB:libcmt /LIBPATH:' . BUILD_LIB_PATH . ' zlibstatic.lib"'
+            'CNF_LDFLAGS="/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:msvcrt /NODEFAULTLIB:msvcrtd /DEFAULTLIB:libcmt /LIBPATH:' . BUILD_LIB_PATH . ' zs.lib"'
         );
         copy($this->source_dir . '\ms\applink.c', BUILD_INCLUDE_PATH . '\openssl\applink.c');
 

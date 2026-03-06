@@ -31,8 +31,9 @@ class zlib extends WindowsLibraryBase
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
-        copy(BUILD_LIB_PATH . '\zlibstatic.lib', BUILD_LIB_PATH . '\zlib_a.lib');
-        unlink(BUILD_ROOT_PATH . '\bin\zlib.dll');
-        unlink(BUILD_LIB_PATH . '\zlib.lib');
+        unlink(BUILD_ROOT_PATH . '\bin\z.dll');
+        unlink(BUILD_LIB_PATH . '\z.lib');
+        copy(BUILD_LIB_PATH . '\zs.lib', BUILD_LIB_PATH . '\zlib_a.lib');
+        copy(BUILD_LIB_PATH . '\zs.lib', BUILD_LIB_PATH . '\zlibstatic.lib');
     }
 }
