@@ -47,6 +47,8 @@ trait unix
 
         // let php m4 tools use static pkg-config
         FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+        // also patch extension config.m4 files (they call PKG_CHECK_MODULES directly, not via php.m4)
+        shell()->cd($package->getSourceDir())->exec("grep -rl 'PKG_CHECK_MODULES(' ext/ | xargs sed -i 's/PKG_CHECK_MODULES(/PKG_CHECK_MODULES_STATIC(/g' || true");
     }
 
     #[Stage]
