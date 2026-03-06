@@ -42,12 +42,12 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
             }
             if ($match_url === null) {
                 $url = $rel['tarball_url'] ?? null;
-                $version = $rel['tag_name'] ?? null;
+                $version = $rel['tag_name'] ?? $rel['name'] ?? null;
                 break;
             }
             if (preg_match("|{$match_url}|", $rel['tarball_url'] ?? '')) {
                 $url = $rel['tarball_url'];
-                $version = $rel['tag_name'] ?? null;
+                $version = $rel['tag_name'] ?? $rel['name'] ?? null;
                 break;
             }
         }
