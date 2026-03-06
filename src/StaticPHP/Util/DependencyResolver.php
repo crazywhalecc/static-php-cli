@@ -45,6 +45,27 @@ class DependencyResolver
             }
         }
 
+        // Virtual-target packages (e.g. php-fpm) are built as part of their real parent's
+        // build step, so any dependency they declare must be available before the real parent
+        // is built. Promote those deps directly onto the real parent's dependency list so
+        // that the topological sort places them before the parent.
+        foreach ($dep_list_clean as $pkg_name => $pkg_item) {
+            if (PackageConfig::get($pkg_name, 'type') !== 'virtual-target') {
+                continue;
+            }
+            foreach ($pkg_item['depends'] as $dep_name) {
+                if (isset($dep_list_clean[$dep_name]) && PackageConfig::get($dep_name, 'type') !== 'virtual-target') {
+                    // $dep_name is the real parent; add all other deps of this virtual-target to it
+                    $other_deps = array_values(array_filter($pkg_item['depends'], fn ($d) => $d !== $dep_name));
+                    if (!empty($other_deps)) {
+                        $dep_list_clean[$dep_name]['depends'] = array_values(array_unique(
+                            array_merge($dep_list_clean[$dep_name]['depends'], $other_deps)
+                        ));
+                    }
+                }
+            }
+        }
+
         $resolved = self::doVisitPlat($packages, $dep_list_clean);
 
         // Build reverse dependency map if $why is requested
