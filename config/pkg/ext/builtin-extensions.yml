@@ -9,6 +9,8 @@ ext-bz2:
     arg-type@windows: with
 ext-calendar:
   type: php-extension
+ext-ctype:
+  type: php-extension
 ext-mbregex:
   type: php-extension
   depends:
