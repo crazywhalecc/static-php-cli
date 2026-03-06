@@ -18,6 +18,6 @@ class Url implements DownloadTypeInterface
         logger()->debug("Downloading {$name} from URL: {$url}");
         $version = $config['version'] ?? null;
         default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
-        return DownloadResult::archive($filename, config: $config, extract: $config['extract'] ?? null, version: $version);
+        return DownloadResult::archive($filename, config: $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
     }
 }

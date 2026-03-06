@@ -36,6 +36,6 @@ class BitBucketTag implements DownloadTypeInterface
         $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
         logger()->debug("Downloading {$name} version {$ver} from BitBucket: {$download_url}");
         default_shell()->executeCurlDownload($download_url, $path, retries: $downloader->getRetry());
-        return DownloadResult::archive($filename, $config, extract: $config['extract'] ?? null);
+        return DownloadResult::archive($filename, $config, extract: $config['extract'] ?? null, downloader: static::class);
     }
 }

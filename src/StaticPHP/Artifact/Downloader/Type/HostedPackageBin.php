@@ -26,7 +26,7 @@ class HostedPackageBin implements DownloadTypeInterface
     public static function getReleaseInfo(): array
     {
         if (empty(self::$release_info)) {
-            $rel = (new GitHubRelease())->getGitHubReleases('hosted', self::BASE_REPO);
+            $rel = new GitHubRelease()->getGitHubReleases('hosted', self::BASE_REPO);
             if (empty($rel)) {
                 throw new DownloaderException('No releases found for hosted package-bin');
             }
@@ -55,7 +55,7 @@ class HostedPackageBin implements DownloadTypeInterface
                 $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
                 $headers = $this->getGitHubTokenHeaders();
                 default_shell()->executeCurlDownload($download_url, $path, headers: $headers, retries: $downloader->getRetry());
-                return DownloadResult::archive($filename, $config, extract: $config['extract'] ?? null, version: $version);
+                return DownloadResult::archive($filename, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
             }
         }
         throw new DownloaderException("No matching asset found for hosted package-bin {$name}: {$find_str}");

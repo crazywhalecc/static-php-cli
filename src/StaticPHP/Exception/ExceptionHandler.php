@@ -29,12 +29,6 @@ class ExceptionHandler
         RegistryException::class,
     ];
 
-    public const array MINOR_LOG_EXCEPTIONS = [
-        InterruptException::class,
-        WrongUsageException::class,
-        RegistryException::class,
-    ];
-
     /** @var array<string, mixed> Build PHP extra info binding */
     private static array $build_php_extra_info = [];
 
@@ -57,10 +51,7 @@ class ExceptionHandler
         };
         self::logError($head_msg);
 
-        // ----------------------------------------
-        $minor_logs = in_array($class, self::MINOR_LOG_EXCEPTIONS, true);
-
-        if ($minor_logs) {
+        if ($e->isSimpleOutput()) {
             return self::getReturnCode($e);
         }
 
@@ -124,7 +115,7 @@ class ExceptionHandler
         $msg = explode("\n", (string) $message);
         foreach ($msg as $v) {
             $line = str_pad($v, strlen($v) + $indent_space, ' ', STR_PAD_LEFT);
-            fwrite($spc_log, strip_ansi_colors($line) . PHP_EOL);
+            spc_write_log($spc_log, strip_ansi_colors($line) . PHP_EOL);
             if ($output_log) {
                 InteractiveTerm::plain(ConsoleColor::$color($line) . '', 'error');
             }
@@ -283,6 +274,6 @@ class ExceptionHandler
             self::printArrayInfo($info);
         }
 
-        self::logError("---------------------------------------------------------\n", color: 'none');
+        self::logError("-----------------------------------------------------------\n", color: 'none');
     }
 }
