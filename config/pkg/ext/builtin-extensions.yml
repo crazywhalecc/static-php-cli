@@ -1,5 +1,25 @@
 ext-bcmath:
   type: php-extension
+ext-bz2:
+  type: php-extension
+  depends:
+    - bzip2
+  php-extension:
+    arg-type@unix: with-path
+    arg-type@windows: with
+ext-calendar:
+  type: php-extension
+ext-ctype:
+  type: php-extension
+ext-curl:
+  type: php-extension
+  depends:
+    - curl
+  depends@windows:
+    - ext-zlib
+    - ext-openssl
+  php-extension:
+    arg-type: with
 ext-mbregex:
   type: php-extension
   depends:

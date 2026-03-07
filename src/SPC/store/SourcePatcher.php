@@ -22,7 +22,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('swoole', [__CLASS__, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']); // migrated
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']); // migrated
-        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']); // migrated
+        // FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']); // migrated
         FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVPhp85']);
