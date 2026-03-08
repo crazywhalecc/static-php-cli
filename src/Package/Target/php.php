@@ -27,6 +27,7 @@ use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ToolchainManager;
+use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\V2CompatLayer;
@@ -215,6 +216,25 @@ class php extends TargetPackage
             }
         }
 
+        // Mark transitive PHP extension dependencies of static extensions as static too
+        if (!empty($static_extensions)) {
+            $static_ext_pkgs = array_map(fn ($x) => "ext-{$x}", $static_extensions);
+            $transitive_deps = DependencyResolver::resolve($static_ext_pkgs);
+            foreach ($transitive_deps as $dep_name) {
+                if (!str_starts_with($dep_name, 'ext-') || !PackageLoader::hasPackage($dep_name)) {
+                    continue;
+                }
+                $dep_instance = PackageLoader::getPackage($dep_name);
+                if (!$dep_instance instanceof PhpExtensionPackage || $dep_instance->isBuildStatic() || $dep_instance->isBuildShared()) {
+                    continue;
+                }
+                $dep_config = PackageConfig::get($dep_name, 'php-extension', []);
+                if (($dep_config['build-static'] ?? true) !== false) {
+                    $dep_instance->setBuildStatic();
+                }
+            }
+        }
+
         // building shared extensions need embed SAPI
         if (!empty($shared_extensions) && !$package->getBuildOption('build-embed', false) && $package->getName() === 'php') {
             $installer->addBuildPackage('php-embed');
@@ -266,7 +286,8 @@ class php extends TargetPackage
             $installer->isPackageResolved('php-embed') ? 'embed' : null,
             $installer->isPackageResolved('frankenphp') ? 'frankenphp' : null,
         ]);
-        $static_extensions = array_filter($installer->getResolvedPackages(), fn ($x) => $x instanceof PhpExtensionPackage && $x->isBuildStatic());
+        $static_extensions = array_filter($installer->getResolvedPackages(), fn ($x) => $x instanceof PhpExtensionPackage &&
+            $x->isBuildStatic());
         $shared_extensions = parse_extension_list($package->getBuildOption('build-shared') ?? []);
         $install_packages = array_filter($installer->getResolvedPackages(), fn ($x) => $x->getType() !== 'php-extension' && $x->getName() !== 'php' && !str_starts_with($x->getName(), 'php-'));
         return [
