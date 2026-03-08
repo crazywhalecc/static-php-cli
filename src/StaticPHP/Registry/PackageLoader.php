@@ -40,6 +40,42 @@ class PackageLoader
     /** @var array<string, true> Track loaded classes to prevent duplicates */
     private static array $loaded_classes = [];
 
+    /**
+     * Annotation metadata keyed by package name, capturing the defining class and its method-level attributes.
+     *
+     * @var array<string, array{class: string, methods: array<string, list<array{attr: string, args: array<string, mixed>}>>}>
+     */
+    private static array $annotation_map = [];
+
+    /**
+     * Source metadata for #[BeforeStage] hooks, keyed by target package name → stage name.
+     *
+     * @var array<string, array<string, list<array{class: string, method: string, only_when: ?string}>>>
+     */
+    private static array $before_stage_meta = [];
+
+    /**
+     * Source metadata for #[AfterStage] hooks, keyed by target package name → stage name.
+     *
+     * @var array<string, array<string, list<array{class: string, method: string, only_when: ?string}>>>
+     */
+    private static array $after_stage_meta = [];
+
+    /**
+     * Reverse index of #[BeforeStage] hooks, keyed by registering class → target package → stage.
+     * Enables O(1) "outbound hook" lookup: what stages does a given class hook into on other packages?
+     *
+     * @var array<string, array<string, array<string, list<array{method: string, only_when: ?string}>>>>
+     */
+    private static array $class_before_stage_meta = [];
+
+    /**
+     * Reverse index of #[AfterStage] hooks, keyed by registering class → target package → stage.
+     *
+     * @var array<string, array<string, array<string, list<array{method: string, only_when: ?string}>>>>
+     */
+    private static array $class_after_stage_meta = [];
+
     public static function initPackageInstances(): void
     {
         if (self::$packages !== null) {
@@ -213,8 +249,19 @@ class PackageLoader
                         Validate::class => $pkg->setValidateCallback([$instance_class, $method->getName()]),
                         default => null,
                     };
+
+                    // Capture annotation metadata for inspection (dev:info, future event-trace commands)
+                    $meta_attr = self::annotationShortName($method_attribute->getName());
+                    if ($meta_attr !== null) {
+                        self::$annotation_map[$pkg->getName()]['methods'][$method->getName()][] = [
+                            'attr' => $meta_attr,
+                            'args' => self::annotationArgs($method_instance),
+                        ];
+                    }
                 }
             }
+            // Record which class defines this package (set once; IS_REPEATABLE may loop more than once)
+            self::$annotation_map[$pkg->getName()]['class'] ??= $class_name;
             // register package
             self::$packages[$pkg->getName()] = $pkg;
         }
@@ -258,6 +305,63 @@ class PackageLoader
     public static function getAllAfterStages(): array
     {
         return self::$after_stages;
+    }
+
+    /**
+     * Get annotation metadata for a specific package.
+     *
+     * Returns null if no annotation class was loaded for this package (config-only package).
+     * The returned structure includes the defining class name, per-method attribute list,
+     * inbound BeforeStage/AfterStage hooks targeting this package, and outbound hooks that
+     * this package's class registers on other packages.
+     *
+     * @return null|array{
+     *   class: string,
+     *   methods: array<string, list<array{attr: string, args: array<string, mixed>}>>,
+     *   before_stages: array<string, list<array{class: string, method: string, only_when: ?string}>>,
+     *   after_stages: array<string, list<array{class: string, method: string, only_when: ?string}>>,
+     *   outbound_before_stages: array<string, array<string, list<array{method: string, only_when: ?string}>>>,
+     *   outbound_after_stages: array<string, array<string, list<array{method: string, only_when: ?string}>>>
+     * }
+     */
+    public static function getPackageAnnotationInfo(string $name): ?array
+    {
+        $class_info = self::$annotation_map[$name] ?? null;
+        if ($class_info === null) {
+            return null;
+        }
+        $class = $class_info['class'];
+        return [
+            'class' => $class,
+            'methods' => $class_info['methods'],
+            'before_stages' => self::$before_stage_meta[$name] ?? [],
+            'after_stages' => self::$after_stage_meta[$name] ?? [],
+            'outbound_before_stages' => self::$class_before_stage_meta[$class] ?? [],
+            'outbound_after_stages' => self::$class_after_stage_meta[$class] ?? [],
+        ];
+    }
+
+    /**
+     * Get all annotation metadata keyed by package name.
+     * Useful for future event-trace commands or cross-package inspection.
+     *
+     * @return array<string, array{class: string, methods: array, before_stages: array, after_stages: array, outbound_before_stages: array, outbound_after_stages: array}>
+     */
+    public static function getAllAnnotations(): array
+    {
+        $result = [];
+        foreach (self::$annotation_map as $name => $info) {
+            $class = $info['class'];
+            $result[$name] = [
+                'class' => $class,
+                'methods' => $info['methods'],
+                'before_stages' => self::$before_stage_meta[$name] ?? [],
+                'after_stages' => self::$after_stage_meta[$name] ?? [],
+                'outbound_before_stages' => self::$class_before_stage_meta[$class] ?? [],
+                'outbound_after_stages' => self::$class_after_stage_meta[$class] ?? [],
+            ];
+        }
+        return $result;
     }
 
     public static function getBeforeStageCallbacks(string $package_name, string $stage): iterable
@@ -385,6 +489,16 @@ class PackageLoader
         }
         $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
         self::$before_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved];
+        $registering_class = get_class($instance_class);
+        self::$before_stage_meta[$package_name][$stage][] = [
+            'class' => $registering_class,
+            'method' => $method->getName(),
+            'only_when' => $method_instance->only_when_package_resolved,
+        ];
+        self::$class_before_stage_meta[$registering_class][$package_name][$stage][] = [
+            'method' => $method->getName(),
+            'only_when' => $method_instance->only_when_package_resolved,
+        ];
     }
 
     private static function addAfterStage(\ReflectionMethod $method, ?Package $pkg, mixed $instance_class, object $method_instance): void
@@ -400,5 +514,49 @@ class PackageLoader
         }
         $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
         self::$after_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved];
+        $registering_class = get_class($instance_class);
+        self::$after_stage_meta[$package_name][$stage][] = [
+            'class' => $registering_class,
+            'method' => $method->getName(),
+            'only_when' => $method_instance->only_when_package_resolved,
+        ];
+        self::$class_after_stage_meta[$registering_class][$package_name][$stage][] = [
+            'method' => $method->getName(),
+            'only_when' => $method_instance->only_when_package_resolved,
+        ];
+    }
+
+    /**
+     * Map a fully-qualified attribute class name to a short display name for metadata storage.
+     * Returns null for attributes that are not tracked in the annotation map.
+     */
+    private static function annotationShortName(string $attr): ?string
+    {
+        return match ($attr) {
+            Stage::class => 'Stage',
+            BuildFor::class => 'BuildFor',
+            PatchBeforeBuild::class => 'PatchBeforeBuild',
+            CustomPhpConfigureArg::class => 'CustomPhpConfigureArg',
+            InitPackage::class => 'InitPackage',
+            ResolveBuild::class => 'ResolveBuild',
+            Info::class => 'Info',
+            Validate::class => 'Validate',
+            default => null,
+        };
+    }
+
+    /**
+     * Extract the meaningful constructor arguments from an attribute instance as a key-value array.
+     *
+     * @return array<string, mixed>
+     */
+    private static function annotationArgs(object $inst): array
+    {
+        return match (true) {
+            $inst instanceof Stage => array_filter(['function' => $inst->function], fn ($v) => $v !== null),
+            $inst instanceof BuildFor => ['os' => $inst->os],
+            $inst instanceof CustomPhpConfigureArg => array_filter(['os' => $inst->os], fn ($v) => $v !== ''),
+            default => [],
+        };
     }
 }

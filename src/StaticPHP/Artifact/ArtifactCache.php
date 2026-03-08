@@ -204,6 +204,17 @@ class ArtifactCache
     }
 
     /**
+     * Get all binary cache entries for an artifact, keyed by platform string.
+     *
+     * @param  string               $artifact_name Artifact name
+     * @return array<string, array> Map of platform → cache info (may be empty)
+     */
+    public function getAllBinaryInfo(string $artifact_name): array
+    {
+        return $this->cache[$artifact_name]['binary'] ?? [];
+    }
+
+    /**
      * Get the full path to the cached file/directory.
      *
      * @param  array  $cache_info Cache info from getSourceInfo() or getBinaryInfo()
