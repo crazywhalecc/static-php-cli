@@ -4,3 +4,6 @@ ext-ast:
     source:
       type: pecl
       name: ast
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
