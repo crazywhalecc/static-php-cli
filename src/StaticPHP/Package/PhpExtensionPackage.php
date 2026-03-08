@@ -148,11 +148,11 @@ class PhpExtensionPackage extends Package
 
     /**
      * Get the dist name used for `--ri` check in smoke test.
-     * Reads from config `dist-name` field, defaults to extension name.
+     * Reads from config `display-name` field, defaults to extension name.
      */
     public function getDistName(): string
     {
-        return $this->extension_config['dist-name'] ?? $this->getExtensionName();
+        return $this->extension_config['display-name'] ?? $this->getExtensionName();
     }
 
     /**
@@ -166,7 +166,7 @@ class PhpExtensionPackage extends Package
         }
 
         $distName = $this->getDistName();
-        // empty dist-name → no --ri check (e.g. password_argon2)
+        // empty display-name → no --ri check (e.g. password_argon2)
         if ($distName === '') {
             return;
         }
