@@ -26,6 +26,14 @@ ext-dba:
     - qdbm
   php-extension:
     arg-type: custom
+ext-dom:
+  type: php-extension
+  depends:
+    - libxml2
+    - ext-xml
+  php-extension:
+    arg-type: '--enable-dom@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@windows: with
 ext-mbregex:
   type: php-extension
   depends:
@@ -65,6 +73,17 @@ ext-readline:
     arg-type: '--with-libedit --without-readline'
     build-shared: false
     build-static: true
+ext-xml:
+  type: php-extension
+  depends:
+    - libxml2
+  depends@windows:
+    - libxml2
+    - ext-iconv
+  php-extension:
+    arg-type: '--enable-xml@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@windows: with
+    build-with-php: true
 ext-zlib:
   type: php-extension
   depends:
