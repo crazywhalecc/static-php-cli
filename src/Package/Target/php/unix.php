@@ -48,7 +48,9 @@ trait unix
         // let php m4 tools use static pkg-config
         FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
         // also patch extension config.m4 files (they call PKG_CHECK_MODULES directly, not via php.m4)
-        shell()->cd($package->getSourceDir())->exec("grep -rl 'PKG_CHECK_MODULES(' ext/ | xargs sed -i 's/PKG_CHECK_MODULES(/PKG_CHECK_MODULES_STATIC(/g' || true");
+        foreach (glob("{$package->getSourceDir()}/ext/*/*.m4") as $m4file) {
+            FileSystem::replaceFileStr($m4file, 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+        }
     }
 
     #[Stage]
@@ -110,11 +112,15 @@ trait unix
 
         $static_extension_str = $this->makeStaticExtensionString($installer);
 
+        // reuse the same make vars so configure conftest links use the same LIBS (incl. -framework flags)
+        $vars = $this->makeVars($installer);
+
         // run ./configure with args
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd($package->getSourceDir())->setEnv([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => "-I{$package->getIncludeDir()}",
             'LDFLAGS' => "-L{$package->getLibDir()} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
+            'LIBS' => $vars['EXTRA_LIBS'] ?? '',
         ])->exec("{$cmd} {$args} {$static_extension_str}"), $package->getSourceDir());
     }
 
