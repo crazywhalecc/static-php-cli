@@ -56,7 +56,7 @@ ext-readline:
     support:
       Windows: wip
       BSD: wip
-    arg-type: with-path
+    arg-type: '--with-libedit --without-readline'
     build-shared: false
     build-static: true
 ext-zlib:
