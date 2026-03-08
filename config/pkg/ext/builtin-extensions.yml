@@ -20,6 +20,12 @@ ext-curl:
     - ext-openssl
   php-extension:
     arg-type: with
+ext-dba:
+  type: php-extension
+  suggests:
+    - qdbm
+  php-extension:
+    arg-type: custom
 ext-mbregex:
   type: php-extension
   depends:
