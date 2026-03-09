@@ -443,7 +443,27 @@ trait unix
         $package->runStage([$this, 'makeForUnix']);
 
         $package->runStage([$this, 'unixBuildSharedExt']);
-        $package->runStage([$this, 'smokeTestForUnix']);
+    }
+
+    #[Stage('postInstall')]
+    public function postInstall(TargetPackage $package, PackageInstaller $installer): void
+    {
+        if ($package->getName() === 'frankenphp') {
+            $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
+            return;
+        }
+        if ($package->getName() !== 'php') {
+            return;
+        }
+        if (SystemTarget::isUnix()) {
+            if ($installer->interactive) {
+                InteractiveTerm::indicateProgress('Running PHP smoke tests');
+            }
+            $package->runStage([$this, 'smokeTestForUnix']);
+            if ($installer->interactive) {
+                InteractiveTerm::finish('PHP smoke tests passed');
+            }
+        }
     }
 
     /**

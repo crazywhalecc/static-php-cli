@@ -18,7 +18,7 @@ use function Laravel\Prompts\confirm;
 
 readonly class Doctor
 {
-    public function __construct(private ?OutputInterface $output = null, private int $auto_fix = FIX_POLICY_PROMPT)
+    public function __construct(private ?OutputInterface $output = null, private int $auto_fix = FIX_POLICY_PROMPT, public readonly bool $interactive = true)
     {
         // debug shows all loaded doctor items
         $items = DoctorLoader::getDoctorItems();
@@ -53,13 +53,13 @@ readonly class Doctor
      * Check all valid check items.
      * @return bool true if all checks passed, false otherwise
      */
-    public function checkAll(bool $interactive = true): bool
+    public function checkAll(): bool
     {
-        if ($interactive) {
+        if ($this->interactive) {
             InteractiveTerm::notice('Starting doctor checks ...');
         }
         foreach ($this->getValidCheckList() as $check) {
-            if (!$this->checkItem($check, $interactive)) {
+            if (!$this->checkItem($check)) {
                 return false;
             }
         }
@@ -72,7 +72,7 @@ readonly class Doctor
      * @param  CheckItem|string $check The check item to be checked
      * @return bool             True if the check passed or was fixed, false otherwise
      */
-    public function checkItem(CheckItem|string $check, bool $interactive = true): bool
+    public function checkItem(CheckItem|string $check): bool
     {
         if (is_string($check)) {
             $found = null;
@@ -88,7 +88,7 @@ readonly class Doctor
             }
             $check = $found;
         }
-        $prepend = $interactive ? '  - ' : '';
+        $prepend = $this->interactive ? '  - ' : '';
         $this->output?->write("{$prepend}Checking <comment>{$check->item_name}</comment> ... ");
 
         // call check

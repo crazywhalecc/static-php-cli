@@ -107,7 +107,7 @@ class WindowsToolCheck
     {
         $installer = new PackageInstaller();
         $installer->addInstallPackage('strawberry-perl');
-        $installer->run(false);
+        $installer->run(true);
         GlobalEnvManager::addPathIfNotExists(PKG_ROOT_PATH . '\strawberry-perl');
         return true;
     }
@@ -116,27 +116,27 @@ class WindowsToolCheck
     public function installSDK(): bool
     {
         FileSystem::removeDir(getenv('PHP_SDK_PATH'));
-        $installer = new PackageInstaller();
+        $installer = new PackageInstaller(interactive: false);
         $installer->addInstallPackage('php-sdk-binary-tools');
-        $installer->run(false);
+        $installer->run(true);
         return true;
     }
 
     #[FixItem('install-nasm')]
     public function installNasm(): bool
     {
-        $installer = new PackageInstaller();
+        $installer = new PackageInstaller(interactive: false);
         $installer->addInstallPackage('nasm');
-        $installer->run(false);
+        $installer->run(true);
         return true;
     }
 
     #[FixItem('install-vswhere')]
     public function installVSWhere(): bool
     {
-        $installer = new PackageInstaller();
+        $installer = new PackageInstaller(interactive: false);
         $installer->addInstallPackage('vswhere');
-        $installer->run(false);
+        $installer->run(true);
         return true;
     }
 }

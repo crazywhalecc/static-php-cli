@@ -34,9 +34,9 @@ class InstallPackageCommand extends BaseCommand
     public function handle(): int
     {
         ApplicationContext::set('elephant', true);
-        $installer = new PackageInstaller([...$this->input->getOptions(), 'dl-prefer-binary' => true]);
+        $installer = new PackageInstaller([...$this->input->getOptions(), 'dl-prefer-binary' => true], false);
         $installer->addInstallPackage($this->input->getArgument('package'));
-        $installer->run(true, true);
+        $installer->run(true);
         return static::SUCCESS;
     }
 }
