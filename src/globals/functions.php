@@ -132,6 +132,32 @@ function patch_point(): string
     return '';
 }
 
+// Add log filter value(s) to prevent secret leak
+function spc_add_log_filter(array|string $filter): void
+{
+    global $spc_log_filters;
+    if (!is_array($spc_log_filters)) {
+        $spc_log_filters = [];
+    }
+    if (is_string($filter)) {
+        if (!in_array($filter, $spc_log_filters, true)) {
+            $spc_log_filters[] = $filter;
+        }
+    } elseif (is_array($filter)) {
+        $spc_log_filters = array_values(array_unique(array_merge($spc_log_filters, $filter)));
+    }
+}
+
+function spc_write_log(mixed $stream, string $data): false|int
+{
+    // get filter
+    global $spc_log_filters;
+    if (is_array($spc_log_filters)) {
+        $data = str_replace($spc_log_filters, '***', $data);
+    }
+    return fwrite($stream, $data);
+}
+
 function patch_point_interrupt(int $retcode, string $msg = ''): InterruptException
 {
     return new InterruptException(message: $msg, code: $retcode);

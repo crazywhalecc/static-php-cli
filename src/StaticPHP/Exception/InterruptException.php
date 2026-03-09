@@ -7,4 +7,7 @@ namespace StaticPHP\Exception;
 /**
  * Exception caused by manual intervention.
  */
-class InterruptException extends SPCException {}
+class InterruptException extends SPCException
+{
+    protected bool $simple_output = true;
+}

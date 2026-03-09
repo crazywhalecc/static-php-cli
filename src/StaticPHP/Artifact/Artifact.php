@@ -27,8 +27,14 @@ class Artifact
     /** @var null|callable Bind custom source fetcher callback */
     protected mixed $custom_source_callback = null;
 
+    /** @var null|callable Bind custom source check-update callback */
+    protected mixed $custom_source_check_update_callback = null;
+
     /** @var array<string, callable> Bind custom binary fetcher callbacks */
     protected mixed $custom_binary_callbacks = [];
+
+    /** @var array<string, callable> Bind custom binary check-update callbacks */
+    protected array $custom_binary_check_update_callbacks = [];
 
     /** @var null|callable Bind custom source extract callback (completely takes over extraction) */
     protected mixed $source_extract_callback = null;
@@ -405,6 +411,19 @@ class Artifact
         return $this->custom_source_callback ?? null;
     }
 
+    /**
+     * Set custom source check-update callback.
+     */
+    public function setCustomSourceCheckUpdateCallback(callable $callback): void
+    {
+        $this->custom_source_check_update_callback = $callback;
+    }
+
+    public function getCustomSourceCheckUpdateCallback(): ?callable
+    {
+        return $this->custom_source_check_update_callback ?? null;
+    }
+
     public function getCustomBinaryCallback(): ?callable
     {
         $current_platform = SystemTarget::getCurrentPlatformString();
@@ -431,6 +450,24 @@ class Artifact
     {
         ConfigValidator::validatePlatformString($target_os);
         $this->custom_binary_callbacks[$target_os] = $callback;
+    }
+
+    /**
+     * Set custom binary check-update callback for a specific target OS.
+     *
+     * @param string   $target_os Target OS platform string (e.g. linux-x86_64)
+     * @param callable $callback  Custom binary check-update callback
+     */
+    public function setCustomBinaryCheckUpdateCallback(string $target_os, callable $callback): void
+    {
+        ConfigValidator::validatePlatformString($target_os);
+        $this->custom_binary_check_update_callbacks[$target_os] = $callback;
+    }
+
+    public function getCustomBinaryCheckUpdateCallback(): ?callable
+    {
+        $current_platform = SystemTarget::getCurrentPlatformString();
+        return $this->custom_binary_check_update_callbacks[$current_platform] ?? null;
     }
 
     // ==================== Extraction Callbacks ====================

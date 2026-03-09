@@ -10,4 +10,7 @@ namespace StaticPHP\Exception;
  * This exception is used to indicate that the SPC is being used incorrectly.
  * Such as when a command is not supported or an invalid argument is provided.
  */
-class WrongUsageException extends SPCException {}
+class WrongUsageException extends SPCException
+{
+    protected bool $simple_output = true;
+}
