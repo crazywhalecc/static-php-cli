@@ -45,12 +45,20 @@ class DependencyResolver
             }
         }
 
+        // Build a lookup set of explicitly requested packages for the promotion step below.
+        $input_package_set = [];
+        foreach ($packages as $pkg) {
+            $input_package_set[is_string($pkg) ? $pkg : $pkg->getName()] = true;
+        }
+
         // Virtual-target packages (e.g. php-fpm) are built as part of their real parent's
         // build step, so any dependency they declare must be available before the real parent
         // is built. Promote those deps directly onto the real parent's dependency list so
         // that the topological sort places them before the parent.
+        // Only applies to virtual-targets that are in the input request — if a virtual-target
+        // is not being built, its deps must not be injected into the parent.
         foreach ($dep_list_clean as $pkg_name => $pkg_item) {
-            if (PackageConfig::get($pkg_name, 'type') !== 'virtual-target') {
+            if (!isset($input_package_set[$pkg_name]) || PackageConfig::get($pkg_name, 'type') !== 'virtual-target') {
                 continue;
             }
             foreach ($pkg_item['depends'] as $dep_name) {
