@@ -219,7 +219,7 @@ class php extends TargetPackage
         // Mark transitive PHP extension dependencies of static extensions as static too
         if (!empty($static_extensions)) {
             $static_ext_pkgs = array_map(fn ($x) => "ext-{$x}", $static_extensions);
-            $transitive_deps = DependencyResolver::resolve($static_ext_pkgs);
+            $transitive_deps = DependencyResolver::resolve($static_ext_pkgs, include_suggests: (bool) $package->getBuildOption('with-suggests', false));
             foreach ($transitive_deps as $dep_name) {
                 if (!str_starts_with($dep_name, 'ext-') || !PackageLoader::hasPackage($dep_name)) {
                     continue;
