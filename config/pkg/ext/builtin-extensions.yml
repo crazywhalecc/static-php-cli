@@ -70,6 +70,12 @@ ext-gettext:
     - gettext
   php-extension:
     arg-type: with-path
+ext-gmp:
+  type: php-extension
+  depends:
+    - gmp
+  php-extension:
+    arg-type: with-path
 ext-mbregex:
   type: php-extension
   depends:
