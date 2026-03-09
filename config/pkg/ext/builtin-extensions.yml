@@ -36,6 +36,13 @@ ext-dom:
     arg-type@windows: with
 ext-exif:
   type: php-extension
+ext-ffi:
+  type: php-extension
+  depends@unix:
+    - libffi
+  php-extension:
+    arg-type@unix: '--with-ffi=@shared_suffix@ --enable-zend-signals'
+    arg-type@windows: with
 ext-mbregex:
   type: php-extension
   depends:
