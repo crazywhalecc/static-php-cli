@@ -43,6 +43,14 @@ ext-ffi:
   php-extension:
     arg-type@unix: '--with-ffi=@shared_suffix@ --enable-zend-signals'
     arg-type@windows: with
+ext-fileinfo:
+  type: php-extension
+ext-filter:
+  type: php-extension
+ext-ftp:
+  type: php-extension
+  suggests:
+    - ext-openssl
 ext-mbregex:
   type: php-extension
   depends:
