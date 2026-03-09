@@ -34,6 +34,8 @@ ext-dom:
   php-extension:
     arg-type: '--enable-dom@shared_suffix@ --with-libxml=@build_root_path@'
     arg-type@windows: with
+ext-exif:
+  type: php-extension
 ext-mbregex:
   type: php-extension
   depends:
