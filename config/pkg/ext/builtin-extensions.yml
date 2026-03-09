@@ -73,6 +73,8 @@ ext-readline:
     arg-type: '--with-libedit --without-readline'
     build-shared: false
     build-static: true
+ext-sockets:
+  type: php-extension
 ext-xml:
   type: php-extension
   depends:
