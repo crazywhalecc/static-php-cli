@@ -51,6 +51,19 @@ ext-ftp:
   type: php-extension
   suggests:
     - ext-openssl
+ext-gd:
+  type: php-extension
+  depends:
+    - zlib
+    - libpng
+    - ext-zlib
+  suggests:
+    - libavif
+    - libwebp
+    - libjpeg
+    - freetype
+  php-extension:
+    arg-type: custom
 ext-mbregex:
   type: php-extension
   depends:
