@@ -64,6 +64,12 @@ ext-gd:
     - freetype
   php-extension:
     arg-type: custom
+ext-gettext:
+  type: php-extension
+  depends:
+    - gettext
+  php-extension:
+    arg-type: with-path
 ext-mbregex:
   type: php-extension
   depends:
