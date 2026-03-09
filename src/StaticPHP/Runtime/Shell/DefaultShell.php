@@ -25,7 +25,7 @@ class DefaultShell extends Shell
     /**
      * Execute a cURL command to fetch data from a URL.
      */
-    public function executeCurl(string $url, string $method = 'GET', array $headers = [], array $hooks = [], int $retries = 0): false|string
+    public function executeCurl(string $url, string $method = 'GET', array $headers = [], array $hooks = [], int $retries = 0, bool $compressed = false): false|string
     {
         foreach ($hooks as $hook) {
             $hook($method, $url, $headers);
@@ -39,7 +39,8 @@ class DefaultShell extends Shell
         };
         $header_arg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
         $retry_arg = $retries > 0 ? "--retry {$retries}" : '';
-        $cmd = SPC_CURL_EXEC . " -sfSL {$retry_arg} {$method_arg} {$header_arg} {$url_arg}";
+        $compressed_arg = $compressed ? '--compressed' : '';
+        $cmd = SPC_CURL_EXEC . " -sfSL --max-time 3600 {$retry_arg} {$compressed_arg} {$method_arg} {$header_arg} {$url_arg}";
 
         $this->logCommandInfo($cmd);
         $result = $this->passthru($cmd, capture_output: true, throw_on_error: false);
@@ -72,7 +73,7 @@ class DefaultShell extends Shell
         $header_arg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
         $retry_arg = $retries > 0 ? "--retry {$retries}" : '';
         $check = $this->console_putput ? '#' : 's';
-        $cmd = clean_spaces(SPC_CURL_EXEC . " -{$check}fSL {$retry_arg} {$header_arg} -o {$path_arg} {$url_arg}");
+        $cmd = clean_spaces(SPC_CURL_EXEC . " -{$check}fSL --max-time 3600 {$retry_arg} {$header_arg} -o {$path_arg} {$url_arg}");
         $this->logCommandInfo($cmd);
         logger()->debug('[CURL DOWNLOAD] ' . $cmd);
         $this->passthru($cmd, $this->console_putput, capture_output: false, throw_on_error: true);
@@ -93,7 +94,7 @@ class DefaultShell extends Shell
         $path_arg = escapeshellarg($path);
         $shallow_arg = $shallow ? '--depth 1 --single-branch' : '';
         $submodules_arg = ($submodules === null && $shallow) ? '--recursive --shallow-submodules' : ($submodules === null ? '--recursive' : '');
-        $cmd = clean_spaces("{$git} clone --config core.autocrlf=false --branch {$branch_arg} {$shallow_arg} {$submodules_arg} {$url_arg} {$path_arg}");
+        $cmd = clean_spaces("{$git} clone -c http.lowSpeedLimit=1 -c http.lowSpeedTime=3600 --config core.autocrlf=false --branch {$branch_arg} {$shallow_arg} {$submodules_arg} {$url_arg} {$path_arg}");
         $this->logCommandInfo($cmd);
         logger()->debug("[GIT CLONE] {$cmd}");
         $this->passthru($cmd, $this->console_putput);

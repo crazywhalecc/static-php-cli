@@ -3,7 +3,7 @@ gmp:
   artifact:
     source:
       type: filelist
-      url: 'https://gmplib.org/download/gmp/'
+      url: 'https://ftp.gnu.org/gnu/gmp/'
       regex: '/href="(?<file>gmp-(?<version>[^"]+)\.tar\.xz)"/'
     source-mirror:
       type: url
