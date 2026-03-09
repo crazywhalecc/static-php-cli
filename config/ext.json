@@ -255,6 +255,9 @@
             "zlib",
             "openssl",
             "libcares"
+        ],
+        "frameworks": [
+            "CoreFoundation"
         ]
     },
     "iconv": {

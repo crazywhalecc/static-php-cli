@@ -33,6 +33,8 @@ class grpc extends Extension
                 'GRPC_LIBDIR=' . BUILD_LIB_PATH . "\n" . 'LDFLAGS="$LDFLAGS -framework CoreFoundation"'
             );
         }
+        FileSystem::replaceFileStr("{$this->source_dir}/config.m4", "CFLAGS=\"-std=c11 -g -O2\"\n", '');
+        file_put_contents("{$this->source_dir}/php_grpc.h", '#include "src/php/ext/grpc/php_grpc.h"');
         return true;
     }
 
