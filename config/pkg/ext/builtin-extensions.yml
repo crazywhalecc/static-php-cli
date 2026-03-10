@@ -76,6 +76,13 @@ ext-gmp:
     - gmp
   php-extension:
     arg-type: with-path
+ext-iconv:
+  type: php-extension
+  depends@unix:
+    - libiconv
+  php-extension:
+    arg-type@unix: with-path
+    arg-type@windows: with
 ext-mbregex:
   type: php-extension
   depends:
