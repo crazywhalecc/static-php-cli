@@ -122,6 +122,8 @@ ext-readline:
     arg-type: '--with-libedit --without-readline'
     build-shared: false
     build-static: true
+ext-session:
+  type: php-extension
 ext-sockets:
   type: php-extension
 ext-xml:
