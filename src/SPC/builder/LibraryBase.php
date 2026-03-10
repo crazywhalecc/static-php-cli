@@ -381,7 +381,10 @@ abstract class LibraryBase
                     return false;
                 }
             }
-            return true; // allow using system dependencies if pkg_config_path is explicitly defined
+            // allow using system dependencies if pkg_config_path is explicitly defined
+            if (count($search_paths) > 1) {
+                return true;
+            }
         }
         foreach (Config::getLib(static::NAME, 'static-libs', []) as $name) {
             if (!file_exists(BUILD_LIB_PATH . "/{$name}")) {
