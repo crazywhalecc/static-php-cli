@@ -87,6 +87,16 @@ ext-intl:
   type: php-extension
   depends@unix:
     - icu
+ext-ldap:
+  type: php-extension
+  depends:
+    - ldap
+  suggests:
+    - gmp
+    - libsodium
+    - ext-openssl
+  php-extension:
+    arg-type: with-path
 ext-mbregex:
   type: php-extension
   depends:
