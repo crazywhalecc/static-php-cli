@@ -74,7 +74,11 @@ abstract class UnixUtil
             throw new SPCInternalException("The symbol file {$symbol_file} does not exist, please check if nm command is available.");
         }
         // https://github.com/ziglang/zig/issues/24662
-        if (SystemTarget::getTargetOS() !== 'Linux' || ApplicationContext::get(ToolchainInterface::class) instanceof ZigToolchain) {
+        $toolchain = ApplicationContext::get(ToolchainInterface::class);
+        if ($toolchain instanceof ZigToolchain) {
+            return '-Wl,--export-dynamic'; // needs release 0.16, can be removed then
+        }
+        if (SystemTarget::getTargetOS() !== 'Linux') {
             return "-Wl,-exported_symbols_list,{$symbol_file}";
         }
         return "-Wl,--dynamic-list={$symbol_file}";

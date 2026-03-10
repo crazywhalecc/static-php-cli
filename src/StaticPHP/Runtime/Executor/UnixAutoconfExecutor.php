@@ -20,8 +20,6 @@ class UnixAutoconfExecutor extends Executor
 
     protected array $configure_args = [];
 
-    protected array $ignore_args = [];
-
     protected PackageInstaller $installer;
 
     public function __construct(protected LibraryPackage $package, ?PackageInstaller $installer = null)
@@ -40,6 +38,8 @@ class UnixAutoconfExecutor extends Executor
         if (!$this->package->hasStage('build')) {
             throw new SPCInternalException("Package {$this->package->getName()} does not have a build stage defined.");
         }
+
+        $this->configure_args = $this->getDefaultConfigureArgs();
     }
 
     /**
@@ -48,16 +48,10 @@ class UnixAutoconfExecutor extends Executor
     public function configure(...$args): static
     {
         // remove all the ignored args
-        $args = array_merge($args, $this->getDefaultConfigureArgs(), $this->configure_args);
-        $args = array_diff($args, $this->ignore_args);
+        $args = array_merge($args, $this->configure_args);
         $configure_args = implode(' ', $args);
         InteractiveTerm::setMessage('Building package: ' . ConsoleColor::yellow($this->package->getName()) . ' (./configure)');
         return $this->seekLogFileOnException(fn () => $this->shell->exec("./configure {$configure_args}"));
-    }
-
-    public function getConfigureArgsString(): string
-    {
-        return implode(' ', array_merge($this->getDefaultConfigureArgs(), $this->configure_args));
     }
 
     /**
@@ -134,7 +128,7 @@ class UnixAutoconfExecutor extends Executor
      */
     public function removeConfigureArgs(...$args): static
     {
-        $this->ignore_args = [...$this->ignore_args, ...$args];
+        $this->configure_args = array_diff($this->configure_args, $args);
         return $this;
     }
 
