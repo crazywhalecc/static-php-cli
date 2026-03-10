@@ -252,12 +252,10 @@
         "arg-type-unix": "enable-path",
         "cpp-extension": true,
         "lib-depends": [
+            "grpc",
             "zlib",
             "openssl",
             "libcares"
-        ],
-        "frameworks": [
-            "CoreFoundation"
         ]
     },
     "iconv": {
