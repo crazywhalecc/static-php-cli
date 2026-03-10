@@ -97,6 +97,14 @@ ext-ldap:
     - ext-openssl
   php-extension:
     arg-type: with-path
+ext-libxml:
+  type: php-extension
+  depends:
+    - ext-xml
+  php-extension:
+    build-with-php: true
+    build-shared: false
+    arg-type: none
 ext-mbregex:
   type: php-extension
   depends:
