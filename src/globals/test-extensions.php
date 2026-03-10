@@ -16,15 +16,15 @@ $test_php_version = [
     // '8.1',
     // '8.2',
     // '8.3',
-    // '8.4',
+    '8.4',
     '8.5',
     // 'git',
 ];
 
 // test os (macos-15-intel, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    // 'macos-15-intel', // bin/spc for x86_64
-    // 'macos-15', // bin/spc for arm64
+    'macos-15-intel', // bin/spc for x86_64
+    'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
     'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     'ubuntu-24.04', // bin/spc for x86_64
@@ -35,7 +35,7 @@ $test_os = [
 ];
 
 // whether enable thread safe
-$zts = true;
+$zts = false;
 
 $no_strip = false;
 
@@ -50,7 +50,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'pgsql',
+    'Linux', 'Darwin' => 'grpc',
     'Windows' => 'com_dotnet',
 };
 
