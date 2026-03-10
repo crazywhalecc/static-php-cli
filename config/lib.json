@@ -862,6 +862,9 @@
     },
     "openssl": {
         "source": "openssl",
+        "pkg-configs": [
+            "openssl"
+        ],
         "static-libs-unix": [
             "libssl.a",
             "libcrypto.a"
@@ -974,6 +977,11 @@
     },
     "unixodbc": {
         "source": "unixodbc",
+        "pkg-configs": [
+            "odbc",
+            "odbccr",
+            "odbcinst"
+        ],
         "static-libs-unix": [
             "libodbc.a",
             "libodbccr.a",
@@ -1015,6 +1023,9 @@
     },
     "zlib": {
         "source": "zlib",
+        "pkg-configs": [
+            "zlib"
+        ],
         "static-libs-unix": [
             "libz.a"
         ],
@@ -1028,6 +1039,9 @@
     },
     "zstd": {
         "source": "zstd",
+        "pkg-configs": [
+            "libzstd"
+        ],
         "static-libs-unix": [
             "libzstd.a"
         ],
