@@ -83,6 +83,10 @@ ext-iconv:
   php-extension:
     arg-type@unix: with-path
     arg-type@windows: with
+ext-intl:
+  type: php-extension
+  depends@unix:
+    - icu
 ext-mbregex:
   type: php-extension
   depends:
