@@ -91,8 +91,8 @@ trait frankenphp
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
                 '-X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\' ' .
+                '-X \'github.com/caddyserver/caddy/v2.CustomBinaryName=frankenphp\' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
-                '-X \'github.com/caddyserver/caddy/v2.CustomBinaryName=frankenphp ' .
                 "v{$frankenphp_version} PHP {$libphp_version} Caddy'\\\" " .
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$no_brotli}{$no_watcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
