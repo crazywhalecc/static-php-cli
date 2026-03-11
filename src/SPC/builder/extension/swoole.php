@@ -50,19 +50,16 @@ class swoole extends Extension
 
         // commonly used feature: coroutine-time
         $arg .= ' --enable-swoole-coro-time --with-pic';
+        $arg .= ' --enable-swoole-ssh --enable-swoole-curl';
 
         $arg .= $this->builder->getOption('enable-zts') ? ' --enable-swoole-thread --disable-thread-context' : ' --disable-swoole-thread --enable-thread-context';
-
-        // required features: curl, openssl (but curl hook is buggy for php 8.0)
-        $arg .= $this->builder->getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
-        $arg .= ' --enable-openssl';
 
         // additional features that only require libraries
         $arg .= $this->builder->getLib('libcares') ? ' --enable-cares' : '';
         $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : '';
         $arg .= $this->builder->getLib('nghttp2') ? (' --with-nghttp2-dir=' . BUILD_ROOT_PATH) : '';
         $arg .= $this->builder->getLib('zstd') ? ' --enable-zstd' : '';
-        $arg .= $this->builder->getLib('liburing') ? ' --enable-iouring' : '';
+        $arg .= $this->builder->getLib('liburing') ? ' --enable-iouring --enable-uring-socket' : '';
         $arg .= $this->builder->getExt('sockets') ? ' --enable-sockets' : '';
 
         // enable additional features that require the pdo extension, but conflict with pdo_* extensions
@@ -74,6 +71,7 @@ class swoole extends Extension
             $config = (new SPCConfigUtil($this->builder))->getLibraryConfig($this->builder->getLib('unixodbc'));
             $arg .= ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH . ' SWOOLE_ODBC_LIBS="' . $config['libs'] . '"';
         }
+        $arg .= $this->builder->getExt('ftp')?->isBuildStatic() ? ' --disable-swoole-ftp' : ' --enable-swoole-ftp';
 
         if ($this->getExtVersion() >= '6.1.0') {
             $arg .= ' --enable-swoole-stdext';
