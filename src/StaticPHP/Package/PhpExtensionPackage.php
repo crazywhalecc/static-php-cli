@@ -94,7 +94,7 @@ class PhpExtensionPackage extends Package
             'enable-path' => $shared ? "--enable-{$name}=shared,{$escapedPath}" : "--enable-{$name}={$escapedPath}",
             'with' => $shared ? "--with-{$name}=shared" : "--with-{$name}",
             'with-path' => $shared ? "--with-{$name}=shared,{$escapedPath}" : "--with-{$name}={$escapedPath}",
-            'custom' => '',
+            'custom', 'none' => '',
             default => $arg_type,
         };
         // customize argument from config string

@@ -76,6 +76,35 @@ ext-gmp:
     - gmp
   php-extension:
     arg-type: with-path
+ext-iconv:
+  type: php-extension
+  depends@unix:
+    - libiconv
+  php-extension:
+    arg-type@unix: with-path
+    arg-type@windows: with
+ext-intl:
+  type: php-extension
+  depends@unix:
+    - icu
+ext-ldap:
+  type: php-extension
+  depends:
+    - ldap
+  suggests:
+    - gmp
+    - libsodium
+    - ext-openssl
+  php-extension:
+    arg-type: with-path
+ext-libxml:
+  type: php-extension
+  depends:
+    - ext-xml
+  php-extension:
+    build-with-php: true
+    build-shared: false
+    arg-type: none
 ext-mbregex:
   type: php-extension
   depends:
@@ -115,6 +144,8 @@ ext-readline:
     arg-type: '--with-libedit --without-readline'
     build-shared: false
     build-static: true
+ext-session:
+  type: php-extension
 ext-sockets:
   type: php-extension
 ext-xml:

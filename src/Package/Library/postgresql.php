@@ -119,8 +119,7 @@ class postgresql extends LibraryPackage
 
         // remove dynamic libs
         shell()->cd($this->getSourceDir() . '/build')
-            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so.*")
-            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so")
+            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so*")
             ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.dylib");
 
         FileSystem::replaceFileStr("{$this->getLibDir()}/pkgconfig/libpq.pc", '-lldap', '-lldap -llber');
