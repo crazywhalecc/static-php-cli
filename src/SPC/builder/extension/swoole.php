@@ -50,7 +50,7 @@ class swoole extends Extension
 
         // commonly used feature: coroutine-time
         $arg .= ' --enable-swoole-coro-time --with-pic';
-        $arg .= ' --enable-swoole-ftp --enable-swoole-ssh --enable-swoole-curl';
+        $arg .= ' --enable-swoole-ssh --enable-swoole-curl';
 
         $arg .= $this->builder->getOption('enable-zts') ? ' --enable-swoole-thread --disable-thread-context' : ' --disable-swoole-thread --enable-thread-context';
 
@@ -71,6 +71,7 @@ class swoole extends Extension
             $config = (new SPCConfigUtil($this->builder))->getLibraryConfig($this->builder->getLib('unixodbc'));
             $arg .= ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH . ' SWOOLE_ODBC_LIBS="' . $config['libs'] . '"';
         }
+        $arg .= $this->builder->getExt('ftp') ? ' --disable-swoole-ftp' : ' --enable-swoole-ftp';
 
         if ($this->getExtVersion() >= '6.1.0') {
             $arg .= ' --enable-swoole-stdext';
