@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SPC\builder\unix\library;
 
 use SPC\exception\WrongUsageException;
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixAutoconfExecutor;
 
 trait unixodbc
@@ -31,6 +32,12 @@ trait unixodbc
             )
             ->make();
         $this->patchPkgconfPrefix(['odbc.pc', 'odbccr.pc', 'odbcinst.pc']);
+        foreach (['odbc.pc', 'odbccr.pc', 'odbcinst.pc'] as $file) {
+            FileSystem::replaceFileStr(
+                BUILD_LIB_PATH . "/pkgconfig/{$file}.pc",
+                '$(top_build_prefix)libltdl/libltdlc.la',
+                '');
+        }
         $this->patchLaDependencyPrefix();
     }
 }
