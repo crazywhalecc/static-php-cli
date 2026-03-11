@@ -216,13 +216,20 @@ class php extends TargetPackage
             }
         }
 
-        // Mark transitive PHP extension dependencies of static extensions as static too
-        if (!empty($static_extensions)) {
-            $static_ext_pkgs = array_map(fn ($x) => "ext-{$x}", $static_extensions);
-            $transitive_deps = DependencyResolver::resolve($static_ext_pkgs, include_suggests: (bool) $package->getBuildOption('with-suggests', false));
+        // Mark transitive PHP extension dependencies of static/shared extensions as static too.
+        // For static extensions: their ext deps must also be static.
+        // For shared extensions: their ext deps that are not themselves shared must be compiled
+        // into the static PHP build so their headers and symbols are available when linking the .so.
+        $all_input_ext_pkgs = array_map(fn ($x) => "ext-{$x}", array_values(array_unique([...$static_extensions, ...$shared_extensions])));
+        if (!empty($all_input_ext_pkgs)) {
+            $transitive_deps = DependencyResolver::resolve($all_input_ext_pkgs, include_suggests: (bool) $package->getBuildOption('with-suggests', false));
             foreach ($transitive_deps as $dep_name) {
                 if (!str_starts_with($dep_name, 'ext-') || !PackageLoader::hasPackage($dep_name)) {
                     continue;
+                }
+                $dep_extname = substr($dep_name, 4);
+                if (in_array($dep_extname, $shared_extensions)) {
+                    continue; // already designated as shared
                 }
                 $dep_instance = PackageLoader::getPackage($dep_name);
                 if (!$dep_instance instanceof PhpExtensionPackage || $dep_instance->isBuildStatic() || $dep_instance->isBuildShared()) {
