@@ -37,7 +37,8 @@ trait unixodbc
             FileSystem::replaceFileStr(
                 BUILD_LIB_PATH . "/pkgconfig/{$file}",
                 '$(top_build_prefix)libltdl/libltdlc.la',
-                '');
+                ''
+            );
         }
         $this->patchLaDependencyPrefix();
     }
