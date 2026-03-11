@@ -71,7 +71,7 @@ class swoole extends Extension
             $config = (new SPCConfigUtil($this->builder))->getLibraryConfig($this->builder->getLib('unixodbc'));
             $arg .= ' --with-swoole-odbc=unixODBC,' . BUILD_ROOT_PATH . ' SWOOLE_ODBC_LIBS="' . $config['libs'] . '"';
         }
-        $arg .= $this->builder->getExt('ftp') ? ' --disable-swoole-ftp' : ' --enable-swoole-ftp';
+        $arg .= $this->builder->getExt('ftp')?->isBuildStatic() ? ' --disable-swoole-ftp' : ' --enable-swoole-ftp';
 
         if ($this->getExtVersion() >= '6.1.0') {
             $arg .= ' --enable-swoole-stdext';
