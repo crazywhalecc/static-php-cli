@@ -119,6 +119,21 @@ ext-mbstring:
   type: php-extension
   php-extension:
     arg-type: custom
+ext-mysqli:
+  type: php-extension
+  depends:
+    - ext-mysqlnd
+  php-extension:
+    arg-type: with
+    build-with-php: true
+ext-mysqlnd:
+  type: php-extension
+  depends:
+    - zlib
+  php-extension:
+    arg-type@unix: enable
+    arg-type@windows: with
+    build-with-php: true
 ext-openssl:
   type: php-extension
   depends:
