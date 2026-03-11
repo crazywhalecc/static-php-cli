@@ -50,7 +50,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'grpc',
+    'Linux', 'Darwin' => 'pdo_odbc',
     'Windows' => 'com_dotnet',
 };
 

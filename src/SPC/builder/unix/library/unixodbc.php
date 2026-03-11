@@ -31,10 +31,11 @@ trait unixodbc
                 '--enable-gui=no',
             )
             ->make();
-        $this->patchPkgconfPrefix(['odbc.pc', 'odbccr.pc', 'odbcinst.pc']);
-        foreach (['odbc.pc', 'odbccr.pc', 'odbcinst.pc'] as $file) {
+        $pkgConfigs = ['odbc.pc', 'odbccr.pc', 'odbcinst.pc'];
+        $this->patchPkgconfPrefix($pkgConfigs);
+        foreach ($pkgConfigs as $file) {
             FileSystem::replaceFileStr(
-                BUILD_LIB_PATH . "/pkgconfig/{$file}.pc",
+                BUILD_LIB_PATH . "/pkgconfig/{$file}",
                 '$(top_build_prefix)libltdl/libltdlc.la',
                 '');
         }
