@@ -209,9 +209,6 @@ class SourcePatcher
             $patch_dir = $tmp_dir;
         }
         $php_package = PackageLoader::getTargetPackage('php');
-        if (!file_exists("{$php_package->getSourceDir()}/sapi/micro/php_micro.c")) {
-            return false;
-        }
         $ver_file = "{$php_package->getSourceDir()}/main/php_version.h";
         if (!file_exists($ver_file)) {
             throw new PatchException('php-src patcher (original micro patches)', 'Patch failed, cannot find php source files');
