@@ -144,6 +144,14 @@ ext-openssl:
     arg-type: custom
     arg-type@windows: with
     build-with-php: true
+ext-password-argon2:
+  type: php-extension
+  depends:
+    - libargon2
+    - ext-openssl
+  php-extension:
+    arg-type: custom
+    display-name: ''
 ext-phar:
   type: php-extension
   depends:
