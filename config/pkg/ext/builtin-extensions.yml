@@ -214,6 +214,8 @@ ext-phar:
   type: php-extension
   depends:
     - zlib
+ext-posix:
+  type: php-extension
 ext-readline:
   type: php-extension
   depends:
