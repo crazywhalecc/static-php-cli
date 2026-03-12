@@ -1,0 +1,15 @@
+ext-sqlsrv:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: sqlsrv
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends@linux:
+    - unixodbc
+    - ext-pcntl
+  depends@macos:
+    - unixodbc
+  lang: cpp
