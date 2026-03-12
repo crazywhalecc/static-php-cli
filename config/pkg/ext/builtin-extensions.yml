@@ -187,6 +187,21 @@ ext-pdo_odbc:
     - ext-odbc
   php-extension:
     arg-type: custom
+ext-pdo_pgsql:
+  type: php-extension
+  depends@unix:
+    - ext-pdo
+    - ext-pgsql
+    - postgresql
+  php-extension:
+    arg-type@unix: with-path
+    arg-type@windows: '--with-pdo-pgsql=yes'
+ext-pgsql:
+  type: php-extension
+  depends@unix:
+    - postgresql
+  php-extension:
+    arg-type: custom
 ext-phar:
   type: php-extension
   depends:
