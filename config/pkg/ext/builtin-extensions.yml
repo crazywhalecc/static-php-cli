@@ -165,6 +165,28 @@ ext-password-argon2:
   php-extension:
     arg-type: custom
     display-name: ''
+ext-pcntl:
+  type: php-extension
+ext-pdo:
+  type: php-extension
+ext-pdo_mysql:
+  type: php-extension
+  depends:
+    - ext-pdo
+    - ext-mysqlnd
+  php-extension:
+    arg-type: with
+ext-pdo_odbc:
+  type: php-extension
+  depends:
+    - ext-pdo
+    - ext-odbc
+  depends@unix:
+    - unixodbc
+    - ext-pdo
+    - ext-odbc
+  php-extension:
+    arg-type: custom
 ext-phar:
   type: php-extension
   depends:
