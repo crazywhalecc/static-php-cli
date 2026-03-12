@@ -134,6 +134,12 @@ ext-mysqlnd:
     arg-type@unix: enable
     arg-type@windows: with
     build-with-php: true
+ext-odbc:
+  type: php-extension
+  depends@unix:
+    - unixodbc
+  php-extension:
+    arg-type@unix: '--with-unixODBC@shared_path_suffix@'
 ext-openssl:
   type: php-extension
   depends:
