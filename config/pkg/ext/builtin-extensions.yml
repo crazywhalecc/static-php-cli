@@ -196,6 +196,14 @@ ext-pdo_pgsql:
   php-extension:
     arg-type@unix: with-path
     arg-type@windows: '--with-pdo-pgsql=yes'
+ext-pdo_sqlite:
+  type: php-extension
+  depends:
+    - ext-pdo
+    - ext-sqlite3
+    - sqlite
+  php-extension:
+    arg-type: with
 ext-pgsql:
   type: php-extension
   depends@unix:
@@ -221,6 +229,14 @@ ext-session:
   type: php-extension
 ext-sockets:
   type: php-extension
+ext-sqlite3:
+  type: php-extension
+  depends:
+    - sqlite
+  php-extension:
+    arg-type@unix: with-path
+    arg-type@windows: with
+    build-with-php: true
 ext-xml:
   type: php-extension
   depends:
