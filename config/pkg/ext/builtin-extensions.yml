@@ -134,6 +134,19 @@ ext-mysqlnd:
     arg-type@unix: enable
     arg-type@windows: with
     build-with-php: true
+ext-odbc:
+  type: php-extension
+  depends@unix:
+    - unixodbc
+  php-extension:
+    arg-type@unix: '--with-unixODBC@shared_path_suffix@'
+ext-opcache:
+  type: php-extension
+  php-extension:
+    arg-type@unix: custom
+    arg-type@windows: enable
+    zend-extension: true
+    display-name: 'Zend Opcache'
 ext-openssl:
   type: php-extension
   depends:
