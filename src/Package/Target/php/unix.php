@@ -161,6 +161,25 @@ trait unix
         shell()->cd(SOURCE_PATH . '/php-src')->exec('sed -i "s|//lib|/lib|g" Makefile');
     }
 
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch info.c to hide configure command in release builds')]
+    public function patchInfoCForRelease(): void
+    {
+        if (str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), '-release')) {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef CONFIGURE_COMMAND',
+                '#ifdef NO_CONFIGURE_COMMAND',
+            );
+        } else {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef NO_CONFIGURE_COMMAND',
+                '#ifdef CONFIGURE_COMMAND',
+            );
+        }
+    }
+
     #[Stage]
     public function makeForUnix(TargetPackage $package, PackageInstaller $installer): void
     {
