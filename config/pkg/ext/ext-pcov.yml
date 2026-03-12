@@ -1,0 +1,12 @@
+ext-pcov:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: pcov
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  php-extension:
+    build-static: false
+    build-shared: true
