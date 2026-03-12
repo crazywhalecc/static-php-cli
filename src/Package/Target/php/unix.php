@@ -32,10 +32,14 @@ use ZM\Logger\ConsoleColor;
 trait unix
 {
     #[BeforeStage('php', [self::class, 'buildconfForUnix'], 'php')]
+    #[PatchDescription('Patch SPC_MICRO_PATCHES defined patches (e.g. cli_checks, disable_huge_page)')]
     #[PatchDescription('Patch configure.ac for musl and musl-toolchain')]
     #[PatchDescription('Let php m4 tools use static pkg-config')]
     public function patchBeforeBuildconf(TargetPackage $package): void
     {
+        // php-src patches from micro (reads SPC_MICRO_PATCHES env var)
+        SourcePatcher::patchPhpSrc();
+
         // patch configure.ac for musl and musl-toolchain
         $musl = SystemTarget::getTargetOS() === 'Linux' && SystemTarget::getLibc() === 'musl';
         FileSystem::backupFile(SOURCE_PATH . '/php-src/configure.ac');
@@ -47,6 +51,7 @@ trait unix
 
         // let php m4 tools use static pkg-config
         FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+
         // also patch extension config.m4 files (they call PKG_CHECK_MODULES directly, not via php.m4)
         foreach (glob("{$package->getSourceDir()}/ext/*/*.m4") as $m4file) {
             FileSystem::replaceFileStr($m4file, 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
