@@ -4,7 +4,7 @@ import sidebarZh from "./sidebar.zh";
 
 // https://vitepress.dev/reference/site-config
 export default {
-  title: "Static PHP",
+  title: "StaticPHP",
   description: "Build single static PHP binary, with PHP project together, with popular extensions included.",
   locales: {
     en: {
