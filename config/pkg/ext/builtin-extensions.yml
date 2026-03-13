@@ -229,6 +229,10 @@ ext-readline:
     build-static: true
 ext-session:
   type: php-extension
+ext-shmop:
+  type: php-extension
+  php-extension:
+    build-with-php: true
 ext-sockets:
   type: php-extension
 ext-sqlite3:
