@@ -7,7 +7,6 @@ namespace Package\Artifact;
 use Package\Target\php;
 use StaticPHP\Attribute\Artifact\AfterSourceExtract;
 use StaticPHP\Attribute\PatchDescription;
-use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SourcePatcher;
 
@@ -50,16 +49,6 @@ class php_src
             file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32.bak', file_get_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32'));
             file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32', $origin);
         }
-    }
-
-    #[AfterSourceExtract('php-src')]
-    #[PatchDescription('Patch FFI extension on CentOS 7 with -O3 optimization (strncmp issue)')]
-    public function patchFfiCentos7FixO3strncmp(): void
-    {
-        spc_skip_if(!($ver = SystemTarget::getLibcVersion()) || version_compare($ver, '2.17', '>'));
-        $ver_id = php::getPHPVersionID(return_null_if_failed: true);
-        spc_skip_if($ver_id === null || $ver_id < 80316);
-        SourcePatcher::patchFile('ffi_centos7_fix_O3_strncmp.patch', SOURCE_PATH . '/php-src');
     }
 
     #[AfterSourceExtract('php-src')]

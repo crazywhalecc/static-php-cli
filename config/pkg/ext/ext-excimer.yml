@@ -1,0 +1,9 @@
+ext-excimer:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: excimer
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01

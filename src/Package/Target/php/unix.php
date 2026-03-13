@@ -32,10 +32,14 @@ use ZM\Logger\ConsoleColor;
 trait unix
 {
     #[BeforeStage('php', [self::class, 'buildconfForUnix'], 'php')]
+    #[PatchDescription('Patch SPC_MICRO_PATCHES defined patches (e.g. cli_checks, disable_huge_page)')]
     #[PatchDescription('Patch configure.ac for musl and musl-toolchain')]
     #[PatchDescription('Let php m4 tools use static pkg-config')]
     public function patchBeforeBuildconf(TargetPackage $package): void
     {
+        // php-src patches from micro (reads SPC_MICRO_PATCHES env var)
+        SourcePatcher::patchPhpSrc();
+
         // patch configure.ac for musl and musl-toolchain
         $musl = SystemTarget::getTargetOS() === 'Linux' && SystemTarget::getLibc() === 'musl';
         FileSystem::backupFile(SOURCE_PATH . '/php-src/configure.ac');
@@ -47,6 +51,11 @@ trait unix
 
         // let php m4 tools use static pkg-config
         FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+
+        // also patch extension config.m4 files (they call PKG_CHECK_MODULES directly, not via php.m4)
+        foreach (glob("{$package->getSourceDir()}/ext/*/*.m4") as $m4file) {
+            FileSystem::replaceFileStr($m4file, 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+        }
     }
 
     #[Stage]
@@ -108,11 +117,15 @@ trait unix
 
         $static_extension_str = $this->makeStaticExtensionString($installer);
 
+        // reuse the same make vars so configure conftest links use the same LIBS (incl. -framework flags)
+        $vars = $this->makeVars($installer);
+
         // run ./configure with args
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd($package->getSourceDir())->setEnv([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => "-I{$package->getIncludeDir()}",
             'LDFLAGS' => "-L{$package->getLibDir()} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
+            'LIBS' => $vars['EXTRA_LIBS'] ?? '',
         ])->exec("{$cmd} {$args} {$static_extension_str}"), $package->getSourceDir());
     }
 
@@ -146,6 +159,25 @@ trait unix
 
         // replace //lib with /lib in Makefile
         shell()->cd(SOURCE_PATH . '/php-src')->exec('sed -i "s|//lib|/lib|g" Makefile');
+    }
+
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch info.c to hide configure command in release builds')]
+    public function patchInfoCForRelease(): void
+    {
+        if (str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), '-release')) {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef CONFIGURE_COMMAND',
+                '#ifdef NO_CONFIGURE_COMMAND',
+            );
+        } else {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef NO_CONFIGURE_COMMAND',
+                '#ifdef CONFIGURE_COMMAND',
+            );
+        }
     }
 
     #[Stage]
@@ -435,7 +467,27 @@ trait unix
         $package->runStage([$this, 'makeForUnix']);
 
         $package->runStage([$this, 'unixBuildSharedExt']);
-        $package->runStage([$this, 'smokeTestForUnix']);
+    }
+
+    #[Stage('postInstall')]
+    public function postInstall(TargetPackage $package, PackageInstaller $installer): void
+    {
+        if ($package->getName() === 'frankenphp') {
+            $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
+            return;
+        }
+        if ($package->getName() !== 'php') {
+            return;
+        }
+        if (SystemTarget::isUnix()) {
+            if ($installer->interactive) {
+                InteractiveTerm::indicateProgress('Running PHP smoke tests');
+            }
+            $package->runStage([$this, 'smokeTestForUnix']);
+            if ($installer->interactive) {
+                InteractiveTerm::finish('PHP smoke tests passed');
+            }
+        }
     }
 
     /**

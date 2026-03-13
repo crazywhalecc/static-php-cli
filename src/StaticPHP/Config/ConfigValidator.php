@@ -16,6 +16,7 @@ class ConfigValidator
     public const array PACKAGE_FIELD_TYPES = [
         // package fields
         'type' => ConfigType::STRING,
+        'description' => ConfigType::STRING,
         'depends' => ConfigType::LIST_ARRAY, // @
         'suggests' => ConfigType::LIST_ARRAY, // @
         'artifact' => [self::class, 'validateArtifactField'], // STRING or OBJECT
@@ -43,6 +44,7 @@ class ConfigValidator
 
     public const array PACKAGE_FIELDS = [
         'type' => true,
+        'description' => false,
         'depends' => false, // @
         'suggests' => false, // @
         'artifact' => false,

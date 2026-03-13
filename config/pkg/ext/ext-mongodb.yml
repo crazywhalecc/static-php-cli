@@ -1,0 +1,21 @@
+ext-mongodb:
+  type: php-extension
+  artifact:
+    source:
+      type: ghrel
+      repo: mongodb/mongo-php-driver
+      match: mongodb.+\.tgz
+      extract: php-src/ext/mongodb
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  suggests:
+    - icu
+    - openssl
+    - zstd
+    - zlib
+  frameworks:
+    - CoreFoundation
+    - Security
+  php-extension:
+    arg-type: custom

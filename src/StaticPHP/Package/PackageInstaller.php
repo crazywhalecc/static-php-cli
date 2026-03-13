@@ -46,7 +46,7 @@ class PackageInstaller
     /** @var null|BuildRootTracker buildroot file tracker for debugging purpose */
     protected ?BuildRootTracker $tracker = null;
 
-    public function __construct(protected array $options = [])
+    public function __construct(protected array $options = [], public readonly bool $interactive = true)
     {
         ApplicationContext::set(PackageInstaller::class, $this);
         $builder = new PackageBuilder($options);
@@ -143,7 +143,7 @@ class PackageInstaller
     /**
      * Run the package installation process.
      */
-    public function run(bool $interactive = true, bool $disable_delay_msg = false): void
+    public function run(bool $disable_delay_msg = false): void
     {
         // apply build toolchain envs
         GlobalEnvManager::afterInit();
@@ -153,7 +153,7 @@ class PackageInstaller
             $this->resolvePackages();
         }
 
-        if ($interactive && !$disable_delay_msg) {
+        if ($this->interactive && !$disable_delay_msg) {
             // show install or build options in terminal with beautiful output
             $this->printInstallerInfo();
 
@@ -167,14 +167,17 @@ class PackageInstaller
         // check download
         if ($this->download) {
             $downloaderOptions = DownloaderOptions::extractFromConsoleOptions($this->options, 'dl');
-            $downloader = new ArtifactDownloader([...$downloaderOptions, 'source-only' => implode(',', array_map(fn ($x) => $x->getName(), $this->build_packages))]);
-            $downloader->addArtifacts($this->getArtifacts())->download($interactive);
+            $downloader = new ArtifactDownloader(
+                [...$downloaderOptions, 'source-only' => implode(',', array_map(fn ($x) => $x->getName(), $this->build_packages))],
+                $this->interactive
+            );
+            $downloader->addArtifacts($this->getArtifacts())->download();
         } else {
             logger()->notice('Skipping download (--no-download option enabled)');
         }
 
         // extract sources
-        $this->extractSourceArtifacts(interactive: $interactive);
+        $this->extractSourceArtifacts();
 
         // validate packages
         foreach ($this->packages as $package) {
@@ -183,7 +186,7 @@ class PackageInstaller
         }
 
         // build/install packages
-        if ($interactive) {
+        if ($this->interactive) {
             InteractiveTerm::notice('Building/Installing packages ...');
             keyboard_interrupt_register(function () {
                 InteractiveTerm::finish('Build/Install process interrupted by user!', false);
@@ -198,7 +201,7 @@ class PackageInstaller
             $has_source = $package->hasSource();
             if (!$is_to_build && $should_use_binary) {
                 // install binary
-                if ($interactive) {
+                if ($this->interactive) {
                     InteractiveTerm::indicateProgress('Installing package: ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
@@ -210,17 +213,17 @@ class PackageInstaller
                 } catch (\Throwable $e) {
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
-                    if ($interactive) {
+                    if ($this->interactive) {
                         InteractiveTerm::finish('Installing binary package failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
                     }
                     throw $e;
                 }
-                if ($interactive) {
+                if ($this->interactive) {
                     InteractiveTerm::finish('Installed binary package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_INSTALLED ? ' (already installed, skipped)' : ''));
                 }
             } elseif ($is_to_build && $has_build_stage || $has_source && $has_build_stage) {
-                if ($interactive) {
+                if ($this->interactive) {
                     InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
@@ -243,22 +246,20 @@ class PackageInstaller
                 } catch (\Throwable $e) {
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
-                    if ($interactive) {
+                    if ($this->interactive) {
                         InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
                     }
                     throw $e;
                 }
-                if ($interactive) {
+                if ($this->interactive) {
                     InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
                 }
             }
         }
 
-        $this->dumpLicenseFiles($this->packages);
-        if ($interactive) {
-            InteractiveTerm::success('Exported package licenses', true);
-        }
+        // perform after-install actions and emit post-install events
+        $this->emitPostInstallEvents();
     }
 
     public function isBuildPackage(Package|string $package): bool
@@ -309,6 +310,17 @@ class PackageInstaller
             return $artifact->isBinaryExtracted();
         }
         return false;
+    }
+
+    public function emitPostInstallEvents(): void
+    {
+        foreach ($this->packages as $package) {
+            if ($package->hasStage('postInstall')) {
+                $package->runStage('postInstall');
+            }
+        }
+
+        $this->dumpLicenseFiles($this->packages);
     }
 
     /**
@@ -368,7 +380,7 @@ class PackageInstaller
     /**
      * Extract all artifacts for resolved packages.
      */
-    public function extractSourceArtifacts(bool $interactive = true): void
+    public function extractSourceArtifacts(): void
     {
         FileSystem::createDir(SOURCE_PATH);
         $packages = array_values($this->packages);
@@ -403,7 +415,7 @@ class PackageInstaller
         }
 
         // Extract each artifact
-        if ($interactive) {
+        if ($this->interactive) {
             InteractiveTerm::notice('Extracting source for ' . count($artifacts) . ' artifacts: ' . implode(',', array_map(fn ($x) => ConsoleColor::yellow($x->getName()), $artifacts)) . ' ...');
             InteractiveTerm::indicateProgress('Extracting artifacts');
         }
@@ -411,7 +423,7 @@ class PackageInstaller
         try {
             V2CompatLayer::beforeExtsExtractHook();
             foreach ($artifacts as $artifact) {
-                if ($interactive) {
+                if ($this->interactive) {
                     InteractiveTerm::setMessage('Extracting source: ' . ConsoleColor::green($artifact->getName()));
                 }
                 if (($pkg = array_search($artifact->getName(), $pkg_artifact_map, true)) !== false) {
@@ -423,12 +435,12 @@ class PackageInstaller
                 }
             }
             V2CompatLayer::afterExtsExtractHook();
-            if ($interactive) {
+            if ($this->interactive) {
                 InteractiveTerm::finish('Extracted all sources successfully.');
                 echo PHP_EOL;
             }
         } catch (\Throwable $e) {
-            if ($interactive) {
+            if ($this->interactive) {
                 InteractiveTerm::finish('Artifact extraction failed!', false);
                 echo PHP_EOL;
             }
@@ -525,6 +537,9 @@ class PackageInstaller
             }
         }
         $dumper->dump(BUILD_ROOT_PATH . '/license');
+        if ($this->interactive) {
+            InteractiveTerm::success('Exported package licenses', true);
+        }
     }
 
     /**

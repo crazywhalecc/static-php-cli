@@ -1,0 +1,13 @@
+ext-ev:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: ev
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - ext-sockets
+  php-extension:
+    arg-type@windows: with
