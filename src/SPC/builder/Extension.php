@@ -456,7 +456,7 @@ class Extension
         // process *.so file
         $soFile = BUILD_MODULES_PATH . '/' . $this->getName() . '.so';
         $soDest = $soFile;
-        preg_match('/-release\s+(\S*)/', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $matches);
+        preg_match('/-release\s+(\S*)/', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '', $matches);
         if (!empty($matches[1])) {
             $soDest = str_replace('.so', '-' . $matches[1] . '.so', $soFile);
         }
@@ -551,7 +551,7 @@ class Extension
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
             'LDFLAGS' => $config['ldflags'],
-            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
+            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '',
             'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
