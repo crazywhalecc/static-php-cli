@@ -233,6 +233,14 @@ ext-shmop:
   type: php-extension
   php-extension:
     build-with-php: true
+ext-simplexml:
+  type: php-extension
+  depends:
+    - ext-xml
+  php-extension:
+    arg-type@unix: '--enable-simplexml@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@windows: with
+    build-with-php: true
 ext-sockets:
   type: php-extension
 ext-sqlite3:
