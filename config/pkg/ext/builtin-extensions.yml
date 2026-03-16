@@ -241,6 +241,12 @@ ext-simplexml:
     arg-type@unix: '--enable-simplexml@shared_suffix@ --with-libxml=@build_root_path@'
     arg-type@windows: with
     build-with-php: true
+ext-snmp:
+  type: php-extension
+  depends:
+    - net-snmp
+  php-extension:
+    arg-type: with
 ext-sockets:
   type: php-extension
 ext-sqlite3:
