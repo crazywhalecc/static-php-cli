@@ -247,6 +247,15 @@ ext-snmp:
     - net-snmp
   php-extension:
     arg-type: with
+ext-soap:
+  type: php-extension
+  depends:
+    - ext-xml
+    - ext-session
+  php-extension:
+    arg-type@unix: '--enable-soap@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@windows: with
+    build-with-php: true
 ext-sockets:
   type: php-extension
 ext-sqlite3:
