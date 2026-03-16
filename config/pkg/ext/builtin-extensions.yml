@@ -258,6 +258,12 @@ ext-soap:
     build-with-php: true
 ext-sockets:
   type: php-extension
+ext-sodium:
+  type: php-extension
+  depends:
+    - libsodium
+  php-extension:
+    arg-type: with
 ext-sqlite3:
   type: php-extension
   depends:
