@@ -181,12 +181,6 @@ jobs:
           ALL_EXTS="$STATIC_EXTS"
           if [ -n "$SHARED_EXTS" ]; then
             ALL_EXTS="$ALL_EXTS,$SHARED_EXTS"
-            case "${{ inputs.os }}" in
-              linux-x86_64|linux-aarch64)
-                echo "Shared extensions (e.g. xdebug) require glibc/macOS targets. Use linux-*-glibc or macos-*."
-                exit 1
-                ;;
-            esac
           fi
           if [ "$BUILD_FRANKENPHP" = "true" ] && [ "$ENABLE_ZTS" != "true" ]; then
             echo "FrankenPHP build requires ZTS. Set enable-zts=true."
