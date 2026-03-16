@@ -766,6 +766,7 @@ trait unix
 
         return array_filter([
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
+            'EXTRA_CXXFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') . "{$config['ldflags']} {$static} {$pie}",
             'EXTRA_LDFLAGS' => $config['ldflags'],
             'EXTRA_LIBS' => $libs,
