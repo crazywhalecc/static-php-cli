@@ -327,6 +327,15 @@ ext-xmlwriter:
   php-extension:
     arg-type: '--enable-xmlwriter@shared_suffix@ --with-libxml=@build_root_path@'
     build-with-php: true
+ext-xsl:
+  type: php-extension
+  depends:
+    - libxslt
+    - ext-xml
+    - ext-dom
+  php-extension:
+    arg-type: with-path
+    build-with-php: true
 ext-zlib:
   type: php-extension
   depends:
