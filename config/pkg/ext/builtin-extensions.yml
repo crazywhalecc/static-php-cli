@@ -272,6 +272,23 @@ ext-sqlite3:
     arg-type@unix: with-path
     arg-type@windows: with
     build-with-php: true
+ext-sysvmsg:
+  type: php-extension
+  php-extension:
+    support:
+      Windows: 'no'
+      BSD: wip
+ext-sysvsem:
+  type: php-extension
+  php-extension:
+    support:
+      Windows: 'no'
+      BSD: wip
+ext-sysvshm:
+  type: php-extension
+  php-extension:
+    support:
+      BSD: wip
 ext-xml:
   type: php-extension
   depends:
