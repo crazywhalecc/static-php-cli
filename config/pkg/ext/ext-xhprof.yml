@@ -1,0 +1,18 @@
+ext-xhprof:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: xhprof
+      extract: php-src/ext/xhprof-src
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  depends:
+    - ext-ctype
+  php-extension:
+    support:
+      Windows: wip
+      BSD: wip
+    arg-type: enable
+    build-with-php: true
