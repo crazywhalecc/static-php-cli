@@ -313,6 +313,20 @@ ext-xml:
     arg-type: '--enable-xml@shared_suffix@ --with-libxml=@build_root_path@'
     arg-type@windows: with
     build-with-php: true
+ext-xmlreader:
+  type: php-extension
+  depends:
+    - libxml2
+  php-extension:
+    arg-type: '--enable-xmlreader@shared_suffix@ --with-libxml=@build_root_path@'
+    build-with-php: true
+ext-xmlwriter:
+  type: php-extension
+  depends:
+    - libxml2
+  php-extension:
+    arg-type: '--enable-xmlwriter@shared_suffix@ --with-libxml=@build_root_path@'
+    build-with-php: true
 ext-zlib:
   type: php-extension
   depends:
