@@ -54,7 +54,7 @@ class PECL implements DownloadTypeInterface, CheckUpdateInterface
         $versions = [];
         logger()->debug('Matched ' . count($matches['version']) . " releases for {$name} from PECL");
         foreach ($matches['version'] as $i => $version) {
-            if ($matches['state'][$i] !== 'stable') {
+            if ($matches['state'][$i] !== 'stable' && ($config['prefer-stable'] ?? true) === true) {
                 continue;
             }
             $versions[$version] = $peclName . '-' . $version . '.tgz';
