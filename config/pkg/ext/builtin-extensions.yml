@@ -298,6 +298,10 @@ ext-tidy:
       Windows: wip
       BSD: wip
     arg-type: with-path
+ext-tokenizer:
+  type: php-extension
+  php-extension:
+    build-with-php: true
 ext-xml:
   type: php-extension
   depends:
