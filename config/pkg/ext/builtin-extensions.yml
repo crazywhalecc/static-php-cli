@@ -289,6 +289,15 @@ ext-sysvshm:
   php-extension:
     support:
       BSD: wip
+ext-tidy:
+  type: php-extension
+  depends:
+    - tidy
+  php-extension:
+    support:
+      Windows: wip
+      BSD: wip
+    arg-type: with-path
 ext-xml:
   type: php-extension
   depends:
