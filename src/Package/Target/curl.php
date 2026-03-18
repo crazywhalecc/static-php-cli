@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Package\Library;
+namespace Package\Target;
 
 use StaticPHP\Attribute\Package\BuildFor;
-use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Attribute\Package\PatchBeforeBuild;
+use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 
-#[Library('curl')]
+#[Target('curl')]
 class curl
 {
     #[PatchBeforeBuild]
@@ -48,7 +48,7 @@ class curl
             ->optionalPackage('idn2', ...cmake_boolean_args('CURL_USE_IDN2'))
             ->optionalPackage('libcares', '-DENABLE_ARES=ON')
             ->addConfigureArgs(
-                '-DBUILD_CURL_EXE=OFF',
+                '-DBUILD_CURL_EXE=ON',
                 '-DBUILD_LIBCURL_DOCS=OFF',
             )
             ->build();
@@ -63,5 +63,7 @@ class curl
         }
         shell()->cd("{$lib->getLibDir()}/cmake/CURL/")
             ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"{$lib->getLibDir()}/libcurl.a\"|g' CURLTargets-release.cmake");
+
+        $lib->setOutput('Static curl executable path', BUILD_BIN_PATH . '/curl');
     }
 }
