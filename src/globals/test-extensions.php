@@ -50,7 +50,7 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'grpc',
+    'Linux', 'Darwin' => 'imagick',
     'Windows' => 'com_dotnet',
 };
 
@@ -62,7 +62,7 @@ $shared_extensions = match (PHP_OS_FAMILY) {
 };
 
 // If you want to test lib-suggests for all extensions and libraries, set it to true.
-$with_suggested_libs = false;
+$with_suggested_libs = true;
 
 // If you want to test extra libs for extensions, add them below (comma separated, example `libwebp,libavif`). Unnecessary, when $with_suggested_libs is true.
 $with_libs = match (PHP_OS_FAMILY) {
