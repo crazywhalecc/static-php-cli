@@ -1,0 +1,10 @@
+htop:
+  type: target
+  artifact:
+    source:
+      type: ghrel
+      repo: htop-dev/htop
+      match: htop.+\.tar\.xz
+      prefer-stable: true
+  depends:
+    - ncursesw
