@@ -325,7 +325,6 @@ jobs:
           name: php-shared-ext-${{ inputs.php-version }}-${{ inputs.os }}
           path: |
             buildroot/modules/*.so
-            buildroot/modules/*.dylib
       - uses: actions/upload-artifact@v4
         name: "Upload License Files"
         with:
