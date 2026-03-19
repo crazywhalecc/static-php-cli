@@ -182,10 +182,6 @@ jobs:
           if [ -n "$SHARED_EXTS" ]; then
             ALL_EXTS="$ALL_EXTS,$SHARED_EXTS"
           fi
-          if [ "$BUILD_FRANKENPHP" = "true" ] && [ "$ENABLE_ZTS" != "true" ]; then
-            echo "FrankenPHP build requires ZTS. Set enable-zts=true."
-            exit 1
-          fi
           DOWN_CMD="$DOWN_CMD --with-php=${{ inputs.php-version }} --for-extensions=$ALL_EXTS --ignore-cache-sources=php-src"
           BUILD_CMD="$BUILD_CMD $STATIC_EXTS"
           if [ -n "$SHARED_EXTS" ]; then
