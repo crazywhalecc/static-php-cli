@@ -15,3 +15,7 @@ brotli:
     - libbrotlicommon
     - libbrotlidec
     - libbrotlienc
+  static-libs@windows:
+    - brotlicommon.lib
+    - brotlidec.lib
+    - brotlienc.lib
