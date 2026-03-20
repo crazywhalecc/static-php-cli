@@ -11,7 +11,10 @@ trait libde265
     protected function build(): void
     {
         UnixCMakeExecutor::create($this)
-            ->addConfigureArgs('-DENABLE_SDL=OFF')
+            ->addConfigureArgs(
+                '-DENABLE_SDL=OFF',
+                '-DENABLE_DECODER=OFF'
+            )
             ->build();
         $this->patchPkgconfPrefix(['libde265.pc']);
     }
