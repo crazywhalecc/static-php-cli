@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    // '8.1',
+    '8.1',
     // '8.2',
     // '8.3',
     '8.4',
@@ -23,19 +23,19 @@ $test_php_version = [
 
 // test os (macos-15-intel, macos-15, ubuntu-latest, windows-latest are available)
 $test_os = [
-    'macos-15-intel', // bin/spc for x86_64
-    'macos-15', // bin/spc for arm64
+    // 'macos-15-intel', // bin/spc for x86_64
+    // 'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
-    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
-    'ubuntu-24.04', // bin/spc for x86_64
-    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
-    'ubuntu-24.04-arm', // bin/spc for arm64
+    // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    // 'ubuntu-24.04', // bin/spc for x86_64
+    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    // 'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-2022', // .\bin\spc.ps1
-    // 'windows-2025',
+    'windows-2025',
 ];
 
 // whether enable thread safe
-$zts = false;
+$zts = true;
 
 $no_strip = false;
 
@@ -50,8 +50,8 @@ $prefer_pre_built = false;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'imagick',
-    'Windows' => 'com_dotnet',
+    'Linux', 'Darwin' => 'pgsql',
+    'Windows' => 'gd,zlib,mbstring,filter',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
@@ -89,7 +89,7 @@ function _getCombination(string $type = 'common'): string
         'common' => 'bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,' .
             'mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,' .
             'sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip',
-        'bulk' => 'apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,ftp,gd,gmp,iconv,imagick,' .
+        'bulk' => 'apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,ftp,gd,gmp,iconv,imagick,imap,' .
             'intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,' .
             'posix,protobuf,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,swoole,sysvmsg,sysvsem,' .
             'sysvshm,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib',
