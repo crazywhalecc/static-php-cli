@@ -29,6 +29,9 @@ on:
         description: Extensions to build (comma separated)
         required: true
         type: string
+      shared-extensions:
+        description: Shared extensions to build (optional, comma separated)
+        type: string
       extra-libs:
         description: Extra libraries to build (optional, comma separated)
         type: string
@@ -42,6 +45,14 @@ on:
       build-fpm:
         description: Build fpm binary
         type: boolean
+      build-frankenphp:
+        description: Build frankenphp binary (requires ZTS)
+        type: boolean
+        default: false
+      enable-zts:
+        description: Enable ZTS
+        type: boolean
+        default: false
       prefer-pre-built:
         description: Prefer pre-built binaries (reduce build time)
         type: boolean
@@ -73,6 +84,9 @@ on:
         description: Extensions to build (comma separated)
         required: true
         type: string
+      shared-extensions:
+        description: Shared extensions to build (optional, comma separated)
+        type: string
       extra-libs:
         description: Extra libraries to build (optional, comma separated)
         type: string
@@ -86,6 +100,14 @@ on:
       build-fpm:
         description: Build fpm binary
         type: boolean
+      build-frankenphp:
+        description: Build frankenphp binary (requires ZTS)
+        type: boolean
+        default: false
+      enable-zts:
+        description: Enable ZTS
+        type: boolean
+        default: false
       prefer-pre-built:
         description: Prefer pre-built binaries (reduce build time)
         type: boolean
@@ -152,8 +174,19 @@ jobs:
               RUNS_ON="macos-15"
               ;;
           esac
-          DOWN_CMD="$DOWN_CMD --with-php=${{ inputs.php-version }} --for-extensions=${{ inputs.extensions }} --ignore-cache-sources=php-src"
-          BUILD_CMD="$BUILD_CMD ${{ inputs.extensions }}"
+          STATIC_EXTS="${{ inputs.extensions }}"
+          SHARED_EXTS="${{ inputs['shared-extensions'] }}"
+          BUILD_FRANKENPHP="${{ inputs['build-frankenphp'] }}"
+          ENABLE_ZTS="${{ inputs['enable-zts'] }}"
+          ALL_EXTS="$STATIC_EXTS"
+          if [ -n "$SHARED_EXTS" ]; then
+            ALL_EXTS="$ALL_EXTS,$SHARED_EXTS"
+          fi
+          DOWN_CMD="$DOWN_CMD --with-php=${{ inputs.php-version }} --for-extensions=$ALL_EXTS --ignore-cache-sources=php-src"
+          BUILD_CMD="$BUILD_CMD $STATIC_EXTS"
+          if [ -n "$SHARED_EXTS" ]; then
+            BUILD_CMD="$BUILD_CMD --build-shared=$SHARED_EXTS"
+          fi
           if [ -n "${{ inputs.extra-libs }}" ]; then
             DOWN_CMD="$DOWN_CMD --for-libs=${{ inputs.extra-libs }}"
             BUILD_CMD="$BUILD_CMD --with-libs=${{ inputs.extra-libs }}"
@@ -177,6 +210,12 @@ jobs:
           if [ ${{ inputs.build-fpm }} == true ]; then
               BUILD_CMD="$BUILD_CMD --build-fpm"
           fi
+          if [ "$BUILD_FRANKENPHP" = "true" ]; then
+              BUILD_CMD="$BUILD_CMD --build-frankenphp"
+          fi
+          if [ "$ENABLE_ZTS" = "true" ]; then
+              BUILD_CMD="$BUILD_CMD --enable-zts"
+          fi
           echo 'download='"$DOWN_CMD" >> "$GITHUB_OUTPUT"
           echo 'build='"$BUILD_CMD" >> "$GITHUB_OUTPUT"
           echo 'run='"$RUNS_ON" >> "$GITHUB_OUTPUT"
@@ -198,6 +237,27 @@ jobs:
           ini-values: memory_limit=-1
         env:
           phpts: nts
+
+      - if: ${{ inputs['build-frankenphp'] == true }}
+        name: "Install go-xcaddy for FrankenPHP"
+        run: |
+          case "${{ inputs.os }}" in
+            linux-x86_64|linux-aarch64)
+              ./bin/spc-alpine-docker install-pkg go-xcaddy
+              ;;
+            linux-x86_64-glibc|linux-aarch64-glibc)
+              ./bin/spc-gnu-docker install-pkg go-xcaddy
+              ;;
+            macos-x86_64|macos-aarch64)
+              composer update --no-dev --classmap-authoritative
+              ./bin/spc doctor --auto-fix
+              ./bin/spc install-pkg go-xcaddy
+              ;;
+            *)
+              echo "Unsupported OS for go-xcaddy install: ${{ inputs.os }}"
+              exit 1
+              ;;
+          esac
 
       # Cache downloaded source
       - id: cache-download
@@ -245,7 +305,22 @@ jobs:
           name: php-fpm-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/php-fpm
 
+      # Upload frankenphp executable
+      - if: ${{ inputs['build-frankenphp'] == true }}
+        name: "Upload FrankenPHP SAPI"
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-frankenphp-${{ inputs.php-version }}-${{ inputs.os }}
+          path: buildroot/bin/frankenphp
+
       # Upload extensions metadata
+      - if: ${{ inputs['shared-extensions'] != '' }}
+        name: "Upload shared extensions"
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-shared-ext-${{ inputs.php-version }}-${{ inputs.os }}
+          path: |
+            buildroot/modules/*.so
       - uses: actions/upload-artifact@v4
         name: "Upload License Files"
         with:
