@@ -7,6 +7,7 @@ namespace StaticPHP\Doctor\Item;
 use StaticPHP\Attribute\Doctor\CheckItem;
 use StaticPHP\Attribute\Doctor\FixItem;
 use StaticPHP\Doctor\CheckResult;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\System\MacOSUtil;
 
 class MacOSToolCheck
@@ -56,6 +57,20 @@ class MacOSToolCheck
             return CheckResult::fail('missing system commands: ' . implode(', ', $missing), 'build-tools', ['missing' => $missing]);
         }
         return CheckResult::ok();
+    }
+
+    #[CheckItem('if homebrew llvm are installed', limit_os: 'Darwin')]
+    public function checkBrewLLVM(): ?CheckResult
+    {
+        if (getenv('SPC_USE_LLVM') === 'brew') {
+            $homebrew_prefix = getenv('HOMEBREW_PREFIX') ?: (SystemTarget::getTargetArch() === 'aarch64' ? '/opt/homebrew' : '/usr/local/homebrew');
+
+            if (($path = MacOSUtil::findCommand('clang', ["{$homebrew_prefix}/opt/llvm/bin"])) === null) {
+                return CheckResult::fail('Homebrew llvm is not installed', 'build-tools', ['missing' => ['llvm']]);
+            }
+            return CheckResult::ok($path);
+        }
+        return null;
     }
 
     #[CheckItem('if bison version is 3.0 or later', limit_os: 'Darwin')]

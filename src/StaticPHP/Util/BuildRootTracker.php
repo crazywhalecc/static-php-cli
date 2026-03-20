@@ -15,7 +15,7 @@ class BuildRootTracker
     /** @var array<string, array{package: string, type: string, files: array<string>}> Tracking data */
     protected array $tracking_data = [];
 
-    protected static string $tracker_file = BUILD_ROOT_PATH . '/.spc-tracker.json';
+    protected static string $tracker_file = BUILD_ROOT_PATH . '/.build.json';
 
     protected ?DirDiff $current_diff = null;
 

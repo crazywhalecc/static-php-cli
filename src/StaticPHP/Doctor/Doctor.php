@@ -9,6 +9,7 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCException;
 use StaticPHP\Registry\DoctorLoader;
 use StaticPHP\Runtime\Shell\Shell;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Output\OutputInterface;
 use ZM\Logger\ConsoleColor;
@@ -17,7 +18,7 @@ use function Laravel\Prompts\confirm;
 
 readonly class Doctor
 {
-    public function __construct(private ?OutputInterface $output = null, private int $auto_fix = FIX_POLICY_PROMPT)
+    public function __construct(private ?OutputInterface $output = null, private int $auto_fix = FIX_POLICY_PROMPT, public readonly bool $interactive = true)
     {
         // debug shows all loaded doctor items
         $items = DoctorLoader::getDoctorItems();
@@ -26,16 +27,39 @@ readonly class Doctor
     }
 
     /**
+     * Returns true if doctor was previously passed with the current SPC version.
+     */
+    public static function isHealthy(): bool
+    {
+        $lock = self::getLockPath();
+        return file_exists($lock) && trim((string) @file_get_contents($lock)) === \StaticPHP\ConsoleApplication::VERSION;
+    }
+
+    /**
+     * Write current SPC version to the lock file, marking doctor as passed.
+     */
+    public static function markPassed(): void
+    {
+        $primary = self::getLockPath();
+        if (!is_dir(dirname($primary))) {
+            @mkdir(dirname($primary), 0755, true);
+        }
+        if (@file_put_contents($primary, \StaticPHP\ConsoleApplication::VERSION) === false) {
+            @file_put_contents((getcwd() ?: '.') . DIRECTORY_SEPARATOR . '.spc-doctor.lock', \StaticPHP\ConsoleApplication::VERSION);
+        }
+    }
+
+    /**
      * Check all valid check items.
      * @return bool true if all checks passed, false otherwise
      */
-    public function checkAll(bool $interactive = true): bool
+    public function checkAll(): bool
     {
-        if ($interactive) {
+        if ($this->interactive) {
             InteractiveTerm::notice('Starting doctor checks ...');
         }
         foreach ($this->getValidCheckList() as $check) {
-            if (!$this->checkItem($check, $interactive)) {
+            if (!$this->checkItem($check)) {
                 return false;
             }
         }
@@ -48,7 +72,7 @@ readonly class Doctor
      * @param  CheckItem|string $check The check item to be checked
      * @return bool             True if the check passed or was fixed, false otherwise
      */
-    public function checkItem(CheckItem|string $check, bool $interactive = true): bool
+    public function checkItem(CheckItem|string $check): bool
     {
         if (is_string($check)) {
             $found = null;
@@ -64,7 +88,7 @@ readonly class Doctor
             }
             $check = $found;
         }
-        $prepend = $interactive ? '  - ' : '';
+        $prepend = $this->interactive ? '  - ' : '';
         $this->output?->write("{$prepend}Checking <comment>{$check->item_name}</comment> ... ");
 
         // call check
@@ -117,6 +141,30 @@ readonly class Doctor
         }
         InteractiveTerm::finish('Failed to apply fix!', false);
         return false;
+    }
+
+    private static function getLockPath(): string
+    {
+        if (SystemTarget::getTargetOS() === 'Windows') {
+            $trial_ls = [
+                getenv('LOCALAPPDATA') ?: ((getenv('USERPROFILE') ?: 'C:\Users\Default') . '\AppData\Local') . '\.spc-doctor.lock',
+                sys_get_temp_dir() . '\.spc-doctor.lock',
+                WORKING_DIR . '\.spc-doctor.lock',
+            ];
+        } else {
+            $trial_ls = [
+                getenv('XDG_CACHE_HOME') ?: ((getenv('HOME') ?: '/tmp') . '/.cache') . '/.spc-doctor.lock',
+                sys_get_temp_dir() . '/.spc-doctor.lock',
+                WORKING_DIR . '/.spc-doctor.lock',
+            ];
+        }
+        foreach ($trial_ls as $path) {
+            if (is_writable(dirname($path))) {
+                return $path;
+            }
+        }
+        // fallback to current directory
+        return WORKING_DIR . DIRECTORY_SEPARATOR . '.spc-doctor.lock';
     }
 
     private function emitFix(string $fix_item, array $fix_item_params = []): bool

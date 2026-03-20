@@ -9,6 +9,8 @@ use StaticPHP\Attribute\Package\AfterStage;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\PatchDescription;
+use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SourcePatcher;
 
 #[Extension('phar')]
@@ -25,5 +27,25 @@ class phar
     public function afterMicroUnixBuild(): void
     {
         SourcePatcher::unpatchMicroPhar();
+    }
+
+    #[BeforeStage('ext-phar', 'build')]
+    public function beforeBuildShared(PhpExtensionPackage $pkg): void
+    {
+        FileSystem::replaceFileStr(
+            "{$pkg->getSourceDir()}/config.m4",
+            ['$ext_dir/phar.1', '$ext_dir/phar.phar.1'],
+            ['${ext_dir}phar.1', '${ext_dir}phar.phar.1']
+        );
+    }
+
+    #[AfterStage('ext-phar', 'build')]
+    public function afterBuildShared(PhpExtensionPackage $pkg): void
+    {
+        FileSystem::replaceFileStr(
+            "{$pkg->getSourceDir()}/config.m4",
+            ['${ext_dir}phar.1', '${ext_dir}phar.phar.1'],
+            ['$ext_dir/phar.1', '$ext_dir/phar.phar.1']
+        );
     }
 }

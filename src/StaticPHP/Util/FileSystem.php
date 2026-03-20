@@ -481,7 +481,7 @@ class FileSystem
     public static function fullpath(string $path, string $relative_path_base): string
     {
         if (FileSystem::isRelativePath($path)) {
-            $path = $relative_path_base . DIRECTORY_SEPARATOR . $path;
+            $path = rtrim($relative_path_base, '/') . DIRECTORY_SEPARATOR . $path;
         }
         if (!file_exists($path)) {
             throw new FileSystemException("Path does not exist: {$path}");

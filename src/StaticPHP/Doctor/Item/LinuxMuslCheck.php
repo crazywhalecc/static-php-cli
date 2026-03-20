@@ -59,8 +59,8 @@ class LinuxMuslCheck
     #[FixItem('fix-musl-wrapper')]
     public function fixMusl(): bool
     {
-        $downloader = new ArtifactDownloader();
-        $downloader->add('musl-wrapper')->download(false);
+        $downloader = new ArtifactDownloader(interactive: false);
+        $downloader->add('musl-wrapper')->download();
         $extractor = new ArtifactExtractor(ApplicationContext::get(ArtifactCache::class));
         $extractor->extract('musl-wrapper');
 
@@ -96,9 +96,9 @@ class LinuxMuslCheck
         Shell::passthruCallback(function () {
             InteractiveTerm::advance();
         });
-        $downloader = new ArtifactDownloader();
+        $downloader = new ArtifactDownloader(interactive: false);
         $extractor = new ArtifactExtractor(ApplicationContext::get(ArtifactCache::class));
-        $downloader->add('musl-toolchain')->download(false);
+        $downloader->add('musl-toolchain')->download();
         $extractor->extract('musl-toolchain');
         $pkg_root = PKG_ROOT_PATH . '/musl-toolchain';
         f_passthru("{$prefix}cp -rf {$pkg_root}/* /usr/local/musl");

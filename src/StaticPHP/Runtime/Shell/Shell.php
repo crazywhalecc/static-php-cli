@@ -114,22 +114,22 @@ abstract class Shell
         if (!$this->enable_log_file) {
             return;
         }
-        // write executed command to log file using fwrite
+        // write executed command to log file using spc_write_log
         $log_file = fopen(SPC_SHELL_LOG, 'a');
-        fwrite($log_file, "\n>>>>>>>>>>>>>>>>>>>>>>>>>> [" . date('Y-m-d H:i:s') . "]\n");
-        fwrite($log_file, "> Executing command: {$cmd}\n");
+        spc_write_log($log_file, "\n>>>>>>>>>>>>>>>>>>>>>>>>>> [" . date('Y-m-d H:i:s') . "]\n");
+        spc_write_log($log_file, "> Executing command: {$cmd}\n");
         // get the backtrace to find the file and line number
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         if (isset($backtrace[1]['file'], $backtrace[1]['line'])) {
             $file = $backtrace[1]['file'];
             $line = $backtrace[1]['line'];
-            fwrite($log_file, "> Called from: {$file} at line {$line}\n");
+            spc_write_log($log_file, "> Called from: {$file} at line {$line}\n");
         }
-        fwrite($log_file, "> Environment variables: {$this->getEnvString()}\n");
+        spc_write_log($log_file, "> Environment variables: {$this->getEnvString()}\n");
         if ($this->cd !== null) {
-            fwrite($log_file, "> Working dir: {$this->cd}\n");
+            spc_write_log($log_file, "> Working dir: {$this->cd}\n");
         }
-        fwrite($log_file, "\n");
+        spc_write_log($log_file, "\n");
     }
 
     /**
@@ -154,7 +154,7 @@ abstract class Shell
     ): array {
         $file_res = null;
         if ($this->enable_log_file) {
-            // write executed command to the log file using fwrite
+            // write executed command to the log file using spc_write_log
             $file_res = fopen(SPC_SHELL_LOG, 'a');
         }
         if ($console_output) {
@@ -194,10 +194,10 @@ abstract class Shell
                     foreach ([$pipes[1], $pipes[2]] as $pipe) {
                         while (($chunk = fread($pipe, 8192)) !== false && $chunk !== '') {
                             if ($console_output) {
-                                fwrite($console_res, $chunk);
+                                spc_write_log($console_res, $chunk);
                             }
                             if ($file_res !== null) {
-                                fwrite($file_res, $chunk);
+                                spc_write_log($file_res, $chunk);
                             }
                             if ($capture_output) {
                                 $output_value .= $chunk;
@@ -207,7 +207,7 @@ abstract class Shell
                     // check exit code
                     if ($throw_on_error && $status['exitcode'] !== 0) {
                         if ($file_res !== null) {
-                            fwrite($file_res, "Command exited with non-zero code: {$status['exitcode']}\n");
+                            spc_write_log($file_res, "Command exited with non-zero code: {$status['exitcode']}\n");
                         }
                         throw new ExecutionException(
                             cmd: $original_command ?? $cmd,
@@ -238,10 +238,10 @@ abstract class Shell
                     foreach ($read as $pipe) {
                         while (($chunk = fread($pipe, 8192)) !== false && $chunk !== '') {
                             if ($console_output) {
-                                fwrite($console_res, $chunk);
+                                spc_write_log($console_res, $chunk);
                             }
                             if ($file_res !== null) {
-                                fwrite($file_res, $chunk);
+                                spc_write_log($file_res, $chunk);
                             }
                             if ($capture_output) {
                                 $output_value .= $chunk;

@@ -18,7 +18,9 @@ class ArtifactCache
      *         filename?: string,
      *         dirname?: string,
      *         extract: null|'&custom'|string,
-     *         hash: null|string
+     *         hash: null|string,
+     *         time: int,
+     *         downloader: null|string
      *     },
      *     binary: array{
      *         windows-x86_64?: null|array{
@@ -28,7 +30,9 @@ class ArtifactCache
      *             dirname?: string,
      *             extract: null|'&custom'|string,
      *             hash: null|string,
-     *             version?: null|string
+     *             time: int,
+     *             version?: null|string,
+     *             downloader: null|string
      *         }
      *     }
      * }>
@@ -106,8 +110,10 @@ class ArtifactCache
                 'filename' => $download_result->filename,
                 'extract' => $download_result->extract,
                 'hash' => sha1_file(DOWNLOAD_PATH . '/' . $download_result->filename),
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         } elseif ($download_result->cache_type === 'file') {
             $obj = [
@@ -116,8 +122,10 @@ class ArtifactCache
                 'filename' => $download_result->filename,
                 'extract' => $download_result->extract,
                 'hash' => sha1_file(DOWNLOAD_PATH . '/' . $download_result->filename),
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         } elseif ($download_result->cache_type === 'git') {
             $obj = [
@@ -126,8 +134,10 @@ class ArtifactCache
                 'dirname' => $download_result->dirname,
                 'extract' => $download_result->extract,
                 'hash' => trim(exec('cd ' . escapeshellarg(DOWNLOAD_PATH . '/' . $download_result->dirname) . ' && ' . SPC_GIT_EXEC . ' rev-parse HEAD')),
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         } elseif ($download_result->cache_type === 'local') {
             $obj = [
@@ -136,8 +146,10 @@ class ArtifactCache
                 'dirname' => $download_result->dirname,
                 'extract' => $download_result->extract,
                 'hash' => null,
+                'time' => time(),
                 'version' => $download_result->version,
                 'config' => $download_result->config,
+                'downloader' => $download_result->downloader,
             ];
         }
         if ($obj === null) {
@@ -157,7 +169,7 @@ class ArtifactCache
             throw new SPCInternalException("Invalid lock type '{$lock_type}' for artifact {$artifact_name}");
         }
         // save cache to file
-        file_put_contents($this->cache_file, json_encode($this->cache, JSON_PRETTY_PRINT));
+        file_put_contents($this->cache_file, json_encode($this->cache, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -189,6 +201,17 @@ class ArtifactCache
     public function getBinaryInfo(string $artifact_name, string $platform): ?array
     {
         return $this->cache[$artifact_name]['binary'][$platform] ?? null;
+    }
+
+    /**
+     * Get all binary cache entries for an artifact, keyed by platform string.
+     *
+     * @param  string               $artifact_name Artifact name
+     * @return array<string, array> Map of platform → cache info (may be empty)
+     */
+    public function getAllBinaryInfo(string $artifact_name): array
+    {
+        return $this->cache[$artifact_name]['binary'] ?? [];
     }
 
     /**
@@ -271,11 +294,21 @@ class ArtifactCache
     }
 
     /**
+     * Get the names of all artifacts that have at least one downloaded entry (source or binary).
+     *
+     * @return array<string> Artifact names
+     */
+    public function getCachedArtifactNames(): array
+    {
+        return array_keys($this->cache);
+    }
+
+    /**
      * Save cache to file.
      */
     public function save(): void
     {
-        file_put_contents($this->cache_file, json_encode($this->cache, JSON_PRETTY_PRINT));
+        file_put_contents($this->cache_file, json_encode($this->cache, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     private function isObjectDownloaded(?array $object, bool $compare_hash = false): bool

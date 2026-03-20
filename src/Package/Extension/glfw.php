@@ -6,7 +6,6 @@ namespace Package\Extension;
 
 use Package\Target\php;
 use StaticPHP\Attribute\Package\BeforeStage;
-use StaticPHP\Attribute\Package\CustomPhpConfigureArg;
 use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\PhpExtensionPackage;
@@ -48,12 +47,5 @@ class glfw extends PhpExtensionPackage
             $extra_ldflags .= ' -L/usr/lib/' . SystemTarget::getTargetArch() . '-linux-gnu ';
             putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS=' . $extra_ldflags);
         }
-    }
-
-    #[CustomPhpConfigureArg('Darwin')]
-    #[CustomPhpConfigureArg('Linux')]
-    public function getUnixConfigureArg(bool $shared = false): string
-    {
-        return '--enable-glfw --with-glfw-dir=' . BUILD_ROOT_PATH;
     }
 }

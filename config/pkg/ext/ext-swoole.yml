@@ -1,0 +1,72 @@
+ext-swoole:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: swoole/swoole-src
+      extract: php-src/ext/swoole
+      match: v6\.+
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  depends:
+    - libcares
+    - brotli
+    - nghttp2
+    - zlib
+    - ext-openssl
+    - ext-curl
+  suggests:
+    - zstd
+    - ext-sockets
+    - ext-swoole-hook-pgsql
+    - ext-swoole-hook-mysql
+    - ext-swoole-hook-sqlite
+    - ext-swoole-hook-odbc
+  suggests@linux:
+    - zstd
+    - liburing
+    - ext-sockets
+    - ext-swoole-hook-pgsql
+    - ext-swoole-hook-mysql
+    - ext-swoole-hook-sqlite
+    - ext-swoole-hook-odbc
+  lang: cpp
+  php-extension:
+    arg-type: custom
+ext-swoole-hook-mysql:
+  type: php-extension
+  depends:
+    - ext-mysqlnd
+    - ext-pdo
+    - ext-pdo_mysql
+  suggests:
+    - ext-mysqli
+  php-extension:
+    arg-type: none
+    display-name: swoole
+ext-swoole-hook-odbc:
+  type: php-extension
+  depends:
+    - ext-pdo
+    - unixodbc
+  php-extension:
+    arg-type: none
+    display-name: swoole
+ext-swoole-hook-pgsql:
+  type: php-extension
+  depends:
+    - ext-pgsql
+    - ext-pdo
+  php-extension:
+    arg-type: none
+    display-name: swoole
+ext-swoole-hook-sqlite:
+  type: php-extension
+  depends:
+    - ext-sqlite3
+    - ext-pdo
+  php-extension:
+    arg-type: none
+    display-name: swoole

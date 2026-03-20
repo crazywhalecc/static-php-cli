@@ -6,8 +6,10 @@ namespace Package\Artifact;
 
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
+use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Runtime\SystemTarget;
 
@@ -24,6 +26,9 @@ class zig
         $index_json = default_shell()->executeCurl('https://ziglang.org/download/index.json', retries: $downloader->getRetry());
         $index_json = json_decode($index_json ?: '', true);
         $latest_version = null;
+        if ($index_json === null) {
+            throw new DownloaderException('Failed to fetch Zig version index');
+        }
         foreach ($index_json as $version => $data) {
             if ($version !== 'master') {
                 $latest_version = $version;
@@ -57,6 +62,36 @@ class zig
             throw new DownloaderException("Hash mismatch for downloaded Zig binary. Expected {$sha256}, got {$file_hash}");
         }
         return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $latest_version], extract: PKG_ROOT_PATH . '/zig', verified: true, version: $latest_version);
+    }
+
+    #[CustomBinaryCheckUpdate('zig', [
+        'linux-x86_64',
+        'linux-aarch64',
+        'macos-x86_64',
+        'macos-aarch64',
+    ])]
+    public function checkUpdateBinary(?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        $index_json = default_shell()->executeCurl('https://ziglang.org/download/index.json', retries: $downloader->getRetry());
+        $index_json = json_decode($index_json ?: '', true);
+        $latest_version = null;
+        if (!is_array($index_json)) {
+            throw new DownloaderException('Failed to fetch Zig version index for update check');
+        }
+        foreach ($index_json as $version => $data) {
+            if ($version !== 'master') {
+                $latest_version = $version;
+                break;
+            }
+        }
+        if (!$latest_version) {
+            throw new DownloaderException('Could not determine latest Zig version');
+        }
+        return new CheckUpdateResult(
+            old: $old_version,
+            new: $latest_version,
+            needUpdate: $old_version === null || $latest_version !== $old_version,
+        );
     }
 
     #[AfterBinaryExtract('zig', [

@@ -44,6 +44,8 @@ class BuildLibsCommand extends BaseCommand
 
     public function handle(): int
     {
+        $this->checkDoctorCache();
+
         $libs = parse_comma_list($this->input->getArgument('libraries'));
 
         $installer = new PackageInstaller($this->input->getOptions());

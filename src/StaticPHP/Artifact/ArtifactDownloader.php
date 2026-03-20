@@ -6,9 +6,19 @@ namespace StaticPHP\Artifact;
 
 use Psr\Log\LogLevel;
 use StaticPHP\Artifact\Downloader\DownloadResult;
+use StaticPHP\Artifact\Downloader\Type\BitBucketTag;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateInterface;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
 use StaticPHP\Artifact\Downloader\Type\DownloadTypeInterface;
+use StaticPHP\Artifact\Downloader\Type\FileList;
 use StaticPHP\Artifact\Downloader\Type\Git;
+use StaticPHP\Artifact\Downloader\Type\GitHubRelease;
+use StaticPHP\Artifact\Downloader\Type\GitHubTarball;
+use StaticPHP\Artifact\Downloader\Type\HostedPackageBin;
 use StaticPHP\Artifact\Downloader\Type\LocalDir;
+use StaticPHP\Artifact\Downloader\Type\PECL;
+use StaticPHP\Artifact\Downloader\Type\PhpRelease;
+use StaticPHP\Artifact\Downloader\Type\PIE;
 use StaticPHP\Artifact\Downloader\Type\Url;
 use StaticPHP\Artifact\Downloader\Type\ValidatorInterface;
 use StaticPHP\DI\ApplicationContext;
@@ -29,6 +39,21 @@ use ZM\Logger\ConsoleColor;
  */
 class ArtifactDownloader
 {
+    public const array DOWNLOADERS = [
+        'bitbuckettag' => BitBucketTag::class,
+        'filelist' => FileList::class,
+        'git' => Git::class,
+        'ghrel' => GitHubRelease::class,
+        'ghtar' => GitHubTarball::class,
+        'ghtagtar' => GitHubTarball::class,
+        'local' => LocalDir::class,
+        'pie' => PIE::class,
+        'pecl' => PECL::class,
+        'url' => Url::class,
+        'php-release' => PhpRelease::class,
+        'hosted' => HostedPackageBin::class,
+    ];
+
     /** @var array<string, class-string<DownloadTypeInterface>> */
     protected array $downloaders = [];
 
@@ -81,7 +106,7 @@ class ArtifactDownloader
      *     no-shallow-clone?: bool
      * } $options Downloader options
      */
-    public function __construct(protected array $options = [])
+    public function __construct(protected array $options = [], public readonly bool $interactive = true)
     {
         // Allow setting concurrency via options
         $this->parallel = max(1, (int) ($options['parallel'] ?? 1));
@@ -196,7 +221,7 @@ class ArtifactDownloader
         $this->_before_files = FileSystem::scanDirFiles(DOWNLOAD_PATH, false, true, true) ?: [];
 
         // load downloaders
-        $this->downloaders = require ROOT_DIR . '/config/downloader.php';
+        $this->downloaders = self::DOWNLOADERS;
     }
 
     /**
@@ -248,12 +273,10 @@ class ArtifactDownloader
 
     /**
      * Download all artifacts, with optional parallel processing.
-     *
-     * @param bool $interactive Enable interactive mode with Ctrl+C handling
      */
-    public function download(bool $interactive = true): void
+    public function download(): void
     {
-        if ($interactive) {
+        if ($this->interactive) {
             Shell::passthruCallback(function () {
                 InteractiveTerm::advance();
             });
@@ -286,7 +309,7 @@ class ArtifactDownloader
         $count = count($this->artifacts);
         $artifacts_str = implode(',', array_map(fn ($x) => '' . ConsoleColor::yellow($x->getName()), $this->artifacts));
         // mute the first line if not interactive
-        if ($interactive) {
+        if ($this->interactive) {
             InteractiveTerm::notice("Downloading {$count} artifacts: {$artifacts_str} ...");
         }
         try {
@@ -304,23 +327,98 @@ class ArtifactDownloader
                 $skipped = [];
                 foreach ($this->artifacts as $artifact) {
                     ++$current;
-                    if ($this->downloadWithType($artifact, $current, $count, interactive: $interactive) === SPC_DOWNLOAD_STATUS_SKIPPED) {
+                    if ($this->downloadWithType($artifact, $current, $count) === SPC_DOWNLOAD_STATUS_SKIPPED) {
                         $skipped[] = $artifact->getName();
                         continue;
                     }
                     $this->_before_files = FileSystem::scanDirFiles(DOWNLOAD_PATH, false, true, true) ?: [];
                 }
-                if ($interactive) {
+                if ($this->interactive) {
                     $skip_msg = !empty($skipped) ? ' (Skipped ' . count($skipped) . ' artifacts for being already downloaded)' : '';
                     InteractiveTerm::success("Downloaded all {$count} artifacts.{$skip_msg}\n", true);
                 }
             }
         } finally {
-            if ($interactive) {
+            if ($this->interactive) {
                 Shell::passthruCallback(null);
                 keyboard_interrupt_unregister();
             }
         }
+    }
+
+    public function checkUpdate(string $artifact_name, bool $prefer_source = false, bool $bare = false): CheckUpdateResult
+    {
+        $artifact = ArtifactLoader::getArtifactInstance($artifact_name);
+        if ($artifact === null) {
+            throw new WrongUsageException("Artifact '{$artifact_name}' not found, please check the name.");
+        }
+        if ($bare) {
+            [$first, $second] = $prefer_source
+                ? [fn () => $this->probeSourceCheckUpdate($artifact, $artifact_name), fn () => $this->probeBinaryCheckUpdate($artifact, $artifact_name)]
+                : [fn () => $this->probeBinaryCheckUpdate($artifact, $artifact_name), fn () => $this->probeSourceCheckUpdate($artifact, $artifact_name)];
+            $result = $first() ?? $second();
+            if ($result !== null) {
+                return $result;
+            }
+            // logger()->warning("Artifact '{$artifact_name}' downloader does not support update checking, skipping.");
+            return new CheckUpdateResult(old: null, new: null, needUpdate: false, unsupported: true);
+        }
+        $cache = ApplicationContext::get(ArtifactCache::class);
+        if ($prefer_source) {
+            $info = $cache->getSourceInfo($artifact_name) ?? $cache->getBinaryInfo($artifact_name, SystemTarget::getCurrentPlatformString());
+        } else {
+            $info = $cache->getBinaryInfo($artifact_name, SystemTarget::getCurrentPlatformString()) ?? $cache->getSourceInfo($artifact_name);
+        }
+        if ($info === null) {
+            throw new WrongUsageException("Artifact '{$artifact_name}' is not downloaded yet, cannot check update.");
+        }
+        if (is_a($info['downloader'] ?? null, CheckUpdateInterface::class, true)) {
+            $cls = $info['downloader'];
+            /** @var CheckUpdateInterface $downloader */
+            $downloader = new $cls();
+            return $downloader->checkUpdate($artifact_name, $info['config'], $info['version'], $this);
+        }
+
+        if (($info['lock_type'] ?? null) === 'source' && ($callback = $artifact->getCustomSourceCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => $info['version'],
+            ]);
+        }
+
+        if (($callback = $artifact->getCustomBinaryCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => $info['version'],
+            ]);
+        }
+        // logger()->warning("Artifact '{$artifact_name}' downloader does not support update checking, skipping.");
+        return new CheckUpdateResult(old: null, new: null, needUpdate: false, unsupported: true);
+    }
+
+    /**
+     * Check updates for multiple artifacts, with optional parallel processing.
+     *
+     * @param  array<string>                    $artifact_names Artifact names to check
+     * @param  bool                             $prefer_source  Whether to prefer source over binary
+     * @param  bool                             $bare           Check without requiring artifact to be downloaded first
+     * @param  null|callable                    $onResult       Called immediately with (string $name, CheckUpdateResult) as each result arrives
+     * @return array<string, CheckUpdateResult> Results keyed by artifact name
+     */
+    public function checkUpdates(array $artifact_names, bool $prefer_source = false, bool $bare = false, ?callable $onResult = null): array
+    {
+        if ($this->parallel > 1 && count($artifact_names) > 1) {
+            return $this->checkUpdatesWithConcurrency($artifact_names, $prefer_source, $bare, $onResult);
+        }
+        $results = [];
+        foreach ($artifact_names as $name) {
+            $result = $this->checkUpdate($name, $prefer_source, $bare);
+            $results[$name] = $result;
+            if ($onResult !== null) {
+                ($onResult)($name, $result);
+            }
+        }
+        return $results;
     }
 
     public function getRetry(): int
@@ -338,7 +436,106 @@ class ArtifactDownloader
         return $this->options[$name] ?? $default;
     }
 
-    private function downloadWithType(Artifact $artifact, int $current, int $total, bool $parallel = false, bool $interactive = true): int
+    private function checkUpdatesWithConcurrency(array $artifact_names, bool $prefer_source, bool $bare, ?callable $onResult): array
+    {
+        $results = [];
+        $fiber_pool = [];
+        $remaining = $artifact_names;
+
+        Shell::passthruCallback(function () {
+            \Fiber::suspend();
+        });
+
+        try {
+            while (!empty($remaining) || !empty($fiber_pool)) {
+                // fill pool
+                while (count($fiber_pool) < $this->parallel && !empty($remaining)) {
+                    $name = array_shift($remaining);
+                    $fiber = new \Fiber(function () use ($name, $prefer_source, $bare) {
+                        return [$name, $this->checkUpdate($name, $prefer_source, $bare)];
+                    });
+                    $fiber->start();
+                    $fiber_pool[$name] = $fiber;
+                }
+                // check pool
+                foreach ($fiber_pool as $fiber_name => $fiber) {
+                    if ($fiber->isTerminated()) {
+                        // getReturn() re-throws if the fiber threw — propagates immediately
+                        [$artifact_name, $result] = $fiber->getReturn();
+                        $results[$artifact_name] = $result;
+                        if ($onResult !== null) {
+                            ($onResult)($artifact_name, $result);
+                        }
+                        unset($fiber_pool[$fiber_name]);
+                    } else {
+                        $fiber->resume();
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // terminate all still-suspended fibers so their curl processes don't hang
+            foreach ($fiber_pool as $fiber) {
+                if (!$fiber->isTerminated()) {
+                    try {
+                        $fiber->throw($e);
+                    } catch (\Throwable) {
+                        // ignore — we only care about stopping them
+                    }
+                }
+            }
+            throw $e;
+        } finally {
+            Shell::passthruCallback(null);
+        }
+
+        return $results;
+    }
+
+    private function probeSourceCheckUpdate(Artifact $artifact, string $artifact_name): ?CheckUpdateResult
+    {
+        if (($callback = $artifact->getCustomSourceCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => null,
+            ]);
+        }
+        $config = $artifact->getDownloadConfig('source');
+        if (!is_array($config)) {
+            return null;
+        }
+        $cls = $this->downloaders[$config['type']] ?? null;
+        if (!is_a($cls, CheckUpdateInterface::class, true)) {
+            return null;
+        }
+        /** @var CheckUpdateInterface $dl */
+        $dl = new $cls();
+        return $dl->checkUpdate($artifact_name, $config, null, $this);
+    }
+
+    private function probeBinaryCheckUpdate(Artifact $artifact, string $artifact_name): ?CheckUpdateResult
+    {
+        // custom binary callback takes precedence over config-based binary
+        if (($callback = $artifact->getCustomBinaryCheckUpdateCallback()) !== null) {
+            return ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => null,
+            ]);
+        }
+        $binary_config = $artifact->getDownloadConfig('binary');
+        $platform_config = is_array($binary_config) ? ($binary_config[SystemTarget::getCurrentPlatformString()] ?? null) : null;
+        if (!is_array($platform_config)) {
+            return null;
+        }
+        $cls = $this->downloaders[$platform_config['type']] ?? null;
+        if (!is_a($cls, CheckUpdateInterface::class, true)) {
+            return null;
+        }
+        /** @var CheckUpdateInterface $dl */
+        $dl = new $cls();
+        return $dl->checkUpdate($artifact_name, $platform_config, null, $this);
+    }
+
+    private function downloadWithType(Artifact $artifact, int $current, int $total, bool $parallel = false): int
     {
         $queue = $this->generateQueue($artifact);
         // already downloaded
@@ -359,7 +556,7 @@ class ArtifactDownloader
                 };
                 $try_h = $try ? 'Try downloading' : 'Downloading';
                 logger()->info("{$try_h} artifact '{$artifact->getName()}' {$item['display']} ...");
-                if ($parallel === false && $interactive) {
+                if ($parallel === false && $this->interactive) {
                     InteractiveTerm::indicateProgress("[{$current}/{$total}] Downloading artifact " . ConsoleColor::green($artifact->getName()) . " {$item['display']} from {$type_display_name} ...");
                 }
                 // is valid download type
@@ -398,13 +595,13 @@ class ArtifactDownloader
                 }
                 // process lock
                 ApplicationContext::get(ArtifactCache::class)->lock($artifact, $item['lock'], $lock, SystemTarget::getCurrentPlatformString());
-                if ($parallel === false && $interactive) {
+                if ($parallel === false && $this->interactive) {
                     $ver = $lock->hasVersion() ? (' (' . ConsoleColor::yellow($lock->version) . ')') : '';
                     InteractiveTerm::finish('Downloaded ' . ($verified ? 'and verified ' : '') . 'artifact ' . ConsoleColor::green($artifact->getName()) . $ver . " {$item['display']} .");
                 }
                 return SPC_DOWNLOAD_STATUS_SUCCESS;
             } catch (DownloaderException|ExecutionException $e) {
-                if ($parallel === false && $interactive) {
+                if ($parallel === false && $this->interactive) {
                     InteractiveTerm::finish("Download artifact {$artifact->getName()} {$item['display']} failed !", false);
                     InteractiveTerm::error("Failed message: {$e->getMessage()}", true);
                 }

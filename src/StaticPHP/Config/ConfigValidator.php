@@ -16,6 +16,7 @@ class ConfigValidator
     public const array PACKAGE_FIELD_TYPES = [
         // package fields
         'type' => ConfigType::STRING,
+        'description' => ConfigType::STRING,
         'depends' => ConfigType::LIST_ARRAY, // @
         'suggests' => ConfigType::LIST_ARRAY, // @
         'artifact' => [self::class, 'validateArtifactField'], // STRING or OBJECT
@@ -39,10 +40,14 @@ class ConfigValidator
         'static-libs' => ConfigType::LIST_ARRAY, // @
         'pkg-configs' => ConfigType::LIST_ARRAY,
         'static-bins' => ConfigType::LIST_ARRAY, // @
+        'path' => ConfigType::LIST_ARRAY, // @
+        'env' => ConfigType::ASSOC_ARRAY, // @
+        'append-env' => ConfigType::ASSOC_ARRAY, // @
     ];
 
     public const array PACKAGE_FIELDS = [
         'type' => true,
+        'description' => false,
         'depends' => false, // @
         'suggests' => false, // @
         'artifact' => false,
@@ -58,6 +63,9 @@ class ConfigValidator
         'static-libs' => false, // @
         'pkg-configs' => false,
         'static-bins' => false, // @
+        'path' => false, // @
+        'env' => false, // @
+        'append-env' => false, // @
     ];
 
     public const array SUFFIX_ALLOWED_FIELDS = [
@@ -66,6 +74,9 @@ class ConfigValidator
         'headers',
         'static-libs',
         'static-bins',
+        'path',
+        'env',
+        'append-env',
     ];
 
     public const array PHP_EXTENSION_FIELDS = [
@@ -89,7 +100,8 @@ class ConfigValidator
         'bitbuckettag' => [['repo'], ['extract']],
         'local' => [['dirname'], ['extract']],
         'pie' => [['repo'], ['extract']],
-        'php-release' => [[], ['extract']],
+        'pecl' => [['name'], ['extract', 'prefer-stable']],
+        'php-release' => [['domain'], ['extract']],
         'custom' => [[], ['func']],
     ];
 

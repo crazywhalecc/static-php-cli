@@ -79,8 +79,8 @@ class PhpExtensionPackage extends Package
             return ApplicationContext::invoke($callback, ['shared' => $shared, static::class => $this, Package::class => $this]);
         }
         $escapedPath = str_replace("'", '', escapeshellarg(BUILD_ROOT_PATH)) !== BUILD_ROOT_PATH || str_contains(BUILD_ROOT_PATH, ' ') ? escapeshellarg(BUILD_ROOT_PATH) : BUILD_ROOT_PATH;
-        $name = str_replace('_', '-', $this->getName());
-        $ext_config = PackageConfig::get($name, 'php-extension', []);
+        $name = str_replace('_', '-', $this->getExtensionName());
+        $ext_config = PackageConfig::get($this->getName(), 'php-extension', []);
 
         $arg_type = match (SystemTarget::getTargetOS()) {
             'Windows' => $ext_config['arg-type@windows'] ?? $ext_config['arg-type'] ?? 'enable',
@@ -94,7 +94,7 @@ class PhpExtensionPackage extends Package
             'enable-path' => $shared ? "--enable-{$name}=shared,{$escapedPath}" : "--enable-{$name}={$escapedPath}",
             'with' => $shared ? "--with-{$name}=shared" : "--with-{$name}",
             'with-path' => $shared ? "--with-{$name}=shared,{$escapedPath}" : "--with-{$name}={$escapedPath}",
-            'custom' => '',
+            'custom', 'none' => '',
             default => $arg_type,
         };
         // customize argument from config string
@@ -143,6 +143,54 @@ class PhpExtensionPackage extends Package
             $this->runStage('build');
         } else {
             throw new WrongUsageException("Extension [{$this->getExtensionName()}] cannot build shared target yet.");
+        }
+    }
+
+    /**
+     * Get the dist name used for `--ri` check in smoke test.
+     * Reads from config `display-name` field, defaults to extension name.
+     */
+    public function getDistName(): string
+    {
+        return $this->extension_config['display-name'] ?? $this->getExtensionName();
+    }
+
+    /**
+     * Run smoke test for the extension on Unix CLI.
+     * Override this method in a subclass.
+     */
+    public function runSmokeTestCliUnix(): void
+    {
+        if (($this->extension_config['smoke-test'] ?? true) === false) {
+            return;
+        }
+
+        $distName = $this->getDistName();
+        // empty display-name → no --ri check (e.g. password_argon2)
+        if ($distName === '') {
+            return;
+        }
+
+        $sharedExtensions = $this->getSharedExtensionLoadString();
+        [$ret] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' --ri "' . $distName . '"', false);
+        if ($ret !== 0) {
+            throw new ValidationException(
+                "extension {$this->getName()} failed compile check: php-cli returned {$ret}",
+                validation_module: 'Extension ' . $this->getName() . ' sanity check'
+            );
+        }
+
+        $test_file = ROOT_DIR . '/src/globals/ext-tests/' . $this->getExtensionName() . '.php';
+        if (file_exists($test_file)) {
+            // Trim additional content & escape special characters to allow inline usage
+            $test = self::escapeInlineTest(file_get_contents($test_file));
+            [$ret, $out] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n' . $sharedExtensions . ' -r "' . trim($test) . '"');
+            if ($ret !== 0) {
+                throw new ValidationException(
+                    "extension {$this->getName()} failed sanity check. Code: {$ret}, output: " . implode("\n", $out),
+                    validation_module: 'Extension ' . $this->getName() . ' function check'
+                );
+            }
         }
     }
 
@@ -233,6 +281,27 @@ class PhpExtensionPackage extends Package
     }
 
     /**
+     * Get per-OS build support status for this php-extension.
+     *
+     * Rules (same as v2):
+     * - OS not listed in 'support' config  => 'yes' (fully supported)
+     * - OS listed with 'wip'               => 'wip'
+     * - OS listed with 'partial'           => 'partial'
+     * - OS listed with 'no'               => 'no'
+     *
+     * @return array<string, string> e.g. ['Linux' => 'yes', 'Darwin' => 'partial', 'Windows' => 'no']
+     */
+    public function getBuildSupportStatus(): array
+    {
+        $exceptions = $this->extension_config['support'] ?? [];
+        $result = [];
+        foreach (['Linux', 'Darwin', 'Windows'] as $os) {
+            $result[$os] = $exceptions[$os] ?? 'yes';
+        }
+        return $result;
+    }
+
+    /**
      * Register default stages if not already defined by attributes.
      * This is called after all attributes have been loaded.
      *
@@ -256,6 +325,34 @@ class PhpExtensionPackage extends Package
                 $this->addStage('makeForUnix', [$this, 'makeForUnix']);
             }
         }
+    }
+
+    /**
+     * Builds the `-d extension_dir=... -d extension=...` string for all resolved shared extensions.
+     * Used in CLI smoke test to load shared extension dependencies at runtime.
+     */
+    public function getSharedExtensionLoadString(): string
+    {
+        $sharedExts = array_filter(
+            $this->getInstaller()->getResolvedPackages(PhpExtensionPackage::class),
+            fn (PhpExtensionPackage $ext) => $ext->isBuildShared() && !$ext->isBuildWithPhp()
+        );
+
+        if (empty($sharedExts)) {
+            return '';
+        }
+
+        $ret = ' -d "extension_dir=' . BUILD_MODULES_PATH . '"';
+        foreach ($sharedExts as $ext) {
+            $extConfig = PackageConfig::get($ext->getName(), 'php-extension', []);
+            if ($extConfig['zend-extension'] ?? false) {
+                $ret .= ' -d "zend_extension=' . $ext->getExtensionName() . '"';
+            } else {
+                $ret .= ' -d "extension=' . $ext->getExtensionName() . '"';
+            }
+        }
+
+        return $ret;
     }
 
     /**
@@ -283,5 +380,18 @@ class PhpExtensionPackage extends Package
             }
         }
         return [trim($staticLibString), trim($sharedLibString)];
+    }
+
+    /**
+     * Escape PHP test file content for inline `-r` usage.
+     * Strips <?php / declare, replaces newlines and special shell characters.
+     */
+    private static function escapeInlineTest(string $code): string
+    {
+        return str_replace(
+            ['<?php', 'declare(strict_types=1);', "\n", '"', '$', '!'],
+            ['', '', '', '\"', '\$', '"\'!\'"'],
+            $code
+        );
     }
 }

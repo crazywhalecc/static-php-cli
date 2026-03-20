@@ -361,7 +361,7 @@
     },
     "gmp": {
         "type": "filelist",
-        "url": "https://gmplib.org/download/gmp/",
+        "url": "https://ftp.gnu.org/gnu/gmp/",
         "regex": "/href=\"(?<file>gmp-(?<version>[^\"]+)\\.tar\\.xz)\"/",
         "provide-pre-built": true,
         "alt": {
@@ -526,7 +526,7 @@
     "libavif": {
         "type": "ghtar",
         "repo": "AOMediaCodec/libavif",
-        "provide-pre-built": true,
+        "provide-pre-built": false,
         "license": {
             "type": "file",
             "path": "LICENSE"

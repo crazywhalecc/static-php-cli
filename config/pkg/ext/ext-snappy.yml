@@ -1,0 +1,18 @@
+ext-snappy:
+  type: php-extension
+  artifact:
+    source:
+      type: git
+      url: 'https://github.com/kjdev/php-ext-snappy'
+      rev: master
+      extract: php-src/ext/snappy
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - snappy
+  suggests:
+    - ext-apcu
+  lang: cpp
+  php-extension:
+    arg-type@unix: '--enable-snappy --with-snappy-includedir=@build_root_path@'

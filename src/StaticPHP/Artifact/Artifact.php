@@ -27,8 +27,14 @@ class Artifact
     /** @var null|callable Bind custom source fetcher callback */
     protected mixed $custom_source_callback = null;
 
+    /** @var null|callable Bind custom source check-update callback */
+    protected mixed $custom_source_check_update_callback = null;
+
     /** @var array<string, callable> Bind custom binary fetcher callbacks */
     protected mixed $custom_binary_callbacks = [];
+
+    /** @var array<string, callable> Bind custom binary check-update callbacks */
+    protected array $custom_binary_check_update_callbacks = [];
 
     /** @var null|callable Bind custom source extract callback (completely takes over extraction) */
     protected mixed $source_extract_callback = null;
@@ -237,6 +243,39 @@ class Artifact
         return isset($this->config['binary'][$target]) || isset($this->custom_binary_callbacks[$target]);
     }
 
+    /**
+     * Get all platform strings for which a binary is declared (config or custom callback).
+     *
+     * For platforms where the binary type is "custom", a registered custom_binary_callback
+     * is required to consider it truly installable.
+     *
+     * @return string[] e.g. ['linux-x86_64', 'linux-aarch64', 'macos-aarch64']
+     */
+    public function getBinaryPlatforms(): array
+    {
+        $platforms = [];
+        if (isset($this->config['binary']) && is_array($this->config['binary'])) {
+            foreach ($this->config['binary'] as $platform => $platformConfig) {
+                $type = is_array($platformConfig) ? ($platformConfig['type'] ?? '') : '';
+                if ($type === 'custom') {
+                    // Only installable if a custom callback has been registered
+                    if (isset($this->custom_binary_callbacks[$platform])) {
+                        $platforms[] = $platform;
+                    }
+                } else {
+                    $platforms[] = $platform;
+                }
+            }
+        }
+        // Include custom callbacks for platforms not listed in config at all
+        foreach (array_keys($this->custom_binary_callbacks) as $platform) {
+            if (!in_array($platform, $platforms, true)) {
+                $platforms[] = $platform;
+            }
+        }
+        return $platforms;
+    }
+
     public function getDownloadConfig(string $type): mixed
     {
         return $this->config[$type] ?? null;
@@ -253,8 +292,11 @@ class Artifact
      */
     public function getSourceDir(): string
     {
-        // defined in config
-        $extract = $this->config['source']['extract'] ?? null;
+        // Prefer cache extract path, fall back to config
+        $cache_info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo($this->name);
+        $extract = is_string($cache_info['extract'] ?? null)
+            ? $cache_info['extract']
+            : ($this->config['source']['extract'] ?? null);
 
         if ($extract === null) {
             return FileSystem::convertPath(SOURCE_PATH . '/' . $this->name);
@@ -372,6 +414,19 @@ class Artifact
         return $this->custom_source_callback ?? null;
     }
 
+    /**
+     * Set custom source check-update callback.
+     */
+    public function setCustomSourceCheckUpdateCallback(callable $callback): void
+    {
+        $this->custom_source_check_update_callback = $callback;
+    }
+
+    public function getCustomSourceCheckUpdateCallback(): ?callable
+    {
+        return $this->custom_source_check_update_callback ?? null;
+    }
+
     public function getCustomBinaryCallback(): ?callable
     {
         $current_platform = SystemTarget::getCurrentPlatformString();
@@ -398,6 +453,24 @@ class Artifact
     {
         ConfigValidator::validatePlatformString($target_os);
         $this->custom_binary_callbacks[$target_os] = $callback;
+    }
+
+    /**
+     * Set custom binary check-update callback for a specific target OS.
+     *
+     * @param string   $target_os Target OS platform string (e.g. linux-x86_64)
+     * @param callable $callback  Custom binary check-update callback
+     */
+    public function setCustomBinaryCheckUpdateCallback(string $target_os, callable $callback): void
+    {
+        ConfigValidator::validatePlatformString($target_os);
+        $this->custom_binary_check_update_callbacks[$target_os] = $callback;
+    }
+
+    public function getCustomBinaryCheckUpdateCallback(): ?callable
+    {
+        $current_platform = SystemTarget::getCurrentPlatformString();
+        return $this->custom_binary_check_update_callbacks[$current_platform] ?? null;
     }
 
     // ==================== Extraction Callbacks ====================

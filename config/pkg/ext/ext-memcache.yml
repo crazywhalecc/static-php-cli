@@ -1,0 +1,14 @@
+ext-memcache:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: memcache
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.0
+  depends:
+    - ext-zlib
+    - ext-session
+  php-extension:
+    arg-type: '--enable-memcache@shared_suffix@ --with-zlib-dir=@build_root_path@'

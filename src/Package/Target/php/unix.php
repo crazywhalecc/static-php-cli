@@ -12,6 +12,7 @@ use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\PatchException;
 use StaticPHP\Exception\SPCException;
+use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
@@ -22,6 +23,7 @@ use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
 use StaticPHP\Util\System\UnixUtil;
 use StaticPHP\Util\V2CompatLayer;
@@ -29,13 +31,15 @@ use ZM\Logger\ConsoleColor;
 
 trait unix
 {
-    use frankenphp;
-
     #[BeforeStage('php', [self::class, 'buildconfForUnix'], 'php')]
+    #[PatchDescription('Patch SPC_MICRO_PATCHES defined patches (e.g. cli_checks, disable_huge_page)')]
     #[PatchDescription('Patch configure.ac for musl and musl-toolchain')]
     #[PatchDescription('Let php m4 tools use static pkg-config')]
     public function patchBeforeBuildconf(TargetPackage $package): void
     {
+        // php-src patches from micro (reads SPC_MICRO_PATCHES env var)
+        SourcePatcher::patchPhpSrc();
+
         // patch configure.ac for musl and musl-toolchain
         $musl = SystemTarget::getTargetOS() === 'Linux' && SystemTarget::getLibc() === 'musl';
         FileSystem::backupFile(SOURCE_PATH . '/php-src/configure.ac');
@@ -47,40 +51,10 @@ trait unix
 
         // let php m4 tools use static pkg-config
         FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
-    }
 
-    #[BeforeStage('php', [php::class, 'makeForUnix'], 'php')]
-    #[PatchDescription('Patch TSRM for musl TLS symbol visibility issue')]
-    #[PatchDescription('Patch ext/standard/info.c for configure command info')]
-    public function patchTSRMBeforeUnixMake(ToolchainInterface $toolchain): void
-    {
-        if (!$toolchain->isStatic() && SystemTarget::getLibc() === 'musl') {
-            // we need to patch the symbol to global visibility, otherwise extensions with `initial-exec` TLS model will fail to load
-            FileSystem::replaceFileStr(
-                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
-                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
-                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
-            );
-        } else {
-            FileSystem::replaceFileStr(
-                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
-                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
-                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
-            );
-        }
-
-        if (str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), '-release')) {
-            FileSystem::replaceFileLineContainsString(
-                SOURCE_PATH . '/php-src/ext/standard/info.c',
-                '#ifdef CONFIGURE_COMMAND',
-                '#ifdef NO_CONFIGURE_COMMAND',
-            );
-        } else {
-            FileSystem::replaceFileLineContainsString(
-                SOURCE_PATH . '/php-src/ext/standard/info.c',
-                '#ifdef NO_CONFIGURE_COMMAND',
-                '#ifdef CONFIGURE_COMMAND',
-            );
+        // also patch extension config.m4 files (they call PKG_CHECK_MODULES directly, not via php.m4)
+        foreach (glob("{$package->getSourceDir()}/ext/*/*.m4") as $m4file) {
+            FileSystem::replaceFileStr($m4file, 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
         }
     }
 
@@ -89,7 +63,6 @@ trait unix
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./buildconf'));
         V2CompatLayer::emitPatchPoint('before-php-buildconf');
-        // run ./buildconf
         shell()->cd($package->getSourceDir())->exec(getenv('SPC_CMD_PREFIX_PHP_BUILDCONF'));
     }
 
@@ -102,6 +75,13 @@ trait unix
 
         $args = [];
         $version_id = self::getPHPVersionID();
+
+        // disable undefined behavior sanitizer when opcache JIT is enabled (Linux only)
+        if (SystemTarget::getTargetOS() === 'Linux' && !$package->getBuildOption('disable-opcache-jit', false)) {
+            if ($version_id >= 80500 || $installer->isPackageResolved('ext-opcache')) {
+                f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
+            }
+        }
         // PHP JSON extension is built-in since PHP 8.0
         if ($version_id < 80000) {
             $args[] = '--enable-json';
@@ -122,7 +102,9 @@ trait unix
         }
         // perform enable cli options
         $args[] = $installer->isPackageResolved('php-cli') ? '--enable-cli' : '--disable-cli';
-        $args[] = $installer->isPackageResolved('php-fpm') ? '--enable-fpm' : '--disable-fpm';
+        $args[] = $installer->isPackageResolved('php-fpm')
+            ? '--enable-fpm' . ($installer->isPackageResolved('libacl') ? ' --with-fpm-acl' : '')
+            : '--disable-fpm';
         $args[] = $installer->isPackageResolved('php-micro') ? match (SystemTarget::getTargetOS()) {
             'Linux' => '--enable-micro=all-static',
             default => '--enable-micro',
@@ -135,12 +117,67 @@ trait unix
 
         $static_extension_str = $this->makeStaticExtensionString($installer);
 
+        // reuse the same make vars so configure conftest links use the same LIBS (incl. -framework flags)
+        $vars = $this->makeVars($installer);
+
         // run ./configure with args
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd($package->getSourceDir())->setEnv([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => "-I{$package->getIncludeDir()}",
             'LDFLAGS' => "-L{$package->getLibDir()} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
+            'LIBS' => $vars['EXTRA_LIBS'] ?? '',
         ])->exec("{$cmd} {$args} {$static_extension_str}"), $package->getSourceDir());
+    }
+
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch TSRM.h to fix musl TLS symbol visibility for non-static builds')]
+    public function beforeMakeUnix(ToolchainInterface $toolchain): void
+    {
+        if (!$toolchain->isStatic() && SystemTarget::getLibc() === 'musl') {
+            // we need to patch the symbol to global visibility, otherwise extensions with `initial-exec` TLS model will fail to load
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        } else {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/TSRM/TSRM.h',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS __attribute__((visibility("default"))) void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+                '#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;',
+            );
+        }
+    }
+
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch Makefile to fix //lib path for Linux builds')]
+    public function tryPatchMakefileUnix(): void
+    {
+        if (SystemTarget::getTargetOS() !== 'Linux') {
+            return;
+        }
+
+        // replace //lib with /lib in Makefile
+        shell()->cd(SOURCE_PATH . '/php-src')->exec('sed -i "s|//lib|/lib|g" Makefile');
+    }
+
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Patch info.c to hide configure command in release builds')]
+    public function patchInfoCForRelease(): void
+    {
+        if (str_contains((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), '-release')) {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef CONFIGURE_COMMAND',
+                '#ifdef NO_CONFIGURE_COMMAND',
+            );
+        } else {
+            FileSystem::replaceFileLineContainsString(
+                SOURCE_PATH . '/php-src/ext/standard/info.c',
+                '#ifdef NO_CONFIGURE_COMMAND',
+                '#ifdef CONFIGURE_COMMAND',
+            );
+        }
     }
 
     #[Stage]
@@ -151,23 +188,18 @@ trait unix
         logger()->info('cleaning up php-src build files');
         shell()->cd($package->getSourceDir())->exec('make clean');
 
-        // cli
         if ($installer->isPackageResolved('php-cli')) {
             $package->runStage([self::class, 'makeCliForUnix']);
         }
-        // cgi
         if ($installer->isPackageResolved('php-cgi')) {
             $package->runStage([self::class, 'makeCgiForUnix']);
         }
-        // fpm
         if ($installer->isPackageResolved('php-fpm')) {
             $package->runStage([self::class, 'makeFpmForUnix']);
         }
-        // micro
         if ($installer->isPackageResolved('php-micro')) {
             $package->runStage([self::class, 'makeMicroForUnix']);
         }
-        // embed
         if ($installer->isPackageResolved('php-embed')) {
             $package->runStage([self::class, 'makeEmbedForUnix']);
         }
@@ -219,44 +251,46 @@ trait unix
     }
 
     #[Stage]
-    #[PatchDescription('Patch micro.sfx after UPX compression')]
+    #[PatchDescription('Patch phar extension for micro SAPI to support compressed phar')]
     public function makeMicroForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
-        InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
-        // apply --with-micro-fake-cli option
-        $vars = $this->makeVars($installer);
-        $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-        $makeArgs = $this->makeVarsToArgs($vars);
-        // build
-        shell()->cd($package->getSourceDir())
-            ->setEnv($vars)
-            ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
-
-        $dst = BUILD_BIN_PATH . '/micro.sfx';
-        $builder->deployBinary("{$package->getSourceDir()}/sapi/micro/micro.sfx", $dst);
-
-        /*
-         * Patch micro.sfx after UPX compression.
-         * micro needs special section handling in LinuxBuilder.
-         * The micro.sfx does not support UPX directly, but we can remove UPX
-         * info segment to adapt.
-         * This will also make micro.sfx with upx-packed more like a malware fore antivirus
-         */
-        if ($package->getBuildOption('with-upx-pack') && SystemTarget::getTargetOS() === 'Linux') {
-            // strip first
-            // cut binary with readelf
-            [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \$1, \$2, \$3, \$4, \$6, \$7}'");
-            $out[1] = explode(' ', $out[1]);
-            $offset = $out[1][0];
-            if ($ret !== 0 || !str_starts_with($offset, '0x')) {
-                throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
+        $phar_patched = false;
+        try {
+            if ($installer->isPackageResolved('ext-phar')) {
+                $phar_patched = true;
+                SourcePatcher::patchMicroPhar(self::getPHPVersionID());
             }
-            $offset = hexdec($offset);
-            // remove upx extra wastes
-            file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
-        }
+            InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
+            // apply --with-micro-fake-cli option
+            $vars = $this->makeVars($installer);
+            $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+            $makeArgs = $this->makeVarsToArgs($vars);
+            // build
+            shell()->cd($package->getSourceDir())
+                ->setEnv($vars)
+                ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
 
-        $package->setOutput('Binary path for micro SAPI', BUILD_BIN_PATH . '/micro.sfx');
+            $dst = BUILD_BIN_PATH . '/micro.sfx';
+            $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', $dst);
+            // patch after UPX-ed micro.sfx (Linux only)
+            if (SystemTarget::getTargetOS() === 'Linux' && $builder->getOption('with-upx-pack')) {
+                // cut binary with readelf to remove UPX extra segment
+                [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \\$1, \\$2, \\$3, \\$4, \\$6, \\$7}'");
+                $out[1] = explode(' ', $out[1]);
+                $offset = $out[1][0];
+                if ($ret !== 0 || !str_starts_with($offset, '0x')) {
+                    throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
+                }
+                $offset = hexdec($offset);
+                // remove upx extra wastes
+                file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
+            }
+            $package->setOutput('Binary path for micro SAPI', $dst);
+        } finally {
+            if ($phar_patched) {
+                SourcePatcher::unpatchMicroPhar();
+            }
+        }
     }
 
     #[Stage]
@@ -285,18 +319,13 @@ trait unix
         // process libphp.so for shared embed
         $suffix = SystemTarget::getTargetOS() === 'Darwin' ? 'dylib' : 'so';
         $libphp_so = "{$package->getLibDir()}/libphp.{$suffix}";
-        $libphp_so_dst = $libphp_so;
         if (file_exists($libphp_so)) {
             // rename libphp.so if -release is set
             if (SystemTarget::getTargetOS() === 'Linux') {
-                // deploy libphp.so
-                preg_match('/-release\s+(\S*)/', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $matches);
-                if (!empty($matches[1])) {
-                    $libphp_so_dst = str_replace('.so', '-' . $matches[1] . '.so', $libphp_so);
-                }
+                $this->processLibphpSoFile($libphp_so, $installer);
             }
             // deploy
-            $builder->deployBinary($libphp_so, $libphp_so_dst, false);
+            $builder->deployBinary($libphp_so, $libphp_so, false);
             $package->setOutput('Library path for embed SAPI', $libphp_so);
         }
 
@@ -368,16 +397,68 @@ trait unix
         }
     }
 
+    #[Stage]
+    public function smokeTestForUnix(PackageBuilder $builder, TargetPackage $package, PackageInstaller $installer): void
+    {
+        // analyse --no-smoke-test option
+        $no_smoke_test = $builder->getOption('no-smoke-test');
+        // validate option
+        $option = match ($no_smoke_test) {
+            false => false, // default value, run all smoke tests
+            null => 'all', // --no-smoke-test without value, skip all smoke tests
+            default => parse_comma_list($no_smoke_test), // --no-smoke-test=cli,fpm, skip specified smoke tests
+        };
+        $valid_tests = ['cli', 'cgi', 'micro', 'micro-exts', 'embed', 'frankenphp'];
+        // compat: --without-micro-ext-test is equivalent to --no-smoke-test=micro-exts
+        if ($builder->getOption('without-micro-ext-test', false)) {
+            $valid_tests = array_diff($valid_tests, ['micro-exts']);
+        }
+        if (is_array($option)) {
+            /*
+            1. if option is not in valid tests, throw WrongUsageException
+            2. if all passed options are valid, remove them from $valid_tests, and run the remaining tests
+            */
+            foreach ($option as $test) {
+                if (!in_array($test, $valid_tests, true)) {
+                    throw new WrongUsageException("Invalid value for --no-smoke-test: {$test}. Valid values are: " . implode(', ', $valid_tests));
+                }
+                $valid_tests = array_diff($valid_tests, [$test]);
+            }
+        } elseif ($option === 'all') {
+            $valid_tests = [];
+        }
+        // run cli tests
+        if (in_array('cli', $valid_tests, true) && $installer->isPackageResolved('php-cli')) {
+            $package->runStage([$this, 'smokeTestCliForUnix']);
+        }
+        // run cgi tests
+        if (in_array('cgi', $valid_tests, true) && $installer->isPackageResolved('php-cgi')) {
+            $package->runStage([$this, 'smokeTestCgiForUnix']);
+        }
+        // run micro tests
+        if (in_array('micro', $valid_tests, true) && $installer->isPackageResolved('php-micro')) {
+            $skipExtTest = !in_array('micro-exts', $valid_tests, true);
+            $package->runStage([$this, 'smokeTestMicroForUnix'], ['skipExtTest' => $skipExtTest]);
+        }
+        // run embed tests
+        if (in_array('embed', $valid_tests, true) && $installer->isPackageResolved('php-embed')) {
+            $package->runStage([$this, 'smokeTestEmbedForUnix']);
+        }
+    }
+
     #[BuildFor('Darwin')]
     #[BuildFor('Linux')]
     public function build(TargetPackage $package): void
     {
-        // virtual target, do nothing
-        if (in_array($package->getName(), ['php-cli', 'php-fpm', 'php-cgi', 'php-micro', 'php-embed'], true)) {
+        // frankenphp is not a php sapi, it's a standalone Go binary that depends on libphp.a (embed)
+        if ($package->getName() === 'frankenphp') {
+            /* @var php $this */
+            $package->runStage([$this, 'buildFrankenphpForUnix']);
+            $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
             return;
         }
-        if ($package->getName() === 'frankenphp') {
-            $package->runStage([$this, 'buildFrankenphpUnix']);
+        // virtual target, do nothing
+        if ($package->getName() !== 'php') {
             return;
         }
 
@@ -386,6 +467,27 @@ trait unix
         $package->runStage([$this, 'makeForUnix']);
 
         $package->runStage([$this, 'unixBuildSharedExt']);
+    }
+
+    #[Stage('postInstall')]
+    public function postInstall(TargetPackage $package, PackageInstaller $installer): void
+    {
+        if ($package->getName() === 'frankenphp') {
+            $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
+            return;
+        }
+        if ($package->getName() !== 'php') {
+            return;
+        }
+        if (SystemTarget::isUnix()) {
+            if ($installer->interactive) {
+                InteractiveTerm::indicateProgress('Running PHP smoke tests');
+            }
+            $package->runStage([$this, 'smokeTestForUnix']);
+            if ($installer->interactive) {
+                InteractiveTerm::finish('PHP smoke tests passed');
+            }
+        }
     }
 
     /**
@@ -415,6 +517,132 @@ trait unix
         }
     }
 
+    #[Stage]
+    public function smokeTestCliForUnix(PackageInstaller $installer): void
+    {
+        InteractiveTerm::setMessage('Running basic php-cli smoke test');
+        [$ret, $output] = shell()->execWithResult(BUILD_BIN_PATH . '/php -n -r "echo \"hello\";"');
+        $raw_output = implode('', $output);
+        if ($ret !== 0 || trim($raw_output) !== 'hello') {
+            throw new ValidationException("cli failed smoke test. code: {$ret}, output: {$raw_output}", validation_module: 'php-cli smoke test');
+        }
+
+        $exts = $installer->getResolvedPackages(PhpExtensionPackage::class);
+        foreach ($exts as $ext) {
+            InteractiveTerm::setMessage('Running php-cli smoke test for ' . ConsoleColor::yellow($ext->getExtensionName()) . ' extension');
+            $ext->runSmokeTestCliUnix();
+        }
+    }
+
+    #[Stage]
+    public function smokeTestCgiForUnix(): void
+    {
+        InteractiveTerm::setMessage('Running basic php-cgi smoke test');
+        [$ret, $output] = shell()->execWithResult("echo '<?php echo \"<h1>Hello, World!</h1>\";' | " . BUILD_BIN_PATH . '/php-cgi -n');
+        $raw_output = implode('', $output);
+        if ($ret !== 0 || !str_contains($raw_output, 'Hello, World!') || !str_contains($raw_output, 'text/html')) {
+            throw new ValidationException("cgi failed smoke test. code: {$ret}, output: {$raw_output}", validation_module: 'php-cgi smoke test');
+        }
+    }
+
+    #[Stage]
+    public function smokeTestMicroForUnix(PackageInstaller $installer, bool $skipExtTest = false): void
+    {
+        $micro_sfx = BUILD_BIN_PATH . '/micro.sfx';
+
+        // micro_ext_test
+        InteractiveTerm::setMessage('Running php-micro ext smoke test');
+        $content = $skipExtTest
+            ? '<?php echo "[micro-test-start][micro-test-end]";'
+            : $this->generateMicroExtTests($installer);
+        $test_file = SOURCE_PATH . '/micro_ext_test.exe';
+        if (file_exists($test_file)) {
+            @unlink($test_file);
+        }
+        file_put_contents($test_file, file_get_contents($micro_sfx) . $content);
+        chmod($test_file, 0755);
+        [$ret, $out] = shell()->execWithResult($test_file);
+        $raw_out = trim(implode('', $out));
+        if ($ret !== 0 || !str_starts_with($raw_out, '[micro-test-start]') || !str_ends_with($raw_out, '[micro-test-end]')) {
+            throw new ValidationException(
+                "micro_ext_test failed. code: {$ret}, output: {$raw_out}",
+                validation_module: 'phpmicro sanity check item [micro_ext_test]'
+            );
+        }
+
+        // micro_zend_bug_test
+        InteractiveTerm::setMessage('Running php-micro zend bug smoke test');
+        $content = file_get_contents(ROOT_DIR . '/src/globals/common-tests/micro_zend_mm_heap_corrupted.txt');
+        $test_file = SOURCE_PATH . '/micro_zend_bug_test.exe';
+        if (file_exists($test_file)) {
+            @unlink($test_file);
+        }
+        file_put_contents($test_file, file_get_contents($micro_sfx) . $content);
+        chmod($test_file, 0755);
+        [$ret, $out] = shell()->execWithResult($test_file);
+        if ($ret !== 0) {
+            $raw_out = trim(implode('', $out));
+            throw new ValidationException(
+                "micro_zend_bug_test failed. code: {$ret}, output: {$raw_out}",
+                validation_module: 'phpmicro sanity check item [micro_zend_bug_test]'
+            );
+        }
+    }
+
+    #[Stage]
+    public function smokeTestEmbedForUnix(PackageInstaller $installer, ToolchainInterface $toolchain): void
+    {
+        $sample_file_path = SOURCE_PATH . '/embed-test';
+        FileSystem::createDir($sample_file_path);
+        // copy embed test files
+        copy(ROOT_DIR . '/src/globals/common-tests/embed.c', $sample_file_path . '/embed.c');
+        copy(ROOT_DIR . '/src/globals/common-tests/embed.php', $sample_file_path . '/embed.php');
+
+        $config = new SPCConfigUtil()->config(array_map(fn ($x) => $x->getName(), $installer->getResolvedPackages()));
+        $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
+        if ($toolchain->isStatic()) {
+            $lens .= ' -static';
+        }
+
+        $dynamic_exports = '';
+        $envVars = [];
+        $embedType = 'static';
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared') {
+            $embedType = 'shared';
+            $libPathKey = SystemTarget::getTargetOS() === 'Darwin' ? 'DYLD_LIBRARY_PATH' : 'LD_LIBRARY_PATH';
+            $envVars[$libPathKey] = BUILD_LIB_PATH . (($existing = getenv($libPathKey)) ? ':' . $existing : '');
+            FileSystem::removeFileIfExists(BUILD_LIB_PATH . '/libphp.a');
+        } else {
+            $suffix = SystemTarget::getTargetOS() === 'Darwin' ? 'dylib' : 'so';
+            foreach (glob(BUILD_LIB_PATH . "/libphp*.{$suffix}") as $file) {
+                unlink($file);
+            }
+            // calling getDynamicExportedSymbols on non-Linux is okay
+            if ($dynamic_exports = UnixUtil::getDynamicExportedSymbols(BUILD_LIB_PATH . '/libphp.a')) {
+                $dynamic_exports = ' ' . $dynamic_exports;
+            }
+        }
+
+        $cc = getenv('CC');
+        InteractiveTerm::setMessage('Running php-embed build smoke test');
+        [$ret, $out] = shell()->cd($sample_file_path)->execWithResult("{$cc} -o embed embed.c {$lens}{$dynamic_exports}");
+        if ($ret !== 0) {
+            throw new ValidationException(
+                'embed failed to build. Error message: ' . implode("\n", $out),
+                validation_module: $embedType . ' libphp embed build smoke test'
+            );
+        }
+
+        InteractiveTerm::setMessage('Running php-embed run smoke test');
+        [$ret, $output] = shell()->cd($sample_file_path)->setEnv($envVars)->execWithResult('./embed');
+        if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
+            throw new ValidationException(
+                'embed failed to run. Error message: ' . implode("\n", $output),
+                validation_module: $embedType . ' libphp embed run smoke test'
+            );
+        }
+    }
+
     /**
      * Seek php-src/config.log when building PHP, add it to exception.
      */
@@ -429,6 +657,26 @@ trait unix
             }
             throw $e;
         }
+    }
+
+    /**
+     * Generate micro extension test php code.
+     */
+    private function generateMicroExtTests(PackageInstaller $installer): string
+    {
+        $php = "<?php\n\necho '[micro-test-start]' . PHP_EOL;\n";
+        foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $ext) {
+            if (!$ext->isBuildStatic()) {
+                continue;
+            }
+            $ext_name = $ext->getDistName();
+            if (!empty($ext_name)) {
+                $php .= "echo 'Running micro with {$ext_name} test' . PHP_EOL;\n";
+                $php .= "assert(extension_loaded('{$ext_name}'));\n\n";
+            }
+        }
+        $php .= "echo '[micro-test-end]';\n";
+        return $php;
     }
 
     /**
@@ -518,6 +766,7 @@ trait unix
 
         return array_filter([
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
+            'EXTRA_CXXFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') . "{$config['ldflags']} {$static} {$pie}",
             'EXTRA_LDFLAGS' => $config['ldflags'],
             'EXTRA_LIBS' => $libs,

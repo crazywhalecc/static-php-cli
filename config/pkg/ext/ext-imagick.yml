@@ -1,0 +1,13 @@
+ext-imagick:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: imagick
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - imagemagick
+  php-extension:
+    arg-type: custom

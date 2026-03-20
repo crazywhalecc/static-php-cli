@@ -67,6 +67,9 @@ class ZigToolchain implements UnixToolchainInterface
             $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
             GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=php_cv_have_avx512=no php_cv_have_avx512vbmi=no {$extra_vars}");
         }
+        // zig-cc/clang treats strlcpy/strlcat as compiler builtins, so configure link tests pass (HAVE_STRLCPY=1)
+        $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+        GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=ac_cv_func_strlcpy=no ac_cv_func_strlcat=no {$extra_vars}");
     }
 
     public function getCompilerInfo(): ?string

@@ -112,6 +112,17 @@ class GlobalEnvManager
         }
     }
 
+    public static function appendEnv(string $key, string $value): void
+    {
+        $existing = getenv($key);
+        if ($existing !== false && $existing !== '') {
+            $separator = SystemTarget::isUnix() ? ':' : ';';
+            self::putenv("{$key}={$value}{$separator}{$existing}");
+        } else {
+            self::putenv("{$key}={$value}");
+        }
+    }
+
     /**
      * Initialize the toolchain after the environment variables are set.
      * The toolchain or environment availability check is done here.

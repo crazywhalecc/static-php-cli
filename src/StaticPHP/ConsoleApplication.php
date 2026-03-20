@@ -6,9 +6,13 @@ namespace StaticPHP;
 
 use StaticPHP\Command\BuildLibsCommand;
 use StaticPHP\Command\BuildTargetCommand;
+use StaticPHP\Command\CheckUpdateCommand;
+use StaticPHP\Command\Dev\DumpCapabilitiesCommand;
+use StaticPHP\Command\Dev\DumpStagesCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\LintConfigCommand;
+use StaticPHP\Command\Dev\PackageInfoCommand;
 use StaticPHP\Command\Dev\PackLibCommand;
 use StaticPHP\Command\Dev\ShellCommand;
 use StaticPHP\Command\DoctorCommand;
@@ -60,6 +64,7 @@ class ConsoleApplication extends Application
             new SPCConfigCommand(),
             new DumpLicenseCommand(),
             new ResetCommand(),
+            new CheckUpdateCommand(),
 
             // dev commands
             new ShellCommand(),
@@ -67,6 +72,9 @@ class ConsoleApplication extends Application
             new EnvCommand(),
             new LintConfigCommand(),
             new PackLibCommand(),
+            new DumpStagesCommand(),
+            new DumpCapabilitiesCommand(),
+            new PackageInfoCommand(),
         ]);
 
         // add additional commands from registries

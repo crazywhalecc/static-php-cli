@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Package\Library;
 
-use Package\Target\php;
-use StaticPHP\Attribute\Package\AfterStage;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Attribute\Package\PatchBeforeBuild;
@@ -19,15 +17,6 @@ use StaticPHP\Util\SourcePatcher;
 #[Library('imap')]
 class imap
 {
-    #[AfterStage('php', [php::class, 'patchUnixEmbedScripts'], 'imap')]
-    #[PatchDescription('Fix missing -lcrypt in php-config libs on glibc systems')]
-    public function afterPatchScripts(): void
-    {
-        if (SystemTarget::getLibc() === 'glibc') {
-            FileSystem::replaceFileRegex(BUILD_BIN_PATH . '/php-config', '/^libs="(.*)"$/m', 'libs="$1 -lcrypt"');
-        }
-    }
-
     #[PatchBeforeBuild]
     #[PatchDescription('Patch imap build system for Linux and macOS compatibility')]
     public function patchBeforeBuild(LibraryPackage $lib): void
@@ -66,14 +55,24 @@ class imap
         }
         $libcVer = SystemTarget::getLibcVersion();
         $extraLibs = $libcVer && version_compare($libcVer, '2.17', '<=') ? 'EXTRALDFLAGS="-ldl -lrt -lpthread"' : '';
-        shell()->cd($lib->getSourceDir())
-            ->exec('make clean')
-            ->exec('touch ip6')
-            ->exec('chmod +x tools/an')
-            ->exec('chmod +x tools/ua')
-            ->exec('chmod +x src/osdep/unix/drivers')
-            ->exec('chmod +x src/osdep/unix/mkauths')
-            ->exec("yes | make slx {$ssl_options} EXTRACFLAGS='-fPIC -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types' {$extraLibs}");
+        try {
+            shell()->cd($lib->getSourceDir())
+                ->exec('make clean')
+                ->exec('touch ip6')
+                ->exec('chmod +x tools/an')
+                ->exec('chmod +x tools/ua')
+                ->exec('chmod +x src/osdep/unix/drivers')
+                ->exec('chmod +x src/osdep/unix/mkauths')
+                // PASSWDTYPE=nul avoids any crypt() symbol reference in c-client.a;
+                // zig-cc 0.15+ uses paths_first strategy and cannot find libcrypt outside of buildroot.
+                ->exec("yes | make slx {$ssl_options} PASSWDTYPE=nul EXTRACFLAGS='-fPIC -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types' {$extraLibs}");
+        } catch (\Throwable $e) {
+            // slx target also builds bundled tools (mtest, etc.) which may fail to link -lcrypt dynamically
+            // (e.g. with zig-cc). We only need c-client.a, so tolerate the failure if it was built.
+            if (!file_exists("{$lib->getSourceDir()}/c-client/c-client.a")) {
+                throw $e;
+            }
+        }
         try {
             shell()
                 ->exec("cp -rf {$lib->getSourceDir()}/c-client/c-client.a {$lib->getLibDir()}/libc-client.a")
@@ -94,16 +93,24 @@ class imap
             $ssl_options = 'SSLTYPE=none';
         }
         $out = shell()->execWithResult('echo "-include $(xcrun --show-sdk-path)/usr/include/poll.h -include $(xcrun --show-sdk-path)/usr/include/time.h -include $(xcrun --show-sdk-path)/usr/include/utime.h"')[1][0];
-        shell()->cd($lib->getSourceDir())
-            ->exec('make clean')
-            ->exec('touch ip6')
-            ->exec('chmod +x tools/an')
-            ->exec('chmod +x tools/ua')
-            ->exec('chmod +x src/osdep/unix/drivers')
-            ->exec('chmod +x src/osdep/unix/mkauths')
-            ->exec(
-                "echo y | make osx {$ssl_options} EXTRACFLAGS='-Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types {$out}'"
-            );
+        try {
+            shell()->cd($lib->getSourceDir())
+                ->exec('make clean')
+                ->exec('touch ip6')
+                ->exec('chmod +x tools/an')
+                ->exec('chmod +x tools/ua')
+                ->exec('chmod +x src/osdep/unix/drivers')
+                ->exec('chmod +x src/osdep/unix/mkauths')
+                ->exec(
+                    "echo y | make osx {$ssl_options} EXTRACFLAGS='-Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types {$out}'"
+                );
+        } catch (\Throwable $e) {
+            // osx target also builds bundled tools (mtest, etc.) which may fail to link.
+            // We only need c-client.a, so tolerate the failure if it was built.
+            if (!file_exists("{$lib->getSourceDir()}/c-client/c-client.a")) {
+                throw $e;
+            }
+        }
         try {
             shell()
                 ->exec("cp -rf {$lib->getSourceDir()}/c-client/c-client.a {$lib->getLibDir()}/libc-client.a")

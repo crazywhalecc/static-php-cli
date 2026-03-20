@@ -1,0 +1,14 @@
+ext-spx:
+  type: php-extension
+  artifact:
+    source:
+      type: pie
+      repo: noisebynorthwest/php-spx
+      extract: php-src/ext/spx
+    metadata:
+      license-files: [LICENSE]
+      license: GPL-3.0-or-later
+  depends:
+    - ext-zlib
+  php-extension:
+    arg-type: '--enable-SPX@shared_suffix@'
