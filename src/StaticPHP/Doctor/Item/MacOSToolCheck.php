@@ -65,10 +65,10 @@ class MacOSToolCheck
         if (getenv('SPC_USE_LLVM') === 'brew') {
             $homebrew_prefix = getenv('HOMEBREW_PREFIX') ?: (SystemTarget::getTargetArch() === 'aarch64' ? '/opt/homebrew' : '/usr/local/homebrew');
 
-            if (MacOSUtil::findCommand('clang', ["{$homebrew_prefix}/opt/llvm/bin"]) === null) {
-                return CheckResult::fail('Homebrew llvm is not installed', 'brew', ['missing' => ['llvm']]);
+            if (($path = MacOSUtil::findCommand('clang', ["{$homebrew_prefix}/opt/llvm/bin"])) === null) {
+                return CheckResult::fail('Homebrew llvm is not installed', 'build-tools', ['missing' => ['llvm']]);
             }
-            return CheckResult::ok();
+            return CheckResult::ok($path);
         }
         return null;
     }
