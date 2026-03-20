@@ -1,0 +1,14 @@
+ext-msgpack:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: msgpack
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
+  depends:
+    - ext-session
+  php-extension:
+    arg-type@unix: with
+    arg-type@windows: enable

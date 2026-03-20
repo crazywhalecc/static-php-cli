@@ -1,0 +1,14 @@
+ext-pdo_sqlsrv:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: pdo_sqlsrv
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - ext-pdo
+    - ext-sqlsrv
+  php-extension:
+    arg-type: with

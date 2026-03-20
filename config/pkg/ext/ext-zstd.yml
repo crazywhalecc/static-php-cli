@@ -1,0 +1,15 @@
+ext-zstd:
+  type: php-extension
+  artifact:
+    source:
+      type: git
+      url: 'https://github.com/kjdev/php-ext-zstd'
+      rev: master
+      extract: php-src/ext/zstd
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - zstd
+  php-extension:
+    arg-type: '--enable-zstd --with-libzstd=@build_root_path@'

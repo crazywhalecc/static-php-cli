@@ -1,0 +1,12 @@
+qdbm:
+  type: library
+  artifact:
+    source:
+      type: git
+      url: 'https://github.com/static-php/qdbm.git'
+      rev: main
+    metadata:
+      license-files: [COPYING]
+      license: 'GPL-2.0-only OR LGPL-2.1-only'
+  static-libs@unix:
+    - libqdbm.a

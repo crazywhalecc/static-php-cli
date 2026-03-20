@@ -1,0 +1,18 @@
+libavif:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: AOMediaCodec/libavif
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  depends:
+    - libaom
+  suggests:
+    - libwebp
+    - libjpeg
+    - libxml2
+    - libpng
+  static-libs@unix:
+    - libavif.a

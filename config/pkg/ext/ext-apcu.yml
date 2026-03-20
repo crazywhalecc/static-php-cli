@@ -1,0 +1,9 @@
+ext-apcu:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: APCu
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01

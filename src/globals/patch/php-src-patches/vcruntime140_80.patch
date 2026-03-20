@@ -1,0 +1,11 @@
+--- php-8.0.0-src/win32/winutil.c	2020-11-24 17:04:03.000000000 +0000
++++ php-8.0.0-micro/win32/winutil.c	2020-12-03 07:59:22.177745800 +0000
+@@ -484,7 +484,7 @@
+ /* Expect a CRT module handle */
+ PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err)
+ {/*{{{*/
+-#if PHP_LINKER_MAJOR == 14
++#if false && PHP_LINKER_MAJOR == 14
+ 	/* Extend for other CRT if needed. */
+ # if PHP_DEBUG
+ 	const char *crt_name = "vcruntime140d.dll";

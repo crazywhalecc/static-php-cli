@@ -1,0 +1,8 @@
+protoc:
+  type: target
+  artifact:
+    binary:
+      linux-x86_64: { type: ghrel, repo: protocolbuffers/protobuf, match: 'protoc-([0-9.]+)-linux-x86_64\.zip', extract: '{pkg_root_path}/protoc' }
+      linux-aarch64: { type: ghrel, repo: protocolbuffers/protobuf, match: 'protoc-([0-9.]+)-linux-aarch_64\.zip', extract: '{pkg_root_path}/protoc' }
+  path:
+    - '{pkg_root_path}/protoc/bin'

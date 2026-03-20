@@ -1,0 +1,14 @@
+ext-yac:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: yac
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends@unix:
+    - fastlz
+    - ext-igbinary
+  php-extension:
+    arg-type@unix: '--enable-yac@shared_suffix@ --enable-igbinary --enable-json --with-system-fastlz'

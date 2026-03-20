@@ -1,0 +1,12 @@
+mimalloc:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: microsoft/mimalloc
+      match: 'v2\.\d\.[^3].*'
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  static-libs@unix:
+    - libmimalloc.a

@@ -184,18 +184,18 @@ abstract class LibraryBase
 
             // extract first if not exists
             if (!is_dir($this->source_dir)) {
-                $this->getBuilder()->emitPatchPoint('before-library[ ' . static::NAME . ']-extract');
+                $this->getBuilder()->emitPatchPoint('before-library[' . static::NAME . ']-extract');
                 SourceManager::initSource(libs: [static::NAME], source_only: true);
-                $this->getBuilder()->emitPatchPoint('after-library[ ' . static::NAME . ']-extract');
+                $this->getBuilder()->emitPatchPoint('after-library[' . static::NAME . ']-extract');
             }
 
             if (!$this->patched && $this->patchBeforeBuild()) {
                 file_put_contents($this->source_dir . '/.spc.patched', 'PATCHED!!!');
             }
-            $this->getBuilder()->emitPatchPoint('before-library[ ' . static::NAME . ']-build');
+            $this->getBuilder()->emitPatchPoint('before-library[' . static::NAME . ']-build');
             $this->build();
             $this->installLicense();
-            $this->getBuilder()->emitPatchPoint('after-library[ ' . static::NAME . ']-build');
+            $this->getBuilder()->emitPatchPoint('after-library[' . static::NAME . ']-build');
             return LIB_STATUS_OK;
         }
 
@@ -346,19 +346,19 @@ abstract class LibraryBase
      */
     protected function installLicense(): void
     {
-        FileSystem::createDir(BUILD_ROOT_PATH . '/source-licenses/' . $this->getName());
         $source = Config::getLib($this->getName(), 'source');
+        FileSystem::createDir(BUILD_ROOT_PATH . "/source-licenses/{$source}");
         $license_files = Config::getSource($source)['license'] ?? [];
         if (is_assoc_array($license_files)) {
             $license_files = [$license_files];
         }
         foreach ($license_files as $index => $license) {
             if ($license['type'] === 'text') {
-                FileSystem::writeFile(BUILD_ROOT_PATH . '/source-licenses/' . $this->getName() . "/{$index}.txt", $license['text']);
+                FileSystem::writeFile(BUILD_ROOT_PATH . "/source-licenses/{$source}/{$index}.txt", $license['text']);
                 continue;
             }
             if ($license['type'] === 'file') {
-                copy($this->source_dir . '/' . $license['path'], BUILD_ROOT_PATH . '/source-licenses/' . $this->getName() . "/{$index}.txt");
+                copy($this->source_dir . '/' . $license['path'], BUILD_ROOT_PATH . "/source-licenses/{$source}/{$index}.txt");
             }
         }
     }
@@ -375,8 +375,17 @@ abstract class LibraryBase
                 return false;
             }
         }
+        $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+        $search_paths = array_filter(explode(is_unix() ? ':' : ';', $pkg_config_path));
         foreach (Config::getLib(static::NAME, 'pkg-configs', []) as $name) {
-            if (!file_exists(BUILD_LIB_PATH . "/pkgconfig/{$name}.pc")) {
+            $found = false;
+            foreach ($search_paths as $path) {
+                if (file_exists($path . "/{$name}.pc")) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
                 return false;
             }
         }

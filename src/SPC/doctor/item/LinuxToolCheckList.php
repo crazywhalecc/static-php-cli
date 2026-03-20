@@ -22,7 +22,6 @@ class LinuxToolCheckList
         'bzip2', 'cmake', 'gcc',
         'g++', 'patch', 'binutils-gold',
         'libtoolize', 'which',
-        'patchelf',
     ];
 
     public const TOOLS_DEBIAN = [
@@ -31,7 +30,6 @@ class LinuxToolCheckList
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch',
         'xz', 'libtoolize', 'which',
-        'patchelf',
     ];
 
     public const TOOLS_RHEL = [
@@ -39,8 +37,7 @@ class LinuxToolCheckList
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch', 'which',
-        'xz', 'libtool', 'gettext-devel',
-        'patchelf', 'file',
+        'xz', 'libtool', 'gettext-devel', 'file',
     ];
 
     public const TOOLS_ARCH = [
@@ -112,7 +109,7 @@ class LinuxToolCheckList
     public function fixBuildTools(array $distro, array $missing): bool
     {
         $install_cmd = match ($distro['dist']) {
-            'ubuntu', 'debian', 'Deepin' => 'apt-get install -y',
+            'ubuntu', 'debian', 'Deepin', 'neon' => 'apt-get install -y',
             'alpine' => 'apk add',
             'redhat' => 'dnf install -y',
             'centos' => 'yum install -y',
@@ -128,7 +125,7 @@ class LinuxToolCheckList
             logger()->warning('Current user (' . $user . ') is not root, using sudo for running command (may require password input)');
         }
 
-        $is_debian = in_array($distro['dist'], ['debian', 'ubuntu', 'Deepin']);
+        $is_debian = in_array($distro['dist'], ['debian', 'ubuntu', 'Deepin', 'neon']);
         $to_install = $is_debian ? str_replace('xz', 'xz-utils', $missing) : $missing;
         // debian, alpine libtool -> libtoolize
         $to_install = str_replace('libtoolize', 'libtool', $to_install);

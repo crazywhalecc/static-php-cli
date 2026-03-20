@@ -69,6 +69,6 @@ return (new PhpCsFixer\Config())
         'php_unit_data_provider_method_order' => false,
     ])
     ->setFinder(
-        PhpCsFixer\Finder::create()->in([__DIR__ . '/src', __DIR__ . '/tests/SPC'])
+        PhpCsFixer\Finder::create()->in([__DIR__ . '/src', __DIR__ . '/tests/StaticPHP'])
     )
     ->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect());

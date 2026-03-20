@@ -1,0 +1,23 @@
+postgresql:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: postgres/postgres
+      match: REL_18_\d+
+    metadata:
+      license-files: [COPYRIGHT]
+      license: PostgreSQL
+  depends:
+    - libiconv
+    - libxml2
+    - openssl
+    - zlib
+    - libedit
+  suggests:
+    - icu
+    - libxslt
+    - ldap
+    - zstd
+  pkg-configs:
+    - libpq

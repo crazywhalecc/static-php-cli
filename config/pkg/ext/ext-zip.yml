@@ -1,0 +1,17 @@
+ext-zip:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: zip
+      extract: ext-zip
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends@unix:
+    - libzip
+  php-extension:
+    support:
+      BSD: wip
+    arg-type: custom
+    arg-type@windows: enable

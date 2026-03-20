@@ -1,0 +1,21 @@
+diff -pru /mnt/c/Users/dixyes/Desktop/phiwrapaper/phibatsh/build/php-7.4.11-src/win32/build/confutils.js win32/build/confutils.js
+--- a/win32/build/confutils.js	2020-09-29 10:17:06.000000000 +0000
++++ b/win32/build/confutils.js	2020-11-20 10:07:21.642064000 +0000
+@@ -3413,7 +3413,7 @@ function toolset_setup_common_libs()
+ function toolset_setup_build_mode()
+ {
+ 	if (PHP_DEBUG == "yes") {
+-		ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Od /D _DEBUG /D ZEND_DEBUG=1 " +
++		ADD_FLAG("CFLAGS", "/LDd /MTd /W3 /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+ 			(X64?"/Zi":"/ZI"));
+ 		ADD_FLAG("LDFLAGS", "/debug");
+ 		// Avoid problems when linking to release libraries that use the release
+@@ -3425,7 +3425,7 @@ function toolset_setup_build_mode()
+ 			ADD_FLAG("CFLAGS", "/Zi");
+ 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
+ 		}
+-		ADD_FLAG("CFLAGS", "/LD /MD /W3");
++		ADD_FLAG("CFLAGS", "/LD /MT /W3");
+ 		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
+ 			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
+ 		} else {

@@ -1,0 +1,12 @@
+libaom:
+  type: library
+  artifact:
+    source:
+      type: git
+      rev: main
+      url: 'https://aomedia.googlesource.com/aom'
+    metadata:
+      license-files: [LICENSE]
+  lang: cpp
+  static-libs@unix:
+    - libaom.a

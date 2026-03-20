@@ -1,0 +1,12 @@
+libjpeg:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: libjpeg-turbo/libjpeg-turbo
+    metadata:
+      license-files: [LICENSE.md]
+      license: IJG
+  static-libs@unix:
+    - libjpeg.a
+    - libturbojpeg.a

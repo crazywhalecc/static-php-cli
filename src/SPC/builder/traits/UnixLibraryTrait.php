@@ -34,7 +34,7 @@ trait UnixLibraryTrait
             $files = array_map(fn ($x) => "{$x}.pc", $conf_pc);
         }
         foreach ($files as $name) {
-            $realpath = realpath(BUILD_ROOT_PATH . '/lib/pkgconfig/' . $name);
+            $realpath = realpath(BUILD_LIB_PATH . '/pkgconfig/' . $name);
             if ($realpath === false) {
                 throw new PatchException('pkg-config prefix patcher', 'Cannot find library [' . static::NAME . '] pkgconfig file [' . $name . '] in ' . BUILD_LIB_PATH . '/pkgconfig/ !');
             }

@@ -1,0 +1,15 @@
+libxslt:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://download.gnome.org/sources/libxslt/1.1/'
+      regex: '/href="(?<file>libxslt-(?<version>[^"]+)\.tar\.xz)"/'
+    metadata:
+      license-files: [Copyright]
+      license: MIT
+  depends:
+    - libxml2
+  static-libs@unix:
+    - libxslt.a
+    - libexslt.a

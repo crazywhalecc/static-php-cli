@@ -1,0 +1,14 @@
+ext-trader:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: trader
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  php-extension:
+    support:
+      BSD: wip
+      Windows: wip
+    arg-type: enable

@@ -1,19 +1,23 @@
 {
-  "alias": "spc-php.phar",
-  "banner": false,
-  "blacklist": [
-    ".github"
-  ],
-  "compression": "GZ",
-  "directories": [
-    "config",
-    "src",
-    "vendor/psr",
-    "vendor/laravel/prompts",
-    "vendor/illuminate",
-    "vendor/symfony",
-    "vendor/zhamao"
-  ],
-  "git-commit-short": "git_commit_short",
-  "output": "spc.phar"
+    "alias": "spc-php.phar",
+    "banner": false,
+    "blacklist": [
+        ".github"
+    ],
+    "compression": "GZ",
+    "check-requirements": false,
+    "directories": [
+        "config",
+        "src",
+        "vendor/psr",
+        "vendor/laravel/prompts",
+        "vendor/symfony",
+        "vendor/php-di",
+        "vendor/zhamao"
+    ],
+    "files": [
+        "spc.registry.yml"
+    ],
+    "git-commit-short": "git_commit_short",
+    "output": "spc.phar"
 }

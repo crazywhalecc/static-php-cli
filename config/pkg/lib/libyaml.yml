@@ -1,0 +1,15 @@
+libyaml:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: yaml/libyaml
+      match: yaml-.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [License]
+      license: MIT
+  headers:
+    - yaml.h
+  static-libs@unix:
+    - libyaml.a

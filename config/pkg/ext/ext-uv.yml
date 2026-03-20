@@ -1,0 +1,18 @@
+ext-uv:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: uv
+      prefer-stable: false
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - libuv
+    - ext-sockets
+  php-extension:
+    support:
+      Windows: wip
+      BSD: wip
+    arg-type: with-path
