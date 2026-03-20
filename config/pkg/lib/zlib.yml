@@ -14,3 +14,6 @@ zlib:
     - zconf.h
   static-libs@unix:
     - libz.a
+  static-libs@windows:
+    - zlibstatic.lib
+    - zlib_a.lib
