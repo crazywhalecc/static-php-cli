@@ -132,7 +132,7 @@ class DefaultShell extends Shell
         };
 
         $mute = $this->console_putput ? '' : ' 2>/dev/null';
-        $cmd = "tar {$compression_flag}xf {$archive_arg} --strip-components {$strip} -C {$target_arg}{$mute}";
+        $cmd = "\"C:\\Windows\\system32\\tar.exe\" {$compression_flag}xf {$archive_arg} --strip-components {$strip} -C {$target_arg}{$mute}";
 
         $this->logCommandInfo($cmd);
         logger()->debug("[TAR EXTRACT] {$cmd}");
@@ -187,7 +187,7 @@ class DefaultShell extends Shell
         $extname = FileSystem::extname($archive_path);
         match ($extname) {
             'tar' => $this->executeTarExtract($archive_path, $target_path, 'none'),
-            'gz', 'tgz', 'xz', 'txz', 'bz2' => $run("{$_7z} x -so {$archive_arg} | tar -f - -x -C {$target_arg} --strip-components 1"),
+            'gz', 'tgz', 'xz', 'txz', 'bz2' => $run("{$_7z} x -so {$archive_arg} | \"C:\\Windows\\system32\\tar.exe\" -f - -x -C {$target_arg} --strip-components 1"),
             default => $run("{$_7z} x {$archive_arg} -o{$target_arg} -y{$mute}"),
         };
 

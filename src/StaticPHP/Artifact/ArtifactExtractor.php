@@ -468,6 +468,9 @@ class ArtifactExtractor
 
         if ($extname !== 'exe' && !is_dir($target)) {
             FileSystem::createDir($target);
+            if (!is_dir($target)) {
+                throw new FileSystemException("Failed to create target directory: {$target}");
+            }
         }
         match (SystemTarget::getTargetOS()) {
             'Windows' => match ($extname) {
