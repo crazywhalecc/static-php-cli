@@ -20,3 +20,5 @@ libssh2:
     - libssh2
   static-libs@unix:
     - libssh2.a
+  static-libs@windows:
+    - libssh2.lib
