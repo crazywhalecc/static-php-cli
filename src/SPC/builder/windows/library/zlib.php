@@ -31,8 +31,23 @@ class zlib extends WindowsLibraryBase
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
-        copy(BUILD_LIB_PATH . '\zlibstatic.lib', BUILD_LIB_PATH . '\zlib_a.lib');
-        unlink(BUILD_ROOT_PATH . '\bin\zlib.dll');
-        unlink(BUILD_LIB_PATH . '\zlib.lib');
+        $detect_list = [
+            'zlibstatic.lib',
+            'zs.lib',
+            'libzs.lib',
+        ];
+        foreach ($detect_list as $item) {
+            if (file_exists(BUILD_LIB_PATH . '\\' . $item)) {
+                FileSystem::copy(BUILD_LIB_PATH . '\\' . $item, BUILD_LIB_PATH . '\zlib_a.lib');
+                FileSystem::copy(BUILD_LIB_PATH . '\\' . $item, BUILD_LIB_PATH . '\zlibstatic.lib');
+                break;
+            }
+        }
+        FileSystem::removeFileIfExists(BUILD_ROOT_PATH . '\bin\zlib.dll');
+        FileSystem::removeFileIfExists(BUILD_LIB_PATH . '\zlib.lib');
+        FileSystem::removeFileIfExists(BUILD_LIB_PATH . '\libz.dll');
+        FileSystem::removeFileIfExists(BUILD_LIB_PATH . '\libz.lib');
+        FileSystem::removeFileIfExists(BUILD_LIB_PATH . '\z.lib');
+        FileSystem::removeFileIfExists(BUILD_LIB_PATH . '\z.dll');
     }
 }
