@@ -17,7 +17,7 @@ class zstd
     public function buildWin(LibraryPackage $package): void
     {
         WindowsCMakeExecutor::create($package)
-            ->setRootDir("{$package->getSourceDir()}/build/cmake")
+            ->setWorkingDir("{$package->getSourceDir()}/build/cmake")
             ->setBuildDir("{$package->getSourceDir()}/build/cmake/build")
             ->addConfigureArgs(
                 '-DZSTD_BUILD_STATIC=ON',
