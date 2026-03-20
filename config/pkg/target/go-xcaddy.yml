@@ -2,5 +2,11 @@ go-xcaddy:
   type: target
   artifact:
     binary: custom
+  env:
+    GOROOT: '{pkg_root_path}/go-xcaddy'
+    GOBIN: '{pkg_root_path}/go-xcaddy/bin'
+    GOPATH: '{pkg_root_path}/go-xcaddy/go'
+  path@unix:
+    - '{pkg_root_path}/go-xcaddy/bin'
   static-bins:
     - xcaddy
