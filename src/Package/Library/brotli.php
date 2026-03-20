@@ -8,11 +8,19 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
 
 #[Library('brotli')]
 class brotli
 {
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $package): void
+    {
+        WindowsCMakeExecutor::create($package)->build();
+        // FileSystem::copy("{$package->getLibDir()}\\onig.lib", "{$package->getLibDir()}\\onig_a.lib");
+    }
+
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib): void
