@@ -12,6 +12,10 @@ curl:
   depends@unix:
     - openssl
     - zlib
+  depends@windows:
+    - zlib
+    - libssh2
+    - nghttp2
   suggests@unix:
     - libssh2
     - brotli
@@ -23,6 +27,9 @@ curl:
     - ldap
     - idn2
     - krb5
+  suggests@windows:
+    - brotli
+    - zstd
   frameworks:
     - CoreFoundation
     - CoreServices
@@ -33,3 +40,5 @@ curl:
     - curl
   static-libs@unix:
     - libcurl.a
+  static-libs@windows:
+    - libcurl_a.lib
