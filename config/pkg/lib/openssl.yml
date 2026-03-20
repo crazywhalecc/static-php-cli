@@ -21,3 +21,6 @@ openssl:
   static-libs@unix:
     - libssl.a
     - libcrypto.a
+  static-libs@windows:
+    - libssl.lib
+    - libcrypto.lib
