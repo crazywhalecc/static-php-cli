@@ -23,7 +23,7 @@ class libiconv_win
         $vs_ver_dir = match ($ver['major_version']) {
             '17' => '\MSVC17',
             '16' => '\MSVC16',
-            default => throw new EnvironmentException("Current VS version {$ver} is not supported yet!"),
+            default => throw new EnvironmentException("Current VS version {$ver['major_version']} is not supported yet!"),
         };
         ApplicationContext::set('vs_ver_dir', $vs_ver_dir);
     }
