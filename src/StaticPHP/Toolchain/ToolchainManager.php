@@ -39,7 +39,10 @@ class ToolchainManager
         return match (PHP_OS_FAMILY) {
             'Linux' => ZigToolchain::class,
             'Windows' => MSVCToolchain::class,
-            'Darwin' => ClangNativeToolchain::class,
+            'Darwin' => match (getenv('SPC_USE_LLVM') ?: 'system') {
+                'brew' => ClangBrewToolchain::class,
+                default => ClangNativeToolchain::class,
+            },
             default => throw new WrongUsageException('Unsupported OS family: ' . PHP_OS_FAMILY),
         };
     }
