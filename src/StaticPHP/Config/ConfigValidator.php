@@ -40,6 +40,9 @@ class ConfigValidator
         'static-libs' => ConfigType::LIST_ARRAY, // @
         'pkg-configs' => ConfigType::LIST_ARRAY,
         'static-bins' => ConfigType::LIST_ARRAY, // @
+        'path' => ConfigType::LIST_ARRAY, // @
+        'env' => ConfigType::ASSOC_ARRAY, // @
+        'append-env' => ConfigType::ASSOC_ARRAY, // @
     ];
 
     public const array PACKAGE_FIELDS = [
@@ -60,6 +63,9 @@ class ConfigValidator
         'static-libs' => false, // @
         'pkg-configs' => false,
         'static-bins' => false, // @
+        'path' => false, // @
+        'env' => false, // @
+        'append-env' => false, // @
     ];
 
     public const array SUFFIX_ALLOWED_FIELDS = [
@@ -68,6 +74,9 @@ class ConfigValidator
         'headers',
         'static-libs',
         'static-bins',
+        'path',
+        'env',
+        'append-env',
     ];
 
     public const array PHP_EXTENSION_FIELDS = [

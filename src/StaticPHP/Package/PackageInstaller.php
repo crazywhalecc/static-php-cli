@@ -9,6 +9,7 @@ use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\ArtifactExtractor;
 use StaticPHP\Artifact\DownloaderOptions;
+use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\PackageLoader;
@@ -579,6 +580,30 @@ class PackageInstaller
 
         foreach ($resolved_packages as $pkg_name) {
             $this->packages[$pkg_name] = PackageLoader::getPackage($pkg_name);
+        }
+
+        foreach ($this->packages as $package) {
+            $this->injectPackageEnvs($package);
+        }
+    }
+
+    private function injectPackageEnvs(Package $package): void
+    {
+        $name = $package->getName();
+
+        $paths = PackageConfig::get($name, 'path', []);
+        foreach ($paths as $path) {
+            GlobalEnvManager::addPathIfNotExists(FileSystem::replacePathVariable($path));
+        }
+
+        $envs = PackageConfig::get($name, 'env', []);
+        foreach ($envs as $k => $v) {
+            GlobalEnvManager::putenv("{$k}=" . FileSystem::replacePathVariable((string) $v));
+        }
+
+        $append_envs = PackageConfig::get($name, 'append-env', []);
+        foreach ($append_envs as $k => $v) {
+            GlobalEnvManager::appendEnv($k, FileSystem::replacePathVariable((string) $v));
         }
     }
 
