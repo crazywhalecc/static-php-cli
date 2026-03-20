@@ -94,7 +94,7 @@ class PhpExtensionPackage extends Package
             'enable-path' => $shared ? "--enable-{$name}=shared,{$escapedPath}" : "--enable-{$name}={$escapedPath}",
             'with' => $shared ? "--with-{$name}=shared" : "--with-{$name}",
             'with-path' => $shared ? "--with-{$name}=shared,{$escapedPath}" : "--with-{$name}={$escapedPath}",
-            'custom' => '',
+            'custom', 'none' => '',
             default => $arg_type,
         };
         // customize argument from config string
@@ -148,11 +148,11 @@ class PhpExtensionPackage extends Package
 
     /**
      * Get the dist name used for `--ri` check in smoke test.
-     * Reads from config `dist-name` field, defaults to extension name.
+     * Reads from config `display-name` field, defaults to extension name.
      */
     public function getDistName(): string
     {
-        return $this->extension_config['dist-name'] ?? $this->getExtensionName();
+        return $this->extension_config['display-name'] ?? $this->getExtensionName();
     }
 
     /**
@@ -166,7 +166,7 @@ class PhpExtensionPackage extends Package
         }
 
         $distName = $this->getDistName();
-        // empty dist-name → no --ri check (e.g. password_argon2)
+        // empty display-name → no --ri check (e.g. password_argon2)
         if ($distName === '') {
             return;
         }
@@ -328,6 +328,34 @@ class PhpExtensionPackage extends Package
     }
 
     /**
+     * Builds the `-d extension_dir=... -d extension=...` string for all resolved shared extensions.
+     * Used in CLI smoke test to load shared extension dependencies at runtime.
+     */
+    public function getSharedExtensionLoadString(): string
+    {
+        $sharedExts = array_filter(
+            $this->getInstaller()->getResolvedPackages(PhpExtensionPackage::class),
+            fn (PhpExtensionPackage $ext) => $ext->isBuildShared() && !$ext->isBuildWithPhp()
+        );
+
+        if (empty($sharedExts)) {
+            return '';
+        }
+
+        $ret = ' -d "extension_dir=' . BUILD_MODULES_PATH . '"';
+        foreach ($sharedExts as $ext) {
+            $extConfig = PackageConfig::get($ext->getName(), 'php-extension', []);
+            if ($extConfig['zend-extension'] ?? false) {
+                $ret .= ' -d "zend_extension=' . $ext->getExtensionName() . '"';
+            } else {
+                $ret .= ' -d "extension=' . $ext->getExtensionName() . '"';
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
      * Splits a given string of library flags into static and shared libraries.
      *
      * @param  string $allLibs A space-separated string of library flags (e.g., -lxyz).
@@ -352,34 +380,6 @@ class PhpExtensionPackage extends Package
             }
         }
         return [trim($staticLibString), trim($sharedLibString)];
-    }
-
-    /**
-     * Builds the `-d extension_dir=... -d extension=...` string for all resolved shared extensions.
-     * Used in CLI smoke test to load shared extension dependencies at runtime.
-     */
-    private function getSharedExtensionLoadString(): string
-    {
-        $sharedExts = array_filter(
-            $this->getInstaller()->getResolvedPackages(PhpExtensionPackage::class),
-            fn (PhpExtensionPackage $ext) => $ext->isBuildShared() && !$ext->isBuildWithPhp()
-        );
-
-        if (empty($sharedExts)) {
-            return '';
-        }
-
-        $ret = ' -d "extension_dir=' . BUILD_MODULES_PATH . '"';
-        foreach ($sharedExts as $ext) {
-            $extConfig = PackageConfig::get($ext->getName(), 'php-extension', []);
-            if ($extConfig['zend-extension'] ?? false) {
-                $ret .= ' -d "zend_extension=' . $ext->getExtensionName() . '"';
-            } else {
-                $ret .= ' -d "extension=' . $ext->getExtensionName() . '"';
-            }
-        }
-
-        return $ret;
     }
 
     /**

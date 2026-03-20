@@ -1,5 +1,5 @@
 curl:
-  type: library
+  type: target
   artifact:
     source:
       type: ghrel
@@ -28,6 +28,8 @@ curl:
     - CoreServices
     - SystemConfiguration
   headers:
+    - curl
+  static-bins@unix:
     - curl
   static-libs@unix:
     - libcurl.a

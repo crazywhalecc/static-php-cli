@@ -26,6 +26,9 @@ class zig
         $index_json = default_shell()->executeCurl('https://ziglang.org/download/index.json', retries: $downloader->getRetry());
         $index_json = json_decode($index_json ?: '', true);
         $latest_version = null;
+        if ($index_json === null) {
+            throw new DownloaderException('Failed to fetch Zig version index');
+        }
         foreach ($index_json as $version => $data) {
             if ($version !== 'master') {
                 $latest_version = $version;

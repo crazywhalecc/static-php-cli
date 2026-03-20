@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Package\Library;
+namespace Package\Target;
 
 use StaticPHP\Attribute\Package\BuildFor;
-use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Attribute\Package\PatchBeforeBuild;
+use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 
-#[Library('curl')]
+#[Target('curl')]
 class curl
 {
     #[PatchBeforeBuild]
@@ -48,14 +48,22 @@ class curl
             ->optionalPackage('idn2', ...cmake_boolean_args('CURL_USE_IDN2'))
             ->optionalPackage('libcares', '-DENABLE_ARES=ON')
             ->addConfigureArgs(
-                '-DBUILD_CURL_EXE=OFF',
+                '-DBUILD_CURL_EXE=ON',
                 '-DBUILD_LIBCURL_DOCS=OFF',
             )
             ->build();
 
         // patch pkgconf
         $lib->patchPkgconfPrefix(['libcurl.pc']);
+        // curl's CMake embeds krb5 link flags directly without following Requires.private chain,
+        // so -lkrb5support (from mit-krb5.pc Libs.private) is missing from libcurl.pc.
+        $pc_path = "{$lib->getLibDir()}/pkgconfig/libcurl.pc";
+        if (str_contains(FileSystem::readFile($pc_path), '-lgssapi_krb5')) {
+            FileSystem::replaceFileRegex($pc_path, '/-lcom_err$/m', '-lcom_err -lkrb5support');
+        }
         shell()->cd("{$lib->getLibDir()}/cmake/CURL/")
             ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"{$lib->getLibDir()}/libcurl.a\"|g' CURLTargets-release.cmake");
+
+        $lib->setOutput('Static curl executable path', BUILD_BIN_PATH . '/curl');
     }
 }

@@ -22,6 +22,13 @@ use ZM\Logger\ConsoleColor;
 
 trait windows
 {
+    #[BeforeStage('php', [self::class, 'buildconfForWindows'])]
+    #[PatchDescription('Patch for fixing win32 xml related extensions builds')]
+    public function beforeBuildconfWin(TargetPackage $package): void
+    {
+        FileSystem::replaceFileStr("{$package->getSourceDir()}/win32/build/config.w32", 'dllmain.c ', '');
+    }
+
     #[Stage]
     public function buildconfForWindows(TargetPackage $package): void
     {

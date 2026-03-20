@@ -48,6 +48,7 @@ class grpc
                 '-DgRPC_ZLIB_PROVIDER=package',
                 '-DgRPC_CARES_PROVIDER=package',
                 '-DgRPC_SSL_PROVIDER=package',
+                '-DCMAKE_SKIP_INSTALL_RPATH=ON',
             );
 
         if (PHP_OS_FAMILY === 'Linux' && $toolchain->isStatic() && !LinuxUtil::isMuslDist()) {

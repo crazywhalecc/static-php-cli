@@ -1,0 +1,13 @@
+ext-brotli:
+  type: php-extension
+  artifact:
+    source:
+      type: git
+      extract: php-src/ext/brotli
+      rev: master
+      url: 'https://github.com/kjdev/php-ext-brotli'
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - brotli

@@ -389,7 +389,9 @@ class SPCConfigUtil
         }
 
         if (in_array('imap', $packages) && SystemTarget::getTargetOS() === 'Linux' && SystemTarget::getLibc() === 'glibc') {
-            $lib_names[] = '-lcrypt';
+            if (file_exists(BUILD_LIB_PATH . '/libcrypt.a')) {
+                $lib_names[] = '-lcrypt';
+            }
         }
         if (!$use_short_libs) {
             $lib_names = array_map(fn ($l) => $this->getFullLibName($l), $lib_names);

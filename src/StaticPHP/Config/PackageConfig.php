@@ -23,6 +23,7 @@ class PackageConfig
         if (!is_dir($dir)) {
             throw new WrongUsageException("Directory {$dir} does not exist, cannot load pkg.json config.");
         }
+        $dir = rtrim($dir, '/');
         $loaded = [];
         $files = FileSystem::scanDirFiles($dir, false);
         if (is_array($files)) {

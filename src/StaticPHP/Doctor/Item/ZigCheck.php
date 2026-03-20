@@ -34,9 +34,9 @@ class ZigCheck
     #[FixItem('install-zig')]
     public function installZig(): bool
     {
-        $installer = new PackageInstaller();
+        $installer = new PackageInstaller(interactive: false);
         $installer->addInstallPackage('zig');
-        $installer->run(false);
+        $installer->run(true);
         return $installer->isPackageInstalled('zig');
     }
 }

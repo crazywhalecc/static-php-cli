@@ -30,9 +30,9 @@ class Re2cVersionCheck
     #[FixItem('build-re2c')]
     public function buildRe2c(): bool
     {
-        $installer = new PackageInstaller();
+        $installer = new PackageInstaller(interactive: false);
         $installer->addInstallPackage('re2c');
-        $installer->run(false);
+        $installer->run(true);
         return true;
     }
 }

@@ -292,8 +292,11 @@ class Artifact
      */
     public function getSourceDir(): string
     {
-        // defined in config
-        $extract = $this->config['source']['extract'] ?? null;
+        // Prefer cache extract path, fall back to config
+        $cache_info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo($this->name);
+        $extract = is_string($cache_info['extract'] ?? null)
+            ? $cache_info['extract']
+            : ($this->config['source']['extract'] ?? null);
 
         if ($extract === null) {
             return FileSystem::convertPath(SOURCE_PATH . '/' . $this->name);

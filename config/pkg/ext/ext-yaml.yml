@@ -1,0 +1,16 @@
+ext-yaml:
+  type: php-extension
+  artifact:
+    source:
+      type: git
+      url: 'https://github.com/php/pecl-file_formats-yaml'
+      rev: php7
+      extract: php-src/ext/yaml
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - libyaml
+  php-extension:
+    arg-type@unix: with-path
+    arg-type@windows: with

@@ -61,7 +61,7 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
             $filename = $matches['filename'];
         } else {
             $basename = $basename ?? basename($repo);
-            $filename = "{$basename}-" . ($rel_type === 'releases' ? $data['tag_name'] : $data['name']) . '.tar.gz';
+            $filename = "{$basename}-" . ($rel_type === 'releases' ? ($data['tag_name'] ?? $data['name']) : $data['name']) . '.tar.gz';
         }
         return [$url, $filename];
     }
