@@ -6,12 +6,25 @@ namespace Package\Library;
 
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
+use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\FileSystem;
 
 #[Library('libavif')]
 class libavif
 {
+    #[PatchBeforeBuild]
+    public function patchBeforeBuild(LibraryPackage $lib): void
+    {
+        // workaround for libavif 1.2.0 bug: MSVC does not support empty initializer list
+        if (SystemTarget::getTargetOS() === 'Windows') {
+            FileSystem::replaceFileStr($lib->getSourceDir() . '/src/read.c', 'avifFileType ftyp = {};', 'avifFileType ftyp = { 0 };');
+        }
+    }
+
     #[BuildFor('Darwin')]
     #[BuildFor('Linux')]
     public function buildUnix(LibraryPackage $lib): void
@@ -26,5 +39,18 @@ class libavif
             ->build();
         // patch pkgconfig
         $lib->patchPkgconfPrefix(['libavif.pc']);
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DAVIF_BUILD_APPS=OFF',
+                '-DAVIF_BUILD_TESTS=OFF',
+                '-DAVIF_LIBYUV=OFF',
+                '-DAVIF_ENABLE_GTEST=OFF',
+            )
+            ->build();
     }
 }
