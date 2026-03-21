@@ -168,10 +168,23 @@ class PackageInstaller
         // check download
         if ($this->download) {
             $downloaderOptions = DownloaderOptions::extractFromConsoleOptions($this->options, 'dl');
-            $downloader = new ArtifactDownloader(
-                [...$downloaderOptions, 'source-only' => implode(',', array_map(fn ($x) => $x->getName(), $this->build_packages))],
-                $this->interactive
+            // Collect packages that have no build stage for current OS but do have a platform binary.
+            // These must always download binary (not source), regardless of global prefer-source setting.
+            $binary_only_packages = array_filter(
+                $this->packages,
+                fn ($p) => $p instanceof LibraryPackage
+                    && !$this->isBuildPackage($p)
+                    && !$p->hasStage('build')
+                    && ($p->getArtifact()?->hasPlatformBinary() ?? false)
             );
+            $dl_opts = [
+                ...$downloaderOptions,
+                'source-only' => implode(',', array_map(fn ($x) => $x->getName(), $this->build_packages)),
+            ];
+            if ($binary_only_packages !== []) {
+                $dl_opts['binary-only'] = implode(',', array_map(fn ($x) => $x->getName(), $binary_only_packages));
+            }
+            $downloader = new ArtifactDownloader($dl_opts, $this->interactive);
             $downloader->addArtifacts($this->getArtifacts())->download();
         } else {
             logger()->notice('Skipping download (--no-download option enabled)');
@@ -716,10 +729,13 @@ class PackageInstaller
             }
             $is_to_build = $this->isBuildPackage($package);
             $has_build_stage = $package instanceof LibraryPackage && $package->hasStage('build');
-            $should_use_binary = $package instanceof LibraryPackage && ($package->getArtifact()?->shouldUseBinary() ?? false);
+            // Use hasPlatformBinary() here (not shouldUseBinary()) because this runs before download,
+            // so the binary is not yet on disk. We only need to know if a binary is declared for
+            // the current platform in the artifact config.
+            $has_platform_binary = $package instanceof LibraryPackage && ($package->getArtifact()?->hasPlatformBinary() ?? false);
 
             // Check if package can neither be built nor installed
-            if (!$is_to_build && !$should_use_binary && !$has_build_stage) {
+            if (!$is_to_build && !$has_platform_binary && !$has_build_stage) {
                 throw new WrongUsageException("Package '{$package->getName()}' cannot be installed: no build stage defined and no binary artifact available for current OS: " . SystemTarget::getCurrentPlatformString());
             }
         }
