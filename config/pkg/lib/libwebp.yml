@@ -14,3 +14,8 @@ libwebp:
     - libwebpdemux
     - libwebpmux
     - libsharpyuv
+  static-libs@windows:
+    - libwebp.lib
+    - libwebpdecoder.lib
+    - libwebpdemux.lib
+    - libsharpyuv.lib
