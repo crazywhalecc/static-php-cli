@@ -14,3 +14,6 @@ libpng:
     - zlib
   static-libs@unix:
     - libpng16.a
+  static-libs@windows:
+    - libpng16_static.lib
+    - libpng_a.lib
