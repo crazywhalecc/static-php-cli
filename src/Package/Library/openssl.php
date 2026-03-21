@@ -10,6 +10,7 @@ use StaticPHP\Attribute\Package\Validate;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\System\LinuxUtil;
@@ -36,7 +37,7 @@ class openssl
     }
 
     #[BuildFor('Windows')]
-    public function buildWin(LibraryPackage $lib): void
+    public function buildWin(LibraryPackage $lib, PackageBuilder $builder): void
     {
         $perl = ApplicationContext::get('perl');
         $cmd = cmd()->cd($lib->getSourceDir())
@@ -47,7 +48,9 @@ class openssl
                 '--with-zlib-lib=' . quote($lib->getLibDir()) . ' ' .
                 '--with-zlib-include=' . quote($lib->getIncludeDir()) . ' ' .
                 '--release ' .
-                'no-legacy '
+                'no-legacy ' .
+                'no-tests ' .
+                '/FS'
             );
 
         // patch zlib
@@ -56,7 +59,7 @@ class openssl
         FileSystem::replaceFileStr("{$lib->getSourceDir()}\\Makefile", '/debug', '/incremental:no /opt:icf /dynamicbase /nxcompat /ltcg /nodefaultlib:msvcrt');
 
         // build
-        $cmd->exec("nmake install_dev CNF_LDFLAGS=\"/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:msvcrt /NODEFAULTLIB:msvcrtd /DEFAULTLIB:libcmt /LIBPATH:{$lib->getLibDir()} zlibstatic.lib\"");
+        $cmd->exec("jom.exe /j{$builder->concurrency} install_dev CNF_LDFLAGS=\"/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:msvcrt /NODEFAULTLIB:msvcrtd /DEFAULTLIB:libcmt /LIBPATH:{$lib->getLibDir()} zlibstatic.lib\"");
 
         // copy necessary c files
         FileSystem::copy("{$lib->getSourceDir()}\\ms\\applink.c", "{$lib->getIncludeDir()}\\openssl\\applink.c");
