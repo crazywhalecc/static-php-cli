@@ -10,3 +10,5 @@ libaom:
   lang: cpp
   static-libs@unix:
     - libaom.a
+  static-libs@windows:
+    - aom.lib
