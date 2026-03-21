@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
 
 #[Library('freetype')]
@@ -32,5 +33,19 @@ class freetype
 
         $lib->patchPkgconfPrefix(['freetype2.pc']);
         FileSystem::replaceFileStr("{$lib->getBuildRootPath()}/lib/pkgconfig/freetype2.pc", ' -L/lib ', " -L{$lib->getBuildRootPath()}/lib ");
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->optionalPackage('libpng', ...cmake_boolean_args('FT_DISABLE_PNG', true))
+            ->optionalPackage('bzip2', ...cmake_boolean_args('FT_DISABLE_BZIP2', true))
+            ->optionalPackage('brotli', ...cmake_boolean_args('FT_DISABLE_BROTLI', true))
+            ->addConfigureArgs('-DFT_DISABLE_HARFBUZZ=ON')
+            ->build();
+
+        // freetype.lib to libfreetype_a.lib
+        FileSystem::copy("{$lib->getLibDir()}\\freetype.lib", "{$lib->getLibDir()}\\libfreetype_a.lib");
     }
 }
