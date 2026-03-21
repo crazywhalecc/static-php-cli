@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Util\System;
 
+use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Util\FileSystem;
 
 class WindowsUtil
@@ -47,6 +48,10 @@ class WindowsUtil
 
         // call vswhere (need VS and C++ tools installed), output is json
         $vswhere_exec = PKG_ROOT_PATH . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'vswhere.exe';
+        // detect vswhere exists, if not throw error
+        if (!file_exists($vswhere_exec)) {
+            throw new EnvironmentException('vswhere.exe not found, please run `doctor` command first');
+        }
         $args = [
             '-latest',
             '-format', 'json',
