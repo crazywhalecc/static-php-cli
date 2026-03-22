@@ -147,13 +147,17 @@ readonly class Doctor
     {
         if (SystemTarget::getTargetOS() === 'Windows') {
             $trial_ls = [
-                getenv('LOCALAPPDATA') ?: ((getenv('USERPROFILE') ?: 'C:\Users\Default') . '\AppData\Local') . '\.spc-doctor.lock',
+                getenv('LOCALAPPDATA') ?
+                    (getenv('LOCALAPPDATA') . '\.spc-doctor.lock') :
+                    (((getenv('USERPROFILE') ?: 'C:\Users\Default') . '\AppData\Local') . '\.spc-doctor.lock'),
                 sys_get_temp_dir() . '\.spc-doctor.lock',
                 WORKING_DIR . '\.spc-doctor.lock',
             ];
         } else {
             $trial_ls = [
-                getenv('XDG_CACHE_HOME') ?: ((getenv('HOME') ?: '/tmp') . '/.cache') . '/.spc-doctor.lock',
+                getenv('XDG_CACHE_HOME') ?
+                    (getenv('XDG_CACHE_HOME') . '/.spc-doctor.lock')
+                    : (((getenv('HOME') ?: '/tmp') . '/.cache') . '/.spc-doctor.lock'),
                 sys_get_temp_dir() . '/.spc-doctor.lock',
                 WORKING_DIR . '/.spc-doctor.lock',
             ];

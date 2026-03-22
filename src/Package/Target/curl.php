@@ -10,6 +10,7 @@ use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 
@@ -20,13 +21,43 @@ class curl
     #[PatchDescription('Remove CMAKE_C_IMPLICIT_LINK_LIBRARIES and fix macOS framework detection')]
     public function patchBeforeBuild(LibraryPackage $lib): bool
     {
-        shell()->cd($lib->getSourceDir())->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ./CMakeLists.txt');
+        if (SystemTarget::getTargetOS() !== 'Windows') {
+            shell()->cd($lib->getSourceDir())->exec('sed -i.save s@\${CMAKE_C_IMPLICIT_LINK_LIBRARIES}@@ ./CMakeLists.txt');
+        }
         if (SystemTarget::getTargetOS() === 'Darwin') {
             FileSystem::replaceFileRegex("{$lib->getSourceDir()}/CMakeLists.txt", '/NOT COREFOUNDATION_FRAMEWORK/m', 'FALSE');
             FileSystem::replaceFileRegex("{$lib->getSourceDir()}/CMakeLists.txt", '/NOT SYSTEMCONFIGURATION_FRAMEWORK/m', 'FALSE');
             FileSystem::replaceFileRegex("{$lib->getSourceDir()}/CMakeLists.txt", '/NOT CORESERVICES_FRAMEWORK/m', 'FALSE');
         }
         return true;
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->optionalPackage('zstd', ...cmake_boolean_args('CURL_ZSTD'))
+            ->optionalPackage('brotli', ...cmake_boolean_args('CURL_BROTLI'))
+            ->addConfigureArgs(
+                '-DBUILD_CURL_EXE=OFF',
+                '-DZSTD_LIBRARY=zstd_static.lib',
+                '-DBUILD_TESTING=OFF',
+                '-DBUILD_EXAMPLES=OFF',
+                '-DUSE_LIBIDN2=OFF',
+                '-DCURL_USE_LIBPSL=OFF',
+                '-DUSE_WINDOWS_SSPI=ON',
+                '-DCURL_USE_SCHANNEL=ON',
+                '-DCURL_USE_OPENSSL=OFF',
+                '-DCURL_ENABLE_SSL=ON',
+                '-DUSE_NGHTTP2=ON',
+                '-DSHARE_LIB_OBJECT=OFF',
+                '-DCURL_USE_LIBSSH2=ON',
+                '-DENABLE_IPV6=ON',
+            )
+            ->build();
+        // move libcurl.lib to libcurl_a.lib
+        rename("{$lib->getLibDir()}\\libcurl.lib", "{$lib->getLibDir()}\\libcurl_a.lib");
+        FileSystem::replaceFileStr("{$lib->getIncludeDir()}\\curl\\curl.h", '#ifdef CURL_STATICLIB', '#if 1');
     }
 
     #[BuildFor('Linux')]

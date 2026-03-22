@@ -176,6 +176,12 @@ class WindowsCMakeExecutor extends Executor
         return implode(' ', array_merge($this->configure_args, $this->getDefaultCMakeArgs()));
     }
 
+    public function setWorkingDir(string $dir): static
+    {
+        $this->cmd = $this->cmd->cd($dir);
+        return $this;
+    }
+
     /**
      * Returns the default CMake args.
      */
@@ -207,12 +213,12 @@ class WindowsCMakeExecutor extends Executor
     private function initBuildDir(): void
     {
         if ($this->build_dir === null) {
-            $this->build_dir = "{$this->package->getSourceDir()}\\build";
+            $this->build_dir = "{$this->package->getSourceRoot()}\\build";
         }
     }
 
     private function initCmd(): void
     {
-        $this->cmd = cmd()->cd($this->package->getSourceDir());
+        $this->cmd = cmd()->cd($this->package->getSourceRoot());
     }
 }

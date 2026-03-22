@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 
 #[Library('libwebp')]
 class libwebp extends LibraryPackage
@@ -40,5 +41,24 @@ int main() { return _mm256_cvtsi256_si32(_mm256_setzero_si256()); }';
         // patch pkgconfig
         $this->patchPkgconfPrefix(patch_option: PKGCONF_PATCH_PREFIX | PKGCONF_PATCH_LIBDIR);
         $this->patchPkgconfPrefix(['libsharpyuv.pc'], PKGCONF_PATCH_CUSTOM, ['/^includedir=.*$/m', 'includedir=${prefix}/include/webp']);
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(): void
+    {
+        WindowsCMakeExecutor::create($this)
+            ->addConfigureArgs(
+                '-DWEBP_BUILD_EXTRAS=OFF',
+                '-DWEBP_BUILD_ANIM_UTILS=OFF',
+                '-DWEBP_BUILD_CWEBP=OFF',
+                '-DWEBP_BUILD_DWEBP=OFF',
+                '-DWEBP_BUILD_GIF2WEBP=OFF',
+                '-DWEBP_BUILD_IMG2WEBP=OFF',
+                '-DWEBP_BUILD_VWEBP=OFF',
+                '-DWEBP_BUILD_WEBPINFO=OFF',
+                '-DWEBP_BUILD_WEBPMUX=OFF',
+                '-DWEBP_BUILD_FUZZTEST=OFF',
+            )
+            ->build();
     }
 }

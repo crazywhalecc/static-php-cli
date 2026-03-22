@@ -8,10 +8,26 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 
 #[Library('nghttp2')]
 class nghttp2
 {
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DENABLE_SHARED_LIB=OFF',
+                '-DENABLE_STATIC_LIB=ON',
+                '-DENABLE_STATIC_CRT=ON',
+                '-DENABLE_LIB_ONLY=ON',
+                '-DENABLE_DOC=OFF',
+                '-DBUILD_TESTING=OFF',
+            )
+            ->build();
+    }
+
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib): void

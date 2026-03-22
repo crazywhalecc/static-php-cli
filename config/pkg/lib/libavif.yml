@@ -16,3 +16,5 @@ libavif:
     - libpng
   static-libs@unix:
     - libavif.a
+  static-libs@windows:
+    - avif.lib
