@@ -32,6 +32,7 @@ class zlib
             'zlibstatic.lib',
             'zs.lib',
             'libzs.lib',
+            'libz.lib',
         ];
         foreach ($detect_list as $item) {
             if (file_exists("{$lib->getLibDir()}\\{$item}")) {
