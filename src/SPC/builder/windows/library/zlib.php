@@ -35,6 +35,7 @@ class zlib extends WindowsLibraryBase
             'zlibstatic.lib',
             'zs.lib',
             'libzs.lib',
+            'libz.lib',
         ];
         foreach ($detect_list as $item) {
             if (file_exists(BUILD_LIB_PATH . '\\' . $item)) {
