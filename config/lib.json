@@ -355,6 +355,9 @@
         "static-libs-unix": [
             "libaom.a"
         ],
+        "static-libs-windows": [
+            "aom.lib"
+        ],
         "cpp-library": true
     },
     "libargon2": {
