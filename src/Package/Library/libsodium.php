@@ -7,6 +7,7 @@ namespace Package\Library;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Attribute\Package\PatchBeforeBuild;
+use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Exception\BuildFailureException;
 use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Package\LibraryPackage;
@@ -19,11 +20,11 @@ use StaticPHP\Util\System\WindowsUtil;
 class libsodium
 {
     #[PatchBeforeBuild]
+    #[PatchDescription('Replace SODIUM_STATIC define guard with unconditional #if 1 for MSVC static linking')]
     public function patchBeforeBuild(LibraryPackage $lib): void
     {
-        if (SystemTarget::getTargetOS() === 'Windows') {
-            FileSystem::replaceFileStr("{$lib->getSourceDir()}\\src\\libsodium\\include\\sodium\\export.h", '#ifdef SODIUM_STATIC', '#if 1');
-        }
+        spc_skip_if(SystemTarget::getTargetOS() !== 'Windows', 'This patch is only for Windows builds.');
+        FileSystem::replaceFileStr($lib->getSourceDir() . '\src\libsodium\include\sodium\export.h', '#ifdef SODIUM_STATIC', '#if 1');
     }
 
     #[BuildFor('Linux')]
