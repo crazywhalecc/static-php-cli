@@ -143,9 +143,7 @@
             "zlib"
         ],
         "lib-suggests": [
-            "libpng",
-            "bzip2",
-            "brotli"
+            "libpng"
         ]
     },
     "gettext": {
