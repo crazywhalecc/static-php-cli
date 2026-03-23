@@ -143,9 +143,7 @@
             "zlib"
         ],
         "lib-suggests": [
-            "libpng",
-            "bzip2",
-            "brotli"
+            "libpng"
         ]
     },
     "gettext": {
@@ -354,6 +352,9 @@
         "source": "libaom",
         "static-libs-unix": [
             "libaom.a"
+        ],
+        "static-libs-windows": [
+            "aom.lib"
         ],
         "cpp-library": true
     },
