@@ -10,3 +10,5 @@ sqlite:
     - sqlite3ext.h
   static-libs@unix:
     - libsqlite3.a
+  static-libs@windows:
+    - libsqlite3_a.lib
