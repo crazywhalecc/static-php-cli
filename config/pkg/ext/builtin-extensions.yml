@@ -342,6 +342,6 @@ ext-zlib:
     - zlib
   php-extension:
     arg-type: custom
-    arg-type@windows: with
+    arg-type@windows: enable
     build-with-php: true
     build-shared: false
