@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Command;
 
+use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Registry\PackageLoader;
@@ -29,6 +30,7 @@ class InstallPackageCommand extends BaseCommand
                 return array_filter($packages, fn ($name) => str_starts_with($name, $val));
             }
         );
+        $this->getDefinition()->addOptions(DownloaderOptions::getConsoleOptions('dl'));
     }
 
     public function handle(): int
