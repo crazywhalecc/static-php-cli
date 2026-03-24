@@ -43,6 +43,14 @@
     "calendar": {
         "type": "builtin"
     },
+    "com_dotnet": {
+        "support": {
+            "BSD": "no",
+            "Linux": "no",
+            "Darwin": "no"
+        },
+        "type": "builtin"
+    },
     "ctype": {
         "type": "builtin"
     },
@@ -126,6 +134,14 @@
         "ext-suggests": [
             "sockets"
         ]
+    },
+    "excimer": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-excimer"
     },
     "exif": {
         "type": "builtin"
@@ -232,11 +248,13 @@
             "BSD": "wip"
         },
         "type": "external",
-        "source": "grpc",
+        "source": "ext-grpc",
         "arg-type-unix": "enable-path",
         "cpp-extension": true,
         "lib-depends": [
-            "grpc"
+            "zlib",
+            "openssl",
+            "libcares"
         ]
     },
     "iconv": {
@@ -408,8 +426,7 @@
         "ext-depends": [
             "zlib",
             "session"
-        ],
-        "build-with-php": true
+        ]
     },
     "memcached": {
         "support": {
@@ -485,6 +502,40 @@
         "build-with-php": true,
         "lib-depends": [
             "zlib"
+        ]
+    },
+    "mysqlnd_ed25519": {
+        "type": "external",
+        "source": "mysqlnd_ed25519",
+        "arg-type": "enable",
+        "target": [
+            "shared"
+        ],
+        "ext-depends": [
+            "mysqlnd"
+        ],
+        "lib-depends": [
+            "libsodium"
+        ],
+        "lib-suggests": [
+            "openssl"
+        ]
+    },
+    "mysqlnd_parsec": {
+        "type": "external",
+        "source": "mysqlnd_parsec",
+        "arg-type": "enable",
+        "target": [
+            "shared"
+        ],
+        "ext-depends": [
+            "mysqlnd"
+        ],
+        "lib-depends": [
+            "libsodium"
+        ],
+        "lib-suggests": [
+            "openssl"
         ]
     },
     "oci8": {
@@ -566,6 +617,13 @@
         },
         "type": "builtin",
         "unix-only": true
+    },
+    "pcov": {
+        "type": "external",
+        "source": "pcov",
+        "target": [
+            "shared"
+        ]
     },
     "pdo": {
         "type": "builtin"

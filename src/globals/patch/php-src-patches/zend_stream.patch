@@ -1,0 +1,12 @@
+--- php-8.0.0-src/Zend/zend_stream.c	2020-11-24 17:04:03.000000000 +0000
++++ php-8.0.0-micro/Zend/zend_stream.c	2020-12-03 07:01:36.375355300 +0000
+@@ -23,7 +23,9 @@
+ #include "zend_compile.h"
+ #include "zend_stream.h"
+ 
++#if !defined(_CRT_INTERNAL_NONSTDC_NAMES) || !_CRT_INTERNAL_NONSTDC_NAMES
+ ZEND_DLIMPORT int isatty(int fd);
++#endif
+ 
+ static ssize_t zend_stream_stdio_reader(void *handle, char *buf, size_t len) /* {{{ */
+ {

@@ -283,11 +283,14 @@ class LinuxBuilder extends UnixBuilderBase
 
         // process libphp.so for shared embed
         $libphpSo = BUILD_LIB_PATH . '/libphp.so';
+        $libphpSoDest = BUILD_LIB_PATH . '/libphp.so';
         if (file_exists($libphpSo)) {
-            // post actions: rename libphp.so to libphp-<release>.so if -release is set in LDFLAGS
-            $this->processLibphpSoFile($libphpSo);
             // deploy libphp.so
-            $this->deployBinary($libphpSo, $libphpSo, false);
+            preg_match('/-release\s+(\S*)/', getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $matches);
+            if (!empty($matches[1])) {
+                $libphpSoDest = str_replace('.so', '-' . $matches[1] . '.so', $libphpSo);
+            }
+            $this->deployBinary($libphpSo, $libphpSoDest, false);
         }
 
         // process shared extensions build-with-php
@@ -322,74 +325,6 @@ class LinuxBuilder extends UnixBuilderBase
             'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
             'EXTRA_LDFLAGS_PROGRAM' => "-L{$lib} {$static} -pie",
         ]);
-    }
-
-    private function processLibphpSoFile(string $libphpSo): void
-    {
-        $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '';
-        $libDir = BUILD_LIB_PATH;
-        $modulesDir = BUILD_MODULES_PATH;
-        $realLibName = 'libphp.so';
-        $cwd = getcwd();
-
-        if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
-            $release = $matches[1];
-            $realLibName = "libphp-{$release}.so";
-            $libphpRelease = "{$libDir}/{$realLibName}";
-            if (!file_exists($libphpRelease) && file_exists($libphpSo)) {
-                rename($libphpSo, $libphpRelease);
-            }
-            if (file_exists($libphpRelease)) {
-                chdir($libDir);
-                if (file_exists($libphpSo)) {
-                    unlink($libphpSo);
-                }
-                symlink($realLibName, 'libphp.so');
-                shell()->exec(sprintf(
-                    'patchelf --set-soname %s %s',
-                    escapeshellarg($realLibName),
-                    escapeshellarg($libphpRelease)
-                ));
-            }
-            if (is_dir($modulesDir)) {
-                chdir($modulesDir);
-                foreach ($this->getExts() as $ext) {
-                    if (!$ext->isBuildShared()) {
-                        continue;
-                    }
-                    $name = $ext->getName();
-                    $versioned = "{$name}-{$release}.so";
-                    $unversioned = "{$name}.so";
-                    $src = "{$modulesDir}/{$versioned}";
-                    $dst = "{$modulesDir}/{$unversioned}";
-                    if (is_file($src)) {
-                        rename($src, $dst);
-                        shell()->exec(sprintf(
-                            'patchelf --set-soname %s %s',
-                            escapeshellarg($unversioned),
-                            escapeshellarg($dst)
-                        ));
-                    }
-                }
-            }
-            chdir($cwd);
-        }
-
-        $target = "{$libDir}/{$realLibName}";
-        if (file_exists($target)) {
-            [, $output] = shell()->execWithResult('readelf -d ' . escapeshellarg($target));
-            $output = implode("\n", $output);
-            if (preg_match('/SONAME.*\[(.+)]/', $output, $sonameMatch)) {
-                $currentSoname = $sonameMatch[1];
-                if ($currentSoname !== basename($target)) {
-                    shell()->exec(sprintf(
-                        'patchelf --set-soname %s %s',
-                        escapeshellarg(basename($target)),
-                        escapeshellarg($target)
-                    ));
-                }
-            }
-        }
     }
 
     /**

@@ -3,7 +3,7 @@
 set -e
 
 # This file is using docker to run commands
-SPC_DOCKER_VERSION=v6
+SPC_DOCKER_VERSION=v7
 
 # Detect docker can run
 if ! which docker >/dev/null; then
@@ -108,8 +108,7 @@ RUN apk update; \
         wget \
         xz \
         gettext-dev \
-        binutils-gold \
-        patchelf
+        binutils-gold
 
 RUN curl -#fSL https://dl.static-php.dev/static-php-cli/bulk/php-8.4.4-cli-linux-\$(uname -m).tar.gz | tar -xz -C /usr/local/bin && \
     chmod +x /usr/local/bin/php
@@ -123,6 +122,7 @@ COPY ./composer.* /app/
 ADD ./bin /app/bin
 RUN composer install --no-dev
 ADD ./config /app/config
+ADD ./spc.registry.json /app/spc.registry.json
 RUN bin/spc doctor --auto-fix
 RUN bin/spc install-pkg upx
 

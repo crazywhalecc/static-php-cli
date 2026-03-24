@@ -1,0 +1,23 @@
+ext-memcached:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: memcached
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - libmemcached
+  depends@unix:
+    - libmemcached
+    - fastlz
+    - ext-session
+    - ext-zlib
+  suggests:
+    - zstd
+    - ext-igbinary
+    - ext-msgpack
+    - ext-session
+  php-extension:
+    arg-type: '--enable-memcached@shared_suffix@ --with-zlib-dir=@build_root_path@'

@@ -45,4 +45,11 @@ class spx extends Extension
         FileSystem::copy($this->source_dir . '/src/php_spx.h', $this->source_dir . '/php_spx.h');
         return true;
     }
+
+    public function getSharedExtensionEnv(): array
+    {
+        $env = parent::getSharedExtensionEnv();
+        $env['SPX_SHARED_LIBADD'] = $env['LIBS'];
+        return $env;
+    }
 }

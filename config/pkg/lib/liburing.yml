@@ -1,0 +1,19 @@
+liburing:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: axboe/liburing
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+      license: LGPL-2.1-or-later
+  headers@linux:
+    - liburing/
+    - liburing.h
+  pkg-configs:
+    - liburing
+    - liburing-ffi
+  static-libs@linux:
+    - liburing.a
+    - liburing-ffi.a

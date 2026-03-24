@@ -1,0 +1,12 @@
+libffi-win:
+  type: library
+  artifact:
+    source:
+      type: git
+      rev: master
+      url: 'https://github.com/static-php/libffi-win.git'
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  static-libs@windows:
+    - libffi.lib

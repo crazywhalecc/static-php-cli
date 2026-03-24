@@ -1,0 +1,4 @@
+zig:
+  type: target
+  artifact:
+    binary: custom

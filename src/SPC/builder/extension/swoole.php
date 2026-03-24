@@ -17,6 +17,7 @@ class swoole extends Extension
     public function patchBeforeMake(): bool
     {
         $patched = parent::patchBeforeMake();
+        FileSystem::replaceFileStr($this->source_dir . '/ext-src/php_swoole_private.h', 'PHP_VERSION_ID > 80500', 'PHP_VERSION_ID >= 80600');
         if ($this->builder instanceof MacOSBuilder) {
             // Fix swoole with event extension <util.h> conflict bug
             $util_path = shell()->execWithResult('xcrun --show-sdk-path', false)[1][0] . '/usr/include/util.h';

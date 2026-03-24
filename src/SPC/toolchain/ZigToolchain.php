@@ -67,7 +67,8 @@ class ZigToolchain implements ToolchainInterface
         $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: getenv('CFLAGS') ?: '';
         $has_avx512 = str_contains($cflags, '-mavx512') || str_contains($cflags, '-march=x86-64-v4');
         if (!$has_avx512) {
-            GlobalEnvManager::putenv('SPC_EXTRA_PHP_VARS=php_cv_have_avx512=no php_cv_have_avx512vbmi=no');
+            $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+            GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=php_cv_have_avx512=no php_cv_have_avx512vbmi=no {$extra_vars}");
         }
     }
 

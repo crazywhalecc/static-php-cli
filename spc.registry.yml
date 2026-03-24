@@ -1,0 +1,20 @@
+name: core
+autoload: vendor/autoload.php
+doctor:
+  psr-4:
+    StaticPHP\Doctor\Item: src/StaticPHP/Doctor/Item
+package:
+  psr-4:
+    Package: src/Package
+  config:
+    - config/pkg/lib/
+    - config/pkg/target/
+    - config/pkg/ext/
+artifact:
+  config:
+    - config/artifact/
+  psr-4:
+    Package\Artifact: src/Package/Artifact
+command:
+  psr-4:
+    Package\Command: src/Package/Command

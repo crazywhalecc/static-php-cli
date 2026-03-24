@@ -1,0 +1,18 @@
+ext-xlswriter:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: xlswriter
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  depends:
+    - ext-zlib
+    - ext-zip
+  suggests:
+    - openssl
+  php-extension:
+    support:
+      BSD: wip
+    arg-type: custom

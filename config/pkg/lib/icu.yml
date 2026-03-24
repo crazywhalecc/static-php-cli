@@ -1,0 +1,25 @@
+icu:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: unicode-org/icu
+      match: icu4c.+-src\.tgz
+      prefer-stable: true
+    binary:
+      windows-x86_64: { type: url, url: 'https://dl.static-php.dev/static-php-cli/deps/icu-static-windows-x64/icu-static-windows-x64.zip', extract: hosted }
+    metadata:
+      license-files: ['@/icu.txt']
+      license: ICU
+  headers@windows:
+    - unicode
+  lang: cpp
+  pkg-configs:
+    - icu-uc
+    - icu-i18n
+    - icu-io
+  static-libs@windows:
+    - icudt.lib
+    - icuin.lib
+    - icuio.lib
+    - icuuc.lib

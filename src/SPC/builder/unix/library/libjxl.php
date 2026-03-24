@@ -29,13 +29,17 @@ trait libjxl
             );
 
         if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            $cmake->addConfigureArgs(
-                '-DCXX_MAVX512F_SUPPORTED:BOOL=FALSE',
-                '-DCXX_MAVX512DQ_SUPPORTED:BOOL=FALSE',
-                '-DCXX_MAVX512CD_SUPPORTED:BOOL=FALSE',
-                '-DCXX_MAVX512BW_SUPPORTED:BOOL=FALSE',
-                '-DCXX_MAVX512VL_SUPPORTED:BOOL=FALSE'
-            );
+            $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: getenv('CFLAGS') ?: '';
+            $has_avx512 = str_contains($cflags, '-mavx512') || str_contains($cflags, '-march=x86-64-v4');
+            if (!$has_avx512) {
+                $cmake->addConfigureArgs(
+                    '-DCXX_MAVX512F_SUPPORTED:BOOL=FALSE',
+                    '-DCXX_MAVX512DQ_SUPPORTED:BOOL=FALSE',
+                    '-DCXX_MAVX512CD_SUPPORTED:BOOL=FALSE',
+                    '-DCXX_MAVX512BW_SUPPORTED:BOOL=FALSE',
+                    '-DCXX_MAVX512VL_SUPPORTED:BOOL=FALSE'
+                );
+            }
         }
 
         $cmake->build();

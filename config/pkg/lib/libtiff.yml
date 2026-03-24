@@ -1,0 +1,21 @@
+libtiff:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://download.osgeo.org/libtiff/'
+      regex: '/href="(?<file>tiff-(?<version>[^"]+)\.tar\.xz)"/'
+    metadata:
+      license-files: [LICENSE.md]
+      license: libtiff
+  depends:
+    - zlib
+    - libjpeg
+  suggests@unix:
+    - lerc
+    - libwebp
+    - jbig
+    - xz
+    - zstd
+  static-libs@unix:
+    - libtiff.a
