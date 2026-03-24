@@ -12,7 +12,13 @@ libxml2:
     - libiconv
     - zlib
     - xz
+  depends@windows:
+    - zlib
+    - libiconv-win
   headers:
     - libxml2
   pkg-configs:
     - libxml-2.0
+  static-libs@windows:
+    - libxml2s.lib
+    - libxml2_a.lib

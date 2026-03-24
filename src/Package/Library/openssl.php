@@ -6,13 +6,72 @@ namespace Package\Library;
 
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\Package\Validate;
+use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\PackageBuilder;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\System\LinuxUtil;
+use StaticPHP\Util\System\WindowsUtil;
 
 #[Library('openssl')]
 class openssl
 {
+    #[Validate]
+    public function validate(): void
+    {
+        if (SystemTarget::getTargetOS() === 'Windows') {
+            global $argv;
+            $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl-' . arch2gnu(php_uname('m')) . '-win\perl\bin\perl.exe';
+            $perl = file_exists($perl_path_native) ? ($perl_path_native) : WindowsUtil::findCommand('perl.exe');
+            if ($perl === null) {
+                throw new EnvironmentException(
+                    'You need to install perl first!',
+                    "Please run \"{$argv[0]} doctor\" to fix the environment.",
+                );
+            }
+            ApplicationContext::set('perl', $perl);
+        }
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib, PackageBuilder $builder): void
+    {
+        $perl = ApplicationContext::get('perl');
+        $cmd = cmd()->cd($lib->getSourceDir())
+            ->exec(
+                "{$perl} Configure zlib VC-WIN64A " .
+                'no-shared ' .
+                '--prefix=' . quote($lib->getBuildRootPath()) . ' ' .
+                '--with-zlib-lib=' . quote($lib->getLibDir()) . ' ' .
+                '--with-zlib-include=' . quote($lib->getIncludeDir()) . ' ' .
+                '--release ' .
+                'no-legacy ' .
+                'no-tests ' .
+                '/FS'
+            );
+
+        // patch zlib
+        FileSystem::replaceFileStr("{$lib->getSourceDir()}\\Makefile", 'ZLIB1', 'zlibstatic.lib');
+        // patch debug: https://stackoverflow.com/questions/18486243/how-do-i-build-openssl-statically-linked-against-windows-runtime
+        FileSystem::replaceFileStr("{$lib->getSourceDir()}\\Makefile", '/debug', '/incremental:no /opt:icf /dynamicbase /nxcompat /ltcg /nodefaultlib:msvcrt');
+
+        // build
+        $cmd->exec("jom.exe /j{$builder->concurrency} install_dev CNF_LDFLAGS=\"/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:msvcrt /NODEFAULTLIB:msvcrtd /DEFAULTLIB:libcmt /LIBPATH:{$lib->getLibDir()} zlibstatic.lib\"");
+
+        // copy necessary c files
+        FileSystem::copy("{$lib->getSourceDir()}\\ms\\applink.c", "{$lib->getIncludeDir()}\\openssl\\applink.c");
+
+        // patch cmake outputs
+        FileSystem::replaceFileRegex(
+            "{$lib->getLibDir()}\\cmake\\OpenSSL\\OpenSSLConfig.cmake",
+            '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m',
+            'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}" ws2_32.lib gdi32.lib advapi32.lib crypt32.lib user32.lib)'
+        );
+    }
+
     #[BuildFor('Darwin')]
     public function buildForDarwin(LibraryPackage $pkg): void
     {

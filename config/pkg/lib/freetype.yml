@@ -11,6 +11,7 @@ freetype:
   depends:
     - zlib
   suggests:
+    - libpng
     - bzip2
     - brotli
   headers@unix:

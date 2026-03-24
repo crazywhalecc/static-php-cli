@@ -13,3 +13,6 @@ onig:
     - oniguruma.h
   static-libs@unix:
     - libonig.a
+  static-libs@windows:
+    - onig.lib
+    - onig_a.lib

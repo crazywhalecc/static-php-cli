@@ -142,6 +142,9 @@ class FileSystem
         logger()->debug("Copying file from {$from} to {$to}");
         $dst_path = FileSystem::convertPath($to);
         $src_path = FileSystem::convertPath($from);
+        if ($src_path === $dst_path) {
+            return true;
+        }
         if (!copy($src_path, $dst_path)) {
             throw new FileSystemException('Cannot copy file from ' . $src_path . ' to ' . $dst_path);
         }
@@ -402,6 +405,7 @@ class FileSystem
     public static function replacePathVariable(string $path): string
     {
         $replacement = [
+            '{build_root_path}' => BUILD_ROOT_PATH,
             '{pkg_root_path}' => PKG_ROOT_PATH,
             '{php_sdk_path}' => getenv('PHP_SDK_PATH') ? getenv('PHP_SDK_PATH') : WORKING_DIR . '/php-sdk-binary-tools',
             '{working_dir}' => WORKING_DIR,

@@ -73,6 +73,11 @@ class postgresql extends LibraryPackage
 
         FileSystem::resetDir("{$this->getSourceDir()}/build");
 
+        if ($installer->isPackageResolved('ldap')) {
+            $ldap_libs = clean_spaces(implode(' ', PkgConfigUtil::getLibsArray('ldap')));
+            FileSystem::replaceFileStr("{$this->getSourceDir()}/configure", '-lldap', $ldap_libs);
+        }
+
         // PHP source relies on the non-private encoding functions in libpgcommon.a
         FileSystem::replaceFileStr(
             "{$this->getSourceDir()}/src/common/Makefile",

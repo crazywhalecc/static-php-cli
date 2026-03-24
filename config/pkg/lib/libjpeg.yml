@@ -7,6 +7,10 @@ libjpeg:
     metadata:
       license-files: [LICENSE.md]
       license: IJG
+  suggests@windows:
+    - zlib
   static-libs@unix:
     - libjpeg.a
     - libturbojpeg.a
+  static-libs@windows:
+    - libjpeg_a.lib

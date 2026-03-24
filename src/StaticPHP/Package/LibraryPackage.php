@@ -44,18 +44,20 @@ class LibraryPackage extends Package
                 return false;
             }
         }
-        foreach (PackageConfig::get($this->getName(), 'pkg-configs', []) as $pc) {
-            if (!str_ends_with($pc, '.pc')) {
-                $pc .= '.pc';
+        if (SystemTarget::getTargetOS() !== 'Windows') {
+            foreach (PackageConfig::get($this->getName(), 'pkg-configs', []) as $pc) {
+                if (!str_ends_with($pc, '.pc')) {
+                    $pc .= '.pc';
+                }
+                if (!file_exists("{$this->getLibDir()}/pkgconfig/{$pc}")) {
+                    return false;
+                }
             }
-            if (!file_exists("{$this->getLibDir()}/pkgconfig/{$pc}")) {
-                return false;
-            }
-        }
-        foreach (PackageConfig::get($this->getName(), 'static-bins', []) as $bin) {
-            $path = FileSystem::isRelativePath($bin) ? "{$this->getBinDir()}/{$bin}" : $bin;
-            if (!file_exists($path)) {
-                return false;
+            foreach (PackageConfig::get($this->getName(), 'static-bins', []) as $bin) {
+                $path = FileSystem::isRelativePath($bin) ? "{$this->getBinDir()}/{$bin}" : $bin;
+                if (!file_exists($path)) {
+                    return false;
+                }
             }
         }
         return true;

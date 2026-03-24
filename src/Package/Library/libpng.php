@@ -8,6 +8,8 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
+use StaticPHP\Util\FileSystem;
 
 #[Library('libpng')]
 class libpng
@@ -43,5 +45,22 @@ class libpng
         // patch pkgconfig
         $lib->patchPkgconfPrefix(['libpng16.pc']);
         $lib->patchLaDependencyPrefix();
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DSKIP_INSTALL_PROGRAM=ON',
+                '-DSKIP_INSTALL_FILES=ON',
+                '-DPNG_STATIC=ON',
+                '-DPNG_SHARED=OFF',
+                '-DPNG_TESTS=OFF',
+            )
+            ->build();
+
+        // libpng16_static.lib to libpng_a.lib
+        FileSystem::copy("{$lib->getLibDir()}\\libpng16_static.lib", "{$lib->getLibDir()}\\libpng_a.lib");
     }
 }

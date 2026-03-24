@@ -7,12 +7,33 @@ namespace Package\Library;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
 
 #[Library('libxml2')]
 class libxml2
 {
+    #[BuildFor('Windows')]
+    public function buildForWindows(LibraryPackage $lib, PackageInstaller $installer): void
+    {
+        $iconv_win = $installer->getLibraryPackage('libiconv-win');
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DLIBXML2_WITH_ICONV=ON',
+                "-DIconv_LIBRARY={$iconv_win->getLibDir()}",
+                "-DIconv_INCLUDE_DIR={$iconv_win->getIncludeDir()}",
+                '-DLIBXML2_WITH_ZLIB=ON',
+                '-DLIBXML2_WITH_PYTHON=OFF',
+                '-DLIBXML2_WITH_LZMA=OFF',
+                '-DLIBXML2_WITH_PROGRAMS=OFF',
+                '-DLIBXML2_WITH_TESTS=OFF',
+            )
+            ->build();
+        FileSystem::copy("{$lib->getLibDir()}\\libxml2s.lib", "{$lib->getLibDir()}\\libxml2_a.lib");
+    }
+
     #[BuildFor('Linux')]
     public function buildForLinux(LibraryPackage $lib): void
     {

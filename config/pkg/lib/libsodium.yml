@@ -13,3 +13,5 @@ libsodium:
     - libsodium
   static-libs@unix:
     - libsodium.a
+  static-libs@windows:
+    - libsodium.lib

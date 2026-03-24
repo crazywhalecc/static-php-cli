@@ -22,3 +22,5 @@ nghttp2:
     - libnghttp2
   static-libs@unix:
     - libnghttp2.a
+  static-libs@windows:
+    - nghttp2.lib

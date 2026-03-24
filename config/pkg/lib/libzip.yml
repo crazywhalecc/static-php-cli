@@ -8,9 +8,10 @@ libzip:
       prefer-stable: true
     metadata:
       license-files: [LICENSE]
-  depends@unix:
+      license: BSD-3-Clause
+  depends:
     - zlib
-  suggests@unix:
+  suggests:
     - bzip2
     - xz
     - zstd
@@ -20,3 +21,5 @@ libzip:
     - zipconf.h
   static-libs@unix:
     - libzip.a
+  static-libs@windows:
+    - libzip_a.lib

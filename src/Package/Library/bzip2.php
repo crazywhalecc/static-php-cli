@@ -20,6 +20,17 @@ class bzip2
         FileSystem::replaceFileStr($lib->getSourceDir() . '/Makefile', 'CFLAGS=-Wall', 'CFLAGS=-fPIC -Wall');
     }
 
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $package): void
+    {
+        cmd()->cd($package->getSourceDir())
+            ->exec('nmake /nologo /f Makefile.msc CFLAGS="-DWIN32 -MT -Ox -D_FILE_OFFSET_BITS=64 -nologo" clean')
+            ->exec('nmake /nologo /f Makefile.msc CFLAGS="-DWIN32 -MT -Ox -D_FILE_OFFSET_BITS=64 -nologo" lib');
+        FileSystem::copy("{$package->getSourceDir()}\\libbz2.lib", "{$package->getLibDir()}\\libbz2.lib");
+        FileSystem::copy("{$package->getSourceDir()}\\libbz2.lib", "{$package->getLibDir()}\\libbz2_a.lib");
+        FileSystem::copy("{$package->getSourceDir()}\\bzlib.h", "{$package->getIncludeDir()}\\bzlib.h");
+    }
+
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib, PackageBuilder $builder): void

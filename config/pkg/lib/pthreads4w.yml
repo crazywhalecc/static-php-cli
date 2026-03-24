@@ -1,0 +1,12 @@
+pthreads4w:
+  type: library
+  artifact:
+    source:
+      type: git
+      rev: master
+      url: 'https://git.code.sf.net/p/pthreads4w/code'
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  static-libs@windows:
+    - libpthreadVC3.lib

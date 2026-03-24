@@ -20,7 +20,7 @@ index 8f05686367..c155028233 100644
  	REGISTER_INI_ENTRIES();
  
 -	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0;
-+	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0 || strcmp(sapi_module.name, "micro") == 1;
++	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0 || strcmp(sapi_module.name, "micro") == 0;
  
  	zend_ffi_exception_ce = register_class_FFI_Exception(zend_ce_error);
  
@@ -103,7 +103,7 @@ index 4287045511..eab0311d07 100644
  			return NULL;
  		}
 -		if (!strcmp(sapi_module.name, "cli")) {
-+		if (!strcmp(sapi_module.name, "cli") && !strcmp(sapi_module.name, "micro")) {
++		if (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "micro")) {
  			static int cli_in = 0;
  			fd = STDIN_FILENO;
  			if (cli_in) {
@@ -112,7 +112,7 @@ index 4287045511..eab0311d07 100644
  #endif
  	} else if (!strcasecmp(path, "stdout")) {
 -		if (!strcmp(sapi_module.name, "cli")) {
-+		if (!strcmp(sapi_module.name, "cli") && !strcmp(sapi_module.name, "micro")) {
++		if (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "micro")) {
  			static int cli_out = 0;
  			fd = STDOUT_FILENO;
  			if (cli_out++) {
@@ -121,7 +121,7 @@ index 4287045511..eab0311d07 100644
  #endif
  	} else if (!strcasecmp(path, "stderr")) {
 -		if (!strcmp(sapi_module.name, "cli")) {
-+		if (!strcmp(sapi_module.name, "cli") && !strcmp(sapi_module.name, "micro")) {
++		if (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "micro")) {
  			static int cli_err = 0;
  			fd = STDERR_FILENO;
  			if (cli_err++) {
@@ -130,7 +130,7 @@ index 4287045511..eab0311d07 100644
  		int		   dtablesize;
  
 -		if (strcmp(sapi_module.name, "cli")) {
-+		if (strcmp(sapi_module.name, "cli") || strcmp(sapi_module.name, "micro")) {
++		if (strcmp(sapi_module.name, "cli") && strcmp(sapi_module.name, "micro")) {
  			if (options & REPORT_ERRORS) {
  				php_error_docref(NULL, E_WARNING, "Direct access to file descriptors is only available from command-line PHP");
  			}

@@ -13,3 +13,5 @@ libyaml:
     - yaml.h
   static-libs@unix:
     - libyaml.a
+  static-libs@windows:
+    - yaml.lib

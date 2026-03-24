@@ -17,3 +17,5 @@ zstd:
     - libzstd
   static-libs@unix:
     - libzstd.a
+  static-libs@windows:
+    - zstd_static.lib

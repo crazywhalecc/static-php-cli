@@ -8,10 +8,27 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 
 #[Library('ngtcp2')]
 class ngtcp2
 {
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DENABLE_SHARED_LIB=OFF',
+                '-DENABLE_STATIC_LIB=ON',
+                '-DBUILD_STATIC_LIBS=ON',
+                '-DBUILD_SHARED_LIBS=OFF',
+                '-DENABLE_STATIC_CRT=ON',
+                '-DENABLE_LIB_ONLY=ON',
+                '-DENABLE_OPENSSL=ON',
+            )
+            ->build();
+    }
+
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib): void
@@ -25,18 +42,6 @@ class ngtcp2
                     "OPENSSL_CFLAGS=\"-I{$openssl->getIncludeDir()}\"",
                 ]),
                 '--with-openssl=no'
-            )
-            ->optionalPackage('nghttp3', ...ac_with_args('libnghttp3', true))
-            ->optionalPackage(
-                'brotli',
-                fn (LibraryPackage $brotli) => implode(' ', [
-                    '--with-brotlidec=yes',
-                    "LIBBROTLIDEC_CFLAGS=\"-I{$brotli->getIncludeDir()}\"",
-                    "LIBBROTLIDEC_LIBS=\"{$brotli->getStaticLibFiles()}\"",
-                    '--with-libbrotlienc=yes',
-                    "LIBBROTLIENC_CFLAGS=\"-I{$brotli->getIncludeDir()}\"",
-                    "LIBBROTLIENC_LIBS=\"{$brotli->getStaticLibFiles()}\"",
-                ])
             )
             ->appendEnv(['PKG_CONFIG' => '$PKG_CONFIG --static'])
             ->configure('--enable-lib-only')

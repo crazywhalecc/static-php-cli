@@ -11,9 +11,6 @@ ngtcp2:
       license: MIT
   depends:
     - openssl
-  suggests:
-    - nghttp3
-    - brotli
   headers:
     - ngtcp2
   pkg-configs:
@@ -22,3 +19,5 @@ ngtcp2:
   static-libs@unix:
     - libngtcp2.a
     - libngtcp2_crypto_ossl.a
+  static-libs@windows:
+    - ngtcp2.lib

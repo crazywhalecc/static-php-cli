@@ -17,3 +17,5 @@ nghttp3:
     - libnghttp3
   static-libs@unix:
     - libnghttp3.a
+  static-libs@windows:
+    - nghttp3.lib

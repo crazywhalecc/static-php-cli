@@ -16,3 +16,6 @@ bzip2:
     - bzlib.h
   static-libs@unix:
     - libbz2.a
+  static-libs@windows:
+    - libbz2.lib
+    - libbz2_a.lib
