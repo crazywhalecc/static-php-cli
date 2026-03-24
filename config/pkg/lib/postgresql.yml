@@ -5,19 +5,25 @@ postgresql:
       type: ghtagtar
       repo: postgres/postgres
       match: REL_18_\d+
+    binary:
+      windows-x86_64: { type: url, url: 'https://get.enterprisedb.com/postgresql/postgresql-16.8-1-windows-x64-binaries.zip', extract: { lib/libpq.lib: '{build_root_path}/lib/libpq.lib', lib/libpgport.lib: '{build_root_path}/lib/libpgport.lib', lib/libpgcommon.lib: '{build_root_path}/lib/libpgcommon.lib', include/libpq-fe.h: '{build_root_path}/include/libpq-fe.h', include/postgres_ext.h: '{build_root_path}/include/postgres_ext.h', include/pg_config_ext.h: '{build_root_path}/include/pg_config_ext.h', include/libpq/libpq-fs.h: '{build_root_path}/include/libpq/libpq-fs.h' } }
     metadata:
-      license-files: [COPYRIGHT]
+      license-files: ['@/postgresql.txt']
       license: PostgreSQL
-  depends:
+  depends@unix:
     - libiconv
     - libxml2
     - openssl
     - zlib
     - libedit
-  suggests:
+  suggests@unix:
     - icu
     - libxslt
     - ldap
     - zstd
   pkg-configs:
     - libpq
+  static-libs@windows:
+    - libpq.lib
+    - libpgport.lib
+    - libpgcommon.lib

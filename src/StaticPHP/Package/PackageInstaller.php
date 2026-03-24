@@ -323,6 +323,11 @@ class PackageInstaller
             $artifact = $package->getArtifact();
             return $artifact->isBinaryExtracted();
         }
+        // Fallback: if the download cache is missing (e.g. download failed or cache was cleared),
+        // still check whether the files are physically present in buildroot.
+        if ($package instanceof LibraryPackage) {
+            return $package->isInstalled();
+        }
         return false;
     }
 

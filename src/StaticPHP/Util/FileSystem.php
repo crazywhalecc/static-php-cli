@@ -405,6 +405,7 @@ class FileSystem
     public static function replacePathVariable(string $path): string
     {
         $replacement = [
+            '{build_root_path}' => BUILD_ROOT_PATH,
             '{pkg_root_path}' => PKG_ROOT_PATH,
             '{php_sdk_path}' => getenv('PHP_SDK_PATH') ? getenv('PHP_SDK_PATH') : WORKING_DIR . '/php-sdk-binary-tools',
             '{working_dir}' => WORKING_DIR,
