@@ -23,4 +23,15 @@ class qdbm
         $ac->make(SystemTarget::getTargetOS() === 'Darwin' ? 'mac' : '');
         $lib->patchPkgconfPrefix(['qdbm.pc']);
     }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        cmd()->cd($lib->getSourceDir())
+            ->exec('nmake /f VCMakefile');
+        FileSystem::createDir($lib->getLibDir());
+        FileSystem::createDir($lib->getIncludeDir());
+        FileSystem::copy("{$lib->getSourceDir()}\\qdbm_a.lib", "{$lib->getLibDir()}\\qdbm_a.lib");
+        FileSystem::copy("{$lib->getSourceDir()}\\depot.h", "{$lib->getIncludeDir()}\\depot.h");
+    }
 }

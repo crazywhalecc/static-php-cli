@@ -10,3 +10,5 @@ qdbm:
       license: 'GPL-2.0-only OR LGPL-2.1-only'
   static-libs@unix:
     - libqdbm.a
+  static-libs@windows:
+    - qdbm_a.lib
