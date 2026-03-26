@@ -26,7 +26,8 @@ class Downloader
     public static function getPECLInfo(string $name, array $source): array
     {
         $package = $source['pecl'] ?? (str_starts_with($name, 'ext-') ? substr($name, 4) : $name);
-        $api_url = "https://pecl.php.net/rest/r/" . strtolower($package) . '/allreleases.xml';
+        $lp = strtolower($package);
+        $api_url = "https://pecl.php.net/rest/r/{$lp}/allreleases.xml";
         logger()->debug("Fetching {$name} source from PECL: {$api_url}");
         $xml = self::curlExec(
             url: $api_url,
