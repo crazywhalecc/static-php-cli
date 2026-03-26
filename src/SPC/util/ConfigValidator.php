@@ -24,6 +24,7 @@ class ConfigValidator
         'repo' => 'string',     // repository name
         'pecl' => 'string',     // PECL package name
         'match' => 'string',    // match pattern (aaa*bbb)
+        'query' => 'string',    // query string for API requests
         'filename' => 'string', // filename
         'path' => 'string',     // copy path
         'extract' => 'string',  // copy path (alias of path)
@@ -74,8 +75,8 @@ class ConfigValidator
     private const array SOURCE_TYPE_FIELDS = [
         'filelist' => [['url', 'regex'], []],
         'git' => [['url', 'rev'], ['path', 'extract', 'submodules']],
-        'ghtagtar' => [['repo'], ['path', 'extract', 'prefer-stable', 'match']],
-        'ghtar' => [['repo'], ['path', 'extract', 'prefer-stable', 'match']],
+        'ghtagtar' => [['repo'], ['path', 'extract', 'prefer-stable', 'match', 'query']],
+        'ghtar' => [['repo'], ['path', 'extract', 'prefer-stable', 'match', 'query']],
         'ghrel' => [['repo', 'match'], ['path', 'extract', 'prefer-stable']],
         'url' => [['url'], ['filename', 'path', 'extract']],
         'bitbuckettag' => [['repo'], ['path', 'extract']],
