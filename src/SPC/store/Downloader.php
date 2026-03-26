@@ -17,6 +17,42 @@ use SPC\util\SPCTarget;
 class Downloader
 {
     /**
+     * Get latest stable version from PECL
+     *
+     * @param  string             $name   Source name
+     * @param  array              $source Source meta info: [pecl?]
+     * @return array<int, string> [url, filename]
+     */
+    public static function getPECLInfo(string $name, array $source): array
+    {
+        $package = $source['pecl'] ?? (str_starts_with($name, 'ext-') ? substr($name, 4) : $name);
+        $api_url = "https://pecl.php.net/rest/r/" . strtolower($package) . '/allreleases.xml';
+        logger()->debug("Fetching {$name} source from PECL: {$api_url}");
+        $xml = self::curlExec(
+            url: $api_url,
+            retries: self::getRetryAttempts()
+        );
+        $dom = new \SimpleXMLElement($xml);
+        $version = null;
+        if ($source['prefer-stable'] ?? false) {
+            foreach ($dom->r as $release) {
+                if ((string) $release->s === 'stable') {
+                    $version = (string) $release->v;
+                    break;
+                }
+            }
+        }
+        $version ??= isset($dom->r[0]) ? (string) $dom->r[0]->v : null;
+        if ($version === null) {
+            throw new DownloaderException("failed to find any release for {$name} on PECL");
+        }
+        $url = "https://pecl.php.net/get/{$package}-{$version}.tgz";
+        $filename = "{$package}-{$version}.tgz";
+        logger()->info("Found {$name} PECL version: {$version}");
+        return [$url, $filename];
+    }
+
+    /**
      * Get latest version from PIE config (Packagist)
      *
      * @param  string             $name   Source name
@@ -612,6 +648,7 @@ class Downloader
      * @param array{
      *     url?: string,
      *     repo?: string,
+     *     pecl?: string,
      *     rev?: string,
      *     path?: string,
      *     filename?: string,
@@ -631,6 +668,10 @@ class Downloader
     {
         try {
             switch ($type) {
+                case 'pecl': // PECL (latest stable)
+                    [$url, $filename] = self::getPECLInfo($name, $conf);
+                    self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as);
+                    break;
                 case 'pie': // Packagist
                     [$url, $filename] = self::getPIEInfo($name, $conf);
                     self::downloadFile($name, $url, $filename, $conf['path'] ?? $conf['extract'] ?? null, $download_as, hooks: [[CurlHook::class, 'setupGithubToken']]);

@@ -22,6 +22,7 @@ class ConfigValidator
         'regex' => 'string',    // regex pattern
         'rev' => 'string',      // revision/branch
         'repo' => 'string',     // repository name
+        'pecl' => 'string',     // PECL package name
         'match' => 'string',    // match pattern (aaa*bbb)
         'filename' => 'string', // filename
         'path' => 'string',     // copy path
@@ -79,6 +80,7 @@ class ConfigValidator
         'url' => [['url'], ['filename', 'path', 'extract']],
         'bitbuckettag' => [['repo'], ['path', 'extract']],
         'local' => [['dirname'], ['path', 'extract']],
+        'pecl' => [[], ['pecl', 'path', 'prefer-stable']],
         'pie' => [['repo'], ['path']],
         'custom' => [[], ['func']],
     ];

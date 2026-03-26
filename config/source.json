@@ -8,30 +8,25 @@
         "alt": false
     },
     "amqp": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/amqp",
+        "type": "pecl",
         "path": "php-src/ext/amqp",
-        "filename": "amqp.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "apcu": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/APCu",
+        "type": "pecl",
+        "pecl": "APCu",
         "path": "php-src/ext/apcu",
-        "filename": "apcu.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "ast": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/ast",
+        "type": "pecl",
         "path": "php-src/ext/ast",
-        "filename": "ast.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -85,20 +80,16 @@
         }
     },
     "dio": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/dio",
+        "type": "pecl",
         "path": "php-src/ext/dio",
-        "filename": "dio.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "ev": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/ev",
+        "type": "pecl",
         "path": "php-src/ext/ev",
-        "filename": "ev.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -115,10 +106,8 @@
         }
     },
     "ext-ds": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/ds",
+        "type": "pecl",
         "path": "php-src/ext/ds",
-        "filename": "ds.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -134,10 +123,8 @@
         }
     },
     "ext-excimer": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/excimer",
+        "type": "pecl",
         "path": "php-src/ext/excimer",
-        "filename": "excimer.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -162,10 +149,8 @@
         }
     },
     "ext-grpc": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/grpc",
+        "type": "pecl",
         "path": "php-src/ext/grpc",
-        "filename": "grpc.tgz",
         "license": {
             "type": "file",
             "path": [
@@ -174,20 +159,16 @@
         }
     },
     "ext-imagick": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/imagick",
+        "type": "pecl",
         "path": "php-src/ext/imagick",
-        "filename": "imagick.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "ext-imap": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/imap",
+        "type": "pecl",
         "path": "php-src/ext/imap",
-        "filename": "imap.tgz",
         "license": {
             "type": "file",
             "path": [
@@ -207,19 +188,15 @@
         }
     },
     "ext-maxminddb": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/maxminddb",
-        "filename": "ext-maxminddb.tgz",
+        "type": "pecl",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "ext-memcache": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/memcache",
+        "type": "pecl",
         "path": "php-src/ext/memcache",
-        "filename": "memcache.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -235,10 +212,8 @@
         }
     },
     "ext-simdjson": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/simdjson",
+        "type": "pecl",
         "path": "php-src/ext/simdjson",
-        "filename": "simdjson.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -255,40 +230,32 @@
         }
     },
     "ext-ssh2": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/ssh2",
+        "type": "pecl",
         "path": "php-src/ext/ssh2",
-        "filename": "ssh2.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "ext-trader": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/trader",
+        "type": "pecl",
         "path": "php-src/ext/trader",
-        "filename": "trader.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "ext-uuid": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/uuid",
+        "type": "pecl",
         "path": "php-src/ext/uuid",
-        "filename": "uuid.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "ext-uv": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/uv",
+        "type": "pecl",
         "path": "php-src/ext/uv",
-        "filename": "uv.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -305,9 +272,7 @@
         }
     },
     "ext-zip": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/zip",
-        "filename": "ext-zip.tgz",
+        "type": "pecl",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -412,10 +377,8 @@
         }
     },
     "igbinary": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/igbinary",
+        "type": "pecl",
         "path": "php-src/ext/igbinary",
-        "filename": "igbinary.tgz",
         "license": {
             "type": "file",
             "path": "COPYING"
@@ -439,10 +402,8 @@
         }
     },
     "inotify": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/inotify",
+        "type": "pecl",
         "path": "php-src/ext/inotify",
-        "filename": "inotify.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -844,10 +805,8 @@
         }
     },
     "memcached": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/memcached",
+        "type": "pecl",
         "path": "php-src/ext/memcached",
-        "filename": "memcached.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -885,10 +844,8 @@
         }
     },
     "msgpack": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/msgpack",
+        "type": "pecl",
         "path": "php-src/ext/msgpack",
-        "filename": "msgpack.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -988,39 +945,31 @@
         }
     },
     "opentelemetry": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/opentelemetry",
+        "type": "pecl",
         "path": "php-src/ext/opentelemetry",
-        "filename": "opentelemetry.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "parallel": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/parallel",
+        "type": "pecl",
         "path": "php-src/ext/parallel",
-        "filename": "parallel.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "pcov": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/pcov",
-        "filename": "pcov.tgz",
+        "type": "pecl",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "pdo_sqlsrv": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/pdo_sqlsrv",
+        "type": "pecl",
         "path": "php-src/ext/pdo_sqlsrv",
-        "filename": "pdo_sqlsrv.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -1053,10 +1002,8 @@
         }
     },
     "protobuf": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/protobuf",
+        "type": "pecl",
         "path": "php-src/ext/protobuf",
-        "filename": "protobuf.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -1115,10 +1062,8 @@
         }
     },
     "redis": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/redis",
+        "type": "pecl",
         "path": "php-src/ext/redis",
-        "filename": "redis.tgz",
         "license": {
             "type": "file",
             "path": [
@@ -1155,10 +1100,8 @@
         }
     },
     "sqlsrv": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/sqlsrv",
+        "type": "pecl",
         "path": "php-src/ext/sqlsrv",
-        "filename": "sqlsrv.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -1221,20 +1164,16 @@
         }
     },
     "xhprof": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/xhprof",
+        "type": "pecl",
         "path": "php-src/ext/xhprof-src",
-        "filename": "xhprof.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
         }
     },
     "xlswriter": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/xlswriter",
+        "type": "pecl",
         "path": "php-src/ext/xlswriter",
-        "filename": "xlswriter.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
@@ -1252,10 +1191,8 @@
         }
     },
     "yac": {
-        "type": "url",
-        "url": "https://pecl.php.net/get/yac",
+        "type": "pecl",
         "path": "php-src/ext/yac",
-        "filename": "yac.tgz",
         "license": {
             "type": "file",
             "path": "LICENSE"
