@@ -1054,7 +1054,7 @@
     },
     "protobuf": {
         "type": "url",
-        "url": "https://pecl.php.net/get/protobuf",
+        "url": "https://pecl.php.net/get/protobuf-5.34.1.tgz",
         "path": "php-src/ext/protobuf",
         "filename": "protobuf.tgz",
         "license": {
