@@ -16,6 +16,7 @@ ext-curl:
   depends:
     - curl
   depends@windows:
+    - curl
     - ext-zlib
     - ext-openssl
   php-extension:
