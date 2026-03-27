@@ -10,6 +10,7 @@ ext-amqp:
   depends:
     - librabbitmq
   depends@windows:
+    - librabbitmq
     - ext-openssl
   php-extension:
     arg-type: '--with-amqp@shared_suffix@ --with-librabbitmq-dir=@build_root_path@'

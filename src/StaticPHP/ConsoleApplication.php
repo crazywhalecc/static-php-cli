@@ -29,7 +29,7 @@ use Symfony\Component\Console\Application;
 
 class ConsoleApplication extends Application
 {
-    public const string VERSION = '3.0.0-dev';
+    public const string VERSION = '3.0.0-alpha1';
 
     private static array $additional_commands = [];
 
