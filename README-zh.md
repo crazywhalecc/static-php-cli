@@ -1,24 +1,24 @@
-# static-php-cli
+# StaticPHP
 
-[![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
 [![Chinese readme](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%20%F0%9F%87%A8%F0%9F%87%B3-moccasin?style=flat-square)](README-zh.md)
+[![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
 [![Releases](https://img.shields.io/packagist/v/crazywhalecc/static-php-cli?include_prereleases&label=Release&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
 
-**static-php-cli** 是一个用于构建静态、独立 PHP 运行时的强大工具，支持众多流行扩展。
+**StaticPHP**（原名 **static-php-cli**）是一个用于构建静态、独立 PHP 运行时的强大工具，支持众多流行扩展。
 
 ## 特性
 
 - :elephant: **支持多 PHP 版本** - 支持 PHP 8.1, 8.2, 8.3, 8.4, 8.5
 - :handbag: **单文件 PHP 可执行文件** - 构建零依赖的独立 PHP
-- :hamburger: **phpmicro 集成** - 构建 **[phpmicro](https://github.com/dixyes/phpmicro)** 自解压可执行文件（将 PHP 二进制文件和源代码合并为一个文件）
+- :hamburger: **phpmicro 集成** - 构建 **[phpmicro](https://github.com/static-php/phpmicro)** 自解压可执行文件（将 PHP 二进制文件和源代码合并为一个文件）
 - :pill: **智能环境检查器** - 自动构建环境检查器，具备自动修复功能
 - :zap: **跨平台支持** - 支持 Linux、macOS、FreeBSD 和 Windows
 - :wrench: **可配置补丁** - 可自定义的源代码补丁系统
 - :books: **智能依赖管理** - 自动处理构建依赖
 - 📦 **自包含工具** - 提供使用 [box](https://github.com/box-project/box) 构建的 `spc` 可执行文件
-- :fire: **广泛的扩展支持** - 支持 75+ 流行 [扩展](https://static-php.dev/zh/guide/extensions.html)
+- :fire: **广泛的扩展支持** - 支持 100+ 流行 [扩展](https://static-php.dev/zh/guide/extensions.html)
 - :floppy_disk: **UPX 压缩** - 减小二进制文件大小 30-50%（仅 Linux/Windows）
 
 **单文件独立 php-cli：**
@@ -32,6 +32,8 @@
 ## 快速开始
 
 ### 1. 下载 spc 二进制文件
+
+`spc` 二进制文件是 StaticPHP 项目的 CLI 工具，打包为单个可执行文件。
 
 ```bash
 # Linux x86_64
@@ -107,7 +109,7 @@ buildroot/bin/php-fpm -v
 以下是几个具有不同扩展组合的预编译静态 PHP 二进制文件，
 您可以根据需要直接下载。
 
-| 组合名称                                                                 | 扩展数量                                                            | 系统           | 备注                 |
+| 组合名称                                                                 | 扩展数量                                                                       | 系统           | 备注                 |
 |----------------------------------------------------------------------|----------------------------------------------------------------------------|--------------|--------------------|
 | [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux, macOS | 二进制文件大小约为 7.5MB    |
 | [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | 二进制文件大小约为 25MB     |

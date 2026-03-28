@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Static PHP"
+  name: "StaticPHP"
   tagline: "Build standalone PHP binary on Linux, macOS, FreeBSD, Windows, with PHP project together, with popular extensions included."
   image:
     src: /images/static-php_nobg.png
@@ -14,9 +14,9 @@ hero:
       link: ./guide/
 
 features:
-  - title: Static CLI Binary
+  - title: Static PHP Binary
     details: You can easily compile a standalone php binary for general use. Including CLI, FPM sapi.
-  - title: Micro Self-Extracted Executable
+  - title: PHP micro Self-Extracted Executable
     details: You can compile a self-extracted executable and build with your php source code.
   - title: Dependency Management
     details: static-php-cli comes with dependency management and supports installation of different types of PHP extensions.
