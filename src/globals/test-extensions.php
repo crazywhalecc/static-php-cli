@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
-    '8.1',
+    // '8.1',
     // '8.2',
     // '8.3',
     '8.4',
@@ -43,7 +43,7 @@ $no_strip = false;
 $upx = false;
 
 // whether to test frankenphp build, only available for macOS and linux
-$frankenphp = true;
+$frankenphp = false;
 
 // prefer downloading pre-built packages to speed up the build process
 $prefer_pre_built = false;
