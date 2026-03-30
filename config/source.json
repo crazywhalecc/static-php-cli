@@ -641,6 +641,7 @@
     "libjpeg": {
         "type": "ghtar",
         "repo": "libjpeg-turbo/libjpeg-turbo",
+        "prefer-stable": true,
         "license": {
             "type": "file",
             "path": "LICENSE.md"
