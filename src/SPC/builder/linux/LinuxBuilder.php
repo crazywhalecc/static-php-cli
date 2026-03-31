@@ -162,7 +162,7 @@ class LinuxBuilder extends UnixBuilderBase
                 throw new WrongUsageException(
                     "You're building against musl libc statically (the default on Linux), but you're trying to build shared extensions.\n" .
                     'Static musl libc does not implement `dlopen`, so your php binary is not able to load shared extensions.' . "\n" .
-                    'Either use SPC_LIBC=glibc to link against glibc on a glibc OS, or use SPC_TARGET="native-native-musl -dynamic" to link against musl libc dynamically using `zig cc`.'
+                    'Either use SPC_LIBC=glibc to link against glibc on a glibc OS, use SPC_TARGET="native-native-musl -dynamic" to link against musl libc dynamically using `zig cc` or use SPC_MUSL_DYNAMIC=true on alpine.'
                 );
             }
             logger()->info('Building shared extensions...');

@@ -393,7 +393,7 @@ class ConfigValidator
         }
         // check php-version
         if (isset($craft['php-version'])) {
-            // validdate version, accept 8.x, 7.x, 8.x.x, 7.x.x, 8, 7
+            // validate version, accept 8.x, 7.x, 8.x.x, 7.x.x, 8, 7
             $version = strval($craft['php-version']);
             if (!preg_match('/^(\d+)(\.\d+)?(\.\d+)?$/', $version, $matches)) {
                 throw new ValidationException('Craft file php-version is invalid');

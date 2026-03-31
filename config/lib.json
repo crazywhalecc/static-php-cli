@@ -143,9 +143,7 @@
             "zlib"
         ],
         "lib-suggests": [
-            "libpng",
-            "bzip2",
-            "brotli"
+            "libpng"
         ]
     },
     "gettext": {
@@ -355,6 +353,9 @@
         "static-libs-unix": [
             "libaom.a"
         ],
+        "static-libs-windows": [
+            "aom.lib"
+        ],
         "cpp-library": true
     },
     "libargon2": {
@@ -493,7 +494,7 @@
         "static-libs-windows": [
             "libjpeg_a.lib"
         ],
-        "lib-suggests-windows": [
+        "lib-depends": [
             "zlib"
         ]
     },
@@ -862,6 +863,9 @@
     },
     "openssl": {
         "source": "openssl",
+        "pkg-configs": [
+            "openssl"
+        ],
         "static-libs-unix": [
             "libssl.a",
             "libcrypto.a"
@@ -974,6 +978,11 @@
     },
     "unixodbc": {
         "source": "unixodbc",
+        "pkg-configs": [
+            "odbc",
+            "odbccr",
+            "odbcinst"
+        ],
         "static-libs-unix": [
             "libodbc.a",
             "libodbccr.a",
@@ -1015,6 +1024,9 @@
     },
     "zlib": {
         "source": "zlib",
+        "pkg-configs": [
+            "zlib"
+        ],
         "static-libs-unix": [
             "libz.a"
         ],
@@ -1028,6 +1040,9 @@
     },
     "zstd": {
         "source": "zstd",
+        "pkg-configs": [
+            "libzstd"
+        ],
         "static-libs-unix": [
             "libzstd.a"
         ],

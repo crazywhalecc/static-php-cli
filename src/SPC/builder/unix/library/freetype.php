@@ -13,8 +13,8 @@ trait freetype
     {
         $cmake = UnixCMakeExecutor::create($this)
             ->optionalLib('libpng', ...cmake_boolean_args('FT_DISABLE_PNG', true))
-            ->optionalLib('bzip2', ...cmake_boolean_args('FT_DISABLE_BZIP2', true))
-            ->optionalLib('brotli', ...cmake_boolean_args('FT_DISABLE_BROTLI', true))
+            ->addConfigureArgs('-DFT_DISABLE_BZIP2=ON')
+            ->addConfigureArgs('-DFT_DISABLE_BROTLI=ON')
             ->addConfigureArgs('-DFT_DISABLE_HARFBUZZ=ON');
 
         // fix cmake 4.0 compatibility

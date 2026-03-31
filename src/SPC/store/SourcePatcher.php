@@ -634,7 +634,13 @@ class SourcePatcher
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gd/libgd/gdft.c', '#ifndef MSWIN32', '#ifndef _WIN32');
             }
             // custom config.w32, because official config.w32 is hard-coded many things
-            $origin = $ver_id >= 80100 ? file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_81.w32') : file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_80.w32');
+            if ($ver_id >= 80500) {
+                $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_85.w32');
+            } elseif ($ver_id >= 80100) {
+                $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_81.w32');
+            } else {
+                $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_80.w32');
+            }
             file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32.bak', file_get_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32'));
             return file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32', $origin) !== false;
         }
