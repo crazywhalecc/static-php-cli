@@ -138,6 +138,28 @@ CMAKE;
         FileSystem::writeFile($cmake_find_dir . DIRECTORY_SEPARATOR . 'FindOpenSSL.cmake', <<<'CMAKE'
 # Custom FindOpenSSL.cmake wrapper for static-php-cli Windows builds.
 
+set(_spc_saved_module_path "${CMAKE_MODULE_PATH}")
+list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
+set(_spc_find_args "")
+if(OpenSSL_FIND_VERSION)
+    list(APPEND _spc_find_args "${OpenSSL_FIND_VERSION}")
+    if(OpenSSL_FIND_VERSION_EXACT)
+        list(APPEND _spc_find_args EXACT)
+    endif()
+endif()
+if(OpenSSL_FIND_REQUIRED)
+    list(APPEND _spc_find_args REQUIRED)
+endif()
+if(OpenSSL_FIND_QUIETLY)
+    list(APPEND _spc_find_args QUIET)
+endif()
+find_package(OpenSSL ${_spc_find_args})
+unset(_spc_find_args)
+
+set(CMAKE_MODULE_PATH "${_spc_saved_module_path}")
+unset(_spc_saved_module_path)
+
 if(WIN32 AND (OpenSSL_FOUND OR OPENSSL_FOUND))
     list(GET CMAKE_FIND_ROOT_PATH 0 _spc_buildroot)
     # Normalize to forward slashes — backslash paths cause 'Invalid character

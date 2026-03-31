@@ -44,8 +44,10 @@ class WindowsCmd extends Shell
         } else {
             logger()->debug('Running command with result: ' . $cmd);
         }
+        $original_command = $cmd;
+        $this->logCommandInfo($original_command);
         $cmd = $this->getExecString($cmd);
-        $result = $this->passthru($cmd, $this->console_putput, $cmd, capture_output: true, throw_on_error: false, cwd: $this->cd, env: $this->env);
+        $result = $this->passthru($cmd, $this->console_putput, $original_command, capture_output: true, throw_on_error: false, cwd: $this->cd, env: $this->env);
         $out = explode("\n", $result['output']);
         return [$result['code'], $out];
     }

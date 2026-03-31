@@ -9,6 +9,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
+use StaticPHP\Util\FileSystem;
 
 #[Library('nghttp2')]
 class nghttp2
@@ -26,6 +27,9 @@ class nghttp2
                 '-DBUILD_TESTING=OFF',
             )
             ->build();
+
+        FileSystem::replaceFileStr($lib->getIncludeDir() . '\nghttp2\nghttp2.h', '#ifdef NGHTTP2_STATICLIB', '#if 1');
+
     }
 
     #[BuildFor('Linux')]
