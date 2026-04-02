@@ -57,8 +57,9 @@ class SPCConfigUtil
             $libs .= " {$extra_env}";
         }
         // package frameworks
-        if (SystemTarget::getTargetOS() === 'Darwin') {
-            $libs .= " {$this->getFrameworksString($resolved)}";
+        $fwStr = self::getFrameworksString($resolved);
+        if ($fwStr !== '') {
+            $libs .= " {$fwStr}";
         }
         // C++
         if ($this->hasCpp($resolved)) {
@@ -236,8 +237,9 @@ class SPCConfigUtil
         }
 
         // package frameworks
-        if (SystemTarget::getTargetOS() === 'Darwin') {
-            $libs .= " {$this->getFrameworksString($resolved_packages)}";
+        $fwStr = self::getFrameworksString($resolved_packages);
+        if ($fwStr !== '') {
+            $libs .= " {$fwStr}";
         }
 
         // C++
@@ -283,6 +285,31 @@ class SPCConfigUtil
             'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
             'libs' => clean_spaces($allLibs),
         ];
+    }
+
+    /**
+     * Get the frameworks string for a list of packages.
+     *
+     * Returns empty string on non-Darwin platforms.
+     *
+     * @param  string[] $packages Package names to collect frameworks from
+     * @return string   e.g. "-framework Kerberos -framework CoreFoundation"
+     */
+    public static function getFrameworksString(array $packages): string
+    {
+        if (SystemTarget::getTargetOS() !== 'Darwin') {
+            return '';
+        }
+        $list = [];
+        foreach ($packages as $package) {
+            foreach (PackageConfig::get($package, 'frameworks', []) as $fw) {
+                $ks = '-framework ' . $fw;
+                if (!in_array($ks, $list)) {
+                    $list[] = $ks;
+                }
+            }
+        }
+        return implode(' ', $list);
     }
 
     private function hasCpp(array $packages): bool
@@ -491,19 +518,5 @@ class SPCConfigUtil
             return $staticLib;
         }
         return $lib;
-    }
-
-    private function getFrameworksString(array $extensions): string
-    {
-        $list = [];
-        foreach ($extensions as $extension) {
-            foreach (PackageConfig::get($extension, 'frameworks', []) as $fw) {
-                $ks = '-framework ' . $fw;
-                if (!in_array($ks, $list)) {
-                    $list[] = $ks;
-                }
-            }
-        }
-        return implode(' ', $list);
     }
 }

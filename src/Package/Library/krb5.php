@@ -10,6 +10,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Library('krb5')]
@@ -59,5 +60,11 @@ class krb5
             'mit-krb5.pc',
             'gssrpc.pc',
         ]);
+        // libkrb5support is in Libs.private of mit-krb5.pc, but CMake's pkg_check_modules
+        // does not follow Libs.private for static linking. Promote it to Libs so that
+        // consumers linking static binaries (e.g. the curl exe) can resolve _k5_* symbols.
+        $mit_krb5_pc = BUILD_ROOT_PATH . '/lib/pkgconfig/mit-krb5.pc';
+        FileSystem::replaceFileStr($mit_krb5_pc, 'Libs.private: -lkrb5support', 'Libs.private:');
+        FileSystem::replaceFileStr($mit_krb5_pc, '-lcom_err', '-lcom_err -lkrb5support');
     }
 }

@@ -81,16 +81,19 @@ class curl
             ->addConfigureArgs(
                 '-DBUILD_CURL_EXE=ON',
                 '-DBUILD_LIBCURL_DOCS=OFF',
+                '-DCURL_USE_PKGCONFIG=ON',
             )
             ->build();
 
         // patch pkgconf
         $lib->patchPkgconfPrefix(['libcurl.pc']);
-        // curl's CMake embeds krb5 link flags directly without following Requires.private chain,
-        // so -lkrb5support (from mit-krb5.pc Libs.private) is missing from libcurl.pc.
+        // Ensure -lkrb5support is present in libcurl.pc for downstream consumers.
+        // krb5.php already promotes it to Libs in mit-krb5.pc before the build, so
+        // CMake should have embedded it; this is a safety fallback if it was missed.
         $pc_path = "{$lib->getLibDir()}/pkgconfig/libcurl.pc";
-        if (str_contains(FileSystem::readFile($pc_path), '-lgssapi_krb5')) {
-            FileSystem::replaceFileRegex($pc_path, '/-lcom_err$/m', '-lcom_err -lkrb5support');
+        $pc_content = FileSystem::readFile($pc_path);
+        if (str_contains($pc_content, '-lgssapi_krb5') && !str_contains($pc_content, '-lkrb5support')) {
+            FileSystem::replaceFileRegex($pc_path, '/-lcom_err\b/', '-lcom_err -lkrb5support');
         }
         shell()->cd("{$lib->getLibDir()}/cmake/CURL/")
             ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"{$lib->getLibDir()}/libcurl.a\"|g' CURLTargets-release.cmake");
