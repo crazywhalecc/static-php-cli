@@ -105,7 +105,7 @@ trait windows
             throw new PatchException('Windows Makefile patching for php.exe target', 'Cannot patch windows CLI Makefile, Makefile does not contain "$(BUILD_DIR)\php.exe:" line');
         }
         $lines[$line_num] = '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest';
-        $lines[$line_num + 1] = "\t" . '"$(LINK)” /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile("{$package->getSourceDir()}\\Makefile", implode("\r\n", $lines));
     }
 
@@ -171,7 +171,7 @@ trait windows
             throw new PatchException('Windows Makefile patching for php-cgi.exe target', 'Cannot patch windows CGI Makefile, Makefile does not contain "$(BUILD_DIR)\php-cgi.exe:" line');
         }
         $lines[$line_num] = '$(BUILD_DIR)\php-cgi.exe: $(DEPS_CGI) $(CGI_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php-cgi.exe.res $(BUILD_DIR)\php-cgi.exe.manifest';
-        $lines[$line_num + 1] = "\t" . '@"$(LINK)” /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile("{$package->getSourceDir()}\\Makefile", implode("\r\n", $lines));
 
         // Patch cgi-static, comment ZEND_TSRMLS_CACHE_DEFINE()
@@ -328,7 +328,7 @@ trait windows
         while ($i < count($lines)) {
             $line = $lines[$i];
             // Check if this is the embed lib target dependency line (contains the lib name and $(BUILD_DIR)\$(PHPLIB))
-            if (str_contains($line, "\$(BUILD_DIR)\\{$embed_lib}:") && str_contains($line, '$(BUILD_DIR)\\$(PHPLIB)')) {
+            if (str_contains($line, "\$(BUILD_DIR)\\{$embed_lib}:") && str_contains($line, '$(BUILD_DIR)\$(PHPLIB)')) {
                 // Replace the dependency line
                 // Original: $(BUILD_DIR)\php8embed.lib: $(DEPS_EMBED) $(EMBED_GLOBAL_OBJS) $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR)\php8embed.lib.res $(BUILD_DIR)\php8embed.lib.manifest
                 // New: $(BUILD_DIR)\php8embed.lib: $(DEPS_EMBED) $(EMBED_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php8embed.lib.res $(BUILD_DIR)\php8embed.lib.manifest
@@ -347,7 +347,7 @@ trait windows
                 if ($i < count($lines) && str_contains($lines[$i], '$(MAKE_LIB)')) {
                     $cmd_line = $lines[$i];
                     // Remove $(BUILD_DIR)\$(PHPLIB) from the command (note the backslash)
-                    $cmd_line = str_replace(' $(BUILD_DIR)\\$(PHPLIB)', '', $cmd_line);
+                    $cmd_line = str_replace(' $(BUILD_DIR)\$(PHPLIB)', '', $cmd_line);
                     // Add PHP_GLOBAL_OBJS_RESP and STATIC_EXT_OBJS_RESP after EMBED_GLOBAL_OBJS_RESP
                     $cmd_line = str_replace(
                         '$(EMBED_GLOBAL_OBJS_RESP)',
@@ -416,84 +416,6 @@ trait windows
 
         // Install PHP headers for embed SAPI development
         $this->installPhpHeadersForWindows($package, $installer);
-    }
-
-    /**
-     * Install PHP headers to buildroot/include for embed SAPI development.
-     * This mirrors the 'make install-headers' behavior on Unix.
-     */
-    private function installPhpHeadersForWindows(TargetPackage $package, PackageInstaller $installer): void
-    {
-        InteractiveTerm::setMessage('Installing PHP headers for embed SAPI');
-
-        $source_dir = $package->getSourceDir();
-        $include_dir = $package->getIncludeDir();
-        $php_include_dir = "{$include_dir}\\php";
-
-        // Create directory structure
-        FileSystem::createDir("{$php_include_dir}\\main");
-        FileSystem::createDir("{$php_include_dir}\\Zend");
-        FileSystem::createDir("{$php_include_dir}\\TSRM");
-        FileSystem::createDir("{$php_include_dir}\\sapi\\embed");
-
-        // Copy main/*.h
-        foreach (glob("{$source_dir}\\main\\*.h") as $h) {
-            FileSystem::copy($h, "{$php_include_dir}\\main\\" . basename($h));
-        }
-
-        // Copy Zend/*.h
-        foreach (glob("{$source_dir}\\Zend\\*.h") as $h) {
-            $target = "{$php_include_dir}\\Zend\\" . basename($h);
-            FileSystem::copy($h, $target);
-            // Fix GCC-specific #warning directive not supported by MSVC
-            if (basename($h) === 'zend_atomic.h') {
-                FileSystem::replaceFileStr($target, '#warning No atomics support detected. Please open an issue with platform details.', '#pragma message("No atomics support detected. Please open an issue with platform details.")');
-            }
-        }
-
-        // Copy TSRM/*.h
-        foreach (glob("{$source_dir}\\TSRM\\*.h") as $h) {
-            FileSystem::copy($h, "{$php_include_dir}\\TSRM\\" . basename($h));
-        }
-
-        // Copy embed SAPI header
-        FileSystem::copy("{$source_dir}\\sapi\\embed\\php_embed.h", "{$php_include_dir}\\sapi\\embed\\php_embed.h");
-
-        // Copy generated config.h (config.w32.h on Windows) to php_config.h
-        $rel_type = 'Release';
-        $ts = $package->getBuildOption('enable-zts', false) ? '_TS' : '';
-        $build_dir = "{$source_dir}\\x64\\{$rel_type}{$ts}";
-
-        // Always copy config.w32.h from source (it's used for both build and headers)
-        if (file_exists("{$source_dir}\\main\\config.w32.h")) {
-            FileSystem::copy("{$source_dir}\\main\\config.w32.h", "{$php_include_dir}\\main\\php_config.h");
-        }
-
-        // Windows: zend_config.w32.h must be copied as zend_config.h for Zend headers to work
-        if (file_exists("{$source_dir}\\Zend\\zend_config.w32.h")) {
-            FileSystem::copy("{$source_dir}\\Zend\\zend_config.w32.h", "{$php_include_dir}\\Zend\\zend_config.h");
-        }
-
-        // Copy extension headers for enabled extensions
-        foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $ext) {
-            $ext_name = $ext->getExtensionName();
-            $ext_dir = "{$source_dir}\\ext\\{$ext_name}";
-            if (is_dir($ext_dir)) {
-                $target_ext_dir = "{$php_include_dir}\\ext\\{$ext_name}";
-                FileSystem::createDir($target_ext_dir);
-                foreach (glob("{$ext_dir}\\*.h") as $h) {
-                    FileSystem::copy($h, "{$target_ext_dir}\\" . basename($h));
-                }
-                // Also copy any arginfo headers
-                foreach (glob("{$ext_dir}\\*_arginfo.h") as $h) {
-                    if (!file_exists("{$target_ext_dir}\\" . basename($h))) {
-                        FileSystem::copy($h, "{$target_ext_dir}\\" . basename($h));
-                    }
-                }
-            }
-        }
-
-        $package->setOutput('PHP headers path for embed SAPI', $php_include_dir);
     }
 
     #[BuildFor('Windows')]
@@ -772,12 +694,83 @@ C_CODE;
             FileSystem::createDir($debug_dir);
             FileSystem::copy("{$src[0]}\\{$src[2]}", "{$debug_dir}\\{$src[2]}");
         }
+    }
 
-        // with-upx-pack for cli, cgi and micro
-        if ($builder->getOption('with-upx-pack', false)) {
-            if (in_array($sapi, ['php-cli', 'php-cgi', 'php-micro'], true)) {
-                cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($dst_file));
+    /**
+     * Install PHP headers to buildroot/include for embed SAPI development.
+     * This mirrors the 'make install-headers' behavior on Unix.
+     */
+    private function installPhpHeadersForWindows(TargetPackage $package, PackageInstaller $installer): void
+    {
+        InteractiveTerm::setMessage('Installing PHP headers for embed SAPI');
+
+        $source_dir = $package->getSourceDir();
+        $include_dir = $package->getIncludeDir();
+        $php_include_dir = "{$include_dir}\\php";
+
+        // Create directory structure
+        FileSystem::createDir("{$php_include_dir}\\main");
+        FileSystem::createDir("{$php_include_dir}\\Zend");
+        FileSystem::createDir("{$php_include_dir}\\TSRM");
+        FileSystem::createDir("{$php_include_dir}\\sapi\\embed");
+
+        // Copy main/*.h
+        foreach (glob("{$source_dir}\\main\\*.h") as $h) {
+            FileSystem::copy($h, "{$php_include_dir}\\main\\" . basename($h));
+        }
+
+        // Copy Zend/*.h
+        foreach (glob("{$source_dir}\\Zend\\*.h") as $h) {
+            $target = "{$php_include_dir}\\Zend\\" . basename($h);
+            FileSystem::copy($h, $target);
+            // Fix GCC-specific #warning directive not supported by MSVC
+            if (basename($h) === 'zend_atomic.h') {
+                FileSystem::replaceFileStr($target, '#warning No atomics support detected. Please open an issue with platform details.', '#pragma message("No atomics support detected. Please open an issue with platform details.")');
             }
         }
+
+        // Copy TSRM/*.h
+        foreach (glob("{$source_dir}\\TSRM\\*.h") as $h) {
+            FileSystem::copy($h, "{$php_include_dir}\\TSRM\\" . basename($h));
+        }
+
+        // Copy embed SAPI header
+        FileSystem::copy("{$source_dir}\\sapi\\embed\\php_embed.h", "{$php_include_dir}\\sapi\\embed\\php_embed.h");
+
+        // Copy generated config.h (config.w32.h on Windows) to php_config.h
+        $rel_type = 'Release';
+        $ts = $package->getBuildOption('enable-zts', false) ? '_TS' : '';
+        $build_dir = "{$source_dir}\\x64\\{$rel_type}{$ts}";
+
+        // Always copy config.w32.h from source (it's used for both build and headers)
+        if (file_exists("{$source_dir}\\main\\config.w32.h")) {
+            FileSystem::copy("{$source_dir}\\main\\config.w32.h", "{$php_include_dir}\\main\\php_config.h");
+        }
+
+        // Windows: zend_config.w32.h must be copied as zend_config.h for Zend headers to work
+        if (file_exists("{$source_dir}\\Zend\\zend_config.w32.h")) {
+            FileSystem::copy("{$source_dir}\\Zend\\zend_config.w32.h", "{$php_include_dir}\\Zend\\zend_config.h");
+        }
+
+        // Copy extension headers for enabled extensions
+        foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $ext) {
+            $ext_name = $ext->getExtensionName();
+            $ext_dir = "{$source_dir}\\ext\\{$ext_name}";
+            if (is_dir($ext_dir)) {
+                $target_ext_dir = "{$php_include_dir}\\ext\\{$ext_name}";
+                FileSystem::createDir($target_ext_dir);
+                foreach (glob("{$ext_dir}\\*.h") as $h) {
+                    FileSystem::copy($h, "{$target_ext_dir}\\" . basename($h));
+                }
+                // Also copy any arginfo headers
+                foreach (glob("{$ext_dir}\\*_arginfo.h") as $h) {
+                    if (!file_exists("{$target_ext_dir}\\" . basename($h))) {
+                        FileSystem::copy($h, "{$target_ext_dir}\\" . basename($h));
+                    }
+                }
+            }
+        }
+
+        $package->setOutput('PHP headers path for embed SAPI', $php_include_dir);
     }
 }
