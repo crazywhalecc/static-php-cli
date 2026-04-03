@@ -689,6 +689,13 @@ C_CODE;
 
         $builder->deployBinary($src_file, $dst_file);
 
+        $output_label = match ($sapi) {
+            'php-cli' => 'Binary path for cli SAPI',
+            'php-cgi' => 'Binary path for cgi SAPI',
+            'php-micro' => 'Binary path for micro SAPI',
+        };
+        $package->setOutput($output_label, $dst_file);
+
         // copy .pdb debug info file
         if ($builder->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
             FileSystem::createDir($debug_dir);
