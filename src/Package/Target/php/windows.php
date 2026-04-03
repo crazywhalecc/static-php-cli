@@ -693,8 +693,11 @@ C_CODE;
             'php-cli' => 'Binary path for cli SAPI',
             'php-cgi' => 'Binary path for cgi SAPI',
             'php-micro' => 'Binary path for micro SAPI',
+            default => null,
         };
-        $package->setOutput($output_label, $dst_file);
+        if ($output_label) {
+            $package->setOutput($output_label, $dst_file);
+        }
 
         // copy .pdb debug info file
         if ($builder->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
