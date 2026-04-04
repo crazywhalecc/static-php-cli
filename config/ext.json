@@ -63,7 +63,8 @@
         ],
         "ext-depends-windows": [
             "zlib",
-            "openssl"
+            "openssl",
+            "brotli"
         ]
     },
     "dba": {

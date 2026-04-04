@@ -29,6 +29,7 @@ class ngtcp2 extends WindowsLibraryBase
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DENABLE_STATIC_CRT=ON ' .
                 '-DENABLE_LIB_ONLY=ON ' .
+                '-DENABLE_OPENSSL=OFF ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '
             )
             ->execWithWrapper(
