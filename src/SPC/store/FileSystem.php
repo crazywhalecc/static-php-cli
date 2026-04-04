@@ -639,7 +639,17 @@ class FileSystem
             // Yeah, I will be an MS HATER !
             match (self::extname($filename)) {
                 'tar' => f_passthru("tar -xf {$filename} -C {$target} --strip-components 1"),
-                'xz', 'txz', 'gz', 'tgz', 'bz2' => cmd()->execWithResult("\"{$_7z}\" x -so {$filename} | tar -f - -x -C \"{$target}\" --strip-components 1"),
+                'xz', 'txz', 'gz', 'tgz', 'bz2' => (function () use ($_7z, $filename, $target) {
+                    $dir = dirname($filename);
+                    cmd()->execWithResult("\"{$_7z}\" x \"{$filename}\" -o\"{$dir}\" -y");
+                    $tarFile = preg_replace('/\.(xz|txz|gz|tgz|bz2)$/i', '', $filename);
+                    if (!file_exists($tarFile)) {
+                        $tarFile .= '.tar';
+                    }
+                    $winTar = getenv('SystemRoot') . '\\System32\\tar.exe';
+                    f_passthru("\"{$winTar}\" -xf \"{$tarFile}\" -C \"{$target}\" --strip-components 1");
+                    @unlink($tarFile);
+                })(),
                 'zip' => self::unzipWithStrip($filename, $target),
                 default => throw new FileSystemException("unknown archive format: {$filename}"),
             };

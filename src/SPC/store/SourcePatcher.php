@@ -283,6 +283,9 @@ class SourcePatcher
 
     public static function patchBeforeMake(BuilderBase $builder): void
     {
+        if ($builder instanceof WindowsBuilder) {
+            self::patchLibxml2DefForWindows();
+        }
         if ($builder instanceof UnixBuilderBase) {
             FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'install-micro', '');
         }
@@ -622,6 +625,113 @@ class SourcePatcher
             return false;
         }
         return false;
+    }
+
+    /**
+     * Strip symbols from php_libxml2.def that don't exist in libxml2_a.lib.
+     *
+     * libxml2 2.14+ removed many deprecated APIs (xmlUCSIs*, xmlNanoFTP*,
+     * xmlShell*, etc.) but PHP's static .def file still exports them, causing
+     * unresolved externals at link time. Instead of maintaining a blocklist,
+     * we scan the installed libxml2 headers for XMLPUBFUN/XMLPUBVAR
+     * declarations and strip any .def entry that doesn't match.
+     */
+    public static function patchLibxml2DefForWindows(): void
+    {
+        $def_file = SOURCE_PATH . '/php-src/ext/libxml/php_libxml2.def';
+        $include_dir = BUILD_ROOT_PATH . '/include/libxml2/libxml';
+        if (!file_exists($def_file) || !is_dir($include_dir)) {
+            logger()->debug("patchLibxml2DefForWindows: def={$def_file} exists=" . (file_exists($def_file) ? 'yes' : 'no') . " include_dir={$include_dir} exists=" . (is_dir($include_dir) ? 'yes' : 'no'));
+            return;
+        }
+
+        // Determine which libxml2 features are disabled so we can exclude
+        // symbols that are declared in headers but not compiled into the lib.
+        $disabled_features = [];
+        $version_h = "{$include_dir}/xmlversion.h";
+        if (file_exists($version_h)) {
+            $version_content = file_get_contents($version_h);
+            // Disabled features have: #undef LIBXML_<FEATURE>_ENABLED
+            // or simply lack the #define. Check for explicit #undef.
+            if (preg_match_all('/#undef\s+(LIBXML_\w+_ENABLED)/', $version_content, $m)) {
+                foreach ($m[1] as $feat) {
+                    $disabled_features[$feat] = true;
+                }
+            }
+        }
+
+        // Scan all libxml2 headers for public API symbols.
+        // XMLPUBFUN marks functions, XMLPUBVAR marks variables.
+        // Respects #ifdef LIBXML_*_ENABLED guards — symbols inside
+        // disabled feature blocks are excluded.
+        $header_symbols = [];
+        foreach (glob("{$include_dir}/*.h") as $header) {
+            $content = file_get_contents($header);
+            $lines = explode("\n", $content);
+            $ifdef_depth = 0;
+            $disabled_depth = 0; // depth at which a disabled feature was entered
+
+            foreach ($lines as $hline) {
+                $trimmed = ltrim($hline);
+                // Track #ifdef/#ifndef LIBXML_*_ENABLED blocks
+                if (preg_match('/^#\s*if(?:def|ndef)?\s+.*?(LIBXML_\w+_ENABLED)/', $trimmed, $im)) {
+                    $ifdef_depth++;
+                    if (isset($disabled_features[$im[1]])) {
+                        $disabled_depth = $ifdef_depth;
+                    }
+                } elseif (preg_match('/^#\s*if\b/', $trimmed)) {
+                    $ifdef_depth++;
+                } elseif (preg_match('/^#\s*endif/', $trimmed)) {
+                    if ($ifdef_depth === $disabled_depth) {
+                        $disabled_depth = 0;
+                    }
+                    $ifdef_depth = max(0, $ifdef_depth - 1);
+                }
+
+                // Skip symbols inside disabled feature blocks
+                if ($disabled_depth > 0) {
+                    continue;
+                }
+
+                // Match: XMLPUBFUN <return_type> [call_conv] <name>(
+                if (preg_match('/XMLPUBFUN\s+\S+\s+(?:XMLCALL\s+|XMLCDECL\s+)?(\w+)\s*\(/', $trimmed, $fm)) {
+                    $header_symbols[$fm[1]] = true;
+                }
+                // Match: XMLPUBVAR <type> <name>
+                if (preg_match('/XMLPUBVAR\s+\S+\s+(\w+)/', $trimmed, $vm)) {
+                    $header_symbols[$vm[1]] = true;
+                }
+            }
+        }
+
+        if (empty($header_symbols)) {
+            logger()->warning('Could not find any XMLPUBFUN/XMLPUBVAR symbols in libxml2 headers — skipping .def patch');
+            return;
+        }
+
+        logger()->debug('Found ' . count($header_symbols) . ' public symbols in libxml2 headers');
+
+        $lines = file($def_file, FILE_IGNORE_NEW_LINES);
+        $filtered = [];
+        $removed = 0;
+        foreach ($lines as $line) {
+            $sym = trim($line);
+            // Keep non-symbol lines (EXPORTS header, comments, blank lines)
+            // and any symbol that exists in the headers
+            if ($sym === '' || $sym === 'EXPORTS' || str_starts_with($sym, ';') || isset($header_symbols[$sym])) {
+                $filtered[] = $line;
+            } else {
+                $removed++;
+            }
+        }
+
+        if ($removed === 0) {
+            logger()->info('All php_libxml2.def symbols found in libxml2 headers — no patching needed');
+            return;
+        }
+
+        file_put_contents($def_file, implode("\n", $filtered) . "\n");
+        logger()->info("Stripped {$removed} missing symbols from php_libxml2.def (libxml2 compat)");
     }
 
     public static function patchGDWin32(): bool

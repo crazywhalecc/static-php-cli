@@ -124,8 +124,7 @@ class WindowsBuilder extends BuilderBase
             SourcePatcher::unpatchMicroWin32();
         }
         if ($enableEmbed) {
-            logger()->warning('Windows does not currently support embed SAPI.');
-            // logger()->info('building embed');
+            logger()->info('building embed');
             $this->buildEmbed();
         }
     }
@@ -191,13 +190,49 @@ class WindowsBuilder extends BuilderBase
 
     public function buildEmbed(): void
     {
-        // TODO: add embed support for windows
-        /*
-        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_embed_wrapper.bat', 'nmake /nologo %*');
+        $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
+
+        // Add debug symbols for release build if --no-strip is specified
+        $debug_overrides = '';
+        $makefile_content = file_get_contents(SOURCE_PATH . '\php-src\Makefile');
+        if ($this->getOption('no-strip', false)) {
+            if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
+                $cflags = $matches[1];
+                $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO secur32.lib" ';
+            }
+        }
+        // Fallback: if no debug overrides, still pass secur32.lib via LDFLAGS.
+        // Needed by curl's SSPI support (InitSecurityInterfaceA in libcurl_a.lib).
+        if ($debug_overrides === '') {
+            $debug_overrides = '"LDFLAGS=secur32.lib" ';
+        }
+
+        // add nmake wrapper
+        FileSystem::writeFile(SOURCE_PATH . '\php-src\nmake_embed_wrapper.bat', "nmake /nologo {$debug_overrides}LIBS_EMBED=\"ws2_32.lib shell32.lib {$extra_libs}\" %*");
 
         cmd()->cd(SOURCE_PATH . '\php-src')
             ->exec("{$this->sdk_prefix} nmake_embed_wrapper.bat --task-args php8embed.lib");
-        */
+
+        $this->deploySAPIBinary(BUILD_TARGET_EMBED);
+
+        // Install headers for embed SDK consumers
+        $include_dst = BUILD_ROOT_PATH . '\include\php';
+        FileSystem::createDir($include_dst);
+        $php_src = SOURCE_PATH . '\php-src';
+        foreach (['main', 'Zend', 'TSRM', 'sapi', 'ext'] as $dir) {
+            $src_dir = "{$php_src}\\{$dir}";
+            if (is_dir($src_dir)) {
+                cmd()->exec("xcopy /E /I /Y " . escapeshellarg($src_dir . '\\*.h') . ' ' . escapeshellarg($include_dst . '\\' . $dir . '\\'));
+            }
+        }
+        // Copy generated config header
+        $rel_type = 'Release';
+        $ts = $this->zts ? '_TS' : '';
+        $config_h = "{$php_src}\\x64\\{$rel_type}{$ts}\\config.w32.h";
+        if (file_exists($config_h)) {
+            cmd()->exec('copy ' . escapeshellarg($config_h) . ' ' . escapeshellarg($include_dst . '\main\config.w32.h'));
+        }
     }
 
     public function buildMicro(): void
@@ -375,11 +410,14 @@ class WindowsBuilder extends BuilderBase
             BUILD_TARGET_CLI => [SOURCE_PATH . "\\php-src\\x64\\{$rel_type}{$ts}", 'php.exe', 'php.pdb'],
             BUILD_TARGET_MICRO => [SOURCE_PATH . "\\php-src\\x64\\{$rel_type}{$ts}", 'micro.sfx', 'micro.pdb'],
             BUILD_TARGET_CGI => [SOURCE_PATH . "\\php-src\\x64\\{$rel_type}{$ts}", 'php-cgi.exe', 'php-cgi.pdb'],
+            BUILD_TARGET_EMBED => [SOURCE_PATH . "\\php-src\\x64\\{$rel_type}{$ts}", 'php8embed.lib', null],
             default => throw new SPCInternalException("Deployment does not accept type {$type}"),
         };
 
-        $src = "{$src[0]}\\{$src[1]}";
-        $dst = BUILD_BIN_PATH . '\\' . basename($src);
+        $src_dir = $src[0];
+        $src_pdb = $src[2];
+        $src = "{$src_dir}\\{$src[1]}";
+        $dst = ($type === BUILD_TARGET_EMBED ? BUILD_ROOT_PATH . '\lib' : BUILD_BIN_PATH) . '\\' . basename($src);
 
         // file must exists
         if (!file_exists($src)) {
@@ -393,9 +431,17 @@ class WindowsBuilder extends BuilderBase
             cmd()->exec('copy ' . escapeshellarg($src) . ' ' . escapeshellarg($dst));
         }
 
+        // Also copy php8embed.dll for embed SAPI
+        if ($type === BUILD_TARGET_EMBED) {
+            $dll_src = "{$src_dir}\\php8embed.dll";
+            if (file_exists($dll_src)) {
+                cmd()->exec('copy ' . escapeshellarg($dll_src) . ' ' . escapeshellarg(BUILD_ROOT_PATH . '\lib\php8embed.dll'));
+            }
+        }
+
         // extract debug info in buildroot/debug
-        if ($this->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
-            cmd()->exec('copy ' . escapeshellarg("{$src[0]}\\{$src[2]}") . ' ' . escapeshellarg($debug_dir));
+        if ($this->getOption('no-strip', false) && $src_pdb !== null && file_exists("{$src_dir}\\{$src_pdb}")) {
+            cmd()->exec('copy ' . escapeshellarg("{$src_dir}\\{$src_pdb}") . ' ' . escapeshellarg($debug_dir));
         }
 
         // with-upx-pack for cli and micro
