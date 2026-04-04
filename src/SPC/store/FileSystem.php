@@ -646,7 +646,7 @@ class FileSystem
                     if (!file_exists($tarFile)) {
                         $tarFile .= '.tar';
                     }
-                    $winTar = getenv('SystemRoot') . '\\System32\\tar.exe';
+                    $winTar = getenv('SystemRoot') . '\System32\tar.exe';
                     f_passthru("\"{$winTar}\" -xf \"{$tarFile}\" -C \"{$target}\" --strip-components 1");
                     @unlink($tarFile);
                 })(),

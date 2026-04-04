@@ -223,7 +223,7 @@ class WindowsBuilder extends BuilderBase
         foreach (['main', 'Zend', 'TSRM', 'sapi', 'ext'] as $dir) {
             $src_dir = "{$php_src}\\{$dir}";
             if (is_dir($src_dir)) {
-                cmd()->exec("xcopy /E /I /Y " . escapeshellarg($src_dir . '\\*.h') . ' ' . escapeshellarg($include_dst . '\\' . $dir . '\\'));
+                cmd()->exec('xcopy /E /I /Y ' . escapeshellarg($src_dir . '\*.h') . ' ' . escapeshellarg($include_dst . '\\' . $dir . '\\'));
             }
         }
         // Copy generated config header

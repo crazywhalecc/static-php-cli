@@ -675,12 +675,12 @@ class SourcePatcher
                 $trimmed = ltrim($hline);
                 // Track #ifdef/#ifndef LIBXML_*_ENABLED blocks
                 if (preg_match('/^#\s*if(?:def|ndef)?\s+.*?(LIBXML_\w+_ENABLED)/', $trimmed, $im)) {
-                    $ifdef_depth++;
+                    ++$ifdef_depth;
                     if (isset($disabled_features[$im[1]])) {
                         $disabled_depth = $ifdef_depth;
                     }
                 } elseif (preg_match('/^#\s*if\b/', $trimmed)) {
-                    $ifdef_depth++;
+                    ++$ifdef_depth;
                 } elseif (preg_match('/^#\s*endif/', $trimmed)) {
                     if ($ifdef_depth === $disabled_depth) {
                         $disabled_depth = 0;
@@ -721,7 +721,7 @@ class SourcePatcher
             if ($sym === '' || $sym === 'EXPORTS' || str_starts_with($sym, ';') || isset($header_symbols[$sym])) {
                 $filtered[] = $line;
             } else {
-                $removed++;
+                ++$removed;
             }
         }
 
