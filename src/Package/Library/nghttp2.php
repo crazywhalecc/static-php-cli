@@ -29,7 +29,6 @@ class nghttp2
             ->build();
 
         FileSystem::replaceFileStr($lib->getIncludeDir() . '\nghttp2\nghttp2.h', '#ifdef NGHTTP2_STATICLIB', '#if 1');
-
     }
 
     #[BuildFor('Linux')]
