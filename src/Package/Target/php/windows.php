@@ -105,7 +105,7 @@ trait windows
             throw new PatchException('Windows Makefile patching for php.exe target', 'Cannot patch windows CLI Makefile, Makefile does not contain "$(BUILD_DIR)\php.exe:" line');
         }
         $lines[$line_num] = '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest';
-        $lines[$line_num + 1] = "\t" . '"$(LINK)” /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile("{$package->getSourceDir()}\\Makefile", implode("\r\n", $lines));
     }
 
@@ -171,7 +171,7 @@ trait windows
             throw new PatchException('Windows Makefile patching for php-cgi.exe target', 'Cannot patch windows CGI Makefile, Makefile does not contain "$(BUILD_DIR)\php-cgi.exe:" line');
         }
         $lines[$line_num] = '$(BUILD_DIR)\php-cgi.exe: $(DEPS_CGI) $(CGI_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php-cgi.exe.res $(BUILD_DIR)\php-cgi.exe.manifest';
-        $lines[$line_num + 1] = "\t" . '@"$(LINK)” /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
         FileSystem::writeFile("{$package->getSourceDir()}\\Makefile", implode("\r\n", $lines));
 
         // Patch cgi-static, comment ZEND_TSRMLS_CACHE_DEFINE()
@@ -689,17 +689,20 @@ C_CODE;
 
         $builder->deployBinary($src_file, $dst_file);
 
+        $output_label = match ($sapi) {
+            'php-cli' => 'Binary path for cli SAPI',
+            'php-cgi' => 'Binary path for cgi SAPI',
+            'php-micro' => 'Binary path for micro SAPI',
+            default => null,
+        };
+        if ($output_label) {
+            $package->setOutput($output_label, $dst_file);
+        }
+
         // copy .pdb debug info file
         if ($builder->getOption('no-strip', false) && file_exists("{$src[0]}\\{$src[2]}")) {
             FileSystem::createDir($debug_dir);
             FileSystem::copy("{$src[0]}\\{$src[2]}", "{$debug_dir}\\{$src[2]}");
-        }
-
-        // with-upx-pack for cli, cgi and micro
-        if ($builder->getOption('with-upx-pack', false)) {
-            if (in_array($sapi, ['php-cli', 'php-cgi', 'php-micro'], true)) {
-                cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($dst_file));
-            }
         }
     }
 
