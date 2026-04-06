@@ -233,7 +233,7 @@ class UnixCMakeExecutor extends Executor
         if ($this->package instanceof TargetPackage) {
             $resolvedNames = array_keys($this->installer->getResolvedPackages());
             $resolvedNames[] = $this->package->getName();
-            $fwFlags = SPCConfigUtil::getFrameworksString($resolvedNames);
+            $fwFlags = new SPCConfigUtil()->getFrameworksString($resolvedNames);
             if ($fwFlags !== '') {
                 $exeLinkerFlags .= " {$fwFlags}";
             }

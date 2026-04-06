@@ -285,6 +285,20 @@ class SPCConfigUtil
         ];
     }
 
+    public function getFrameworksString(array $extensions): string
+    {
+        $list = [];
+        foreach ($extensions as $extension) {
+            foreach (PackageConfig::get($extension, 'frameworks', []) as $fw) {
+                $ks = '-framework ' . $fw;
+                if (!in_array($ks, $list)) {
+                    $list[] = $ks;
+                }
+            }
+        }
+        return implode(' ', $list);
+    }
+
     private function hasCpp(array $packages): bool
     {
         foreach ($packages as $package) {
@@ -491,19 +505,5 @@ class SPCConfigUtil
             return $staticLib;
         }
         return $lib;
-    }
-
-    private function getFrameworksString(array $extensions): string
-    {
-        $list = [];
-        foreach ($extensions as $extension) {
-            foreach (PackageConfig::get($extension, 'frameworks', []) as $fw) {
-                $ks = '-framework ' . $fw;
-                if (!in_array($ks, $list)) {
-                    $list[] = $ks;
-                }
-            }
-        }
-        return implode(' ', $list);
     }
 }
