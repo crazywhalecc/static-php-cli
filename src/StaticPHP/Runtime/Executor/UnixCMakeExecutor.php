@@ -10,10 +10,13 @@ use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\Shell\UnixShell;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\PkgConfigUtil;
+use StaticPHP\Util\SPCConfigUtil;
 use ZM\Logger\ConsoleColor;
 
 /**
@@ -214,7 +217,7 @@ class UnixCMakeExecutor extends Executor
      */
     private function getDefaultCMakeArgs(): array
     {
-        return $this->custom_default_args ?? [
+        $args = $this->custom_default_args ?? [
             '-DCMAKE_BUILD_TYPE=Release',
             "-DCMAKE_INSTALL_PREFIX={$this->package->getBuildRootPath()}",
             '-DCMAKE_INSTALL_BINDIR=bin',
@@ -224,6 +227,20 @@ class UnixCMakeExecutor extends Executor
             '-DBUILD_SHARED_LIBS=OFF',
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
         ];
+
+        // EXE linker flags: base system libs + framework flags for target packages
+        $exeLinkerFlags = SystemTarget::getRuntimeLibs();
+        if ($this->package instanceof TargetPackage) {
+            $resolvedNames = array_keys($this->installer->getResolvedPackages());
+            $resolvedNames[] = $this->package->getName();
+            $fwFlags = SPCConfigUtil::getFrameworksString($resolvedNames);
+            if ($fwFlags !== '') {
+                $exeLinkerFlags .= " {$fwFlags}";
+            }
+        }
+        $args[] = "-DCMAKE_EXE_LINKER_FLAGS=\"{$exeLinkerFlags}\"";
+
+        return $args;
     }
 
     /**
@@ -274,13 +291,13 @@ SET(CMAKE_PREFIX_PATH "{$root}")
 SET(CMAKE_INSTALL_PREFIX "{$root}")
 SET(CMAKE_INSTALL_LIBDIR "lib")
 
-set(PKG_CONFIG_EXECUTABLE "{$pkgConfigExecutable}")
+set(PKG_CONFIG_EXECUTABLE "{$pkgConfigExecutable}" CACHE FILEPATH "pkg-config executable" FORCE)
 set(PKG_CONFIG_ARGN "--static" CACHE STRING "Extra arguments for pkg-config" FORCE)
+set(ENV{PKG_CONFIG_PATH} "{$root}/lib/pkgconfig")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
-set(CMAKE_EXE_LINKER_FLAGS "-ldl -lpthread -lm -lutil")
 CMAKE;
         // Whoops, linux may need CMAKE_AR sometimes
         if (PHP_OS_FAMILY === 'Linux') {
