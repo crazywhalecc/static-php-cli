@@ -55,9 +55,7 @@ class ArtifactConfig
             if (!is_array($data)) {
                 throw new WrongUsageException("Invalid JSON format in artifact config file: {$file}");
             }
-            if (is_array($data)) {
-                ConfigCache::set($content, $data);
-            }
+            ConfigCache::set($content, $data);
         }
         ConfigValidator::validateAndLintArtifacts(basename($file), $data);
         foreach ($data as $artifact_name => $config) {
