@@ -63,6 +63,9 @@
         "optimize-autoloader": true,
         "sort-packages": true
     },
+    "suggest": {
+        "ext-yaml": "Speeds up YAML config file parsing"
+    },
     "funding": [
         {
             "type": "other",
