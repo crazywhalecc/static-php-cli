@@ -64,7 +64,7 @@ class Registry
         }
         $data = match (pathinfo($registry_file, PATHINFO_EXTENSION)) {
             'json' => json_decode($yaml, true),
-            'yaml', 'yml' => Yaml::parse($yaml),
+            'yaml', 'yml' => extension_loaded('yaml') ? yaml_parse($yaml) : Yaml::parse($yaml),
             default => throw new RegistryException("Unsupported registry file format: {$registry_file}"),
         };
         if (!is_array($data)) {
