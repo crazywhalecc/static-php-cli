@@ -755,6 +755,14 @@ class PackageInstaller
     private function validatePackagesBeforeBuild(): void
     {
         foreach ($this->packages as $package) {
+            // Check OS support for php-extension packages
+            if ($package instanceof PhpExtensionPackage && !$package->isSupportedOnCurrentOS()) {
+                $supported = implode(', ', $package->getSupportedOSList());
+                throw new WrongUsageException(
+                    "Extension '{$package->getName()}' is not supported on current OS: " . SystemTarget::getTargetOS() .
+                    ". Supported OS: [{$supported}]"
+                );
+            }
             if ($package->getType() !== 'library') {
                 continue;
             }
