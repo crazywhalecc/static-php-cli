@@ -76,10 +76,13 @@ ext-gd:
     arg-type: custom
 ext-gettext:
   type: php-extension
-  depends:
+  depends@unix:
     - gettext
+  depends@windows:
+    - gettext-win
   php-extension:
     arg-type: with-path
+    arg-type@windows: with
 ext-gmp:
   type: php-extension
   depends@unix:
