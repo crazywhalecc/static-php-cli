@@ -82,10 +82,13 @@ ext-gettext:
     arg-type: with-path
 ext-gmp:
   type: php-extension
-  depends:
+  depends@unix:
     - gmp
+  depends@windows:
+    - mpir
   php-extension:
     arg-type: with-path
+    arg-type@windows: with
 ext-iconv:
   type: php-extension
   depends@unix:
