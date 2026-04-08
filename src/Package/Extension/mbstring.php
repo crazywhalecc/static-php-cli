@@ -19,4 +19,10 @@ class mbstring
         $arg .= $installer->isPackageResolved('ext-mbregex') === false ? ' --disable-mbregex' : ' --enable-mbregex';
         return $arg;
     }
+
+    #[CustomPhpConfigureArg('Windows')]
+    public function getWinConfigureArg(PackageInstaller $installer): string
+    {
+        return '--enable-mbstring ' . ($installer->isPackageResolved('ext-mbregex') ? '--enable-mbregex' : ' --disable-mbregex');
+    }
 }

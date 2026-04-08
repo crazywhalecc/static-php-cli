@@ -37,6 +37,7 @@ class libjpeg
                 '-DENABLE_STATIC=ON',
                 '-DBUILD_TESTING=OFF',
                 '-DWITH_JAVA=OFF',
+                '-DWITH_SIMD=OFF',
                 '-DWITH_CRT_DLL=OFF',
             )
             ->optionalPackage('zlib', '-DENABLE_ZLIB_COMPRESSION=ON', '-DENABLE_ZLIB_COMPRESSION=OFF')

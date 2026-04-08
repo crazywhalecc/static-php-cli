@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Command;
 
+use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -87,20 +88,24 @@ class ResetCommand extends BaseCommand
 
         // Try using PowerShell for force deletion
         $escaped_path = escapeshellarg($path);
+        Shell::passthruCallback(fn () => InteractiveTerm::advance());
 
         // Use PowerShell Remove-Item with -Force and -Recurse
-        $ps_cmd = "powershell -Command \"Remove-Item -Path {$escaped_path} -Recurse -Force -ErrorAction SilentlyContinue\"";
-        f_exec($ps_cmd, $output, $ret_code);
-
+        $result = cmd()->execWithResult("powershell -Command \"Remove-Item -Path {$escaped_path} -Recurse -Force -ErrorAction SilentlyContinue\"", false);
+        $ret_code = $result[0];
         // If PowerShell fails or directory still exists, try cmd rmdir
         if ($ret_code !== 0 || is_dir($path)) {
             $cmd_command = "rmdir /s /q {$escaped_path}";
-            f_exec($cmd_command, $output, $ret_code);
+            $result = cmd()->execWithResult($cmd_command, false);
+            if ($result[0] === 0) {
+                return;
+            }
         }
 
         // Final fallback: use FileSystem::removeDir
         if (is_dir($path)) {
             FileSystem::removeDir($path);
         }
+        Shell::passthruCallback(null);
     }
 }

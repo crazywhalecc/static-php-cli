@@ -9,6 +9,14 @@ ext-bz2:
     arg-type@windows: with
 ext-calendar:
   type: php-extension
+ext-com_dotnet:
+  type: php-extension
+  php-extension:
+    support:
+      Linux: 'no'
+      Darwin: 'no'
+      BSD: 'no'
+    arg-type@windows: '--enable-com-dotnet=yes'
 ext-ctype:
   type: php-extension
 ext-curl:
@@ -30,17 +38,20 @@ ext-dba:
 ext-dom:
   type: php-extension
   depends:
-    - libxml2
     - ext-xml
   php-extension:
-    arg-type: '--enable-dom@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type: enable
     arg-type@windows: with
 ext-exif:
   type: php-extension
+  depends@windows:
+    - ext-mbstring
 ext-ffi:
   type: php-extension
   depends@unix:
     - libffi
+  depends@windows:
+    - libffi-win
   php-extension:
     arg-type@unix: '--with-ffi=@shared_suffix@ --enable-zend-signals'
     arg-type@windows: with
@@ -101,11 +112,12 @@ ext-ldap:
 ext-libxml:
   type: php-extension
   depends:
-    - ext-xml
+    - libxml2
   php-extension:
     build-with-php: true
     build-shared: false
-    arg-type: none
+    arg-type@unix: with-path
+    arg-type@windows: with
 ext-mbregex:
   type: php-extension
   depends:
@@ -239,7 +251,7 @@ ext-simplexml:
   depends:
     - ext-xml
   php-extension:
-    arg-type@unix: '--enable-simplexml@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@unix: enable
     arg-type@windows: with
     build-with-php: true
 ext-snmp:
@@ -254,7 +266,7 @@ ext-soap:
     - ext-xml
     - ext-session
   php-extension:
-    arg-type@unix: '--enable-soap@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@unix: enable
     arg-type@windows: with
     build-with-php: true
 ext-sockets:
@@ -306,27 +318,27 @@ ext-tokenizer:
 ext-xml:
   type: php-extension
   depends:
-    - libxml2
+    - ext-libxml
   depends@windows:
-    - libxml2
     - ext-iconv
+    - ext-libxml
   php-extension:
-    arg-type: '--enable-xml@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@unix: enable
     arg-type@windows: with
     build-with-php: true
 ext-xmlreader:
   type: php-extension
   depends:
-    - libxml2
+    - ext-xml
   php-extension:
-    arg-type: '--enable-xmlreader@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type: enable
     build-with-php: true
 ext-xmlwriter:
   type: php-extension
   depends:
-    - libxml2
+    - ext-xml
   php-extension:
-    arg-type: '--enable-xmlwriter@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type: enable
     build-with-php: true
 ext-xsl:
   type: php-extension
