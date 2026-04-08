@@ -16,6 +16,7 @@ use StaticPHP\Util\FileSystem;
 class glfw extends PhpExtensionPackage
 {
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-glfw')]
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-glfw')]
     #[PatchDescription('Patch glfw extension before buildconf')]
     public function patchBeforeBuildconf(): void
     {

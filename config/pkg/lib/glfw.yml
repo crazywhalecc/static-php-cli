@@ -1,6 +1,11 @@
 glfw:
   type: library
   artifact: glfw
+  headers:
+    - GLFW/glfw3.h
+    - GLFW/glfw3native.h
   lang: cpp
   static-libs@unix:
     - libglfw3.a
+  static-libs@windows:
+    - glfw3.lib
