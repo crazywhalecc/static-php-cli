@@ -35,11 +35,17 @@ trait windows
     }
 
     #[Stage]
-    public function buildconfForWindows(TargetPackage $package): void
+    public function buildconfForWindows(TargetPackage $package, PackageInstaller $installer): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./buildconf.bat'));
         V2CompatLayer::emitPatchPoint('before-php-buildconf');
         cmd()->cd($package->getSourceDir())->exec('.\buildconf.bat');
+
+        if ($package->getBuildOption('enable-micro-win32') && $installer->isPackageResolved('php-micro')) {
+            SourcePatcher::patchMicroWin32();
+        } else {
+            SourcePatcher::unpatchMicroWin32();
+        }
     }
 
     #[Stage]

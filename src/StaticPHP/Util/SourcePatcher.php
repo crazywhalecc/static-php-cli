@@ -196,6 +196,22 @@ class SourcePatcher
         FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
     }
 
+    public static function patchMicroWin32(): void
+    {
+        // patch micro win32
+        if (!file_exists(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak')) {
+            copy(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c', SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak');
+            FileSystem::replaceFileStr(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c', '#include "php_variables.h"', '#include "php_variables.h"' . "\n#define PHP_MICRO_WIN32_NO_CONSOLE 1");
+        }
+    }
+
+    public static function unpatchMicroWin32(): void
+    {
+        if (file_exists(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak')) {
+            rename(SOURCE_PATH . '\php-src\sapi\micro\php_micro.c.win32bak', SOURCE_PATH . '\php-src\sapi\micro\php_micro.c');
+        }
+    }
+
     public static function patchPhpSrc(?array $items = null): bool
     {
         $patch_dir = ROOT_DIR . '/src/globals/patch/php-src-patches';
