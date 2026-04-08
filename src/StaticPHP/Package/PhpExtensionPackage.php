@@ -61,6 +61,28 @@ class PhpExtensionPackage extends Package
         return str_replace('ext-', '', $this->getName());
     }
 
+    /**
+     * Get the list of OS platforms that this extension supports.
+     * Returns an empty array if no restriction is defined (all platforms supported).
+     */
+    public function getSupportedOSList(): array
+    {
+        return $this->extension_config['os'] ?? [];
+    }
+
+    /**
+     * Check if this extension is supported on the current target OS.
+     * Returns true if no 'os' restriction is defined, or if the current OS is in the list.
+     */
+    public function isSupportedOnCurrentOS(): bool
+    {
+        $osList = $this->getSupportedOSList();
+        if (empty($osList)) {
+            return true;
+        }
+        return in_array(SystemTarget::getTargetOS(), $osList, true);
+    }
+
     public function addCustomPhpConfigureArgCallback(string $os, callable $fn): void
     {
         if ($os === '') {
