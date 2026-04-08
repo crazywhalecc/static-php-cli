@@ -120,7 +120,7 @@ class FileSystem
         $src_path = FileSystem::convertPath($from);
         switch (PHP_OS_FAMILY) {
             case 'Windows':
-                cmd(false)->exec('xcopy "' . $src_path . '" "' . $dst_path . '" /s/e/v/y/i');
+                cmd(false)->exec('xcopy "' . $src_path . '" "' . $dst_path . '" /s/e/y/i');
                 break;
             case 'Linux':
             case 'Darwin':
