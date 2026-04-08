@@ -493,6 +493,44 @@ class FileSystem
         return FileSystem::convertPath($path);
     }
 
+    /**
+     * Move file or directory, handling cross-device scenarios
+     * Uses rename() if possible, falls back to copy+delete for cross-device moves
+     *
+     * @param string $source Source path
+     * @param string $dest   Destination path
+     */
+    public static function moveFileOrDir(string $source, string $dest): void
+    {
+        $source = FileSystem::convertPath($source);
+        $dest = FileSystem::convertPath($dest);
+
+        // Check if source and dest are on the same device to avoid cross-device rename errors
+        $source_stat = @stat($source);
+        $dest_parent = dirname($dest);
+        $dest_stat = @stat($dest_parent);
+
+        // Only use rename if on same device
+        if ($source_stat !== false && $dest_stat !== false && $source_stat['dev'] === $dest_stat['dev']) {
+            if (@rename($source, $dest)) {
+                return;
+            }
+        }
+
+        // Fall back to copy + delete for cross-device moves or if rename failed
+        if (is_dir($source)) {
+            FileSystem::copyDir($source, $dest);
+            FileSystem::removeDir($source);
+        } else {
+            if (!copy($source, $dest)) {
+                throw new FileSystemException("Failed to copy file from {$source} to {$dest}");
+            }
+            if (!unlink($source)) {
+                throw new FileSystemException("Failed to remove source file: {$source}");
+            }
+        }
+    }
+
     private static function replaceFile(string $filename, int $replace_type = REPLACE_FILE_STR, mixed $callback_or_search = null, mixed $to_replace = null): false|int
     {
         logger()->debug('Replacing file with type[' . $replace_type . ']: ' . $filename);
