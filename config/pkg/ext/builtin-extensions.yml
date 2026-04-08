@@ -12,10 +12,8 @@ ext-calendar:
 ext-com_dotnet:
   type: php-extension
   php-extension:
-    support:
-      Linux: 'no'
-      Darwin: 'no'
-      BSD: 'no'
+    os:
+      - Windows
     arg-type@windows: '--enable-com-dotnet=yes'
 ext-ctype:
   type: php-extension
