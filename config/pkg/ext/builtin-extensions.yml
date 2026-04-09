@@ -306,28 +306,22 @@ ext-sqlite3:
 ext-sysvmsg:
   type: php-extension
   php-extension:
-    support:
-      Windows: 'no'
-      BSD: wip
+    os:
+      - Linux
+      - Darwin
 ext-sysvsem:
   type: php-extension
   php-extension:
-    support:
-      Windows: 'no'
-      BSD: wip
+    os:
+      - Linux
+      - Darwin
 ext-sysvshm:
   type: php-extension
-  php-extension:
-    support:
-      BSD: wip
 ext-tidy:
   type: php-extension
   depends:
     - tidy
   php-extension:
-    support:
-      Windows: wip
-      BSD: wip
     arg-type: with-path
 ext-tokenizer:
   type: php-extension
