@@ -161,6 +161,7 @@ ext-odbc:
     - unixodbc
   php-extension:
     arg-type@unix: '--with-unixODBC@shared_path_suffix@'
+    arg-type@windows: enable
 ext-opcache:
   type: php-extension
   php-extension:
@@ -201,7 +202,6 @@ ext-pdo_odbc:
   type: php-extension
   depends:
     - ext-pdo
-    - ext-odbc
   depends@unix:
     - unixodbc
     - ext-pdo
