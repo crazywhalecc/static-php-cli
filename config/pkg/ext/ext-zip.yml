@@ -8,10 +8,8 @@ ext-zip:
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01
-  depends@unix:
+  depends:
     - libzip
   php-extension:
-    support:
-      BSD: wip
     arg-type: custom
     arg-type@windows: enable
