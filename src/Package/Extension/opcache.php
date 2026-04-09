@@ -29,6 +29,7 @@ class opcache extends PhpExtensionPackage
     }
 
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-opcache')]
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-opcache')]
     #[PatchDescription('Fix static opcache build for PHP 8.2.0 to 8.4.x')]
     public function patchBeforeBuildconf(PackageInstaller $installer): bool
     {
