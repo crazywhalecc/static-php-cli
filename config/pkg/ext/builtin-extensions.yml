@@ -217,7 +217,7 @@ ext-pdo_odbc:
     arg-type: custom
 ext-pdo_pgsql:
   type: php-extension
-  depends@unix:
+  depends:
     - ext-pdo
     - ext-pgsql
     - postgresql
@@ -234,7 +234,7 @@ ext-pdo_sqlite:
     arg-type: with
 ext-pgsql:
   type: php-extension
-  depends@unix:
+  depends:
     - postgresql
   php-extension:
     arg-type: custom
