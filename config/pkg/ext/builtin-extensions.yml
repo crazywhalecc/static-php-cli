@@ -74,6 +74,7 @@ ext-gd:
     - freetype
   php-extension:
     arg-type: custom
+    arg-type@windows: with
 ext-gettext:
   type: php-extension
   depends@unix:
@@ -96,12 +97,14 @@ ext-iconv:
   type: php-extension
   depends@unix:
     - libiconv
+  depends@windows:
+    - libiconv-win
   php-extension:
     arg-type@unix: with-path
     arg-type@windows: with
 ext-intl:
   type: php-extension
-  depends@unix:
+  depends:
     - icu
 ext-ldap:
   type: php-extension
@@ -113,6 +116,7 @@ ext-ldap:
     - ext-openssl
   php-extension:
     arg-type: with-path
+    arg-type@windows: with
 ext-libxml:
   type: php-extension
   depends:
