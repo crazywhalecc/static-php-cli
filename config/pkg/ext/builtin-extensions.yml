@@ -185,10 +185,17 @@ ext-password-argon2:
     - libargon2
     - ext-openssl
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: custom
     display-name: ''
 ext-pcntl:
   type: php-extension
+  php-extension:
+    os:
+      - Linux
+      - Darwin
 ext-pdo:
   type: php-extension
 ext-pdo_mysql:
