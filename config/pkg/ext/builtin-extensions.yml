@@ -285,8 +285,7 @@ ext-soap:
     - ext-xml
     - ext-session
   php-extension:
-    arg-type@unix: enable
-    arg-type@windows: with
+    arg-type: enable
     build-with-php: true
 ext-sockets:
   type: php-extension
