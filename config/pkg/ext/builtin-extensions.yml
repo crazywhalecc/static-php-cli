@@ -250,13 +250,13 @@ ext-posix:
       - Darwin
 ext-readline:
   type: php-extension
-  depends:
+  depends@unix:
     - libedit
+  depends@windows:
+    - wineditline
   php-extension:
-    support:
-      Windows: wip
-      BSD: wip
     arg-type: '--with-libedit --without-readline'
+    arg-type@windows: with
     build-shared: false
     build-static: true
 ext-session:
