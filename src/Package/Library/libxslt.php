@@ -9,7 +9,9 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Library('libxslt')]
@@ -48,5 +50,21 @@ class libxslt
         shell()->cd($lib->getLibDir())
             ->exec("{$AR} -t libxslt.a | grep '\\.a$' | xargs -n1 {$AR} d libxslt.a")
             ->exec("{$AR} -t libexslt.a | grep '\\.a$' | xargs -n1 {$AR} d libexslt.a");
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib, PackageInstaller $installer): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DBUILD_SHARED_LIBS=OFF',
+                '-DLIBXSLT_WITH_PROFILER=OFF',
+                '-DLIBXSLT_WITH_PROGRAMS=OFF',
+                '-DLIBXSLT_WITH_PYTHON=OFF',
+                '-DLIBXSLT_WITH_TESTS=OFF',
+            )
+            ->build();
+        FileSystem::copy($lib->getLibDir() . '\libxslts.lib', $lib->getLibDir() . '\libxslt_a.lib');
+        FileSystem::copy($lib->getLibDir() . '\libexslts.lib', $lib->getLibDir() . '\libexslt_a.lib');
     }
 }

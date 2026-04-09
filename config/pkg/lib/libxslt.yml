@@ -13,3 +13,6 @@ libxslt:
   static-libs@unix:
     - libxslt.a
     - libexslt.a
+  static-libs@windows:
+    - libxslt_a.lib
+    - libexslt_a.lib
