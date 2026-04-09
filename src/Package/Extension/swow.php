@@ -17,6 +17,7 @@ class swow extends PhpExtensionPackage
 {
     #[CustomPhpConfigureArg('Darwin')]
     #[CustomPhpConfigureArg('Linux')]
+    #[CustomPhpConfigureArg('Windows')]
     public function configureArg(PackageInstaller $installer): string
     {
         $arg = '--enable-swow';
