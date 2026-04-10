@@ -8,6 +8,8 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
+use StaticPHP\Util\FileSystem;
 
 #[Library('libmaxminddb')]
 class libmaxminddb
@@ -22,5 +24,19 @@ class libmaxminddb
                 '-DMAXMINDDB_BUILD_BINARIES=OFF',
             )
             ->build();
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWindows(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DBUILD_TESTING=OFF',
+                '-DMAXMINDDB_BUILD_BINARIES=OFF',
+            )
+            ->build();
+        if (!file_exists($lib->getLibDir() . '\libmaxminddb.lib')) {
+            FileSystem::copy("{$lib->getLibDir()}\\maxminddb.lib", "{$lib->getLibDir()}\\libmaxminddb.lib");
+        }
     }
 }

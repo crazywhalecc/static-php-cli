@@ -15,6 +15,7 @@ use StaticPHP\Util\FileSystem;
 class maxminddb extends PhpExtensionPackage
 {
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-maxminddb')]
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-maxminddb')]
     #[PatchDescription('Patch maxminddb extension for buildconf to support new source structure')]
     public function patchBeforeBuildconf(): void
     {
