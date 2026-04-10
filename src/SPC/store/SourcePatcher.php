@@ -125,6 +125,15 @@ class SourcePatcher
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
         }
 
+        // PHP 8.2 and below: bcmath libbcmath uses K&R style C function
+        if (is_unix() && $builder->getPHPVersionID() < 80300) {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/configure',
+                "for ac_arg in '' -std=gnu23",
+                "for ac_arg in ''"
+            );
+        }
+
         if (file_exists(SOURCE_PATH . '/php-src/configure.ac.bak')) {
             // restore configure.ac
             FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/configure.ac');
