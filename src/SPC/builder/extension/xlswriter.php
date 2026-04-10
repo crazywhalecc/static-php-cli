@@ -7,6 +7,7 @@ namespace SPC\builder\extension;
 use SPC\builder\Extension;
 use SPC\store\SourcePatcher;
 use SPC\util\CustomExt;
+use SPC\util\GlobalEnvManager;
 
 #[CustomExt('xlswriter')]
 class xlswriter extends Extension
@@ -28,6 +29,13 @@ class xlswriter extends Extension
     public function patchBeforeMake(): bool
     {
         $patched = parent::patchBeforeMake();
+
+        // Remove when https://github.com/viest/php-ext-xlswriter/pull/560 is merged
+        if (PHP_OS_FAMILY !== 'Windows') {
+            GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -std=gnu17');
+            $patched = true;
+        }
+
         if (PHP_OS_FAMILY === 'Windows') {
             // fix windows build with openssl extension duplicate symbol bug
             SourcePatcher::patchFile('spc_fix_xlswriter_win32.patch', $this->source_dir);
@@ -39,5 +47,11 @@ class xlswriter extends Extension
             return true;
         }
         return $patched;
+    }
+
+    // Remove when https://github.com/viest/php-ext-xlswriter/pull/560 is merged
+    protected function getExtraEnv(): array
+    {
+        return ['CFLAGS' => '-std=gnu17'];
     }
 }

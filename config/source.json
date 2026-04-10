@@ -462,10 +462,8 @@
         }
     },
     "krb5": {
-        "type": "ghtagtar",
-        "repo": "krb5/krb5",
-        "match": "krb5.+-final",
-        "prefer-stable": true,
+        "type": "url",
+        "url": "https://web.mit.edu/kerberos/dist/krb5/1.22/krb5-1.22.2.tar.gz",
         "license": {
             "type": "file",
             "path": "NOTICE"

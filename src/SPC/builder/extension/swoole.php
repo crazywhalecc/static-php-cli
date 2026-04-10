@@ -59,7 +59,7 @@ class swoole extends Extension
         $arg .= $this->builder->getLib('brotli') ? (' --enable-brotli --with-brotli-dir=' . BUILD_ROOT_PATH) : '';
         $arg .= $this->builder->getLib('nghttp2') ? (' --with-nghttp2-dir=' . BUILD_ROOT_PATH) : '';
         $arg .= $this->builder->getLib('zstd') ? ' --enable-zstd' : '';
-        $arg .= $this->builder->getLib('liburing') ? ' --enable-iouring --enable-uring-socket' : '';
+        $arg .= $this->builder->getLib('liburing') && getenv('SPC_LIBC') !== 'glibc' ? ' --enable-iouring --enable-uring-socket' : '--disable-iouring';
         $arg .= $this->builder->getExt('sockets') ? ' --enable-sockets' : '';
 
         // enable additional features that require the pdo extension, but conflict with pdo_* extensions
