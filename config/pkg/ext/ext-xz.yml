@@ -13,3 +13,4 @@ ext-xz:
     - xz
   php-extension:
     arg-type: with-path
+    arg-type@windows: enable
