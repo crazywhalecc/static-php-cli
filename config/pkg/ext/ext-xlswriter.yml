@@ -13,7 +13,5 @@ ext-xlswriter:
   suggests:
     - openssl
   php-extension:
-    support:
-      BSD: wip
     arg-type: custom
     arg-type@windows: '--with-xlswriter'
