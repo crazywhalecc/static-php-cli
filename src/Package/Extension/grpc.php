@@ -29,6 +29,15 @@ class grpc extends PhpExtensionPackage
             'zend_ce_exception,',
         );
 
+        // Fix include path conflict with pdo_sqlsrv: grpc's PHP ext dir is added to the global include path via
+        $grpc_php_dir = "{$this->getSourceDir()}/src/php/ext/grpc";
+        if (file_exists("{$grpc_php_dir}/version.h")) {
+            copy("{$grpc_php_dir}/version.h", "{$grpc_php_dir}/php_grpc_version.h");
+            unlink("{$grpc_php_dir}/version.h");
+            FileSystem::replaceFileStr("{$grpc_php_dir}/php_grpc.h", '#include "version.h"', '#include "php_grpc_version.h"');
+            FileSystem::replaceFileStr("{$grpc_php_dir}/php_grpc.c", '#include "version.h"', '#include "php_grpc_version.h"');
+        }
+
         // custom config.m4 content for grpc extension, to prevent building libgrpc.a again
         $config_m4 = <<<'M4'
 PHP_ARG_ENABLE(grpc, [whether to enable grpc support], [AS_HELP_STRING([--enable-grpc], [Enable grpc support])])
