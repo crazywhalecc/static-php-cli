@@ -115,6 +115,9 @@ ext-ldap:
     - libsodium
     - ext-openssl
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: with-path
     arg-type@windows: with
 ext-libxml:
@@ -278,6 +281,9 @@ ext-snmp:
   depends:
     - net-snmp
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: with
 ext-soap:
   type: php-extension
