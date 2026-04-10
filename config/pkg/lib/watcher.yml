@@ -8,6 +8,8 @@ watcher:
     metadata:
       license-files: [license]
       license: MIT
+  frameworks:
+    - CoreServices
   headers:
     - wtr/watcher-c.h
   lang: cpp
