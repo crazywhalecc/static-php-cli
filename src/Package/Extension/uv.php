@@ -24,6 +24,21 @@ class uv extends PhpExtensionPackage
         }
     }
 
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-uv')]
+    public function patchBeforeBuild(): void
+    {
+        FileSystem::replaceFileStr(
+            "{$this->getSourceDir()}/php_uv.c",
+            '#if !defined(PHP_WIN32) || defined(HAVE_SOCKET)',
+            '#if !defined(PHP_WIN32) || (defined(HAVE_SOCKETS) && !defined(COMPILE_DL_SOCKETS))',
+        );
+        FileSystem::replaceFileStr(
+            "{$this->getSourceDir()}/config.w32",
+            'CHECK_LIB("Ws2_32.lib","uv", PHP_UV);',
+            "CHECK_LIB(\"Ws2_32.lib\",\"uv\" , PHP_UV);\n\tCHECK_LIB(\"dbghelp.lib\",\"uv\", PHP_UV);",
+        );
+    }
+
     #[BeforeStage('ext-uv', [PhpExtensionPackage::class, 'makeForUnix'])]
     public function patchBeforeSharedMake(PhpExtensionPackage $pkg): bool
     {

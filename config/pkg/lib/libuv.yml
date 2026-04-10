@@ -9,3 +9,5 @@ libuv:
       license: MIT
   static-libs@unix:
     - libuv.a
+  static-libs@windows:
+    - libuv.lib
