@@ -12,7 +12,4 @@ ext-uv:
     - libuv
     - ext-sockets
   php-extension:
-    support:
-      Windows: wip
-      BSD: wip
     arg-type: with-path
