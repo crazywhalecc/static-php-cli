@@ -197,6 +197,26 @@
             "Security"
         ]
     },
+    "graphicsmagick": {
+        "source": "graphicsmagick",
+        "pkg-configs": [
+            "GraphicsMagick",
+            "GraphicsMagickWand"
+        ],
+        "lib-depends": [
+            "zlib",
+            "libpng",
+            "libjpeg",
+            "bzip2"
+        ],
+        "lib-suggests": [
+            "libwebp",
+            "libtiff",
+            "freetype",
+            "zstd",
+            "xz"
+        ]
+    },
     "grpc": {
         "source": "grpc",
         "pkg-configs": [

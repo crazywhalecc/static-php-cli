@@ -222,6 +222,18 @@
         ],
         "lib-depends-windows": []
     },
+    "gmagick": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-gmagick",
+        "arg-type": "custom",
+        "lib-depends": [
+            "graphicsmagick"
+        ]
+    },
     "gmp": {
         "support": {
             "Windows": "wip",

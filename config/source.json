@@ -152,6 +152,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-gmagick": {
+        "type": "url",
+        "url": "https://pecl.php.net/get/gmagick",
+        "path": "php-src/ext/gmagick",
+        "filename": "gmagick.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-gmssl": {
         "type": "ghtar",
         "repo": "gmssl/GmSSL-PHP",
@@ -380,6 +390,14 @@
         "license": {
             "type": "file",
             "path": "LICENSE"
+        }
+    },
+    "graphicsmagick": {
+        "type": "url",
+        "url": "https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/1.3.45/GraphicsMagick-1.3.45.tar.xz",
+        "license": {
+            "type": "file",
+            "path": "Copyright.txt"
         }
     },
     "grpc": {
