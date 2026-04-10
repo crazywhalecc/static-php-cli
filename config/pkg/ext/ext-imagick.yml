@@ -10,4 +10,7 @@ ext-imagick:
   depends:
     - imagemagick
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: custom

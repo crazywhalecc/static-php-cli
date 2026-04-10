@@ -7,3 +7,7 @@ ext-protobuf:
     metadata:
       license-files: [LICENSE]
       license: BSD-3-Clause
+  php-extension:
+    os:
+      - Linux
+      - Darwin

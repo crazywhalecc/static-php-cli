@@ -12,4 +12,7 @@ ext-rdkafka:
     - librdkafka
   lang: cpp
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: custom
