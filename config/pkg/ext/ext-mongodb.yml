@@ -9,7 +9,9 @@ ext-mongodb:
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01
-  suggests:
+  depends@windows:
+    - ext-openssl
+  suggests@unix:
     - icu
     - openssl
     - zstd
@@ -18,4 +20,5 @@ ext-mongodb:
     - CoreFoundation
     - Security
   php-extension:
-    arg-type: custom
+    arg-type@unix: custom
+    arg-type@windows: '--enable-mongodb --with-mongodb-client-side-encryption'
