@@ -62,8 +62,16 @@ class SPCConfigUtil
         }
         // C++
         if ($this->hasCpp($resolved)) {
-            $libcpp = SystemTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
-            $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            $target_os = SystemTarget::getTargetOS();
+            if ($target_os === 'Darwin') {
+                $libcpp = '-lc++';
+                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            } elseif ($target_os !== 'Windows') {
+                // Linux and other Unix-like systems use libstdc++
+                $libcpp = '-lstdc++';
+                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            }
+            // Windows (MSVC): C++ runtime is linked automatically, no explicit lib needed
         }
 
         if ($this->libs_only_deps) {
@@ -80,7 +88,16 @@ class SPCConfigUtil
 
         // embed
         if (!$this->no_php) {
-            $libs = "-lphp {$libs} -lc";
+            if (SystemTarget::getTargetOS() === 'Windows') {
+                // Windows: use php8embed.lib directly (either full path or short name)
+                $major = intdiv(PHP_VERSION_ID, 10000);
+                $php_lib = $this->absolute_libs ? BUILD_LIB_PATH . "\\php{$major}embed.lib" : "php{$major}embed.lib";
+                // Windows system libs required by PHP
+                // Use same system libs as PHP Makefile: LIBS=kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib
+                $libs = "{$php_lib} {$libs} kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib";
+            } else {
+                $libs = "-lphp {$libs} -lc";
+            }
         }
 
         $allLibs = getenv('LIBS') . ' ' . $libs;
@@ -225,8 +242,16 @@ class SPCConfigUtil
 
         // C++
         if ($this->hasCpp($resolved_packages)) {
-            $libcpp = SystemTarget::getTargetOS() === 'Darwin' ? '-lc++' : '-lstdc++';
-            $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            $target_os = SystemTarget::getTargetOS();
+            if ($target_os === 'Darwin') {
+                $libcpp = '-lc++';
+                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            } elseif ($target_os !== 'Windows') {
+                // Linux and other Unix-like systems use libstdc++
+                $libcpp = '-lstdc++';
+                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            }
+            // Windows (MSVC): C++ runtime is linked automatically, no explicit lib needed
         }
 
         if ($this->libs_only_deps) {
@@ -260,6 +285,20 @@ class SPCConfigUtil
         ];
     }
 
+    public function getFrameworksString(array $extensions): string
+    {
+        $list = [];
+        foreach ($extensions as $extension) {
+            foreach (PackageConfig::get($extension, 'frameworks', []) as $fw) {
+                $ks = '-framework ' . $fw;
+                if (!in_array($ks, $list)) {
+                    $list[] = $ks;
+                }
+            }
+        }
+        return implode(' ', $list);
+    }
+
     private function hasCpp(array $packages): bool
     {
         foreach ($packages as $package) {
@@ -274,44 +313,64 @@ class SPCConfigUtil
     private function getIncludesString(array $packages): string
     {
         $base = BUILD_INCLUDE_PATH;
-        $includes = ["-I{$base}"];
 
-        // link with libphp
-        if (!$this->no_php) {
-            $includes = [
-                ...$includes,
-                "-I{$base}/php",
-                "-I{$base}/php/main",
-                "-I{$base}/php/TSRM",
-                "-I{$base}/php/Zend",
-                "-I{$base}/php/ext",
-            ];
+        // Windows MSVC uses /I flag instead of -I
+        if (SystemTarget::getTargetOS() === 'Windows') {
+            $includes = ["/I\"{$base}\""];
+
+            // link with libphp
+            if (!$this->no_php) {
+                $includes = [
+                    ...$includes,
+                    "/I\"{$base}\\php\"",
+                    "/I\"{$base}\\php\\main\"",
+                    "/I\"{$base}\\php\\TSRM\"",
+                    "/I\"{$base}\\php\\Zend\"",
+                    "/I\"{$base}\\php\\ext\"",
+                ];
+            }
+        } else {
+            $includes = ["-I{$base}"];
+
+            // link with libphp
+            if (!$this->no_php) {
+                $includes = [
+                    ...$includes,
+                    "-I{$base}/php",
+                    "-I{$base}/php/main",
+                    "-I{$base}/php/TSRM",
+                    "-I{$base}/php/Zend",
+                    "-I{$base}/php/ext",
+                ];
+            }
         }
 
-        // parse pkg-configs
-        foreach ($packages as $package) {
-            $pc = PackageConfig::get($package, 'pkg-configs', []);
-            $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
-            $search_paths = array_filter(explode(SystemTarget::isUnix() ? ':' : ';', $pkg_config_path));
-            foreach ($pc as $file) {
-                $found = false;
-                foreach ($search_paths as $path) {
-                    if (file_exists($path . "/{$file}.pc")) {
-                        $found = true;
-                        break;
+        // parse pkg-configs (only for Unix)
+        if (SystemTarget::isUnix()) {
+            foreach ($packages as $package) {
+                $pc = PackageConfig::get($package, 'pkg-configs', []);
+                $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
+                $search_paths = array_filter(explode(':', $pkg_config_path));
+                foreach ($pc as $file) {
+                    $found = false;
+                    foreach ($search_paths as $path) {
+                        if (file_exists($path . "/{$file}.pc")) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$package}] does not exist. Please build it first.");
                     }
                 }
-                if (!$found) {
-                    throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$package}] does not exist. Please build it first.");
+                $pc_cflags = implode(' ', $pc);
+                if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags)) !== '') {
+                    $arr = explode(' ', $pc_cflags);
+                    $arr = array_unique($arr);
+                    $arr = array_filter($arr, fn ($x) => !str_starts_with($x, 'SHELL:-Xarch_'));
+                    $pc_cflags = implode(' ', $arr);
+                    $includes[] = $pc_cflags;
                 }
-            }
-            $pc_cflags = implode(' ', $pc);
-            if ($pc_cflags !== '' && ($pc_cflags = PkgConfigUtil::getCflags($pc_cflags)) !== '') {
-                $arr = explode(' ', $pc_cflags);
-                $arr = array_unique($arr);
-                $arr = array_filter($arr, fn ($x) => !str_starts_with($x, 'SHELL:-Xarch_'));
-                $pc_cflags = implode(' ', $arr);
-                $includes[] = $pc_cflags;
             }
         }
         $includes = array_unique($includes);
@@ -320,6 +379,10 @@ class SPCConfigUtil
 
     private function getLdflagsString(): string
     {
+        // Windows MSVC uses /LIBPATH flag instead of -L
+        if (SystemTarget::getTargetOS() === 'Windows') {
+            return '/LIBPATH:"' . BUILD_LIB_PATH . '"';
+        }
         return '-L' . BUILD_LIB_PATH;
     }
 
@@ -401,15 +464,38 @@ class SPCConfigUtil
 
     private function getShortLibName(string $lib): string
     {
+        // Windows: library files are xxx.lib format (not libxxx.a)
+        if (SystemTarget::getTargetOS() === 'Windows') {
+            if (!str_ends_with($lib, '.lib')) {
+                return BUILD_LIB_PATH . '\\' . $lib;
+            }
+            // For Windows, return just the library filename (e.g., "libssl.lib")
+            return $lib;
+        }
+
+        // Unix: library files are libxxx.a format
         if (!str_starts_with($lib, 'lib') || !str_ends_with($lib, '.a')) {
             return BUILD_LIB_PATH . '/' . $lib;
         }
-        // get short name
+        // get short name (e.g., "libssl.a" -> "-lssl")
         return '-l' . substr($lib, 3, -2);
     }
 
     private function getFullLibName(string $lib): string
     {
+        // Windows: libraries don't use -l prefix, return as-is or with full path
+        if (SystemTarget::getTargetOS() === 'Windows') {
+            if (str_ends_with($lib, '.lib') && !str_contains($lib, '\\') && !str_contains($lib, '/')) {
+                // It's a short lib name like "libssl.lib", convert to full path
+                $fullPath = BUILD_LIB_PATH . '\\' . $lib;
+                if (file_exists($fullPath)) {
+                    return $fullPath;
+                }
+            }
+            return $lib;
+        }
+
+        // Unix: convert -lxxx to full path
         if (!str_starts_with($lib, '-l')) {
             return $lib;
         }
@@ -419,19 +505,5 @@ class SPCConfigUtil
             return $staticLib;
         }
         return $lib;
-    }
-
-    private function getFrameworksString(array $extensions): string
-    {
-        $list = [];
-        foreach ($extensions as $extension) {
-            foreach (PackageConfig::get($extension, 'frameworks', []) as $fw) {
-                $ks = '-framework ' . $fw;
-                if (!in_array($ks, $list)) {
-                    $list[] = $ks;
-                }
-            }
-        }
-        return implode(' ', $list);
     }
 }

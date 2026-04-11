@@ -11,8 +11,8 @@ ext-xhprof:
   depends:
     - ext-ctype
   php-extension:
-    support:
-      Windows: wip
-      BSD: wip
+    os:
+      - Linux
+      - Darwin
     arg-type: enable
     build-with-php: true

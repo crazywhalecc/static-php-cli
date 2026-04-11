@@ -19,7 +19,9 @@ class krb5
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib, PackageInstaller $installer): void
     {
-        shell()->cd($lib->getSourceRoot())->exec('autoreconf -if');
+        if (!file_exists($lib->getSourceRoot() . '/configure')) {
+            shell()->cd($lib->getSourceRoot())->exec('autoreconf -if');
+        }
 
         $resolved = array_keys($installer->getResolvedPackages());
         $spc = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true]);

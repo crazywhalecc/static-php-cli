@@ -18,4 +18,4 @@ zstd:
   static-libs@unix:
     - libzstd.a
   static-libs@windows:
-    - zstd_static.lib
+    - zstd.lib

@@ -11,4 +11,7 @@ ext-spx:
   depends:
     - ext-zlib
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: '--enable-SPX@shared_suffix@'

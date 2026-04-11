@@ -13,7 +13,10 @@ trait krb5
     {
         $origin_source_dir = $this->source_dir;
         $this->source_dir .= '/src';
-        shell()->cd($this->source_dir)->exec('autoreconf -if');
+        shell()->cd($this->source_dir)->exec('ls -lah');
+        if (!file_exists($this->source_dir . '/configure')) {
+            shell()->cd($this->source_dir)->exec('autoreconf -if');
+        }
         $libs = array_map(fn ($x) => $x->getName(), $this->getDependencies(true));
         $spc = new SPCConfigUtil($this->builder, ['no_php' => true, 'libs_only_deps' => true]);
         $config = $spc->config(libraries: $libs, include_suggest_lib: $this->builder->getOption('with-suggested-libs', false));

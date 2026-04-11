@@ -469,27 +469,6 @@ trait unix
         $package->runStage([$this, 'unixBuildSharedExt']);
     }
 
-    #[Stage('postInstall')]
-    public function postInstall(TargetPackage $package, PackageInstaller $installer): void
-    {
-        if ($package->getName() === 'frankenphp') {
-            $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
-            return;
-        }
-        if ($package->getName() !== 'php') {
-            return;
-        }
-        if (SystemTarget::isUnix()) {
-            if ($installer->interactive) {
-                InteractiveTerm::indicateProgress('Running PHP smoke tests');
-            }
-            $package->runStage([$this, 'smokeTestForUnix']);
-            if ($installer->interactive) {
-                InteractiveTerm::finish('PHP smoke tests passed');
-            }
-        }
-    }
-
     /**
      * Patch phpize and php-config if needed
      */
@@ -598,7 +577,7 @@ trait unix
         copy(ROOT_DIR . '/src/globals/common-tests/embed.c', $sample_file_path . '/embed.c');
         copy(ROOT_DIR . '/src/globals/common-tests/embed.php', $sample_file_path . '/embed.php');
 
-        $config = new SPCConfigUtil()->config(array_map(fn ($x) => $x->getName(), $installer->getResolvedPackages()));
+        $config = new SPCConfigUtil()->config($installer->getAvailableResolvedPackageNames());
         $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
         if ($toolchain->isStatic()) {
             $lens .= ' -static';
@@ -662,7 +641,7 @@ trait unix
     /**
      * Generate micro extension test php code.
      */
-    private function generateMicroExtTests(PackageInstaller $installer): string
+    protected function generateMicroExtTests(PackageInstaller $installer): string
     {
         $php = "<?php\n\necho '[micro-test-start]' . PHP_EOL;\n";
         foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $ext) {
@@ -756,7 +735,7 @@ trait unix
      */
     private function makeVars(PackageInstaller $installer): array
     {
-        $config = new SPCConfigUtil(['libs_only_deps' => true])->config(array_map(fn ($x) => $x->getName(), $installer->getResolvedPackages()));
+        $config = new SPCConfigUtil(['libs_only_deps' => true])->config($installer->getAvailableResolvedPackageNames());
         $static = ApplicationContext::get(ToolchainInterface::class)->isStatic() ? '-all-static' : '';
         $pie = SystemTarget::getTargetOS() === 'Linux' ? '-pie' : '';
 

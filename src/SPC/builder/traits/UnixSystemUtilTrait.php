@@ -72,6 +72,10 @@ trait UnixSystemUtilTrait
         if (!is_file($symbol_file)) {
             throw new SPCInternalException("The symbol file {$symbol_file} does not exist, please check if nm command is available.");
         }
+        // https://github.com/ziglang/zig/issues/24662
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            return '-Wl,--export-dynamic'; // needs release 0.16, can be removed then
+        }
         // macOS/zig
         if (SPCTarget::getTargetOS() !== 'Linux' || ToolchainManager::getToolchainClass() === ZigToolchain::class) {
             return "-Wl,-exported_symbols_list,{$symbol_file}";

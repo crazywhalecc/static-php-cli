@@ -67,3 +67,6 @@ spc.exe
 
 # dumped files from StaticPHP v3
 /dump-*.json
+
+# config parse cache
+/.spc.cache.php

@@ -11,3 +11,5 @@ liblz4:
       license: BSD-2-Clause
   static-libs@unix:
     - liblz4.a
+  static-libs@windows:
+    - lz4.lib

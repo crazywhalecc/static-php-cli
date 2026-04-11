@@ -301,6 +301,32 @@ class PackageInstaller
         return isset($this->packages[$package_name]);
     }
 
+    /**
+     * Get resolved package names filtered to only packages whose build artifacts are available.
+     * This excludes library packages that haven't been built/installed yet, which naturally
+     * prevents SPCConfigUtil from checking static-lib files of libraries that come after
+     * the current target in the build order (e.g. 'watcher' for frankenphp isn't built
+     * when 'php' is being compiled).
+     *
+     * @return string[] Available resolved package names
+     */
+    public function getAvailableResolvedPackageNames(): array
+    {
+        return array_values(array_filter(
+            array_keys($this->packages),
+            function (string $name): bool {
+                $pkg = $this->packages[$name] ?? null;
+                // Exclude library packages whose build artifacts don't exist yet.
+                // Extensions and targets are not filtered — extensions are compiled into PHP
+                // and don't have standalone build artifacts.
+                if ($pkg instanceof LibraryPackage && $pkg->getType() === 'library' && !$pkg->isInstalled()) {
+                    return false;
+                }
+                return true;
+            }
+        ));
+    }
+
     public function isPackageInstalled(Package|string $package_name): bool
     {
         if (empty($this->packages)) {
@@ -729,6 +755,14 @@ class PackageInstaller
     private function validatePackagesBeforeBuild(): void
     {
         foreach ($this->packages as $package) {
+            // Check OS support for php-extension packages
+            if ($package instanceof PhpExtensionPackage && !$package->isSupportedOnCurrentOS()) {
+                $supported = implode(', ', $package->getSupportedOSList());
+                throw new WrongUsageException(
+                    "Extension '{$package->getName()}' is not supported on current OS: " . SystemTarget::getTargetOS() .
+                    ". Supported OS: [{$supported}]"
+                );
+            }
             if ($package->getType() !== 'library') {
                 continue;
             }

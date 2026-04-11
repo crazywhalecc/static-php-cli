@@ -9,6 +9,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
+use StaticPHP\Util\FileSystem;
 
 #[Library('zstd')]
 class zstd
@@ -24,6 +25,7 @@ class zstd
                 '-DZSTD_BUILD_SHARED=OFF',
             )
             ->build();
+        FileSystem::copy($package->getLibDir() . '\zstd_static.lib', $package->getLibDir() . '/zstd.lib');
     }
 
     #[BuildFor('Linux')]

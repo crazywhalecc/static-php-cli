@@ -20,6 +20,7 @@ use StaticPHP\Command\DownloadCommand;
 use StaticPHP\Command\DumpLicenseCommand;
 use StaticPHP\Command\ExtractCommand;
 use StaticPHP\Command\InstallPackageCommand;
+use StaticPHP\Command\MicroCombineCommand;
 use StaticPHP\Command\ResetCommand;
 use StaticPHP\Command\SPCConfigCommand;
 use StaticPHP\Package\TargetPackage;
@@ -29,7 +30,7 @@ use Symfony\Component\Console\Application;
 
 class ConsoleApplication extends Application
 {
-    public const string VERSION = '3.0.0-dev';
+    public const string VERSION = '3.0.0-alpha1';
 
     private static array $additional_commands = [];
 
@@ -65,6 +66,7 @@ class ConsoleApplication extends Application
             new DumpLicenseCommand(),
             new ResetCommand(),
             new CheckUpdateCommand(),
+            new MicroCombineCommand(),
 
             // dev commands
             new ShellCommand(),

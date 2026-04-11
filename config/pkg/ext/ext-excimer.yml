@@ -7,3 +7,7 @@ ext-excimer:
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01
+  php-extension:
+    os:
+      - Linux
+      - Darwin

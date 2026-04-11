@@ -96,7 +96,8 @@ class Extension
             fn ($x) => $x->getStaticLibFiles(),
             $this->getLibraryDependencies(recursive: true)
         );
-        return implode(' ', $ret);
+        $libs = implode(' ', $ret);
+        return deduplicate_flags($libs);
     }
 
     /**

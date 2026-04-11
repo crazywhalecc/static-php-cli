@@ -63,7 +63,8 @@
         ],
         "ext-depends-windows": [
             "zlib",
-            "openssl"
+            "openssl",
+            "brotli"
         ]
     },
     "dba": {
@@ -252,6 +253,7 @@
         "arg-type-unix": "enable-path",
         "cpp-extension": true,
         "lib-depends": [
+            "grpc",
             "zlib",
             "openssl",
             "libcares"

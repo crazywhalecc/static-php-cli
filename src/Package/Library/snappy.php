@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 
 #[Library('snappy')]
 class snappy
@@ -23,5 +24,16 @@ class snappy
                 '-DSNAPPY_BUILD_BENCHMARKS=OFF',
             )
             ->build('../..');
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs(
+                '-DSNAPPY_BUILD_TESTS=OFF',
+                '-DSNAPPY_BUILD_BENCHMARKS=OFF',
+            )
+            ->build();
     }
 }

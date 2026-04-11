@@ -347,7 +347,11 @@ class Artifact
     public function getBinaryExtractConfig(array $cache_info = []): array
     {
         if (is_string($cache_info['extract'] ?? null)) {
-            return ['path' => $this->replaceExtractPathVariables($cache_info['extract']), 'mode' => 'standard'];
+            $cache_extract = $cache_info['extract'];
+            if ($cache_extract === 'hosted') {
+                return ['path' => BUILD_ROOT_PATH, 'mode' => 'standard'];
+            }
+            return ['path' => $this->replaceExtractPathVariables($cache_extract), 'mode' => 'standard'];
         }
 
         $platform = SystemTarget::getCurrentPlatformString();

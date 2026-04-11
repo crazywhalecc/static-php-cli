@@ -22,6 +22,10 @@ class libjpeg
             ->addConfigureArgs(
                 '-DENABLE_STATIC=ON',
                 '-DENABLE_SHARED=OFF',
+                '-DWITH_SYSTEM_ZLIB=ON',
+                '-DWITH_TOOLS=OFF',
+                '-DWITH_TESTS=OFF',
+                '-DWITH_SIMD=OFF',
             )
             ->build();
         // patch pkgconfig
@@ -37,6 +41,7 @@ class libjpeg
                 '-DENABLE_STATIC=ON',
                 '-DBUILD_TESTING=OFF',
                 '-DWITH_JAVA=OFF',
+                '-DWITH_SIMD=OFF',
                 '-DWITH_CRT_DLL=OFF',
             )
             ->optionalPackage('zlib', '-DENABLE_ZLIB_COMPRESSION=ON', '-DENABLE_ZLIB_COMPRESSION=OFF')

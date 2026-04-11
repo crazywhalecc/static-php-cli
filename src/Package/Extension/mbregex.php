@@ -12,6 +12,7 @@ class mbregex
 {
     #[CustomPhpConfigureArg('Linux')]
     #[CustomPhpConfigureArg('Darwin')]
+    #[CustomPhpConfigureArg('Windows')]
     public function getUnixConfigureArg(): string
     {
         return '';

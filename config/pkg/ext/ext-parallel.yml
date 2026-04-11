@@ -7,3 +7,7 @@ ext-parallel:
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01
+  depends@windows:
+    - pthreads4w
+  php-extension:
+    arg-type@windows: with

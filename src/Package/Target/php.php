@@ -12,6 +12,7 @@ use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\Info;
 use StaticPHP\Attribute\Package\InitPackage;
 use StaticPHP\Attribute\Package\ResolveBuild;
+use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Attribute\Package\Validate;
 use StaticPHP\Config\PackageConfig;
@@ -29,6 +30,7 @@ use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ToolchainManager;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\V2CompatLayer;
 use Symfony\Component\Console\Input\InputArgument;
@@ -337,6 +339,35 @@ class php extends TargetPackage
 
         // clean old modules that may conflict with the new php build
         FileSystem::removeDir(BUILD_MODULES_PATH);
+    }
+
+    #[Stage('postInstall')]
+    public function postInstall(TargetPackage $package, PackageInstaller $installer): void
+    {
+        if ($package->getName() === 'frankenphp') {
+            $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
+            return;
+        }
+        if ($package->getName() !== 'php') {
+            return;
+        }
+        if (SystemTarget::isUnix()) {
+            if ($installer->interactive) {
+                InteractiveTerm::indicateProgress('Running PHP smoke tests');
+            }
+            $package->runStage([$this, 'smokeTestForUnix']);
+            if ($installer->interactive) {
+                InteractiveTerm::finish('PHP smoke tests passed');
+            }
+        } elseif (SystemTarget::getTargetOS() === 'Windows') {
+            if ($installer->interactive) {
+                InteractiveTerm::indicateProgress('Running PHP smoke tests');
+            }
+            $package->runStage([$this, 'smokeTestForWindows']);
+            if ($installer->interactive) {
+                InteractiveTerm::finish('PHP smoke tests passed');
+            }
+        }
     }
 
     private function makeStaticExtensionString(PackageInstaller $installer): string

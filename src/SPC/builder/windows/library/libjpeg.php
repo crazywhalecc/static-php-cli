@@ -28,6 +28,7 @@ class libjpeg extends WindowsLibraryBase
                 '-DENABLE_STATIC=ON ' .
                 '-DBUILD_TESTING=OFF ' .
                 '-DWITH_JAVA=OFF ' .
+                '-DWITH_SIMD=OFF ' .
                 '-DWITH_CRT_DLL=OFF ' .
                 "-DENABLE_ZLIB_COMPRESSION={$zlib} " .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '

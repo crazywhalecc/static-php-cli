@@ -9,6 +9,12 @@ ext-bz2:
     arg-type@windows: with
 ext-calendar:
   type: php-extension
+ext-com_dotnet:
+  type: php-extension
+  php-extension:
+    os:
+      - Windows
+    arg-type@windows: '--enable-com-dotnet=yes'
 ext-ctype:
   type: php-extension
 ext-curl:
@@ -16,6 +22,7 @@ ext-curl:
   depends:
     - curl
   depends@windows:
+    - curl
     - ext-zlib
     - ext-openssl
   php-extension:
@@ -29,17 +36,20 @@ ext-dba:
 ext-dom:
   type: php-extension
   depends:
-    - libxml2
     - ext-xml
   php-extension:
-    arg-type: '--enable-dom@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type: enable
     arg-type@windows: with
 ext-exif:
   type: php-extension
+  depends@windows:
+    - ext-mbstring
 ext-ffi:
   type: php-extension
   depends@unix:
     - libffi
+  depends@windows:
+    - libffi-win
   php-extension:
     arg-type@unix: '--with-ffi=@shared_suffix@ --enable-zend-signals'
     arg-type@windows: with
@@ -64,28 +74,37 @@ ext-gd:
     - freetype
   php-extension:
     arg-type: custom
+    arg-type@windows: with
 ext-gettext:
   type: php-extension
-  depends:
+  depends@unix:
     - gettext
+  depends@windows:
+    - gettext-win
   php-extension:
     arg-type: with-path
+    arg-type@windows: with
 ext-gmp:
   type: php-extension
-  depends:
+  depends@unix:
     - gmp
+  depends@windows:
+    - mpir
   php-extension:
     arg-type: with-path
+    arg-type@windows: with
 ext-iconv:
   type: php-extension
   depends@unix:
     - libiconv
+  depends@windows:
+    - libiconv-win
   php-extension:
     arg-type@unix: with-path
     arg-type@windows: with
 ext-intl:
   type: php-extension
-  depends@unix:
+  depends:
     - icu
 ext-ldap:
   type: php-extension
@@ -96,15 +115,20 @@ ext-ldap:
     - libsodium
     - ext-openssl
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: with-path
+    arg-type@windows: with
 ext-libxml:
   type: php-extension
   depends:
-    - ext-xml
+    - libxml2
   php-extension:
     build-with-php: true
     build-shared: false
-    arg-type: none
+    arg-type@unix: with-path
+    arg-type@windows: with
 ext-mbregex:
   type: php-extension
   depends:
@@ -140,6 +164,7 @@ ext-odbc:
     - unixodbc
   php-extension:
     arg-type@unix: '--with-unixODBC@shared_path_suffix@'
+    arg-type@windows: enable
 ext-opcache:
   type: php-extension
   php-extension:
@@ -163,10 +188,17 @@ ext-password-argon2:
     - libargon2
     - ext-openssl
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: custom
     display-name: ''
 ext-pcntl:
   type: php-extension
+  php-extension:
+    os:
+      - Linux
+      - Darwin
 ext-pdo:
   type: php-extension
 ext-pdo_mysql:
@@ -180,7 +212,6 @@ ext-pdo_odbc:
   type: php-extension
   depends:
     - ext-pdo
-    - ext-odbc
   depends@unix:
     - unixodbc
     - ext-pdo
@@ -189,7 +220,7 @@ ext-pdo_odbc:
     arg-type: custom
 ext-pdo_pgsql:
   type: php-extension
-  depends@unix:
+  depends:
     - ext-pdo
     - ext-pgsql
     - postgresql
@@ -206,7 +237,7 @@ ext-pdo_sqlite:
     arg-type: with
 ext-pgsql:
   type: php-extension
-  depends@unix:
+  depends:
     - postgresql
   php-extension:
     arg-type: custom
@@ -216,15 +247,19 @@ ext-phar:
     - zlib
 ext-posix:
   type: php-extension
+  php-extension:
+    os:
+      - Linux
+      - Darwin
 ext-readline:
   type: php-extension
-  depends:
+  depends@unix:
     - libedit
+  depends@windows:
+    - wineditline
   php-extension:
-    support:
-      Windows: wip
-      BSD: wip
     arg-type: '--with-libedit --without-readline'
+    arg-type@windows: with
     build-shared: false
     build-static: true
 ext-session:
@@ -238,7 +273,7 @@ ext-simplexml:
   depends:
     - ext-xml
   php-extension:
-    arg-type@unix: '--enable-simplexml@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@unix: enable
     arg-type@windows: with
     build-with-php: true
 ext-snmp:
@@ -246,6 +281,9 @@ ext-snmp:
   depends:
     - net-snmp
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: with
 ext-soap:
   type: php-extension
@@ -253,8 +291,7 @@ ext-soap:
     - ext-xml
     - ext-session
   php-extension:
-    arg-type@unix: '--enable-soap@shared_suffix@ --with-libxml=@build_root_path@'
-    arg-type@windows: with
+    arg-type: enable
     build-with-php: true
 ext-sockets:
   type: php-extension
@@ -275,28 +312,22 @@ ext-sqlite3:
 ext-sysvmsg:
   type: php-extension
   php-extension:
-    support:
-      Windows: 'no'
-      BSD: wip
+    os:
+      - Linux
+      - Darwin
 ext-sysvsem:
   type: php-extension
   php-extension:
-    support:
-      Windows: 'no'
-      BSD: wip
+    os:
+      - Linux
+      - Darwin
 ext-sysvshm:
   type: php-extension
-  php-extension:
-    support:
-      BSD: wip
 ext-tidy:
   type: php-extension
   depends:
     - tidy
   php-extension:
-    support:
-      Windows: wip
-      BSD: wip
     arg-type: with-path
 ext-tokenizer:
   type: php-extension
@@ -305,27 +336,27 @@ ext-tokenizer:
 ext-xml:
   type: php-extension
   depends:
-    - libxml2
+    - ext-libxml
   depends@windows:
-    - libxml2
     - ext-iconv
+    - ext-libxml
   php-extension:
-    arg-type: '--enable-xml@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type@unix: enable
     arg-type@windows: with
     build-with-php: true
 ext-xmlreader:
   type: php-extension
   depends:
-    - libxml2
+    - ext-xml
   php-extension:
-    arg-type: '--enable-xmlreader@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type: enable
     build-with-php: true
 ext-xmlwriter:
   type: php-extension
   depends:
-    - libxml2
+    - ext-xml
   php-extension:
-    arg-type: '--enable-xmlwriter@shared_suffix@ --with-libxml=@build_root_path@'
+    arg-type: enable
     build-with-php: true
 ext-xsl:
   type: php-extension
@@ -342,6 +373,6 @@ ext-zlib:
     - zlib
   php-extension:
     arg-type: custom
-    arg-type@windows: with
+    arg-type@windows: enable
     build-with-php: true
     build-shared: false

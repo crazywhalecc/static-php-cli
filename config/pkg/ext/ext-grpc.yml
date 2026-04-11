@@ -11,4 +11,7 @@ ext-grpc:
     - grpc
   lang: cpp
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type@unix: enable-path

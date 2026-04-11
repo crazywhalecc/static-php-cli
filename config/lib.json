@@ -109,8 +109,7 @@
             "krb5"
         ],
         "lib-suggests-windows": [
-            "brotli",
-            "zstd"
+            "brotli"
         ],
         "frameworks": [
             "CoreFoundation",
@@ -143,9 +142,7 @@
             "zlib"
         ],
         "lib-suggests": [
-            "libpng",
-            "bzip2",
-            "brotli"
+            "libpng"
         ]
     },
     "gettext": {
@@ -355,6 +352,9 @@
         "static-libs-unix": [
             "libaom.a"
         ],
+        "static-libs-windows": [
+            "aom.lib"
+        ],
         "cpp-library": true
     },
     "libargon2": {
@@ -493,7 +493,7 @@
         "static-libs-windows": [
             "libjpeg_a.lib"
         ],
-        "lib-suggests-windows": [
+        "lib-depends": [
             "zlib"
         ]
     },
@@ -762,7 +762,6 @@
             "xz"
         ],
         "lib-suggests-windows": [
-            "zstd",
             "openssl"
         ]
     },
@@ -862,6 +861,9 @@
     },
     "openssl": {
         "source": "openssl",
+        "pkg-configs": [
+            "openssl"
+        ],
         "static-libs-unix": [
             "libssl.a",
             "libcrypto.a"
@@ -974,6 +976,11 @@
     },
     "unixodbc": {
         "source": "unixodbc",
+        "pkg-configs": [
+            "odbc",
+            "odbccr",
+            "odbcinst"
+        ],
         "static-libs-unix": [
             "libodbc.a",
             "libodbccr.a",
@@ -991,6 +998,9 @@
         ],
         "headers": [
             "wtr/watcher-c.h"
+        ],
+        "frameworks": [
+            "CoreServices"
         ]
     },
     "xz": {
@@ -1015,6 +1025,9 @@
     },
     "zlib": {
         "source": "zlib",
+        "pkg-configs": [
+            "zlib"
+        ],
         "static-libs-unix": [
             "libz.a"
         ],
@@ -1028,6 +1041,9 @@
     },
     "zstd": {
         "source": "zstd",
+        "pkg-configs": [
+            "libzstd"
+        ],
         "static-libs-unix": [
             "libzstd.a"
         ],

@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 
 #[Library('libuv')]
 class libuv
@@ -21,5 +22,13 @@ class libuv
             ->build();
         // patch pkgconfig
         $lib->patchPkgconfPrefix(['libuv-static.pc']);
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWindows(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->addConfigureArgs('-DLIBUV_BUILD_SHARED=OFF')
+            ->build();
     }
 }

@@ -14,3 +14,5 @@ libmaxminddb:
     - maxminddb_config.h
   static-libs@unix:
     - libmaxminddb.a
+  static-libs@windows:
+    - libmaxminddb.lib

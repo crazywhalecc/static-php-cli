@@ -8,7 +8,4 @@ ext-trader:
       license-files: [LICENSE]
       license: BSD-2-Clause
   php-extension:
-    support:
-      BSD: wip
-      Windows: wip
     arg-type: enable

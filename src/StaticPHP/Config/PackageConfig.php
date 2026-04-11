@@ -50,12 +50,20 @@ class PackageConfig
         if ($content === false) {
             throw new WrongUsageException("Failed to read package config file: {$file}");
         }
-        // judge extension
-        $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
-            'json' => json_decode($content, true),
-            'yml', 'yaml' => Yaml::parse($content),
-            default => throw new WrongUsageException("Unsupported package config file format: {$file}"),
-        };
+        // judge extension — use cache to skip redundant parsing
+        $data = ConfigCache::get($content);
+        if ($data !== null) {
+            logger()->debug("Config cache hit: {$file}");
+        } else {
+            $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
+                'json' => json_decode($content, true),
+                'yml', 'yaml' => extension_loaded('yaml') ? yaml_parse($content) : Yaml::parse($content),
+                default => throw new WrongUsageException("Unsupported package config file format: {$file}"),
+            };
+            if (is_array($data)) {
+                ConfigCache::set($content, $data);
+            }
+        }
         ConfigValidator::validateAndLintPackages(basename($file), $data);
         foreach ($data as $pkg_name => $config) {
             self::$package_configs[$pkg_name] = $config;

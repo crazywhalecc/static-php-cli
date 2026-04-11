@@ -15,6 +15,13 @@ snappy:
     - snappy-c.h
     - snappy-sinksource.h
     - snappy-stubs-public.h
+  headers@windows:
+    - snappy.h
+    - snappy-c.h
+    - snappy-sinksource.h
+    - snappy-stubs-public.h
   lang: cpp
   static-libs@unix:
     - libsnappy.a
+  static-libs@windows:
+    - snappy.lib

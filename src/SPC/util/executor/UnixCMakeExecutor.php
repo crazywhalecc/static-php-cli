@@ -183,6 +183,7 @@ class UnixCMakeExecutor extends Executor
         $cflags = getenv('SPC_DEFAULT_C_FLAGS');
         $cc = getenv('CC');
         $cxx = getenv('CCX');
+        $include = BUILD_INCLUDE_PATH;
         logger()->debug("making cmake tool chain file for {$os} {$target_arch} with CFLAGS='{$cflags}'");
         $root = BUILD_ROOT_PATH;
         $pkgConfigExecutable = PkgConfigUtil::findPkgConfig();
@@ -210,6 +211,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES "{$include}")
+set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES "{$include}")
 set(CMAKE_EXE_LINKER_FLAGS "-ldl -lpthread -lm -lutil")
 CMAKE;
         // Whoops, linux may need CMAKE_AR sometimes

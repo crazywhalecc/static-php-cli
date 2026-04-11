@@ -16,3 +16,4 @@ ext-snappy:
   lang: cpp
   php-extension:
     arg-type@unix: '--enable-snappy --with-snappy-includedir=@build_root_path@'
+    arg-type@windows: '--enable-snappy'

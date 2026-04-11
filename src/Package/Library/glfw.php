@@ -11,6 +11,7 @@ use StaticPHP\Exception\BuildFailureException;
 use StaticPHP\Exception\ValidationException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 
@@ -96,5 +97,20 @@ class glfw
             ->build('.');
         // patch pkgconf
         $lib->patchPkgconfPrefix(['glfw3.pc']);
+    }
+
+    #[BuildFor('Windows')]
+    public function buildForWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->setWorkingDir("{$lib->getSourceDir()}/vendor/glfw")
+            ->setBuildDir("{$lib->getSourceDir()}/vendor/glfw")
+            ->setReset(false)
+            ->addConfigureArgs(
+                '-DGLFW_BUILD_EXAMPLES=OFF',
+                '-DGLFW_BUILD_TESTS=OFF',
+                '-DGLFW_BUILD_DOCS=OFF',
+            )
+            ->build();
     }
 }

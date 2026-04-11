@@ -10,3 +10,5 @@ tidy:
       license: W3C
   static-libs@unix:
     - libtidy.a
+  static-libs@windows:
+    - tidy_a.lib

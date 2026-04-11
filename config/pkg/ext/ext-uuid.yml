@@ -10,7 +10,7 @@ ext-uuid:
   depends:
     - libuuid
   php-extension:
-    support:
-      Windows: wip
-      BSD: wip
+    os:
+      - Linux
+      - Darwin
     arg-type: with-path

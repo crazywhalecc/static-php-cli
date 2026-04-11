@@ -34,6 +34,7 @@ class ConfigValidator
         'build-with-php' => ConfigType::BOOL,
         'notes' => ConfigType::BOOL,
         'display-name' => ConfigType::STRING,
+        'os' => ConfigType::LIST_ARRAY,
 
         // library and target fields
         'headers' => ConfigType::LIST_ARRAY, // @
@@ -88,6 +89,7 @@ class ConfigValidator
         'build-with-php' => false,
         'notes' => false,
         'display-name' => false,
+        'os' => false,
     ];
 
     public const array ARTIFACT_TYPE_FIELDS = [ // [required_fields, optional_fields]

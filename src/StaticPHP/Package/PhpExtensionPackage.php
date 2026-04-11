@@ -61,6 +61,28 @@ class PhpExtensionPackage extends Package
         return str_replace('ext-', '', $this->getName());
     }
 
+    /**
+     * Get the list of OS platforms that this extension supports.
+     * Returns an empty array if no restriction is defined (all platforms supported).
+     */
+    public function getSupportedOSList(): array
+    {
+        return $this->extension_config['os'] ?? [];
+    }
+
+    /**
+     * Check if this extension is supported on the current target OS.
+     * Returns true if no 'os' restriction is defined, or if the current OS is in the list.
+     */
+    public function isSupportedOnCurrentOS(): bool
+    {
+        $osList = $this->getSupportedOSList();
+        if (empty($osList)) {
+            return true;
+        }
+        return in_array(SystemTarget::getTargetOS(), $osList, true);
+    }
+
     public function addCustomPhpConfigureArgCallback(string $os, callable $fn): void
     {
         if ($os === '') {
@@ -153,6 +175,43 @@ class PhpExtensionPackage extends Package
     public function getDistName(): string
     {
         return $this->extension_config['display-name'] ?? $this->getExtensionName();
+    }
+
+    /**
+     * Run smoke test for the extension on Unix CLI.
+     * Override this method in a subclass.
+     */
+    public function runSmokeTestCliWindows(): void
+    {
+        if (($this->extension_config['smoke-test'] ?? true) === false) {
+            return;
+        }
+
+        $distName = $this->getDistName();
+        // empty display-name → no --ri check (e.g. password_argon2)
+        if ($distName === '') {
+            return;
+        }
+
+        [$ret] = cmd()->execWithResult(BUILD_BIN_PATH . '\php.exe -n --ri "' . $distName . '"', false);
+        if ($ret !== 0) {
+            throw new ValidationException(
+                "extension {$this->getName()} failed compile check: php-cli returned {$ret}",
+                validation_module: 'Extension ' . $this->getName() . ' sanity check'
+            );
+        }
+
+        $test_file = ROOT_DIR . '/src/globals/ext-tests/' . $this->getExtensionName() . '.php';
+        if (file_exists($test_file)) {
+            $test = self::escapeInlineTestWindows(file_get_contents($test_file));
+            [$ret, $out] = cmd()->execWithResult(BUILD_BIN_PATH . '\php.exe -n -r "' . trim($test) . '"');
+            if ($ret !== 0) {
+                throw new ValidationException(
+                    "extension {$this->getName()} failed sanity check. Code: {$ret}, output: " . implode("\n", $out),
+                    validation_module: 'Extension ' . $this->getName() . ' function check'
+                );
+            }
+        }
     }
 
     /**
@@ -391,6 +450,19 @@ class PhpExtensionPackage extends Package
         return str_replace(
             ['<?php', 'declare(strict_types=1);', "\n", '"', '$', '!'],
             ['', '', '', '\"', '\$', '"\'!\'"'],
+            $code
+        );
+    }
+
+    /**
+     * Escape PHP test file content for inline `-r` usage on Windows cmd.
+     * Strips <?php / declare, replaces newlines and special cmd characters.
+     */
+    private static function escapeInlineTestWindows(string $code): string
+    {
+        return str_replace(
+            ['<?php', 'declare(strict_types=1);', "\n", '"', '$'],
+            ['', '', '', '\"', '$'],
             $code
         );
     }

@@ -42,13 +42,20 @@ class ArtifactConfig
         if ($content === false) {
             throw new WrongUsageException("Failed to read artifact config file: {$file}");
         }
-        $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
-            'json' => json_decode($content, true),
-            'yml', 'yaml' => Yaml::parse($content),
-            default => throw new WrongUsageException("Unsupported artifact config file format: {$file}"),
-        };
-        if (!is_array($data)) {
-            throw new WrongUsageException("Invalid JSON format in artifact config file: {$file}");
+        // use cache to skip redundant parsing
+        $data = ConfigCache::get($content);
+        if ($data !== null) {
+            logger()->debug("Config cache hit: {$file}");
+        } else {
+            $data = match (pathinfo($file, PATHINFO_EXTENSION)) {
+                'json' => json_decode($content, true),
+                'yml', 'yaml' => extension_loaded('yaml') ? yaml_parse($content) : Yaml::parse($content),
+                default => throw new WrongUsageException("Unsupported artifact config file format: {$file}"),
+            };
+            if (!is_array($data)) {
+                throw new WrongUsageException("Invalid JSON format in artifact config file: {$file}");
+            }
+            ConfigCache::set($content, $data);
         }
         ConfigValidator::validateAndLintArtifacts(basename($file), $data);
         foreach ($data as $artifact_name => $config) {
@@ -66,6 +73,16 @@ class ArtifactConfig
     public static function getAll(): array
     {
         return self::$artifact_configs;
+    }
+
+    /**
+     * Restore artifact configs from cache without re-parsing YAML files.
+     *
+     * @internal used by Registry cache layer only
+     */
+    public static function _restoreFromCache(array $configs): void
+    {
+        self::$artifact_configs = array_merge(self::$artifact_configs, $configs);
     }
 
     /**

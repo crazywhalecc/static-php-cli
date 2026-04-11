@@ -145,7 +145,7 @@ class PackageBuilder
             shell()->exec(getenv('UPX_EXEC') . " --best {$dst}");
         } elseif ($upx_option && SystemTarget::getTargetOS() === 'Windows' && $executable) {
             logger()->info("Compressing {$dst} with UPX");
-            shell()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($dst));
+            cmd()->exec(getenv('UPX_EXEC') . ' --best ' . escapeshellarg($dst));
         }
 
         return $dst;

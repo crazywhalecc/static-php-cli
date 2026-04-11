@@ -10,6 +10,7 @@ use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
+use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
 
 #[Library('liblz4')]
@@ -20,6 +21,16 @@ class liblz4
     public function patchBeforeBuild(LibraryPackage $lib): void
     {
         FileSystem::replaceFileStr($lib->getSourceDir() . '/programs/Makefile', 'install: lz4', "install: lz4\n\ninstallewfwef: lz4");
+    }
+
+    #[BuildFor('Windows')]
+    public function buildWin(LibraryPackage $lib): void
+    {
+        WindowsCMakeExecutor::create($lib)
+            ->setWorkingDir("{$lib->getSourceDir()}/build/cmake")
+            ->setBuildDir("{$lib->getSourceDir()}/_win_build")
+            ->addConfigureArgs('-DLZ4_BUILD_CLI=OFF')
+            ->build();
     }
 
     #[BuildFor('Darwin')]
