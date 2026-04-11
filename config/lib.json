@@ -207,7 +207,8 @@
             "zlib",
             "libpng",
             "libjpeg",
-            "bzip2"
+            "bzip2",
+            "libxml2"
         ],
         "lib-suggests": [
             "libwebp",
