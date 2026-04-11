@@ -394,7 +394,7 @@
     },
     "graphicsmagick": {
         "type": "url",
-        "url": "https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/1.3.45/GraphicsMagick-1.3.45.tar.xz",
+        "url": "https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/1.3.46/GraphicsMagick-1.3.46.tar.xz",
         "license": {
             "type": "file",
             "path": "Copyright.txt"
