@@ -80,6 +80,14 @@ class TargetPackage extends LibraryPackage
         if ($input !== null && $input->hasOption($key)) {
             return $input->getOption($key);
         }
+
+        // try builder options
+        $builder = ApplicationContext::has(PackageBuilder::class)
+            ? ApplicationContext::get(PackageBuilder::class)
+            : null;
+        if ($builder !== null && ($option = $builder->getOption($key)) !== null) {
+            return $option;
+        }
         return $default;
     }
 
