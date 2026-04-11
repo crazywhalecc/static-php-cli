@@ -7,6 +7,7 @@ namespace StaticPHP;
 use StaticPHP\Command\BuildLibsCommand;
 use StaticPHP\Command\BuildTargetCommand;
 use StaticPHP\Command\CheckUpdateCommand;
+use StaticPHP\Command\CraftCommand;
 use StaticPHP\Command\Dev\DumpCapabilitiesCommand;
 use StaticPHP\Command\Dev\DumpStagesCommand;
 use StaticPHP\Command\Dev\EnvCommand;
@@ -67,6 +68,7 @@ class ConsoleApplication extends Application
             new ResetCommand(),
             new CheckUpdateCommand(),
             new MicroCombineCommand(),
+            new CraftCommand(),
 
             // dev commands
             new ShellCommand(),
