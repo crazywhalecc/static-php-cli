@@ -8,8 +8,6 @@ trait GlobalPathTrait
 {
     /**
      * Get the build root path for the package.
-     *
-     * TODO: Can be changed to support per-package build root path in the future.
      */
     public function getBuildRootPath(): string
     {
@@ -18,8 +16,6 @@ trait GlobalPathTrait
 
     /**
      * Get the include directory for the package.
-     *
-     * TODO: Can be changed to support per-package include directory in the future.
      */
     public function getIncludeDir(): string
     {
@@ -28,8 +24,6 @@ trait GlobalPathTrait
 
     /**
      * Get the library directory for the package.
-     *
-     * TODO: Can be changed to support per-package library directory in the future.
      */
     public function getLibDir(): string
     {

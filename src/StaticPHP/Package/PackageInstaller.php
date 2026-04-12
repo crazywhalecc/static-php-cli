@@ -154,10 +154,9 @@ class PackageInstaller
             $this->resolvePackages();
         }
 
-        // show install or build options in terminal with beautiful output
-        $this->printInstallerInfo();
-
         if ($this->interactive && !$disable_delay_msg) {
+            // show install or build options in terminal with beautiful output
+            $this->printInstallerInfo();
             InteractiveTerm::notice('Build process will start after 2s ...' . PHP_EOL);
             sleep(2);
         }
