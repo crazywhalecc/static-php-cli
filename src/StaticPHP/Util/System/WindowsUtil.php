@@ -86,6 +86,44 @@ class WindowsUtil
     }
 
     /**
+     * Find Clang compiler from the Visual Studio LLVM toolchain.
+     *
+     * Checks the CC environment variable first (user override), then searches
+     * the VS2022/VS2019 installation via vswhere.
+     *
+     * @return array{clang: string, clangpp: string}|false False if not found
+     */
+    public static function findClang(): array|false
+    {
+        // Allow user to override via CC environment variable
+        if ($cc = getenv('CC')) {
+            if (file_exists($cc)) {
+                $clangpp = dirname($cc) . DIRECTORY_SEPARATOR . 'clang++.exe';
+                return [
+                    'clang' => $cc,
+                    'clangpp' => file_exists($clangpp) ? $clangpp : $cc,
+                ];
+            }
+        }
+
+        $vs = self::findVisualStudio();
+        if ($vs === false) {
+            return false;
+        }
+
+        $clang = $vs['dir'] . '\VC\Tools\Llvm\x64\bin\clang.exe';
+        $clangpp = $vs['dir'] . '\VC\Tools\Llvm\x64\bin\clang++.exe';
+        if (!file_exists($clang)) {
+            return false;
+        }
+
+        return [
+            'clang' => $clang,
+            'clangpp' => file_exists($clangpp) ? $clangpp : $clang,
+        ];
+    }
+
+    /**
      * Create CMake toolchain file.
      *
      * @param null|string $cflags  CFLAGS for cmake, default use '/MT /Os /Ob1 /DNDEBUG /D_ACRTIMP= /D_CRTIMP='

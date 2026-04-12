@@ -11,8 +11,16 @@ frankenphp:
   depends:
     - php-embed
     - go-xcaddy
+  depends@windows:
+    - php-embed
+    - go-win
+    - pthreads4w
   suggests@unix:
     - brotli
     - watcher
+  suggests@windows:
+    - brotli
   static-bins@unix:
     - frankenphp
+  static-bins@windows:
+    - frankenphp.exe

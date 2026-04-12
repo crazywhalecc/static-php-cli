@@ -26,6 +26,8 @@ class pthreads4w
         FileSystem::createDir($lib->getLibDir());
         FileSystem::createDir($lib->getIncludeDir());
         FileSystem::copy("{$lib->getSourceDir()}\\libpthreadVC3.lib", "{$lib->getLibDir()}\\libpthreadVC3.lib");
+        // FrankenPHP's cgo.go uses -lpthreadVC3, which lld-link maps to pthreadVC3.lib (no lib prefix)
+        FileSystem::copy("{$lib->getSourceDir()}\\libpthreadVC3.lib", "{$lib->getLibDir()}\\pthreadVC3.lib");
         FileSystem::copy("{$lib->getSourceDir()}\\_ptw32.h", "{$lib->getIncludeDir()}\\_ptw32.h");
         FileSystem::copy("{$lib->getSourceDir()}\\pthread.h", "{$lib->getIncludeDir()}\\pthread.h");
         FileSystem::copy("{$lib->getSourceDir()}\\sched.h", "{$lib->getIncludeDir()}\\sched.h");

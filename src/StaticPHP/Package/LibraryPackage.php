@@ -53,11 +53,12 @@ class LibraryPackage extends Package
                     return false;
                 }
             }
-            foreach (PackageConfig::get($this->getName(), 'static-bins', []) as $bin) {
-                $path = FileSystem::isRelativePath($bin) ? "{$this->getBinDir()}/{$bin}" : $bin;
-                if (!file_exists($path)) {
-                    return false;
-                }
+        }
+
+        foreach (PackageConfig::get($this->getName(), 'static-bins', []) as $bin) {
+            $path = FileSystem::isRelativePath($bin) ? "{$this->getBinDir()}/{$bin}" : $bin;
+            if (!file_exists($path)) {
+                return false;
             }
         }
         return true;

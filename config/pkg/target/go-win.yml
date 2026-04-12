@@ -1,0 +1,10 @@
+go-win:
+  type: target
+  artifact:
+    binary: custom
+  env:
+    GOROOT: '{pkg_root_path}/go-win'
+    GOBIN: '{pkg_root_path}/go-win/bin'
+    GOPATH: '{pkg_root_path}/go-win/go'
+  path@windows:
+    - '{pkg_root_path}/go-win/bin'
