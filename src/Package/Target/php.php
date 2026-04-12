@@ -342,7 +342,11 @@ class php extends TargetPackage
     public function postInstall(TargetPackage $package, PackageInstaller $installer): void
     {
         if ($package->getName() === 'frankenphp') {
-            $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
+            if (SystemTarget::getTargetOS() === 'Windows') {
+                $package->runStage([$this, 'smokeTestFrankenphpForWindows']);
+            } else {
+                $package->runStage([$this, 'smokeTestFrankenphpForUnix']);
+            }
             return;
         }
         if ($package->getName() !== 'php') {
