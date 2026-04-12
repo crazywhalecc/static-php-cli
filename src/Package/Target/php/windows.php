@@ -698,6 +698,7 @@ C_CODE;
         $output_label = match ($sapi) {
             'php-cli' => 'Binary path for cli SAPI',
             'php-cgi' => 'Binary path for cgi SAPI',
+            /* @phpstan-ignore-next-line */
             'php-micro' => 'Binary path for micro SAPI',
             default => null,
         };

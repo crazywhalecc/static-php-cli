@@ -20,4 +20,3 @@ parameters:
       analyseAndScan:
             - ./src/globals/ext-tests/
             - ./src/globals/test-extensions.php
-            - ./src/SPC/
