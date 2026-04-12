@@ -161,6 +161,7 @@ class php extends TargetPackage
         // embed build options
         if ($package->getName() === 'php' || $package->getName() === 'php-embed') {
             $package->addBuildOption('build-shared', 'D', InputOption::VALUE_REQUIRED, 'Shared extensions to build, comma separated', '');
+            $package->addBuildOption('maintainer-skip-build', null, null, '(maintainer only) skip embed build if exists');
         }
 
         // legacy php target build options
@@ -264,10 +265,6 @@ class php extends TargetPackage
         if ($package->getName() === 'frankenphp' && $package instanceof TargetPackage) {
             if (!$package->getBuildOption('enable-zts')) {
                 throw new WrongUsageException('FrankenPHP SAPI requires ZTS enabled PHP, build with `--enable-zts`!');
-            }
-            // frankenphp doesn't support windows, BSD is currently not supported by StaticPHP
-            if (!in_array(PHP_OS_FAMILY, ['Linux', 'Darwin'])) {
-                throw new WrongUsageException('FrankenPHP SAPI is only available on Linux and macOS!');
             }
         }
         // linux does not support loading shared libraries when target is pure static
