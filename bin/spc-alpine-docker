@@ -122,7 +122,7 @@ COPY ./composer.* /app/
 ADD ./bin /app/bin
 RUN composer install --no-dev
 ADD ./config /app/config
-ADD ./spc.registry.json /app/spc.registry.json
+ADD ./spc.registry.yml /app/spc.registry.yml
 RUN bin/spc doctor --auto-fix
 RUN bin/spc install-pkg upx
 
