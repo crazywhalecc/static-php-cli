@@ -295,11 +295,10 @@ trait frankenphp
         $source_dir = $package->getSourceDir();
         $build_dir = "{$source_dir}\\caddy\\frankenphp";
 
-        // Parse version components for the FixedFileInfo block.
-        $parts = explode('.', $frankenphp_version);
-        $major = (int) ($parts[0] ?? 0);
-        $minor = (int) ($parts[1] ?? 0);
-        $patch = (int) ($parts[2] ?? 0);
+        [$p1, $p2, $p3] = explode('.', $frankenphp_version);
+        $major = (int) $p1;
+        $minor = (int) $p2;
+        $patch = (int) $p3;
 
         $version_info = [
             'FixedFileInfo' => [
