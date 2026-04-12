@@ -140,14 +140,19 @@ trait windows
         // We need to modify CFLAGS to replace /Ox with /Zi and add /DEBUG to LDFLAGS
         $debug_overrides = '';
         if ($package->getBuildOption('no-strip', false)) {
-            // Read current CFLAGS from Makefile and replace optimization flags
+            // Read current CFLAGS and LDFLAGS from Makefile
             $makefile_content = file_get_contents("{$package->getSourceDir()}\\Makefile");
             if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
                 $cflags = $matches[1];
                 // Replace /Ox (full optimization) with /Zi (debug info) and /Od (disable optimization)
                 // Keep optimization for speed: /O2 /Zi instead of /Od /Zi
                 $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
-                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_CLI=/DEBUG" ';
+                // Append debug flags to existing LDFLAGS to preserve /libpath entries set by configure
+                $ldflags = '';
+                if (preg_match('/^LDFLAGS=(.+?)$/m', $makefile_content, $lm)) {
+                    $ldflags = trim($lm[1]) . ' ';
+                }
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=' . $ldflags . '/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_CLI=/DEBUG" ';
             }
         }
 
@@ -209,7 +214,12 @@ trait windows
             if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
                 $cflags = $matches[1];
                 $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
-                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_CGI=/DEBUG" ';
+                // Append debug flags to existing LDFLAGS to preserve /libpath entries set by configure
+                $ldflags = '';
+                if (preg_match('/^LDFLAGS=(.+?)$/m', $makefile_content, $lm)) {
+                    $ldflags = trim($lm[1]) . ' ';
+                }
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=' . $ldflags . '/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_CGI=/DEBUG" ';
             }
         }
 
@@ -247,6 +257,23 @@ trait windows
 
         // workaround for fiber (originally from https://github.com/dixyes/lwmbs/blob/master/windows/MicroBuild.php)
         $makefile = FileSystem::readFile("{$package->getSourceDir()}\\Makefile");
+
+        // Add debug symbols for release build if --no-strip is specified.
+        // Extract CFLAGS/LDFLAGS here, before fiber content is appended, to ensure the regex works on clean content.
+        $debug_overrides = '';
+        if ($package->getBuildOption('no-strip', false)) {
+            if (preg_match('/^CFLAGS=(.+?)$/m', $makefile, $matches)) {
+                $cflags = $matches[1];
+                $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
+                // Append debug flags to existing LDFLAGS to preserve /libpath entries set by configure
+                $ldflags = '';
+                if (preg_match('/^LDFLAGS=(.+?)$/m', $makefile, $lm)) {
+                    $ldflags = trim($lm[1]) . ' ';
+                }
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=' . $ldflags . '/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_MICRO=/DEBUG" ';
+            }
+        }
+
         if ($this->getPHPVersionID() >= 80200 && str_contains($makefile, 'FIBER_ASM_ARCH')) {
             $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
         } elseif ($this->getPHPVersionID() >= 80400 && str_contains($makefile, 'FIBER_ASM_ABI')) {
@@ -267,16 +294,6 @@ trait windows
 
         // extra lib
         $extra_libs = trim((getenv('SPC_EXTRA_LIBS') ?: '') . ' ' . implode(' ', $resolved_libs));
-        // Add debug symbols for release build if --no-strip is specified
-        $debug_overrides = '';
-        if ($package->getBuildOption('no-strip', false)) {
-            $makefile_content = file_get_contents("{$package->getSourceDir()}\\Makefile");
-            if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
-                $cflags = $matches[1];
-                $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
-                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO" "LDFLAGS_MICRO=/DEBUG" ';
-            }
-        }
 
         $fake_cli = $package->getBuildOption('with-micro-fake-cli', false) ? ' /DPHP_MICRO_FAKE_CLI' : '';
 
@@ -387,7 +404,12 @@ trait windows
             if (preg_match('/^CFLAGS=(.+?)$/m', $makefile_content, $matches)) {
                 $cflags = $matches[1];
                 $cflags = str_replace('/Ox ', '/O2 /Zi ', $cflags);
-                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=/DEBUG /LTCG /INCREMENTAL:NO" ';
+                // Append debug flags to existing LDFLAGS to preserve /libpath entries set by configure
+                $ldflags = '';
+                if (preg_match('/^LDFLAGS=(.+?)$/m', $makefile_content, $lm)) {
+                    $ldflags = trim($lm[1]) . ' ';
+                }
+                $debug_overrides = '"CFLAGS=' . $cflags . '" "LDFLAGS=' . $ldflags . '/DEBUG /LTCG /INCREMENTAL:NO" ';
             }
         }
 
