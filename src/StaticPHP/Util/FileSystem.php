@@ -287,10 +287,11 @@ class FileSystem
     /**
      * Remove directory recursively
      *
-     * @param  string $dir Directory to remove
-     * @return bool   Success status
+     * @param  string        $dir      Directory to remove
+     * @param  null|callable $callback Callback for every single scan items
+     * @return bool          Success status
      */
-    public static function removeDir(string $dir): bool
+    public static function removeDir(string $dir, ?callable $callback = null): bool
     {
         $dir = self::convertPath($dir);
         logger()->debug('Removing path recursively: "' . $dir . '"');
@@ -311,7 +312,9 @@ class FileSystem
         }
         // 遍历目录
         foreach ($scan_list as $v) {
-            InteractiveTerm::advance();
+            if ($callback) {
+                $callback($v);
+            }
             // Unix 系统排除这俩目录
             if ($v == '.' || $v == '..') {
                 continue;

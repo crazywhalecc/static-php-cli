@@ -62,8 +62,10 @@ class ResetCommand extends BaseCommand
             InteractiveTerm::indicateProgress("Removing: {$path}");
 
             if (PHP_OS_FAMILY === 'Windows') {
+                Shell::passthruCallback(fn () => InteractiveTerm::advance());
                 // Force delete on Windows to handle git directories
                 $this->removeDirectoryWindows($path);
+                Shell::passthruCallback(null);
             } else {
                 // Use FileSystem::removeDir for Unix systems
                 FileSystem::removeDir($path);
@@ -88,7 +90,6 @@ class ResetCommand extends BaseCommand
 
         // Try using PowerShell for force deletion
         $escaped_path = escapeshellarg($path);
-        Shell::passthruCallback(fn () => InteractiveTerm::advance());
 
         // Use PowerShell Remove-Item with -Force and -Recurse
         $result = cmd()->execWithResult("powershell -Command \"Remove-Item -Path {$escaped_path} -Recurse -Force -ErrorAction SilentlyContinue\"", false);
@@ -106,6 +107,5 @@ class ResetCommand extends BaseCommand
         if (is_dir($path)) {
             FileSystem::removeDir($path);
         }
-        Shell::passthruCallback(null);
     }
 }
