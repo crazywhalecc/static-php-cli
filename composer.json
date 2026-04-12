@@ -29,7 +29,6 @@
     },
     "autoload": {
         "psr-4": {
-            "SPC\\": "src/SPC",
             "StaticPHP\\": "src/StaticPHP",
             "Package\\": "src/Package"
         },
