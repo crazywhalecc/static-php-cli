@@ -133,7 +133,8 @@ class PackageInstaller
 
     public function printBuildPackageOutputs(): void
     {
-        foreach ($this->build_packages as $package) {
+        /** @var Package $package */
+        foreach ($this->getResolvedPackages() as $package) {
             if (($outputs = $package->getOutputs()) !== []) {
                 InteractiveTerm::notice('Package ' . ConsoleColor::green($package->getName()) . ' outputs');
                 $this->printArrayInfo(info: $outputs);
@@ -685,6 +686,7 @@ class PackageInstaller
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-frankenphp')) {
                 $frankenphp = PackageLoader::getPackage('frankenphp');
                 $this->install_packages[$frankenphp->getName()] = $frankenphp;
+                $this->build_packages[$package->getName()] = $package;
                 $added = true;
             }
             $this->build_packages[$package->getName()] = $package;
