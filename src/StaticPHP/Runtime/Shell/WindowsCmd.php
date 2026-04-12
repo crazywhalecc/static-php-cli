@@ -27,7 +27,7 @@ class WindowsCmd extends Shell
         $this->last_cmd = $cmd = $this->getExecString($cmd);
         // echo $cmd . PHP_EOL;
 
-        $this->passthru($cmd, $this->console_putput, $original_command, cwd: $this->cd);
+        $this->passthru($cmd, $this->console_putput, $original_command, cwd: $this->cd, env: $this->env);
         return $this;
     }
 
