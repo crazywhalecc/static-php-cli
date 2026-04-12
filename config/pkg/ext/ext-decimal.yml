@@ -1,0 +1,16 @@
+ext-decimal:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtagtar
+      repo: php-decimal/ext-decimal
+      match: 'v2\.\d.*'
+      extract: php-src/ext/decimal
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - libmpdec
+  php-extension:
+    arg-type@unix: '--enable-decimal --with-libmpdec-path=@build_root_path@'
+    arg-type@windows: '--with-decimal'
