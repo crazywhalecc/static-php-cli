@@ -10,3 +10,4 @@ pthreads4w:
       license: Apache-2.0
   static-libs@windows:
     - libpthreadVC3.lib
+    - pthreadVC3.lib
