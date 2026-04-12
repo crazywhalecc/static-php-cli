@@ -26,4 +26,16 @@ class decimal extends PhpExtensionPackage
             'zend_module_entry php_decimal_module_entry'
         );
     }
+
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-decimal')]
+    #[PatchDescription('Ensure ext/json MINIT runs before ext/decimal on Windows static builds')]
+    public function patchConfigW32(): void
+    {
+        FileSystem::replaceFileStr(
+            $this->getSourceDir() . '/config.w32',
+            'ARG_WITH("decimal", "for decimal support", "no");',
+            'ARG_WITH("decimal", "for decimal support",  "no");' . "\n" .
+            'ADD_EXTENSION_DEP("decimal", "json");'
+        );
+    }
 }
