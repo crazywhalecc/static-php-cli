@@ -40,6 +40,6 @@ class swow extends PhpExtensionPackage
         }
         // replace AC_DEFUN([SWOW_PKG_CHECK_MODULES] to AC_DEFUN([SWOW_PKG_CHECK_MODULES_STATIC]
         FileSystem::replaceFileStr($this->getSourceDir() . '/ext/config.m4', 'AC_DEFUN([SWOW_PKG_CHECK_MODULES]', 'AC_DEFUN([SWOW_PKG_CHECK_MODULES_STATIC]');
-        return false;
+        return true;
     }
 }
