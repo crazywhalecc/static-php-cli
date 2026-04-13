@@ -101,7 +101,7 @@ jobs:
             tar -czf ${{ matrix.operating-system.filename }} spc
             # validate spc binary
             if [ "${{ matrix.operating-system.name }}" == "linux-x86_64" ]; then
-              ./spc dev:extensions
+              ./spc dev:info php
             fi
           fi
 
@@ -172,4 +172,4 @@ jobs:
       - name: "Run SPC Tests"
         env:
           SUFFIX: ${{ matrix.operating-system.name == 'windows-x64' && '.exe' || '' }}
-        run: ./spc${{ env.SUFFIX }} dev:extensions
+        run: ./spc${{ env.SUFFIX }} dev:info php
