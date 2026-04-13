@@ -94,24 +94,24 @@ jobs:
 
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v7
         with:
           name: php-${{ inputs.version }}
           path: buildroot/bin/php.exe
 
       # Upload micro self-extracted executable
       - if: ${{ inputs.build-micro == true }}
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v7
         with:
           name: micro-${{ inputs.version }}
           path: buildroot/bin/micro.sfx
 
       # Upload extensions metadata
-      - uses: actions/upload-artifact@v8
+      - uses: actions/upload-artifact@v7
         with:
           name: license-files
           path: buildroot/license/
-      - uses: actions/upload-artifact@v8
+      - uses: actions/upload-artifact@v7
         with:
           name: build-meta
           path: |
