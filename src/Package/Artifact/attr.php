@@ -17,7 +17,7 @@ class attr
     #[PatchDescription('Patch attr for Alpine Linux (musl) and macOS - gethostname declaration')]
     public function patchAttrForAlpine(Artifact $artifact): void
     {
-        spc_skip_unless(SystemTarget::getTargetOS() === 'Darwin' || SystemTarget::getTargetOS() === 'Linux' && !LinuxUtil::isMuslDist(), 'Only for Alpine Linux (musl) and macOS');
+        spc_skip_unless(SystemTarget::getTargetOS() === 'Darwin' || SystemTarget::getTargetOS() === 'Linux' && LinuxUtil::isMuslDist(), 'Only for Alpine Linux (musl) and macOS');
         SourcePatcher::patchFile('attr_alpine_gethostname.patch', $artifact->getSourceDir());
     }
 }
