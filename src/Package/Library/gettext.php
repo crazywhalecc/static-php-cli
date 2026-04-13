@@ -36,7 +36,7 @@ class gettext
             $autoconf->addConfigureArgs('--enable-threads=isoc+posix')
                 ->appendEnv([
                     'CFLAGS' => '-lpthread -D_REENTRANT',
-                    'LDFLGAS' => '-lpthread',
+                    'LDFLAGS' => '-lpthread',
                 ]);
         } else {
             $autoconf->addConfigureArgs('--disable-threads');
