@@ -549,6 +549,18 @@
             "maxminddb_config.h"
         ]
     },
+    "libmpdec": {
+        "source": "libmpdec",
+        "static-libs-unix": [
+            "libmpdec.a"
+        ],
+        "static-libs-windows": [
+            "libmpdec_a.lib"
+        ],
+        "headers": [
+            "mpdecimal.h"
+        ]
+    },
     "libmemcached": {
         "source": "libmemcached",
         "cpp-library": true,
