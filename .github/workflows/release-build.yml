@@ -145,7 +145,7 @@ jobs:
           endpoint: ${{ secrets.AWS_ENDPOINT }}
 
       - name: "Upload Artifact"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v8
         with:
           path: spc${{ env.SUFFIX }}
           name: spc-${{ matrix.operating-system.name }}${{ env.SUFFIX }}

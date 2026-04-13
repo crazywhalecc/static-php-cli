@@ -206,7 +206,7 @@ jobs:
 
       - name: "Upload logs"
         if: ${{ always() && hashFiles('log/**') != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: build-logs-${{ matrix.os }}-${{ matrix.php }}
           path: log

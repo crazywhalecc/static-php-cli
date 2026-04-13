@@ -276,7 +276,7 @@ jobs:
       # Upload debug logs
       - if: ${{ inputs.debug && failure() }}
         name: "Upload build logs on failure"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: spc-logs-${{ inputs.php-version }}-${{ inputs.os }}
           path: log/*.log
@@ -284,7 +284,7 @@ jobs:
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
         name: "Upload PHP cli SAPI"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: php-cli-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/php
@@ -292,7 +292,7 @@ jobs:
       # Upload micro self-extracted executable
       - if: ${{ inputs.build-micro == true }}
         name: "Upload PHP micro SAPI"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: php-micro-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/micro.sfx
@@ -300,7 +300,7 @@ jobs:
       # Upload fpm executable
       - if: ${{ inputs.build-fpm == true }}
         name: "Upload PHP fpm SAPI"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: php-fpm-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/php-fpm
@@ -308,7 +308,7 @@ jobs:
       # Upload frankenphp executable
       - if: ${{ inputs['build-frankenphp'] == true }}
         name: "Upload FrankenPHP SAPI"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: php-frankenphp-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/frankenphp
@@ -316,17 +316,17 @@ jobs:
       # Upload extensions metadata
       - if: ${{ inputs['shared-extensions'] != '' }}
         name: "Upload shared extensions"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: php-shared-ext-${{ inputs.php-version }}-${{ inputs.os }}
           path: |
             buildroot/modules/*.so
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v8
         name: "Upload License Files"
         with:
           name: license-files-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/license/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v8
         name: "Upload Build Metadata"
         with:
           name: build-meta-${{ inputs.php-version }}-${{ inputs.os }}
