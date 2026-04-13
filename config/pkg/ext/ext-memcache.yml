@@ -11,4 +11,7 @@ ext-memcache:
     - ext-zlib
     - ext-session
   php-extension:
+    os:
+      - Linux
+      - Darwin
     arg-type: '--enable-memcache@shared_suffix@ --with-zlib-dir=@build_root_path@'
