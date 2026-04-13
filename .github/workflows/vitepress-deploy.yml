@@ -2,9 +2,9 @@ name: Docs Auto Deploy
 on:
   push:
     branches:
-      - main
+      - v3
     paths:
-      - 'config/**.json'
+      - 'config/**.yml'
       - 'docs/**'
       - 'package.json'
       - 'yarn.lock'
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'crazywhalecc/static-php-cli'
     steps:
-      - name: Checkout master
+      - name: Checkout
         uses: actions/checkout@v4
 
       - uses: actions/setup-node@v3
