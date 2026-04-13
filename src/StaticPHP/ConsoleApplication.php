@@ -18,6 +18,7 @@ use StaticPHP\Command\Dev\PackLibCommand;
 use StaticPHP\Command\Dev\ShellCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
+use StaticPHP\Command\DumpExtensionsCommand;
 use StaticPHP\Command\DumpLicenseCommand;
 use StaticPHP\Command\ExtractCommand;
 use StaticPHP\Command\InstallPackageCommand;
@@ -65,6 +66,7 @@ class ConsoleApplication extends Application
             new ExtractCommand(),
             new SPCConfigCommand(),
             new DumpLicenseCommand(),
+            new DumpExtensionsCommand(),
             new ResetCommand(),
             new CheckUpdateCommand(),
             new MicroCombineCommand(),
