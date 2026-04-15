@@ -489,9 +489,9 @@
         }
     },
     "ldap": {
-        "type": "filelist",
-        "url": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
-        "regex": "/href=\"(?<file>openldap-(?<version>[^\"]+)\\.tgz)\"/",
+        "type": "ghtagtar",
+        "repo": "openldap/openldap",
+        "match": "OPENLDAP_REL_ENG_2_6_\\d+",
         "license": {
             "type": "file",
             "path": "LICENSE"
