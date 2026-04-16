@@ -72,7 +72,7 @@ class ExceptionHandler
             }
         }
         if (!ApplicationContext::isDebug()) {
-            self::logError('⚠ If you want to see more details in console, use `-vvv` option.');
+            self::logError('⚠ If you want to see more details in console, use `-v`, `-vv` or `-vvv` option.');
         }
         return self::getReturnCode($e);
     }
@@ -232,6 +232,9 @@ class ExceptionHandler
         if ($e instanceof ExecutionException) {
             self::logError('');
             self::logError('Failed command: ' . ConsoleColor::gray($e->getExecutionCommand()));
+            if ($e->getCode() !== 0) {
+                self::logError('  - Exit code: ' . ConsoleColor::gray((string) $e->getCode()));
+            }
             if ($cd = $e->getCd()) {
                 self::logError('  - Command executed in: ' . ConsoleColor::gray($cd));
             }
@@ -240,6 +243,26 @@ class ExceptionHandler
                 foreach ($env as $k => $v) {
                     self::logError(ConsoleColor::gray("{$k}={$v}"), 6);
                 }
+            }
+        }
+
+        // get downloader info
+        if ($e instanceof DownloaderException) {
+            if ($artifact_name = $e->getArtifactName()) {
+                self::logError('Failed artifact: ' . ConsoleColor::gray($artifact_name));
+            }
+            $cause = $e->getPrevious();
+            if ($cause instanceof ExecutionException) {
+                self::logError('');
+                self::logError('Last failed command: ' . ConsoleColor::gray($cause->getExecutionCommand()));
+                if ($cause->getCode() !== 0) {
+                    self::logError('  - Exit code: ' . ConsoleColor::gray((string) $cause->getCode()));
+                }
+                if ($cd = $cause->getCd()) {
+                    self::logError('  - Command executed in: ' . ConsoleColor::gray($cd));
+                }
+            } elseif ($cause instanceof DownloaderException || $cause instanceof ValidationException) {
+                self::logError('Cause: ' . ConsoleColor::gray($cause->getMessage()));
             }
         }
 

@@ -174,6 +174,7 @@ abstract class Shell
         $process = proc_open($cmd, $descriptors, $pipes, $cwd, env_vars: $env, options: PHP_OS_FAMILY === 'Windows' ? ['create_process_group' => true] : null);
 
         $output_value = '';
+        $process_completed = false;
         try {
             if (!is_resource($process)) {
                 throw new ExecutionException(
@@ -251,11 +252,15 @@ abstract class Shell
                 }
             }
 
+            $process_completed = true;
             return [
                 'code' => $status['exitcode'],
                 'output' => $output_value,
             ];
         } finally {
+            if (!$process_completed && is_resource($process)) {
+                proc_terminate($process);
+            }
             fclose($pipes[1]);
             fclose($pipes[2]);
             if ($file_res !== null) {

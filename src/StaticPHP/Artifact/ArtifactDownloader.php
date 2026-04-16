@@ -545,6 +545,7 @@ class ArtifactDownloader
         }
 
         $try = false;
+        $last_exception = null;
         foreach ($queue as $item) {
             try {
                 $instance = null;
@@ -605,6 +606,7 @@ class ArtifactDownloader
                     InteractiveTerm::finish("Download artifact {$artifact->getName()} {$item['display']} failed !", false);
                     InteractiveTerm::error("Failed message: {$e->getMessage()}", true);
                 }
+                $last_exception = $e;
                 $try = true;
                 continue;
             } catch (ValidationException $e) {
@@ -612,11 +614,12 @@ class ArtifactDownloader
                     InteractiveTerm::finish("Download artifact {$artifact->getName()} {$item['display']} failed !", false);
                     InteractiveTerm::error("Validation failed: {$e->getMessage()}");
                 }
+                $last_exception = $e;
                 break;
             }
         }
         $vvv = !ApplicationContext::isDebug() ? "\nIf the problem persists, consider using `-v`, `-vv` or `-vvv` to enable verbose mode, or disable parallel downloading for more details." : '';
-        throw new DownloaderException("Download artifact '{$artifact->getName()}' failed. Please check your internet connection and try again.{$vvv}");
+        throw new DownloaderException("Download artifact '{$artifact->getName()}' failed. Please check your internet connection and try again.{$vvv}", previous: $last_exception, artifact_name: $artifact->getName());
     }
 
     private function downloadWithConcurrency(): void
@@ -672,8 +675,7 @@ class ArtifactDownloader
                                 $artifact_name = $artifact->getName();
                             }
                             $failed_downloads[] = ['artifact' => $artifact_name, 'error' => $e];
-                            InteractiveTerm::setMessage("[{$downloaded}/{$total}] Download failed: {$artifact_name}");
-                            InteractiveTerm::advance();
+                            throw $e;
                         }
                         // remove from pool
                         unset($fiber_pool[$index]);
