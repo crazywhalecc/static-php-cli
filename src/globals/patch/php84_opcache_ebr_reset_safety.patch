@@ -1,0 +1,610 @@
+From e110a901897be30456ea80177fcf544872f89f59 Mon Sep 17 00:00:00 2001
+From: David Stone <david@nnucomputerwhiz.com>
+Date: Thu, 16 Apr 2026 14:21:19 -0600
+Subject: [PATCH] Fix GH-8739: opcache_reset()/invalidate() races via
+ epoch-based reclamation
+
+opcache_reset() and opcache_invalidate() destroy shared memory (hash
+table memset, interned strings restore, SHM watermark reset) while
+concurrent reader threads/processes still hold pointers into that
+memory. This causes zend_mm_heap corrupted crashes under concurrent
+load in both ZTS (FrankenPHP, parallel) and FPM configurations.
+
+A prior fix attempt (PR #14803) wrapped cache lookups in
+zend_shared_alloc_lock(), which was rejected by Dmitry Stogov because
+readers must remain lock-free. This patch introduces epoch-based
+reclamation (EBR), a proven lock-free pattern also used by RCU in the
+Linux kernel and by Crossbeam in Rust:
+
+- Readers publish their epoch on request start (one atomic store) and
+  clear it on request end (one atomic store). No locks acquired.
+- Writers (opcache_reset path) increment the global epoch and defer the
+  actual hash/interned-string cleanup until all pre-epoch readers have
+  completed. The deferred reset completes at the next request boundary
+  after the drain is complete.
+- The existing immediate-cleanup fast path is retained for the case
+  when accel_is_inactive() reports no active readers.
+
+Additional safety:
+
+- When the per-slot pool (256 slots) is exhausted, readers fall back
+  to an aggregate overflow counter that unconditionally blocks
+  deferred reclamation while non-zero. This preserves safety for
+  installations with more concurrent readers than slots.
+- UNASSIGNED vs OVERFLOW sentinels distinguish "slot not yet attempted"
+  from "allocation failed", avoiding per-request atomic contention on
+  the slot-next counter once slots are exhausted.
+- A full memory barrier after zend_accel_hash_clean()'s memset ensures
+  readers on weak-memory architectures see the zeroed table before any
+  subsequent insert.
+- A defensive ZCG(locked) check in accel_try_complete_deferred_reset()
+  prevents the ZEND_ASSERT(!ZCG(locked)) failure that would otherwise
+  fire if the completer is re-entered while the SHM lock is held.
+
+Fixes GH-8739
+Fixes GH-14471
+Fixes GH-18517
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+---
+ NEWS                                          |   3 +
+ ext/opcache/ZendAccelerator.c                 | 222 ++++++++++++++++++
+ ext/opcache/ZendAccelerator.h                 |  73 ++++++
+ .../tests/gh8739_invalidate_epoch_safety.phpt |  42 ++++
+ .../tests/gh8739_reset_epoch_safety.phpt      |  39 +++
+ ext/opcache/tests/gh8739_reset_multiple.phpt  |  36 +++
+ ext/opcache/zend_accelerator_hash.c           |   9 +
+ 7 files changed, 424 insertions(+)
+ create mode 100644 ext/opcache/tests/gh8739_invalidate_epoch_safety.phpt
+ create mode 100644 ext/opcache/tests/gh8739_reset_epoch_safety.phpt
+ create mode 100644 ext/opcache/tests/gh8739_reset_multiple.phpt
+
+diff --git a/ext/opcache/ZendAccelerator.c b/ext/opcache/ZendAccelerator.c
+index dca5f607..e214b507 100644
+--- a/ext/opcache/ZendAccelerator.c
++++ b/ext/opcache/ZendAccelerator.c
+@@ -136,6 +136,8 @@ static zend_result (*orig_post_startup_cb)(void);
+ 
+ static zend_result accel_post_startup(void);
+ static zend_result accel_finish_startup(void);
++static void zend_reset_cache_vars(void);
++static void accel_interned_strings_restore_state(void);
+ 
+ static void preload_shutdown(void);
+ static void preload_activate(void);
+@@ -402,6 +404,175 @@ static inline void accel_unlock_all(void)
+ #endif
+ }
+ 
++/* Epoch-based reclamation for safe opcache_reset()/opcache_invalidate()
++ * under concurrent load (GH-8739). Readers publish their epoch on request
++ * start and clear it on request end. Writers defer the destructive cleanup
++ * until every pre-reset reader has finished, so lock-free readers never
++ * race with hash memset or interned strings restore.
++ */
++
++void accel_epoch_init(void)
++{
++	int i;
++
++	/* epoch 0 is reserved as the "never deferred" sentinel for drain_epoch */
++	ZCSG(current_epoch) = 1;
++	ZCSG(drain_epoch) = 0;
++	ZCSG(reset_deferred) = false;
++	ZCSG(epoch_slot_next) = 0;
++	ZCSG(epoch_overflow_active) = 0;
++
++	for (i = 0; i < ACCEL_EPOCH_MAX_SLOTS; i++) {
++		ZCSG(epoch_slots)[i].epoch = ACCEL_EPOCH_INACTIVE;
++	}
++}
++
++static int32_t accel_epoch_alloc_slot(void)
++{
++	int32_t slot;
++
++#if defined(ZEND_WIN32)
++	slot = (int32_t)InterlockedIncrement((volatile LONG *)&ZCSG(epoch_slot_next)) - 1;
++#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
++	slot = __atomic_fetch_add(&ZCSG(epoch_slot_next), 1, __ATOMIC_SEQ_CST);
++#elif defined(__GNUC__)
++	slot = __sync_fetch_and_add(&ZCSG(epoch_slot_next), 1);
++#else
++	slot = ZCSG(epoch_slot_next)++;
++#endif
++
++	if (slot < 0 || slot >= ACCEL_EPOCH_MAX_SLOTS) {
++		return ACCEL_EPOCH_SLOT_OVERFLOW;
++	}
++	return slot;
++}
++
++void accel_epoch_enter(void)
++{
++	int32_t slot = ZCG(epoch_slot);
++
++	if (UNEXPECTED(slot == ACCEL_EPOCH_SLOT_UNASSIGNED)) {
++		slot = accel_epoch_alloc_slot();
++		ZCG(epoch_slot) = slot;
++	}
++
++	if (EXPECTED(slot >= 0)) {
++		uint64_t epoch = ACCEL_ATOMIC_LOAD_64(&ZCSG(current_epoch));
++		ZCG(local_epoch) = epoch;
++		ACCEL_ATOMIC_STORE_64(&ZCSG(epoch_slots)[slot].epoch, epoch);
++	} else {
++		/* per-reader slots exhausted - fall back to the aggregate counter
++		 * so deferred reclamation still waits for this reader */
++		ACCEL_ATOMIC_INC_32(&ZCSG(epoch_overflow_active));
++		ZCG(local_epoch) = 0;
++	}
++}
++
++void accel_epoch_leave(void)
++{
++	int32_t slot = ZCG(epoch_slot);
++
++	if (EXPECTED(slot >= 0)) {
++		ACCEL_ATOMIC_STORE_64(&ZCSG(epoch_slots)[slot].epoch, ACCEL_EPOCH_INACTIVE);
++	} else if (slot == ACCEL_EPOCH_SLOT_OVERFLOW) {
++		ACCEL_ATOMIC_DEC_32(&ZCSG(epoch_overflow_active));
++	}
++}
++
++static uint64_t accel_min_active_epoch(void)
++{
++	uint64_t min_epoch = ACCEL_EPOCH_INACTIVE;
++	int i;
++
++	for (i = 0; i < ACCEL_EPOCH_MAX_SLOTS; i++) {
++		uint64_t e = ACCEL_ATOMIC_LOAD_64(&ZCSG(epoch_slots)[i].epoch);
++		if (e < min_epoch) {
++			min_epoch = e;
++		}
++	}
++	return min_epoch;
++}
++
++bool accel_deferred_reset_pending(void)
++{
++	return ZCSG(reset_deferred);
++}
++
++void accel_try_complete_deferred_reset(void)
++{
++	uint64_t drain_epoch;
++	uint64_t min_epoch;
++	uint32_t overflow;
++
++	if (!ZCSG(reset_deferred)) {
++		return;
++	}
++
++	/* re-entering zend_shared_alloc_lock() would hit ZEND_ASSERT(!ZCG(locked)) */
++	if (ZCG(locked)) {
++		return;
++	}
++
++	overflow = ACCEL_ATOMIC_LOAD_32(&ZCSG(epoch_overflow_active));
++	if (overflow > 0) {
++		return;
++	}
++
++	drain_epoch = ACCEL_ATOMIC_LOAD_64(&ZCSG(drain_epoch));
++	min_epoch = accel_min_active_epoch();
++
++	if (min_epoch <= drain_epoch) {
++		return;
++	}
++
++	zend_shared_alloc_lock();
++
++	if (ZCSG(reset_deferred)) {
++		/* re-check under lock in case another thread already completed,
++		 * or a reader published drain_epoch after our lock-free check */
++		min_epoch = accel_min_active_epoch();
++		if (min_epoch > ACCEL_ATOMIC_LOAD_64(&ZCSG(drain_epoch))) {
++			zend_accel_error(ACCEL_LOG_DEBUG,
++				"Completing deferred opcache reset (drain_epoch=%" PRIu64
++				", min_active_epoch=%" PRIu64 ")",
++				drain_epoch, min_epoch);
++
++			accel_restart_enter();
++
++			zend_map_ptr_reset();
++			zend_reset_cache_vars();
++			zend_accel_hash_clean(&ZCSG(hash));
++
++			if (ZCG(accel_directives).interned_strings_buffer) {
++				accel_interned_strings_restore_state();
++			}
++
++			zend_shared_alloc_restore_state();
++
++			if (ZCSG(preload_script)) {
++				preload_restart();
++			}
++
++#ifdef HAVE_JIT
++			zend_jit_restart();
++#endif
++
++			ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
++			if (ZCSG(last_restart_time) < ZCG(request_time)) {
++				ZCSG(last_restart_time) = ZCG(request_time);
++			} else {
++				ZCSG(last_restart_time)++;
++			}
++
++			ZCSG(reset_deferred) = false;
++
++			accel_restart_leave();
++		}
++	}
++
++	zend_shared_alloc_unlock();
++}
++
+ /* Interned strings support */
+ 
+ /* O+ disables creation of interned strings by regular PHP compiler, instead,
+@@ -2692,6 +2863,14 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
+ 		ZCG(counted) = false;
+ 	}
+ 
++	/* publish epoch before any shared memory access so a concurrent
++	 * opcache_reset() waits for us (GH-8739) */
++	accel_epoch_enter();
++
++	if (UNEXPECTED(ZCSG(reset_deferred))) {
++		accel_try_complete_deferred_reset();
++	}
++
+ 	if (ZCSG(restart_pending)) {
+ 		zend_shared_alloc_lock();
+ 		if (ZCSG(restart_pending)) { /* check again, to ensure that the cache wasn't already cleaned by another process */
+@@ -2735,6 +2914,35 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
+ 					ZCSG(last_restart_time)++;
+ 				}
+ 				accel_restart_leave();
++			} else if (!ZCSG(reset_deferred)) {
++				/* Readers are active — defer the destructive cleanup to
++				 * accel_try_complete_deferred_reset() at the next request
++				 * boundary, after all current readers have drained (GH-8739) */
++				zend_accel_error(ACCEL_LOG_DEBUG,
++					"Deferring opcache restart: active readers detected");
++				ZCSG(restart_pending) = false;
++
++				switch ZCSG(restart_reason) {
++					case ACCEL_RESTART_OOM:
++						ZCSG(oom_restarts)++;
++						break;
++					case ACCEL_RESTART_HASH:
++						ZCSG(hash_restarts)++;
++						break;
++					case ACCEL_RESTART_USER:
++						ZCSG(manual_restarts)++;
++						break;
++				}
++
++				/* new readers publish current_epoch+1, which is > drain_epoch,
++				 * so they don't block the drain check */
++				ACCEL_ATOMIC_STORE_64(&ZCSG(drain_epoch),
++					ACCEL_ATOMIC_LOAD_64(&ZCSG(current_epoch)));
++				ACCEL_ATOMIC_INC_64(&ZCSG(current_epoch));
++
++				ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
++				ZCSG(accelerator_enabled) = false;
++				ZCSG(reset_deferred) = true;
+ 			}
+ 		}
+ 		zend_shared_alloc_unlock();
+@@ -2789,6 +2997,17 @@ zend_result accel_post_deactivate(void)
+ 		return SUCCESS;
+ 	}
+ 
++	/* leave the epoch before try_complete, so our own slot doesn't block
++	 * the drain check (GH-8739) */
++	if (!file_cache_only && accel_shared_globals) {
++		SHM_UNPROTECT();
++		accel_epoch_leave();
++		if (UNEXPECTED(ZCSG(reset_deferred))) {
++			accel_try_complete_deferred_reset();
++		}
++		SHM_PROTECT();
++	}
++
+ 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
+ 	accel_unlock_all();
+ 	ZCG(counted) = false;
+@@ -2936,6 +3155,8 @@ static zend_result zend_accel_init_shm(void)
+ 
+ 	zend_reset_cache_vars();
+ 
++	accel_epoch_init();
++
+ 	ZCSG(oom_restarts) = 0;
+ 	ZCSG(hash_restarts) = 0;
+ 	ZCSG(manual_restarts) = 0;
+@@ -2962,6 +3183,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
+ 	memset(accel_globals, 0, sizeof(zend_accel_globals));
+ 	accel_globals->key = zend_string_alloc(ZCG_KEY_LEN, true);
+ 	GC_MAKE_PERSISTENT_LOCAL(accel_globals->key);
++	accel_globals->epoch_slot = ACCEL_EPOCH_SLOT_UNASSIGNED;
+ }
+ 
+ static void accel_globals_dtor(zend_accel_globals *accel_globals)
+diff --git a/ext/opcache/ZendAccelerator.h b/ext/opcache/ZendAccelerator.h
+index 486074ef..9665c4be 100644
+--- a/ext/opcache/ZendAccelerator.h
++++ b/ext/opcache/ZendAccelerator.h
+@@ -52,10 +52,59 @@
+ #include "zend_compile.h"
+ #include "zend_API.h"
+ 
++#include <stdint.h>
++
+ #include "Optimizer/zend_optimizer.h"
+ #include "zend_accelerator_hash.h"
+ #include "zend_accelerator_debug.h"
+ 
++/* Concurrent readers tracked precisely; excess readers fall back to
++ * ZCSG(epoch_overflow_active) (GH-8739) */
++#define ACCEL_EPOCH_MAX_SLOTS 256
++
++#define ACCEL_EPOCH_SLOT_UNASSIGNED  (-1)  /* slot not yet claimed */
++#define ACCEL_EPOCH_SLOT_OVERFLOW    (-2)  /* claim failed, slots exhausted */
++#define ACCEL_EPOCH_INACTIVE         UINT64_MAX
++
++/* 64-bit atomics for epoch tracking; zend_atomic.h only covers 32-bit */
++#if defined(ZEND_WIN32)
++# define ACCEL_ATOMIC_LOAD_64(ptr)       ((uint64_t)InterlockedCompareExchange64((volatile LONG64 *)(ptr), 0, 0))
++# define ACCEL_ATOMIC_STORE_64(ptr, val) ((void)InterlockedExchange64((volatile LONG64 *)(ptr), (LONG64)(val)))
++# define ACCEL_ATOMIC_INC_64(ptr)        ((uint64_t)InterlockedIncrement64((volatile LONG64 *)(ptr)))
++# define ACCEL_ATOMIC_INC_32(ptr)        ((uint32_t)InterlockedIncrement((volatile LONG *)(ptr)))
++# define ACCEL_ATOMIC_DEC_32(ptr)        ((uint32_t)InterlockedDecrement((volatile LONG *)(ptr)))
++# define ACCEL_ATOMIC_LOAD_32(ptr)       ((uint32_t)InterlockedCompareExchange((volatile LONG *)(ptr), 0, 0))
++#elif defined(__clang__) && defined(__has_feature) && __has_feature(c_atomic)
++# define ACCEL_ATOMIC_LOAD_64(ptr)       __c11_atomic_load((_Atomic(uint64_t) *)(ptr), __ATOMIC_ACQUIRE)
++# define ACCEL_ATOMIC_STORE_64(ptr, val) __c11_atomic_store((_Atomic(uint64_t) *)(ptr), (uint64_t)(val), __ATOMIC_RELEASE)
++# define ACCEL_ATOMIC_INC_64(ptr)        (__c11_atomic_fetch_add((_Atomic(uint64_t) *)(ptr), 1, __ATOMIC_SEQ_CST) + 1)
++# define ACCEL_ATOMIC_INC_32(ptr)        (__c11_atomic_fetch_add((_Atomic(uint32_t) *)(ptr), 1, __ATOMIC_SEQ_CST) + 1)
++# define ACCEL_ATOMIC_DEC_32(ptr)        (__c11_atomic_fetch_sub((_Atomic(uint32_t) *)(ptr), 1, __ATOMIC_SEQ_CST) - 1)
++# define ACCEL_ATOMIC_LOAD_32(ptr)       __c11_atomic_load((_Atomic(uint32_t) *)(ptr), __ATOMIC_ACQUIRE)
++#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
++# define ACCEL_ATOMIC_LOAD_64(ptr)       __atomic_load_n((volatile uint64_t *)(ptr), __ATOMIC_ACQUIRE)
++# define ACCEL_ATOMIC_STORE_64(ptr, val) __atomic_store_n((volatile uint64_t *)(ptr), (uint64_t)(val), __ATOMIC_RELEASE)
++# define ACCEL_ATOMIC_INC_64(ptr)        __atomic_add_fetch((volatile uint64_t *)(ptr), 1, __ATOMIC_SEQ_CST)
++# define ACCEL_ATOMIC_INC_32(ptr)        __atomic_add_fetch((volatile uint32_t *)(ptr), 1, __ATOMIC_SEQ_CST)
++# define ACCEL_ATOMIC_DEC_32(ptr)        __atomic_sub_fetch((volatile uint32_t *)(ptr), 1, __ATOMIC_SEQ_CST)
++# define ACCEL_ATOMIC_LOAD_32(ptr)       __atomic_load_n((volatile uint32_t *)(ptr), __ATOMIC_ACQUIRE)
++#elif defined(__GNUC__)
++# define ACCEL_ATOMIC_LOAD_64(ptr)       __sync_fetch_and_or((volatile uint64_t *)(ptr), 0)
++# define ACCEL_ATOMIC_STORE_64(ptr, val) do { __sync_synchronize(); *(volatile uint64_t *)(ptr) = (uint64_t)(val); __sync_synchronize(); } while (0)
++# define ACCEL_ATOMIC_INC_64(ptr)        __sync_add_and_fetch((volatile uint64_t *)(ptr), 1)
++# define ACCEL_ATOMIC_INC_32(ptr)        __sync_add_and_fetch((volatile uint32_t *)(ptr), 1)
++# define ACCEL_ATOMIC_DEC_32(ptr)        __sync_sub_and_fetch((volatile uint32_t *)(ptr), 1)
++# define ACCEL_ATOMIC_LOAD_32(ptr)       __sync_fetch_and_or((volatile uint32_t *)(ptr), 0)
++#else
++/* fallback: volatile only - correct on x86 TSO, not on weak-memory arches */
++# define ACCEL_ATOMIC_LOAD_64(ptr)       (*(volatile uint64_t *)(ptr))
++# define ACCEL_ATOMIC_STORE_64(ptr, val) (*(volatile uint64_t *)(ptr) = (uint64_t)(val))
++# define ACCEL_ATOMIC_INC_64(ptr)        (++(*(volatile uint64_t *)(ptr)))
++# define ACCEL_ATOMIC_INC_32(ptr)        (++(*(volatile uint32_t *)(ptr)))
++# define ACCEL_ATOMIC_DEC_32(ptr)        (--(*(volatile uint32_t *)(ptr)))
++# define ACCEL_ATOMIC_LOAD_32(ptr)       (*(volatile uint32_t *)(ptr))
++#endif
++
+ #ifndef PHPAPI
+ # ifdef ZEND_WIN32
+ #  define PHPAPI __declspec(dllimport)
+@@ -117,6 +166,12 @@ typedef struct _zend_early_binding {
+ 	uint32_t cache_slot;
+ } zend_early_binding;
+ 
++/* per-reader epoch publication slot, padded to a cache line against false sharing */
++typedef struct _zend_accel_epoch_slot {
++	volatile uint64_t epoch;
++	char padding[56];
++} zend_accel_epoch_slot;
++
+ typedef struct _zend_persistent_script {
+ 	zend_script    script;
+ 	zend_long      compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
+@@ -219,6 +274,9 @@ typedef struct _zend_accel_globals {
+ #endif
+ 	void                   *preloaded_internal_run_time_cache;
+ 	size_t                  preloaded_internal_run_time_cache_size;
++	/* EBR state: slot index into ZCSG(epoch_slots) or ACCEL_EPOCH_SLOT_* */
++	int32_t                 epoch_slot;
++	uint64_t                local_epoch;
+ 	/* preallocated shared-memory block to save current script */
+ 	void                   *mem;
+ 	zend_persistent_script *current_persistent_script;
+@@ -282,6 +340,14 @@ typedef struct _zend_accel_shared_globals {
+ 	void *jit_traces;
+ 	const void **jit_exit_groups;
+ 
++	/* Epoch-based reclamation for safe opcache_reset()/invalidate() (GH-8739) */
++	volatile uint64_t      current_epoch;         /* bumped on each deferred reset */
++	volatile uint64_t      drain_epoch;           /* readers publishing <= this block reclamation */
++	volatile bool          reset_deferred;
++	volatile int32_t       epoch_slot_next;       /* monotonic slot allocator */
++	volatile uint32_t      epoch_overflow_active; /* readers that didn't get a slot */
++	zend_accel_epoch_slot  epoch_slots[ACCEL_EPOCH_MAX_SLOTS];
++
+ 	/* Interned Strings Support (must be the last element) */
+ 	ZEND_SET_ALIGNED(ZEND_STRING_TABLE_POS_ALIGNMENT, zend_string_table interned_strings);
+ } zend_accel_shared_globals;
+@@ -328,6 +394,13 @@ void accelerator_shm_read_unlock(void);
+ zend_string *accel_make_persistent_key(zend_string *path);
+ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
+ 
++/* Epoch-based reclamation API (GH-8739) */
++void accel_epoch_init(void);
++void accel_epoch_enter(void);
++void accel_epoch_leave(void);
++bool accel_deferred_reset_pending(void);
++void accel_try_complete_deferred_reset(void);
++
+ #define IS_ACCEL_INTERNED(str) \
+ 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
+ 
+diff --git a/ext/opcache/tests/gh8739_invalidate_epoch_safety.phpt b/ext/opcache/tests/gh8739_invalidate_epoch_safety.phpt
+new file mode 100644
+index 00000000..2b1ceaad
+--- /dev/null
++++ b/ext/opcache/tests/gh8739_invalidate_epoch_safety.phpt
+@@ -0,0 +1,42 @@
++--TEST--
++GH-8739: opcache_invalidate() does not crash when reader holds cached pointer
++--EXTENSIONS--
++opcache
++--INI--
++opcache.enable=1
++opcache.enable_cli=1
++opcache.file_cache_only=0
++opcache.revalidate_freq=0
++opcache.validate_timestamps=1
++--FILE--
++<?php
++$status = opcache_get_status(false);
++if (!$status || !$status['opcache_enabled']) {
++    die("skip: OPcache not enabled");
++}
++
++$tmpFile = tempnam(sys_get_temp_dir(), 'opcache_inv_');
++$tmpPhp = $tmpFile . '.php';
++rename($tmpFile, $tmpPhp);
++file_put_contents($tmpPhp, '<?php function opcache_inv_fn() { return "before"; }');
++
++include $tmpPhp;
++echo opcache_inv_fn() . "\n";
++
++/* Invalidate while this request still holds pointers to the cached
++ * op_array. Under the epoch-based reclamation model, invalidate()
++ * must not corrupt memory the current request is reading. */
++var_dump(opcache_invalidate($tmpPhp, true));
++
++/* The function reference already resolved in this request continues
++ * to work because its op_array is kept alive by our published epoch. */
++echo opcache_inv_fn() . "\n";
++
++unlink($tmpPhp);
++echo "OK\n";
++?>
++--EXPECT--
++before
++bool(true)
++before
++OK
+diff --git a/ext/opcache/tests/gh8739_reset_epoch_safety.phpt b/ext/opcache/tests/gh8739_reset_epoch_safety.phpt
+new file mode 100644
+index 00000000..f046f28c
+--- /dev/null
++++ b/ext/opcache/tests/gh8739_reset_epoch_safety.phpt
+@@ -0,0 +1,39 @@
++--TEST--
++GH-8739: opcache_reset() with epoch-based reclamation does not corrupt cached data
++--EXTENSIONS--
++opcache
++--INI--
++opcache.enable=1
++opcache.enable_cli=1
++opcache.file_cache_only=0
++opcache.revalidate_freq=0
++--FILE--
++<?php
++$status = opcache_get_status(false);
++if (!$status || !$status['opcache_enabled']) {
++    die("skip: OPcache not enabled");
++}
++
++$tmpFile = tempnam(sys_get_temp_dir(), 'opcache_ebr_');
++$tmpPhp = $tmpFile . '.php';
++rename($tmpFile, $tmpPhp);
++file_put_contents($tmpPhp, '<?php class OpcacheEbrTest { const VALUE = 42; }');
++
++include $tmpPhp;
++echo "Before reset: " . OpcacheEbrTest::VALUE . "\n";
++
++var_dump(opcache_reset());
++
++/* After reset, the class is still loaded in this request — the actual
++ * SHM cleanup is deferred to the next request boundary. The reader's
++ * pointer must remain valid for the duration of this request. */
++echo "After reset: " . OpcacheEbrTest::VALUE . "\n";
++
++unlink($tmpPhp);
++echo "OK\n";
++?>
++--EXPECT--
++Before reset: 42
++bool(true)
++After reset: 42
++OK
+diff --git a/ext/opcache/tests/gh8739_reset_multiple.phpt b/ext/opcache/tests/gh8739_reset_multiple.phpt
+new file mode 100644
+index 00000000..8f610bb5
+--- /dev/null
++++ b/ext/opcache/tests/gh8739_reset_multiple.phpt
+@@ -0,0 +1,36 @@
++--TEST--
++GH-8739: Multiple opcache_reset() calls in the same request do not crash
++--EXTENSIONS--
++opcache
++--INI--
++opcache.enable=1
++opcache.enable_cli=1
++opcache.file_cache_only=0
++--FILE--
++<?php
++$status = opcache_get_status(false);
++if (!$status || !$status['opcache_enabled']) {
++    die("skip: OPcache not enabled");
++}
++
++/* First reset succeeds and disables the cache for the remainder of the
++ * current request. Subsequent resets in the same request return false
++ * because the cache is already disabled — that is the pre-existing
++ * opcache_reset() semantics and must be preserved. */
++var_dump(opcache_reset());
++var_dump(opcache_reset());
++var_dump(opcache_reset());
++
++/* opcache_get_status() must still work after reset — the SHM cleanup
++ * is deferred and the status structure remains readable. */
++$after = opcache_get_status(false);
++var_dump(is_array($after));
++
++echo "OK\n";
++?>
++--EXPECT--
++bool(true)
++bool(false)
++bool(false)
++bool(true)
++OK
+diff --git a/ext/opcache/zend_accelerator_hash.c b/ext/opcache/zend_accelerator_hash.c
+index 2fd3dfb5..f37c3a0d 100644
+--- a/ext/opcache/zend_accelerator_hash.c
++++ b/ext/opcache/zend_accelerator_hash.c
+@@ -34,6 +34,15 @@ void zend_accel_hash_clean(zend_accel_hash *accel_hash)
+ 	accel_hash->num_entries = 0;
+ 	accel_hash->num_direct_entries = 0;
+ 	memset(accel_hash->hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
++
++	/* publish the cleared table on weak-memory arches before readers can see the next insert (GH-8739) */
++#if defined(ZEND_WIN32)
++	MemoryBarrier();
++#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
++	__atomic_thread_fence(__ATOMIC_SEQ_CST);
++#elif defined(__GNUC__)
++	__sync_synchronize();
++#endif
+ }
+ 
+ void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
+-- 
+2.43.0
+

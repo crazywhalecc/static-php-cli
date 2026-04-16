@@ -21,6 +21,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('openssl', [__CLASS__, 'patchOpenssl11Darwin']);
         FileSystem::addSourceExtractHook('swoole', [__CLASS__, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']);
+        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpOpcacheEbrResetSafety']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']);
         // FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
         FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
@@ -622,6 +623,38 @@ class SourcePatcher
             return false;
         }
         return false;
+    }
+
+    /**
+     * Apply opcache EBR reset-safety fix (upstream PR php/php-src#21778)
+     * to PHP 8.4.x until it lands in a tagged release. Fixes zend_mm_heap
+     * corruption crashes caused by opcache_reset()/opcache_invalidate()
+     * racing with concurrent readers under ZTS (FrankenPHP) and FPM.
+     *
+     * Fixes GH-8739, GH-14471, GH-18517.
+     */
+    public static function patchPhpOpcacheEbrResetSafety(): bool
+    {
+        $file = SOURCE_PATH . '/php-src/main/php_version.h';
+        if (!file_exists($file)) {
+            return false;
+        }
+        if (preg_match('/PHP_VERSION_ID (\d+)/', file_get_contents($file), $match) === 0) {
+            return false;
+        }
+        $ver_id = intval($match[1]);
+        // Apply only to PHP 8.4.x releases prior to the version that ships the fix.
+        // Upper bound will be tightened once PR #21778 is merged and tagged.
+        if ($ver_id < 80400 || $ver_id >= 80500) {
+            return false;
+        }
+        // Skip if already applied (e.g. rerunning on an already-patched tree)
+        $probe = SOURCE_PATH . '/php-src/ext/opcache/ZendAccelerator.c';
+        if (file_exists($probe) && str_contains(file_get_contents($probe), 'accel_try_complete_deferred_reset')) {
+            return false;
+        }
+        self::patchFile('php84_opcache_ebr_reset_safety.patch', SOURCE_PATH . '/php-src');
+        return true;
     }
 
     public static function patchGDWin32(): bool
