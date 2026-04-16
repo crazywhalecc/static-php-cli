@@ -650,7 +650,6 @@ class ArtifactDownloader
             });
 
             InteractiveTerm::indicateProgress("[{$downloaded}/{$total}] Downloading artifacts with concurrency {$this->parallel} ...");
-            $failed_downloads = [];
             while (true) {
                 // fill pool
                 while (count($fiber_pool) < $pool_count && ($artifact = array_shift($this->artifacts)) !== null) {
@@ -674,7 +673,7 @@ class ArtifactDownloader
                             if (isset($artifact)) {
                                 $artifact_name = $artifact->getName();
                             }
-                            $failed_downloads[] = ['artifact' => $artifact_name, 'error' => $e];
+                            logger()->debug("Download failed for artifact '{$artifact_name}': {$e->getMessage()}");
                             throw $e;
                         }
                         // remove from pool
@@ -688,13 +687,6 @@ class ArtifactDownloader
                 }
                 // all done
                 if (count($this->artifacts) === 0 && count($fiber_pool) === 0) {
-                    if (!empty($failed_downloads)) {
-                        InteractiveTerm::finish('Download completed with ' . count($failed_downloads) . ' failure(s).', false);
-                        foreach ($failed_downloads as $failure) {
-                            InteractiveTerm::error("Failed to download '{$failure['artifact']}': {$failure['error']->getMessage()}");
-                        }
-                        throw new DownloaderException('Failed to download ' . count($failed_downloads) . ' artifact(s). Please check your internet connection and try again.');
-                    }
                     $skip_msg = !empty($skipped) ? ' (Skipped ' . count($skipped) . ' artifacts for being already downloaded)' : '';
                     InteractiveTerm::finish("Downloaded all {$total} artifacts.{$skip_msg}");
                     break;
