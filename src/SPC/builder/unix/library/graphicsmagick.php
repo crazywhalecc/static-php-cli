@@ -23,6 +23,13 @@ trait graphicsmagick
                 '--disable-openmp',
                 '--without-x',
                 '--without-perl',
+                // HEIF/JXL: GraphicsMagick auto-detects libheif/libjxl from the
+                // buildroot but the API versions are often incompatible (e.g.
+                // GM 1.3.46 expects libheif symbols added in 2.4+). Exclude them
+                // to avoid compile errors. Neither format is needed for typical
+                // WordPress/web image processing (JPEG/PNG/WebP/GIF suffice).
+                '--without-heif',
+                '--without-jxl',
                 '--enable-shared=no',
                 '--enable-static=yes',
             );
