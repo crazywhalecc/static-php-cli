@@ -1016,15 +1016,10 @@
         }
     },
     "openssl": {
-        "type": "ghrel",
-        "repo": "openssl/openssl",
-        "match": "openssl.+\\.tar\\.gz",
-        "prefer-stable": true,
-        "alt": {
-            "type": "filelist",
-            "url": "https://www.openssl.org/source/",
-            "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
-        },
+        "__comment": "Pinned to 3.5.0 because OpenSSL 4.0.0 (Apr 2026) made ASN1_STRING opaque and breaks PHP 8.4.x openssl ext. Revert to ghrel once static-php-cli supports OpenSSL 4.0 or PHP 8.4 absorbs the API change.",
+        "type": "url",
+        "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.0/openssl-3.5.0.tar.gz",
+        "filename": "openssl-3.5.0.tar.gz",
         "provide-pre-built": true,
         "license": {
             "type": "file",
