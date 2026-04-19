@@ -1,50 +1,45 @@
 # Guide
 
-Static php cli is a tool used to build statically compiled PHP binaries, 
-currently supporting Linux and macOS systems.
+## What is StaticPHP?
 
-In the guide section, you will learn how to use static php cli to build standalone PHP programs.
+StaticPHP is a build tool that compiles the PHP interpreter together with any extensions you need into a single self-contained binary. The target system doesn't need PHP or any runtime libraries installed — just copy the binary and run it. Builds target Linux, macOS, and Windows.
 
-- [Build (local)](./manual-build)
-- [Build (GitHub Actions)](./action-build)
-- [Supported Extensions](./extensions)
+## Why bother with a static PHP binary?
 
-## Compilation Environment
+A typical PHP installation is tightly coupled to the system: you install PHP, then extensions, then spend time dealing with version mismatches across distros. A static binary sidesteps all of that — what you get is a single executable that runs on any machine of the same architecture, no setup required.
 
-The following is the architecture support situation, where :gear: represents support for GitHub Action build, 
-:computer: represents support for local manual build, and empty represents temporarily not supported.
+Common use cases:
 
-|         | x86_64            | aarch64           |
-|---------|-------------------|-------------------|
-| macOS   | :gear: :computer: | :gear: :computer: |
-| Linux   | :gear: :computer: | :gear: :computer: |
-| Windows | :gear: :computer: |                   |
-| FreeBSD | :computer:        | :computer:        |
+- **Distributing CLI tools** — Ship tools like Composer, PHPStan, or your own CLI as a single file. Users don't need PHP installed.
+- **Leaner containers** — Replace a bloated `php:8.x` base image with a minimal image (or even `FROM scratch`) carrying just a static binary.
+- **Server applications** — Build a static binary with FPM or FrankenPHP baked in. Deployment becomes a file copy, with no dependency on the host environment.
 
-Current supported PHP versions for compilation:
+## phpmicro: ship PHP and your code as one file
 
-> :warning: Partial support, there may be issues with new beta versions and old versions.
->
-> :heavy_check_mark: Supported
->
-> :x: Not supported
+[phpmicro](https://github.com/easysoft/phpmicro) is a third-party PHP SAPI that StaticPHP supports out of the box. It merges the PHP interpreter with your `.php` source or `.phar` archive into a single self-extracting executable (`.sfx`).
 
-| PHP Version | Status             | Comment                                                                                                                 |
-|-------------|--------------------|-------------------------------------------------------------------------------------------------------------------------|
-| 7.2         | :x:                |                                                                                                                         |
-| 7.3         | :x:                | phpmicro and many extensions do not support 7.3, 7.4 versions                                                           |
-| 7.4         | :x:                | phpmicro and many extensions do not support 7.3, 7.4 versions                                                           |
-| 8.0         | :warning:          | PHP official has stopped maintaining 8.0, we no longer handle 8.0 related backport support                              |
-| 8.1         | :warning:          | PHP official only provides security updates for 8.1, we no longer handle 8.1 related backport support after 8.5 release |
-| 8.2         | :heavy_check_mark: |                                                                                                                         |
-| 8.3         | :heavy_check_mark: |                                                                                                                         |
-| 8.4         | :heavy_check_mark: |                                                                                                                         |
-| 8.5 (beta)  | :warning:          | PHP 8.5 is currently in beta stage                                                                                      |
+```
+micro.sfx + your-app.phar = your-app   # one file, zero dependencies
+```
 
-> This table shows the support status of static-php-cli for building corresponding versions, not the PHP official support status for that version.
+This is ideal for distributing PHP-based CLI tools: the end user just gets an ordinary executable with no idea PHP is involved.
 
-## PHP Support Versions
+## Improving how you ship and deploy PHP projects
 
-Currently, static-php-cli supports PHP versions 8.2 ~ 8.5, and theoretically supports PHP 8.1 and earlier versions, just select the earlier version when downloading.
-However, due to some extensions and special components that have stopped supporting earlier versions of PHP, static-php-cli will not explicitly support earlier versions.
-We recommend that you compile the latest PHP version possible for a better experience.
+**Drop the heavy Docker base image**
+
+The official `php:8.x` image can be hundreds of megabytes, most of which is just the PHP runtime. Swap it for a static PHP binary with a minimal base image — or `FROM scratch` — and you can get container sizes down to single-digit megabytes with noticeably faster startup times.
+
+**Ship PHP CLI tools like native binaries**
+
+Build your CLI with [symfony/console](https://symfony.com/doc/current/components/console.html) or [Laravel Zero](https://laravel-zero.com), bundle it into a `.phar` with [Box](https://github.com/box-project/box), then merge it with phpmicro. The result is a single distributable executable — the same experience users expect from Go or Rust tools, with no PHP runtime required on their end.
+
+**Single-file web apps with FrankenPHP**
+
+[FrankenPHP](https://frankenphp.dev) is a modern PHP app server with built-in HTTP/2, HTTP/3, and automatic HTTPS. StaticPHP can compile FrankenPHP together with your chosen extensions into one binary. The result is a complete web server in a single file — no Nginx, no PHP-FPM, just deploy and run.
+
+## Next steps
+
+- [Installation](./installation) — Get the StaticPHP build tool
+- [First Build](./first-build) — Full walkthrough: from downloading sources to a working executable
+- [CLI Reference](./cli-reference) — Every command and option, in one place

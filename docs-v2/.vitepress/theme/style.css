@@ -1,0 +1,24 @@
+/** override default styles */
+.vp-sponsor-grid-image {
+    max-height:36px !important;
+    max-width: 1000px !important;
+}
+
+
+.vp-doc .contributors-header h2 {
+    padding-top: 0;
+    border-top: none;
+}
+
+.vp-doc .sponsors-header h2 {
+    padding-top: 0;
+    border-top: none;
+}
+
+.dark .VPImage.logo {
+  filter: contrast(0.7);
+}
+
+.dark .VPImage.image-src {
+  filter: contrast(0.7);
+}

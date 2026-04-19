@@ -2,6 +2,6 @@
 aside: false
 ---
 
-# craft.yml 配置
+# craft.yml 配置详解
 
-<!--@include: ../../deps-craft-yml.md-->
+<!-- TODO: craft.yml 字段完整参考。 -->

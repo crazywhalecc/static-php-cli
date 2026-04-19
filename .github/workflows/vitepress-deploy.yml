@@ -55,11 +55,13 @@ jobs:
       - name: "Install Locked Dependencies"
         run: "composer install --no-interaction --no-progress"
 
-      - name: "Generate Extension Support List"
-        run: |
-          bin/spc dev:gen-ext-docs > docs/extensions.md
-          bin/spc dev:gen-ext-dep-docs > docs/deps-map-ext.md
-          bin/spc dev:gen-lib-dep-docs > docs/deps-map-lib.md
+      # TODO: Uncomment when v3 gen commands are implemented
+      # - name: "Generate Extension Support List"
+      #   run: |
+      #     bin/spc dev:gen-ext-docs > docs/en/guide/extensions.md
+      #     bin/spc dev:gen-ext-docs > docs/zh/guide/extensions.md
+      #     bin/spc dev:gen-ext-dep-docs > docs/en/guide/deps-map.md
+      #     bin/spc dev:gen-ext-dep-docs > docs/zh/guide/deps-map.md
 
       - name: Build
         run: yarn docs:build
