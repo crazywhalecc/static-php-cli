@@ -6,6 +6,7 @@ export default {
         { text: 'Overview', link: '/en/guide/' },
         { text: 'Installation', link: '/en/guide/installation' },
         { text: 'First Build', link: '/en/guide/first-build' },
+        { text: 'PHP SAPI Reference', link: '/en/guide/sapi-reference' },
         { text: 'CLI Reference', link: '/en/guide/cli-reference' },
       ],
     },

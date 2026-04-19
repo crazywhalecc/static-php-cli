@@ -15,7 +15,7 @@ StaticPHP supports two build workflows — pick the one that fits your situation
 | Approach | When to use |
 |---|---|
 | `craft` (one-shot) | Everyday use, getting started quickly |
-| Step-by-step | CI/CD pipelines, when you need to separate download and build phases |
+| Step-by-step | Fine-grained control over the build pipeline |
 
 ## Option 1: One-Shot Build with `craft` (Recommended)
 
@@ -76,39 +76,30 @@ This approach lets you run download and compile as separate steps — useful whe
 
 ```bash
 # Download only what the chosen extensions need (recommended)
-spc download --for-extensions=bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer --with-php=8.4
+spc download --for-extensions="bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer" --with-php=8.4
 
-# Download by specific libraries
-spc download --for-libs=curl,openssl --with-php=8.4
+# Download by specific package names
+spc download "curl,openssl" --with-php=8.4
 ```
 
 Downloads are cached in `downloads/` and reused across builds automatically.
 
 ```bash
 # Slow connection? Increase parallelism and retries
-spc download --for-extensions=bcmath,openssl,curl -P 4 --retry=3
+spc download --for-extensions="bcmath,openssl,curl" --parallel 10 --retry=3
 
 # Use pre-built binaries where available — skips compiling those dependencies
-spc download --for-extensions=bcmath,openssl,curl --prefer-binary
+spc download --for-extensions="bcmath,openssl,curl" --prefer-binary
 ```
 
 ### Step 2: Build PHP
 
 ```bash
 # Build the cli SAPI
-spc build:php bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer --build-cli
+spc build:php "bcmath,phar,zlib,openssl,curl,fileinfo,tokenizer" --build-cli
 
 # Build multiple SAPIs in one go
-spc build:php bcmath,posix,phar,zlib,openssl,curl --build-cli --build-micro
-
-# Build all SAPIs
-spc build:php bcmath,posix,phar,zlib,openssl,curl --build-all
-```
-
-`build:php` will automatically fetch any missing dependencies before building. If you already ran `download`, pass `--no-download` to skip that step:
-
-```bash
-spc build:php bcmath,openssl,curl --build-cli --no-download
+spc build:php "bcmath,phar,zlib,openssl,curl" --build-cli --build-micro
 ```
 
 #### Common Build Options
@@ -118,9 +109,8 @@ spc build:php bcmath,openssl,curl --build-cli --no-download
 | `--build-cli` | Build the cli SAPI |
 | `--build-fpm` | Build php-fpm (not available on Windows) |
 | `--build-micro` | Build micro.sfx |
-| `--build-embed` | Build the embed SAPI (not available on Windows) |
-| `--build-frankenphp` | Build FrankenPHP (not available on Windows) |
-| `--build-all` | Build all SAPIs |
+| `--build-embed` | Build the embed SAPI |
+| `--build-frankenphp` | Build FrankenPHP |
 | `--enable-zts` | Enable thread-safe (ZTS) mode |
 | `--no-strip` | Keep debug symbols; do not strip the binary |
 | `-I key=value` | Hard-compile an INI option into PHP |
@@ -129,7 +119,7 @@ spc build:php bcmath,openssl,curl --build-cli --no-download
 Example — baking in a larger memory limit and disabling the `system` function:
 
 ```bash
-spc build:php bcmath,pcntl,posix --build-all -I "memory_limit=4G" -I "disable_functions=system"
+spc build:php "bcmath,pcntl,posix" --build-cli -I "memory_limit=4G" -I "disable_functions=system"
 ```
 
 ## Packaging a micro App
@@ -160,7 +150,7 @@ spc micro:combine your-app.phar --output=your-app -N /path/to/custom.ini
 If a build fails or you want to trace what's happening, use `-v` / `-vv` / `-vvv`:
 
 ```bash
-spc build:php bcmath,openssl --build-cli -vv
+spc build:php "bcmath,openssl" --build-cli -vv
 ```
 
 - `-v` shows `INFO`-level logs: which modules are running and what build commands are being executed.
@@ -172,7 +162,7 @@ To wipe compiled artifacts and start fresh without re-downloading, run `reset`:
 ```bash
 spc reset
 # Then rebuild
-spc build:php bcmath,openssl --build-cli
+spc build:php "bcmath,openssl" --build-cli
 ```
 
 ::: tip
@@ -184,6 +174,7 @@ If you're stuck, open an [Issue](https://github.com/static-php/static-php-cli/is
 
 ## What's Next
 
+- [PHP SAPI Reference](./sapi-reference) — Build options and usage guide for each PHP SAPI
 - [CLI Reference](./cli-reference) — Full documentation for every command and option
 - [Extensions](./extensions) — Browse supported extensions and their dependencies
 - [Troubleshooting](./troubleshooting) — Diagnose common build failures

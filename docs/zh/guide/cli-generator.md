@@ -2,6 +2,10 @@
 aside: false
 ---
 
+<script setup>
+import CliGenerator from "../../.vitepress/components/CliGenerator.vue";
+</script>
+
 # 编译命令生成器
 
-<!-- TODO: 嵌入 CliGenerator Vue 组件。 -->
+<CliGenerator lang="zh" />

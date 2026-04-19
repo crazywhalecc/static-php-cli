@@ -15,7 +15,7 @@ StaticPHP 提供两种构建方式，根据使用场景选择：
 | 方式           | 适合场景                     |
 |--------------|--------------------------|
 | `craft` 一键构建 | 日常使用、快速上手                |
-| 分步构建         | CI/CD 流水线、需要拆分下载与编译阶段的场景 |
+| 分步构建         | 细化构建流程 |
 
 ## 方式一：`craft` 一键构建（推荐）
 
@@ -90,20 +90,20 @@ spc download "curl,openssl" --with-php=8.4
 
 ```bash
 # 网络较慢时，可增大并发数和重试次数
-spc download --for-extensions=bcmath,openssl,curl --parallel 10 --retry=3
+spc download --for-extensions="bcmath,openssl,curl" --parallel 10 --retry=3
 
 # 优先使用预编译的二进制依赖，跳过源码编译（大幅加速构建）
-spc download --for-extensions=bcmath,openssl,curl --prefer-binary
+spc download --for-extensions="bcmath,openssl,curl" --prefer-binary
 ```
 
 ### 第二步：构建 PHP
 
 ```bash
 # 构建 cli SAPI
-spc build:php bcmath,phar,zlib,openssl,curl,fileinfo,tokenizer --build-cli
+spc build:php "bcmath,phar,zlib,openssl,curl,fileinfo,tokenizer" --build-cli
 
 # 同时构建多个 SAPI
-spc build:php bcmath,phar,zlib,openssl,curl --build-cli --build-micro
+spc build:php "bcmath,phar,zlib,openssl,curl" --build-cli --build-micro
 ```
 
 
@@ -125,7 +125,7 @@ spc build:php bcmath,phar,zlib,openssl,curl --build-cli --build-micro
 硬编译 INI 的例子——预设更大的内存限制，并禁用 `system` 函数：
 
 ```bash
-spc build:php bcmath,pcntl,posix --build-cli -I "memory_limit=4G" -I "disable_functions=system"
+spc build:php "bcmath,pcntl,posix" --build-cli -I "memory_limit=4G" -I "disable_functions=system"
 ```
 
 ## 打包 micro 应用
@@ -160,7 +160,7 @@ spc micro:combine your-app.phar --output=your-app -N /path/to/custom.ini
 - `-vvv` 将显示 `DEBUG` 级别的日志，并将其他 shell 命令执行的 STDOUT 输出到终端。
 
 ```bash
-spc build:php bcmath,openssl --build-cli -vv
+spc build:php "bcmath,openssl" --build-cli -vv
 ```
 
 或者，你也可以查看 `log/spc.shell.log` 和 `log/spc.output.log` 获取终端输出和 StaticPHP 日志。
@@ -170,7 +170,7 @@ spc build:php bcmath,openssl --build-cli -vv
 ```bash
 spc reset
 # 然后重新构建
-spc build:php bcmath,openssl --build-cli
+spc build:php "bcmath,openssl" --build-cli
 ```
 
 ::: tip
@@ -182,6 +182,7 @@ spc build:php bcmath,openssl --build-cli
 
 ## 接下来
 
+- [PHP SAPI 构建参考](./sapi-reference) - 各个 PHP 的 SAPI 构建及使用指南
 - [命令行参考](./cli-reference) — 所有命令与选项的完整说明
 - [扩展列表](./extensions) — 查看支持的扩展及其依赖关系
 - [常见问题](./troubleshooting) — 构建失败时的排查指南

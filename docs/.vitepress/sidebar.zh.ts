@@ -6,6 +6,7 @@ export default {
         { text: '概览', link: '/zh/guide/' },
         { text: '安装', link: '/zh/guide/installation' },
         { text: '第一次构建', link: '/zh/guide/first-build' },
+        { text: 'PHP SAPI 构建参考', link: '/zh/guide/sapi-reference' },
         { text: '命令行参考', link: '/zh/guide/cli-reference' },
       ],
     },

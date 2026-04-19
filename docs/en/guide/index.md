@@ -4,6 +4,8 @@
 
 StaticPHP is a build tool that compiles the PHP interpreter together with any extensions you need into a single self-contained binary. The target system doesn't need PHP or any runtime libraries installed — just copy the binary and run it. Builds target Linux, macOS, and Windows.
 
+StaticPHP isn't limited to PHP. Built on the same infrastructure, it can also compile standalone static binaries for common tools like `curl`, `pkg-config`, and `htop` — no dependencies required on the target machine. Support for more tools (including `openssl` and other frequently-used CLI utilities) is planned.
+
 ## Why bother with a static PHP binary?
 
 A typical PHP installation is tightly coupled to the system: you install PHP, then extensions, then spend time dealing with version mismatches across distros. A static binary sidesteps all of that — what you get is a single executable that runs on any machine of the same architecture, no setup required.
@@ -16,7 +18,7 @@ Common use cases:
 
 ## phpmicro: ship PHP and your code as one file
 
-[phpmicro](https://github.com/easysoft/phpmicro) is a third-party PHP SAPI that StaticPHP supports out of the box. It merges the PHP interpreter with your `.php` source or `.phar` archive into a single self-extracting executable (`.sfx`).
+[phpmicro](https://micro.static-php.dev) is a third-party PHP SAPI that StaticPHP supports out of the box. It merges the PHP interpreter with your `.php` source or `.phar` archive into a single self-extracting executable (`.sfx`).
 
 ```
 micro.sfx + your-app.phar = your-app   # one file, zero dependencies
