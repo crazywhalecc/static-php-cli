@@ -93,14 +93,27 @@ class LinuxBuilder extends UnixBuilderBase
 
         // prepare build php envs
         // $musl_flag = SPCTarget::getLibc() === 'musl' ? ' -D__MUSL__' : ' -U__MUSL__';
-        $php_configure_env = SystemUtil::makeEnvVarString([
+        $env_vars = [
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => '-I' . BUILD_INCLUDE_PATH, // . ' -Dsomethinghere', // . $musl_flag,
             'LDFLAGS' => '-L' . BUILD_LIB_PATH,
             // 'LIBS' => SPCTarget::getRuntimeLibs(), // do not pass static libraries here yet, they may contain polyfills for libc functions!
-        ]);
+        ];
 
+        // Parse and add SPC_EXTRA_PHP_VARS as environment variables
         $phpvars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+        if ($phpvars !== '') {
+            // Parse space-separated key=value pairs
+            $parts = preg_split('/\s+/', trim($phpvars), -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($parts as $part) {
+                if (str_contains($part, '=')) {
+                    [$key, $value] = explode('=', $part, 2);
+                    $env_vars[$key] = $value;
+                }
+            }
+        }
+
+        $php_configure_env = SystemUtil::makeEnvVarString($env_vars);
 
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         if ($embed_type !== 'static' && SPCTarget::isStatic()) {
@@ -123,7 +136,6 @@ class LinuxBuilder extends UnixBuilderBase
             $json_74 .
             $zts .
             $maxExecutionTimers .
-            $phpvars . ' ' .
             $this->makeStaticExtensionArgs() . ' '
         ));
 
