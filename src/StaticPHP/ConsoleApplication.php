@@ -11,6 +11,7 @@ use StaticPHP\Command\CraftCommand;
 use StaticPHP\Command\Dev\DumpCapabilitiesCommand;
 use StaticPHP\Command\Dev\DumpStagesCommand;
 use StaticPHP\Command\Dev\EnvCommand;
+use StaticPHP\Command\Dev\GenDepsDataCommand;
 use StaticPHP\Command\Dev\GenExtDocsCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\LintConfigCommand;
@@ -83,6 +84,7 @@ class ConsoleApplication extends Application
             new DumpCapabilitiesCommand(),
             new PackageInfoCommand(),
             new GenExtDocsCommand(),
+            new GenDepsDataCommand(),
         ]);
 
         // add additional commands from registries

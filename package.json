@@ -5,6 +5,7 @@
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
+    "mermaid": "^11.0.0",
     "vitepress": "^2.0.0-alpha.5",
     "vue": "^3.2.47"
   }

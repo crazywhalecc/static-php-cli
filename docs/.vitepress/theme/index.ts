@@ -3,9 +3,13 @@ import DefaultTheme from 'vitepress/theme'
 import {inBrowser, useData} from "vitepress";
 import {watchEffect} from "vue";
 import './style.css';
+import DepsMap from '../components/DepsMap.vue';
 
 export default {
     ...DefaultTheme,
+    enhanceApp({ app }) {
+        app.component('DepsMap', DepsMap)
+    },
     setup() {
         const { lang } = useData()
         watchEffect(() => {
