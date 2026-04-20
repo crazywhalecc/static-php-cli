@@ -1,5 +1,10 @@
 # 构建指南
 
+::: warning
+你正在阅读 StaticPHP v3 版本的文档，v2 版本将在 v3 稳定发布后废弃。v3 版本目前仍处于 alpha 阶段，
+你可以在 [这里](https://static-php.github.io/v2-docs/) 查看 v2 文档。
+:::
+
 ## StaticPHP 是什么
 
 StaticPHP 是一个构建工具，能够将 PHP 解释器与你所需的扩展一起编译成一个独立的二进制文件，无需在目标系统上预先安装 PHP 或任何依赖库。

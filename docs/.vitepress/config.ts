@@ -19,7 +19,7 @@ export default {
             text: 'v3 (alpha)',
             items: [
               { text: 'v3 (alpha)', link: '/en/' },
-              { text: 'v2', link: '/v2/en/guide/' },
+              { text: 'v2', link: 'https://static-php.github.io/v2-docs/' },
             ],
           },
         ],
@@ -43,7 +43,7 @@ export default {
             text: 'v3 (alpha)',
             items: [
               { text: 'v3 (alpha)', link: '/zh/' },
-              { text: 'v2', link: '/v2/zh/guide/' },
+              { text: 'v2', link: 'https://static-php.github.io/v2-docs/' },
             ],
           },
         ],

@@ -1,5 +1,10 @@
 # Guide
 
+::: warning
+You are reading the documentation for StaticPHP v3. The v2 version will be deprecated after the stable release of v3. 
+The 3.0 version is currently in the alpha stage, and you can view the v2 documentation [here](https://static-php.github.io/v2-docs/).
+:::
+
 ## What is StaticPHP?
 
 StaticPHP is a build tool that compiles the PHP interpreter together with any extensions you need into a single self-contained binary. The target system doesn't need PHP or any runtime libraries installed — just copy the binary and run it. Builds target Linux, macOS, and Windows.
