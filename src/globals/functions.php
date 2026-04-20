@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use StaticPHP\Exception\ExecutionException;
-use StaticPHP\Exception\InterruptException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\DefaultShell;
 use StaticPHP\Runtime\Shell\UnixShell;
@@ -120,18 +119,6 @@ function cmd(?bool $debug = null): WindowsCmd
     return new WindowsCmd($debug);
 }
 
-/**
- * Get current patch point.
- */
-function patch_point(): string
-{
-    if (StaticPHP\DI\ApplicationContext::has('patch_point')) {
-        /* @phpstan-ignore-next-line */
-        return StaticPHP\DI\ApplicationContext::get('patch_point');
-    }
-    return '';
-}
-
 // Add log filter value(s) to prevent secret leak
 function spc_add_log_filter(array|string $filter): void
 {
@@ -156,11 +143,6 @@ function spc_write_log(mixed $stream, string $data): false|int
         $data = str_replace($spc_log_filters, '***', $data);
     }
     return fwrite($stream, $data);
-}
-
-function patch_point_interrupt(int $retcode, string $msg = ''): InterruptException
-{
-    return new InterruptException(message: $msg, code: $retcode);
 }
 
 // ------- function f_* part -------
