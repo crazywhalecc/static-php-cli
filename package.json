@@ -1,7 +1,8 @@
 {
   "scripts": {
     "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "docs:gen-meta": "node docs/.vitepress/gen-meta.js",
+    "docs:build": "npm run docs:gen-meta && vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
