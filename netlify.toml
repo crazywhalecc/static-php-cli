@@ -1,3 +1,6 @@
 [build]
   publish = "docs/.vitepress/dist"
   command = "bin/setup-runtime && export PATH=\"$(pwd)/bin:$PATH\" && php --version && npm run docs:build"
+
+[context.deploy-preview]
+  ignore = "curl -s -H \"Authorization: token $GITHUB_PAT\" https://api.github.com/repos/:owner/:repo/pulls/$REVIEW_ID | grep '\"documentation\"'"
