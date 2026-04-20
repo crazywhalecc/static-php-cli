@@ -52,6 +52,8 @@ packlib_files.txt
 /node_modules/
 /docs/.vitepress/dist/
 /docs/.vitepress/cache/
+/docs/.vitepress/ext-data.json
+/docs/.vitepress/deps-data.json
 package-lock.json
 pnpm-lock.yaml
 

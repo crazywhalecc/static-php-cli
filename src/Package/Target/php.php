@@ -296,18 +296,29 @@ class php extends TargetPackage
             $x->isBuildStatic());
         $shared_extensions = parse_extension_list($package->getBuildOption('build-shared') ?? []);
         $install_packages = array_filter($installer->getResolvedPackages(), fn ($x) => $x->getType() !== 'php-extension' && $x->getName() !== 'php' && !str_starts_with($x->getName(), 'php-'));
-        return [
+
+        $builder = ApplicationContext::get(PackageBuilder::class);
+        $ignore_cache = $builder->getOption('dl-ignore-cache', false);
+        $php_will_be_refreshed = $ignore_cache !== false && (
+            $ignore_cache === null ||   // --dl-ignore-cache with no value (ignore all)
+            str_contains((string) $ignore_cache, 'php-src')
+        );
+
+        $info = [
             'Build OS' => SystemTarget::getTargetOS() . ' (' . SystemTarget::getTargetArch() . ')',
             'Build Target' => getenv('SPC_TARGET') ?: '',
             'Build Toolchain' => ToolchainManager::getToolchainClass(),
             'Build SAPI' => implode(', ', $sapis),
-            'PHP Version' => self::getPHPVersion(return_null_if_failed: true) ?? self::getPHPVersionFromArchive(return_null_if_failed: true) ?? 'Unknown',
-            'Static Extensions (' . count($static_extensions) . ')' => implode(',', array_map(fn ($x) => substr($x->getName(), 4), $static_extensions)),
-            'Shared Extensions (' . count($shared_extensions) . ')' => implode(',', $shared_extensions),
-            'Install Packages (' . count($install_packages) . ')' => implode(',', array_map(fn ($x) => $x->getName(), $install_packages)),
-            'Strip Binaries' => $package->getBuildOption('no-strip') ? 'No' : 'Yes',
-            'Enable ZTS' => $package->getBuildOption('enable-zts') ? 'Yes' : 'No',
         ];
+        if (!$php_will_be_refreshed) {
+            $info['PHP Version'] = self::getPHPVersion(return_null_if_failed: true) ?? self::getPHPVersionFromArchive(return_null_if_failed: true) ?? 'Unknown';
+        }
+        $info['Static Extensions (' . count($static_extensions) . ')'] = implode(',', array_map(fn ($x) => substr($x->getName(), 4), $static_extensions));
+        $info['Shared Extensions (' . count($shared_extensions) . ')'] = implode(',', $shared_extensions);
+        $info['Install Packages (' . count($install_packages) . ')'] = implode(',', array_map(fn ($x) => $x->getName(), $install_packages));
+        $info['Strip Binaries'] = $package->getBuildOption('no-strip') ? 'No' : 'Yes';
+        $info['Enable ZTS'] = $package->getBuildOption('enable-zts') ? 'Yes' : 'No';
+        return $info;
     }
 
     #[BeforeStage('php', 'build')]

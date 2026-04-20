@@ -5,11 +5,6 @@ declare(strict_types=1);
 namespace StaticPHP\Util;
 
 use StaticPHP\Artifact\Artifact;
-use StaticPHP\DI\ApplicationContext;
-use StaticPHP\Exception\InterruptException;
-use StaticPHP\Exception\WrongUsageException;
-use StaticPHP\Package\PackageBuilder;
-use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\TargetPackage;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -70,71 +65,15 @@ class V2CompatLayer
         }
     }
 
-    public static function beforeExtractHook(Artifact $artifact): void
-    {
-        self::emitPatchPoint(match ($artifact->getName()) {
-            'php-src' => 'before-php-extract',
-            'micro' => 'before-micro-extract',
-            default => '',
-        });
-    }
+    public static function beforeExtractHook(Artifact $artifact): void {}
 
-    public static function afterExtractHook(Artifact $artifact): void
-    {
-        self::emitPatchPoint(match ($artifact->getName()) {
-            'php-src' => 'after-php-extract',
-            'micro' => 'after-micro-extract',
-            default => '',
-        });
-    }
+    public static function afterExtractHook(Artifact $artifact): void {}
 
-    public static function beforeExtsExtractHook(): void
-    {
-        self::emitPatchPoint('before-exts-extract');
-    }
+    public static function beforeExtsExtractHook(): void {}
 
-    public static function afterExtsExtractHook(): void
-    {
-        self::emitPatchPoint('after-exts-extract');
-    }
+    public static function afterExtsExtractHook(): void {}
 
-    public static function beforeLibExtractHook(string $pkg): void
-    {
-        self::emitPatchPoint("before-library[{$pkg}]-extract");
-    }
+    public static function beforeLibExtractHook(string $pkg): void {}
 
-    public static function afterLibExtractHook(string $pkg): void
-    {
-        self::emitPatchPoint("after-library[{$pkg}]-extract");
-    }
-
-    public static function emitPatchPoint(string $point_name): void
-    {
-        if ($point_name === '') {
-            return;
-        }
-        if (!ApplicationContext::has(PackageInstaller::class)) {
-            return;
-        }
-        $builder = ApplicationContext::get(PackageBuilder::class);
-        $patch_points = $builder->getOption('with-added-patch', []);
-        ApplicationContext::set('patch_point', $point_name);
-        foreach ($patch_points as $patch_point) {
-            if (!file_exists($patch_point)) {
-                throw new WrongUsageException("Additional patch script {$patch_point} does not exist!");
-            }
-            logger()->debug("Applying additional patch script {$patch_point}");
-
-            try {
-                require $patch_point;
-            } catch (InterruptException $e) {
-                if ($e->getCode() === 0) {
-                    logger()->notice('Patch script ' . $patch_point . ' interrupted' . ($e->getMessage() ? (': ' . $e->getMessage()) : '.'));
-                } else {
-                    logger()->error('Patch script ' . $patch_point . ' interrupted with error code [' . $e->getCode() . ']' . ($e->getMessage() ? (': ' . $e->getMessage()) : '.'));
-                }
-            }
-        }
-        ApplicationContext::set('patch_point', '');
-    }
+    public static function afterLibExtractHook(string $pkg): void {}
 }

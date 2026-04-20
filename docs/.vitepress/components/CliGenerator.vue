@@ -1,9 +1,14 @@
 <template>
   <div>
+    <div v-if="missing" class="warning custom-block" style="margin-bottom: 16px">
+      <p class="custom-block-title">WARNING</p>
+      <p>Extension list is not generated yet. Run <code>bin/spc dev:gen-ext-docs</code> to generate it.</p>
+    </div>
+
     <h2>{{ I18N[lang].selectedSystem }}</h2>
     <div class="option-line">
       <span v-for="(item, index) in osList" :key="index" style="margin-right: 8px">
-        <input type="radio" :id="'os-' + item.os" :value="item.os" :disabled="item.disabled === true" v-model="selectedSystem" />
+        <input type="radio" :id="'os-' + item.os" :value="item.os" v-model="selectedSystem" />
         <label :for="'os-' + item.os">{{ item.label }}</label>
       </span>
     </div>
@@ -13,13 +18,14 @@
         <option value="aarch64" :disabled="selectedSystem === 'windows'">aarch64</option>
       </select>
     </div>
+
     <h2>{{ I18N[lang].selectExt }}{{ checkedExts.length > 0 ? (' (' + checkedExts.length + ')') : '' }}</h2>
     <div class="box">
       <input class="input" v-model="filterText" :placeholder="I18N[lang].searchPlaceholder" />
       <br>
-      <div v-for="item in extFilter" :key="item" class="ext-item">
+      <div v-for="item in extByOS" :key="item" class="ext-item">
         <span>
-          <input type="checkbox" :id="item" :value="item" v-model="checkedExts" :disabled="extDisableList.indexOf(item) !== -1">
+          <input type="checkbox" :id="item" :value="item" v-model="checkedExts" />
           <label :for="item">
             <span>{{ highlightItem(item, 0) }}</span>
             <span style="color: orangered; font-weight: bolder">{{ highlightItem(item, 1) }}</span>
@@ -32,50 +38,31 @@
     <div class="my-btn" v-if="selectedSystem !== 'windows'" @click="selectAll">{{ I18N[lang].selectAll }}</div>
     <div class="my-btn" @click="checkedExts = []">{{ I18N[lang].selectNone }}</div>
 
-    <details class="details custom-block" open>
-      <summary>{{ I18N[lang].buildLibs }}{{ checkedLibs.length > 0 ? (' (' + checkedLibs.length + ')') : '' }}</summary>
-      <div class="box">
-        <div v-for="(item, index) in libContain" :key="index" class="ext-item">
-          <input type="checkbox" :id="index" :value="item" v-model="checkedLibs" :disabled="libDisableList.indexOf(item) !== -1">
-          <label :for="index">{{ item }}</label>
-        </div>
-      </div>
-    </details>
-    <div class="tip custom-block">
-      <p class="custom-block-title">TIP</p>
-      <p>{{ I18N[lang].depTips }}</p>
-      <p>{{ I18N[lang].depTips2 }}</p>
-    </div>
     <h2>{{ I18N[lang].buildTarget }}</h2>
     <div class="box">
       <div v-for="item in TARGET" :key="item" class="ext-item">
-        <input type="checkbox" :id="'build_' + item" :value="item" v-model="checkedTargets" @change="onTargetChange">
+        <input type="checkbox" :id="'build_' + item" :value="item" v-model="checkedTargets" />
         <label :for="'build_' + item">{{ item }}</label>
       </div>
     </div>
-    <div v-if="selectedPhpVersion === '7.4' && (checkedTargets.indexOf('micro') !== -1 || checkedTargets.indexOf('all') !== -1)" class="warning custom-block">
-      <p class="custom-block-title">WARNING</p>
-      <p>{{ I18N[lang].microUnavailable }}</p>
-    </div>
-    <div v-if="selectedSystem === 'windows' && (checkedTargets.indexOf('fpm') !== -1 || checkedTargets.indexOf('embed') !== -1 || checkedTargets.indexOf('frankenphp') !== -1)" class="warning custom-block">
+    <div v-if="selectedSystem === 'windows' && (checkedTargets.includes('fpm') || checkedTargets.includes('embed') || checkedTargets.includes('frankenphp'))" class="warning custom-block">
       <p class="custom-block-title">WARNING</p>
       <p>{{ I18N[lang].windowsSAPIUnavailable }}</p>
     </div>
+
     <h2>{{ I18N[lang].buildOptions }}</h2>
-    <!-- Refactor all build options in table -->
     <table>
-      <!-- buildEnvironment -->
+      <!-- Build Environment -->
       <tr>
         <td>{{ I18N[lang].buildEnvironment }}</td>
         <td>
           <select v-model="selectedEnv">
-            <option value="native">{{ I18N[lang].buildEnvNative }}</option>
             <option value="spc">{{ I18N[lang].buildEnvSpc }}</option>
-            <option value="docker" v-if="selectedSystem !== 'windows'">{{ I18N[lang].buildEnvDocker }}</option>
+            <option value="native">{{ I18N[lang].buildEnvNative }}</option>
           </select>
         </td>
       </tr>
-      <!-- Download PHP version -->
+      <!-- PHP Version -->
       <tr>
         <td>{{ I18N[lang].downloadPhpVersion }}</td>
         <td>
@@ -84,70 +71,85 @@
           </select>
         </td>
       </tr>
-      <!-- Enable debug message -->
+      <!-- Verbose log -->
       <tr>
-        <td>{{ I18N[lang].useDebug }}</td>
+        <td>{{ I18N[lang].useVerbose }}</td>
         <td>
-          <input type="radio" id="debug-yes" :value="1" v-model="debug" />
-          <label for="debug-yes">{{ I18N[lang].yes }}</label>
-          <input type="radio" id="debug-no" :value="0" v-model="debug" />
-          <label for="debug-no">{{ I18N[lang].no }}</label>
+          <select v-model="verbosity">
+            <option value="">{{ I18N[lang].verboseNone }}</option>
+            <option value="-v">-v</option>
+            <option value="-vv">-vv</option>
+            <option value="-vvv">-vvv</option>
+          </select>
         </td>
       </tr>
       <!-- Enable ZTS -->
       <tr>
         <td>{{ I18N[lang].useZTS }}</td>
         <td>
-          <input type="radio" id="zts-yes" :value="1" v-model="zts" />
+          <input type="radio" id="zts-yes" :value="true" v-model="zts" />
           <label for="zts-yes">{{ I18N[lang].yes }}</label>
-          <input type="radio" id="zts-no" :value="0" v-model="zts" />
+          <input type="radio" id="zts-no" :value="false" v-model="zts" />
           <label for="zts-no">{{ I18N[lang].no }}</label>
         </td>
       </tr>
-      <!-- download corresponding extensions -->
+      <!-- Parallel downloads -->
       <tr>
-        <td>{{ I18N[lang].resultShowDownload }}</td>
+        <td>{{ I18N[lang].dlParallel }}</td>
         <td>
-          <input type="radio" id="show-download-yes" :value="1" v-model="downloadByExt" />
-          <label for="show-download-yes">{{ I18N[lang].yes }}</label>
-          <input type="radio" id="show-download-no" :value="0" v-model="downloadByExt" />
-          <label for="show-download-no">{{ I18N[lang].no }}</label>
+          <input class="number-input" type="number" v-model.number="dlParallel" min="1" max="50" />
         </td>
       </tr>
-      <!-- Download pre-built -->
+      <!-- Retry count -->
+      <tr>
+        <td>{{ I18N[lang].dlRetry }}</td>
+        <td>
+          <input class="number-input" type="number" v-model.number="dlRetry" min="0" max="100" />
+        </td>
+      </tr>
+      <!-- Prefer binary (pre-built) -->
       <tr>
         <td>{{ I18N[lang].usePreBuilt }}</td>
         <td>
-          <input type="radio" id="pre-built-yes" :value="1" v-model="preBuilt" />
+          <input type="radio" id="pre-built-yes" :value="true" v-model="preBuilt" />
           <label for="pre-built-yes">{{ I18N[lang].yes }}</label>
-          <input type="radio" id="pre-built-no" :value="0" v-model="preBuilt" />
+          <input type="radio" id="pre-built-no" :value="false" v-model="preBuilt" />
           <label for="pre-built-no">{{ I18N[lang].no }}</label>
         </td>
       </tr>
-      <!-- Enable UPX -->
+      <!-- Enable UPX (linux/windows only) -->
       <tr v-if="selectedSystem !== 'macos'">
         <td>{{ I18N[lang].useUPX }}</td>
         <td>
-          <input type="radio" id="upx-yes" :value="1" v-model="enableUPX" />
+          <input type="radio" id="upx-yes" :value="true" v-model="enableUPX" />
           <label for="upx-yes">{{ I18N[lang].yes }}</label>
-          <input type="radio" id="upx-no" :value="0" v-model="enableUPX" />
+          <input type="radio" id="upx-no" :value="false" v-model="enableUPX" />
           <label for="upx-no">{{ I18N[lang].no }}</label>
+        </td>
+      </tr>
+      <!-- Keep debug symbols (--no-strip) -->
+      <tr>
+        <td>{{ I18N[lang].noStrip }}</td>
+        <td>
+          <input type="radio" id="nostrip-yes" :value="true" v-model="noStrip" />
+          <label for="nostrip-yes">{{ I18N[lang].yes }}</label>
+          <input type="radio" id="nostrip-no" :value="false" v-model="noStrip" />
+          <label for="nostrip-no">{{ I18N[lang].no }}</label>
         </td>
       </tr>
     </table>
 
     <h2>{{ I18N[lang].hardcodedINI }}</h2>
-    <textarea class="textarea" :placeholder="I18N[lang].hardcodedINIPlacehoder" v-model="hardcodedINIData" rows="5" />
+    <textarea class="textarea" :placeholder="I18N[lang].hardcodedINIPlaceholder" v-model="hardcodedINIData" rows="5" />
+
     <h2>{{ I18N[lang].resultShow }}</h2>
 
-    <!-- SPC Binary Download Command -->
+    <!-- SPC Binary Download Command (spc env only) -->
     <div v-if="selectedEnv === 'spc'" class="command-container">
       <b>{{ I18N[lang].downloadSPCBinaryCommand }}</b>
       <div v-if="selectedSystem !== 'windows'" class="command-preview">
-        <div class="command-content">
-          {{ spcDownloadCommand }}
-        </div>
-        <button class="copy-btn" @click="copyToClipboard(spcDownloadCommand)" :class="{ 'copied': copiedStates.spcDownload }">
+        <div class="command-content">{{ spcDownloadCommand }}</div>
+        <button class="copy-btn" @click="copyToClipboard(spcDownloadCommand, 'spcDownload')" :class="{ 'copied': copiedStates.spcDownload }">
           {{ copiedStates.spcDownload ? I18N[lang].copied : I18N[lang].copy }}
         </button>
       </div>
@@ -155,45 +157,8 @@
         <div class="warning custom-block">
           <p class="custom-block-title">WARNING</p>
           <p>{{ I18N[lang].windowsDownSPCWarning }}</p>
-          <a href="https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe" target="_blank">https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe</a>
+          <a href="https://dl.static-php.dev/v3/spc-bin/latest/spc-windows-x86_64.exe" target="_blank">https://dl.static-php.dev/v3/spc-bin/latest/spc-windows-x86_64.exe</a>
         </div>
-      </div>
-    </div>
-
-    <!-- Download Commands -->
-    <div v-if="downloadByExt" class="command-container">
-      <b>{{ I18N[lang].downloadExtOnlyCommand }}</b>
-      <div class="command-preview">
-        <div class="command-content">
-          {{ downloadExtCommand }}
-        </div>
-        <button class="copy-btn" @click="copyToClipboard(downloadExtCommand)" :class="{ 'copied': copiedStates.downloadExt }">
-          {{ copiedStates.downloadExt ? I18N[lang].copied : I18N[lang].copy }}
-        </button>
-      </div>
-    </div>
-    <div v-else class="command-container">
-      <b>{{ I18N[lang].downloadAllCommand }}</b>
-      <div class="command-preview">
-        <div class="command-content">
-          {{ downloadAllCommand }}
-        </div>
-        <button class="copy-btn" @click="copyToClipboard(downloadAllCommand)" :class="{ 'copied': copiedStates.downloadAll }">
-          {{ copiedStates.downloadAll ? I18N[lang].copied : I18N[lang].copy }}
-        </button>
-      </div>
-    </div>
-
-    <!-- UPX Download Command -->
-    <div class="command-container" v-if="enableUPX">
-      <b>{{ I18N[lang].downloadUPXCommand }}</b>
-      <div class="command-preview">
-        <div class="command-content">
-          {{ downloadPkgCommand }}
-        </div>
-        <button class="copy-btn" @click="copyToClipboard(downloadPkgCommand)" :class="{ 'copied': copiedStates.downloadPkg }">
-          {{ copiedStates.downloadPkg ? I18N[lang].copied : I18N[lang].copy }}
-        </button>
       </div>
     </div>
 
@@ -201,10 +166,8 @@
     <div class="command-container">
       <b>{{ I18N[lang].doctorCommand }}</b>
       <div class="command-preview">
-        <div class="command-content">
-          {{ doctorCommandString }}
-        </div>
-        <button class="copy-btn" @click="copyToClipboard(doctorCommandString)" :class="{ 'copied': copiedStates.doctor }">
+        <div class="command-content">{{ doctorCommandString }}</div>
+        <button class="copy-btn" @click="copyToClipboard(doctorCommandString, 'doctor')" :class="{ 'copied': copiedStates.doctor }">
           {{ copiedStates.doctor ? I18N[lang].copied : I18N[lang].copy }}
         </button>
       </div>
@@ -214,23 +177,19 @@
     <div class="command-container">
       <b>{{ I18N[lang].compileCommand }}</b>
       <div class="command-preview">
-        <div class="command-content">
-          {{ buildCommandString }}
-        </div>
-        <button class="copy-btn" @click="copyToClipboard(buildCommandString)" :class="{ 'copied': copiedStates.build }">
+        <div class="command-content">{{ buildCommandString }}</div>
+        <button class="copy-btn" @click="copyToClipboard(buildCommandString, 'build')" :class="{ 'copied': copiedStates.build }">
           {{ copiedStates.build ? I18N[lang].copied : I18N[lang].copy }}
         </button>
       </div>
     </div>
 
-    <!-- Craft.yml -->
+    <!-- craft.yml -->
     <div class="command-container">
       <b>craft.yml</b>
       <div class="command-preview pre">
-        <div class="command-content">
-          {{ craftCommandString }}
-        </div>
-        <button class="copy-btn" @click="copyToClipboard(craftCommandString)" :class="{ 'copied': copiedStates.craft }">
+        <div class="command-content">{{ craftCommandString }}</div>
+        <button class="copy-btn" @click="copyToClipboard(craftCommandString, 'craft')" :class="{ 'copied': copiedStates.craft }">
           {{ copiedStates.craft ? I18N[lang].copied : I18N[lang].copy }}
         </button>
       </div>
@@ -245,14 +204,12 @@ export default {
 </script>
 
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
-import extData from '../config/ext.json';
-import libData from '../config/lib.json';
-import { getAllExtLibsByDeps } from './DependencyUtil.js';
+import { computed, ref, watch } from 'vue';
+// @ts-ignore VitePress data loader — transformed at build time
+import { data as extDataRaw } from '../extensions.data.js';
 
 // Constants
-const OS_MAP = new Map([['linux', 'Linux'], ['macos', 'Darwin'], ['windows', 'Windows']]);
-const TARGET = ['cli', 'fpm', 'micro', 'embed', 'frankenphp', 'all'];
+const TARGET = ['cli', 'fpm', 'micro', 'embed', 'frankenphp', 'cgi'];
 const availablePhpVersions = ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
 
 // Props
@@ -263,154 +220,135 @@ const props = defineProps({
   }
 });
 
-// Reactive data
-const ext = ref(extData);
-const lib = ref(libData);
-const libContain = ref([]);
+// Extension data
+const missing = extDataRaw.missing ?? false;
+const allExtensions: Array<{ name: string; linux: boolean; macos: boolean; windows: boolean }> = extDataRaw.extensions ?? [];
+
+// Reactive state
 const filterText = ref('');
-const checkedExts = ref([]);
-const checkedLibs = ref([]);
-const extDisableList = ref([]);
-const libDisableList = ref([]);
-const checkedTargets = ref(['cli']);
-const selectedEnv = ref('spc');
+const checkedExts = ref<string[]>([]);
+const checkedTargets = ref<string[]>(['cli']);
+const selectedEnv = ref<'spc' | 'native'>('spc');
 const selectedPhpVersion = ref('8.4');
-const selectedSystem = ref('linux');
-const selectedArch = ref('x86_64');
-const debug = ref(0);
-const zts = ref(0);
-const downloadByExt = ref(1);
-const preBuilt = ref(1);
-const enableUPX = ref(0);
+const selectedSystem = ref<'linux' | 'macos' | 'windows'>('linux');
+const selectedArch = ref<'x86_64' | 'aarch64'>('x86_64');
+const verbosity = ref('');
+const zts = ref(false);
+const preBuilt = ref(true);
+const enableUPX = ref(false);
+const noStrip = ref(false);
+const dlParallel = ref(10);
+const dlRetry = ref(5);
 const hardcodedINIData = ref('');
-const buildCommand = ref('--build-cli');
 
 // Copy states
-const copiedStates = ref({
+const copiedStates = ref<Record<string, boolean>>({
   spcDownload: false,
-  downloadExt: false,
-  downloadAll: false,
-  downloadPkg: false,
+  doctor: false,
   build: false,
   craft: false,
-  doctor: false
 });
 
 // OS list
 const osList = [
-  { os: 'linux', label: 'Linux', disabled: false },
-  { os: 'macos', label: 'macOS', disabled: false },
-  { os: 'windows', label: 'Windows', disabled: false },
+  { os: 'linux', label: 'Linux' },
+  { os: 'macos', label: 'macOS' },
+  { os: 'windows', label: 'Windows' },
 ];
 
-// Computed properties
-const extFilter = computed(() => {
-  return Object.entries(ext.value)
-    .filter(([name]) => isSupported(name, selectedSystem.value))
-    .map(([name]) => name);
+// Computed: extensions filtered by selected OS
+const extByOS = computed(() => {
+  return allExtensions
+    .filter(item => {
+      if (selectedSystem.value === 'linux') return item.linux;
+      if (selectedSystem.value === 'macos') return item.macos;
+      if (selectedSystem.value === 'windows') return item.windows;
+      return true;
+    })
+    .map(item => item.name);
 });
 
-const extList = computed(() => checkedExts.value.join(','));
-
-const additionalLibs = computed(() => {
-  const ls = checkedLibs.value.filter(item => libDisableList.value.indexOf(item) === -1);
-  return ls.length > 0 ? ` --with-libs="${ls.join(',')}"` : '';
-});
+const extList = computed(() => [...checkedExts.value].sort().join(','));
 
 const spcCommand = computed(() => {
-  switch (selectedEnv.value) {
-    case 'native':
-      return 'bin/spc';
-    case 'spc':
-      return selectedSystem.value === 'windows' ? '.\\spc.exe' : './spc';
-    case 'docker':
-      return 'bin/spc-alpine-docker';
-    default:
-      return '';
-  }
+  if (selectedEnv.value === 'native') return 'bin/spc';
+  return selectedSystem.value === 'windows' ? '.\\spc.exe' : './spc';
 });
 
 const spcDownloadCommand = computed(() => {
-  if (selectedSystem.value === 'windows') return '';
-  return `curl -fsSL -o spc.tgz https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-${selectedSystem.value}-${selectedArch.value}.tar.gz && tar -zxvf spc.tgz && rm spc.tgz`;
+  const os = selectedSystem.value === 'macos' ? 'macos' : 'linux';
+  const arch = selectedArch.value;
+  return `curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-${os}-${arch} -o spc && chmod +x spc`;
 });
+
+const doctorCommandString = computed(() => `${spcCommand.value} doctor --auto-fix`);
 
 const displayINI = computed(() => {
-  const split = hardcodedINIData.value.split('\n');
-  const validLines = split.filter(x => x.indexOf('=') >= 1);
-  return validLines.length > 0 ? ' ' + validLines.map(x => `-I "${x}"`).join(' ') : '';
-});
-
-const downloadAllCommand = computed(() => {
-  return `${spcCommand.value} download --all --with-php=${selectedPhpVersion.value}${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
-});
-
-const downloadExtCommand = computed(() => {
-  return `${spcCommand.value} download --with-php=${selectedPhpVersion.value} --for-extensions "${extList.value}"${preBuilt.value ? ' --prefer-pre-built' : ''}${debug.value ? ' --debug' : ''}`;
-});
-
-const downloadPkgCommand = computed(() => {
-  return `${spcCommand.value} install-pkg upx${debug.value ? ' --debug' : ''}`;
-});
-
-const doctorCommandString = computed(() => {
-  return `${spcCommand.value} doctor --auto-fix${debug.value ? ' --debug' : ''}`;
+  const lines = hardcodedINIData.value.split('\n').filter(x => x.indexOf('=') >= 1);
+  return lines.length > 0 ? ' ' + lines.map(x => `-I "${x}"`).join(' ') : '';
 });
 
 const buildCommandString = computed(() => {
-  return `${spcCommand.value} build ${buildCommand.value} "${extList.value}"${additionalLibs.value}${debug.value ? ' --debug' : ''}${zts.value ? ' --enable-zts' : ''}${enableUPX.value ? ' --with-upx-pack' : ''}${displayINI.value}`;
+  const sapi = checkedTargets.value.map(x => `--build-${x}`).join(' ');
+  const php = ` --dl-with-php=${selectedPhpVersion.value}`;
+  const parallel = ` --dl-parallel=${dlParallel.value}`;
+  const retry = ` --dl-retry=${dlRetry.value}`;
+  const ignoreCache = ' --dl-ignore-cache=php-src';
+  const binary = preBuilt.value ? ' --dl-prefer-binary' : '';
+  const strip = noStrip.value ? ' --no-strip' : '';
+  const upx = enableUPX.value ? ' --with-upx-pack' : '';
+  const ztsFlag = zts.value ? ' --enable-zts' : '';
+  const verbose = verbosity.value ? ` ${verbosity.value}` : '';
+  return `${spcCommand.value} build:php "${extList.value}" ${sapi}${php}${parallel}${retry}${ignoreCache}${binary}${strip}${upx}${ztsFlag}${displayINI.value}${verbose}`;
 });
 
 const craftCommandString = computed(() => {
   let str = `php-version: ${selectedPhpVersion.value}\n`;
   str += `extensions: "${extList.value}"\n`;
 
-  if (checkedTargets.value.join(',') === 'all') {
-    str += 'sapi: ' + ['cli', 'fpm', 'micro', 'embed', 'frankenphp'].join(',') + '\n';
+  // sapi
+  if (checkedTargets.value.length === 1) {
+    str += `sapi:\n  - ${checkedTargets.value[0]}\n`;
   } else {
-    str += `sapi: ${checkedTargets.value.join(',')}\n`;
+    str += `sapi:\n`;
+    checkedTargets.value.forEach(s => { str += `  - ${s}\n`; });
   }
 
-  if (additionalLibs.value) {
-    str += `libs: ${additionalLibs.value.replace('--with-libs="', '').replace('"', '').trim()}\n`;
+  // verbosity (Symfony OutputInterface constants: 64=-v, 128=-vv, 256=-vvv)
+  const verbosityMap: Record<string, number> = { '-v': 64, '-vv': 128, '-vvv': 256 };
+  if (verbosity.value && verbosityMap[verbosity.value]) {
+    str += `verbosity: ${verbosityMap[verbosity.value]}\n`;
   }
 
-  if (debug.value) {
-    str += 'debug: true\n';
+  // download-options
+  str += `download-options:\n`;
+  str += `  parallel: ${dlParallel.value}\n`;
+  str += `  retry: ${dlRetry.value}\n`;
+  str += `  ignore-cache: php-src\n`;
+  if (preBuilt.value) str += `  prefer-binary: true\n`;
+
+  // build-options (only when needed)
+  const buildOpts: string[] = [];
+  if (noStrip.value) buildOpts.push(`  no-strip: true`);
+  if (enableUPX.value) buildOpts.push(`  with-upx-pack: true`);
+  if (zts.value) buildOpts.push(`  enable-zts: true`);
+
+  const iniLines = hardcodedINIData.value.split('\n').filter(x => x.indexOf('=') >= 1);
+  if (iniLines.length > 0) {
+    buildOpts.push(`  with-hardcoded-ini:`);
+    iniLines.forEach(line => buildOpts.push(`    - "${line}"`));
   }
 
-  if (preBuilt.value) {
-    str += 'download-options:\n';
-    str += '  prefer-pre-built: true\n';
-  }
-
-  str += '{{position_hold}}';
-
-  if (enableUPX.value) {
-    str += '  with-upx-pack: true\n';
-  }
-  if (zts.value) {
-    str += '  enable-zts: true\n';
-  }
-
-  if (!str.endsWith('{{position_hold}}')) {
-    str = str.replace('{{position_hold}}', 'build-options:\n');
-  } else {
-    str = str.replace('{{position_hold}}', '');
+  if (buildOpts.length > 0) {
+    str += `build-options:\n${buildOpts.join('\n')}\n`;
   }
 
   return str;
 });
 
 // Methods
-const isSupported = (extName: string, os: string) => {
-  const osName = OS_MAP.get(os);
-  const osSupport = ext.value[extName]?.support?.[osName] ?? 'yes';
-  return osSupport === 'yes' || osSupport === 'partial';
-};
-
 const selectCommon = () => {
-  checkedExts.value = [
+  const common = [
     'apcu', 'bcmath', 'calendar', 'ctype', 'curl', 'dba', 'dom', 'exif',
     'filter', 'fileinfo', 'gd', 'iconv', 'intl', 'mbstring', 'mbregex',
     'mysqli', 'mysqlnd', 'openssl', 'opcache', 'pcntl', 'pdo', 'pdo_mysql',
@@ -418,30 +356,18 @@ const selectCommon = () => {
     'session', 'simplexml', 'sockets', 'sodium', 'sqlite3', 'tokenizer',
     'xml', 'xmlreader', 'xmlwriter', 'xsl', 'zip', 'zlib',
   ];
+  const supported = new Set(extByOS.value);
+  checkedExts.value = common.filter(e => supported.has(e));
 };
 
 const selectAll = () => {
-  checkedExts.value = [...extFilter.value];
-};
-
-const onTargetChange = (event: Event) => {
-  const target = (event.target as HTMLInputElement).value;
-  if (target === 'all') {
-    checkedTargets.value = ['all'];
-  } else {
-    const allIndex = checkedTargets.value.indexOf('all');
-    if (allIndex !== -1) {
-      checkedTargets.value.splice(allIndex, 1);
-    }
-  }
-  buildCommand.value = checkedTargets.value.map(x => `--build-${x}`).join(' ');
+  checkedExts.value = [...extByOS.value];
 };
 
 const highlightItem = (item: string, step: number) => {
   if (!filterText.value || !item.includes(filterText.value)) {
     return step === 0 ? item : '';
   }
-
   const index = item.indexOf(filterText.value);
   switch (step) {
     case 0: return item.substring(0, index);
@@ -451,30 +377,12 @@ const highlightItem = (item: string, step: number) => {
   }
 };
 
-const copyToClipboard = async (text: string) => {
+const copyToClipboard = async (text: string, key: string) => {
   try {
     await navigator.clipboard.writeText(text);
-    // Find which command was copied and update its state
-    const commandMap = {
-      [spcDownloadCommand.value]: 'spcDownload',
-      [downloadExtCommand.value]: 'downloadExt',
-      [downloadAllCommand.value]: 'downloadAll',
-      [downloadPkgCommand.value]: 'downloadPkg',
-      [doctorCommandString.value]: 'doctor',
-      [buildCommandString.value]: 'build',
-      [craftCommandString.value]: 'craft'
-    };
-
-    const key = commandMap[text];
-    if (key) {
-      copiedStates.value[key] = true;
-      setTimeout(() => {
-        copiedStates.value[key] = false;
-      }, 2000);
-    }
-  } catch (err) {
-    console.error('Failed to copy text: ', err);
-    // Fallback for older browsers
+    copiedStates.value[key] = true;
+    setTimeout(() => { copiedStates.value[key] = false; }, 2000);
+  } catch {
     const textArea = document.createElement('textarea');
     textArea.value = text;
     document.body.appendChild(textArea);
@@ -484,113 +392,17 @@ const copyToClipboard = async (text: string) => {
   }
 };
 
-const calculateExtDepends = (input: string[]) => {
-  const result = new Set<string>();
-
-  const dfs = (node: string) => {
-    let depends: string[] = [];
-
-    if (selectedSystem.value === 'linux') {
-      depends = ext.value[node]?.['ext-depends-linux'] ?? ext.value[node]?.['ext-depends-unix'] ?? ext.value[node]?.['ext-depends'] ?? [];
-    } else if (selectedSystem.value === 'macos') {
-      depends = ext.value[node]?.['ext-depends-macos'] ?? ext.value[node]?.['ext-depends-unix'] ?? ext.value[node]?.['ext-depends'] ?? [];
-    } else if (selectedSystem.value === 'windows') {
-      depends = ext.value[node]?.['ext-depends-windows'] ?? ext.value[node]?.['ext-depends'] ?? [];
-    }
-
-    if (depends.length === 0) return;
-
-    depends.forEach(dep => {
-      result.add(dep);
-      dfs(dep);
-    });
-  };
-
-  input.forEach(dfs);
-  return Array.from(result);
-};
-
-const calculateExtLibDepends = (input: string[]) => {
-  const result = new Set<string>();
-
-  const dfsLib = (node: string) => {
-    let depends: string[] = [];
-
-    if (selectedSystem.value === 'linux') {
-      depends = lib.value[node]?.['lib-depends-linux'] ?? lib.value[node]?.['lib-depends-unix'] ?? lib.value[node]?.['lib-depends'] ?? [];
-    } else if (selectedSystem.value === 'macos') {
-      depends = lib.value[node]?.['lib-depends-macos'] ?? lib.value[node]?.['lib-depends-unix'] ?? lib.value[node]?.['lib-depends'] ?? [];
-    } else if (selectedSystem.value === 'windows') {
-      depends = lib.value[node]?.['lib-depends-windows'] ?? lib.value[node]?.['lib-depends'] ?? [];
-    }
-
-    if (depends.length === 0) return;
-
-    depends.forEach(dep => {
-      result.add(dep);
-      dfsLib(dep);
-    });
-  };
-
-  const dfsExt = (node: string) => {
-    let depends: string[] = [];
-
-    if (selectedSystem.value === 'linux') {
-      depends = ext.value[node]?.['lib-depends-linux'] ?? ext.value[node]?.['lib-depends-unix'] ?? ext.value[node]?.['lib-depends'] ?? [];
-    } else if (selectedSystem.value === 'macos') {
-      depends = ext.value[node]?.['lib-depends-macos'] ?? ext.value[node]?.['lib-depends-unix'] ?? ext.value[node]?.['lib-depends'] ?? [];
-    } else if (selectedSystem.value === 'windows') {
-      depends = ext.value[node]?.['lib-depends-windows'] ?? ext.value[node]?.['lib-depends'] ?? [];
-    }
-
-    if (depends.length === 0) return;
-
-    depends.forEach(dep => {
-      result.add(dep);
-      dfsLib(dep);
-    });
-  };
-
-  input.forEach(dfsExt);
-  return Array.from(result);
-};
-
 // Watchers
 watch(selectedSystem, () => {
   if (selectedSystem.value === 'windows') {
     selectedArch.value = 'x86_64';
+    enableUPX.value = false;
   }
-  // Reset related values when OS changes
   checkedExts.value = [];
-  enableUPX.value = 0;
 });
 
-watch(checkedExts, (newValue) => {
-  // Apply ext-depends
-  extDisableList.value = calculateExtDepends(newValue);
-  extDisableList.value.forEach(x => {
-    if (checkedExts.value.indexOf(x) === -1) {
-      checkedExts.value.push(x);
-    }
-  });
-
-  checkedExts.value.sort();
-
-  const calculated = getAllExtLibsByDeps({ ext: ext.value, lib: lib.value, os: selectedSystem.value }, checkedExts.value);
-  libContain.value = calculated.libs.sort();
-
-  // Apply lib-depends
-  checkedLibs.value = [];
-  libDisableList.value = calculateExtLibDepends(calculated.exts);
-  libDisableList.value.forEach(x => {
-    if (checkedLibs.value.indexOf(x) === -1) {
-      checkedLibs.value.push(x);
-    }
-  });
-}, { deep: true });
-
 // I18N
-const I18N = {
+const I18N: Record<string, Record<string, string>> = {
   zh: {
     selectExt: '选择扩展',
     buildTarget: '选择编译目标',
@@ -598,8 +410,8 @@ const I18N = {
     buildEnvironment: '编译环境',
     buildEnvNative: '本地构建（Git 源码）',
     buildEnvSpc: '本地构建（独立 spc 二进制）',
-    buildEnvDocker: 'Alpine Docker 构建',
-    useDebug: '是否开启调试输出',
+    useVerbose: '是否输出详细日志',
+    verboseNone: '不输出（默认）',
     yes: '是',
     no: '否',
     resultShow: '结果展示',
@@ -608,28 +420,22 @@ const I18N = {
     selectNone: '全部取消选择',
     useZTS: '是否编译线程安全版',
     hardcodedINI: '硬编码 INI 选项',
-    hardcodedINIPlacehoder: '如需要硬编码 ini，每行写一个，例如：memory_limit=2G',
-    resultShowDownload: '是否展示仅下载对应扩展依赖的命令',
-    downloadExtOnlyCommand: '只下载对应扩展的依赖包命令',
-    downloadAllCommand: '下载所有依赖包命令',
-    downloadUPXCommand: '下载 UPX 命令',
+    hardcodedINIPlaceholder: '如需要硬编码 ini，每行写一个，例如：memory_limit=2G',
     compileCommand: '编译命令',
     downloadPhpVersion: '下载 PHP 版本',
     downloadSPCBinaryCommand: '下载 spc 二进制命令',
-    selectedArch: '选择系统架构',
     selectedSystem: '选择操作系统',
-    buildLibs: '要构建的库',
-    depTips: '选择扩展后，不可选中的项目为必需的依赖，编译的依赖库列表中可选的为现有扩展和依赖库的可选依赖。选择可选依赖后，将生成 --with-libs 参数。',
-    depTips2: '无法同时构建所有扩展，因为有些扩展之间相互冲突。请根据需要选择扩展。',
-    microUnavailable: 'micro 不支持 PHP 7.4 及更早版本！',
     windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed、frankenphp 构建！',
     useUPX: '是否开启 UPX 压缩（减小二进制体积）',
-    windowsDownSPCWarning: 'Windows 下请手动下载 spc.exe 二进制文件，解压到当前目录并重命名为 spc.exe！',
-    usePreBuilt: '如果可能，下载预编译的依赖库（减少编译时间）',
+    windowsDownSPCWarning: 'Windows 下请手动下载 spc.exe 二进制文件！',
+    usePreBuilt: '如果可能，使用预编译的依赖库（减少编译时间）',
     searchPlaceholder: '搜索扩展...',
     copy: '复制',
     copied: '已复制',
     doctorCommand: '自动检查和准备构建环境命令',
+    dlParallel: '并行下载数（1-50）',
+    dlRetry: '失败重试次数',
+    noStrip: '保留调试符号（--no-strip）',
   },
   en: {
     selectExt: 'Select Extensions',
@@ -638,43 +444,58 @@ const I18N = {
     buildEnvironment: 'Build Environment',
     buildEnvNative: 'Native build (Git source code)',
     buildEnvSpc: 'Native build (standalone spc binary)',
-    buildEnvDocker: 'Alpine docker build',
-    useDebug: 'Enable debug message',
+    useVerbose: 'Verbose log output',
+    verboseNone: 'None (default)',
     yes: 'Yes',
     no: 'No',
     resultShow: 'Result',
     selectCommon: 'Select common extensions',
     selectAll: 'Select all',
     selectNone: 'Unselect all',
-    useZTS: 'Enable ZTS',
+    useZTS: 'Enable ZTS (thread-safe)',
     hardcodedINI: 'Hardcoded INI options',
-    hardcodedINIPlacehoder: 'If you need to hardcode ini, write one per line, for example: memory_limit=2G',
-    resultShowDownload: 'Download with corresponding extension dependencies',
-    downloadExtOnlyCommand: 'Download sources by extensions command',
-    downloadAllCommand: 'Download all sources command',
-    downloadUPXCommand: 'Download UPX command',
-    compileCommand: 'Compile command',
-    downloadPhpVersion: 'Download PHP version',
-    downloadSPCBinaryCommand: 'Download spc binary command',
-    selectedArch: 'Select build architecture',
-    selectedSystem: 'Select Build OS',
-    buildLibs: 'Select Dependencies',
-    depTips: 'After selecting the extensions, the unselectable items are essential dependencies. In the compiled dependencies list, optional dependencies consist of existing extensions and optional dependencies of libraries. Optional dependencies will be added in --with-libs parameter.',
-    depTips2: 'It is not possible to build all extensions at the same time, as some extensions conflict with each other. Please select the extensions you need.',
-    microUnavailable: 'Micro does not support PHP 7.4 and earlier versions!',
+    hardcodedINIPlaceholder: 'If you need to hardcode ini, write one per line, for example: memory_limit=2G',
+    compileCommand: 'Build command',
+    downloadPhpVersion: 'PHP version',
+    downloadSPCBinaryCommand: 'Download spc binary',
+    selectedSystem: 'Select OS',
     windowsSAPIUnavailable: 'Windows does not support fpm, embed and frankenphp build!',
     useUPX: 'Enable UPX compression (reduce binary size)',
-    windowsDownSPCWarning: 'Please download the binary file manually, extract it to the current directory and rename to spc.exe on Windows!',
-    usePreBuilt: 'Download pre-built dependencies if possible (reduce compile time)',
+    windowsDownSPCWarning: 'Please download the spc.exe binary manually on Windows!',
+    usePreBuilt: 'Use pre-built dependencies where available (reduce compile time)',
     searchPlaceholder: 'Search extensions...',
     copy: 'Copy',
     copied: 'Copied',
-    doctorCommand: 'Auto-check and prepare build environment command',
+    doctorCommand: 'Auto-check and prepare build environment',
+    dlParallel: 'Parallel downloads (1-50)',
+    dlRetry: 'Retry count on failure',
+    noStrip: 'Keep debug symbols (--no-strip)',
   }
 };
 </script>
 
 <style scoped>
+.number-input {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  width: 80px;
+  padding: 6px 10px;
+  background-color: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.number-input:hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+.number-input:focus {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 0 0 3px var(--vp-c-brand-soft);
+}
+
 .box {
   display: flex;
   flex-wrap: wrap;

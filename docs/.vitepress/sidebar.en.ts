@@ -1,57 +1,83 @@
 export default {
-    '/en/guide/': [
-        {
-            text: 'Basic Build Guides',
-            items: [
-                {text: 'Guide', link: '/en/guide/'},
-                {text: 'Build (Local)', link: '/en/guide/manual-build'},
-                {text: 'Build (CI)', link: '/en/guide/action-build'},
-                {text: 'Supported Extensions', link: '/en/guide/extensions'},
-                {text: 'Extension Notes', link: '/en/guide/extension-notes'},
-                {text: 'Build Command Generator', link: '/en/guide/cli-generator'},
-                {text: 'Environment Variables', link: '/en/guide/env-vars', collapsed: true,},
-                {text: 'Dependency Table', link: '/en/guide/deps-map'},
-            ]
-        },
-        {
-            text: 'Extended Build Guides',
-            items: [
-                {text: 'Troubleshooting', link: '/en/guide/troubleshooting'},
-                {text: 'Build on Windows', link: '/en/guide/build-on-windows'},
-                {text: 'Build with GNU libc', link: '/en/guide/build-with-glibc'},
-            ],
-        }
-    ],
-    '/en/develop/': [
-        {
-            text: 'Development',
-            items: [
-                {text: 'Get Started', link: '/en/develop/'},
-                {text: 'Project Structure', link: '/en/develop/structure'},
-                {text: 'PHP Source Modification', link: '/en/develop/php-src-changes'},
-            ],
-        },
-        {
-            text: 'Module',
-            items: [
-                {text: 'Doctor ', link: '/en/develop/doctor-module'},
-                {text: 'Source', link: '/en/develop/source-module'},
-            ]
-        },
-        {
-            text: 'Extra',
-            items: [
-                {text: 'Compilation Tools', link: '/en/develop/system-build-tools'},
-                {text: 'craft.yml Configuration', link: '/zh/develop/craft-yml'},
-            ]
-        }
-    ],
-    '/en/contributing/': [
-        {
-            text: 'Contributing',
-            items: [
-                {text: 'Contributing', link: '/en/contributing/'},
-            ],
-        }
-    ],
+  '/en/guide/': [
+    {
+      text: 'Getting Started',
+      items: [
+        { text: 'Overview', link: '/en/guide/' },
+        { text: 'Installation', link: '/en/guide/installation' },
+        { text: 'First Build', link: '/en/guide/first-build' },
+        { text: 'PHP SAPI Reference', link: '/en/guide/sapi-reference' },
+        { text: 'CLI Reference', link: '/en/guide/cli-reference' },
+      ],
+    },
+    {
+      text: 'Extensions',
+      items: [
+        { text: 'Supported Extensions', link: '/en/guide/extensions' },
+        { text: 'Extension Notes', link: '/en/guide/extension-notes' },
+        { text: 'Build Command Generator', link: '/en/guide/cli-generator' },
+      ],
+    },
+    {
+      text: 'Reference',
+      items: [
+        { text: 'Environment Variables', link: '/en/guide/env-vars' },
+        { text: 'Dependency Table', link: '/en/guide/deps-map' },
+        { text: 'Troubleshooting', link: '/en/guide/troubleshooting' },
+      ],
+    },
+  ],
+  '/en/develop/': [
+    {
+      text: 'Developer Guide',
+      items: [
+        { text: 'Get Started', link: '/en/develop/' },
+        { text: 'Project Structure', link: '/en/develop/structure' },
+        { text: 'PHP Source Modifications', link: '/en/develop/php-src-changes' },
+      ],
+    },
+    {
+      text: 'Concepts',
+      items: [
+        { text: 'Package Model', link: '/en/develop/package-model' },
+        { text: 'Registry & Plugin System', link: '/en/develop/registry' },
+        { text: 'Build Lifecycle', link: '/en/develop/build-lifecycle' },
+      ],
+    },
+    {
+      text: 'Modules',
+      items: [
+        { text: 'Doctor', link: '/en/develop/doctor-module' },
+        { text: 'Source', link: '/en/develop/source-module' },
+        { text: 'craft.yml', link: '/en/develop/craft-yml' },
+        { text: 'Compilation Tools', link: '/en/develop/system-build-tools' },
+      ],
+    },
+    {
+      text: 'Vendor Mode',
+      items: [
+        { text: 'Introduction', link: '/en/develop/vendor-mode/' },
+        { text: 'Writing Package Classes', link: '/en/develop/vendor-mode/package-classes' },
+        { text: 'Annotations Reference', link: '/en/develop/vendor-mode/annotations' },
+        { text: 'Dependency Injection', link: '/en/develop/vendor-mode/dependency-injection' },
+        { text: 'Lifecycle Hooks', link: '/en/develop/vendor-mode/lifecycle-hooks' },
+      ],
+    },
+  ],
+  '/en/contributing/': [
+    {
+      text: 'Contributing',
+      items: [
+        { text: 'Contributing Guide', link: '/en/contributing/' },
+      ],
+    },
+  ],
+  '/en/faq/': [
+    {
+      text: 'FAQ',
+      items: [
+        { text: 'Frequently Asked Questions', link: '/en/faq/' },
+      ],
+    },
+  ],
 };

@@ -7,7 +7,7 @@
 HTTP3 支持默认未启用，需在编译时添加 `--with-libs="nghttp2,nghttp3,ngtcp2"` 以启用 PHP 8.4 及以上版本的 HTTP3 支持。
 
 使用 curl 请求 HTTPS 时，可能存在 `error:80000002:system library::No such file or directory` 错误，
-解决办法详见 [FAQ - 无法使用 ssl](../faq/#无法使用-ssl)。
+解决办法详见 [FAQ](../faq/)。
 
 ## phpmicro
 
@@ -62,7 +62,7 @@ swoole-hook-odbc 与 `pdo_odbc` 扩展冲突。如需使用 Swoole 和 `pdo_odbc
 ## imap
 
 1. 该扩展目前不支持 Kerberos。
-2. 由于底层的 c-client、ext-imap 不是线程安全的。 无法在 `--enable-zts` 构建中使用它。
+2. 由于底层的 c-client、ext-imap 不是线程安全的。无法在 `--enable-zts` 构建中使用它。
 3. 该扩展已在 PHP 8.4 中被移除，因此我们建议您寻找替代实现，例如 [Webklex/php-imap](https://github.com/Webklex/php-imap)。
 
 ## gd
@@ -84,18 +84,18 @@ bin/spc build gd --with-libs=freetype,libjpeg,libavif,libwebp --build-cli
 
 ## xdebug
 
-1. Xdebug 只能作为共享扩展进行构建。您需要使用除了 `musl-static` 外的其他 `SPC_TARGET` 构建目标。
+1. Xdebug 只能作为共享扩展进行构建。在 Linux 上，您需要使用 glibc 变体的 `SPC_TARGET`（例如 `native-native-gnu.2.17`），而不是默认的 musl 静态目标。
 2. 使用 Linux/glibc 或 macOS 时，您可以使用 `--build-shared=xdebug` 将 Xdebug 编译为共享扩展。
    编译后的 `./php` 二进制文件可以通过指定 INI 文件进行配置和运行，例如 `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`。
 
 ## xml
 
-1. xml包括 xmlreader、xmlwriter、dom、simplexml 等，添加 xml 扩展时最好同时启用这些扩展。
-2. libxml 包含在 xml 扩展中。 启用 xml 相当于启用 libxml。
+1. xml 包括 xmlreader、xmlwriter、dom、simplexml 等，添加 xml 扩展时最好同时启用这些扩展。
+2. libxml 包含在 xml 扩展中。启用 xml 相当于启用 libxml。
 
 ## glfw
 
-1. glfw 扩展依赖 OpenGL，在 Linux 平台还依赖 X11 等环境，这些库都无法被轻易地动态链接。
+1. glfw 扩展依赖 OpenGL，在 Linux 平台还依赖 X11 等环境，这些库都无法被轻易地静态链接。
 2. 在 macOS 系统下，我们可以动态链接系统的 OpenGL 和一些相关的库。
 
 ## rar
@@ -113,22 +113,22 @@ bin/spc build gd --with-libs=freetype,libjpeg,libavif,libwebp --build-cli
 pgsql 16.2 修复了这个 Bug，现在正常工作了。
 
 在 pgsql 使用 SSL 连接时，可能存在 `error:80000002:system library::No such file or directory` 错误，
-解决办法详见 [FAQ - 无法使用 ssl](../faq/#无法使用-ssl)。
+解决办法详见 [FAQ](../faq/)。
 
 ## openssl
 
 使用基于 openssl 的扩展（如 curl、pgsql 等网络库）时，可能存在 `error:80000002:system library::No such file or directory` 错误，
-解决办法详见 [FAQ - 无法使用 ssl](../faq/#无法使用-ssl)。
+解决办法详见 [FAQ](../faq/)。
 
 ## password-argon2
 
-1. password-argon2不是一个标准的扩展。`password_hash` 函数的 `PASSWORD_ARGON2ID` 算法需要 libsodium 或 libargon2 才能工作。
+1. password-argon2 不是一个标准的扩展。`password_hash` 函数的 `PASSWORD_ARGON2ID` 算法需要 libsodium 或 libargon2 才能工作。
 2. 使用 password-argon2 可以为此启用多线程支持。
 
 ## ffi
 
 1. 由于 musl libc 静态链接的限制，无法加载动态库，因此无法使用 ffi。
-   如果您需要使用 ffi 扩展，请参阅 [使用 GNU libc 编译 PHP](./build-with-glibc)。
+   如果您需要使用 ffi 扩展，请使用基于 glibc 的 `SPC_TARGET`（例如 `native-native-gnu.2.17`），详见 [SAPI 参考](./sapi-reference)。
 2. macOS 支持 ffi 扩展，但某些内核不包含调试符号时会出现错误。
 3. Windows x64 支持 ffi 扩展。
 
@@ -156,3 +156,4 @@ parallel 扩展只支持 PHP 8.0 及以上版本，并只支持 ZTS 构建（`--
 1. 从技术上讲，这不是扩展，而是一个库。
 2. 在 Linux 或 macOS 上使用 `--with-libs="mimalloc"` 进行构建将覆盖默认分配器。
 3. 目前，这还处于实验阶段，但建议在线程环境中使用。
+

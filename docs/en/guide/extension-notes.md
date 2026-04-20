@@ -1,7 +1,7 @@
 # Extension Notes
 
-Because it is a static compilation, extensions will not compile 100% perfectly, 
-and different extensions have different requirements for PHP and the environment, 
+Because it is a static compilation, extensions will not compile 100% perfectly,
+and different extensions have different requirements for PHP and the environment,
 which will be listed one by one here.
 
 ## curl
@@ -9,7 +9,7 @@ which will be listed one by one here.
 HTTP3 support is not enabled by default, compile with `--with-libs="nghttp2,nghttp3,ngtcp2"` to enable HTTP3 support for PHP >= 8.4.
 
 When using curl to request HTTPS, there may be an `error:80000002:system library::No such file or directory` error.
-For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use-ssl).
+For details on the solution, see [FAQ](../faq/).
 
 ## phpmicro
 
@@ -19,7 +19,7 @@ For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use
 
 1. swoole >= 5.0 Only PHP >= 8.0 is supported.
 2. swoole Currently, curl hooks are not supported for PHP 8.0.x (which may be fixed in the future).
-3. When compiling, if only `swoole` extension is included, the supported Swoole database coroutine hook will not be fully enabled. 
+3. When compiling, if only `swoole` extension is included, the supported Swoole database coroutine hook will not be fully enabled.
    If you need to use it, please add the corresponding `swoole-hook-xxx` extension.
 4. The `zend_mm_heap corrupted` problem may occur in swoole under some extension combinations. The cause has not yet been found.
 
@@ -70,9 +70,9 @@ This extension contains an implementation of the coroutine environment for `pdo_
 
 ## gd
 
-1. gd Extension relies on more additional Graphics library. By default, 
+1. gd Extension relies on more additional Graphics library. By default,
 using `bin/spc build gd` directly will not support some Graphics library, such as `libjpeg`, `libavif`, etc.
-Currently, it supports four libraries: `freetype,libjpeg,libavif,libwebp`. 
+Currently, it supports four libraries: `freetype,libjpeg,libavif,libwebp`.
 Therefore, the following command can be used to introduce them into the gd library:
 
 ```bash
@@ -85,19 +85,19 @@ bin/spc build gd --with-libs=freetype,libjpeg,libavif,libwebp --build-cli
 
 ## oci8
 
-1. oci8 is an extension of the Oracle database, because the library on which the extension provided by Oracle does not provide a statically compiled version (`.a`) or source code, 
+1. oci8 is an extension of the Oracle database, because the library on which the extension provided by Oracle does not provide a statically compiled version (`.a`) or source code,
 and this extension cannot be compiled into php by static linking, so it cannot be supported.
 
 ## xdebug
 
-1. Xdebug is only buildable as a shared extension. On Linux, you'll need to use a SPC_TARGET like `native-native -dynamic` or `native-native-gnu`.
-2. When using Linux/glibc or macOS, you can compile Xdebug as a shared extension using --build-shared="xdebug". 
-   The compiled `./php` binary can be configured and run by specifying the INI, eg `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
+1. Xdebug is only buildable as a shared extension. On Linux, you'll need to use a `SPC_TARGET` with a glibc variant (e.g. `native-native-gnu.2.17`) instead of the default musl static target.
+2. When using Linux/glibc or macOS, you can compile Xdebug as a shared extension using `--build-shared="xdebug"`.
+   The compiled `./php` binary can be configured and run by specifying the INI, e.g. `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
 
 ## xml
 
-1. xml includes xml, xmlreader, xmlwriter, xsl, dom, simplexml, etc. 
-    When adding xml extensions, it is best to enable these extensions at the same time.
+1. xml includes xml, xmlreader, xmlwriter, xsl, dom, simplexml, etc.
+   When adding xml extensions, it is best to enable these extensions at the same time.
 2. libxml is included in xml extension. Enabling xml is equivalent to enabling libxml.
 
 ## glfw
@@ -119,14 +119,14 @@ and this extension cannot be compiled into php by static linking, so it cannot b
 
 pgsql 16.2 has fixed this bug, now it's working.
 
-When pgsql uses SSL connection, there may be `error:80000002:system library::No such file or directory` error,
-For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use-ssl).
+When pgsql uses SSL connection, there may be `error:80000002:system library::No such file or directory` error.
+For details on the solution, see [FAQ](../faq/).
 
 ## openssl
 
 When using openssl-based extensions (such as curl, pgsql and other network libraries),
 there may be an `error:80000002:system library::No such file or directory` error.
-For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use-ssl).
+For details on the solution, see [FAQ](../faq/).
 
 ## password-argon2
 
@@ -135,14 +135,14 @@ For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use
 
 ## ffi
 
-1. Due to the limitation of musl libc's static linkage, you cannot use ffi because dynamic libraries cannot be loaded. 
-   If you need to use the ffi extension, see [Compile PHP with GNU libc](./build-with-glibc).
+1. Due to the limitation of musl libc's static linkage, you cannot use ffi because dynamic libraries cannot be loaded.
+   If you need to use the ffi extension, use a glibc-based `SPC_TARGET` (e.g. `native-native-gnu.2.17`). See [SAPI Reference](./sapi-reference) for details.
 2. macOS supports the ffi extension, but errors will occur when some kernels do not contain debugging symbols.
 3. Windows x64 supports the ffi extension.
 
 ## xhprof
 
-The xhprof extension consists of three parts: `xhprof_extension`, `xhprof_html`, `xhprof_libs`. 
+The xhprof extension consists of three parts: `xhprof_extension`, `xhprof_html`, `xhprof_libs`.
 Only `xhprof_extension` is included in the compiled binary.
 If you need to use xhprof,
 please download the source code from [pecl.php.net/package/xhprof](http://pecl.php.net/package/xhprof) and specify the `xhprof_libs` and `xhprof_html` paths for use.
@@ -166,3 +166,4 @@ Parallel is only supported on PHP 8.0 ZTS and above.
 1. This is not technically an extension, but a library.
 2. Building with `--with-libs="mimalloc"` on Linux or macOS will override the default allocator.
 3. This is experimental for now, but is recommended in threaded environments.
+

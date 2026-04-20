@@ -26,7 +26,6 @@ use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
 use StaticPHP\Util\System\UnixUtil;
-use StaticPHP\Util\V2CompatLayer;
 use ZM\Logger\ConsoleColor;
 
 trait unix
@@ -62,7 +61,6 @@ trait unix
     public function buildconfForUnix(TargetPackage $package): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./buildconf'));
-        V2CompatLayer::emitPatchPoint('before-php-buildconf');
         shell()->cd($package->getSourceDir())->exec(getenv('SPC_CMD_PREFIX_PHP_BUILDCONF'));
     }
 
@@ -70,7 +68,6 @@ trait unix
     public function configureForUnix(TargetPackage $package, PackageInstaller $installer): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./configure'));
-        V2CompatLayer::emitPatchPoint('before-php-configure');
         $cmd = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
 
         $args = [];
@@ -183,8 +180,6 @@ trait unix
     #[Stage]
     public function makeForUnix(TargetPackage $package, PackageInstaller $installer): void
     {
-        V2CompatLayer::emitPatchPoint('before-php-make');
-
         logger()->info('cleaning up php-src build files');
         shell()->cd($package->getSourceDir())->exec('make clean');
 

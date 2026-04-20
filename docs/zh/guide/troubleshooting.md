@@ -1,6 +1,6 @@
 # 故障排除
 
-使用 static-php-cli 过程中可能会碰到各种各样的故障，这里将讲述如何自行查看错误并反馈 Issue。
+使用 StaticPHP 过程中可能会碰到各种各样的故障，这里将讲述如何自行查看错误并反馈 Issue。
 
 ## 下载失败问题
 
@@ -8,7 +8,7 @@
 在遇到下载失败后，可以多次尝试调用下载命令。
 
 当下载资源时，你可能最终会看到类似 `curl: (56) The requested URL returned error: 403` 的错误，这通常是由于 GitHub 限制导致的。
-你可以通过在命令中添加 `--debug` 来验证，会看到类似 `[DEBU] Running command (no output) : curl -sfSL   "https://api.github.com/repos/openssl/openssl/releases"` 的输出。
+你可以通过在命令中添加 `-vvv` 来验证，会看到类似 `[DEBU] Running command (no output) : curl -sfSL   "https://api.github.com/repos/openssl/openssl/releases"` 的输出。
 
 要解决这个问题，可以在 GitHub 上 [创建](https://github.com/settings/tokens) 一个个人访问令牌，并将其设置为环境变量 `GITHUB_TOKEN=<XXX>`。
 
@@ -24,8 +24,9 @@
 
 ## 编译错误
 
-遇到编译错误时，如果没有开启 `--debug` 日志，请先开启调试日志，然后确定报错的命令。
+遇到编译错误时，如果没有开启 `-vvv` 日志，请先开启调试日志，然后确定报错的命令。
 报错的终端输出对于修复编译错误非常重要。
 在提交 Issue 时，请上传终端日志的最后报错片段（或整个终端日志输出），并且包含使用的 `spc` 命令和参数。
 
-如果你是重复构建，请参考 [本地构建 - 多次构建](./manual-build#多次构建) 章节。
+如果你是重复构建，请参考 [首次构建 - 调试与重新构建](./first-build#调试与重新构建) 章节。
+

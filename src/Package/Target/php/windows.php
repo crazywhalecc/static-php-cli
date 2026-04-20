@@ -22,7 +22,6 @@ use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\System\WindowsUtil;
-use StaticPHP\Util\V2CompatLayer;
 use ZM\Logger\ConsoleColor;
 
 trait windows
@@ -38,7 +37,6 @@ trait windows
     public function buildconfForWindows(TargetPackage $package, PackageInstaller $installer): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./buildconf.bat'));
-        V2CompatLayer::emitPatchPoint('before-php-buildconf');
         cmd()->cd($package->getSourceDir())->exec('.\buildconf.bat');
 
         if ($package->getBuildOption('enable-micro-win32') && $installer->isPackageResolved('php-micro')) {
@@ -52,7 +50,6 @@ trait windows
     public function configureForWindows(TargetPackage $package, PackageInstaller $installer): void
     {
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./configure.bat'));
-        V2CompatLayer::emitPatchPoint('before-php-configure');
         $args = [
             '--disable-all',
             "--with-php-build={$package->getBuildRootPath()}",
@@ -232,7 +229,6 @@ trait windows
     #[Stage]
     public function makeForWindows(TargetPackage $package, PackageInstaller $installer): void
     {
-        V2CompatLayer::emitPatchPoint('before-php-make');
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('nmake clean'));
         cmd()->cd($package->getSourceDir())->exec('nmake clean');
 

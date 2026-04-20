@@ -52,7 +52,6 @@ class PackageInstaller
         ApplicationContext::set(PackageInstaller::class, $this);
         $builder = new PackageBuilder($options);
         ApplicationContext::set(PackageBuilder::class, $builder);
-        ApplicationContext::set('patch_point', '');
 
         // Check for no-download option
         if (!empty($options['no-download'])) {

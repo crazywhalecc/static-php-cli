@@ -4,4 +4,4 @@ aside: false
 
 # craft.yml Configuration
 
-<!--@include: ../../deps-craft-yml.md-->
+<!-- TODO: Full reference for craft.yml fields. -->
