@@ -33,14 +33,14 @@ export default {
       items: [
         { text: 'Get Started', link: '/en/develop/' },
         { text: 'Project Structure', link: '/en/develop/structure' },
-        { text: 'PHP Source Modifications', link: '/en/develop/php-src-changes' },
       ],
     },
     {
       text: 'Concepts',
       items: [
+        { text: 'Registry', link: '/en/develop/registry' },
         { text: 'Package Model', link: '/en/develop/package-model' },
-        { text: 'Registry & Plugin System', link: '/en/develop/registry' },
+        { text: 'Artifact Model', link: '/en/develop/artifact-model' },
         { text: 'Build Lifecycle', link: '/en/develop/build-lifecycle' },
       ],
     },
@@ -58,9 +58,15 @@ export default {
       items: [
         { text: 'Introduction', link: '/en/develop/vendor-mode/' },
         { text: 'Writing Package Classes', link: '/en/develop/vendor-mode/package-classes' },
-        { text: 'Annotations Reference', link: '/en/develop/vendor-mode/annotations' },
         { text: 'Dependency Injection', link: '/en/develop/vendor-mode/dependency-injection' },
+        { text: 'Annotations Reference', link: '/en/develop/vendor-mode/annotations' },
         { text: 'Lifecycle Hooks', link: '/en/develop/vendor-mode/lifecycle-hooks' },
+      ],
+    },
+    {
+      text: 'Miscellaneous',
+      items: [
+        { text: 'PHP Source Modifications', link: '/en/develop/php-src-changes' },
       ],
     },
   ],

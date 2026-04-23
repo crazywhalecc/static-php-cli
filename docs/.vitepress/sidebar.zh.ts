@@ -33,14 +33,14 @@ export default {
       items: [
         { text: '开发简介', link: '/zh/develop/' },
         { text: '项目结构', link: '/zh/develop/structure' },
-        { text: '对 PHP 源码的修改', link: '/zh/develop/php-src-changes' },
       ],
     },
     {
       text: '核心概念',
       items: [
-        { text: 'Package 模型', link: '/zh/develop/package-model' },
         { text: 'Registry 与插件系统', link: '/zh/develop/registry' },
+        { text: 'Package 模型', link: '/zh/develop/package-model' },
+        { text: 'Artifact 模型', link: '/zh/develop/artifact-model' },
         { text: '构建生命周期', link: '/zh/develop/build-lifecycle' },
       ],
     },
@@ -58,11 +58,17 @@ export default {
       items: [
         { text: '简介', link: '/zh/develop/vendor-mode/' },
         { text: '编写 Package 类', link: '/zh/develop/vendor-mode/package-classes' },
-        { text: '注解参考', link: '/zh/develop/vendor-mode/annotations' },
         { text: '依赖注入', link: '/zh/develop/vendor-mode/dependency-injection' },
+        { text: '注解参考', link: '/zh/develop/vendor-mode/annotations' },
         { text: '生命周期 Hook', link: '/zh/develop/vendor-mode/lifecycle-hooks' },
       ],
     },
+    {
+      text: '杂项',
+      items: [
+        { text: '对 PHP 源码的修改', link: '/zh/develop/php-src-changes' },
+      ]
+    }
   ],
   '/zh/contributing/': [
     {
