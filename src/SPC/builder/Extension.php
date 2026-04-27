@@ -187,14 +187,6 @@ class Extension
      */
     public function patchBeforeMake(): bool
     {
-        if (SPCTarget::getTargetOS() === 'Linux' && $this->isBuildShared() && ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS'))) {
-            FileSystem::replaceFileRegex(
-                SOURCE_PATH . '/php-src/Makefile',
-                "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
-                "$1 {$objs}",
-            );
-            return true;
-        }
         return false;
     }
 
@@ -244,13 +236,6 @@ class Extension
             );
         }
 
-        if ($objs = getenv('SPC_EXTRA_RUNTIME_OBJECTS')) {
-            FileSystem::replaceFileRegex(
-                $this->source_dir . '/Makefile',
-                "/^(shared_objects_{$this->getName()}\\s*=.*)$/m",
-                "$1 {$objs}",
-            );
-        }
         return true;
     }
 

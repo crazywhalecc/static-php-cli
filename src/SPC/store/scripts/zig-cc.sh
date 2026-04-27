@@ -39,6 +39,24 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+IS_LINK=1
+NEED_PROFILE_RT=0 # https://codeberg.org/ziglang/zig/issues/32066
+NEED_CRT=0 # https://codeberg.org/ziglang/zig/issues/32064
+for _a in "${PARSED_ARGS[@]}"; do
+    case "$_a" in
+        -c|-S|-E|-M|-MM) IS_LINK=0 ;;
+        -fprofile-generate*|-fprofile-instr-generate*) NEED_PROFILE_RT=1 ;;
+        -shared) NEED_CRT=1 ;;
+    esac
+done
+[[ "$SPC_COMPILER_EXTRA" == *-fprofile-generate* ]] && NEED_PROFILE_RT=1
+if [[ $IS_LINK -eq 1 && $NEED_PROFILE_RT -eq 1 && -f "$SCRIPT_DIR/lib/libclang_rt.profile.a" ]]; then
+    PARSED_ARGS+=("$SCRIPT_DIR/lib/libclang_rt.profile.a" "-Wl,-u,__llvm_profile_runtime")
+fi
+if [[ $IS_LINK -eq 1 && $NEED_CRT -eq 1 && -f "$SCRIPT_DIR/lib/clang_rt.crtbegin.o" && -f "$SCRIPT_DIR/lib/clang_rt.crtend.o" ]]; then
+    PARSED_ARGS+=("$SCRIPT_DIR/lib/clang_rt.crtbegin.o" "$SCRIPT_DIR/lib/clang_rt.crtend.o")
+fi
+
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""
 
 if [[ "$SPC_TARGET" =~ \.[0-9]+\.[0-9]+ ]]; then

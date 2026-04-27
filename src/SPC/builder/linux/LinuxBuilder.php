@@ -14,6 +14,7 @@ use SPC\store\SourcePatcher;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\GlobalEnvManager;
+use SPC\util\PgoManager;
 use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
@@ -132,32 +133,36 @@ class LinuxBuilder extends UnixBuilderBase
 
         $this->cleanMake();
 
-        if ($enableCli) {
-            logger()->info('building cli');
-            $this->buildCli();
-        }
-        if ($enableFpm) {
-            logger()->info('building fpm');
-            $this->buildFpm();
-        }
-        if ($enableCgi) {
-            logger()->info('building cgi');
-            $this->buildCgi();
-        }
-        if ($enableMicro) {
-            logger()->info('building micro');
-            $this->buildMicro();
-        }
-        if ($enableEmbed) {
-            logger()->info('building embed');
-            if ($enableMicro) {
-                FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
+        $pgo = PgoManager::active();
+        $needsClean = false;
+        $sapiBuilds = [
+            ['cli',        $enableCli,        true,  fn () => $this->buildCli()],
+            ['fpm',        $enableFpm,        true,  fn () => $this->buildFpm()],
+            ['cgi',        $enableCgi,        true,  fn () => $this->buildCgi()],
+            ['micro',      $enableMicro,      true,  fn () => $this->buildMicro()],
+            ['embed',      $enableEmbed,      true,  function () use ($enableMicro): void {
+                if ($enableMicro) {
+                    FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
+                }
+                $this->buildEmbed();
+            }],
+            // frankenphp doesn't rebuild php-src; xcaddy links against the deployed libphp.so
+            ['frankenphp', $enableFrankenphp, false, fn () => $this->buildFrankenphp()],
+        ];
+
+        foreach ($sapiBuilds as [$sapi, $enabled, $rebuildsPhpSrc, $build]) {
+            if (!$enabled) {
+                continue;
             }
-            $this->buildEmbed();
-        }
-        if ($enableFrankenphp) {
-            logger()->info('building frankenphp');
-            $this->buildFrankenphp();
+            if ($pgo) {
+                if ($needsClean && $rebuildsPhpSrc) {
+                    $this->cleanMake();
+                }
+                $pgo->applyForSapi($sapi);
+                $needsClean = $needsClean || $rebuildsPhpSrc;
+            }
+            logger()->info('building ' . $sapi);
+            $build();
         }
         $shared_extensions = array_map('trim', array_filter(explode(',', $this->getOption('build-shared'))));
         if (!empty($shared_extensions)) {
@@ -327,11 +332,18 @@ class LinuxBuilder extends UnixBuilderBase
         $config = (new SPCConfigUtil($this, ['libs_only_deps' => true, 'absolute_libs' => true]))->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
         $static = SPCTarget::isStatic() ? '-all-static' : '';
         $lib = BUILD_LIB_PATH;
+        $extra_ldflags = (string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared'
+            && !str_contains($extra_ldflags, '-avoid-version')
+            && !preg_match('/-release\s+\S+/', $extra_ldflags)) {
+            $extra_ldflags = trim($extra_ldflags . ' -avoid-version -module');
+        }
+        $extra_ldflags_program = trim("-L{$lib} {$static} -pie " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'));
         return array_filter([
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_LIBS' => $config['libs'],
-            'EXTRA_LDFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
-            'EXTRA_LDFLAGS_PROGRAM' => "-L{$lib} {$static} -pie",
+            'EXTRA_LDFLAGS' => $extra_ldflags,
+            'EXTRA_LDFLAGS_PROGRAM' => $extra_ldflags_program,
         ]);
     }
 

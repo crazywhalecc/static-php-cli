@@ -12,6 +12,7 @@ use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
 use SPC\util\GlobalEnvManager;
 use SPC\util\LicenseDumper;
+use SPC\util\PgoManager;
 use SPC\util\SPCTarget;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -49,6 +50,8 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('with-micro-logo', null, InputOption::VALUE_REQUIRED, 'Use custom .ico for micro.sfx (windows only)');
         $this->addOption('enable-micro-win32', null, null, 'Enable win32 mode for phpmicro (Windows only)');
         $this->addOption('with-frankenphp-app', null, InputOption::VALUE_REQUIRED, 'Path to a folder to be embedded in FrankenPHP');
+        $this->addOption('pgi', null, null, 'Build instrumented binaries (-fprofile-generate). Run them to collect .profraw files, then re-run with --pgo.');
+        $this->addOption('pgo', null, null, 'Build optimised binaries (-fprofile-use) from .profraw collected by a previous --pgi run.');
     }
 
     public function handle(): int
@@ -210,9 +213,19 @@ class BuildPHPCommand extends BuildCommand
 
         // clean old modules that may conflict with the new php build
         FileSystem::removeDir(BUILD_MODULES_PATH);
-        // start to build
-        $builder->buildPHP($rule);
 
+        $pgi = (bool) $this->getOption('pgi');
+        $pgo = (bool) $this->getOption('pgo');
+        if ($pgi && $pgo) {
+            $this->output->writeln('<error>--pgi and --pgo are mutually exclusive</error>');
+            return static::FAILURE;
+        }
+        if ($pgi) {
+            (new PgoManager())->setupInstrument($rule);
+        } elseif ($pgo) {
+            (new PgoManager())->setupUse($rule);
+        }
+        $builder->buildPHP($rule);
         $builder->testPHP($rule);
 
         // compile stopwatch :P

@@ -450,10 +450,11 @@ abstract class UnixBuilderBase extends BuilderBase
             $cflags .= ' -Wno-error=missing-profile';
             $libs .= ' -lgcov';
         }
+        $extraLdProgram = (string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM');
         $env = [...[
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => clean_spaces($cflags),
-            'CGO_LDFLAGS' => "{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$libs}",
+            'CGO_LDFLAGS' => trim("{$this->arch_ld_flags} {$staticFlags} {$config['ldflags']} {$libs} {$extraLdProgram}"),
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
                 '-X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\' ' .
