@@ -14,6 +14,10 @@ use SPC\store\FileSystem;
  */
 class PgoManager
 {
+    public const MODE_INSTRUMENT = 'instrument';
+
+    public const MODE_USE = 'use';
+
     /**
      * SAPIs whose clang-compiled output can be PGO'd. frankenphp is included
      * because its cgo glue is C compiled by zig — the Go side it wraps is
@@ -22,17 +26,13 @@ class PgoManager
      * frankenphp (because the cgo glue runs too).
      */
     private const TRAINABLE = [
-        'cli'        => BUILD_TARGET_CLI,
-        'micro'      => BUILD_TARGET_MICRO,
-        'cgi'        => BUILD_TARGET_CGI,
-        'fpm'        => BUILD_TARGET_FPM,
-        'embed'      => BUILD_TARGET_EMBED,
+        'cli' => BUILD_TARGET_CLI,
+        'micro' => BUILD_TARGET_MICRO,
+        'cgi' => BUILD_TARGET_CGI,
+        'fpm' => BUILD_TARGET_FPM,
+        'embed' => BUILD_TARGET_EMBED,
         'frankenphp' => BUILD_TARGET_FRANKENPHP,
     ];
-
-    public const MODE_INSTRUMENT = 'instrument';
-
-    public const MODE_USE = 'use';
 
     private string $profileRoot;
 

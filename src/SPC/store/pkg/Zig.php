@@ -162,7 +162,7 @@ class Zig extends CustomPackage
         }
 
         $zig = "{$zig_bin_dir}/zig";
-        $verLine = trim((string)shell_exec(escapeshellarg($zig) . ' cc --version 2>/dev/null'));
+        $verLine = trim((string) shell_exec(escapeshellarg($zig) . ' cc --version 2>/dev/null'));
         if (!preg_match('/clang version (\d+\.\d+\.\d+)/', $verLine, $m)) {
             logger()->warning('[zig] could not detect bundled clang version; skipping runtime bit build (--pgo + shared libs without __dso_handle)');
             return;
@@ -196,8 +196,7 @@ class Zig extends CustomPackage
                 'url' => $url,
                 'filename' => $tarball,
             ]);
-        }
-        catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             logger()->warning("[zig] failed to download {$tarball}: {$e->getMessage()}");
             return null;
         }

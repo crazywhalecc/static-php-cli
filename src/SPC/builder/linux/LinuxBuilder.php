@@ -136,11 +136,11 @@ class LinuxBuilder extends UnixBuilderBase
         $pgo = PgoManager::active();
         $needsClean = false;
         $sapiBuilds = [
-            ['cli',        $enableCli,        true,  fn () => $this->buildCli()],
-            ['fpm',        $enableFpm,        true,  fn () => $this->buildFpm()],
-            ['cgi',        $enableCgi,        true,  fn () => $this->buildCgi()],
-            ['micro',      $enableMicro,      true,  fn () => $this->buildMicro()],
-            ['embed',      $enableEmbed,      true,  function () use ($enableMicro): void {
+            ['cli', $enableCli, true, fn () => $this->buildCli()],
+            ['fpm', $enableFpm, true, fn () => $this->buildFpm()],
+            ['cgi', $enableCgi, true, fn () => $this->buildCgi()],
+            ['micro', $enableMicro, true, fn () => $this->buildMicro()],
+            ['embed', $enableEmbed, true, function () use ($enableMicro): void {
                 if ($enableMicro) {
                     FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/Makefile', 'OVERALL_TARGET =', 'OVERALL_TARGET = libphp.la');
                 }
