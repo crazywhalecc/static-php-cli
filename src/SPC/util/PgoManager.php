@@ -6,11 +6,11 @@ namespace SPC\util;
 
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
+use SPC\store\SourcePatcher;
 
 /**
  * Two-call PGO driver: --pgi instruments, --pgo uses the .profraw the user
- * collected by running the instrumented binaries. PgoManager only sets the
- * compiler flags; it does not run any workload itself.
+ * collected by running the instrumented binaries.
  */
 class PgoManager
 {
@@ -18,13 +18,6 @@ class PgoManager
 
     public const MODE_USE = 'use';
 
-    /**
-     * SAPIs whose clang-compiled output can be PGO'd. frankenphp is included
-     * because its cgo glue is C compiled by zig — the Go side it wraps is
-     * not clang-PGO'd here. libphp.so is the embed SAPI; running frankenphp
-     * produces profile data for embed (because it loads libphp.so) AND for
-     * frankenphp (because the cgo glue runs too).
-     */
     private const TRAINABLE = [
         'cli' => BUILD_TARGET_CLI,
         'micro' => BUILD_TARGET_MICRO,
@@ -32,6 +25,15 @@ class PgoManager
         'fpm' => BUILD_TARGET_FPM,
         'embed' => BUILD_TARGET_EMBED,
         'frankenphp' => BUILD_TARGET_FRANKENPHP,
+    ];
+
+    /**
+     * Applied during --pgi only: explicit __llvm_profile_write_file() at
+     * shutdown, since Go/frankenphp exits skip libc atexit.
+     */
+    private const SHUTDOWN_PATCHES = [
+        'php-src' => 'spc_pgo_flush_php_main.patch',
+        'frankenphp' => 'spc_pgo_flush_frankenphp.patch',
     ];
 
     private string $profileRoot;
@@ -61,6 +63,7 @@ class PgoManager
         }
         $this->mode = self::MODE_INSTRUMENT;
         self::$active = $this;
+        $this->applyShutdownPatches();
         $this->applyForSapi($this->trainableIn($rule)[0]);
         logger()->info('pgo --pgi: instrumented build, profraw will land under ' . $this->profileRoot . '/<sapi>/');
     }
@@ -80,30 +83,33 @@ class PgoManager
         $this->applyForSapi($this->trainableIn($rule)[0]);
     }
 
-    /**
-     * Set EXTRA_CFLAGS / EXTRA_LDFLAGS_PROGRAM for the SAPI about to be built.
-     * Non-trainable SAPIs (e.g. frankenphp's Go side) are left untouched.
-     */
     public function applyForSapi(string $sapi): void
     {
         $sapi = $this->resolveSapi($sapi);
         if (!isset(self::TRAINABLE[$sapi])) {
             return;
         }
+        if ($this->mode === self::MODE_USE && !is_file($this->profDataFile($sapi))) {
+            logger()->warning("pgo --pgo: no profdata for {$sapi}, building without PGO for this sapi");
+            $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS', '');
+            $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM', '');
+            return;
+        }
         $flags = $this->mode === self::MODE_INSTRUMENT
-            ? '-fprofile-generate=' . $this->rawDir($sapi) . ' -fprofile-continuous -mllvm -disable-vp'
-            : '-fprofile-use=' . $this->profDataFile($sapi) . ' -Wno-error=profile-instr-unprofiled -Wno-error=profile-instr-out-of-date -Wno-backend-plugin';
+            ? '-fprofile-generate=' . $this->rawDir($sapi)
+            : '-fprofile-use=' . $this->profDataFile($sapi)
+                . ' -Wno-error=profile-instr-unprofiled'
+                . ' -Wno-error=profile-instr-out-of-date'
+                . ' -Wno-backend-plugin';
         $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS', $flags);
-        $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM', $this->ldOnly($flags));
+        $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM', $this->ldOnly($flags, $sapi));
         logger()->info("pgo {$this->mode} ({$sapi})");
     }
 
     /**
-     * In static-embed mode libphp.a is linked into frankenphp, and the linker
-     * resolves all `__llvm_profile_filename` references to a single path —
-     * the embed SAPI's per-TU `-fprofile-generate=…` setting is silently
-     * dropped. Compile libphp.a with frankenphp's path so all counter writes
-     * agree on one file, and read libphp.a's PGO from frankenphp.profdata.
+     * Static-embed mode links libphp.a into frankenphp; both end up in one
+     * binary so must share one profdata. Shared-embed mode keeps libphp.so
+     * standalone — embed and frankenphp keep separate profiles.
      */
     private function resolveSapi(string $sapi): string
     {
@@ -124,6 +130,10 @@ class PgoManager
     {
         $raws = glob($this->rawDir($sapi) . '/*.profraw') ?: [];
         if (empty($raws)) {
+            if ($sapi === 'frankenphp') {
+                logger()->warning('pgo --pgo: no .profraw for frankenphp (cgo glue PGO will be skipped); run --pgi, exercise frankenphp longer, then re-run --pgo to include it');
+                return;
+            }
             throw new WrongUsageException("--pgo: no .profraw for {$sapi}; run --pgi, exercise the binary, then re-run --pgo");
         }
         $out = $this->profDataFile($sapi);
@@ -166,14 +176,69 @@ class PgoManager
     {
         $cur = (string) getenv($var);
         $cur = preg_replace('/\s*-fprofile-(generate|use)=\S+/', '', $cur) ?? $cur;
-        $cur = str_replace([' -fprofile-continuous', ' -mllvm -disable-vp'], '', $cur);
-        $cur = preg_replace('/\s*-Wno-error=profile-instr-unprofiled\s+-Wno-error=profile-instr-out-of-date\s+-Wno-backend-plugin/', '', $cur) ?? $cur;
+        $cur = preg_replace('/\s*-Wno-error=profile-instr-\S+/', '', $cur) ?? $cur;
+        $cur = preg_replace('/\s*-Wno-backend-plugin/', '', $cur) ?? $cur;
         f_putenv($var . '=' . trim($cur . ' ' . $append));
     }
 
-    /** Linker only takes -fprofile-{generate,use}; strip the codegen-only -mllvm and warning flags. */
-    private function ldOnly(string $flags): string
+    /**
+     * Linker flags: cli wants -fprofile-use= at link too (LTO does its
+     * profile-driven inlining/reordering at link time). Strip -Wno-error
+     * flags (linker doesn't accept them).
+     */
+    private function ldOnly(string $flags, string $sapi = ''): string
     {
-        return preg_replace(['/\s*-mllvm\s+\S+/', '/\s*-Wno-error=\S+/', '/\s*-Wno-backend-plugin/'], '', $flags) ?? $flags;
+        $patterns = ['/\s*-Wno-error=\S+/', '/\s*-Wno-backend-plugin/'];
+        if ($sapi === 'frankenphp') {
+            $patterns[] = '/\s*-fprofile-use=\S+/';
+        }
+        return trim(preg_replace($patterns, '', $flags) ?? $flags);
+    }
+
+    /** --pgi patch: inject __llvm_profile_write_file() flush handler to php and frankenphp sources. */
+    private function applyShutdownPatches(): void
+    {
+        $applied = [];
+        foreach (self::SHUTDOWN_PATCHES as $dir => $patch) {
+            $cwd = SOURCE_PATH . '/' . $dir;
+            if (!is_dir($cwd)) {
+                continue;
+            }
+            if (!SourcePatcher::patchFile($patch, $cwd)) {
+                throw new WrongUsageException("--pgi: patch {$patch} failed to apply in {$cwd}");
+            }
+            $applied[] = ['cwd' => $cwd, 'patch' => $patch];
+            logger()->info("pgo --pgi: applied {$patch}");
+        }
+        if ($applied === []) {
+            return;
+        }
+        register_shutdown_function(static function () use ($applied): void {
+            foreach ($applied as $entry) {
+                $cwd = $entry['cwd'];
+                $patch = $entry['patch'];
+                if (!is_dir($cwd)) {
+                    continue;
+                }
+                $patch_file = ROOT_DIR . "/src/globals/patch/{$patch}";
+                if (!is_file($patch_file)) {
+                    continue;
+                }
+                $args = ' -p1 -s -R -F0 ';
+                exec('cd ' . escapeshellarg($cwd) . ' && patch --dry-run' . $args
+                    . ' < ' . escapeshellarg($patch_file) . ' >/dev/null 2>&1', $_, $detect_status);
+                if ($detect_status !== 0) {
+                    logger()->info("pgo --pgi: {$patch} already clean, skipping revert");
+                    continue;
+                }
+                exec('cd ' . escapeshellarg($cwd) . ' && patch' . $args
+                    . ' < ' . escapeshellarg($patch_file), $out, $apply_status);
+                if ($apply_status === 0) {
+                    logger()->info("pgo --pgi: reverted {$patch}");
+                } else {
+                    logger()->warning("pgo --pgi: failed to revert {$patch} (status {$apply_status}): " . implode("\n", $out));
+                }
+            }
+        });
     }
 }
