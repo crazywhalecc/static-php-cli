@@ -128,6 +128,7 @@ spc build:php <extensions> [options]
 | 选项 | 说明 |
 |---|---|
 | `--build-shared=<list>` | 将指定扩展编译为共享库（需要 embed SAPI）|
+| `--maintainer-skip-build` | （仅维护者）若 buildroot 中已存在 `libphp.a` / `libphp.so`，则跳过 PHP embed 的编译构建 |
 
 ### 下载透传选项 {#download-options}
 
