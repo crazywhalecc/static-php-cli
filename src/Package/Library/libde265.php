@@ -17,7 +17,11 @@ class libde265 extends LibraryPackage
     public function buildUnix(): void
     {
         UnixCMakeExecutor::create($this)
-            ->addConfigureArgs('-DENABLE_SDL=OFF')
+            ->addConfigureArgs(
+                '-DENABLE_SDL=OFF',
+                '-DENABLE_DECODER=OFF',
+                '-DHAVE_NEON=OFF',
+            )
             ->build();
         $this->patchPkgconfPrefix(['libde265.pc']);
     }
