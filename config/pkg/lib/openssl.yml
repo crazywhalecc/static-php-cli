@@ -4,12 +4,12 @@ openssl:
     source:
       type: ghrel
       repo: openssl/openssl
-      match: openssl.+\.tar\.gz
+      match: openssl-3.+\.tar\.gz
       prefer-stable: true
     source-mirror:
       type: filelist
       url: 'https://www.openssl.org/source/'
-      regex: '/href="(?<file>openssl-(?<version>[^"]+)\.tar\.gz)"/'
+      regex: '/href="(?<file>openssl-(?<version>3\.[^"]+)\.tar\.gz)"/'
     binary: hosted
     metadata:
       license-files: [LICENSE.txt]
