@@ -106,6 +106,14 @@ class TargetPackage extends LibraryPackage
         if ($input !== null && $input->hasArgument($key)) {
             return $input->getArgument($key);
         }
+
+        // fallback to builder arguments (set programmatically, e.g. from CraftCommand)
+        $builder = ApplicationContext::has(PackageBuilder::class)
+            ? ApplicationContext::get(PackageBuilder::class)
+            : null;
+        if ($builder !== null && ($arg = $builder->getArgument($key)) !== null) {
+            return $arg;
+        }
         return null;
     }
 

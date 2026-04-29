@@ -7,7 +7,7 @@ hero:
   tagline: "StaticPHP is a powerful tool designed for building portable executables including PHP, extensions, and more."
   image:
     src: /images/static-php_nobg.png
-    alt: StaticPHP Logo
+    alt: logo
   actions:
     - theme: brand
       text: Get Started

@@ -90,7 +90,7 @@ bin/spc build gd --with-libs=freetype,libjpeg,libavif,libwebp --build-cli
 
 ## xml
 
-1. xml 包括 xmlreader、xmlwriter、dom、simplexml 等，添加 xml 扩展时最好同时启用这些扩展。
+1. xml 包括 xmlreader、xmlwriter、xsl、dom、simplexml 等，添加 xml 扩展时最好同时启用这些扩展。
 2. libxml 包含在 xml 扩展中。启用 xml 相当于启用 libxml。
 
 ## glfw

@@ -29,38 +29,39 @@ export default {
   ],
   '/en/develop/': [
     {
-      text: 'Developer Guide',
+      text: 'Overview',
       items: [
         { text: 'Get Started', link: '/en/develop/' },
         { text: 'Project Structure', link: '/en/develop/structure' },
+      ],
+    },
+    {
+      text: 'Configuration Reference',
+      items: [
+        { text: 'Registry', link: '/en/develop/registry' },
+        { text: 'Package Model', link: '/en/develop/package-model' },
+        { text: 'Artifact Model', link: '/en/develop/artifact-model' },
+        { text: 'craft.yml', link: '/en/develop/craft-yml' },
+      ],
+    },
+    {
+      text: 'Build System',
+      items: [
+        { text: 'Build Lifecycle', link: '/en/develop/build-lifecycle' },
+        { text: 'Compilation Tools', link: '/en/develop/system-build-tools' },
+        { text: 'Doctor', link: '/en/develop/doctor-module' },
         { text: 'PHP Source Modifications', link: '/en/develop/php-src-changes' },
       ],
     },
     {
-      text: 'Concepts',
+      text: 'Extending StaticPHP',
       items: [
-        { text: 'Package Model', link: '/en/develop/package-model' },
-        { text: 'Registry & Plugin System', link: '/en/develop/registry' },
-        { text: 'Build Lifecycle', link: '/en/develop/build-lifecycle' },
-      ],
-    },
-    {
-      text: 'Modules',
-      items: [
-        { text: 'Doctor', link: '/en/develop/doctor-module' },
-        { text: 'Source', link: '/en/develop/source-module' },
-        { text: 'craft.yml', link: '/en/develop/craft-yml' },
-        { text: 'Compilation Tools', link: '/en/develop/system-build-tools' },
-      ],
-    },
-    {
-      text: 'Vendor Mode',
-      items: [
-        { text: 'Introduction', link: '/en/develop/vendor-mode/' },
-        { text: 'Writing Package Classes', link: '/en/develop/vendor-mode/package-classes' },
-        { text: 'Annotations Reference', link: '/en/develop/vendor-mode/annotations' },
-        { text: 'Dependency Injection', link: '/en/develop/vendor-mode/dependency-injection' },
-        { text: 'Lifecycle Hooks', link: '/en/develop/vendor-mode/lifecycle-hooks' },
+        { text: 'Introduction', link: '/en/develop/extending/' },
+        { text: 'Writing Package Classes', link: '/en/develop/extending/package-classes' },
+        { text: 'Annotations Reference', link: '/en/develop/extending/annotations' },
+        { text: 'Lifecycle Hooks', link: '/en/develop/extending/lifecycle-hooks' },
+        { text: 'Dependency Injection', link: '/en/develop/extending/dependency-injection' },
+        { text: 'Custom Artifact', link: '/en/develop/extending/custom-artifact' },
       ],
     },
   ],

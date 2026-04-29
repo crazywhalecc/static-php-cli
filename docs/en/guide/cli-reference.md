@@ -516,10 +516,3 @@ spc spc-config "bcmath,openssl" --libs
 # Use absolute library paths
 spc spc-config "bcmath,openssl" --libs --absolute-libs
 ```
-Enter an interactive shell with StaticPHP's build environment pre-loaded (compiler wrappers, `buildroot/`, `pkgroot/` paths, etc. on `PATH`).
-
-```bash
-spc dev:shell
-```
-
-Useful for compiling small programs against `libphp.a` (embed SAPI) or inspecting the build environment manually.

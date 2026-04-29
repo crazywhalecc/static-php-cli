@@ -29,38 +29,39 @@ export default {
   ],
   '/zh/develop/': [
     {
-      text: '开发者指南',
+      text: '概览',
       items: [
         { text: '开发简介', link: '/zh/develop/' },
         { text: '项目结构', link: '/zh/develop/structure' },
+      ],
+    },
+    {
+      text: '配置参考',
+      items: [
+        { text: 'Registry', link: '/zh/develop/registry' },
+        { text: 'Package 模型', link: '/zh/develop/package-model' },
+        { text: 'Artifact 模型', link: '/zh/develop/artifact-model' },
+        { text: 'craft.yml 配置', link: '/zh/develop/craft-yml' },
+      ],
+    },
+    {
+      text: '构建系统',
+      items: [
+        { text: '构建生命周期', link: '/zh/develop/build-lifecycle' },
+        { text: '编译工具', link: '/zh/develop/system-build-tools' },
+        { text: 'Doctor 环境检查', link: '/zh/develop/doctor-module' },
         { text: '对 PHP 源码的修改', link: '/zh/develop/php-src-changes' },
       ],
     },
     {
-      text: '核心概念',
+      text: '扩展 StaticPHP',
       items: [
-        { text: 'Package 模型', link: '/zh/develop/package-model' },
-        { text: 'Registry 与插件系统', link: '/zh/develop/registry' },
-        { text: '构建生命周期', link: '/zh/develop/build-lifecycle' },
-      ],
-    },
-    {
-      text: '模块',
-      items: [
-        { text: 'Doctor 环境检查', link: '/zh/develop/doctor-module' },
-        { text: '资源模块', link: '/zh/develop/source-module' },
-        { text: 'craft.yml 配置', link: '/zh/develop/craft-yml' },
-        { text: '编译工具', link: '/zh/develop/system-build-tools' },
-      ],
-    },
-    {
-      text: 'Vendor 模式',
-      items: [
-        { text: '简介', link: '/zh/develop/vendor-mode/' },
-        { text: '编写 Package 类', link: '/zh/develop/vendor-mode/package-classes' },
-        { text: '注解参考', link: '/zh/develop/vendor-mode/annotations' },
-        { text: '依赖注入', link: '/zh/develop/vendor-mode/dependency-injection' },
-        { text: '生命周期 Hook', link: '/zh/develop/vendor-mode/lifecycle-hooks' },
+        { text: '简介', link: '/zh/develop/extending/' },
+        { text: '编写 Package 类', link: '/zh/develop/extending/package-classes' },
+        { text: '注解参考', link: '/zh/develop/extending/annotations' },
+        { text: '生命周期 Hook', link: '/zh/develop/extending/lifecycle-hooks' },
+        { text: '依赖注入', link: '/zh/develop/extending/dependency-injection' },
+        { text: '自定义 Artifact', link: '/zh/develop/extending/custom-artifact' },
       ],
     },
   ],

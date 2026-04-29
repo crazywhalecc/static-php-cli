@@ -23,6 +23,9 @@ class PackageBuilder
     /** @var int make jobs count */
     public readonly int $concurrency;
 
+    /** @var array<string, mixed> Build arguments */
+    protected array $arguments = [];
+
     /**
      * @param array $options Builder options
      */
@@ -99,6 +102,16 @@ class PackageBuilder
     public function getOption(string $key, mixed $default = null): mixed
     {
         return $this->options[$key] ?? $default;
+    }
+
+    public function setArgument(string $key, mixed $value): void
+    {
+        $this->arguments[$key] = $value;
+    }
+
+    public function getArgument(string $key, mixed $default = null): mixed
+    {
+        return $this->arguments[$key] ?? $default;
     }
 
     /**

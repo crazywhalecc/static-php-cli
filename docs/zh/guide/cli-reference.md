@@ -405,9 +405,6 @@ spc install-pkg <package> [options]
 ```bash
 # 安装 UPX 压缩工具
 spc install-pkg upx
-
-# 安装时优先使用预编译二进制（默认行为）
-spc install-pkg upx
 ```
 
 ## micro:combine

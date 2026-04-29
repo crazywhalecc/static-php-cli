@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace StaticPHP\Command;
 
+use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Doctor\Doctor;
 use StaticPHP\Exception\ValidationException;
+use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Util\FileSystem;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -63,6 +65,18 @@ class CraftCommand extends BaseCommand
             $build_options["build-{$name}"] = true;
         }
 
+        // merge craft-level packages into with-packages option
+        if ($craft['packages'] !== []) {
+            $existing = parse_comma_list($build_options['with-packages'] ?? '');
+            $build_options['with-packages'] = implode(',', array_unique(array_merge($existing, $craft['packages'])));
+        }
+
+        // merge shared-extensions into build-shared option
+        if ($craft['shared-extensions'] !== []) {
+            $existing = parse_extension_list($build_options['build-shared'] ?? '');
+            $build_options['build-shared'] = implode(',', array_unique(array_merge($existing, $craft['shared-extensions'])));
+        }
+
         // clean build
         if ($craft['clean-build']) {
             FileSystem::resetDir(BUILD_ROOT_PATH);
@@ -72,6 +86,7 @@ class CraftCommand extends BaseCommand
         $starttime = microtime(true);
         // run installer
         $installer = new PackageInstaller($build_options);
+        ApplicationContext::get(PackageBuilder::class)->setArgument('extensions', implode(',', $craft['extensions']));
         $installer->addBuildPackage('php');
         $installer->run(true);
 

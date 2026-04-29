@@ -82,13 +82,6 @@ The script downloads `php` and `composer` into a `runtime/` subdirectory. You th
    # Add this to ~/.bashrc or ~/.zshrc to make it permanent
    ```
 
-::: tip
-In regions with restricted access to GitHub or getcomposer.org, pass `--mirror china` to use a mirror:
-```bash
-bin/setup-runtime --mirror china
-```
-:::
-
 ## Vendor mode
 
 If you already have a PHP project and want to call StaticPHP's build APIs directly, or use a custom registry to support private libraries and extensions, pull it in as a Composer dependency:
@@ -97,7 +90,7 @@ If you already have a PHP project and want to call StaticPHP's build APIs direct
 composer require crazywhalecc/static-php-cli
 ```
 
-See the [Vendor Mode guide](../develop/vendor-mode/) for details.
+See the [Extending StaticPHP](../develop/extending/) guide for details.
 
 ## Verify your build environment
 

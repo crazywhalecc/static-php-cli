@@ -74,6 +74,10 @@ This approach lets you run download and compile as separate steps — useful whe
 
 ### Step 1: Download Dependencies
 
+In v3, you can skip this step entirely — running `build:php` directly will automatically download any missing artifacts.
+
+If you want to pre-download ahead of time, or if you're working in a slow-network environment and want to separate the download phase, use the `download` command:
+
 ```bash
 # Download only what the chosen extensions need (recommended)
 spc download --for-extensions="bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer" --with-php=8.4
