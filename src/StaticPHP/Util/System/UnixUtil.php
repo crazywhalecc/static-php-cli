@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace StaticPHP\Util\System;
 
-use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\ExecutionException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\SystemTarget;
-use StaticPHP\Toolchain\Interface\ToolchainInterface;
-use StaticPHP\Toolchain\ZigToolchain;
 
 abstract class UnixUtil
 {
@@ -72,11 +69,6 @@ abstract class UnixUtil
         }
         if (!is_file($symbol_file)) {
             throw new SPCInternalException("The symbol file {$symbol_file} does not exist, please check if nm command is available.");
-        }
-        // https://github.com/ziglang/zig/issues/24662
-        $toolchain = ApplicationContext::get(ToolchainInterface::class);
-        if ($toolchain instanceof ZigToolchain) {
-            return '-Wl,--export-dynamic'; // needs release 0.16, can be removed then
         }
         if (SystemTarget::getTargetOS() !== 'Linux') {
             return "-Wl,-exported_symbols_list,{$symbol_file}";
