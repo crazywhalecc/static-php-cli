@@ -55,6 +55,10 @@ trait unix
         foreach (glob("{$package->getSourceDir()}/ext/*/*.m4") as $m4file) {
             FileSystem::replaceFileStr($m4file, 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
         }
+
+        if (self::getPHPVersionID() >= 80300 && self::getPHPVersionID() < 80400) {
+            SourcePatcher::patchFile('spc_fix_avx512_cache_before_80400.patch', $this->getSourceDir());
+        }
     }
 
     #[Stage]
@@ -443,7 +447,7 @@ trait unix
 
     #[BuildFor('Darwin')]
     #[BuildFor('Linux')]
-    public function build(TargetPackage $package): void
+    public function build(TargetPackage $package, PackageInstaller $installer): void
     {
         // frankenphp is not a php sapi, it's a standalone Go binary that depends on libphp.a (embed)
         if ($package->getName() === 'frankenphp') {
@@ -457,9 +461,21 @@ trait unix
             return;
         }
 
-        $package->runStage([$this, 'buildconfForUnix']);
-        $package->runStage([$this, 'configureForUnix']);
-        $package->runStage([$this, 'makeForUnix']);
+        // maintainer can skip build though ...
+        $skip_build = false;
+        if ($installer->isPackageResolved('php-embed')
+            && $installer->getTargetPackage('php-embed')->getBuildOption('maintainer-skip-build')
+        ) {
+            $suffix = SystemTarget::getTargetOS() === 'Darwin' ? 'dylib' : 'so';
+            $skip_build = file_exists(BUILD_LIB_PATH . '/libphp.a')
+                || file_exists(BUILD_LIB_PATH . "/libphp.{$suffix}");
+        }
+
+        if (!$skip_build) {
+            $package->runStage([$this, 'buildconfForUnix']);
+            $package->runStage([$this, 'configureForUnix']);
+            $package->runStage([$this, 'makeForUnix']);
+        }
 
         $package->runStage([$this, 'unixBuildSharedExt']);
     }

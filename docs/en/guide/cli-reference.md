@@ -125,9 +125,10 @@ These flags apply only to the combined `build:php` target. To build a specific S
 
 ### embed Options {#embed-options}
 
-| Option                  | Description                                                           |
-|-------------------------|-----------------------------------------------------------------------|
-| `--build-shared=<list>` | Compile specific extensions as shared libraries (requires embed SAPI) |
+| Option                      | Description                                                                                          |
+|-----------------------------|------------------------------------------------------------------------------------------------------|
+| `--build-shared=<list>`     | Compile specific extensions as shared libraries (requires embed SAPI)                                |
+| `--maintainer-skip-build`   | (maintainer only) Skip the PHP embed build if `libphp.a` / `libphp.so` already exists in buildroot  |
 
 ### Download Pass-through Options {#download-options}
 

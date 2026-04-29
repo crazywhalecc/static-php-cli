@@ -61,9 +61,19 @@ class LinuxToolCheck
             'alpine' => self::TOOLS_ALPINE,
             'redhat' => self::TOOLS_RHEL,
             'centos' => array_merge(self::TOOLS_RHEL, ['perl-IPC-Cmd', 'perl-Time-Piece']),
-            'arch' => self::TOOLS_ARCH,
-            default => self::TOOLS_DEBIAN,
+            'arch', 'manjaro' => self::TOOLS_ARCH,
+            default => null,
         };
+        if ($required === null) {
+            // fallback to family-based detection
+            $family = explode(' ', strtolower($distro['family']));
+            $required = match (true) {
+                in_array('alpine', $family) => self::TOOLS_ALPINE,
+                in_array('rhel', $family) || in_array('fedora', $family) => self::TOOLS_RHEL,
+                in_array('arch', $family) => self::TOOLS_ARCH,
+                default => self::TOOLS_DEBIAN,
+            };
+        }
         $missing = [];
         foreach ($required as $package) {
             if (LinuxUtil::findCommand(self::PROVIDED_COMMAND[$package] ?? $package) === null) {
@@ -116,10 +126,12 @@ class LinuxToolCheck
         if ($install_cmd === null) {
             // try family
             $family = explode(' ', strtolower($distro['family']));
-            if (in_array('debian', $family)) {
+            if (in_array('debian', $family) || in_array('ubuntu', $family)) {
                 $install_cmd = 'apt-get install -y';
             } elseif (in_array('rhel', $family) || in_array('fedora', $family)) {
                 $install_cmd = 'dnf install -y';
+            } elseif (in_array('arch', $family)) {
+                $install_cmd = 'pacman -S --noconfirm';
             } else {
                 throw new EnvironmentException(
                     "Current linux distro [{$distro['dist']}] does not have an auto-install script for packages yet.",

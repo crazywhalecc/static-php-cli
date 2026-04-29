@@ -50,6 +50,7 @@ class LinuxUtil extends UnixUtil
 
             $ret['dist'] = trim($ret['dist'], '"\'');
             $ret['ver'] = trim($ret['ver'], '"\'');
+            $ret['family'] = trim($ret['family'], '"\'');
 
             if (strcasecmp($ret['dist'], 'centos') === 0) {
                 $ret['dist'] = 'redhat';
@@ -91,7 +92,7 @@ class LinuxUtil extends UnixUtil
     {
         return [
             // debian-like
-            'debian', 'ubuntu', 'Deepin', 'neon',
+            'debian', 'ubuntu', 'Deepin',
             // rhel-like
             'redhat',
             // centos
