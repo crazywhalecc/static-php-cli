@@ -51,7 +51,7 @@ chmod +x spc && ./spc --version
 适合想参与开发、或需要修改核心注册表和构建脚本的开发者。需要系统已安装 PHP >= 8.4、Composer，以及 `mbstring,posix,pcntl,iconv,phar,zlib` 扩展。
 
 ```bash
-git clone https://github.com/static-php/static-php.git --branch v3
+git clone https://github.com/crazywhalecc/static-php-cli.git --branch v3
 cd static-php-cli
 composer install
 ```
@@ -100,9 +100,15 @@ Vendor 模式的详细用法见 [扩展 StaticPHP](../develop/extending/)。
 
 ```bash
 # 使用 spc 二进制
-./spc doctor --auto-fix
+./spc doctor
 # 使用源码安装
-bin/spc doctor --auto-fix
+bin/spc doctor
+```
+
+如有缺失，`--auto-fix` 会尝试自动安装修复：
+
+```bash
+./spc doctor --auto-fix
 ```
 
 检查通过后，继续阅读[第一次构建](./first-build)。
