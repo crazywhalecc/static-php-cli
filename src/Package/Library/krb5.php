@@ -10,6 +10,8 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Toolchain\Interface\ToolchainInterface;
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Library('krb5')]
@@ -17,7 +19,7 @@ class krb5
 {
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
-    public function build(LibraryPackage $lib, PackageInstaller $installer): void
+    public function build(LibraryPackage $lib, PackageInstaller $installer, ToolchainInterface $toolchain): void
     {
         if (!file_exists($lib->getSourceRoot() . '/configure')) {
             shell()->cd($lib->getSourceRoot())->exec('autoreconf -if');
@@ -45,12 +47,15 @@ class krb5
             $extraEnv['LDFLAGS'] = '-framework Kerberos';
             $args[] = 'ac_cv_func_secure_getenv=no';
         }
-        UnixAutoconfExecutor::create($lib)
+        $executor = UnixAutoconfExecutor::create($lib)
             ->appendEnv($extraEnv)
             ->optionalPackage('ldap', '--with-ldap', '--without-ldap')
             ->optionalPackage('libedit', '--with-libedit', '--without-libedit')
-            ->configure(...$args)
-            ->make();
+            ->configure(...$args);
+        if ($toolchain instanceof ZigToolchain) {
+            $executor->exec('find . -name Makefile -exec sed -i "s/-Werror=incompatible-pointer-types//g" {} +');
+        }
+        $executor->make();
         $lib->patchPkgconfPrefix([
             'krb5-gssapi.pc',
             'krb5.pc',
