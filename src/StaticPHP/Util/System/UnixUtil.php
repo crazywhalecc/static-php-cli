@@ -8,6 +8,8 @@ use StaticPHP\Exception\ExecutionException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Toolchain\ToolchainManager;
+use StaticPHP\Toolchain\ZigToolchain;
 
 abstract class UnixUtil
 {
@@ -70,7 +72,8 @@ abstract class UnixUtil
         if (!is_file($symbol_file)) {
             throw new SPCInternalException("The symbol file {$symbol_file} does not exist, please check if nm command is available.");
         }
-        if (SystemTarget::getTargetOS() !== 'Linux') {
+        // macOS/zig
+        if (SystemTarget::getTargetOS() === 'Darwin' || ToolchainManager::getToolchainClass() === ZigToolchain::class) {
             return "-Wl,-exported_symbols_list,{$symbol_file}";
         }
         return "-Wl,--dynamic-list={$symbol_file}";

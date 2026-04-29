@@ -10,6 +10,9 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Toolchain\ToolchainManager;
+use StaticPHP\Toolchain\ZigToolchain;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\SPCConfigUtil;
 
 /**
@@ -266,6 +269,11 @@ class PhpExtensionPackage extends Package
      */
     public function getSharedExtensionEnv(): array
     {
+        $compiler_extra = getenv('SPC_COMPILER_EXTRA') ?: '';
+        if (!str_contains($compiler_extra, '-lcompiler_rt') && ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $compiler_extra = trim($compiler_extra . ' -lcompiler_rt');
+            GlobalEnvManager::putenv("SPC_COMPILER_EXTRA={$compiler_extra}");
+        }
         $config = (new SPCConfigUtil())->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
