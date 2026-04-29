@@ -345,6 +345,7 @@ class PhpExtensionPackage extends Package
             throw new ValidationException("Extension {$this->getExtensionName()} build failed: {$soFile} not found", validation_module: "Extension {$this->getExtensionName()} build");
         }
         $builder->deployBinary($soFile, $soFile, false);
+        $this->setOutput('Shared extension path', $soFile);
     }
 
     /**
