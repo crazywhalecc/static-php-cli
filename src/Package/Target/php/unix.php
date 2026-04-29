@@ -55,6 +55,10 @@ trait unix
         foreach (glob("{$package->getSourceDir()}/ext/*/*.m4") as $m4file) {
             FileSystem::replaceFileStr($m4file, 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
         }
+
+        if (self::getPHPVersionID() >= 80300 && self::getPHPVersionID() < 80400) {
+            SourcePatcher::patchFile('spc_fix_avx512_cache_before_80400.patch', $this->getSourceDir());
+        }
     }
 
     #[Stage]
