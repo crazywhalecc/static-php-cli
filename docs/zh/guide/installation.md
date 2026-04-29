@@ -90,7 +90,7 @@ bin/setup-runtime
 composer require crazywhalecc/static-php-cli
 ```
 
-Vendor 模式的详细用法见 [Vendor 模式指南](../develop/vendor-mode/)。
+Vendor 模式的详细用法见 [扩展 StaticPHP](../develop/extending/)。
 
 ## 验证构建环境
 

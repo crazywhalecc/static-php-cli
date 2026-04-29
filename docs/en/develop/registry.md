@@ -9,7 +9,7 @@ StaticPHP ships with a built-in core registry (`core`) that contains all definit
 External Registries can only define new packages that don't already exist in `core`; they cannot override or modify existing definitions in the core registry. Depending on your needs, there are three ways to extend or modify StaticPHP's build capabilities:
 
 - **Modify the `core` registry**: Directly edit files under `src/Package` and `config/pkg/`, suitable when you want to contribute changes back to the StaticPHP mainline. Please read the [Contributing Guide](../contributing/) section on contributing new packages before submitting a PR.
-- **Vendor Mode**: Package your custom packages as a standalone sub-registry distributed as a Composer package, suitable for private packages or scenarios where you want to reuse build logic as a library. See [Vendor Mode](./vendor-mode/) for details.
+- **Vendor Mode**: Package your custom packages as a standalone sub-registry distributed as a Composer package, suitable for private packages or scenarios where you want to reuse build logic as a library. See [Extending StaticPHP](./extending/) for details.
 - **External Registry (`SPC_REGISTRIES`)**: Specify one or more external registry file paths via the `SPC_REGISTRIES` environment variable, which StaticPHP loads at startup. Suitable for temporary extensions or scenarios where packaging as a Composer package isn't practical, similar to external source mechanisms in other package managers.
 
 ## Registry Declaration File

@@ -97,7 +97,7 @@ If you already have a PHP project and want to call StaticPHP's build APIs direct
 composer require crazywhalecc/static-php-cli
 ```
 
-See the [Vendor Mode guide](../develop/vendor-mode/) for details.
+See the [Extending StaticPHP](../develop/extending/) guide for details.
 
 ## Verify your build environment
 
