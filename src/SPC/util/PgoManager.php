@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\util;
 
+use SPC\builder\BuilderBase;
 use SPC\exception\WrongUsageException;
 use SPC\store\FileSystem;
 use SPC\store\SourcePatcher;
@@ -15,6 +16,8 @@ use SPC\store\SourcePatcher;
 class PgoManager
 {
     public const MODE_INSTRUMENT = 'instrument';
+
+    public const MODE_CS_INSTRUMENT = 'cs-instrument';
 
     public const MODE_USE = 'use';
 
@@ -68,6 +71,23 @@ class PgoManager
         logger()->info('pgo --pgi: instrumented build, profraw will land under ' . $this->profileRoot . '/<sapi>/');
     }
 
+    /** Setup --cs-pgi: build with -fprofile-use=<sapi.profdata> -fcs-profile-generate=<cs-dir>. Requires existing .profdata. */
+    public function setupCsInstrument(int $rule): void
+    {
+        $this->validateRule($rule);
+        foreach ($this->trainableIn($rule) as $sapi) {
+            if (!is_file($this->profDataFile($sapi))) {
+                throw new WrongUsageException("--cs-pgi: missing {$sapi}.profdata; run --pgi + --pgo first");
+            }
+            f_mkdir($this->csRawDir($sapi), recursive: true);
+        }
+        $this->mode = self::MODE_CS_INSTRUMENT;
+        self::$active = $this;
+        $this->applyShutdownPatches();
+        $this->applyForSapi($this->trainableIn($rule)[0]);
+        logger()->info('pgo --cs-pgi: cs-instrumented build, cs-profraw under ' . $this->profileRoot . '/cs-<sapi>/');
+    }
+
     /** Setup --pgo: merge collected .profraw, then build with -fprofile-use=<sapi.profdata>. */
     public function setupUse(int $rule): void
     {
@@ -83,6 +103,29 @@ class PgoManager
         $this->applyForSapi($this->trainableIn($rule)[0]);
     }
 
+    /** Patches php-src/libtool to passthrough -fcs-profile-* flags (otherwise dropped during shared lib link). */
+    public static function patchBeforeMake(BuilderBase $builder): void
+    {
+        if (!$builder->getOption('cs-pgi')) {
+            return;
+        }
+        $libtool = SOURCE_PATH . '/php-src/libtool';
+        if (!is_file($libtool)) {
+            return;
+        }
+        $contents = file_get_contents($libtool);
+        if (str_contains($contents, '-fcs-profile-*')) {
+            return;
+        }
+        $patched = str_replace('-fprofile-*|-F*', '-fprofile-*|-fcs-profile-*|-F*', $contents);
+        if ($patched === $contents) {
+            logger()->warning('pgo --cs-pgi: could not patch libtool for -fcs-profile-* passthrough');
+            return;
+        }
+        file_put_contents($libtool, $patched);
+        logger()->info('pgo --cs-pgi: patched libtool for -fcs-profile-* passthrough');
+    }
+
     public function applyForSapi(string $sapi): void
     {
         $sapi = $this->resolveSapi($sapi);
@@ -95,12 +138,18 @@ class PgoManager
             $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM', '');
             return;
         }
-        $flags = $this->mode === self::MODE_INSTRUMENT
-            ? '-fprofile-generate=' . $this->rawDir($sapi)
-            : '-fprofile-use=' . $this->profDataFile($sapi)
+        $flags = match ($this->mode) {
+            self::MODE_INSTRUMENT => '-fprofile-generate=' . $this->rawDir($sapi),
+            self::MODE_CS_INSTRUMENT => '-fprofile-use=' . $this->profDataFile($sapi)
+                . ' -fcs-profile-generate=' . $this->csRawDir($sapi)
                 . ' -Wno-error=profile-instr-unprofiled'
                 . ' -Wno-error=profile-instr-out-of-date'
-                . ' -Wno-backend-plugin';
+                . ' -Wno-backend-plugin',
+            default => '-fprofile-use=' . $this->profDataFile($sapi)
+                . ' -Wno-error=profile-instr-unprofiled'
+                . ' -Wno-error=profile-instr-out-of-date'
+                . ' -Wno-backend-plugin',
+        };
         $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS', $flags);
         $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM', $this->ldOnly($flags, $sapi));
         logger()->info("pgo {$this->mode} ({$sapi})");
@@ -129,7 +178,8 @@ class PgoManager
     private function mergeSapi(string $sapi): void
     {
         $raws = glob($this->rawDir($sapi) . '/*.profraw') ?: [];
-        if (empty($raws)) {
+        $csRaws = glob($this->csRawDir($sapi) . '/*.profraw') ?: [];
+        if (empty($raws) && empty($csRaws)) {
             if ($sapi === 'frankenphp') {
                 logger()->warning('pgo --pgo: no .profraw for frankenphp (cgo glue PGO will be skipped); run --pgi, exercise frankenphp longer, then re-run --pgo to include it');
                 return;
@@ -137,7 +187,8 @@ class PgoManager
             throw new WrongUsageException("--pgo: no .profraw for {$sapi}; run --pgi, exercise the binary, then re-run --pgo");
         }
         $out = $this->profDataFile($sapi);
-        $argv = implode(' ', array_map('escapeshellarg', $raws));
+        $inputs = array_merge($raws, $csRaws);
+        $argv = implode(' ', array_map('escapeshellarg', $inputs));
         shell()->exec('llvm-profdata merge --failure-mode=warn -output=' . escapeshellarg($out) . ' ' . $argv);
         if (!is_file($out) || filesize($out) === 0) {
             throw new WrongUsageException("--pgo: empty merge output for {$sapi}");
@@ -148,6 +199,11 @@ class PgoManager
     private function rawDir(string $sapi): string
     {
         return $this->profileRoot . '/' . $sapi;
+    }
+
+    private function csRawDir(string $sapi): string
+    {
+        return $this->profileRoot . '/cs-' . $sapi;
     }
 
     private function profDataFile(string $sapi): string
@@ -175,7 +231,7 @@ class PgoManager
     private function setFlag(string $var, string $append): void
     {
         $cur = (string) getenv($var);
-        $cur = preg_replace('/\s*-fprofile-(generate|use)=\S+/', '', $cur) ?? $cur;
+        $cur = preg_replace('/\s*-f(cs-)?profile-(generate|use)=\S+/', '', $cur) ?? $cur;
         $cur = preg_replace('/\s*-Wno-error=profile-instr-\S+/', '', $cur) ?? $cur;
         $cur = preg_replace('/\s*-Wno-backend-plugin/', '', $cur) ?? $cur;
         f_putenv($var . '=' . trim($cur . ' ' . $append));
@@ -191,6 +247,7 @@ class PgoManager
         $patterns = ['/\s*-Wno-error=\S+/', '/\s*-Wno-backend-plugin/'];
         if ($sapi === 'frankenphp') {
             $patterns[] = '/\s*-fprofile-use=\S+/';
+            $patterns[] = '/\s*-fcs-profile-generate=\S+/';
         }
         return trim(preg_replace($patterns, '', $flags) ?? $flags);
     }

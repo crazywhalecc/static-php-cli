@@ -51,6 +51,7 @@ class BuildPHPCommand extends BuildCommand
         $this->addOption('enable-micro-win32', null, null, 'Enable win32 mode for phpmicro (Windows only)');
         $this->addOption('with-frankenphp-app', null, InputOption::VALUE_REQUIRED, 'Path to a folder to be embedded in FrankenPHP');
         $this->addOption('pgi', null, null, 'Build instrumented binaries (-fprofile-generate). Run them to collect .profraw files, then re-run with --pgo.');
+        $this->addOption('cs-pgi', null, null, 'Build cs-instrumented binaries (-fprofile-use=<existing.profdata> -fcs-profile-generate). Requires a prior --pgi+--pgo cycle.');
         $this->addOption('pgo', null, null, 'Build optimised binaries (-fprofile-use) from .profraw collected by a previous --pgi run.');
     }
 
@@ -215,13 +216,16 @@ class BuildPHPCommand extends BuildCommand
         FileSystem::removeDir(BUILD_MODULES_PATH);
 
         $pgi = (bool) $this->getOption('pgi');
+        $csPgi = (bool) $this->getOption('cs-pgi');
         $pgo = (bool) $this->getOption('pgo');
-        if ($pgi && $pgo) {
-            $this->output->writeln('<error>--pgi and --pgo are mutually exclusive</error>');
+        if (((int) $pgi + (int) $csPgi + (int) $pgo) > 1) {
+            $this->output->writeln('<error>--pgi, --cs-pgi, and --pgo are mutually exclusive</error>');
             return static::FAILURE;
         }
         if ($pgi) {
             (new PgoManager())->setupInstrument($rule);
+        } elseif ($csPgi) {
+            (new PgoManager())->setupCsInstrument($rule);
         } elseif ($pgo) {
             (new PgoManager())->setupUse($rule);
         }

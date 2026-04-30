@@ -130,6 +130,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         $this->emitPatchPoint('before-php-make');
         SourcePatcher::patchBeforeMake($this);
+        PgoManager::patchBeforeMake($this);
 
         $this->cleanMake();
 

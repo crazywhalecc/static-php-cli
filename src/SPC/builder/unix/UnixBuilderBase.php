@@ -145,7 +145,7 @@ abstract class UnixBuilderBase extends BuilderBase
             throw new SPCInternalException("Deploy failed. Cannot find file after copy: {$dst}");
         }
 
-        if (!$this->getOption('no-strip') && !$this->getOption('pgi')) {
+        if (!$this->getOption('no-strip') && !$this->getOption('pgi') && !$this->getOption('cs-pgi')) {
             // extract debug info
             $this->extractDebugInfo($dst);
             // extra strip
