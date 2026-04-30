@@ -21,49 +21,59 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
     /**
      * Get the GitHub tarball URL for a given repository and release type.
      * If match_url is provided, only return the tarball that matches the regex.
-     * Otherwise, return the first tarball found.
      */
     public function getGitHubTarballInfo(string $name, string $repo, string $rel_type, bool $prefer_stable = true, ?string $match_url = null, ?string $basename = null, ?string $query = null): array
     {
-        $url = str_replace(['{repo}', '{rel_type}'], [$repo, $rel_type], self::API_URL);
-        $url .= ($query ?? '');
-        $data = default_shell()->executeCurl($url, headers: $this->getGitHubTokenHeaders());
-        $data = json_decode($data ?: '', true);
-        if (!is_array($data)) {
-            throw new DownloaderException("Failed to get GitHub tarball URL for {$repo} from {$url}");
-        }
-        $url = null;
-        foreach ($data as $rel) {
-            $prerelease = $rel['prerelease'] ?? false;
-            $draft = $rel['draft'] ?? false;
-            $tarball_url = $rel['tarball_url'] ?? null;
-            if ($prerelease && $prefer_stable || $draft && $prefer_stable || !$tarball_url) {
-                continue;
+        if ($rel_type === 'releases' && $match_url === null && $query === null && $prefer_stable) {
+            $api_url = str_replace(['{repo}', '{rel_type}'], [$repo, 'releases/latest'], self::API_URL);
+            $data = default_shell()->executeCurl($api_url, headers: $this->getGitHubTokenHeaders());
+            $data = json_decode($data ?: '', true);
+            if (!is_array($data) || empty($data['tarball_url'])) {
+                throw new DownloaderException("Failed to get GitHub latest release for {$repo} from {$api_url}");
             }
-            if ($match_url === null) {
-                $url = $rel['tarball_url'] ?? null;
-                $version = $rel['tag_name'] ?? $rel['name'] ?? null;
-                break;
+            $rel_url = $data['tarball_url'];
+            $this->version = $data['tag_name'] ?? $data['name'] ?? null;
+        } else {
+            $api_url = str_replace(['{repo}', '{rel_type}'], [$repo, $rel_type], self::API_URL);
+            $api_url .= ($query ?? '');
+            $data = default_shell()->executeCurl($api_url, headers: $this->getGitHubTokenHeaders());
+            $data = json_decode($data ?: '', true);
+            if (!is_array($data)) {
+                throw new DownloaderException("Failed to get GitHub tarball URL for {$repo} from {$api_url}");
             }
-            if (preg_match("|{$match_url}|", $rel['tarball_url'] ?? '')) {
-                $url = $rel['tarball_url'];
-                $version = $rel['tag_name'] ?? $rel['name'] ?? null;
-                break;
+            $rel_url = null;
+            foreach ($data as $rel) {
+                $prerelease = $rel['prerelease'] ?? false;
+                $draft = $rel['draft'] ?? false;
+                $tarball_url = $rel['tarball_url'] ?? null;
+                if ($prerelease && $prefer_stable || $draft && $prefer_stable || !$tarball_url) {
+                    continue;
+                }
+                if ($match_url === null) {
+                    $rel_url = $rel['tarball_url'] ?? null;
+                    $version = $rel['tag_name'] ?? $rel['name'] ?? null;
+                    break;
+                }
+                if (preg_match("|{$match_url}|", $rel['tarball_url'] ?? '')) {
+                    $rel_url = $rel['tarball_url'];
+                    $version = $rel['tag_name'] ?? $rel['name'] ?? null;
+                    break;
+                }
             }
+            if (!$rel_url) {
+                throw new DownloaderException("No suitable GitHub tarball found for {$repo}");
+            }
+            $this->version = $version ?? null;
         }
-        if (!$url) {
-            throw new DownloaderException("No suitable GitHub tarball found for {$repo}");
-        }
-        $this->version = $version ?? null;
-        $head = default_shell()->executeCurl($url, 'HEAD', headers: $this->getGitHubTokenHeaders()) ?: '';
+        $head = default_shell()->executeCurl($rel_url, 'HEAD', headers: $this->getGitHubTokenHeaders()) ?: '';
         preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+\.tar\.gz)\1/im', $head, $matches);
         if ($matches) {
             $filename = $matches['filename'];
         } else {
             $basename = $basename ?? basename($repo);
-            $filename = "{$basename}-" . ($rel_type === 'releases' ? ($data['tag_name'] ?? $data['name']) : $data['name']) . '.tar.gz';
+            $filename = "{$basename}-" . ($this->version ?? 'latest') . '.tar.gz';
         }
-        return [$url, $filename];
+        return [$rel_url, $filename];
     }
 
     public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
