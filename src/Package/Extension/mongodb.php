@@ -8,6 +8,7 @@ use Package\Target\php;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\CustomPhpConfigureArg;
 use StaticPHP\Attribute\Package\Extension;
+use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Util\FileSystem;
@@ -16,12 +17,24 @@ use StaticPHP\Util\FileSystem;
 class mongodb extends PhpExtensionPackage
 {
     #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-mongodb')]
+    #[PatchDescription('Add /utf-8 flag to CFLAGS_MONGODB for Windows build to fix compilation error on non-English Windows.')]
     public function patchBeforeBuild(): void
     {
         FileSystem::replaceFileStr(
             "{$this->getSourceDir()}/config.w32",
             'ADD_FLAG("CFLAGS_MONGODB", "/D KMS_MESSAGE_LITTLE_ENDIAN=1 /D MONGOCRYPT_LITTLE_ENDIAN=1 /D MLIB_USER=1");',
             'ADD_FLAG("CFLAGS_MONGODB", "/D KMS_MESSAGE_LITTLE_ENDIAN=1  /D MONGOCRYPT_LITTLE_ENDIAN=1 /D MLIB_USER=1");' . "\n    ADD_FLAG(\"CFLAGS_MONGODB\", \"/utf-8\");",
+        );
+    }
+
+    #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-mongodb')]
+    #[PatchDescription('Replace src/libmongoc/ with ${ac_config_dir}/src/libmongoc/ in config.m4 to fix the build on Unix-like systems.')]
+    public function patchBeforeBuildconfUnix(): void
+    {
+        FileSystem::replaceFileRegex(
+            $this->getSourceDir() . '/config.m4',
+            '/^(\s+)(src\/libmongoc\/)/m',
+            '$1${ac_config_dir}/$2'
         );
     }
 
