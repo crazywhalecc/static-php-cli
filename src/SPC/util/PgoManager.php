@@ -43,64 +43,29 @@ class PgoManager
 
     private string $mode;
 
-    private static ?self $active = null;
-
-    public function __construct()
+    private function __construct()
     {
         $this->profileRoot = BUILD_ROOT_PATH . '/pgo-data';
     }
 
-    public static function active(): ?self
+    /** Build a PgoManager for the active --pgi/--cs-pgi/--pgo option, or null if none set. */
+    public static function fromBuilder(BuilderBase $builder, int $rule): ?self
     {
-        return self::$active;
-    }
-
-    /** Setup --pgi: build with -fprofile-generate=<sapi-dir>. */
-    public function setupInstrument(int $rule): void
-    {
-        $this->validateRule($rule);
-        FileSystem::removeDir($this->profileRoot);
-        f_mkdir($this->profileRoot, recursive: true);
-        foreach ($this->trainableIn($rule) as $sapi) {
-            f_mkdir($this->rawDir($sapi), recursive: true);
+        $modes = array_filter(['pgi', 'cs-pgi', 'pgo'], fn ($m) => (bool) $builder->getOption($m));
+        if (count($modes) > 1) {
+            throw new WrongUsageException('--pgi, --cs-pgi, and --pgo are mutually exclusive');
         }
-        $this->mode = self::MODE_INSTRUMENT;
-        self::$active = $this;
-        $this->applyShutdownPatches();
-        $this->applyForSapi($this->trainableIn($rule)[0]);
-        logger()->info('pgo --pgi: instrumented build, profraw will land under ' . $this->profileRoot . '/<sapi>/');
-    }
-
-    /** Setup --cs-pgi: build with -fprofile-use=<sapi.profdata> -fcs-profile-generate=<cs-dir>. Requires existing .profdata. */
-    public function setupCsInstrument(int $rule): void
-    {
-        $this->validateRule($rule);
-        foreach ($this->trainableIn($rule) as $sapi) {
-            if (!is_file($this->profDataFile($sapi))) {
-                throw new WrongUsageException("--cs-pgi: missing {$sapi}.profdata; run --pgi + --pgo first");
-            }
-            f_mkdir($this->csRawDir($sapi), recursive: true);
+        $mode = array_values($modes)[0] ?? null;
+        if ($mode === null) {
+            return null;
         }
-        $this->mode = self::MODE_CS_INSTRUMENT;
-        self::$active = $this;
-        $this->applyShutdownPatches();
-        $this->applyForSapi($this->trainableIn($rule)[0]);
-        logger()->info('pgo --cs-pgi: cs-instrumented build, cs-profraw under ' . $this->profileRoot . '/cs-<sapi>/');
-    }
-
-    /** Setup --pgo: merge collected .profraw, then build with -fprofile-use=<sapi.profdata>. */
-    public function setupUse(int $rule): void
-    {
-        $this->validateRule($rule);
-        if (trim((string) shell_exec('command -v llvm-profdata 2>/dev/null')) === '') {
-            throw new WrongUsageException('--pgo: llvm-profdata not on PATH');
-        }
-        foreach ($this->trainableIn($rule) as $sapi) {
-            $this->mergeSapi($sapi);
-        }
-        $this->mode = self::MODE_USE;
-        self::$active = $this;
-        $this->applyForSapi($this->trainableIn($rule)[0]);
+        $instance = new self();
+        match ($mode) {
+            'pgi' => $instance->setupInstrument($rule),
+            'cs-pgi' => $instance->setupCsInstrument($rule),
+            'pgo' => $instance->setupUse($rule),
+        };
+        return $instance;
     }
 
     /** Patches php-src/libtool to passthrough -fcs-profile-* flags (otherwise dropped during shared lib link). */
@@ -153,6 +118,51 @@ class PgoManager
         $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS', $flags);
         $this->setFlag('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM', $this->ldOnly($flags, $sapi));
         logger()->info("pgo {$this->mode} ({$sapi})");
+    }
+
+    /** Setup --pgi: build with -fprofile-generate=<sapi-dir>. */
+    private function setupInstrument(int $rule): void
+    {
+        $this->validateRule($rule);
+        FileSystem::removeDir($this->profileRoot);
+        f_mkdir($this->profileRoot, recursive: true);
+        foreach ($this->trainableIn($rule) as $sapi) {
+            f_mkdir($this->rawDir($sapi), recursive: true);
+        }
+        $this->mode = self::MODE_INSTRUMENT;
+        $this->applyShutdownPatches();
+        $this->applyForSapi($this->trainableIn($rule)[0]);
+        logger()->info('pgo --pgi: instrumented build, profraw will land under ' . $this->profileRoot . '/<sapi>/');
+    }
+
+    /** Setup --cs-pgi: build with -fprofile-use=<sapi.profdata> -fcs-profile-generate=<cs-dir>. Requires existing .profdata. */
+    private function setupCsInstrument(int $rule): void
+    {
+        $this->validateRule($rule);
+        foreach ($this->trainableIn($rule) as $sapi) {
+            if (!is_file($this->profDataFile($sapi))) {
+                throw new WrongUsageException("--cs-pgi: missing {$sapi}.profdata; run --pgi + --pgo first");
+            }
+            f_mkdir($this->csRawDir($sapi), recursive: true);
+        }
+        $this->mode = self::MODE_CS_INSTRUMENT;
+        $this->applyShutdownPatches();
+        $this->applyForSapi($this->trainableIn($rule)[0]);
+        logger()->info('pgo --cs-pgi: cs-instrumented build, cs-profraw under ' . $this->profileRoot . '/cs-<sapi>/');
+    }
+
+    /** Setup --pgo: merge collected .profraw, then build with -fprofile-use=<sapi.profdata>. */
+    private function setupUse(int $rule): void
+    {
+        $this->validateRule($rule);
+        if (trim((string) shell_exec('command -v llvm-profdata 2>/dev/null')) === '') {
+            throw new WrongUsageException('--pgo: llvm-profdata not on PATH');
+        }
+        foreach ($this->trainableIn($rule) as $sapi) {
+            $this->mergeSapi($sapi);
+        }
+        $this->mode = self::MODE_USE;
+        $this->applyForSapi($this->trainableIn($rule)[0]);
     }
 
     /**

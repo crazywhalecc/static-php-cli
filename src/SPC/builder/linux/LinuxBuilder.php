@@ -23,6 +23,8 @@ class LinuxBuilder extends UnixBuilderBase
     /** @var bool Micro patch phar flag */
     private bool $phar_patched = false;
 
+    private ?PgoManager $pgo = null;
+
     public function __construct(array $options = [])
     {
         $this->options = $options;
@@ -49,6 +51,8 @@ class LinuxBuilder extends UnixBuilderBase
      */
     public function buildPHP(int $build_target = BUILD_TARGET_NONE): void
     {
+        $this->pgo = PgoManager::fromBuilder($this, $build_target);
+
         $cflags = $this->arch_c_flags;
         f_putenv('CFLAGS=' . $cflags);
 
@@ -134,7 +138,7 @@ class LinuxBuilder extends UnixBuilderBase
 
         $this->cleanMake();
 
-        $pgo = PgoManager::active();
+        $pgo = $this->pgo;
         $needsClean = false;
         $sapiBuilds = [
             ['cli', $enableCli, true, fn () => $this->buildCli()],

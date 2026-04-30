@@ -12,7 +12,6 @@ use SPC\store\SourcePatcher;
 use SPC\util\DependencyUtil;
 use SPC\util\GlobalEnvManager;
 use SPC\util\LicenseDumper;
-use SPC\util\PgoManager;
 use SPC\util\SPCTarget;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -215,20 +214,6 @@ class BuildPHPCommand extends BuildCommand
         // clean old modules that may conflict with the new php build
         FileSystem::removeDir(BUILD_MODULES_PATH);
 
-        $pgi = (bool) $this->getOption('pgi');
-        $csPgi = (bool) $this->getOption('cs-pgi');
-        $pgo = (bool) $this->getOption('pgo');
-        if (((int) $pgi + (int) $csPgi + (int) $pgo) > 1) {
-            $this->output->writeln('<error>--pgi, --cs-pgi, and --pgo are mutually exclusive</error>');
-            return static::FAILURE;
-        }
-        if ($pgi) {
-            (new PgoManager())->setupInstrument($rule);
-        } elseif ($csPgi) {
-            (new PgoManager())->setupCsInstrument($rule);
-        } elseif ($pgo) {
-            (new PgoManager())->setupUse($rule);
-        }
         $builder->buildPHP($rule);
         $builder->testPHP($rule);
 
