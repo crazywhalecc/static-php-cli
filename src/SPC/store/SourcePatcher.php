@@ -95,6 +95,10 @@ class SourcePatcher
         // patch php-src/build/php.m4 PKG_CHECK_MODULES -> PKG_CHECK_MODULES_STATIC
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
 
+        if ($builder->getPHPVersionID() >= 80300 && $builder->getPHPVersionID() < 80400) {
+            self::patchFile('spc_fix_avx512_cache_before_80400.patch', SOURCE_PATH . '/php-src');
+        }
+
         if ($builder->getOption('enable-micro-win32')) {
             self::patchMicroWin32();
         } else {

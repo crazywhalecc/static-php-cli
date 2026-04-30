@@ -14,7 +14,7 @@ declare(strict_types=1);
 // test php version (8.1 ~ 8.4 available, multiple for matrix)
 $test_php_version = [
     // '8.1',
-    // '8.2',
+    '8.2',
     // '8.3',
     // '8.4',
     '8.5',
@@ -26,9 +26,9 @@ $test_os = [
     // 'macos-15-intel', // bin/spc for x86_64
     'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
-    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     // 'ubuntu-24.04', // bin/spc for x86_64
-    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
     // 'ubuntu-24.04-arm', // bin/spc for arm64
     // 'windows-2022', // .\bin\spc.ps1
     // 'windows-2025',
@@ -50,13 +50,13 @@ $prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'openssl,brotli',
+    'Linux', 'Darwin' => 'swoole,mongodb',
     'Windows' => 'bcmath,brotli,bz2,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_pgsql,pgsql,session,simdjson,simplexml,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
 $shared_extensions = match (PHP_OS_FAMILY) {
-    'Linux' => 'zstd',
+    'Linux' => '',
     'Darwin' => '',
     'Windows' => '',
 };
@@ -66,7 +66,7 @@ $with_suggested_libs = true;
 
 // If you want to test extra libs for extensions, add them below (comma separated, example `libwebp,libavif`). Unnecessary, when $with_suggested_libs is true.
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'krb5',
+    'Linux', 'Darwin' => '',
     'Windows' => '',
 };
 

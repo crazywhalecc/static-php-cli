@@ -12,6 +12,15 @@ use SPC\exception\SPCInternalException;
 function f_exec(string $command, mixed &$output, mixed &$result_code): bool
 {
     $result_code = 0;
+    if (str_contains($command, 'https://api.github.com/repos/AOMediaCodec/libavif/releases/latest')) {
+        $output = explode("\n", json_encode([
+            'tag_name' => 'v1.1.1',
+            'tarball_url' => 'https://api.github.com/repos/AOMediaCodec/libavif/tarball/v1.1.1',
+            'prerelease' => false,
+            'draft' => false,
+        ]));
+        return true;
+    }
     if (str_contains($command, 'https://api.github.com/repos/AOMediaCodec/libavif/releases')) {
         $output = explode("\n", gzdecode(file_get_contents(__DIR__ . '/../assets/github_api_AOMediaCodec_libavif_releases.json.gz')));
         return true;

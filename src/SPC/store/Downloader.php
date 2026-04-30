@@ -98,31 +98,50 @@ class Downloader
     {
         logger()->debug("finding {$name} source from github {$type} tarball");
         $source['query'] ??= '';
-        $data = json_decode(self::curlExec(
-            url: "https://api.github.com/repos/{$source['repo']}/{$type}{$source['query']}",
-            hooks: [[CurlHook::class, 'setupGithubToken']],
-            retries: self::getRetryAttempts()
-        ), true, 512, JSON_THROW_ON_ERROR);
 
-        $url = null;
-        foreach ($data as $rel) {
-            if (($rel['prerelease'] ?? false) === true && ($source['prefer-stable'] ?? false)) {
-                continue;
+        // Use /releases/latest when possible: it returns the semantically latest stable
+        // release regardless of publish order, avoiding issues with concurrent release branches.
+        if ($type === 'releases' && empty($source['query']) && !($source['match'] ?? null)) {
+            $data = json_decode(self::curlExec(
+                url: "https://api.github.com/repos/{$source['repo']}/releases/latest",
+                hooks: [[CurlHook::class, 'setupGithubToken']],
+                retries: self::getRetryAttempts()
+            ), true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($data) || empty($data['tarball_url'])) {
+                throw new DownloaderException("failed to find {$name} source");
             }
-            if (($rel['draft'] ?? false) === true && (($source['prefer-stable'] ?? false) || !$rel['tarball_url'])) {
-                continue;
+            $url = $data['tarball_url'];
+            $version = $data['tag_name'] ?? $data['name'] ?? null;
+        } else {
+            $data = json_decode(self::curlExec(
+                url: "https://api.github.com/repos/{$source['repo']}/{$type}{$source['query']}",
+                hooks: [[CurlHook::class, 'setupGithubToken']],
+                retries: self::getRetryAttempts()
+            ), true, 512, JSON_THROW_ON_ERROR);
+
+            $url = null;
+            $version = null;
+            foreach ($data as $rel) {
+                if (($rel['prerelease'] ?? false) === true && ($source['prefer-stable'] ?? false)) {
+                    continue;
+                }
+                if (($rel['draft'] ?? false) === true && (($source['prefer-stable'] ?? false) || !$rel['tarball_url'])) {
+                    continue;
+                }
+                if (!($source['match'] ?? null)) {
+                    $url = $rel['tarball_url'] ?? null;
+                    $version = $rel['tag_name'] ?? $rel['name'] ?? null;
+                    break;
+                }
+                if (preg_match('|' . $source['match'] . '|', $rel['tarball_url'])) {
+                    $url = $rel['tarball_url'];
+                    $version = $rel['tag_name'] ?? $rel['name'] ?? null;
+                    break;
+                }
             }
-            if (!($source['match'] ?? null)) {
-                $url = $rel['tarball_url'] ?? null;
-                break;
+            if (!$url) {
+                throw new DownloaderException("failed to find {$name} source");
             }
-            if (preg_match('|' . $source['match'] . '|', $rel['tarball_url'])) {
-                $url = $rel['tarball_url'];
-                break;
-            }
-        }
-        if (!$url) {
-            throw new DownloaderException("failed to find {$name} source");
         }
         $headers = self::curlExec(
             url: $url,
@@ -134,7 +153,7 @@ class Downloader
         if ($matches) {
             $filename = $matches['filename'];
         } else {
-            $filename = "{$name}-" . ($type === 'releases' ? $data['tag_name'] : $data['name']) . '.tar.gz';
+            $filename = "{$name}-" . ($version ?? 'latest') . '.tar.gz';
         }
 
         return [$url, $filename];
