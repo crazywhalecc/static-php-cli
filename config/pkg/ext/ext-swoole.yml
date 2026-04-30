@@ -5,7 +5,6 @@ ext-swoole:
       type: ghtar
       repo: swoole/swoole-src
       extract: php-src/ext/swoole
-      match: v6\.+
       prefer-stable: true
     metadata:
       license-files: [LICENSE]
