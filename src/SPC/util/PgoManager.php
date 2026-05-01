@@ -104,9 +104,11 @@ class PgoManager
             return;
         }
         $flags = match ($this->mode) {
-            self::MODE_INSTRUMENT => '-fprofile-generate=' . $this->rawDir($sapi),
+            self::MODE_INSTRUMENT => '-fprofile-generate=' . $this->rawDir($sapi)
+                . ' -fprofile-update=atomic',
             self::MODE_CS_INSTRUMENT => '-fprofile-use=' . $this->profDataFile($sapi)
                 . ' -fcs-profile-generate=' . $this->csRawDir($sapi)
+                . ' -fprofile-update=atomic'
                 . ' -Wno-error=profile-instr-unprofiled'
                 . ' -Wno-error=profile-instr-out-of-date'
                 . ' -Wno-backend-plugin',
