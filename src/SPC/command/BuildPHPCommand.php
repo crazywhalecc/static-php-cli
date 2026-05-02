@@ -180,7 +180,7 @@ class BuildPHPCommand extends BuildCommand
         // compile libraries
         $builder->proveLibs($libraries);
         // check extensions
-        $builder->proveExts($static_extensions, $shared_extensions);
+        $builder->proveExts($static_extensions, $shared_extensions, build_target: $rule);
         // validate libs and extensions
         $builder->validateLibsAndExts();
 

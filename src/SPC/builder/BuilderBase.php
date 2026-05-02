@@ -143,7 +143,7 @@ abstract class BuilderBase
      *
      * @internal
      */
-    public function proveExts(array $static_extensions, array $shared_extensions = [], bool $skip_check_deps = false, bool $skip_extract = false): void
+    public function proveExts(array $static_extensions, array $shared_extensions = [], bool $skip_check_deps = false, bool $skip_extract = false, int $build_target = BUILD_TARGET_NONE): void
     {
         // judge ext
         foreach ($static_extensions as $ext) {
@@ -171,7 +171,9 @@ abstract class BuilderBase
             SourceManager::initSource(exts: [...$static_extensions, ...$shared_extensions]);
             $this->emitPatchPoint('after-exts-extract');
             // patch micro
-            SourcePatcher::patchMicro();
+            if (($build_target & BUILD_TARGET_MICRO) === BUILD_TARGET_MICRO) {
+                SourcePatcher::patchMicro();
+            }
         }
 
         foreach ([...$static_extensions, ...$shared_extensions] as $extension) {
