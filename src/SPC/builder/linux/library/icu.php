@@ -15,9 +15,11 @@ class icu extends LinuxLibraryBase
 
     protected function build(): void
     {
+        $userCxxFlags = trim((string) getenv('SPC_DEFAULT_CXX_FLAGS'));
+        $userLdFlags = trim((string) getenv('SPC_DEFAULT_LD_FLAGS'));
         $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1 -DPIC -fPIC"';
-        $cxxflags = 'CXXFLAGS="-std=c++17 -DPIC -fPIC -fno-ident"';
-        $ldflags = SPCTarget::isStatic() ? 'LDFLAGS="-static"' : '';
+        $cxxflags = "CXXFLAGS=\"-std=c++17 -DPIC -fPIC -fno-ident {$userCxxFlags}\"";
+        $ldflags = SPCTarget::isStatic() ? "LDFLAGS=\"-static {$userLdFlags}\"" : "LDFLAGS=\"{$userLdFlags}\"";
         shell()->cd($this->source_dir . '/source')->initializeEnv($this)
             ->exec(
                 "{$cppflags} {$cxxflags} {$ldflags} " .

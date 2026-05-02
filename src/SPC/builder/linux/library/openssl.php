@@ -57,6 +57,11 @@ class openssl extends LinuxLibraryBase
         $openssl_dir ??= '/etc/ssl';
         $ex_lib = trim($ex_lib);
 
+        // OpenSSL's Configure ignores env CFLAGS for its target template; pass our flags as extra args after the target.
+        $userCFlags = trim((string) getenv('SPC_DEFAULT_C_FLAGS'));
+        $userLdFlags = trim((string) getenv('SPC_DEFAULT_LD_FLAGS'));
+        $userExtraFlags = trim($userCFlags . ' ' . $userLdFlags);
+
         shell()->cd($this->source_dir)->initializeEnv($this)
             ->exec(
                 "{$env} ./Configure no-shared {$extra} " .
@@ -67,7 +72,8 @@ class openssl extends LinuxLibraryBase
                 'enable-pie ' .
                 'no-legacy ' .
                 'no-tests ' .
-                "linux-{$arch}"
+                "linux-{$arch} " .
+                $userExtraFlags
             )
             ->exec('make clean')
             ->exec("make -j{$this->builder->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")

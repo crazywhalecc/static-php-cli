@@ -19,6 +19,9 @@ class CraftCommand extends BuildCommand
     public function configure(): void
     {
         $this->addArgument('craft', null, 'Path to craft.yml file', WORKING_DIR . '/craft.yml');
+        $this->addOption('pgi', null, null, 'Forward --pgi to the inner build (instrumented binaries).');
+        $this->addOption('cs-pgi', null, null, 'Forward --cs-pgi to the inner build (cs-instrumented binaries).');
+        $this->addOption('pgo', null, null, 'Forward --pgo to the inner build (use collected profile data).');
     }
 
     public function handle(): int
@@ -105,6 +108,11 @@ class CraftCommand extends BuildCommand
         if ($craft['craft-options']['build']) {
             $args = [$static_extensions, "--with-libs={$libs}", "--build-shared={$shared_extensions}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
             $this->optionsToArguments($craft['build-options'], $args);
+            foreach (['pgi', 'cs-pgi', 'pgo'] as $pgoFlag) {
+                if ($this->getOption($pgoFlag)) {
+                    $args[] = "--{$pgoFlag}";
+                }
+            }
             $retcode = $this->runCommand('build', ...$args);
             if ($retcode !== 0) {
                 $this->output->writeln('<error>craft build failed</error>');
