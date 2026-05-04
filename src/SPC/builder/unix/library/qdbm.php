@@ -14,6 +14,8 @@ trait qdbm
     {
         $ac = UnixAutoconfExecutor::create($this)->configure();
         FileSystem::replaceFileRegex($this->source_dir . '/Makefile', '/MYLIBS = libqdbm.a.*/m', 'MYLIBS = libqdbm.a');
+        $extra = trim((string) getenv('SPC_DEFAULT_C_FLAGS'));
+        FileSystem::replaceFileRegex($this->source_dir . '/Makefile', '/^CFLAGS = .*$/m', "CFLAGS = -Wall {$extra}");
         $ac->make($this instanceof MacOSLibraryBase ? 'mac' : '');
         $this->patchPkgconfPrefix(['qdbm.pc']);
     }
