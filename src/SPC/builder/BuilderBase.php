@@ -29,7 +29,7 @@ abstract class BuilderBase
     /** @var array<int, string> extension names */
     protected array $ext_list = [];
 
-    /** @var array<int, string> library names */
+    /** @var array<int, string> all libraries being built (resolved dep list) */
     protected array $lib_list = [];
 
     /** @var bool compile libs only (just mark it) */

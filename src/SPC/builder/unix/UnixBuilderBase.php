@@ -229,7 +229,7 @@ abstract class UnixBuilderBase extends BuilderBase
             copy(ROOT_DIR . '/src/globals/common-tests/embed.c', $sample_file_path . '/embed.c');
             copy(ROOT_DIR . '/src/globals/common-tests/embed.php', $sample_file_path . '/embed.php');
             $util = new SPCConfigUtil($this);
-            $config = $util->config($this->ext_list, $this->lib_list, $this->getOption('with-suggested-exts'), $this->getOption('with-suggested-libs'));
+            $config = $util->config(array_keys($this->getExts(false)), [], $this->getOption('with-suggested-exts'), $this->lib_list);
             $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
             if (SPCTarget::isStatic()) {
                 $lens .= ' -static';
@@ -440,7 +440,7 @@ abstract class UnixBuilderBase extends BuilderBase
             $staticFlags = '-static-pie';
         }
 
-        $config = (new SPCConfigUtil($this))->config($this->ext_list, $this->lib_list);
+        $config = (new SPCConfigUtil($this))->config(array_keys($this->getExts(false)), [], false, $this->lib_list);
         $cflags = "{$this->arch_c_flags} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . ' -DFRANKENPHP_VERSION=' . $frankenPhpVersion;
         $libs = $config['libs'];
         // Go's gcc driver doesn't automatically link against -lgcov or -lrt. Ugly, but necessary fix.

@@ -42,17 +42,18 @@ class SPCConfigUtil
     /**
      * Generate configuration for building PHP extensions.
      *
-     * @param array $extensions          Extension name list
-     * @param array $libraries           Additional library name list
-     * @param bool  $include_suggest_ext Include suggested extensions
-     * @param bool  $include_suggest_lib Include suggested libraries
+     * @param array      $extensions          Extension name list
+     * @param array      $libraries           Additional library name list
+     * @param bool       $include_suggest_ext Include suggested extensions
+     * @param array|bool $include_suggest_lib true/false to include all/no suggested libs; array to include only suggests that point at libs in the array erse of libs being built)
      * @return array{
      *     cflags: string,
      *     ldflags: string,
      *     libs: string
      * }
+     * @throws WrongUsageException
      */
-    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, bool $include_suggest_lib = false): array
+    public function config(array $extensions = [], array $libraries = [], bool $include_suggest_ext = false, array|bool $include_suggest_lib = false): array
     {
         logger()->debug('config extensions: ' . implode(',', $extensions));
         logger()->debug('config libs: ' . implode(',', $libraries));

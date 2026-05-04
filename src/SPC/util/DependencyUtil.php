@@ -101,11 +101,15 @@ class DependencyUtil
     /**
      * Get extension dependencies in correct order
      *
-     * @param  array $exts            Array of extension names
-     * @param  array $additional_libs Array of additional libraries
-     * @return array Ordered array of extension names
+     * @param  array      $exts                   Array of extension names
+     * @param  array      $additional_libs        Array of additional libraries
+     * @param  bool       $include_suggested_exts Whether to follow ext-suggests edges
+     * @param  array|bool $include_suggested_libs true = follow all lib-suggests edges;
+     *                                            false = follow none;
+     *                                            array = follow lib-suggests edges only when the suggested lib is in this list (i.e. it's already being built)
+     * @return array      Ordered array of extension names
      */
-    public static function getExtsAndLibs(array $exts, array $additional_libs = [], bool $include_suggested_exts = false, bool $include_suggested_libs = false): array
+    public static function getExtsAndLibs(array $exts, array $additional_libs = [], bool $include_suggested_exts = false, array|bool $include_suggested_libs = false): array
     {
         $dep_list = self::platExtToLibs();
 
@@ -127,16 +131,20 @@ class DependencyUtil
             }
         }
 
-        // include suggested libraries
-        if ($include_suggested_libs) {
-            // check every deps suggests
+        // include suggested libraries (all, or only those in the available set)
+        if ($include_suggested_libs !== false) {
+            $available = is_array($include_suggested_libs) ? $include_suggested_libs : null;
             foreach ($dep_list as $name => $obj) {
                 $del_list = [];
                 foreach ($obj['suggests'] as $id => $suggest) {
-                    if (!str_starts_with($suggest, 'ext@')) {
-                        $dep_list[$name]['depends'][] = $suggest;
-                        $del_list[] = $id;
+                    if (str_starts_with($suggest, 'ext@')) {
+                        continue;
                     }
+                    if ($available !== null && !in_array($suggest, $available, true)) {
+                        continue;
+                    }
+                    $dep_list[$name]['depends'][] = $suggest;
+                    $del_list[] = $id;
                 }
                 foreach ($del_list as $id) {
                     unset($dep_list[$name]['suggests'][$id]);
