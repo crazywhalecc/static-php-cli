@@ -21,7 +21,7 @@ trait unixodbc
             'Linux' => '/etc',
             default => throw new WrongUsageException('Unsupported OS: ' . PHP_OS_FAMILY),
         };
-        UnixAutoconfExecutor::create($this)
+        $make = UnixAutoconfExecutor::create($this)
             ->configure(
                 '--disable-debug',
                 '--disable-dependency-tracking',
@@ -29,8 +29,15 @@ trait unixodbc
                 '--with-included-ltdl',
                 "--sysconfdir={$sysconf_selector}",
                 '--enable-gui=no',
-            )
-            ->make();
+            );
+
+        FileSystem::replaceFileRegex(
+            "{$this->source_dir}/Makefile",
+            '/^(SUBDIRS\s*=\s*[^\n]*)\bexe\b\s*/m',
+            '$1'
+        );
+
+        $make->make();
         $pkgConfigs = ['odbc.pc', 'odbccr.pc', 'odbcinst.pc'];
         $this->patchPkgconfPrefix($pkgConfigs);
         foreach ($pkgConfigs as $file) {
