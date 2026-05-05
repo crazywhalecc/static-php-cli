@@ -31,10 +31,9 @@ trait unixodbc
                 '--enable-gui=no',
             );
 
-        FileSystem::replaceFileStr(
-            "{$this->source_dir}/Makefile",
-            "\texe \\\n",
-            '',
+        file_put_contents(
+            "{$this->source_dir}/exe/Makefile",
+            ".PHONY: all install clean check distclean install-strip\nall install clean check distclean install-strip:\n\t@true\n",
         );
 
         $make->make();
