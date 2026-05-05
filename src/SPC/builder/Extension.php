@@ -592,7 +592,7 @@ class Extension
      *                of static library flags, and the second is a space-separated string
      *                of shared library flags
      */
-    protected function splitLibsIntoStaticAndShared(string $allLibs, array $excludeFromStatic = []): array
+    protected function splitLibsIntoStaticAndShared(string $allLibs): array
     {
         $staticLibString = '';
         $sharedLibString = '';
@@ -601,16 +601,6 @@ class Extension
             $staticLib = BUILD_LIB_PATH . '/lib' . str_replace('-l', '', $lib) . '.a';
             if (str_starts_with($lib, BUILD_LIB_PATH . '/lib') && str_ends_with($lib, '.a')) {
                 $staticLib = $lib;
-            }
-            // Libs in $excludeFromStatic are statically linked into php-cli already and re-export their
-            // symbols; including them as static archives in a shared extension creates a second in-process
-            // copy of the same library (e.g. libssl/libcrypto), causing duplicated atexit handlers and
-            // shared-state corruption (NULL engine_lock at exit). Drop them here so the shared extension's
-            // undefined refs resolve at runtime against php-cli's exported symbols instead.
-            $libName = str_starts_with($lib, '-l') ? substr($lib, 2) : basename($lib, '.a');
-            $libName = str_starts_with($libName, 'lib') ? substr($libName, 3) : $libName;
-            if (in_array($libName, $excludeFromStatic, true)) {
-                continue;
             }
             if ($lib === '-lphp' || !file_exists($staticLib)) {
                 $sharedLibString .= " {$lib}";
