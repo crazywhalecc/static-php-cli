@@ -58,7 +58,10 @@ class opcache extends Extension
         ) {
             $opcache_jit = ' --disable-opcache-jit';
         }
-        return '--enable-opcache' . ($shared ? '=shared' : '') . $opcache_jit;
+        if ($phpVersionID < 80500) {
+            return '--enable-opcache' . ($shared ? '=shared' : '') . $opcache_jit;
+        }
+        return trim($opcache_jit);
     }
 
     public function getDistName(): string

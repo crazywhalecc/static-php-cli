@@ -12,6 +12,13 @@ trait liblz4
     {
         // disable executables
         FileSystem::replaceFileStr($this->source_dir . '/programs/Makefile', 'install: lz4', "install: lz4\n\ninstallewfwef: lz4");
+        // zig-cc / clang -flto -c with multiple input files only produces an .o for the first source,
+        // leaving liblz4.a with just lz4.o. Compile sources individually so all .o files exist.
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/lib/Makefile',
+            "liblz4.a: \$(SRCFILES)\nifeq (\$(BUILD_STATIC),yes)  # can be disabled on command line\n\t@echo compiling static library\n\t\$(COMPILE.c) \$^\n\t\$(AR) rcs \$@ *.o\nendif",
+            "liblz4.a: \$(SRCFILES:.c=.o)\nifeq (\$(BUILD_STATIC),yes)  # can be disabled on command line\n\t@echo compiling static library\n\t\$(AR) rcs \$@ \$^\nendif"
+        );
         return true;
     }
 
@@ -28,7 +35,7 @@ trait liblz4
 
         $this->patchPkgconfPrefix(['liblz4.pc']);
 
-        foreach (FileSystem::scanDirFiles(BUILD_ROOT_PATH . '/lib/', false, true) as $filename) {
+        foreach (FileSystem::scanDirFiles(BUILD_LIB_PATH . '/', false, true) as $filename) {
             if (str_starts_with($filename, 'liblz4') && (str_contains($filename, '.so') || str_ends_with($filename, '.dylib'))) {
                 unlink(BUILD_ROOT_PATH . '/lib/' . $filename);
             }
