@@ -10,6 +10,7 @@ use SPC\store\pkg\Zig;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\ConfigValidator;
+use SPC\util\DependencyUtil;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
 
@@ -22,6 +23,7 @@ class CraftCommand extends BuildCommand
         $this->addOption('pgi', null, null, 'Forward --pgi to the inner build (instrumented binaries).');
         $this->addOption('cs-pgi', null, null, 'Forward --cs-pgi to the inner build (cs-instrumented binaries).');
         $this->addOption('pgo', null, null, 'Forward --pgo to the inner build (use collected profile data).');
+        $this->addOption('libs-only', null, null, 'Build only the libraries needed by the configured exts (skip PHP and extension build).');
     }
 
     public function handle(): int
@@ -106,17 +108,38 @@ class CraftCommand extends BuildCommand
 
         // craft build
         if ($craft['craft-options']['build']) {
-            $args = [$static_extensions, "--with-libs={$libs}", "--build-shared={$shared_extensions}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
-            $this->optionsToArguments($craft['build-options'], $args);
-            foreach (['pgi', 'cs-pgi', 'pgo'] as $pgoFlag) {
-                if ($this->getOption($pgoFlag)) {
-                    $args[] = "--{$pgoFlag}";
+            if ($this->getOption('libs-only')) {
+                $exts = array_merge($craft['extensions'], $craft['shared-extensions'] ?? []);
+                $include_suggested_exts = (bool) ($craft['build-options']['with-suggested-exts'] ?? false);
+                $include_suggested_libs = (bool) ($craft['build-options']['with-suggested-libs'] ?? false);
+                [, $needed_libs] = DependencyUtil::getExtsAndLibs(
+                    $exts,
+                    $craft['libs'],
+                    $include_suggested_exts,
+                    $include_suggested_libs,
+                );
+                if ($needed_libs === []) {
+                    $this->output->writeln('<comment>No libs needed for the configured extensions; skipping build:libs.</comment>');
+                } else {
+                    $retcode = $this->runCommand('build:libs', implode(',', $needed_libs));
+                    if ($retcode !== 0) {
+                        $this->output->writeln('<error>craft build:libs failed</error>');
+                        return static::FAILURE;
+                    }
                 }
-            }
-            $retcode = $this->runCommand('build', ...$args);
-            if ($retcode !== 0) {
-                $this->output->writeln('<error>craft build failed</error>');
-                return static::FAILURE;
+            } else {
+                $args = [$static_extensions, "--with-libs={$libs}", "--build-shared={$shared_extensions}", ...array_map(fn ($x) => "--build-{$x}", $craft['sapi'])];
+                $this->optionsToArguments($craft['build-options'], $args);
+                foreach (['pgi', 'cs-pgi', 'pgo'] as $pgoFlag) {
+                    if ($this->getOption($pgoFlag)) {
+                        $args[] = "--{$pgoFlag}";
+                    }
+                }
+                $retcode = $this->runCommand('build', ...$args);
+                if ($retcode !== 0) {
+                    $this->output->writeln('<error>craft build failed</error>');
+                    return static::FAILURE;
+                }
             }
         }
 
