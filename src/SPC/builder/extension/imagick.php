@@ -18,9 +18,9 @@ class imagick extends Extension
         return '--with-imagick=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $disable_omp;
     }
 
-    protected function splitLibsIntoStaticAndShared(string $allLibs): array
+    protected function splitLibsIntoStaticAndShared(string $allLibs, array $excludeFromStatic = []): array
     {
-        [$static, $shared] = parent::splitLibsIntoStaticAndShared($allLibs);
+        [$static, $shared] = parent::splitLibsIntoStaticAndShared($allLibs, $excludeFromStatic);
         if (ToolchainManager::getToolchainClass() !== ZigToolchain::class &&
             (str_contains(getenv('PATH'), 'rh/devtoolset') || str_contains(getenv('PATH'), 'rh/gcc-toolset'))
         ) {
