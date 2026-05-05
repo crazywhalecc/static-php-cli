@@ -123,7 +123,7 @@
             "libfastlz.a"
         ],
         "headers": [
-            "fastlz/fastlz.h"
+            "fastlz.h"
         ]
     },
     "freetype": {
