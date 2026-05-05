@@ -31,10 +31,10 @@ trait unixodbc
                 '--enable-gui=no',
             );
 
-        FileSystem::replaceFileRegex(
+        FileSystem::replaceFileStr(
             "{$this->source_dir}/Makefile",
-            '/^(SUBDIRS\s*=\s*[^\n]*)\bexe\b\s*/m',
-            '$1'
+            "\texe \\\n",
+            '',
         );
 
         $make->make();
