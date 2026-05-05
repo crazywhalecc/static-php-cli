@@ -29,6 +29,7 @@ trait curl
             ->addConfigureArgs(
                 '-DBUILD_CURL_EXE=OFF',
                 '-DBUILD_LIBCURL_DOCS=OFF',
+                '-DOPENSSL_ROOT_DIR=' . BUILD_ROOT_PATH,
             )
             ->build();
 
