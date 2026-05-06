@@ -10,13 +10,26 @@ use SPC\util\SPCTarget;
 
 trait ncurses
 {
+    public function patchBeforeBuild(): bool
+    {
+        // MKlib_gen.sh feeds preprocessor stdout through a sed/awk pipeline into lib_gen.c.
+        // zig-cc/clang leaks the "N warning(s) generated." summary onto stdout (not stderr),
+        // and that line ends up as invalid C in the generated source. Filter it out of the pipe.
+        FileSystem::replaceFileStr(
+            $this->source_dir . '/ncurses/base/MKlib_gen.sh',
+            '$preprocessor $TMP 2>/dev/null \\',
+            "\$preprocessor \$TMP 2>/dev/null \\\n| grep -v ' generated\\.\$' \\",
+        );
+        return true;
+    }
+
     protected function build(): void
     {
         $filelist = FileSystem::scanDirFiles(BUILD_BIN_PATH, relative: true);
 
         UnixAutoconfExecutor::create($this)
             ->appendEnv([
-                'CFLAGS' => '-std=c17',
+                'CFLAGS' => '-std=c17 -w',
                 'LDFLAGS' => SPCTarget::isStatic() ? '-static' : '',
             ])
             ->configure(

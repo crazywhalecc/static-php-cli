@@ -18,6 +18,7 @@ class GccNativeToolchain implements ToolchainInterface
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CC=gcc');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_CXX=g++');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_AR=ar');
+        GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_RANLIB=ranlib');
         GlobalEnvManager::putenv('SPC_LINUX_DEFAULT_LD=ld');
     }
 

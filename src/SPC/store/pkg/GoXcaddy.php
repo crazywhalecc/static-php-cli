@@ -85,7 +85,7 @@ class GoXcaddy extends CustomPackage
                 'GOBIN' => "{$pkgroot}/go-xcaddy/bin",
                 'GOPATH' => "{$pkgroot}/go",
             ])
-            ->exec('CC=cc go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest');
+            ->exec('CGO_ENABLED=0 go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest');
     }
 
     public static function getEnvironment(): array

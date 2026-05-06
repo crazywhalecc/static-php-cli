@@ -21,6 +21,14 @@ trait unixodbc
             'Linux' => '/etc',
             default => throw new WrongUsageException('Unsupported OS: ' . PHP_OS_FAMILY),
         };
+        // libltdl is incompatible with -flto (https://bugs.gentoo.org/532672)
+        $stripLto = static fn ($s) => preg_replace('/(^|\s)-flto(=\S+)?(?=\s|$)/', ' ', (string) $s);
+        $origC = $this->builder->arch_c_flags;
+        $origCxx = $this->builder->arch_cxx_flags;
+        $origLd = $this->builder->arch_ld_flags;
+        $this->builder->arch_c_flags = clean_spaces($stripLto($origC));
+        $this->builder->arch_cxx_flags = clean_spaces($stripLto($origCxx));
+        $this->builder->arch_ld_flags = clean_spaces($stripLto($origLd));
         $make = UnixAutoconfExecutor::create($this)
             ->configure(
                 '--disable-debug',
@@ -37,6 +45,10 @@ trait unixodbc
         );
 
         $make->make();
+        $this->builder->arch_c_flags = $origC;
+        $this->builder->arch_cxx_flags = $origCxx;
+        $this->builder->arch_ld_flags = $origLd;
+
         $pkgConfigs = ['odbc.pc', 'odbccr.pc', 'odbcinst.pc'];
         $this->patchPkgconfPrefix($pkgConfigs);
         foreach ($pkgConfigs as $file) {
