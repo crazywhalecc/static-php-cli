@@ -30,7 +30,7 @@ GlobalEnvManager::init();
 // init console logger
 global $ob_logger;
 ConsoleLogger::$date_format = 'H:i:s';
-ConsoleLogger::$format = '[%date% %level%] %body%';
+ConsoleLogger::$format = '[%date% %level_long%] %body%';
 $ob_logger = new ConsoleLogger(LogLevel::WARNING);
 
 // setup log file

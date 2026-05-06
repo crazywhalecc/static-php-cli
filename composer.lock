@@ -1177,16 +1177,16 @@
         },
         {
             "name": "zhamao/logger",
-            "version": "1.1.4",
+            "version": "1.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zhamao-robot/zhamao-logger.git",
-                "reference": "b28c0c26d59d58f153c764f224c21c5901213e25"
+                "reference": "ac5fa59428165d252566bb50c2f558fe871b7686"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zhamao-robot/zhamao-logger/zipball/b28c0c26d59d58f153c764f224c21c5901213e25",
-                "reference": "b28c0c26d59d58f153c764f224c21c5901213e25",
+                "url": "https://api.github.com/repos/zhamao-robot/zhamao-logger/zipball/ac5fa59428165d252566bb50c2f558fe871b7686",
+                "reference": "ac5fa59428165d252566bb50c2f558fe871b7686",
                 "shasum": ""
             },
             "require": {
@@ -1230,19 +1230,19 @@
             "authors": [
                 {
                     "name": "jerry",
-                    "email": "admin@zhamao.me"
+                    "email": "github@cwcc.me"
                 },
                 {
                     "name": "sunxyw",
                     "email": "dev@sunxyw.xyz"
                 }
             ],
-            "description": "Another Console Logger for CLI Applications",
+            "description": "Another Colorful Console Logger for CLI Applications",
             "support": {
                 "issues": "https://github.com/zhamao-robot/zhamao-logger/issues",
-                "source": "https://github.com/zhamao-robot/zhamao-logger/tree/1.1.4"
+                "source": "https://github.com/zhamao-robot/zhamao-logger/tree/1.1.6"
             },
-            "time": "2025-11-08T15:38:01+00:00"
+            "time": "2026-05-06T06:47:06+00:00"
         }
     ],
     "packages-dev": [
