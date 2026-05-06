@@ -13,4 +13,4 @@ ext-gearman:
     os:
       - Linux
       - Darwin
-    arg-type: custom
+    arg-type: '--with-gearman@shared_path_suffix@'
