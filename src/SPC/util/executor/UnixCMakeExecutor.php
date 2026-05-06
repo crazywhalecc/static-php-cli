@@ -182,7 +182,7 @@ class UnixCMakeExecutor extends Executor
         $target_arch = arch2gnu(php_uname('m'));
         $cflags = getenv('SPC_DEFAULT_C_FLAGS');
         $cc = getenv('CC');
-        $cxx = getenv('CCX');
+        $cxx = getenv('CXX');
         $include = BUILD_INCLUDE_PATH;
         logger()->debug("making cmake tool chain file for {$os} {$target_arch} with CFLAGS='{$cflags}'");
         $root = BUILD_ROOT_PATH;
