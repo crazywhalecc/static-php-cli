@@ -61,6 +61,19 @@ trait unix
         }
     }
 
+    #[BeforeStage('php', [self::class, 'configureForUnix'], 'php')]
+    #[PatchDescription('Patch configure to use -std=gnu17 instead of -std=gnu23 for PHP <= 8.2')]
+    public function patchBeforeConfigure(TargetPackage $package): void
+    {
+        if (SystemTarget::isUnix() && self::getPHPVersionID() < 80300) {
+            FileSystem::replaceFileStr(
+                "{$package->getSourceDir()}/configure",
+                "for ac_arg in '' -std=gnu23",
+                "for ac_arg in '' -std=gnu17",
+            );
+        }
+    }
+
     #[Stage]
     public function buildconfForUnix(TargetPackage $package): void
     {
