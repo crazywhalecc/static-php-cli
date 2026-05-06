@@ -15,11 +15,14 @@ trait ncurses
         // MKlib_gen.sh feeds preprocessor stdout through a sed/awk pipeline into lib_gen.c.
         // zig-cc/clang leaks the "N warning(s) generated." summary onto stdout (not stderr),
         // and that line ends up as invalid C in the generated source. Filter it out of the pipe.
-        FileSystem::replaceFileStr(
-            $this->source_dir . '/ncurses/base/MKlib_gen.sh',
-            '$preprocessor $TMP 2>/dev/null \\',
-            "\$preprocessor \$TMP 2>/dev/null \\\n| grep -v ' generated\\.\$' \\",
-        );
+        $mklibGen = $this->source_dir . '/ncurses/base/MKlib_gen.sh';
+        if (!str_contains((string) file_get_contents($mklibGen), "| grep -v ' generated")) {
+            FileSystem::replaceFileStr(
+                $mklibGen,
+                '$preprocessor $TMP 2>/dev/null \\',
+                "\$preprocessor \$TMP 2>/dev/null \\\n| grep -v ' generated\\.\$' \\",
+            );
+        }
         return true;
     }
 

@@ -11,7 +11,7 @@ trait jbig
     public function patchBeforeBuild(): bool
     {
         $extra = trim((string) getenv('SPC_DEFAULT_C_FLAGS'));
-        FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', "CFLAGS = -W -Wno-unused-result {$extra}");
+        FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', "CFLAGS = {$extra} -W -Wno-unused-result");
         return true;
     }
 

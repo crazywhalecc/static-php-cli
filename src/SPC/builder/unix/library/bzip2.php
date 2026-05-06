@@ -11,7 +11,7 @@ trait bzip2
     public function patchBeforeBuild(): bool
     {
         $extra = trim((string) getenv('SPC_DEFAULT_C_FLAGS'));
-        FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS=-Wall', "CFLAGS=-Wall {$extra}");
+        FileSystem::replaceFileStr($this->source_dir . '/Makefile', 'CFLAGS=-Wall', "CFLAGS={$extra} -Wall");
         return true;
     }
 
