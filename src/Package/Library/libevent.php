@@ -57,7 +57,6 @@ class libevent
             ->addConfigureArgs(
                 '-DEVENT__LIBRARY_TYPE=STATIC',
                 '-DEVENT__DISABLE_BENCHMARK=ON',
-                '-DEVENT__DISABLE_THREAD_SUPPORT=ON',
                 '-DEVENT__DISABLE_TESTS=ON',
                 '-DEVENT__DISABLE_SAMPLES=ON',
                 '-DEVENT__DISABLE_MBEDTLS=ON ',
@@ -67,7 +66,7 @@ class libevent
         }
         $cmake->build();
 
-        $lib->patchPkgconfPrefix(['libevent.pc', 'libevent_core.pc', 'libevent_extra.pc', 'libevent_openssl.pc']);
+        $lib->patchPkgconfPrefix(['libevent.pc', 'libevent_core.pc', 'libevent_extra.pc', 'libevent_openssl.pc', 'libevent_pthreads.pc']);
 
         $lib->patchPkgconfPrefix(
             ['libevent_openssl.pc'],

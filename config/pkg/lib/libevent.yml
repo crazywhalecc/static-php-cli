@@ -16,3 +16,4 @@ libevent:
     - libevent_core.a
     - libevent_extra.a
     - libevent_openssl.a
+    - libevent_pthreads.a

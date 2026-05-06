@@ -18,6 +18,7 @@ class MacOSToolCheck
         'bison',
         're2c',
         'flex',
+        'gperf',
         'pkg-config',
         'git',
         'autoconf',

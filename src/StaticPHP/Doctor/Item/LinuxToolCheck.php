@@ -13,7 +13,7 @@ use StaticPHP\Util\System\LinuxUtil;
 class LinuxToolCheck
 {
     public const TOOLS_ALPINE = [
-        'make', 'bison', 're2c', 'flex',
+        'make', 'bison', 're2c', 'flex', 'gperf',
         'git', 'autoconf', 'automake', 'gettext-dev',
         'tar', 'unzip', 'gzip',
         'bzip2', 'cmake', 'gcc',
@@ -22,7 +22,7 @@ class LinuxToolCheck
     ];
 
     public const TOOLS_DEBIAN = [
-        'make', 'bison', 're2c', 'flex',
+        'make', 'bison', 're2c', 'flex', 'gperf',
         'git', 'autoconf', 'automake', 'autopoint',
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch',
@@ -30,7 +30,7 @@ class LinuxToolCheck
     ];
 
     public const TOOLS_RHEL = [
-        'perl', 'make', 'bison', 're2c', 'flex',
+        'perl', 'make', 'bison', 're2c', 'flex', 'gperf',
         'git', 'autoconf', 'automake',
         'tar', 'unzip', 'gzip', 'gcc', 'g++',
         'bzip2', 'cmake', 'patch', 'which',
@@ -38,7 +38,7 @@ class LinuxToolCheck
     ];
 
     public const TOOLS_ARCH = [
-        'base-devel', 'cmake',
+        'base-devel', 'cmake', 'gperf',
     ];
 
     private const PROVIDED_COMMAND = [
