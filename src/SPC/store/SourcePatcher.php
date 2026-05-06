@@ -130,7 +130,7 @@ class SourcePatcher
             FileSystem::replaceFileStr(
                 SOURCE_PATH . '/php-src/configure',
                 "for ac_arg in '' -std=gnu23",
-                "for ac_arg in ''"
+                "for ac_arg in '' -std=gnu17",
             );
         }
 
