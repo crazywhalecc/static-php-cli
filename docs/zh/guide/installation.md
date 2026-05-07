@@ -29,15 +29,15 @@ spc 无须任何依赖，下载即可运行，支持 Linux、macOS 和 Windows�
 
 ```shell
 # Linux x86_64
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-linux-x86_64 -o spc
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-linux-x86_64 -o spc
 # Linux arm64
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-linux-aarch64 -o spc
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-linux-aarch64 -o spc
 # macOS x86_64 (Intel)
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-macos-x86_64 -o spc
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-macos-x86_64 -o spc
 # macOS arm64 (Apple Silicon)
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-macos-aarch64 -o spc
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-macos-aarch64 -o spc
 # Windows x86_64 (PowerShell)
-curl.exe -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-windows-x86_64.exe -o spc.exe
+curl.exe -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.exe -o spc.exe
 ```
 
 *nix 系统下载完成后需要赋予可执行权限：
