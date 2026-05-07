@@ -1,35 +1,49 @@
-# Start Developing
+# Developer Guide
 
-Developing this project requires the installation and deployment of a PHP environment, 
-as well as some extensions and Composer commonly used in PHP projects.
+This section covers the StaticPHP development workflow and the foundational knowledge needed to understand how StaticPHP works under the hood.
 
-The development environment and running environment of the project are almost exactly the same. 
-You can refer to the **Manual Build** section to install system PHP or use the pre-built static PHP of this project as the environment. 
-I will not go into details here.
+## Overview
 
-Regardless of its purpose, this project itself is actually a `php-cli` program. You can edit and develop it as a normal PHP project. 
-At the same time, you need to understand the Shell languages of different systems.
+StaticPHP is a binary build tool whose core purpose is managing the build pipeline — downloading and configuring PHP source code, resolving extension dependencies, and invoking the underlying build system (e.g., Docker or a local compiler).
 
-The current purpose of this project is to compile statically compiled independent PHP, 
-but the main part also includes compiling static versions of many dependent libraries, 
-so you can reuse this set of compilation logic to build independent binary versions of other programs, such as Nginx, etc.
+From a development perspective, StaticPHP is an open framework that provides the ability to statically build PHP and other open-source tools together. The project is maintained by [@crazywhalecc](https://github.com/crazywhalecc) and [@henderkes](https://github.com/henderkes), with contributions from the community.
 
-## Environment preparation
+You can think of StaticPHP as a typical PHP CLI project built on [symfony/console](https://symfony.com/doc/current/components/console.html).
 
-A PHP environment is required to develop this project. You can use the PHP that comes with the system, 
-or you can use the static PHP built by this project.
+## Development Environment
 
-Regardless of which PHP you use, in your development environment you need to install these extensions:
+To get started with StaticPHP development, you'll need a PHP development environment with the required dependencies installed.
 
-```
-curl,dom,filter,mbstring,openssl,pcntl,phar,posix,sodium,tokenizer,xml,xmlwriter
-```
+Requirements:
 
-The static-php-cli project itself does not require so many extensions, but during the development process, 
-you will use tools such as Composer and PHPUnit, which require these extensions.
+- PHP 8.4 or later
+- Composer
+- Git
+- PHP extensions: `curl, dom, filter, mbstring, openssl, pcntl, phar, posix, sodium, tokenizer, xml, xmlwriter`
 
-> For micro self-executing binaries built by static-php-cli itself, only `pcntl,posix,mbstring,tokenizer,phar` is required.
+> These PHP extensions are required for StaticPHP's `dev` environment.
 
-## Start development
+### Setup Steps
 
-Continuing down to see the project structure documentation, you can learn how `static-php-cli` works.
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/crazywhalecc/static-php-cli.git
+    cd static-php-cli
+    ```
+
+2. Install PHP dependencies:
+
+    ```bash
+    composer install
+    ```
+
+3. Verify the setup:
+
+    ```bash
+    bin/spc --version
+    ```
+
+---
+
+You can continue reading [Project Structure](./structure) to learn more about StaticPHP's framework architecture.

@@ -1,0 +1,16 @@
+ext-xz:
+  type: php-extension
+  artifact:
+    source:
+      type: git
+      url: 'https://github.com/codemasher/php-ext-xz'
+      rev: main
+      extract: php-src/ext/xz
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - xz
+  php-extension:
+    arg-type: with-path
+    arg-type@windows: enable

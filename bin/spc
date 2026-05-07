@@ -1,13 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-use SPC\ConsoleApplication;
-use SPC\exception\ExceptionHandler;
-
-// Load custom php if exists
-if (PHP_OS_FAMILY !== 'Windows' && PHP_BINARY !== (__DIR__ . '/php') && file_exists(__DIR__ . '/php') && is_executable(__DIR__ . '/php')) {
-    pcntl_exec(__DIR__ . '/php', $argv);
-}
+use StaticPHP\ConsoleApplication;
+use StaticPHP\Exception\ExceptionHandler;
+use StaticPHP\Exception\SPCException;
 
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     // Current: ./bin (git/project mode)
@@ -17,11 +13,6 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     require_once dirname(__DIR__, 3) . '/autoload.php';
 }
 
-// 防止 Micro 打包状态下不支持中文的显示（虽然这个项目目前好像没输出过中文？）
-if (PHP_OS_FAMILY === 'Windows' && Phar::running()) {
-    exec('CHCP 65001');
-}
-
 // Print deprecation notice on PHP < 8.4, use red and highlight background
 if (PHP_VERSION_ID < 80400) {
     echo "\e[43mDeprecation Notice: PHP < 8.4 is deprecated, please upgrade your PHP version.\e[0m\n";
@@ -29,7 +20,9 @@ if (PHP_VERSION_ID < 80400) {
 
 try {
     (new ConsoleApplication())->run();
-} catch (Exception $e) {
-    ExceptionHandler::getInstance()->handle($e);
-    exit(1);
+} catch (SPCException $e) {
+    exit(ExceptionHandler::handleSPCException($e));
+} catch (\Throwable $e) {
+    exit(ExceptionHandler::handleDefaultException($e));
 }
+

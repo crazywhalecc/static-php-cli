@@ -1,0 +1,22 @@
+diff --git a/win32/build/confutils.js b/win32/build/confutils.js
+index 0f97a1a2..4797967d 100644
+--- a/win32/build/confutils.js
++++ b/win32/build/confutils.js
+@@ -3450,7 +3450,7 @@ function toolset_setup_common_libs()
+ function toolset_setup_build_mode()
+ {
+ 	if (PHP_DEBUG == "yes") {
+-		ADD_FLAG("CFLAGS", "/MDd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
++		ADD_FLAG("CFLAGS", "/MTd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
+ 			(TARGET_ARCH == 'x86'?"/ZI":"/Zi"));
+ 		ADD_FLAG("LDFLAGS", "/debug");
+ 		// Avoid problems when linking to release libraries that use the release
+@@ -3462,7 +3462,7 @@ function toolset_setup_build_mode()
+ 			ADD_FLAG("CFLAGS", "/Zi");
+ 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
+ 		}
+-		ADD_FLAG("CFLAGS", "/MD");
++		ADD_FLAG("CFLAGS", "/MT");
+ 		if (PHP_SANITIZER == "yes") {
+ 			if (VS_TOOLSET) {
+ 				ADD_FLAG("CFLAGS", "/Ox /U NDebug /U NDEBUG /D ZEND_DEBUG=1");

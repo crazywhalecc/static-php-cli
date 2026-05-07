@@ -1,0 +1,9 @@
+ext-opentelemetry:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: opentelemetry
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0

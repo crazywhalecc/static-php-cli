@@ -1,0 +1,21 @@
+ext-redis:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: redis
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  suggests:
+    - ext-session
+    - ext-igbinary
+    - ext-msgpack
+  suggests@unix:
+    - ext-session
+    - ext-igbinary
+    - ext-msgpack
+    - zstd
+    - liblz4
+  php-extension:
+    arg-type: custom

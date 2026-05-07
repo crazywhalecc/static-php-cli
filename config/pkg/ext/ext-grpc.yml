@@ -1,0 +1,17 @@
+ext-grpc:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: grpc
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  depends:
+    - grpc
+  lang: cpp
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    arg-type@unix: enable-path

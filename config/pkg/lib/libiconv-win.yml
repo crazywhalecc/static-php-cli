@@ -1,0 +1,13 @@
+libiconv-win:
+  type: library
+  artifact:
+    source:
+      type: git
+      rev: master
+      url: 'https://github.com/static-php/libiconv-win.git'
+    metadata:
+      license-files: [source/COPYING]
+      license: GPL-3.0-or-later
+  static-libs@windows:
+    - libiconv.lib
+    - libiconv_a.lib

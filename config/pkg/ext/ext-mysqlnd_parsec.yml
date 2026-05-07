@@ -1,0 +1,17 @@
+ext-mysqlnd_parsec:
+  type: php-extension
+  artifact:
+    source:
+      type: pie
+      repo: mariadb/mysqlnd_parsec
+      extract: php-src/ext/mysqlnd_parsec
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
+  depends:
+    - ext-mysqlnd
+    - libsodium
+    - openssl
+  php-extension:
+    arg-type: '--enable-mysqlnd_parsec'
+    build-static: false

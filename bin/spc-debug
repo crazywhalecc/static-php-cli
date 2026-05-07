@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Use SPC_XDEBUG=profile to enable Xdebug profiling mode, which will generate profiling files in /tmp.
+# Otherwise, it will enable Xdebug debugging mode, which allows you to connect a debugger to port 9003.
+if [ "$SPC_XDEBUG" = "profile" ]; then
+    XDEBUG_PREFIX="-d xdebug.mode=profile -d xdebug.start_with_request=yes -d xdebug.output_dir=/tmp -d xdebug.output_name=spc-profile.%t.%p.%r"
+else
+    XDEBUG_PREFIX="-d xdebug.mode=debug -d xdebug.client_host=127.0.0.1 -d xdebug.client_port=9003 -d xdebug.start_with_request=yes"
+fi
+
+# This script runs the 'spc' command with Xdebug enabled for debugging purposes.
+php $XDEBUG_PREFIX "$(dirname "$0")/../bin/spc" "$@"

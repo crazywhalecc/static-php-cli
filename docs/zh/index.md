@@ -3,23 +3,26 @@
 layout: home
 
 hero:
-  name: "Static PHP"
-  tagline: "在 Linux、macOS、FreeBSD、Windows 上与 PHP 项目一起构建独立的 PHP 二进制文件，并包含流行的扩展。"
+  name: "StaticPHP"
+  tagline: "StaticPHP 是一款强大的工具，旨在构建包含 PHP、扩展等在内的可移植可执行文件。"
   image:
     src: /images/static-php_nobg.png
-    alt: Static PHP CLI Logo
+    alt: StaticPHP Logo
   actions:
     - theme: brand
       text: 开始使用
-      link: ./guide/
+      link: /zh/guide/
+    - theme: alt
+      text: English Docs
+      link: /en/
 
 features:
   - title: 静态 CLI 二进制
-    details: 您可以轻松地编译一个独立的 PHP 二进制文件以供通用使用，包括 CLI、FPM SAPI。
+    details: 您可以轻松编译一个可独立运行的 PHP 二进制文件用于通用场景，支持 CLI、FPM、CGI、FrankenPHP SAPI。
   - title: Micro 自解压可执行文件
-    details: 您可以编译一个自解压的可执行文件，并将 PHP 源代码与二进制文件打包在一起。
+    details: 您可以编译一个自解压可执行文件，并通过 Micro SAPI 将其与 PHP 源代码一起构建。
   - title: 依赖管理
-    details: static-php-cli 附带依赖项管理，支持安装不同类型的 PHP 扩展。
+    details: StaticPHP 内置依赖管理，支持安装不同类型的 PHP 扩展、包和库。
 ---
 
 <script setup>

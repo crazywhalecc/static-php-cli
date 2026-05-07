@@ -1,0 +1,16 @@
+ext-lz4:
+  type: php-extension
+  artifact:
+    source:
+      type: git
+      url: 'https://github.com/kjdev/php-ext-lz4.git'
+      rev: master
+      extract: php-src/ext/lz4
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - liblz4
+  php-extension:
+    arg-type@unix: '--enable-lz4=@shared_suffix@ --with-lz4-includedir=@build_root_path@'
+    arg-type@windows: '--enable-lz4'

@@ -1,0 +1,16 @@
+libmemcached:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: awesomized/libmemcached
+      match: 1.\d.\d
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
+  lang: cpp
+  static-libs@unix:
+    - libmemcached.a
+    - libmemcachedprotocol.a
+    - libmemcachedutil.a
+    - libhashkit.a

@@ -1,0 +1,88 @@
+diff --git a/win32/dllmain.c b/win32/dllmain.c
+index a507f1e1..ab625bf3 100644
+--- a/win32/dllmain.c
++++ b/win32/dllmain.c
+@@ -38,20 +38,6 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
+ 	switch (reason)
+ 	{
+ 		case DLL_PROCESS_ATTACH:
+-			/*
+-			 * We do not need to check the return value of php_win32_init_gettimeofday()
+-			 * because the symbol bare minimum symbol we need is always available on our
+-			 * lowest supported platform.
+-			 *
+-			 * On Windows 8 or greater, we use a more precise symbol to obtain the system
+-			 * time, which is dynamically. The fallback allows us to proper support
+-			 * Vista/7/Server 2003 R2/Server 2008/Server 2008 R2.
+-			 *
+-			 * Instead simply initialize the global in win32/time.c for gettimeofday()
+-			 * use later on
+-			 */
+-			php_win32_init_gettimeofday();
+-
+ 			ret = ret && php_win32_ioutil_init();
+ 			if (!ret) {
+ 				fprintf(stderr, "ioutil initialization failed");
+diff --git a/win32/time.c b/win32/time.c
+index d1fe5145..57db914e 100644
+--- a/win32/time.c
++++ b/win32/time.c
+@@ -23,42 +23,13 @@
+ #include <errno.h>
+ #include "php_win32_globals.h"
+
+-typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
+-
+-static MyGetSystemTimeAsFileTime timefunc = NULL;
+-
+-#ifdef PHP_EXPORTS
+-static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
+-{/*{{{*/
+-	MyGetSystemTimeAsFileTime timefunc = NULL;
+-	HMODULE hMod = GetModuleHandle("kernel32.dll");
+-
+-	if (hMod) {
+-		/* Max possible resolution <1us, win8/server2012 */
+-		timefunc = (MyGetSystemTimeAsFileTime)GetProcAddress(hMod, "GetSystemTimePreciseAsFileTime");
+-	}
+-
+-	if(!timefunc) {
+-		/* 100ns blocks since 01-Jan-1641 */
+-		timefunc = (MyGetSystemTimeAsFileTime) GetSystemTimeAsFileTime;
+-	}
+-
+-	return timefunc;
+-}/*}}}*/
+-
+-void php_win32_init_gettimeofday(void)
+-{/*{{{*/
+-	timefunc = get_time_func();
+-}/*}}}*/
+-#endif
+-
+ static zend_always_inline int getfilesystemtime(struct timeval *tv)
+ {/*{{{*/
+ 	FILETIME ft;
+ 	unsigned __int64 ff = 0;
+ 	ULARGE_INTEGER fft;
+
+-	timefunc(&ft);
++	GetSystemTimePreciseAsFileTime(&ft);
+
+         /*
+ 	 * Do not cast a pointer to a FILETIME structure to either a
+diff --git a/win32/time.h b/win32/time.h
+index 51090ccf..77d1cbfd 100644
+--- a/win32/time.h
++++ b/win32/time.h
+@@ -54,10 +54,4 @@ PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp );
+
+ PHPAPI int usleep(unsigned int useconds);
+
+-#ifdef PHP_EXPORTS
+-/* This symbols are needed only for the DllMain, but should not be exported
+-	or be available when used with PHP binaries. */
+-void php_win32_init_gettimeofday(void);
+-#endif
+-
+ #endif

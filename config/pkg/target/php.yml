@@ -1,0 +1,33 @@
+php:
+  type: target
+  artifact: php-src
+  depends@macos:
+    - libxml2
+php-cgi:
+  type: virtual-target
+  depends:
+    - php
+php-cli:
+  type: virtual-target
+  depends:
+    - php
+php-embed:
+  type: virtual-target
+  depends:
+    - php
+php-fpm:
+  type: virtual-target
+  depends:
+    - php
+  suggests@linux:
+    - libacl
+php-micro:
+  type: virtual-target
+  artifact:
+    source:
+      type: git
+      extract: php-src/sapi/micro
+      rev: master
+      url: 'https://github.com/static-php/phpmicro'
+  depends:
+    - php

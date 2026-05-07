@@ -2,7 +2,7 @@ name: Tests
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "v3" ]
     types: [ opened, synchronize, reopened ]
     paths:
       - 'src/**'
@@ -106,6 +106,7 @@ jobs:
         run: SPC_LIBC=glibc vendor/bin/phpunit tests/ --no-coverage
 
   define-matrix:
+    if: false # TODO: enable when refactoring workflows
     name: "Define Matrix"
     runs-on: ubuntu-latest
     outputs:
@@ -131,6 +132,7 @@ jobs:
 
 
   build:
+    if: false
     name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
     needs: [define-matrix, php-cs-fixer, phpstan, phpunit]
@@ -204,7 +206,7 @@ jobs:
 
       - name: "Upload logs"
         if: ${{ always() && hashFiles('log/**') != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-logs-${{ matrix.os }}-${{ matrix.php }}
           path: log

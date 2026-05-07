@@ -1,0 +1,7 @@
+ext-glfw:
+  type: php-extension
+  artifact: glfw
+  depends:
+    - glfw
+  php-extension:
+    arg-type@unix: '--enable-glfw --with-glfw-dir=@build_root_path@'

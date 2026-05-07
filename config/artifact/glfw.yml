@@ -1,0 +1,9 @@
+glfw:
+  metadata:
+    license-files:
+      - LICENSE
+    license: MIT
+  source:
+    type: git
+    url: 'https://github.com/mario-deluna/php-glfw'
+    rev: master

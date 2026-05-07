@@ -1,0 +1,12 @@
+ext-inotify:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: inotify
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  php-extension:
+    os:
+      - Linux

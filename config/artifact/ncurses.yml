@@ -1,0 +1,9 @@
+ncurses:
+  binary: hosted
+  metadata:
+    license-files:
+      - COPYING
+  source:
+    type: filelist
+    url: 'https://ftp.gnu.org/pub/gnu/ncurses/'
+    regex: '/href="(?<file>ncurses-(?<version>[^"]+)\.tar\.gz)"/'

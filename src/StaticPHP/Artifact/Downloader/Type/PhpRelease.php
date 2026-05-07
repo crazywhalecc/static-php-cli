@@ -1,0 +1,116 @@
+<?php
+
+declare(strict_types=1);
+
+namespace StaticPHP\Artifact\Downloader\Type;
+
+use StaticPHP\Artifact\ArtifactDownloader;
+use StaticPHP\Artifact\Downloader\DownloadResult;
+use StaticPHP\Exception\DownloaderException;
+
+class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpdateInterface
+{
+    public const string DEFAULT_PHP_DOMAIN = 'https://www.php.net';
+
+    public const string API_URL = '/releases/index.php?json&version={version}';
+
+    public const string DOWNLOAD_URL = '/distributions/php-{version}.tar.xz';
+
+    public const string GIT_URL = 'https://github.com/php/php-src.git';
+
+    public const string GIT_REV = 'master';
+
+    private ?string $sha256 = '';
+
+    public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
+    {
+        $phpver = $downloader->getOption('with-php', '8.4');
+        // Handle 'git' version to clone from php-src repository
+        if ($phpver === 'git') {
+            $this->sha256 = null;
+            return (new Git())->download($name, ['url' => self::GIT_URL, 'rev' => self::GIT_REV], $downloader);
+        }
+        $info = $this->fetchPhpReleaseInfo($name, $config, $downloader);
+        $version = $info['version'];
+        foreach ($info['source'] as $source) {
+            if (str_ends_with($source['filename'], '.tar.xz')) {
+                $this->sha256 = $source['sha256'];
+                $filename = $source['filename'];
+                break;
+            }
+        }
+        if (!isset($filename)) {
+            throw new DownloaderException("No suitable source tarball found for PHP version {$version}");
+        }
+        $url = $config['domain'] ?? self::DEFAULT_PHP_DOMAIN;
+        $url .= str_replace('{version}', $version, self::DOWNLOAD_URL);
+        logger()->debug("Downloading PHP release {$version} from {$url}");
+        $path = DOWNLOAD_PATH . "/{$filename}";
+        default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
+        return DownloadResult::archive($filename, config: $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
+    }
+
+    public function validate(string $name, array $config, ArtifactDownloader $downloader, DownloadResult $result): bool
+    {
+        if ($this->sha256 === null) {
+            logger()->debug('Php-src is downloaded from non-release source, skipping validation.');
+            return true;
+        }
+
+        if ($this->sha256 === '') {
+            logger()->error("No SHA256 checksum available for validation of {$name}.");
+            return false;
+        }
+
+        $path = DOWNLOAD_PATH . "/{$result->filename}";
+        $hash = hash_file('sha256', $path);
+        if ($hash !== $this->sha256) {
+            logger()->error("SHA256 checksum mismatch for {$name}: expected {$this->sha256}, got {$hash}");
+            return false;
+        }
+        logger()->debug("SHA256 checksum validated successfully for {$name}.");
+        return true;
+    }
+
+    public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        $phpver = $downloader->getOption('with-php', '8.4');
+        if ($phpver === 'git') {
+            // git version: delegate to Git checkUpdate with master branch
+            return (new Git())->checkUpdate($name, ['url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $old_version, $downloader);
+        }
+        $info = $this->fetchPhpReleaseInfo($name, $config, $downloader);
+        $new_version = $info['version'];
+        return new CheckUpdateResult(
+            old: $old_version,
+            new: $new_version,
+            needUpdate: $old_version === null || $new_version !== $old_version,
+        );
+    }
+
+    protected function fetchPhpReleaseInfo(string $name, array $config, ArtifactDownloader $downloader): array
+    {
+        $phpver = $downloader->getOption('with-php', '8.4');
+        // Handle 'git' version to clone from php-src repository
+        if ($phpver === 'git') {
+            // cannot fetch release info for git version, return empty info to skip validation
+            throw new DownloaderException("Cannot fetch PHP release info for 'git' version.");
+        }
+
+        $url = $config['domain'] ?? self::DEFAULT_PHP_DOMAIN;
+        $url .= self::API_URL;
+        $url = str_replace('{version}', $phpver, $url);
+        logger()->debug("Fetching PHP release info for version {$phpver} from {$url}");
+
+        // Fetch PHP release info first
+        $info = default_shell()->executeCurl($url, retries: $downloader->getRetry());
+        if ($info === false) {
+            throw new DownloaderException("Failed to fetch PHP release info for version {$phpver}");
+        }
+        $info = json_decode($info, true);
+        if (!is_array($info) || !isset($info['version'])) {
+            throw new DownloaderException("Invalid PHP release info received for version {$phpver}");
+        }
+        return $info;
+    }
+}

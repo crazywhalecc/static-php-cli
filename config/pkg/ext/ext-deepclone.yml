@@ -1,0 +1,10 @@
+ext-deepclone:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtagtar
+      repo: symfony/php-ext-deepclone
+      extract: php-src/ext/deepclone
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01

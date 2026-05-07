@@ -1,0 +1,18 @@
+ext-rdkafka:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: php-rdkafka/php-rdkafka
+      extract: php-src/ext/rdkafka
+    metadata:
+      license-files: [LICENSE]
+      license: MIT
+  depends:
+    - librdkafka
+  lang: cpp
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    arg-type: custom

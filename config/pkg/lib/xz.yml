@@ -1,0 +1,26 @@
+xz:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: tukaani-project/xz
+      match: xz.+\.tar\.xz
+      prefer-stable: true
+    binary: hosted
+    metadata:
+      license-files: [COPYING]
+      license: 0BSD
+  depends@unix:
+    - libiconv
+  headers@unix:
+    - lzma
+  headers@windows:
+    - lzma
+    - lzma.h
+  pkg-configs:
+    - liblzma
+  static-libs@unix:
+    - liblzma.a
+  static-libs@windows:
+    - lzma.lib
+    - liblzma_a.lib

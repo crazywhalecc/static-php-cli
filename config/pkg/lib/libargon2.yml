@@ -1,0 +1,14 @@
+libargon2:
+  type: library
+  artifact:
+    source:
+      type: git
+      rev: master
+      url: 'https://github.com/static-php/phc-winner-argon2'
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  suggests:
+    - libsodium
+  static-libs@unix:
+    - libargon2.a

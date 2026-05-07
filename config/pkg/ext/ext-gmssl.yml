@@ -1,0 +1,12 @@
+ext-gmssl:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: gmssl/GmSSL-PHP
+      extract: php-src/ext/gmssl
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - gmssl

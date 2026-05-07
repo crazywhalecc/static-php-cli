@@ -1,28 +1,31 @@
 ```yaml
-# PHP version to build (default: 8.4)
-php-version: 8.4
+# PHP version to build (default: 8.5)
+php-version: 8.5
 # [REQUIRED] Static PHP extensions to build (list or comma-separated are both accepted)
 extensions: bcmath,fileinfo,phar,zlib,sodium,posix,pcntl
-# Extra libraries to build (list or comma-separated are both accepted)
-libs: [ ]
+# Extra packages to build (list or comma-separated are both accepted)
+packages: [ ]
 # [REQUIRED] Build SAPIs (list or comma-separated are both accepted)
+# Available: cli, micro, fpm, embed, frankenphp, cgi, all
 sapi: cli,micro,fpm
 # Show full console output (default: false)
 debug: false
-# Build options (same as `build` command options, all options are optional)
+# Before build, remove all old build files and sources (default: false)
+clean-build: false
+# Build options (same as `build:php` command options, all options are optional)
 build-options:
-  # Before build, remove all old build files and sources (default: false)
-  with-clean: false
-  # Build with all suggested libraries (default: false)
-  with-suggested-libs: false
-  # Build with all suggested extensions (default: false)
-  with-suggested-exts: false
-  # Build extra shared extensions (list or comma-separated are both accepted)
-  build-shared: [ ]
+  # Build with all suggested packages (libraries and extensions) as well (default: false)
+  with-suggests: false
+  # Build extra shared extensions (comma-separated string)
+  build-shared: ""
   # Build without stripping the binary (default: false)
   no-strip: false
   # Disable Opcache JIT (default: false)
   disable-opcache-jit: false
+  # Enable thread-safe (ZTS) support (default: false)
+  enable-zts: false
+  # Disable smoke test, or for specific SAPIs comma-separated (default: false)
+  no-smoke-test: false
   # PHP configuration options (same as --with-config-file-path)
   with-config-file-path: ""
   # PHP configuration options (same as --with-config-file-scan-dir)
@@ -41,27 +44,42 @@ build-options:
   with-micro-logo: ""
   # Set micro SAPI as win32 mode, without this, micro SAPI will be compiled as a console application (only for Windows, default: false)
   enable-micro-win32: false
+  # Path to a folder to be embedded in FrankenPHP (frankenphp SAPI only)
+  with-frankenphp-app: ""
 
 # Build options for shared extensions (list or comma-separated are both accepted)
 shared-extensions: [ ]
 
 # Download options
 download-options:
+  # Number of parallel downloads (default: 1)
+  parallel: 1
+  # Retries count for downloading sources (default: 0)
+  retry: 0
+  # Prefer source downloads when both source and binary are available (default: false)
+  prefer-source: false
+  # Prefer binary downloads when both source and binary are available (default: false)
+  prefer-binary: false
+  # Only download source artifacts, skip binary artifacts (default: false)
+  source-only: false
+  # Only download binary artifacts, skip source artifacts (default: false)
+  binary-only: false
+  # Ignore download cache for specified packages, comma separated (default: false)
+  ignore-cache: false
+  # Do not use alternative mirror download sources (default: false)
+  no-alt: false
+  # Do not clone shallowly repositories when downloading sources (default: false)
+  no-shallow-clone: false
   # Use custom url for specified sources, format: "{source-name}:{url}" (e.g. "php-src:https://example.com/php-8.4.0.tar.gz")
   custom-url: [ ]
   # Use custom git repo for specified sources, format: "{source-name}:{branch}:{url}" (e.g. "php-src:master:https://github.com/php/php-src.git")
   custom-git: [ ]
-  # Retries count for downloading sources (default: 5)
-  retry: 5
-  # Use pre-built libraries if available (default: false)
-  prefer-pre-built: true
-  # Do not download from alternative sources (default: false)
-  no-alt: false
+  # Use custom local source path, format: "{source-name}:{path}" (e.g. "php-src:/path/to/php-src")
+  custom-local: [ ]
 
 craft-options:
   doctor: true
   download: true
-  build: true
 
 # Extra environment variables
 extra-env:

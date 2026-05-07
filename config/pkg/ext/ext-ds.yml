@@ -1,0 +1,9 @@
+ext-ds:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: ds
+    metadata:
+      license-files: [LICENSE]
+      license: MIT

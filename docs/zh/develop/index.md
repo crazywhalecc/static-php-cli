@@ -1,27 +1,48 @@
 # 开发简介
 
-开发本项目需要安装部署 PHP 环境，以及一些 PHP 项目常用的扩展和 Composer。
+本章节将介绍 StaticPHP 的开发流程，以及了解 StaticPHP 内部工作原理所需的基础知识。
 
-项目的开发环境和运行环境几乎完全一致。你可以参照 **手动构建** 部分安装系统 PHP 或使用本项目预构建的静态 PHP 作为环境。这里不再赘述。
+## 概述
 
-抛开用途，本项目本身其实就是一个 `php-cli` 程序，你可以将它当作一个正常的 PHP 项目进行编辑和开发，同时你需要了解不同系统的 Shell 命令行。
+StaticPHP 是一个静态二进制的构建工具，核心功能是管理构建流程，包括下载和配置 PHP 源码、处理扩展依赖、调用底层构建系统（如 Docker 或本地编译器）等。
 
-本项目目前的目的就是为了编译静态编译的独立 PHP，但主体部分也包含编译很多依赖库的静态版本，所以你可以复用这套编译逻辑，用于构建其他程序的独立二进制版本，例如 Nginx 等。
+从开发的角度来看，StaticPHP 本身是一个开放的框架，它提供了静态构建包括 PHP 在内的各种开源工具的能力。项目主要由 [@crazywhalecc](https://github.com/crazywhalecc) 和 [@henderkes](https://github.com/henderkes) 维护，由广大社区成员贡献代码、完善构建脚本和修复问题。
 
-## 环境准备
+你可以将 StaticPHP 当作一个典型的 PHP 开发的 CLI 项目来看待，它使用了 [symfony/console](https://symfony.com/doc/current/components/console.html) 来构建命令行界面。
 
-开发本项目需要 PHP 环境。你可以使用系统自带的 PHP，也可以使用本项目构建的静态 PHP。
+## 开发环境
 
-无论是使用哪种 PHP，在开发环境，你需要安装这些扩展：
+要开始开发 StaticPHP，你需要设置一个 PHP 开发环境，安装必要的依赖，并了解项目的构建流程。
 
-```
-curl,dom,filter,mbstring,openssl,pcntl,phar,posix,sodium,tokenizer,xml,xmlwriter
-```
+StaticPHP 的开发环境要求如下：
 
-static-php-cli 项目本身不需要这么多扩展，但在开发过程中，你会用到 Composer 和 PHPUnit 等工具，它们需要这些扩展。
+- PHP 8.4 或更高版本
+- Composer
+- Git
+- PHP 扩展：`curl,dom,filter,mbstring,openssl,pcntl,phar,posix,sodium,tokenizer,xml,xmlwriter`
 
-> 对于 static-php-cli 自身构建的 micro 自执行二进制，仅需要 `pcntl,posix,mbstring,tokenizer,phar`。
+> 这些 PHP 扩展是 StaticPHP 的 `dev` 环境依赖。
 
-## 开始开发
+以下是一些基本步骤：
 
-继续向下查看项目结构文档，你可以学习 `static-php-cli` 是如何工作的。
+1. 克隆项目代码：
+
+    ```bash
+    git clone https://github.com/crazywhalecc/static-php-cli.git
+    cd static-php-cli
+    ```
+2. 安装 PHP 依赖：
+
+    ```bash
+    composer install
+    ```
+
+3. 运行测试：
+
+    ```bash
+    bin/spc --version
+    ```
+
+------------------------------
+
+你可以继续阅读 [项目结构](./structure) 来深入了解 StaticPHP 的框架结构。

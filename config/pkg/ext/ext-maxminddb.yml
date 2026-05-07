@@ -1,0 +1,13 @@
+ext-maxminddb:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: maxminddb
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  depends:
+    - libmaxminddb
+  php-extension:
+    arg-type: with

@@ -1,0 +1,18 @@
+ext-imap:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: imap
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - imap
+  suggests:
+    - ext-openssl
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    arg-type: custom

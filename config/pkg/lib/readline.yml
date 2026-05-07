@@ -1,0 +1,14 @@
+readline:
+  type: library
+  artifact:
+    source:
+      type: filelist
+      url: 'https://ftp.gnu.org/pub/gnu/readline/'
+      regex: '/href="(?<file>readline-(?<version>[^"]+)\.tar\.gz)"/'
+    metadata:
+      license-files: [COPYING]
+      license: GPL-3.0-or-later
+  depends:
+    - ncurses
+  static-libs@unix:
+    - libreadline.a

@@ -1,0 +1,17 @@
+watcher:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: e-dant/watcher
+      prefer-stable: true
+    metadata:
+      license-files: [license]
+      license: MIT
+  frameworks:
+    - CoreServices
+  headers:
+    - wtr/watcher-c.h
+  lang: cpp
+  static-libs@unix:
+    - libwatcher-c.a

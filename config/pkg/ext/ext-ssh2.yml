@@ -1,0 +1,15 @@
+ext-ssh2:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: ssh2
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - libssh2
+    - ext-openssl
+    - ext-zlib
+  php-extension:
+    arg-type: with-path

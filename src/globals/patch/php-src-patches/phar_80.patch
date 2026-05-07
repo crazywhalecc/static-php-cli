@@ -1,0 +1,22 @@
+diff --git a/ext/phar/phar.c b/ext/phar/phar.c
+index 2403d77a..c908a1b4 100644
+--- a/ext/phar/phar.c
++++ b/ext/phar/phar.c
+@@ -3309,6 +3309,8 @@ static zend_string *phar_resolve_path(const char *filename, size_t filename_len)
+ 	return phar_find_in_include_path((char *) filename, filename_len, NULL);
+ }
+ 
++char *micro_get_filename(void);
++
+ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type) /* {{{ */
+ {
+ 	zend_op_array *res;
+@@ -3319,7 +3321,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
+ 	if (!file_handle || !file_handle->filename) {
+ 		return phar_orig_compile_file(file_handle, type);
+ 	}
+-	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
++	if ((strstr(file_handle->filename, micro_get_filename()) || strstr(file_handle->filename, ".phar")) && !strstr(file_handle->filename, "://")) {
+ 		if (SUCCESS == phar_open_from_filename((char*)file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL)) {
+ 			if (phar->is_zip || phar->is_tar) {
+ 				zend_file_handle f = *file_handle;

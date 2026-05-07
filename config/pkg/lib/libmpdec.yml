@@ -1,0 +1,15 @@
+libmpdec:
+  type: library
+  artifact:
+    source:
+      type: url
+      url: 'https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.1.tar.gz'
+    metadata:
+      license-files: [COPYRIGHT.txt]
+      license: BSD-2-Clause
+  headers:
+    - mpdecimal.h
+  static-libs@unix:
+    - libmpdec.a
+  static-libs@windows:
+    - libmpdec_a.lib

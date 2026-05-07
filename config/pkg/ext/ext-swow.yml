@@ -1,0 +1,18 @@
+ext-swow:
+  type: php-extension
+  artifact:
+    source:
+      extract: php-src/ext/swow-src
+      type: ghtar
+      repo: swow/swow
+      prefer-stable: true
+    metadata:
+      license: Apache-2.0
+      license-files: [LICENSE]
+  suggests:
+    - openssl
+    - curl
+    - ext-openssl
+    - ext-curl
+  php-extension:
+    arg-type: custom

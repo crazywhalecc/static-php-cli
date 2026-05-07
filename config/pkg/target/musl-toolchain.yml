@@ -1,0 +1,6 @@
+musl-toolchain:
+  type: target
+  artifact:
+    binary:
+      linux-x86_64: { type: url, url: 'https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/x86_64-musl-toolchain.tgz', extract: '{pkg_root_path}/musl-toolchain' }
+      linux-aarch64: { type: url, url: 'https://dl.static-php.dev/static-php-cli/deps/musl-toolchain/aarch64-musl-toolchain.tgz', extract: '{pkg_root_path}/musl-toolchain' }

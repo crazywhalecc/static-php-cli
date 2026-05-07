@@ -1,0 +1,12 @@
+ext-igbinary:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: igbinary
+    metadata:
+      license-files: [COPYING]
+      license: BSD-3-Clause
+  suggests:
+    - ext-session
+    - ext-apcu

@@ -1,25 +1,30 @@
-# static-php-cli
+# StaticPHP
 
 [![Chinese readme](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%20%F0%9F%87%A8%F0%9F%87%B3-moccasin?style=flat-square)](README-zh.md)
 [![English readme](https://img.shields.io/badge/README-English%20%F0%9F%87%AC%F0%9F%87%A7-moccasin?style=flat-square)](README.md)
 [![Releases](https://img.shields.io/packagist/v/crazywhalecc/static-php-cli?include_prereleases&label=Release&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
+[![Discord](https://img.shields.io/discord/nrSRbpMJ?label=Discord&logo=discord&style=flat-square)](https://discord.gg/nrSRbpMJ)
 
-**static-php-cli** is a powerful tool designed for building static, standalone PHP runtime
-with popular extensions.
+**StaticPHP** is a powerful tool designed for building portable executables including PHP, extensions, and more.
+
+> [!IMPORTANT]
+> We are preparing to release **v3**, which will include a project rename from **static-php-cli** to **StaticPHP**.
+> And this branch is for v3. For v2, please check the [v2 branch](https://github.com/crazywhalecc/static-php-cli/tree/main).
+> Please update your references and stay tuned for the official release.
 
 ## Features
 
 - :elephant: Support multiple PHP versions - PHP 8.1, 8.2, 8.3, 8.4, 8.5
 - :handbag: Build single-file PHP executable with zero dependencies
-- :hamburger:Build **[phpmicro](https://github.com/dixyes/phpmicro)** self-extracting executables (combines PHP binary and source code into one file)
+- :hamburger: Build **[phpmicro](https://github.com/static-php/phpmicro)** self-extracting executables (combines PHP binary and source code into one file)
 - :pill: Automatic build environment checker with auto-fix capabilities
-- :zap: `Linux`, `macOS`, `FreeBSD`, `Windows` support
-- :wrench: Configurable source code patching
+- :zap: `Linux`, `macOS`, `Windows` support
+- :wrench: Easy to extend with vendor mode and custom registries
 - :books: Intelligent dependency management
-- 📦 Self-contained `spc` executable (built with [box](https://github.com/box-project/box))
-- :fire: Support 100+ popular [extensions](https://static-php.dev/en/guide/extensions.html)
+- 📦 Self-contained `spc` executable for easy self-installation
+- :fire: Support 100+ popular [PHP extensions](https://static-php.dev/en/guide/extensions.html)
 - :floppy_disk: UPX compression support (reduces binary size by 30-50%)
 
 **Single-file standalone php-cli:**
@@ -36,15 +41,15 @@ with popular extensions.
 
 ```bash
 # For Linux x86_64
-curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/v3/spc-bin/latest/spc-linux-x86_64
 # For Linux aarch64
-curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/v3/spc-bin/latest/spc-linux-aarch64
 # macOS x86_64 (Intel)
-curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/v3/spc-bin/latest/spc-macos-x86_64
 # macOS aarch64 (Apple)
-curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/v3/spc-bin/latest/spc-macos-aarch64
 # Windows (x86_64, win10 build 17063 or later, please install VS2022 first)
-curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+curl.exe -fsSL -o spc.exe https://dl.static-php.dev/v3/spc-bin/latest/spc-windows-x64.exe
 ```
 
 For macOS and Linux, add execute permission first:
@@ -59,15 +64,14 @@ First, create a `craft.yml` file and specify which extensions you want to includ
 
 ```yml
 # PHP version support: 8.1, 8.2, 8.3, 8.4, 8.5
-php-version: 8.4
+php-version: 8.5
 # Put your extension list here
 extensions: "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib"
 sapi:
   - cli
   - micro
-  - fpm
 download-options:
-  prefer-pre-built: true
+  parallel: 10
 ```
 
 Run command:
@@ -76,12 +80,12 @@ Run command:
 ./spc craft
 
 # Output full console log
-./spc craft --debug
+./spc craft -vvv
 ```
 
 ### 3. Static PHP usage
 
-Now you can copy binaries built by static-php-cli to another machine and run with no dependencies:
+Now you can copy binaries built by StaticPHP to another machine and run with no dependencies:
 
 ```
 # php-cli
@@ -91,47 +95,39 @@ buildroot/bin/php -v
 echo '<?php echo "Hello world!\n";' > a.php
 ./spc micro:combine a.php -O my-app
 ./my-app
-
-# php-fpm
-buildroot/bin/php-fpm -v
 ```
 
 ## Documentation
 
-The current README contains basic usage. For all the features of static-php-cli,
-see <https://static-php.dev> .
+The current README contains basic usage. For the complete feature set of StaticPHP,
+see <https://static-php.dev>.
 
 ## Direct Download
 
-If you don't want to build or want to test first, you can download example pre-compiled artifact from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-bulk.yml), or from self-hosted server.
+If you do not want to build yet or just want to test first, you can download example pre-compiled artifacts from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-bulk.yml) or from a self-hosted server.
 
-Below are several precompiled static-php binaries with different extension combinations,
-which can be downloaded directly according to your needs.
+We offer 2 types of extension sets for each PHP version:
 
-| Combination                                                          | Extension Count                                                            | OS           | Comment                        |
-|----------------------------------------------------------------------|----------------------------------------------------------------------------|--------------|--------------------------------|
-| [common](https://dl.static-php.dev/static-php-cli/common/)           | [30+](https://dl.static-php.dev/static-php-cli/common/README.txt)          | Linux, macOS | The binary size is about 7.5MB |
-| [bulk](https://dl.static-php.dev/static-php-cli/bulk/)               | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | The binary size is about 25MB  |
-| [gnu-bulk](https://dl.static-php.dev/static-php-cli/gnu-bulk/)       | [50+](https://dl.static-php.dev/static-php-cli/bulk/README.txt)            | Linux, macOS | Using shared glibc             |
-| [minimal](https://dl.static-php.dev/static-php-cli/minimal/)         | [5](https://dl.static-php.dev/static-php-cli/minimal/README.txt)           | Linux, macOS | The binary size is about 3MB   |
-| [spc-min](https://dl.static-php.dev/static-php-cli/windows/spc-min/) | [5](https://dl.static-php.dev/static-php-cli/windows/spc-min/README.txt)   | Windows      | The binary size is about 3MB   |
-| [spc-max](https://dl.static-php.dev/static-php-cli/windows/spc-max/) | [40+](https://dl.static-php.dev/static-php-cli/windows/spc-max/README.txt) | Windows      | The binary size is about 8.5MB |
+- **gigantic**: Includes as many extensions as possible, the binary size is about 100-150MB.
+- **base**: Only includes a few extensions used by StaticPHP itself, the binary size is about 10MB.
 
-> Linux and Windows supports UPX compression for binaries, which can reduce the size of the binary by 30% to 50%.
-> macOS does not support UPX compression, so the size of the pre-built binaries for mac is larger.
+> WIP
 
 ### Build Online (using GitHub Actions)
 
-When the above direct download binaries cannot meet your needs,
-you can use GitHub Action to easily build a statically compiled PHP,
-and at the same time define the extensions to be compiled by yourself.
+When the direct-download binaries above cannot meet your needs,
+you can use GitHub Actions to easily build a statically compiled PHP
+while defining your own extension list.
 
-1. Fork me.
+1. Fork this repository.
 2. Go to the Actions of the project and select `CI`.
 3. Select `Run workflow`, fill in the PHP version you want to compile, the target type, and the list of extensions. (extensions comma separated, e.g. `bcmath,curl,mbstring`)
-4. After waiting for about a period of time, enter the corresponding task and get `Artifacts`.
+4. After waiting for the workflow to finish, open the corresponding run and download `Artifacts`.
 
 If you enable `debug`, all logs will be output at build time, including compiled logs, for troubleshooting.
+
+> We are also planning to provide a reusable GitHub Actions workflow in the future, 
+> so that you can easily build static PHP in your own repository, without forking this project.
 
 ## Contribution
 
@@ -139,8 +135,6 @@ If the extension you need is missing, you can create an issue.
 If you are familiar with this project, you are also welcome to initiate a pull request.
 
 If you want to contribute documentation, please just edit in `docs/`.
-
-Now there is a [static-php](https://github.com/static-php) organization, which is used to store the repo related to the project.
 
 ## Sponsor this project
 
@@ -154,21 +148,9 @@ You can sponsor me or my project from [GitHub Sponsor](https://github.com/crazyw
 
 ## Open-Source License
 
-This project itself is based on MIT License,
-some newly added extensions and dependencies may originate from the the other projects,
-and the headers of these code files will also be given additional instructions LICENSE and AUTHOR.
-
-These are similar projects:
-
-- [dixyes/lwmbs](https://github.com/dixyes/lwmbs)
-- [swoole/swoole-cli](https://github.com/swoole/swoole-cli)
-
-The project uses some code from [dixyes/lwmbs](https://github.com/dixyes/lwmbs), such as windows static build target and libiconv support.
-lwmbs is licensed under the [Mulan PSL 2](http://license.coscl.org.cn/MulanPSL2).
-
-Due to the special nature of this project,
-many other open source projects such as curl and protobuf will be used during the project compilation process,
-and they all have their own open source licenses.
+This project itself is licensed under MIT.
+Some newly added extensions and dependencies may originate from other projects.
+The headers of those source files may also include additional LICENSE and AUTHOR information.
 
 Please use the `bin/spc dump-license` command to export the open source licenses used in the project after compilation,
 and comply with the corresponding project's LICENSE.

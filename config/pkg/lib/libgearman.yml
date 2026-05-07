@@ -1,0 +1,23 @@
+libgearman:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: gearman/gearmand
+      match: gearmand-.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+      license: BSD-3-Clause
+  depends:
+    - libevent
+    - libuuid
+  suggests:
+    - libmemcached
+  headers@unix:
+    - libgearman-1.0/gearman.h
+  lang: cpp
+  pkg-configs:
+    - gearmand
+  static-libs@unix:
+    - libgearman.a

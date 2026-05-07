@@ -1,0 +1,21 @@
+diff --git a/win32/build/default.manifest b/win32/build/default.manifest
+index a73c2fb53d..52351251e1 100644
+--- a/win32/build/default.manifest
++++ b/win32/build/default.manifest
+@@ -24,4 +24,16 @@
+            <ws2:longPathAware>true</ws2:longPathAware>
+        </windowsSettings>
+    </application>
++   <dependency>
++       <dependentAssembly>
++           <assemblyIdentity
++               type="win32"
++               name="Microsoft.Windows.Common-Controls"
++               version="6.0.0.0"
++               processorArchitecture="*"
++               publicKeyToken="6595b64144ccf1df"
++               language="*"
++           />
++       </dependentAssembly>
++   </dependency>
+ </assembly>

@@ -1,0 +1,17 @@
+ext-xdebug:
+  type: php-extension
+  artifact:
+    source:
+      type: pie
+      repo: xdebug/xdebug
+    metadata:
+      license-files: [LICENSE]
+      license: Xdebug-1.03
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    zend-extension: true
+    build-static: false
+    build-shared: true
+    build-with-php: false

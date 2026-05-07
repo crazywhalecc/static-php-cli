@@ -1,0 +1,15 @@
+net-snmp:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: net-snmp/net-snmp
+    metadata:
+      license-files: [COPYING]
+      license: 'BSD-3-Clause AND MIT'
+  depends:
+    - openssl
+    - zlib
+  pkg-configs:
+    - netsnmp
+    - netsnmp-agent

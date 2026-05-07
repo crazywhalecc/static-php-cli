@@ -1,0 +1,12 @@
+lerc:
+  type: library
+  artifact:
+    source:
+      type: ghtar
+      repo: Esri/lerc
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+  lang: cpp
+  static-libs@unix:
+    - libLerc.a

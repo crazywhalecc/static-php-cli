@@ -1,0 +1,13 @@
+libde265:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: strukturag/libde265
+      match: libde265-.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [COPYING]
+  lang: cpp
+  static-libs@unix:
+    - libde265.a

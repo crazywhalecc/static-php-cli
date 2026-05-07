@@ -1,0 +1,13 @@
+ext-protobuf:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: protobuf
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-3-Clause
+  php-extension:
+    os:
+      - Linux
+      - Darwin

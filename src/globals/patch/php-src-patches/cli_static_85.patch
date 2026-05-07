@@ -1,0 +1,13 @@
+diff --git a/sapi/cli/php_cli.c b/sapi/cli/php_cli.c
+index e212a0f7..f16e8ea9 100644
+--- a/sapi/cli/php_cli.c
++++ b/sapi/cli/php_cli.c
+@@ -98,7 +98,7 @@ PHPAPI extern char *php_ini_scanned_files;
+ 
+ #if defined(PHP_WIN32)
+ #if defined(ZTS)
+-ZEND_TSRMLS_CACHE_DEFINE()
++// ZEND_TSRMLS_CACHE_DEFINE()
+ #endif
+ static DWORD orig_cp = 0;
+ #endif

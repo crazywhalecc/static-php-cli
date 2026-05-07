@@ -1,0 +1,18 @@
+libmaxminddb:
+  type: library
+  artifact:
+    source:
+      type: ghrel
+      repo: maxmind/libmaxminddb
+      match: libmaxminddb-.+\.tar\.gz
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  headers:
+    - maxminddb.h
+    - maxminddb_config.h
+  static-libs@unix:
+    - libmaxminddb.a
+  static-libs@windows:
+    - libmaxminddb.lib

@@ -1,0 +1,6 @@
+rust:
+  type: target
+  artifact:
+    binary: custom
+  path:
+    - '{pkg_root_path}/rust/bin'

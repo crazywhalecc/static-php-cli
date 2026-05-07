@@ -1,0 +1,10 @@
+ext-simdjson:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: simdjson
+    metadata:
+      license-files: [LICENSE]
+      license: Apache-2.0
+  lang: cpp

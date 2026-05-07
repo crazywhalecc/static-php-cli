@@ -1,0 +1,16 @@
+ext-gearman:
+  type: php-extension
+  artifact:
+    source:
+      type: pecl
+      name: gearman
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  depends:
+    - libgearman
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    arg-type: '--with-gearman@shared_path_suffix@'
