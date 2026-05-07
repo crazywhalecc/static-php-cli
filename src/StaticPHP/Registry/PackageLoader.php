@@ -7,6 +7,7 @@ namespace StaticPHP\Registry;
 use StaticPHP\Attribute\Package\AfterStage;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\BuildFor;
+use StaticPHP\Attribute\Package\ConditionalOn;
 use StaticPHP\Attribute\Package\CustomPhpConfigureArg;
 use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\Package\Info;
@@ -50,14 +51,14 @@ class PackageLoader
     /**
      * Source metadata for #[BeforeStage] hooks, keyed by target package name → stage name.
      *
-     * @var array<string, array<string, list<array{class: string, method: string, only_when: ?string}>>>
+     * @var array<string, array<string, list<array{class: string, method: string, only_when: ?string, conditionals: list<class-string>}>>>
      */
     private static array $before_stage_meta = [];
 
     /**
      * Source metadata for #[AfterStage] hooks, keyed by target package name → stage name.
      *
-     * @var array<string, array<string, list<array{class: string, method: string, only_when: ?string}>>>
+     * @var array<string, array<string, list<array{class: string, method: string, only_when: ?string, conditionals: list<class-string>}>>>
      */
     private static array $after_stage_meta = [];
 
@@ -369,9 +370,14 @@ class PackageLoader
         // match condition
         $installer = ApplicationContext::get(PackageInstaller::class);
         $stages = self::$before_stages[$package_name][$stage] ?? [];
-        foreach ($stages as [$callback, $only_when_package_resolved]) {
+        foreach ($stages as [$callback, $only_when_package_resolved, $conditionals]) {
             if ($only_when_package_resolved !== null && !$installer->isPackageResolved($only_when_package_resolved)) {
                 continue;
+            }
+            foreach ($conditionals as $class) {
+                if (!ApplicationContext::has($class)) {
+                    continue 2;
+                }
             }
             yield $callback;
         }
@@ -383,9 +389,14 @@ class PackageLoader
         $installer = ApplicationContext::get(PackageInstaller::class);
         $stages = self::$after_stages[$package_name][$stage] ?? [];
         $result = [];
-        foreach ($stages as [$callback, $only_when_package_resolved]) {
+        foreach ($stages as [$callback, $only_when_package_resolved, $conditionals]) {
             if ($only_when_package_resolved !== null && !$installer->isPackageResolved($only_when_package_resolved)) {
                 continue;
+            }
+            foreach ($conditionals as $class) {
+                if (!ApplicationContext::has($class)) {
+                    continue 2;
+                }
             }
             $result[] = $callback;
         }
@@ -422,7 +433,7 @@ class PackageLoader
                 }
                 $pkg = self::getPackage($package_name);
                 foreach ($stages as $stage_name => $before_events) {
-                    foreach ($before_events as [$event_callable, $only_when_package_resolved]) {
+                    foreach ($before_events as [$event_callable, $only_when_package_resolved, $conditionals]) {
                         // check only_when_package_resolved package exists
                         if ($only_when_package_resolved !== null && !self::hasPackage($only_when_package_resolved)) {
                             throw new RegistryException("{$event_name} event in package [{$package_name}] for stage [{$stage_name}] has unknown only_when_package_resolved package [{$only_when_package_resolved}].");
@@ -488,12 +499,17 @@ class PackageLoader
             throw new RegistryException('Package name must not be empty when no package context is available for BeforeStage attribute.');
         }
         $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
-        self::$before_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved];
+        $conditionals = array_map(
+            fn (\ReflectionAttribute $a) => $a->newInstance()->class,
+            [...$method->getDeclaringClass()->getAttributes(ConditionalOn::class), ...$method->getAttributes(ConditionalOn::class)],
+        );
+        self::$before_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved, $conditionals];
         $registering_class = get_class($instance_class);
         self::$before_stage_meta[$package_name][$stage][] = [
             'class' => $registering_class,
             'method' => $method->getName(),
             'only_when' => $method_instance->only_when_package_resolved,
+            'conditionals' => $conditionals,
         ];
         self::$class_before_stage_meta[$registering_class][$package_name][$stage][] = [
             'method' => $method->getName(),
@@ -513,12 +529,17 @@ class PackageLoader
             throw new RegistryException('Package name must not be empty when no package context is available for AfterStage attribute.');
         }
         $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
-        self::$after_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved];
+        $conditionals = array_map(
+            fn (\ReflectionAttribute $a) => $a->newInstance()->class,
+            [...$method->getDeclaringClass()->getAttributes(ConditionalOn::class), ...$method->getAttributes(ConditionalOn::class)],
+        );
+        self::$after_stages[$package_name][$stage][] = [[$instance_class, $method->getName()], $method_instance->only_when_package_resolved, $conditionals];
         $registering_class = get_class($instance_class);
         self::$after_stage_meta[$package_name][$stage][] = [
             'class' => $registering_class,
             'method' => $method->getName(),
             'only_when' => $method_instance->only_when_package_resolved,
+            'conditionals' => $conditionals,
         ];
         self::$class_after_stage_meta[$registering_class][$package_name][$stage][] = [
             'method' => $method->getName(),
@@ -541,6 +562,7 @@ class PackageLoader
             ResolveBuild::class => 'ResolveBuild',
             Info::class => 'Info',
             Validate::class => 'Validate',
+            ConditionalOn::class => 'ConditionalOn',
             default => null,
         };
     }
