@@ -34,7 +34,7 @@ trait curl
             ->build();
 
         $this->patchPkgconfPrefix(['libcurl.pc']);
-        // On glibc <2.28 without built-in pthreads, FindThreads
+        // On glibc <2.28 without built-in pthreads, FindThreads sets
         // INTERFACE_LINK_LIBRARIES to '-lpthread'
         // curls .pc generator walks and prepends '-l' to each
         // entry, resulting in -l-lpthread
