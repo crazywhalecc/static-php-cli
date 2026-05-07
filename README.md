@@ -9,6 +9,11 @@
 
 **StaticPHP** is a powerful tool designed for building portable executables including PHP, extensions, and more.
 
+> [!IMPORTANT]
+> We are preparing to release **v3**, which will include a project rename from **static-php-cli** to **StaticPHP**.
+> And this branch is for v3. For v2, please check the [v2 branch](https://github.com/crazywhalecc/static-php-cli/tree/main).
+> Please update your references and stay tuned for the official release.
+
 ## Features
 
 - :elephant: Support multiple PHP versions - PHP 8.1, 8.2, 8.3, 8.4, 8.5

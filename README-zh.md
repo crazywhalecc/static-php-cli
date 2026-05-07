@@ -9,6 +9,11 @@
 
 **StaticPHP** 是一个强大的工具，用于构建可移植的可执行文件，包括 PHP、扩展等。
 
+> [!IMPORTANT]
+> 我们正准备发布 **v3** 版本，届时项目名称将从 **static-php-cli** 更改为 **StaticPHP**。
+> 此分支对应 v3 版本。v2 版本请查看 [v2 分支](https://github.com/crazywhalecc/static-php-cli/tree/main)。
+> 请更新您的参考资料，并关注正式版发布。
+
 ## 特性
 
 - :elephant: 支持多个 PHP 版本 - PHP 8.1, 8.2, 8.3, 8.4, 8.5
