@@ -13,7 +13,8 @@ trait libde265
         UnixCMakeExecutor::create($this)
             ->addConfigureArgs(
                 '-DENABLE_SDL=OFF',
-                '-DENABLE_DECODER=OFF'
+                '-DENABLE_DECODER=OFF',
+                '-DHAVE_NEON=OFF',
             )
             ->build();
         $this->patchPkgconfPrefix(['libde265.pc']);

@@ -11,6 +11,9 @@ use SPC\exception\ValidationException;
 use SPC\exception\WrongUsageException;
 use SPC\store\Config;
 use SPC\store\FileSystem;
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
+use SPC\util\GlobalEnvManager;
 use SPC\util\SPCConfigUtil;
 use SPC\util\SPCTarget;
 
@@ -231,7 +234,7 @@ class Extension
         if (preg_match('/^(.*_SHARED_LIBADD\s*=\s*)(.*)$/m', $makefileContent, $matches)) {
             $prefix = $matches[1];
             $currentLibs = trim($matches[2]);
-            $newLibs = trim("{$currentLibs} {$staticLibs} {$lstdcpp}");
+            $newLibs = clean_spaces("{$currentLibs} {$staticLibs} {$lstdcpp}");
             $deduplicatedLibs = deduplicate_flags($newLibs);
 
             FileSystem::replaceFileRegex(
@@ -543,6 +546,11 @@ class Extension
      */
     protected function getSharedExtensionEnv(): array
     {
+        $compiler_extra = getenv('SPC_COMPILER_EXTRA') ?: '';
+        if (!str_contains($compiler_extra, '-lcompiler_rt') && ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $compiler_extra = trim($compiler_extra . ' -lcompiler_rt');
+            GlobalEnvManager::putenv("SPC_COMPILER_EXTRA={$compiler_extra}");
+        }
         $config = (new SPCConfigUtil($this->builder, ['no_php' => true]))->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';

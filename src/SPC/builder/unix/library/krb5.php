@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\toolchain\ToolchainManager;
+use SPC\toolchain\ZigToolchain;
 use SPC\util\executor\UnixAutoconfExecutor;
 use SPC\util\SPCConfigUtil;
 
@@ -39,12 +41,16 @@ trait krb5
             $extraEnv['LDFLAGS'] = '-framework Kerberos';
             $args[] = 'ac_cv_func_secure_getenv=no';
         }
-        UnixAutoconfExecutor::create($this)
+        $make = UnixAutoconfExecutor::create($this)
             ->appendEnv($extraEnv)
             ->optionalLib('ldap', '--with-ldap', '--without-ldap')
             ->optionalLib('libedit', '--with-libedit', '--without-libedit')
-            ->configure(...$args)
-            ->make();
+            ->configure(...$args);
+
+        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $make->exec('find . -name Makefile -exec sed -i "s/-Werror=incompatible-pointer-types//g" {} +');
+        }
+        $make->make();
         $this->patchPkgconfPrefix([
             'krb5-gssapi.pc',
             'krb5.pc',

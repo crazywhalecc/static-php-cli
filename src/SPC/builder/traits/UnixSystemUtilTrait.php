@@ -50,7 +50,7 @@ trait UnixSystemUtilTrait
         $defined = array_unique($defined);
         sort($defined);
         // export
-        if (SPCTarget::getTargetOS() === 'Linux') {
+        if (SPCTarget::getTargetOS() === 'Linux' && ToolchainManager::getToolchainClass() !== ZigToolchain::class) {
             file_put_contents("{$lib_file}.dynsym", "{\n" . implode("\n", array_map(fn ($x) => "  {$x};", $defined)) . "};\n");
         } else {
             file_put_contents("{$lib_file}.dynsym", implode("\n", $defined) . "\n");
@@ -71,10 +71,6 @@ trait UnixSystemUtilTrait
         }
         if (!is_file($symbol_file)) {
             throw new SPCInternalException("The symbol file {$symbol_file} does not exist, please check if nm command is available.");
-        }
-        // https://github.com/ziglang/zig/issues/24662
-        if (ToolchainManager::getToolchainClass() === ZigToolchain::class) {
-            return '-Wl,--export-dynamic'; // needs release 0.16, can be removed then
         }
         // macOS/zig
         if (SPCTarget::getTargetOS() !== 'Linux' || ToolchainManager::getToolchainClass() === ZigToolchain::class) {

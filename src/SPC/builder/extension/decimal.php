@@ -16,8 +16,14 @@ class decimal extends Extension
     {
         FileSystem::replaceFileStr(
             $this->source_dir . '/php_decimal.c',
-            'zend_module_entry decimal_module_entry',
-            'zend_module_entry php_decimal_module_entry'
+            [
+                'zend_module_entry decimal_module_entry',
+                'ZEND_GET_MODULE(decimal)',
+            ],
+            [
+                'zend_module_entry php_decimal_module_entry',
+                'ZEND_GET_MODULE(php_decimal)',
+            ]
         );
         FileSystem::replaceFileStr(
             $this->source_dir . '/config.w32',

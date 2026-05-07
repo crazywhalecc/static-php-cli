@@ -26,12 +26,12 @@ $test_os = [
     // 'macos-15-intel', // bin/spc for x86_64
     // 'macos-15', // bin/spc for arm64
     // 'ubuntu-latest', // bin/spc-alpine-docker for x86_64
-    // 'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
+    'ubuntu-22.04', // bin/spc-gnu-docker for x86_64
     // 'ubuntu-24.04', // bin/spc for x86_64
-    // 'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
+    'ubuntu-22.04-arm', // bin/spc-gnu-docker for arm64
     // 'ubuntu-24.04-arm', // bin/spc for arm64
-    'windows-2022', // .\bin\spc.ps1
-    'windows-2025',
+    // 'windows-2022', // .\bin\spc.ps1
+    // 'windows-2025',
 ];
 
 // whether enable thread safe
@@ -43,15 +43,15 @@ $no_strip = false;
 $upx = false;
 
 // whether to test frankenphp build, only available for macOS and linux
-$frankenphp = false;
+$frankenphp = true;
 
 // prefer downloading pre-built packages to speed up the build process
-$prefer_pre_built = false;
+$prefer_pre_built = true;
 
 // If you want to test your added extensions and libs, add below (comma separated, example `bcmath,openssl`).
 $extensions = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'decimal',
-    'Windows' => 'decimal',
+    'Linux', 'Darwin' => 'curl,gd',
+    'Windows' => 'bcmath,brotli,bz2,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_pgsql,pgsql,session,simdjson,simplexml,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib',
 };
 
 // If you want to test shared extensions, add them below (comma separated, example `bcmath,openssl`).
@@ -66,7 +66,7 @@ $with_suggested_libs = true;
 
 // If you want to test extra libs for extensions, add them below (comma separated, example `libwebp,libavif`). Unnecessary, when $with_suggested_libs is true.
 $with_libs = match (PHP_OS_FAMILY) {
-    'Linux', 'Darwin' => 'krb5',
+    'Linux', 'Darwin' => '',
     'Windows' => '',
 };
 

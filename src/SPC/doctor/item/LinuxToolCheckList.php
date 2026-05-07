@@ -109,7 +109,7 @@ class LinuxToolCheckList
     public function fixBuildTools(array $distro, array $missing): bool
     {
         $install_cmd = match ($distro['dist']) {
-            'ubuntu', 'debian', 'Deepin' => 'apt-get install -y',
+            'ubuntu', 'debian', 'linuxmint', 'Deepin' => 'apt-get install -y',
             'alpine' => 'apk add',
             'redhat' => 'dnf install -y',
             'centos' => 'yum install -y',
