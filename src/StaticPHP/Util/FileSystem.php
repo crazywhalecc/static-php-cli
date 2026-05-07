@@ -194,7 +194,7 @@ class FileSystem
         if (!is_dir($dir)) {
             return false;
         }
-        logger()->debug('scanning directory ' . $dir);
+        // logger()->debug('scanning directory ' . $dir);
         $scan_list = scandir($dir);
         if ($scan_list === false) {
             logger()->warning('Scan dir failed, cannot scan directory: ' . $dir);
@@ -303,7 +303,7 @@ class FileSystem
             logger()->warning('Scan dir failed, not directory.');
             return false;
         }
-        logger()->debug('scanning directory ' . $dir);
+        // logger()->debug('scanning directory ' . $dir);
         // 套上 zm_dir
         $scan_list = scandir($dir);
         if ($scan_list === false) {
