@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-BUILDROOT_ABS="$(realpath "$SCRIPT_DIR/../../../buildroot/include" 2>/dev/null || true)"
+BUILDROOT_INC="${BUILD_INCLUDE_PATH:-$SCRIPT_DIR/../../../buildroot/include}"
+BUILDROOT_ABS="$(realpath "$BUILDROOT_INC" 2>/dev/null || true)"
 PARSED_ARGS=()
+
+is_buildroot_inc() {
+    [[ -n "$BUILDROOT_ABS" && "$1" == "$BUILDROOT_ABS" ]]
+}
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -11,13 +16,13 @@ while [[ $# -gt 0 ]]; do
             ARG="$1"
             shift
             ARG_ABS="$(realpath "$ARG" 2>/dev/null || true)"
-            [[ "$ARG_ABS" == "$BUILDROOT_ABS" ]] && PARSED_ARGS+=("-I$ARG") || PARSED_ARGS+=("-isystem" "$ARG")
+            is_buildroot_inc "$ARG_ABS" && PARSED_ARGS+=("-I$ARG") || PARSED_ARGS+=("-isystem" "$ARG")
             ;;
         -isystem*)
             ARG="${1#-isystem}"
             shift
             ARG_ABS="$(realpath "$ARG" 2>/dev/null || true)"
-            [[ "$ARG_ABS" == "$BUILDROOT_ABS" ]] && PARSED_ARGS+=("-I$ARG") || PARSED_ARGS+=("-isystem$ARG")
+            is_buildroot_inc "$ARG_ABS" && PARSED_ARGS+=("-I$ARG") || PARSED_ARGS+=("-isystem$ARG")
             ;;
         -march=*|-mcpu=*)
             OPT_NAME="${1%%=*}"
@@ -30,6 +35,10 @@ while [[ $# -gt 0 ]]; do
             # replace -march=x86-64 with -march=x86_64
             OPT_VALUE="${OPT_VALUE//-/_}"
             PARSED_ARGS+=("${OPT_NAME}=${OPT_VALUE}")
+            shift
+            ;;
+        -Wlogical-op|-Wduplicated-cond|-Wduplicated-branches|-Wno-clobbered|-Wjump-misses-init|-Wformat-truncation|-Warray-bounds=*|-Wimplicit-fallthrough=*)
+            # GCC-only warning flags that clang/zig doesn't recognize; drop to silence -Wunknown-warning-option noise
             shift
             ;;
         *)
