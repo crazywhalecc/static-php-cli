@@ -51,6 +51,6 @@ without modifying the default `config/env.ini` file.
 SPC_CONCURRENCY=4
 
 [linux]
-SPC_DEFAULT_C_FLAGS="-O3"
+SPC_DEFAULT_CFLAGS="-O3"
 ```
 

@@ -34,7 +34,7 @@ class libjxl extends LibraryPackage
             );
 
         if ($toolchain instanceof ZigToolchain) {
-            $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: getenv('CFLAGS') ?: '';
+            $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: getenv('CFLAGS') ?: '';
             $has_avx512 = str_contains($cflags, '-mavx512') || str_contains($cflags, '-march=x86-64-v4');
             if (!$has_avx512) {
                 $cmake->addConfigureArgs(

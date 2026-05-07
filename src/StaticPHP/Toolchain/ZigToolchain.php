@@ -44,13 +44,13 @@ class ZigToolchain implements UnixToolchainInterface
     {
         GlobalEnvManager::addPathIfNotExists($this->getPath());
         f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
-        $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: '';
+        $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
         $cxxflags = getenv('SPC_DEFAULT_CXX_FLAGS') ?: '';
         $extraCflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
         $cflags = trim($cflags . ' -Wno-date-time');
         $cxxflags = trim($cxxflags . ' -Wno-date-time');
         $extraCflags = trim($extraCflags . ' -Wno-date-time');
-        GlobalEnvManager::putenv("SPC_DEFAULT_C_FLAGS={$cflags}");
+        GlobalEnvManager::putenv("SPC_DEFAULT_CFLAGS={$cflags}");
         GlobalEnvManager::putenv("SPC_DEFAULT_CXX_FLAGS={$cxxflags}");
         GlobalEnvManager::putenv("SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS={$extraCflags}");
         GlobalEnvManager::putenv('RANLIB=zig-ranlib');
@@ -61,7 +61,7 @@ class ZigToolchain implements UnixToolchainInterface
             $extra_libs = trim($extra_libs . ' -lunwind');
             GlobalEnvManager::putenv("SPC_EXTRA_LIBS={$extra_libs}");
         }
-        $cflags = getenv('SPC_DEFAULT_C_FLAGS') ?: getenv('CFLAGS') ?: '';
+        $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: getenv('CFLAGS') ?: '';
         $has_avx512 = str_contains($cflags, '-mavx512') || str_contains($cflags, '-march=x86-64-v4');
         if (!$has_avx512) {
             $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';

@@ -46,6 +46,6 @@ SPC_CONCURRENCY=4 spc build:php "mbstring,pcntl" --build-cli
 SPC_CONCURRENCY=4
 
 [linux]
-SPC_DEFAULT_C_FLAGS="-O3"
+SPC_DEFAULT_CFLAGS="-O3"
 ```
 

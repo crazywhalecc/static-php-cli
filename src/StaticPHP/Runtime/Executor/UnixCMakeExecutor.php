@@ -267,7 +267,7 @@ class UnixCMakeExecutor extends Executor
         }
         $os = PHP_OS_FAMILY;
         $target_arch = arch2gnu(php_uname('m'));
-        $cflags = getenv('SPC_DEFAULT_C_FLAGS');
+        $cflags = getenv('SPC_DEFAULT_CFLAGS');
         $cc = getenv('CC');
         $cxx = getenv('CXX');
         $include = BUILD_INCLUDE_PATH;
