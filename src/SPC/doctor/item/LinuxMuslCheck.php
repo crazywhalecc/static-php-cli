@@ -74,9 +74,10 @@ class LinuxMuslCheck
         SourcePatcher::patchFile('musl-1.2.5_CVE-2025-26519_0002.patch', SOURCE_PATH . "/{$musl_version_name}");
         logger()->info('Installing musl wrapper');
         shell()->cd(SOURCE_PATH . "/{$musl_version_name}")
-            ->exec('CC=gcc CXX=g++ AR=ar LD=ld ./configure --disable-gcc-wrapper')
-            ->exec('CC=gcc CXX=g++ AR=ar LD=ld make -j')
-            ->exec("CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
+            ->setEnv(['CC' => 'gcc', 'CXX' => 'g++', 'AR' => 'ar', 'LD' => 'ld', 'RANLIB' => 'ranlib'])
+            ->exec('./configure --disable-gcc-wrapper')
+            ->exec('make -j')
+            ->exec("{$prefix}make install");
         // TODO: add path using putenv instead of editing /etc/profile
         return true;
     }

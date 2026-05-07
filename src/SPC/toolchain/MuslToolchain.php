@@ -16,6 +16,7 @@ class MuslToolchain implements ToolchainInterface
         GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_CC={$arch}-linux-musl-gcc");
         GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_CXX={$arch}-linux-musl-g++");
         GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_AR={$arch}-linux-musl-ar");
+        GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_RANLIB={$arch}-linux-musl-ranlib");
         GlobalEnvManager::putenv("SPC_LINUX_DEFAULT_LD={$arch}-linux-musl-ld");
         GlobalEnvManager::addPathIfNotExists('/usr/local/musl/bin');
         GlobalEnvManager::addPathIfNotExists("/usr/local/musl/{$arch}-linux-musl/bin");
