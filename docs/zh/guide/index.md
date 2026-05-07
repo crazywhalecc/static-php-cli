@@ -53,6 +53,10 @@ micro.sfx + your-app.phar = your-app  （可直接运行，无任何依赖）
 StaticPHP 支持将 FrankenPHP 连同所需扩展一起静态编译，
 最终产物是一个包含完整 Web 服务器的单一可执行文件，无需 Nginx、PHP-FPM，直接部署即可运行。
 
+## 社区
+
+加入我们的 [Discord 服务器](https://discord.gg/nrSRbpMJ)，提问、分享构建成果，与其他 StaticPHP 用户交流。
+
 ## 接下来
 
 - [安装 StaticPHP](./installation) — 安装 StaticPHP 构建工具

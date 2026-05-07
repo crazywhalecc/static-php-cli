@@ -45,6 +45,10 @@ Build your CLI with [symfony/console](https://symfony.com/doc/current/components
 
 [FrankenPHP](https://frankenphp.dev) is a modern PHP app server with built-in HTTP/2, HTTP/3, and automatic HTTPS. StaticPHP can compile FrankenPHP together with your chosen extensions into one binary. The result is a complete web server in a single file — no Nginx, no PHP-FPM, just deploy and run.
 
+## Community
+
+Join our [Discord server](https://discord.gg/nrSRbpMJ) to ask questions, share your builds, and connect with other StaticPHP users.
+
 ## Next steps
 
 - [Installation](./installation) — Get the StaticPHP build tool
