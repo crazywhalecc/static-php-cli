@@ -3,7 +3,7 @@ ext-rdkafka:
   artifact:
     source:
       type: ghtar
-      repo: arnaud-lb/php-rdkafka
+      repo: php-rdkafka/php-rdkafka
       extract: php-src/ext/rdkafka
     metadata:
       license-files: [LICENSE]
