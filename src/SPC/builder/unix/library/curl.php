@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\store\FileSystem;
 use SPC\util\executor\UnixCMakeExecutor;
 
 trait curl
@@ -32,8 +33,16 @@ trait curl
             )
             ->build();
 
-        // patch pkgconf
         $this->patchPkgconfPrefix(['libcurl.pc']);
+        // On glibc <2.28 without built-in pthreads, FindThreads
+        // INTERFACE_LINK_LIBRARIES to '-lpthread'
+        // curls .pc generator walks and prepends '-l' to each
+        // entry, resulting in -l-lpthread
+        FileSystem::replaceFileRegex(
+            BUILD_LIB_PATH . '/pkgconfig/libcurl.pc',
+            '/-l(-l\S+)/',
+            '$1'
+        );
         shell()->cd(BUILD_LIB_PATH . '/cmake/CURL/')
             ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"" . BUILD_LIB_PATH . "/libcurl.a\"|g' CURLTargets-release.cmake");
     }
