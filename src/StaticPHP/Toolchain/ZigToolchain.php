@@ -45,13 +45,13 @@ class ZigToolchain implements UnixToolchainInterface
         GlobalEnvManager::addPathIfNotExists($this->getPath());
         f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
         $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
-        $cxxflags = getenv('SPC_DEFAULT_CXX_FLAGS') ?: '';
+        $cxxflags = getenv('SPC_DEFAULT_CXXFLAGS') ?: '';
         $extraCflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
         $cflags = trim($cflags . ' -Wno-date-time');
         $cxxflags = trim($cxxflags . ' -Wno-date-time');
         $extraCflags = trim($extraCflags . ' -Wno-date-time');
         GlobalEnvManager::putenv("SPC_DEFAULT_CFLAGS={$cflags}");
-        GlobalEnvManager::putenv("SPC_DEFAULT_CXX_FLAGS={$cxxflags}");
+        GlobalEnvManager::putenv("SPC_DEFAULT_CXXFLAGS={$cxxflags}");
         GlobalEnvManager::putenv("SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS={$extraCflags}");
         GlobalEnvManager::putenv('RANLIB=zig-ranlib');
         GlobalEnvManager::putenv('OBJCOPY=zig-objcopy');
