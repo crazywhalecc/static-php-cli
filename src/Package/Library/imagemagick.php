@@ -19,10 +19,10 @@ class imagemagick
     #[BuildFor('Linux')]
     public function buildUnix(LibraryPackage $lib, ToolchainInterface $toolchain): void
     {
-        $ldflags = $original_ldflags = getenv('SPC_DEFAULT_LD_FLAGS');
+        $ldflags = $original_ldflags = getenv('SPC_DEFAULT_LDFLAGS');
         if (str_contains($ldflags, '-Wl,--as-needed')) {
             $ldflags = str_replace('-Wl,--as-needed', '', $ldflags);
-            f_putenv("SPC_DEFAULT_LD_FLAGS={$ldflags}");
+            f_putenv("SPC_DEFAULT_LDFLAGS={$ldflags}");
         }
 
         $ac = UnixAutoconfExecutor::create($lib)
@@ -58,7 +58,7 @@ class imagemagick
 
         $ac->configure()->make();
 
-        f_putenv("SPC_DEFAULT_LD_FLAGS={$original_ldflags}");
+        f_putenv("SPC_DEFAULT_LDFLAGS={$original_ldflags}");
 
         $filelist = [
             'ImageMagick.pc',

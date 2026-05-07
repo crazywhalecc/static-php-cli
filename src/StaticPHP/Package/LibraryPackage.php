@@ -160,8 +160,8 @@ class LibraryPackage extends Package
         // get environment variable
         $env = getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
         // get default ld flags
-        $arch_ld_flags = getenv('SPC_DEFAULT_LD_FLAGS') ?: '';
-        if (!empty(getenv('SPC_DEFAULT_LD_FLAGS')) && !str_contains($env, $arch_ld_flags)) {
+        $arch_ld_flags = getenv('SPC_DEFAULT_LDFLAGS') ?: '';
+        if (!empty(getenv('SPC_DEFAULT_LDFLAGS')) && !str_contains($env, $arch_ld_flags)) {
             $env .= ' ' . $arch_ld_flags;
         }
         return trim($env);
