@@ -22,7 +22,15 @@ class GenExtTestMatrixCommand extends BaseCommand
      * Extensions excluded from specific OS matrix entries.
      */
     private const array OS_EXCLUDE = [
-        'linux' => ['ext-glfw'],
+        'linux' => ['glfw'],
+    ];
+
+    /**
+     * Extra build flags appended when a matrix entry contains any of the listed extensions.
+     * Key: extension display name (without ext- prefix). Value: extra flags string.
+     */
+    private const array EXTRA_BUILD_FLAGS = [
+        'parallel' => '--enable-zts',
     ];
 
     protected bool $no_motd = true;
@@ -59,7 +67,7 @@ class GenExtTestMatrixCommand extends BaseCommand
             $os_key = $os_info['os_key'];
 
             // Filter by OS support
-            $os_exclude = array_fill_keys(self::OS_EXCLUDE[$os] ?? [], true);
+            $os_exclude = array_fill_keys(array_map(fn ($n) => 'ext-' . $n, self::OS_EXCLUDE[$os] ?? []), true);
             $os_regular = array_filter($all_regular, fn ($c, $k) => $this->supportsOS($c, $os_key) && !isset($os_exclude[$k]), ARRAY_FILTER_USE_BOTH);
             $os_virtual = array_filter($all_virtual, fn ($c, $k) => $this->supportsOS($c, $os_key) && !isset($os_exclude[$k]), ARRAY_FILTER_USE_BOTH);
 
@@ -128,12 +136,13 @@ class GenExtTestMatrixCommand extends BaseCommand
 
             sort($groups);
             foreach ($groups as $group) {
+                $extra = $this->extraBuildFlags($group);
                 $entries[] = [
                     'runner' => $os_info['runner'],
                     'os' => $os,
                     'arch' => $os_info['arch'],
                     'extension' => $group,
-                    'build-args' => '"' . $group . '" ' . self::BUILD_TARGETS,
+                    'build-args' => '"' . $group . '" ' . self::BUILD_TARGETS . ($extra !== '' ? ' ' . $extra : ''),
                 ];
             }
         }
@@ -170,6 +179,22 @@ class GenExtTestMatrixCommand extends BaseCommand
     private function displayName(string $pkg_name): string
     {
         return str_starts_with($pkg_name, 'ext-') ? substr($pkg_name, 4) : $pkg_name;
+    }
+
+    /**
+     * Returns any extra build flags required for an extension group string.
+     * Checks whether any extension in the comma-separated group matches EXTRA_BUILD_FLAGS.
+     */
+    private function extraBuildFlags(string $group): string
+    {
+        $names = explode(',', $group);
+        $flags = [];
+        foreach (self::EXTRA_BUILD_FLAGS as $ext => $extra) {
+            if (in_array($ext, $names, true)) {
+                $flags[] = $extra;
+            }
+        }
+        return implode(' ', $flags);
     }
 
     /**
