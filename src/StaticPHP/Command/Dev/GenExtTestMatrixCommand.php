@@ -16,7 +16,7 @@ class GenExtTestMatrixCommand extends BaseCommand
     private const array OS_RUNNERS = [
         'linux' => ['arch' => 'x86_64', 'runner' => 'ubuntu-latest', 'os_key' => 'Linux'],
         'windows' => ['arch' => 'x86_64', 'runner' => 'windows-latest', 'os_key' => 'Windows'],
-        'macos' => ['arch' => 'aarch64', 'runner' => 'macos-15', 'os_key' => 'macos'],
+        'macos' => ['arch' => 'aarch64', 'runner' => 'macos-15', 'os_key' => 'Darwin'],
     ];
 
     /**
@@ -32,6 +32,14 @@ class GenExtTestMatrixCommand extends BaseCommand
      */
     private const array EXTRA_BUILD_FLAGS = [
         'parallel' => '--enable-zts',
+    ];
+
+    /**
+     * Pairs of extensions that cannot be built together in the same matrix entry.
+     */
+    private const array CONFLICTS = [
+        ['grpc', 'protobuf'],
+        ['swow', 'swoole'],
     ];
 
     protected bool $no_motd = true;
@@ -129,10 +137,12 @@ class GenExtTestMatrixCommand extends BaseCommand
                 }
             }
 
-            // All orphans become a single batched matrix entry
+            // Batch orphans, splitting conflicting extensions into separate entries
             if (!empty($orphans)) {
                 sort($orphans);
-                $groups[] = implode(',', $orphans);
+                foreach ($this->splitOrphansByConflicts($orphans) as $batch) {
+                    $groups[] = implode(',', $batch);
+                }
             }
 
             sort($groups);
@@ -180,6 +190,46 @@ class GenExtTestMatrixCommand extends BaseCommand
     private function displayName(string $pkg_name): string
     {
         return str_starts_with($pkg_name, 'ext-') ? substr($pkg_name, 4) : $pkg_name;
+    }
+
+    /**
+     * Split orphans into batches such that no two conflicting extensions share a batch.
+     * Uses a greedy graph-coloring approach.
+     *
+     * @param  string[]   $orphans display names, pre-sorted
+     * @return string[][] array of batches, each batch is an array of display names
+     */
+    private function splitOrphansByConflicts(array $orphans): array
+    {
+        $adjacency = [];
+        foreach (self::CONFLICTS as [$a, $b]) {
+            $adjacency[$a][$b] = true;
+            $adjacency[$b][$a] = true;
+        }
+
+        $batches = [];
+        foreach ($orphans as $ext) {
+            $placed = false;
+            foreach ($batches as &$batch) {
+                $conflict = false;
+                foreach ($batch as $member) {
+                    if (isset($adjacency[$ext][$member])) {
+                        $conflict = true;
+                        break;
+                    }
+                }
+                if (!$conflict) {
+                    $batch[] = $ext;
+                    $placed = true;
+                    break;
+                }
+            }
+            unset($batch);
+            if (!$placed) {
+                $batches[] = [$ext];
+            }
+        }
+        return $batches;
     }
 
     /**
