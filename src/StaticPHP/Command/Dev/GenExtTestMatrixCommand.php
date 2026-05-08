@@ -42,6 +42,14 @@ class GenExtTestMatrixCommand extends BaseCommand
         ['swow', 'swoole'],
     ];
 
+    /**
+     * Extensions that must always appear alone in their own matrix entry.
+     * Use display names (without ext- prefix).
+     */
+    private const array STANDALONE = [
+        'grpc',
+    ];
+
     protected bool $no_motd = true;
 
     public function handle(): int
@@ -124,14 +132,19 @@ class GenExtTestMatrixCommand extends BaseCommand
             $covered = [];
             $groups = [];
             $orphans = [];
+            $standalone_set = array_fill_keys(self::STANDALONE, true);
 
             foreach (array_merge($roots, $non_roots) as $ext) {
                 if (isset($covered[$ext])) {
                     continue;
                 }
                 $chain = $this->dfsCollect($ext, $ext_deps, $pool_set, $covered);
-                if (count($chain) === 1 && empty($ext_deps[$ext])) {
-                    $orphans[] = $this->displayName($ext);
+                $display = $this->displayName($ext);
+                if (isset($standalone_set[$display])) {
+                    // Always emit standalone extensions as their own single entry
+                    $groups[] = $display;
+                } elseif (count($chain) === 1 && empty($ext_deps[$ext])) {
+                    $orphans[] = $display;
                 } else {
                     $groups[] = implode(',', array_map($this->displayName(...), $chain));
                 }
