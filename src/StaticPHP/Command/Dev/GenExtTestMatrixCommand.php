@@ -11,11 +11,18 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand('dev:gen-ext-test-matrix', 'Generate GitHub Actions extension test matrix JSON', [], true)]
 class GenExtTestMatrixCommand extends BaseCommand
 {
-    private const BUILD_TARGETS = '--build-cli --build-cgi --build-micro --dl-parallel=10';
+    private const string BUILD_TARGETS = '--build-cli --build-cgi --build-micro --dl-parallel=10';
 
-    private const OS_RUNNERS = [
+    private const array OS_RUNNERS = [
         'linux' => ['arch' => 'x86_64', 'runner' => 'ubuntu-latest', 'os_key' => 'Linux'],
         'windows' => ['arch' => 'x86_64', 'runner' => 'windows-2025', 'os_key' => 'Windows'],
+    ];
+
+    /**
+     * Extensions excluded from specific OS matrix entries.
+     */
+    private const array OS_EXCLUDE = [
+        'linux' => ['ext-glfw'],
     ];
 
     protected bool $no_motd = true;
@@ -52,8 +59,9 @@ class GenExtTestMatrixCommand extends BaseCommand
             $os_key = $os_info['os_key'];
 
             // Filter by OS support
-            $os_regular = array_filter($all_regular, fn ($c) => $this->supportsOS($c, $os_key));
-            $os_virtual = array_filter($all_virtual, fn ($c) => $this->supportsOS($c, $os_key));
+            $os_exclude = array_fill_keys(self::OS_EXCLUDE[$os] ?? [], true);
+            $os_regular = array_filter($all_regular, fn ($c, $k) => $this->supportsOS($c, $os_key) && !isset($os_exclude[$k]), ARRAY_FILTER_USE_BOTH);
+            $os_virtual = array_filter($all_virtual, fn ($c, $k) => $this->supportsOS($c, $os_key) && !isset($os_exclude[$k]), ARRAY_FILTER_USE_BOTH);
 
             // Pool: all ext-* names available on this OS (regular + virtual)
             $pool_set = array_fill_keys(
