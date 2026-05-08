@@ -22,23 +22,23 @@ spc download [artifacts] [options]
 
 ### 选项
 
-| 选项 | 缩写 | 说明 |
-|---|---|---|
+| 选项 | 缩写   | 说明 |
+|---|------|---|
 | `--for-extensions=<list>` | `-e` | 按扩展名下载其所需的制品 |
 | `--for-libs=<list>` | `-l` | 按库名下载其所需的制品 |
-| `--for-packages=<list>` | | 按包名下载其所需的制品 |
-| `--without-suggests` | | 使用 `--for-extensions` 时跳过建议包 |
-| `--clean` | | 下载前删除旧的下载缓存 |
-| `--with-php=<ver>` | | PHP 版本，格式为 `major.minor`（默认 `8.4`）|
+| `--for-packages=<list>` |      | 按包名下载其所需的制品 |
+| `--without-suggests` |      | 使用 `--for-extensions` 时跳过建议包 |
+| `--clean` |      | 下载前删除旧的下载缓存 |
+| `--with-php=<ver>` |      | PHP 版本，格式为 `major.minor`（默认 `8.4`）|
 | `--prefer-binary` | `-p` | 优先使用预编译二进制 |
-| `--prefer-source` | | 优先使用源码包 |
-| `--source-only` | | 仅下载源码制品 |
-| `--binary-only` | | 仅下载二进制制品 |
+| `--prefer-source` |      | 优先使用源码包 |
+| `--source-only` |      | 仅下载源码制品 |
+| `--binary-only` |      | 仅下载二进制制品 |
 | `--parallel=<n>` | `-P` | 并行下载数（默认 `1`）|
 | `--retry=<n>` | `-R` | 失败重试次数（默认 `0`）|
-| `--ignore-cache=<list>` | | 强制重新下载指定制品 |
-| `--no-alt` | | 不使用镜像站 |
-| `--no-shallow-clone` | | 不使用浅层克隆 |
+| `--ignore-cache=<list>` | `-i` | 强制重新下载指定制品 |
+| `--no-alt` |      | 不使用镜像站 |
+| `--no-shallow-clone` |      | 不使用浅层克隆 |
 | `--custom-url=<src:url>` | `-U` | 覆盖指定源的下载地址 |
 | `--custom-git=<src:branch:url>` | `-G` | 覆盖为自定义 git 仓库 |
 | `--custom-local=<src:path>` | `-L` | 使用本地路径作为制品来源 |

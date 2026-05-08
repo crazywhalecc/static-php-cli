@@ -36,7 +36,7 @@ spc download [artifacts] [options]
 | `--binary-only`                 |       | Only download binary artifacts                        |
 | `--parallel=<n>`                | `-P`  | Number of parallel downloads (default: `1`)           |
 | `--retry=<n>`                   | `-R`  | Number of retries on failure (default: `0`)           |
-| `--ignore-cache=<list>`         |       | Force re-download the specified artifacts             |
+| `--ignore-cache=<list>`         | `-i`  | Force re-download the specified artifacts             |
 | `--no-alt`                      |       | Do not use alternative mirror URLs                    |
 | `--no-shallow-clone`            |       | Do not clone git repositories shallowly               |
 | `--custom-url=<src:url>`        | `-U`  | Override the download URL for a source                |
