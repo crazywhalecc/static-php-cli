@@ -17,6 +17,20 @@ class memcache extends PhpExtensionPackage
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-memcache')]
     public function patchBeforeBuildconf(): bool
     {
+        // PHP 8.5 moved php_smart_string*.h from ext/standard/ to Zend/
+        foreach (['src/memcache_pool.h', 'src/memcache_pool.c', 'src/memcache_session.c', 'src/memcache_ascii_protocol.c', 'src/memcache_binary_protocol.c'] as $file) {
+            FileSystem::replaceFileStr(
+                "{$this->getSourceDir()}/{$file}",
+                '#include "ext/standard/php_smart_string_public.h"',
+                '#include "Zend/zend_smart_string_public.h"',
+            );
+            FileSystem::replaceFileStr(
+                "{$this->getSourceDir()}/{$file}",
+                '#include "ext/standard/php_smart_string.h"',
+                '#include "Zend/zend_smart_string.h"',
+            );
+        }
+
         if (!$this->isBuildStatic()) {
             return false;
         }
