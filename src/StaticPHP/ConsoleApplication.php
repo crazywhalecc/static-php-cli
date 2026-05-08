@@ -13,6 +13,7 @@ use StaticPHP\Command\Dev\DumpStagesCommand;
 use StaticPHP\Command\Dev\EnvCommand;
 use StaticPHP\Command\Dev\GenDepsDataCommand;
 use StaticPHP\Command\Dev\GenExtDocsCommand;
+use StaticPHP\Command\Dev\GenExtTestMatrixCommand;
 use StaticPHP\Command\Dev\IsInstalledCommand;
 use StaticPHP\Command\Dev\LintConfigCommand;
 use StaticPHP\Command\Dev\PackageInfoCommand;
@@ -85,6 +86,7 @@ class ConsoleApplication extends Application
             new PackageInfoCommand(),
             new GenExtDocsCommand(),
             new GenDepsDataCommand(),
+            new GenExtTestMatrixCommand(),
         ]);
 
         // add additional commands from registries
