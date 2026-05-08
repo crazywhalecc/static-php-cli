@@ -8,6 +8,7 @@ export default {
         { text: '第一次构建', link: '/zh/guide/first-build' },
         { text: 'PHP SAPI 构建参考', link: '/zh/guide/sapi-reference' },
         { text: '命令行参考', link: '/zh/guide/cli-reference' },
+        { text: '从 v2 迁移', link: '/zh/guide/migrate-from-v2' },
       ],
     },
     {
