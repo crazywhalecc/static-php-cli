@@ -5,7 +5,6 @@ libedit:
       type: filelist
       url: 'https://thrysoee.dk/editline/'
       regex: '/href="(?<file>libedit-(?<version>[^"]+)\.tar\.gz)"/'
-    binary: hosted
     metadata:
       license-files: [COPYING]
       license: BSD-3-Clause
