@@ -16,6 +16,7 @@ class GenExtTestMatrixCommand extends BaseCommand
     private const array OS_RUNNERS = [
         'linux' => ['arch' => 'x86_64', 'runner' => 'ubuntu-latest', 'os_key' => 'Linux'],
         'windows' => ['arch' => 'x86_64', 'runner' => 'windows-latest', 'os_key' => 'Windows'],
+        'macos' => ['arch' => 'aarch64', 'runner' => 'macos-15', 'os_key' => 'macos'],
     ];
 
     /**
