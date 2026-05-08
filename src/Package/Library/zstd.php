@@ -26,6 +26,7 @@ class zstd
             )
             ->build();
         FileSystem::copy($package->getLibDir() . '\zstd_static.lib', $package->getLibDir() . '/zstd.lib');
+        FileSystem::copy($package->getLibDir() . '\zstd_static.lib', $package->getLibDir() . '/libzstd.lib');
     }
 
     #[BuildFor('Linux')]
