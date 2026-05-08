@@ -49,6 +49,8 @@ class GenExtTestMatrixCommand extends BaseCommand
     private const array STANDALONE = [
         'grpc',
         'glfw',
+        'imagick',
+        'intl',
     ];
 
     protected bool $no_motd = true;
