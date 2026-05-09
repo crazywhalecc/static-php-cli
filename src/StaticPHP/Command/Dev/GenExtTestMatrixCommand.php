@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand('dev:gen-ext-test-matrix', 'Generate GitHub Actions extension test matrix JSON', [], true)]
 class GenExtTestMatrixCommand extends BaseCommand
 {
-    private const string BUILD_TARGETS = '--build-cli --build-cgi --build-micro';
+    private const string BUILD_TARGETS = '--build-cli --build-cgi --build-micro --with-suggests -vvv';
 
     private const array OS_RUNNERS = [
         'linux' => ['arch' => 'x86_64', 'runner' => 'ubuntu-latest', 'os_key' => 'Linux'],
@@ -210,7 +210,7 @@ class GenExtTestMatrixCommand extends BaseCommand
                     'os' => $os,
                     'arch' => $os_info['arch'],
                     'extension' => $group,
-                    'build-args' => '"' . $group . '" ' . self::BUILD_TARGETS . ($extra !== '' ? ' ' . $extra : ''),
+                    'build-args' => './bin/spc build "' . $group . '" ' . self::BUILD_TARGETS . ($extra !== '' ? ' ' . $extra : ''),
                 ];
             }
         }
