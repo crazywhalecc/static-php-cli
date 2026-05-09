@@ -19,6 +19,7 @@ use StaticPHP\Command\Dev\LintConfigCommand;
 use StaticPHP\Command\Dev\PackageInfoCommand;
 use StaticPHP\Command\Dev\PackLibCommand;
 use StaticPHP\Command\Dev\ShellCommand;
+use StaticPHP\Command\Dev\TestBotCommand;
 use StaticPHP\Command\DoctorCommand;
 use StaticPHP\Command\DownloadCommand;
 use StaticPHP\Command\DumpExtensionsCommand;
@@ -87,6 +88,7 @@ class ConsoleApplication extends Application
             new GenExtDocsCommand(),
             new GenDepsDataCommand(),
             new GenExtTestMatrixCommand(),
+            new TestBotCommand(),
         ]);
 
         // add additional commands from registries
