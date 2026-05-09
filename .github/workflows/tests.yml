@@ -3,7 +3,7 @@ name: v3 Tests
 on:
   pull_request:
     branches: [ "v3" ]
-    types: [ opened, synchronize, reopened ]
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
     paths:
       - 'src/**'
       - 'config/**'
