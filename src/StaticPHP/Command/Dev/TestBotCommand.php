@@ -283,6 +283,7 @@ class TestBotCommand extends BaseCommand
             $platform_parts[] = match ($os_key) {
                 'Linux' => 'Linux x86_64',
                 'Darwin' => 'macOS arm64',
+                /* @phpstan-ignore-next-line */
                 'Windows' => 'Windows x86_64',
                 default => $os_key,
             };
