@@ -22,6 +22,7 @@ use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
@@ -93,7 +94,8 @@ trait unix
         // disable undefined behavior sanitizer when opcache JIT is enabled (Linux only)
         if (SystemTarget::getTargetOS() === 'Linux' && !$package->getBuildOption('disable-opcache-jit', false)) {
             if ($version_id >= 80500 || $installer->isPackageResolved('ext-opcache')) {
-                f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
+                $compiler_extra = getenv('SPC_COMPILER_EXTRA') ?: '';
+                GlobalEnvManager::putenv('SPC_COMPILER_EXTRA=' . trim($compiler_extra . ' -fno-sanitize=undefined'));
             }
         }
         // PHP JSON extension is built-in since PHP 8.0
