@@ -1,0 +1,19 @@
+ext-clickhouse:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: iliaal/php_clickhouse
+      extract: php-src/ext/clickhouse
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+      license: PHP-3.01
+  suggests@unix:
+    - openssl
+  lang: cpp
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    arg-type@unix: custom
