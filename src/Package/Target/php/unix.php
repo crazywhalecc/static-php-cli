@@ -266,43 +266,32 @@ trait unix
     #[PatchDescription('Patch phar extension for micro SAPI to support compressed phar')]
     public function makeMicroForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
-        $phar_patched = false;
-        try {
-            if ($installer->isPackageResolved('ext-phar')) {
-                $phar_patched = true;
-                SourcePatcher::patchMicroPhar(self::getPHPVersionID());
-            }
-            InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
-            // apply --with-micro-fake-cli option
-            $vars = $this->makeVars($installer);
-            $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-            $makeArgs = $this->makeVarsToArgs($vars);
-            // build
-            shell()->cd($package->getSourceDir())
-                ->setEnv($vars)
-                ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
+        InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
+        // apply --with-micro-fake-cli option
+        $vars = $this->makeVars($installer);
+        $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+        $makeArgs = $this->makeVarsToArgs($vars);
+        // build
+        shell()->cd($package->getSourceDir())
+            ->setEnv($vars)
+            ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
 
-            $dst = BUILD_BIN_PATH . '/micro.sfx';
-            $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', $dst);
-            // patch after UPX-ed micro.sfx (Linux only)
-            if (SystemTarget::getTargetOS() === 'Linux' && $builder->getOption('with-upx-pack')) {
-                // cut binary with readelf to remove UPX extra segment
-                [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \\$1, \\$2, \\$3, \\$4, \\$6, \\$7}'");
-                $out[1] = explode(' ', $out[1]);
-                $offset = $out[1][0];
-                if ($ret !== 0 || !str_starts_with($offset, '0x')) {
-                    throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
-                }
-                $offset = hexdec($offset);
-                // remove upx extra wastes
-                file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
+        $dst = BUILD_BIN_PATH . '/micro.sfx';
+        $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', $dst);
+        // patch after UPX-ed micro.sfx (Linux only)
+        if (SystemTarget::getTargetOS() === 'Linux' && $builder->getOption('with-upx-pack')) {
+            // cut binary with readelf to remove UPX extra segment
+            [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \\$1, \\$2, \\$3, \\$4, \\$6, \\$7}'");
+            $out[1] = explode(' ', $out[1]);
+            $offset = $out[1][0];
+            if ($ret !== 0 || !str_starts_with($offset, '0x')) {
+                throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
             }
-            $package->setOutput('Binary path for micro SAPI', $dst);
-        } finally {
-            if ($phar_patched) {
-                SourcePatcher::unpatchMicroPhar();
-            }
+            $offset = hexdec($offset);
+            // remove upx extra wastes
+            file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
         }
+        $package->setOutput('Binary path for micro SAPI', $dst);
     }
 
     #[Stage]
