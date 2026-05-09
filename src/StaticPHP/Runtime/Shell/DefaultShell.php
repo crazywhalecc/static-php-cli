@@ -44,6 +44,7 @@ class DefaultShell extends Shell
         $cmd = SPC_CURL_EXEC . " -sfSL --max-time 3600 {$retry_arg} {$compressed_arg} {$method_arg} {$header_arg} {$url_arg}";
 
         $this->logCommandInfo($cmd);
+        logger()->debug("[CURL EXECUTE] {$cmd}");
         $result = $this->passthru($cmd, capture_output: true, throw_on_error: false);
         $ret = $result['code'];
         $output = $result['output'];
