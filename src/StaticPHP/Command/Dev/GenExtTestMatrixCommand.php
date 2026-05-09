@@ -21,6 +21,14 @@ class GenExtTestMatrixCommand extends BaseCommand
     ];
 
     /**
+     * Tier 2 runners: Linux aarch64 + macOS x86_64, no Windows.
+     */
+    private const array OS_RUNNERS_TIER2 = [
+        'linux' => ['arch' => 'aarch64', 'runner' => 'ubuntu-24.04-arm', 'os_key' => 'Linux'],
+        'macos' => ['arch' => 'x86_64', 'runner' => 'macos-15-intel', 'os_key' => 'Darwin'],
+    ];
+
+    /**
      * Extensions excluded from specific OS matrix entries.
      */
     private const array OS_EXCLUDE = [
@@ -65,7 +73,8 @@ class GenExtTestMatrixCommand extends BaseCommand
     {
         $this->addOption('for-extensions', null, InputOption::VALUE_OPTIONAL, 'Filter by extension display names, comma-separated', '')
             ->addOption('for-libs', null, InputOption::VALUE_OPTIONAL, 'Filter by lib names (depends+suggests), comma-separated', '')
-            ->addOption('os', null, InputOption::VALUE_OPTIONAL, 'Filter by OS (Linux/Darwin/Windows), comma-separated', '');
+            ->addOption('os', null, InputOption::VALUE_OPTIONAL, 'Filter by OS (Linux/Darwin/Windows), comma-separated', '')
+            ->addOption('tier2', null, InputOption::VALUE_NONE, 'Use Tier 2 runners (Linux aarch64 + macOS x86_64, no Windows)');
     }
 
     public function handle(): int
@@ -79,6 +88,9 @@ class GenExtTestMatrixCommand extends BaseCommand
         $filter_extensions = $parse_option('for-extensions');
         $filter_libs = $parse_option('for-libs');
         $filter_os_keys = $parse_option('os');
+        $tier2 = (bool) $this->input->getOption('tier2');
+
+        $base_runners = $tier2 ? self::OS_RUNNERS_TIER2 : self::OS_RUNNERS;
 
         $all = PackageConfig::getAll();
 
@@ -100,8 +112,8 @@ class GenExtTestMatrixCommand extends BaseCommand
         }
 
         $os_runners = empty($filter_os_keys)
-            ? self::OS_RUNNERS
-            : array_filter(self::OS_RUNNERS, fn ($info) => in_array($info['os_key'], $filter_os_keys, true));
+            ? $base_runners
+            : array_filter($base_runners, fn ($info) => in_array($info['os_key'], $filter_os_keys, true));
 
         $entries = [];
         $all_ext_lib_deps = [];
