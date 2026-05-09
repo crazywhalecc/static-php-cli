@@ -22,11 +22,11 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
      * Get the GitHub tarball URL for a given repository and release type.
      * If match_url is provided, only return the tarball that matches the regex.
      */
-    public function getGitHubTarballInfo(string $name, string $repo, string $rel_type, bool $prefer_stable = true, ?string $match_url = null, ?string $basename = null, ?string $query = null): array
+    public function getGitHubTarballInfo(string $name, string $repo, string $rel_type, bool $prefer_stable = true, ?string $match_url = null, ?string $basename = null, ?string $query = null, int $retries = 0): array
     {
         if ($rel_type === 'releases' && $match_url === null && $query === null && $prefer_stable) {
             $api_url = str_replace(['{repo}', '{rel_type}'], [$repo, 'releases/latest'], self::API_URL);
-            $data = default_shell()->executeCurl($api_url, headers: $this->getGitHubTokenHeaders());
+            $data = default_shell()->executeCurl($api_url, headers: $this->getGitHubTokenHeaders(), retries: $retries);
             $data = json_decode($data ?: '', true);
             if (!is_array($data) || empty($data['tarball_url'])) {
                 throw new DownloaderException("Failed to get GitHub latest release for {$repo} from {$api_url}");
@@ -36,7 +36,7 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
         } else {
             $api_url = str_replace(['{repo}', '{rel_type}'], [$repo, $rel_type], self::API_URL);
             $api_url .= ($query ?? '');
-            $data = default_shell()->executeCurl($api_url, headers: $this->getGitHubTokenHeaders());
+            $data = default_shell()->executeCurl($api_url, headers: $this->getGitHubTokenHeaders(), retries: $retries);
             $data = json_decode($data ?: '', true);
             if (!is_array($data)) {
                 throw new DownloaderException("Failed to get GitHub tarball URL for {$repo} from {$api_url}");
@@ -65,7 +65,7 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
             }
             $this->version = $version ?? null;
         }
-        $head = default_shell()->executeCurl($rel_url, 'HEAD', headers: $this->getGitHubTokenHeaders()) ?: '';
+        $head = default_shell()->executeCurl($rel_url, 'HEAD', headers: $this->getGitHubTokenHeaders(), retries: $retries) ?: '';
         preg_match('/^content-disposition:\s+attachment;\s*filename=("?)(?<filename>.+\.tar\.gz)\1/im', $head, $matches);
         if ($matches) {
             $filename = $matches['filename'];
@@ -84,9 +84,9 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
             'ghtagtar' => 'tags',
             default => throw new DownloaderException("Invalid GitHubTarball type for {$name}"),
         };
-        [$url, $filename] = $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name, $config['query'] ?? null);
+        [$url, $filename] = $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name, $config['query'] ?? null, $downloader->getRetry());
         $path = DOWNLOAD_PATH . "/{$filename}";
-        default_shell()->executeCurlDownload($url, $path, headers: $this->getGitHubTokenHeaders());
+        default_shell()->executeCurlDownload($url, $path, headers: $this->getGitHubTokenHeaders(), retries: $downloader->getRetry());
         return DownloadResult::archive($filename, $config, $config['extract'] ?? null, version: $this->version, downloader: static::class);
     }
 
@@ -97,7 +97,7 @@ class GitHubTarball implements DownloadTypeInterface, CheckUpdateInterface
             'ghtagtar' => 'tags',
             default => throw new DownloaderException("Invalid GitHubTarball type for {$name}"),
         };
-        $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name, $config['query'] ?? null);
+        $this->getGitHubTarballInfo($name, $config['repo'], $rel_type, $config['prefer-stable'] ?? true, $config['match'] ?? null, $name, $config['query'] ?? null, $downloader->getRetry());
         $new_version = $this->version ?? $old_version ?? '';
         return new CheckUpdateResult(
             old: $old_version,

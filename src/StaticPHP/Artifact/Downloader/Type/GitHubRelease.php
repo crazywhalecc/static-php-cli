@@ -21,13 +21,13 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface, CheckU
 
     private ?string $version = null;
 
-    public function getGitHubReleases(string $name, string $repo, bool $prefer_stable = true, ?string $query = null): array
+    public function getGitHubReleases(string $name, string $repo, bool $prefer_stable = true, ?string $query = null, int $retries = 0): array
     {
         logger()->debug("Fetching {$name} GitHub releases from {$repo}");
         $url = str_replace('{repo}', $repo, self::API_URL);
         $url .= ($query ?? '');
         $headers = $this->getGitHubTokenHeaders();
-        $data2 = default_shell()->executeCurl($url, headers: $headers);
+        $data2 = default_shell()->executeCurl($url, headers: $headers, retries: $retries);
         $data = json_decode($data2 ?: '', true);
         if (!is_array($data)) {
             throw new DownloaderException("Failed to get GitHub release API info for {$repo} from {$url}");
@@ -46,13 +46,13 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface, CheckU
      * Get the latest GitHub release assets for a given repository.
      * match_asset is provided, only return the asset that matches the regex.
      */
-    public function getLatestGitHubRelease(string $name, string $repo, bool $prefer_stable, string $match_asset, ?string $query = null): array
+    public function getLatestGitHubRelease(string $name, string $repo, bool $prefer_stable, string $match_asset, ?string $query = null, int $retries = 0): array
     {
         logger()->debug("Fetching {$name} GitHub release from {$repo}");
         $url = str_replace('{repo}', $repo, self::API_URL);
         $url .= ($query ?? '');
         $headers = $this->getGitHubTokenHeaders();
-        $data2 = default_shell()->executeCurl($url, headers: $headers);
+        $data2 = default_shell()->executeCurl($url, headers: $headers, retries: $retries);
         $data = json_decode($data2 ?: '', true);
         if (!is_array($data)) {
             throw new DownloaderException("Failed to get GitHub release API info for {$repo} from {$url}");
@@ -84,7 +84,7 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface, CheckU
         if (!isset($config['match'])) {
             throw new DownloaderException("GitHubRelease downloader requires 'match' config for {$name}");
         }
-        $rel = $this->getLatestGitHubRelease($name, $config['repo'], $config['prefer-stable'] ?? true, $config['match'], $config['query'] ?? null);
+        $rel = $this->getLatestGitHubRelease($name, $config['repo'], $config['prefer-stable'] ?? true, $config['match'], $config['query'] ?? null, $downloader->getRetry());
 
         // download file using curl
         $asset_url = str_replace(['{repo}', '{id}'], [$config['repo'], $rel['id']], self::ASSET_URL);
@@ -124,7 +124,7 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface, CheckU
         if (!isset($config['match'])) {
             throw new DownloaderException("GitHubRelease downloader requires 'match' config for {$name}");
         }
-        $this->getLatestGitHubRelease($name, $config['repo'], $config['prefer-stable'] ?? true, $config['match'], $config['query'] ?? null);
+        $this->getLatestGitHubRelease($name, $config['repo'], $config['prefer-stable'] ?? true, $config['match'], $config['query'] ?? null, $downloader->getRetry());
         $new_version = $this->version ?? $old_version ?? '';
         return new CheckUpdateResult(
             old: $old_version,
