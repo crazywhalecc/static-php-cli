@@ -263,7 +263,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./bin/spc doctor --auto-fix
-          ${{ matrix.combo.build-args }}
+          ${{ matrix.combo.build-args }} --dl-with-php=${{ matrix.combo.php-version }}
 
       - name: Upload logs
         if: always() && hashFiles('log/**') != ''
