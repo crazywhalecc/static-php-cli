@@ -246,7 +246,7 @@
     },
     "ext-rdkafka": {
         "type": "ghtar",
-        "repo": "arnaud-lb/php-rdkafka",
+        "repo": "php-rdkafka/php-rdkafka",
         "path": "php-src/ext/rdkafka",
         "license": {
             "type": "file",
