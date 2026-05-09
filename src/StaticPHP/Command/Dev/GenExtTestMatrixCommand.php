@@ -7,6 +7,7 @@ namespace StaticPHP\Command\Dev;
 use StaticPHP\Command\BaseCommand;
 use StaticPHP\Config\PackageConfig;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand('dev:gen-ext-test-matrix', 'Generate GitHub Actions extension test matrix JSON', [], true)]
 class GenExtTestMatrixCommand extends BaseCommand
@@ -53,7 +54,19 @@ class GenExtTestMatrixCommand extends BaseCommand
         'intl',
     ];
 
+    /**
+     * Maximum number of orphan extensions per matrix entry.
+     */
+    private const int ORPHAN_BATCH_SIZE = 15;
+
     protected bool $no_motd = true;
+
+    public function configure(): void
+    {
+        $this->addOption('for-extensions', null, InputOption::VALUE_OPTIONAL, 'Filter by extension display names, comma-separated', '')
+            ->addOption('for-libs', null, InputOption::VALUE_OPTIONAL, 'Filter by lib names (depends+suggests), comma-separated', '')
+            ->addOption('os', null, InputOption::VALUE_OPTIONAL, 'Filter by OS (Linux/Darwin/Windows), comma-separated', '');
+    }
 
     public function handle(): int
     {
@@ -61,6 +74,11 @@ class GenExtTestMatrixCommand extends BaseCommand
             $this->output->writeln('<error>This command is only available in source mode.</error>');
             return static::USER_ERROR;
         }
+
+        $parse_option = fn (string $name): array => array_values(array_filter(array_map('trim', explode(',', (string) $this->input->getOption($name)))));
+        $filter_extensions = $parse_option('for-extensions');
+        $filter_libs = $parse_option('for-libs');
+        $filter_os_keys = $parse_option('os');
 
         $all = PackageConfig::getAll();
 
@@ -81,9 +99,14 @@ class GenExtTestMatrixCommand extends BaseCommand
             }
         }
 
-        $entries = [];
+        $os_runners = empty($filter_os_keys)
+            ? self::OS_RUNNERS
+            : array_filter(self::OS_RUNNERS, fn ($info) => in_array($info['os_key'], $filter_os_keys, true));
 
-        foreach (self::OS_RUNNERS as $os => $os_info) {
+        $entries = [];
+        $all_ext_lib_deps = [];
+
+        foreach ($os_runners as $os => $os_info) {
             $os_key = $os_info['os_key'];
 
             // Filter by OS support
@@ -99,6 +122,7 @@ class GenExtTestMatrixCommand extends BaseCommand
 
             // Compute ext_deps for every pool member: union of depends + suggests, limited to pool
             $ext_deps = [];
+            $os_lib_deps = [];
             foreach (array_merge($os_regular, $os_virtual) as $pkg_name => $config) {
                 $raw = array_merge(
                     $this->resolvePlatformList($config, 'depends', $os),
@@ -108,7 +132,12 @@ class GenExtTestMatrixCommand extends BaseCommand
                     $raw,
                     fn ($d) => isset($pool_set[$d]) && $d !== $pkg_name
                 ));
+                $os_lib_deps[$this->displayName($pkg_name)] = array_values(array_filter(
+                    $raw,
+                    fn ($d) => !str_starts_with($d, 'ext-')
+                ));
             }
+            $all_ext_lib_deps[$os] = $os_lib_deps;
 
             // Which regular exts are reachable as a dep/suggest from another regular ext?
             $depended_on = [];
@@ -174,6 +203,26 @@ class GenExtTestMatrixCommand extends BaseCommand
             }
         }
 
+        if (!empty($filter_extensions)) {
+            $entries = array_values(array_filter($entries, function (array $entry) use ($filter_extensions): bool {
+                $names = explode(',', $entry['extension']);
+                return count(array_intersect($names, $filter_extensions)) > 0;
+            }));
+        }
+
+        if (!empty($filter_libs)) {
+            $entries = array_values(array_filter($entries, function (array $entry) use ($filter_libs, $all_ext_lib_deps): bool {
+                $names = explode(',', $entry['extension']);
+                $lib_deps = $all_ext_lib_deps[$entry['os']] ?? [];
+                foreach ($names as $name) {
+                    if (count(array_intersect($lib_deps[$name] ?? [], $filter_libs)) > 0) {
+                        return true;
+                    }
+                }
+                return false;
+            }));
+        }
+
         $this->output->write(json_encode($entries, JSON_UNESCAPED_SLASHES));
         return static::SUCCESS;
     }
@@ -227,6 +276,9 @@ class GenExtTestMatrixCommand extends BaseCommand
         foreach ($orphans as $ext) {
             $placed = false;
             foreach ($batches as &$batch) {
+                if (count($batch) >= self::ORPHAN_BATCH_SIZE) {
+                    continue;
+                }
                 $conflict = false;
                 foreach ($batch as $member) {
                     if (isset($adjacency[$ext][$member])) {
