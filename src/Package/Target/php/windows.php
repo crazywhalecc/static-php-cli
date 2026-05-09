@@ -293,21 +293,8 @@ trait windows
 
         $fake_cli = $package->getBuildOption('with-micro-fake-cli', false) ? ' /DPHP_MICRO_FAKE_CLI' : '';
 
-        // phar patch for micro
-        $phar_patched = false;
-        if ($installer->isPackageResolved('ext-phar')) {
-            $phar_patched = true;
-            SourcePatcher::patchMicroPhar(self::getPHPVersionID());
-        }
-
-        try {
-            cmd()->cd($package->getSourceDir())
-                ->exec("nmake /nologo {$debug_overrides}LIBS_MICRO=\"ws2_32.lib shell32.lib {$extra_libs}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" EXTRA_LD_FLAGS_PROGRAM= micro");
-        } finally {
-            if ($phar_patched) {
-                SourcePatcher::unpatchMicroPhar();
-            }
-        }
+        cmd()->cd($package->getSourceDir())
+            ->exec("nmake /nologo {$debug_overrides}LIBS_MICRO=\"ws2_32.lib shell32.lib {$extra_libs}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" EXTRA_LD_FLAGS_PROGRAM= micro");
 
         $this->deployWindowsBinary($builder, $package, 'php-micro');
     }
