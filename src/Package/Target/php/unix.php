@@ -169,18 +169,18 @@ trait unix
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
     #[PatchDescription('Patch Makefile to fix //lib path for Linux builds')]
     #[PatchDescription('Patch BUILD_CC to disable auto-vectorization when zig-cc is used (prevents minilua segfault)')]
-    public function tryPatchMakefileUnix(ToolchainInterface $toolchain): void
+    public function tryPatchMakefileUnix(TargetPackage $package, ToolchainInterface $toolchain): void
     {
         if (SystemTarget::getTargetOS() !== 'Linux') {
             return;
         }
 
         // replace //lib with /lib in Makefile
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('sed -i "s|//lib|/lib|g" Makefile');
+        shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
 
         // try to fix minilua with zig-cc, disable vectorize for some edge cases
         if ($toolchain instanceof ZigToolchain) {
-            $makefile = "{$this->getSourceDir()}/Makefile";
+            $makefile = "{$package->getSourceDir()}/Makefile";
             FileSystem::replaceFileRegex($makefile, '/^(BUILD_CC\s*=\s*zig-cc)\s*$/m', '$1 -fno-vectorize -fno-slp-vectorize');
         }
     }

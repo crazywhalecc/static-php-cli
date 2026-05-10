@@ -499,6 +499,10 @@ class PackageLoader
             throw new RegistryException('Package name must not be empty when no package context is available for BeforeStage attribute.');
         }
         $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
+
+        if ($instance_class instanceof Package && isset(self::$packages[$package_name])) {
+            $instance_class = self::$packages[$package_name];
+        }
         $conditionals = array_map(
             fn (\ReflectionAttribute $a) => $a->newInstance()->class,
             [...$method->getDeclaringClass()->getAttributes(ConditionalOn::class), ...$method->getAttributes(ConditionalOn::class)],
@@ -529,6 +533,11 @@ class PackageLoader
             throw new RegistryException('Package name must not be empty when no package context is available for AfterStage attribute.');
         }
         $package_name = $method_instance->package_name === '' ? $pkg->getName() : $method_instance->package_name;
+
+        if ($instance_class instanceof Package && isset(self::$packages[$package_name])) {
+            $instance_class = self::$packages[$package_name];
+        }
+
         $conditionals = array_map(
             fn (\ReflectionAttribute $a) => $a->newInstance()->class,
             [...$method->getDeclaringClass()->getAttributes(ConditionalOn::class), ...$method->getAttributes(ConditionalOn::class)],
