@@ -16,28 +16,8 @@ class ZigToolchain implements UnixToolchainInterface
         GlobalEnvManager::putenv('SPC_DEFAULT_CC=zig-cc');
         GlobalEnvManager::putenv('SPC_DEFAULT_CXX=zig-c++');
         GlobalEnvManager::putenv('SPC_DEFAULT_AR=zig-ar');
+        GlobalEnvManager::putenv('SPC_DEFAULT_RANLIB=zig-ranlib');
         GlobalEnvManager::putenv('SPC_DEFAULT_LD=zig-ld.lld');
-
-        // Generate additional objects needed for zig toolchain
-        $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
-        $objects = ['crtbeginS.o', 'crtendS.o'];
-        $found = [];
-
-        foreach ($objects as $obj) {
-            $located = null;
-            foreach ($paths as $base) {
-                $output = shell_exec("find {$base} -name {$obj} 2>/dev/null | grep -v '/32/' | head -n 1");
-                $line = trim((string) $output);
-                if ($line !== '') {
-                    $located = $line;
-                    break;
-                }
-            }
-            if ($located) {
-                $found[] = $located;
-            }
-        }
-        GlobalEnvManager::putenv('SPC_EXTRA_RUNTIME_OBJECTS=' . implode(' ', $found));
     }
 
     public function afterInit(): void

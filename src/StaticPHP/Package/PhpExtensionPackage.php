@@ -274,14 +274,20 @@ class PhpExtensionPackage extends Package
             $compiler_extra = trim($compiler_extra . ' -lcompiler_rt');
             GlobalEnvManager::putenv("SPC_COMPILER_EXTRA={$compiler_extra}");
         }
-        $config = (new SPCConfigUtil())->getExtensionConfig($this);
+        // include_suggests so transitive optional libs (e.g. librdkafka → lz4/zstd/ssl) are in the link line
+        $config = (new SPCConfigUtil())->getExtensionConfig($this, include_suggests: true);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
         $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';
+        // -Wl,-Bsymbolic: bind zend_* refs to the .so's own copies, not via global lookup
+        $ldflags = (string) $config['ldflags'];
+        if (PHP_OS_FAMILY !== 'Darwin' && !str_contains($ldflags, '-Wl,-Bsymbolic')) {
+            $ldflags = clean_spaces($ldflags . ' -Wl,-Bsymbolic');
+        }
         return [
             'CFLAGS' => $config['cflags'],
             'CXXFLAGS' => $config['cflags'],
-            'LDFLAGS' => $config['ldflags'],
+            'LDFLAGS' => $ldflags,
             'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
@@ -303,10 +309,11 @@ class PhpExtensionPackage extends Package
     public function configureForUnix(array $env, PhpExtensionPackage $package): void
     {
         $phpvars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+        // CustomPhpConfigureArg keys are OS names ('Linux'/'Darwin'), not platform strings
         shell()->cd($package->getSourceDir())
             ->setEnv($env)
             ->exec(
-                './configure ' . $this->getPhpConfigureArg(SystemTarget::getCurrentPlatformString(), true) .
+                './configure ' . $this->getPhpConfigureArg(SystemTarget::getTargetOS(), true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
                 "--enable-shared --disable-static {$phpvars}"
             );
@@ -318,11 +325,41 @@ class PhpExtensionPackage extends Package
     #[Stage]
     public function makeForUnix(array $env, PhpExtensionPackage $package, PackageBuilder $builder): void
     {
+        // phpize Makefile's _SHARED_LIBADD line misses our static archives — splice them in
+        $package->patchSharedLibAdd();
         shell()->cd($package->getSourceDir())
             ->setEnv($env)
             ->exec('make clean')
             ->exec("make -j{$builder->concurrency}")
             ->exec('make install');
+    }
+
+    public function patchSharedLibAdd(): void
+    {
+        // include_suggests so transitive optional libs (e.g. librdkafka → lz4/zstd/ssl) are in the link line
+        $config = (new SPCConfigUtil())->getExtensionConfig($this, include_suggests: true);
+        [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
+        $lstdcpp = str_contains($sharedLibs, '-l:libstdc++.a')
+            ? '-l:libstdc++.a'
+            : (str_contains($sharedLibs, '-lstdc++') ? '-lstdc++' : '');
+
+        $makefile = $this->getSourceDir() . '/Makefile';
+        if (!is_file($makefile)) {
+            return;
+        }
+        $content = (string) file_get_contents($makefile);
+        if (!preg_match('/^(.*_SHARED_LIBADD\s*=\s*)(.*)$/m', $content, $m)) {
+            return;
+        }
+        $prefix = $m[1];
+        $current = trim($m[2]);
+        $merged = clean_spaces("{$current} {$staticLibs} {$lstdcpp}");
+        $merged = deduplicate_flags($merged);
+        \StaticPHP\Util\FileSystem::replaceFileRegex(
+            $makefile,
+            '/^(.*_SHARED_LIBADD\s*=.*)$/m',
+            $prefix . $merged
+        );
     }
 
     /**
@@ -333,6 +370,21 @@ class PhpExtensionPackage extends Package
      */
     public function buildSharedForUnix(PackageBuilder $builder): void
     {
+        // skip virtual addons (arg-type=none + display-name → owning ext); the parent ext built it
+        $argType = $this->extension_config['arg-type'] ?? null;
+        $displayName = $this->extension_config['display-name'] ?? null;
+        if ($argType === 'none' && $displayName !== null && $displayName !== $this->getExtensionName()) {
+            logger()->info("Skipping virtual extension [{$this->getName()}] — it's part of [{$displayName}].");
+            return;
+        }
+
+        if (!is_dir($this->getSourceDir())) {
+            throw new ValidationException(
+                "Extension source directory not found: {$this->getSourceDir()}",
+                validation_module: "Extension {$this->getName()} source"
+            );
+        }
+
         $env = $this->getSharedExtensionEnv();
 
         $this->runStage([$this, 'phpizeForUnix'], ['env' => $env]);
