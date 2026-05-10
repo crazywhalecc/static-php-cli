@@ -265,9 +265,9 @@ jobs:
           ./bin/spc doctor --auto-fix
           ${{ matrix.combo.build-args }} --dl-with-php=${{ matrix.combo.php-version }}
 
-      - name: Setup tmate session
+      - name: Setup upterm session
         if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+        uses: owenthereal/action-upterm@v1
 
       - name: Upload logs
         if: always() && hashFiles('log/**') != ''
