@@ -16,6 +16,8 @@ curl:
     - zlib
     - libssh2
     - nghttp2
+    - brotli
+    - zstd
   suggests@unix:
     - libssh2
     - brotli
@@ -27,9 +29,6 @@ curl:
     - ldap
     - idn2
     - krb5
-  suggests@windows:
-    - brotli
-    - zstd
   frameworks:
     - CoreFoundation
     - CoreServices

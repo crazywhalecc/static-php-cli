@@ -2,8 +2,10 @@ ext-ds:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: ds
+      type: git
+      url: 'https://github.com/php-ds/ext-ds.git'
+      rev: master
+      extract: php-src/ext/ds
     metadata:
       license-files: [LICENSE]
       license: MIT

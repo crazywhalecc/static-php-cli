@@ -44,6 +44,7 @@ class DefaultShell extends Shell
         $cmd = SPC_CURL_EXEC . " -sfSL --max-time 3600 {$retry_arg} {$compressed_arg} {$method_arg} {$header_arg} {$url_arg}";
 
         $this->logCommandInfo($cmd);
+        logger()->debug("[CURL EXECUTE] {$cmd}");
         $result = $this->passthru($cmd, capture_output: true, throw_on_error: false);
         $ret = $result['code'];
         $output = $result['output'];
@@ -83,7 +84,7 @@ class DefaultShell extends Shell
     /**
      * Execute a Git clone command to clone a repository.
      */
-    public function executeGitClone(string $url, string $branch, string $path, bool $shallow = true, ?array $submodules = null): void
+    public function executeGitClone(string $url, string $branch, string $path, bool $shallow = true, ?array $submodules = null, int $retries = 0): void
     {
         $path = FileSystem::convertPath($path);
         if (file_exists($path)) {
@@ -98,7 +99,21 @@ class DefaultShell extends Shell
         $cmd = clean_spaces("{$git} clone -c http.lowSpeedLimit=1 -c http.lowSpeedTime=3600 --config core.autocrlf=false --branch {$branch_arg} {$shallow_arg} {$submodules_arg} {$url_arg} {$path_arg}");
         $this->logCommandInfo($cmd);
         logger()->debug("[GIT CLONE] {$cmd}");
-        $this->passthru($cmd, $this->console_putput);
+        try {
+            $this->passthru($cmd, $this->console_putput);
+        } catch (InterruptException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            if ($retries > 0) {
+                logger()->warning("Git clone failed, retrying... ({$retries} retries left)");
+                if (is_dir($path)) {
+                    FileSystem::removeDir($path);
+                }
+                $this->executeGitClone($url, $branch, $path, $shallow, $submodules, $retries - 1);
+                return;
+            }
+            throw $e;
+        }
         if ($submodules !== null) {
             $depth_flag = $shallow ? '--depth 1' : '';
             foreach ($submodules as $submodule) {

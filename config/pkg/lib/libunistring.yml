@@ -5,7 +5,6 @@ libunistring:
       type: filelist
       url: 'https://ftp.gnu.org/gnu/libunistring/'
       regex: '/href="(?<file>libunistring-(?<version>[^"]+)\.tar\.gz)"/'
-    binary: hosted
     metadata:
       license-files: [COPYING.LIB]
       license: LGPL-3.0-or-later

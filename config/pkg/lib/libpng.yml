@@ -6,7 +6,6 @@ libpng:
       repo: pnggroup/libpng
       match: v1\.6\.\d+
       query: '?per_page=150'
-    binary: hosted
     metadata:
       license-files: [LICENSE]
       license: PNG

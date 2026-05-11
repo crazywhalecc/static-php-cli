@@ -39,11 +39,11 @@ class go_xcaddy
         };
 
         // get version and hash
-        [$version] = explode("\n", default_shell()->executeCurl('https://go.dev/VERSION?m=text') ?: '');
+        [$version] = explode("\n", default_shell()->executeCurl('https://go.dev/VERSION?m=text', retries: $downloader->getRetry()) ?: '');
         if ($version === '') {
             throw new DownloaderException('Failed to get latest Go version from https://go.dev/VERSION?m=text');
         }
-        $page = default_shell()->executeCurl('https://go.dev/dl/');
+        $page = default_shell()->executeCurl('https://go.dev/dl/', retries: $downloader->getRetry());
         if ($page === '' || $page === false) {
             throw new DownloaderException('Failed to get Go download page from https://go.dev/dl/');
         }

@@ -1,5 +1,4 @@
 ncurses:
-  binary: hosted
   metadata:
     license-files:
       - COPYING

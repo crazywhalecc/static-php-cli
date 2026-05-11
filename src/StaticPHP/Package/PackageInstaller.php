@@ -350,7 +350,10 @@ class PackageInstaller
         }
         // Fallback: if the download cache is missing (e.g. download failed or cache was cleared),
         // still check whether the files are physically present in buildroot.
-        if ($package instanceof LibraryPackage) {
+        // Note: TargetPackage extends LibraryPackage, but target packages (e.g. zig) have no
+        // static-libs/headers configured, so isInstalled() would trivially return true for them.
+        // Only apply this fallback to pure library packages.
+        if ($package instanceof LibraryPackage && !($package instanceof TargetPackage)) {
             return $package->isInstalled();
         }
         return false;

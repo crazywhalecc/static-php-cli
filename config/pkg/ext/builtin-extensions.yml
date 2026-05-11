@@ -348,6 +348,7 @@ ext-xmlreader:
   type: php-extension
   depends:
     - ext-xml
+    - ext-dom
   php-extension:
     arg-type: enable
     build-with-php: true

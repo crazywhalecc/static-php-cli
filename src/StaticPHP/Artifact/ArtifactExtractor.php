@@ -242,7 +242,10 @@ class ArtifactExtractor
         }
 
         logger()->info("Extracting binary [{$name}] to {$target_path}...");
-        $this->doStandardExtract($name, $cache_info, $target_path);
+        // When a binary artifact targets the shared buildroot, merge into it instead of wiping it.
+        // Wiping buildroot would destroy files installed by packages processed earlier in the build queue.
+        $merge = (FileSystem::convertPath($target_path) === FileSystem::convertPath(BUILD_ROOT_PATH));
+        $this->doStandardExtract($name, $cache_info, $target_path, $merge);
 
         $artifact->emitAfterBinaryExtract($target_path, $platform);
         logger()->debug("Emitted after-binary-extract hooks for [{$name}]");
@@ -256,8 +259,10 @@ class ArtifactExtractor
 
     /**
      * Standard extraction: extract entire archive to target directory.
+     *
+     * @param bool $merge when true, merge extracted files into existing target dir instead of wiping it
      */
-    protected function doStandardExtract(string $name, array $cache_info, string $target_path): void
+    protected function doStandardExtract(string $name, array $cache_info, string $target_path, bool $merge = false): void
     {
         $source_file = $this->cache->getCacheFullPath($cache_info);
         $cache_type = $cache_info['cache_type'];
@@ -265,7 +270,7 @@ class ArtifactExtractor
         // Validate source file exists before extraction
         $this->validateSourceFile($name, $source_file, $cache_type);
 
-        $this->extractWithType($cache_type, $source_file, $target_path);
+        $this->extractWithType($cache_type, $source_file, $target_path, $merge);
     }
 
     /**
@@ -443,10 +448,10 @@ class ArtifactExtractor
      * @param string $source_file Path to source file or directory
      * @param string $target_path Target extraction path
      */
-    protected function extractWithType(string $cache_type, string $source_file, string $target_path): void
+    protected function extractWithType(string $cache_type, string $source_file, string $target_path, bool $merge = false): void
     {
         match ($cache_type) {
-            'archive' => $this->extractArchive($source_file, $target_path),
+            'archive' => $this->extractArchive($source_file, $target_path, $merge),
             'file' => $this->copyFile($source_file, $target_path),
             'git' => FileSystem::copyDir(FileSystem::convertPath($source_file), $target_path),
             'local' => symlink(FileSystem::convertPath($source_file), $target_path),
@@ -458,8 +463,10 @@ class ArtifactExtractor
      * Extract archive file to target directory.
      *
      * Supports: tar, tar.gz, tgz, tar.bz2, tar.xz, txz, zip, exe
+     *
+     * @param bool $merge when true, merge zip contents into existing target dir instead of wiping it
      */
-    protected function extractArchive(string $filename, string $target): void
+    protected function extractArchive(string $filename, string $target, bool $merge = false): void
     {
         $target = FileSystem::convertPath($target);
         $filename = FileSystem::convertPath($filename);
@@ -476,7 +483,7 @@ class ArtifactExtractor
             'Windows' => match ($extname) {
                 'tar' => default_shell()->executeTarExtract($filename, $target, 'none'),
                 'xz', 'txz', 'gz', 'tgz', 'bz2' => default_shell()->execute7zExtract($filename, $target),
-                'zip' => $this->unzipWithStrip($filename, $target),
+                'zip' => $this->unzipWithStrip($filename, $target, $merge),
                 'exe' => $this->copyFile($filename, $target),
                 default => throw new FileSystemException("Unknown archive format: {$filename}"),
             },
@@ -485,7 +492,7 @@ class ArtifactExtractor
                 'gz', 'tgz' => default_shell()->executeTarExtract($filename, $target, 'gz'),
                 'bz2' => default_shell()->executeTarExtract($filename, $target, 'bz2'),
                 'xz', 'txz' => default_shell()->executeTarExtract($filename, $target, 'xz'),
-                'zip' => $this->unzipWithStrip($filename, $target),
+                'zip' => $this->unzipWithStrip($filename, $target, $merge),
                 'exe' => $this->copyFile($filename, $target),
                 default => throw new FileSystemException("Unknown archive format: {$filename}"),
             },
@@ -496,7 +503,7 @@ class ArtifactExtractor
     /**
      * Unzip file with stripping top-level directory.
      */
-    protected function unzipWithStrip(string $zip_file, string $extract_path): bool
+    protected function unzipWithStrip(string $zip_file, string $extract_path, bool $merge = false): bool
     {
         $temp_dir = FileSystem::convertPath(sys_get_temp_dir() . '/spc_unzip_' . bin2hex(random_bytes(16)));
         $zip_file = FileSystem::convertPath($zip_file);
@@ -517,15 +524,22 @@ class ArtifactExtractor
             throw new FileSystemException('Cannot scan unzip temp dir: ' . $temp_dir);
         }
 
-        // If extract path already exists, remove it
-        if (is_dir($extract_path)) {
-            FileSystem::removeDir($extract_path);
+        if (!$merge) {
+            // Replace mode: wipe the target directory before extracting
+            if (is_dir($extract_path)) {
+                FileSystem::removeDir($extract_path);
+            }
         }
 
-        // If only one dir, move its contents to extract_path
+        // If only one dir, move/merge its contents to extract_path
         $subdir = FileSystem::convertPath("{$temp_dir}/{$contents[0]}");
         if (count($contents) === 1 && is_dir($subdir)) {
-            $this->moveFileOrDir($subdir, $extract_path);
+            if ($merge) {
+                $this->mergeDirContent($subdir, $extract_path);
+                FileSystem::removeDir($subdir);
+            } else {
+                $this->moveFileOrDir($subdir, $extract_path);
+            }
         } else {
             // Else, if it contains only one dir, strip dir and copy other files
             $dircount = 0;
@@ -550,26 +564,36 @@ class ArtifactExtractor
                     throw new FileSystemException("Cannot scan unzip temp sub-dir: {$dir[0]}");
                 }
                 foreach ($sub_contents as $sub_item) {
-                    $this->moveFileOrDir(
-                        FileSystem::convertPath("{$temp_dir}/{$dir[0]}/{$sub_item}"),
-                        FileSystem::convertPath("{$extract_path}/{$sub_item}")
-                    );
+                    $src = FileSystem::convertPath("{$temp_dir}/{$dir[0]}/{$sub_item}");
+                    $dst = FileSystem::convertPath("{$extract_path}/{$sub_item}");
+                    if ($merge && is_dir($src)) {
+                        $this->mergeDirContent($src, $dst);
+                    } else {
+                        $this->moveFileOrDir($src, $dst);
+                    }
                 }
             } else {
                 foreach ($dir as $item) {
-                    $this->moveFileOrDir(
-                        FileSystem::convertPath("{$temp_dir}/{$item}"),
-                        FileSystem::convertPath("{$extract_path}/{$item}")
-                    );
+                    $src = FileSystem::convertPath("{$temp_dir}/{$item}");
+                    $dst = FileSystem::convertPath("{$extract_path}/{$item}");
+                    if ($merge) {
+                        $this->mergeDirContent($src, $dst);
+                    } else {
+                        $this->moveFileOrDir($src, $dst);
+                    }
                 }
             }
 
-            // Move top-level files to extract_path
+            // Move or copy top-level files to extract_path
             foreach ($top_files as $top_file) {
-                $this->moveFileOrDir(
-                    FileSystem::convertPath("{$temp_dir}/{$top_file}"),
-                    FileSystem::convertPath("{$extract_path}/{$top_file}")
-                );
+                $src = FileSystem::convertPath("{$temp_dir}/{$top_file}");
+                $dst = FileSystem::convertPath("{$extract_path}/{$top_file}");
+                if ($merge) {
+                    FileSystem::createDir(dirname($dst));
+                    copy($src, $dst);
+                } else {
+                    $this->moveFileOrDir($src, $dst);
+                }
             }
         }
 
@@ -593,6 +617,25 @@ class ArtifactExtractor
             '{php_sdk_path}' => getenv('PHP_SDK_PATH') ?: '',
         ];
         return str_replace(array_keys($replacement), array_values($replacement), $path);
+    }
+
+    private function mergeDirContent(string $src_dir, string $dest_dir): void
+    {
+        FileSystem::createDir($dest_dir);
+        $items = FileSystem::scanDirFiles($src_dir, false, true, true);
+        if ($items === false || empty($items)) {
+            return;
+        }
+        foreach ($items as $item) {
+            $src_item = FileSystem::convertPath("{$src_dir}/{$item}");
+            $dest_item = FileSystem::convertPath("{$dest_dir}/{$item}");
+            if (is_dir($src_item)) {
+                $this->mergeDirContent($src_item, $dest_item);
+            } else {
+                FileSystem::createDir(dirname($dest_item));
+                copy($src_item, $dest_item);
+            }
+        }
     }
 
     /**

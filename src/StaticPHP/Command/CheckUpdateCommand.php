@@ -26,7 +26,7 @@ class CheckUpdateCommand extends BaseCommand
         $this->addOption('parallel', 'p', InputOption::VALUE_REQUIRED, 'Number of parallel update checks (default: 10)', 10);
 
         // --with-php option for checking updates with a specific PHP version context
-        $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.4)', '8.4');
+        $this->addOption('with-php', null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.5)', '8.5');
     }
 
     public function handle(): int
