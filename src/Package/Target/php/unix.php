@@ -20,8 +20,10 @@ use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
@@ -93,7 +95,8 @@ trait unix
         // disable undefined behavior sanitizer when opcache JIT is enabled (Linux only)
         if (SystemTarget::getTargetOS() === 'Linux' && !$package->getBuildOption('disable-opcache-jit', false)) {
             if ($version_id >= 80500 || $installer->isPackageResolved('ext-opcache')) {
-                f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
+                $compiler_extra = getenv('SPC_COMPILER_EXTRA') ?: '';
+                GlobalEnvManager::putenv('SPC_COMPILER_EXTRA=' . trim($compiler_extra . ' -fno-sanitize=undefined'));
             }
         }
         // PHP JSON extension is built-in since PHP 8.0
@@ -165,14 +168,20 @@ trait unix
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
     #[PatchDescription('Patch Makefile to fix //lib path for Linux builds')]
-    public function tryPatchMakefileUnix(): void
+    #[PatchDescription('Patch BUILD_CC to use system cc instead of zig-cc (prevents minilua crash)')]
+    public function tryPatchMakefileUnix(TargetPackage $package, ToolchainInterface $toolchain): void
     {
         if (SystemTarget::getTargetOS() !== 'Linux') {
             return;
         }
 
         // replace //lib with /lib in Makefile
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('sed -i "s|//lib|/lib|g" Makefile');
+        shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
+
+        if ($toolchain instanceof ZigToolchain) {
+            $makefile = "{$package->getSourceDir()}/Makefile";
+            FileSystem::replaceFileRegex($makefile, '/^BUILD_CC\s*=\s*zig-cc\s*$/m', 'BUILD_CC = cc');
+        }
     }
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
@@ -392,14 +401,13 @@ trait unix
 
         // ------------- SPC_CMD_VAR_PHP_EMBED_TYPE=static -------------
 
-        // process libphp.a for static embed
-        if (!file_exists("{$package->getLibDir()}/libphp.a")) {
-            return;
+        // process libphp.a for static embed (only when present)
+        if (file_exists("{$package->getLibDir()}/libphp.a")) {
+            $ar = getenv('AR') ?: 'ar';
+            $libphp_a = "{$package->getLibDir()}/libphp.a";
+            shell()->exec("{$ar} -t {$libphp_a} | grep '\\.a$' | xargs -n1 {$ar} d {$libphp_a}");
+            UnixUtil::exportDynamicSymbols($libphp_a);
         }
-        $ar = getenv('AR') ?: 'ar';
-        $libphp_a = "{$package->getLibDir()}/libphp.a";
-        shell()->exec("{$ar} -t {$libphp_a} | grep '\\.a$' | xargs -n1 {$ar} d {$libphp_a}");
-        UnixUtil::exportDynamicSymbols($libphp_a);
     }
 
     #[Stage]
@@ -552,7 +560,8 @@ trait unix
         if (file_exists(BUILD_BIN_PATH . '/php-config')) {
             logger()->debug('Patching php-config prefix and libs order');
             $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
-            $php_config_str = str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
+            // anchor to start-of-line so we don't also match `program_prefix=""`
+            $php_config_str = preg_replace('/^prefix=""/m', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
             // move mimalloc to the beginning of libs
             $php_config_str = preg_replace('/(libs=")(.*?)\s*(' . preg_quote(BUILD_LIB_PATH, '/') . '\/mimalloc\.o)\s*(.*?)"/', '$1$3 $2 $4"', $php_config_str);
             // move lstdc++ to the end of libs

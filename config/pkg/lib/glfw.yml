@@ -1,6 +1,12 @@
 glfw:
   type: library
   artifact: glfw
+  frameworks:
+    - Cocoa
+    - CoreFoundation
+    - CoreVideo
+    - IOKit
+    - QuartzCore
   headers:
     - GLFW/glfw3.h
     - GLFW/glfw3native.h

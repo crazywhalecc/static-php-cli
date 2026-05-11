@@ -26,7 +26,7 @@ The `craft` command reads a `craft.yml` file and handles everything automaticall
 Create a `craft.yml` in your working directory and declare the PHP version, extensions, and target SAPIs:
 
 ```yaml
-php-version: 8.4
+php-version: 8.5
 extensions: bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer
 sapi:
   - cli
@@ -80,10 +80,10 @@ If you want to pre-download ahead of time, or if you're working in a slow-networ
 
 ```bash
 # Download only what the chosen extensions need (recommended)
-spc download --for-extensions="bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer" --with-php=8.4
+spc download --for-extensions="bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer" --with-php=8.5
 
 # Download by specific package names
-spc download "curl,openssl" --with-php=8.4
+spc download "curl,openssl" --with-php=8.5
 ```
 
 Downloads are cached in `downloads/` and reused across builds automatically.

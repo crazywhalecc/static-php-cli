@@ -6,7 +6,6 @@ xz:
       repo: tukaani-project/xz
       match: xz.+\.tar\.xz
       prefer-stable: true
-    binary: hosted
     metadata:
       license-files: [COPYING]
       license: 0BSD

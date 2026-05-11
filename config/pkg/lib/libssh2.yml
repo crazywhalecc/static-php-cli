@@ -6,7 +6,6 @@ libssh2:
       repo: libssh2/libssh2
       match: libssh2.+\.tar\.gz
       prefer-stable: true
-    binary: hosted
     metadata:
       license-files: [COPYING]
       license: BSD-3-Clause

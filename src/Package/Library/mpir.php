@@ -33,7 +33,7 @@ class mpir
     {
         $vs_ver_dir = ApplicationContext::get('mpir_vs_ver_dir');
         cmd()->cd("{$lib->getSourceDir()}{$vs_ver_dir}\\lib_mpir_gc")
-            ->exec('msbuild lib_mpir_gc.vcxproj /t:Rebuild /p:Configuration=Release /p:Platform=x64');
+            ->exec('msbuild lib_mpir_gc.vcxproj /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:WindowsTargetPlatformVersion=10.0');
         FileSystem::createDir($lib->getLibDir());
         FileSystem::createDir($lib->getIncludeDir());
         FileSystem::copy("{$lib->getSourceDir()}{$vs_ver_dir}\\lib_mpir_gc\\x64\\Release\\mpir_a.lib", "{$lib->getLibDir()}\\mpir_a.lib");

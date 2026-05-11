@@ -22,32 +22,32 @@ spc download [artifacts] [options]
 
 ### 选项
 
-| 选项 | 缩写 | 说明 |
-|---|---|---|
-| `--for-extensions=<list>` | `-e` | 按扩展名下载其所需的制品 |
-| `--for-libs=<list>` | `-l` | 按库名下载其所需的制品 |
-| `--for-packages=<list>` | | 按包名下载其所需的制品 |
-| `--without-suggests` | | 使用 `--for-extensions` 时跳过建议包 |
-| `--clean` | | 下载前删除旧的下载缓存 |
-| `--with-php=<ver>` | | PHP 版本，格式为 `major.minor`（默认 `8.4`）|
-| `--prefer-binary` | `-p` | 优先使用预编译二进制 |
-| `--prefer-source` | | 优先使用源码包 |
-| `--source-only` | | 仅下载源码制品 |
-| `--binary-only` | | 仅下载二进制制品 |
-| `--parallel=<n>` | `-P` | 并行下载数（默认 `1`）|
-| `--retry=<n>` | `-R` | 失败重试次数（默认 `0`）|
-| `--ignore-cache=<list>` | | 强制重新下载指定制品 |
-| `--no-alt` | | 不使用镜像站 |
-| `--no-shallow-clone` | | 不使用浅层克隆 |
-| `--custom-url=<src:url>` | `-U` | 覆盖指定源的下载地址 |
-| `--custom-git=<src:branch:url>` | `-G` | 覆盖为自定义 git 仓库 |
-| `--custom-local=<src:path>` | `-L` | 使用本地路径作为制品来源 |
+| 选项 | 缩写   | 说明                                 |
+|---|------|------------------------------------|
+| `--for-extensions=<list>` | `-e` | 按扩展名下载其所需的制品                       |
+| `--for-libs=<list>` | `-l` | 按库名下载其所需的制品                        |
+| `--for-packages=<list>` |      | 按包名下载其所需的制品                        |
+| `--without-suggests` |      | 使用 `--for-extensions` 时跳过建议包       |
+| `--clean` |      | 下载前删除旧的下载缓存                        |
+| `--with-php=<ver>` |      | PHP 版本，格式为 `major.minor`（默认 `8.5`） |
+| `--prefer-binary` | `-p` | 优先使用预编译二进制                         |
+| `--prefer-source` |      | 优先使用源码包                            |
+| `--source-only` |      | 仅下载源码制品                            |
+| `--binary-only` |      | 仅下载二进制制品                           |
+| `--parallel=<n>` | `-P` | 并行下载数（默认 `1`）                      |
+| `--retry=<n>` | `-R` | 失败重试次数（默认 `0`）                     |
+| `--ignore-cache=<list>` | `-i` | 强制重新下载指定制品                         |
+| `--no-alt` |      | 不使用镜像站                             |
+| `--no-shallow-clone` |      | 不使用浅层克隆                            |
+| `--custom-url=<src:url>` | `-U` | 覆盖指定源的下载地址                         |
+| `--custom-git=<src:branch:url>` | `-G` | 覆盖为自定义 git 仓库                      |
+| `--custom-local=<src:path>` | `-L` | 使用本地路径作为制品来源                       |
 
 ### 示例
 
 ```bash
 # 按扩展名下载（推荐）
-spc download --for-extensions="bcmath,openssl,curl" --with-php=8.4
+spc download --for-extensions="bcmath,openssl,curl" --with-php=8.5
 
 # 下载指定制品
 spc download "php-src,openssl"
@@ -134,14 +134,14 @@ spc build:php <extensions> [options]
 
 所有下载器选项均可加 `--dl-` 前缀使用：
 
-| 选项 | 说明 |
-|---|---|
-| `--dl-with-php=<ver>` | 指定下载的 PHP 版本（默认 `8.4`）|
-| `--dl-prefer-binary` | 优先使用预编译二进制依赖 |
-| `--dl-parallel=<n>` | 并行下载数 |
-| `--dl-retry=<n>` | 失败重试次数 |
-| `--dl-custom-url=<src:url>` | 覆盖指定源的下载地址 |
-| `--dl-custom-git=<src:branch:url>` | 覆盖为自定义 git 仓库 |
+| 选项 | 说明                     |
+|---|------------------------|
+| `--dl-with-php=<ver>` | 指定下载的 PHP 版本（默认 `8.5`） |
+| `--dl-prefer-binary` | 优先使用预编译二进制依赖           |
+| `--dl-parallel=<n>` | 并行下载数                  |
+| `--dl-retry=<n>` | 失败重试次数                 |
+| `--dl-custom-url=<src:url>` | 覆盖指定源的下载地址             |
+| `--dl-custom-git=<src:branch:url>` | 覆盖为自定义 git 仓库          |
 
 Downloader 选项传递给 `build:php` 命令时，会被自动下载器在构建前使用。
 这样你就可以直接通过构建命令控制下载行为，无需单独执行 `spc download` 命令。
@@ -265,12 +265,12 @@ spc check-update [artifact] [options]
 
 ### 选项
 
-| 选项 | 缩写 | 说明 |
-|---|---|---|
-| `--json` | | 以 JSON 格式输出结果 |
-| `--bare` | | 检查时不要求制品已下载（旧版本显示为 null）|
-| `--parallel=<n>` | `-p` | 并行检查数（默认 `10`）|
-| `--with-php=<ver>` | | PHP 版本上下文，格式为 `major.minor`（默认 `8.4`）|
+| 选项 | 缩写 | 说明                                    |
+|---|---|---------------------------------------|
+| `--json` | | 以 JSON 格式输出结果                         |
+| `--bare` | | 检查时不要求制品已下载（旧版本显示为 null）              |
+| `--parallel=<n>` | `-p` | 并行检查数（默认 `10`）                        |
+| `--with-php=<ver>` | | PHP 版本上下文，格式为 `major.minor`（默认 `8.5`） |
 
 ### 示例
 

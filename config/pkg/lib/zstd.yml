@@ -19,3 +19,4 @@ zstd:
     - libzstd.a
   static-libs@windows:
     - zstd.lib
+    - libzstd.lib

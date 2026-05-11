@@ -20,7 +20,7 @@ class swow extends PhpExtensionPackage
     #[CustomPhpConfigureArg('Windows')]
     public function configureArg(PackageInstaller $installer): string
     {
-        $arg = '--enable-swow';
+        $arg = '--enable-swow --disable-swow-pdo-pgsql';
         $arg .= $installer->getLibraryPackage('openssl') ? ' --enable-swow-ssl' : ' --disable-swow-ssl';
         $arg .= $installer->getLibraryPackage('curl') ? ' --enable-swow-curl' : ' --disable-swow-curl';
         return $arg;

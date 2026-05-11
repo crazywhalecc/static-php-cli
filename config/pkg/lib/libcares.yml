@@ -10,7 +10,6 @@ libcares:
       type: filelist
       url: 'https://c-ares.org/download/'
       regex: '/href="\/download\/(?<file>c-ares-(?<version>[^"]+)\.tar\.gz)"/'
-    binary: hosted
     metadata:
       license-files: [LICENSE.md]
   headers@unix:
