@@ -6,6 +6,8 @@ namespace Package\Library;
 
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\Package\PatchBeforeBuild;
+use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
@@ -16,6 +18,24 @@ use StaticPHP\Util\FileSystem;
 #[Library('ncursesw')]
 class ncurses
 {
+    #[PatchBeforeBuild]
+    #[PatchDescription('Filter clang/zig "N warning(s) generated." line out of MKlib_gen.sh preprocessor pipe')]
+    public function patchBeforeBuild(LibraryPackage $lib): void
+    {
+        // MKlib_gen.sh feeds the C preprocessor's stdout through a sed/awk
+        // pipeline into lib_gen.c. zig-cc/clang emits "N warning(s) generated."
+        // on stdout (not stderr), and that line ends up as invalid C in the
+        // generated source. Filter it out of the pipe before sed sees it.
+        $mklibGen = $lib->getSourceDir() . '/ncurses/base/MKlib_gen.sh';
+        if (is_file($mklibGen) && !str_contains((string) file_get_contents($mklibGen), "| grep -v ' generated")) {
+            FileSystem::replaceFileStr(
+                $mklibGen,
+                '$preprocessor $TMP 2>/dev/null \\',
+                "\$preprocessor \$TMP 2>/dev/null \\\n| grep -v ' generated\\.\$' \\",
+            );
+        }
+    }
+
     #[BuildFor('Darwin')]
     #[BuildFor('Linux')]
     public function build(LibraryPackage $package, ToolchainInterface $toolchain): void

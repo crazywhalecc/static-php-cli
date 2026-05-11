@@ -17,7 +17,9 @@ class jbig
     #[PatchBeforeBuild]
     public function patchBeforeBuild(LibraryPackage $lib): void
     {
-        FileSystem::replaceFileStr($lib->getSourceDir() . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', 'CFLAGS = -O2 -W -Wno-unused-result -fPIC');
+        $extra = trim((string) getenv('SPC_DEFAULT_CFLAGS'));
+        $cflags = ($extra !== '' ? $extra : '-O2') . ' -W -Wno-unused-result -fPIC';
+        FileSystem::replaceFileStr($lib->getSourceDir() . '/Makefile', 'CFLAGS = -O2 -W -Wno-unused-result', "CFLAGS = {$cflags}");
     }
 
     #[BuildFor('Darwin')]
