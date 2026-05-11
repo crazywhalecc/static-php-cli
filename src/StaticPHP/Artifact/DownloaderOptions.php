@@ -52,7 +52,7 @@ class DownloaderOptions
 
         return [
             // php version option
-            new InputOption("{$p}with-php", null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.4)', '8.4'),
+            new InputOption("{$p}with-php", null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.5)', '8.5'),
 
             // download preference options
             new InputOption("{$p}prefer-source", null, InputOption::VALUE_OPTIONAL, 'Prefer source downloads when both source and binary are available', false),
