@@ -14,6 +14,6 @@ ext-swow:
     - curl
     - ext-openssl
     - ext-curl
-    - pgsql
+    - postgresql
   php-extension:
     arg-type: custom
