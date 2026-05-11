@@ -20,7 +20,7 @@ class pgsql extends PhpExtensionPackage
     public function getUnixConfigureArg(bool $shared, PackageBuilder $builder, PackageInstaller $installer): string
     {
         if (php::getPHPVersionID() >= 80400) {
-            $libfiles = new SPCConfigUtil(['libs_only_deps' => true, 'absolute_libs' => true])->getPackageDepsConfig('postgresql', array_keys($installer->getResolvedPackages()), $builder->getOption('with-suggests'))['libs'];
+            $libfiles = new SPCConfigUtil(['libs_only_deps' => true, 'absolute_libs' => true])->getPackageDepsConfig('postgresql', array_keys($installer->getResolvedPackages()))['libs'];
             $libfiles = str_replace("{$builder->getLibDir()}/lib", '-l', $libfiles);
             $libfiles = str_replace('.a', '', $libfiles);
             return '--with-pgsql' . ($shared ? '=shared' : '') .

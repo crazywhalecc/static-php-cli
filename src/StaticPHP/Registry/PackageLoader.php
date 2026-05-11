@@ -375,7 +375,7 @@ class PackageLoader
                 continue;
             }
             foreach ($conditionals as $class) {
-                if (!ApplicationContext::has($class)) {
+                if (ApplicationContext::tryGet($class) === null) {
                     continue 2;
                 }
             }
@@ -394,7 +394,7 @@ class PackageLoader
                 continue;
             }
             foreach ($conditionals as $class) {
-                if (!ApplicationContext::has($class)) {
+                if (ApplicationContext::tryGet($class) === null) {
                     continue 2;
                 }
             }

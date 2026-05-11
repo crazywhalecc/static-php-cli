@@ -274,8 +274,7 @@ class PhpExtensionPackage extends Package
             $compiler_extra = trim($compiler_extra . ' -lcompiler_rt');
             GlobalEnvManager::putenv("SPC_COMPILER_EXTRA={$compiler_extra}");
         }
-        // include_suggests so transitive optional libs (e.g. librdkafka → lz4/zstd/ssl) are in the link line
-        $config = (new SPCConfigUtil())->getExtensionConfig($this, include_suggests: true);
+        $config = (new SPCConfigUtil())->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
         $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';
@@ -336,8 +335,7 @@ class PhpExtensionPackage extends Package
 
     public function patchSharedLibAdd(): void
     {
-        // include_suggests so transitive optional libs (e.g. librdkafka → lz4/zstd/ssl) are in the link line
-        $config = (new SPCConfigUtil())->getExtensionConfig($this, include_suggests: true);
+        $config = (new SPCConfigUtil())->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $lstdcpp = str_contains($sharedLibs, '-l:libstdc++.a')
             ? '-l:libstdc++.a'
