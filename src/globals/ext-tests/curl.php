@@ -8,7 +8,7 @@ assert(function_exists('curl_exec'));
 assert(function_exists('curl_close'));
 assert(function_exists('curl_version'));
 $curl_version = curl_version();
-if (stripos($curl_version['ssl_version'], 'schannel') !== false) {
+if (stripos($curl_version['ssl_version'], 'schannel') !== false && !extension_loaded('swow')) {
     $domain_list = [
         'https://captive.apple.com/',
         'https://detectportal.firefox.com/',
