@@ -29,7 +29,7 @@ spc download [artifacts] [options]
 | `--for-packages=<list>`         |       | Download artifacts needed by the given packages       |
 | `--without-suggests`            |       | Skip suggested packages when using `--for-extensions` |
 | `--clean`                       |       | Delete existing download cache before fetching        |
-| `--with-php=<ver>`              |       | PHP version in `major.minor` format (default: `8.4`)  |
+| `--with-php=<ver>`              |       | PHP version in `major.minor` format (default: `8.5`)  |
 | `--prefer-binary`               | `-p`  | Prefer pre-built binaries over source archives        |
 | `--prefer-source`               |       | Prefer source archives over pre-built binaries        |
 | `--source-only`                 |       | Only download source artifacts                        |
@@ -47,7 +47,7 @@ spc download [artifacts] [options]
 
 ```bash
 # Download only what the chosen extensions need
-spc download --for-extensions="bcmath,openssl,curl" --with-php=8.4
+spc download --for-extensions="bcmath,openssl,curl" --with-php=8.5
 
 # Download specific artifacts
 spc download "php-src,openssl"
@@ -136,7 +136,7 @@ All downloader options are available with the `--dl-` prefix:
 
 | Option                             | Description                                |
 |------------------------------------|--------------------------------------------|
-| `--dl-with-php=<ver>`              | PHP version to download (default: `8.4`)   |
+| `--dl-with-php=<ver>`              | PHP version to download (default: `8.5`)   |
 | `--dl-prefer-binary`               | Prefer pre-built binaries for dependencies |
 | `--dl-parallel=<n>`                | Number of parallel downloads               |
 | `--dl-retry=<n>`                   | Number of retries on failure               |
@@ -265,12 +265,12 @@ spc check-update [artifact] [options]
 
 ### Options
 
-| Option | Short | Description |
-|---|---|---|
-| `--json` | | Output results in JSON format |
+| Option | Short | Description                                                                              |
+|---|---|------------------------------------------------------------------------------------------|
+| `--json` | | Output results in JSON format                                                            |
 | `--bare` | | Check without requiring the artifact to be downloaded first (old version will be `null`) |
-| `--parallel=<n>` | `-p` | Number of parallel update checks (default: `10`) |
-| `--with-php=<ver>` | | PHP version context in `major.minor` format (default: `8.4`) |
+| `--parallel=<n>` | `-p` | Number of parallel update checks (default: `10`)                                         |
+| `--with-php=<ver>` | | PHP version context in `major.minor` format (default: `8.5`)                             |
 
 ### Examples
 

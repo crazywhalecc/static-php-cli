@@ -26,7 +26,7 @@ StaticPHP 提供两种构建方式，根据使用场景选择：
 在当前目录创建 `craft.yml`，声明要编译的 PHP 版本、扩展和目标 SAPI：
 
 ```yaml
-php-version: 8.4
+php-version: 8.5
 extensions: bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer
 sapi:
   - cli
@@ -80,10 +80,10 @@ v3 版本中，你可以省略这一步骤，直接构建想要的内容，Stati
 
 ```bash
 # 按扩展列表下载（推荐，只下载实际需要的内容）
-spc download --for-extensions="bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer" --with-php=8.4
+spc download --for-extensions="bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer" --with-php=8.5
 
 # 按依赖包列表下载
-spc download "curl,openssl" --with-php=8.4
+spc download "curl,openssl" --with-php=8.5
 ```
 
 下载内容缓存在 `downloads/` 目录，重复构建时会直接复用。
