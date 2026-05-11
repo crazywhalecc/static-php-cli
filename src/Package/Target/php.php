@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Package\Target;
 
 use Package\Target\php\frankenphp;
+use Package\Target\php\pgo;
 use Package\Target\php\unix;
 use Package\Target\php\windows;
 use StaticPHP\Artifact\ArtifactCache;
@@ -48,6 +49,7 @@ class php extends TargetPackage
     use unix;
     use windows;
     use frankenphp;
+    use pgo;
 
     /** @var string[] Supported major PHP versions */
     public const array SUPPORTED_MAJOR_VERSIONS = ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];

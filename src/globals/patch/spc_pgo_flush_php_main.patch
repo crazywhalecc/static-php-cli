@@ -1,0 +1,12 @@
+--- a/main/main.c
++++ b/main/main.c
+@@ -2563,6 +2563,9 @@
+ #endif
+
+ 	zend_observer_shutdown();
++
++	{ extern int __llvm_profile_write_file(void) __attribute__((weak));
++	  if (__llvm_profile_write_file) __llvm_profile_write_file(); }
+ }
+ /* }}} */
+

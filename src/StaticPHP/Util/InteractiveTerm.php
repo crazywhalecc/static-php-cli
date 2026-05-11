@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace StaticPHP\Util;
 
 use StaticPHP\DI\ApplicationContext;
+use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -27,14 +28,19 @@ class InteractiveTerm
         }
     }
 
-    public static function success(string $message, bool $indent = false): void
+    public static function success(string $message, bool $indent = false, ?float $start_time = null): void
     {
         $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
         $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        if ($start_time !== null) {
+            $message .= ' (' . Helper::formatTime(microtime(true) - $start_time) . ')';
+        }
         if ($output->isVerbose()) {
             logger()->info(strip_ansi_colors($message));
         } else {
-            $output->writeln(($no_ansi ? 'strip_ansi_colors' : 'strval')(ConsoleColor::green(($indent ? '  ' : '') . '✔ ') . $message));
+            // wipe the current indicator line so our persistent ✔ line doesn't get appended to a spinner
+            $clear = (self::$indicator !== null && $output->isDecorated() && !$no_ansi) ? "\x0D\x1B[2K" : '';
+            $output->writeln($clear . ($no_ansi ? 'strip_ansi_colors' : 'strval')(ConsoleColor::green(($indent ? '  ' : '') . '✔ ') . $message));
             logger()->debug(strip_ansi_colors($message));
         }
     }

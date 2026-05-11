@@ -67,7 +67,7 @@ class PkgConfigUtil
     public static function getCflags(string $pkg_config_str): string
     {
         // get other things
-        $result = self::execWithResult("pkg-config --static --cflags-only-other {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config --static --cflags {$pkg_config_str}");
         return trim($result);
     }
 

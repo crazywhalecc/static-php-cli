@@ -215,7 +215,7 @@ class PackageInstaller
             if (!$is_to_build && $should_use_binary) {
                 // install binary
                 if ($this->interactive) {
-                    InteractiveTerm::indicateProgress('Installing package: ' . ConsoleColor::yellow($package->getName()));
+                    InteractiveTerm::indicateProgress('Installing ' . $this->kindLabel($package) . ': ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
                     // Start tracking for binary installation
@@ -227,17 +227,17 @@ class PackageInstaller
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
                     if ($this->interactive) {
-                        InteractiveTerm::finish('Installing binary package failed: ' . ConsoleColor::red($package->getName()), false);
+                        InteractiveTerm::finish('Installing ' . $this->kindLabel($package) . ' failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
                     }
                     throw $e;
                 }
                 if ($this->interactive) {
-                    InteractiveTerm::finish('Installed binary package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_INSTALLED ? ' (already installed, skipped)' : ''));
+                    InteractiveTerm::finish('Installed ' . $this->kindLabel($package) . ': ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_INSTALLED ? ' (already installed, skipped)' : ''));
                 }
             } elseif ($is_to_build && $has_build_stage || $has_source && $has_build_stage) {
                 if ($this->interactive) {
-                    InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
+                    InteractiveTerm::indicateProgress('Building ' . $this->kindLabel($package) . ': ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
                     // Start tracking for build
@@ -260,13 +260,13 @@ class PackageInstaller
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
                     if ($this->interactive) {
-                        InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);
+                        InteractiveTerm::finish('Building ' . $this->kindLabel($package) . ' failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
                     }
                     throw $e;
                 }
                 if ($this->interactive) {
-                    InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
+                    InteractiveTerm::finish('Built ' . $this->kindLabel($package) . ': ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
                 }
             }
         }
@@ -566,6 +566,16 @@ class PackageInstaller
             return $pkg;
         }
         return null;
+    }
+
+    private function kindLabel(Package $package): string
+    {
+        return match (true) {
+            $package instanceof PhpExtensionPackage => 'extension',
+            $package instanceof TargetPackage => 'target',
+            $package instanceof LibraryPackage => 'library',
+            default => 'package',
+        };
     }
 
     /**

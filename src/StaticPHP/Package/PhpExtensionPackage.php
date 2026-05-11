@@ -12,6 +12,7 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\ToolchainManager;
 use StaticPHP\Toolchain\ZigToolchain;
+use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\SPCConfigUtil;
 
@@ -326,16 +327,29 @@ class PhpExtensionPackage extends Package
     {
         // phpize Makefile's _SHARED_LIBADD line misses our static archives — splice them in
         $package->patchSharedLibAdd();
+        $extra_ldflags = (string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
+        $makeArgs = $extra_ldflags !== '' ? 'EXTRA_LDFLAGS=' . escapeshellarg($extra_ldflags) : '';
         shell()->cd($package->getSourceDir())
             ->setEnv($env)
             ->exec('make clean')
-            ->exec("make -j{$builder->concurrency}")
-            ->exec('make install');
+            ->exec("make -j{$builder->concurrency} {$makeArgs}")
+            ->exec("make install {$makeArgs}");
+
+        // install-modules deref'd libtool's `$ext.so → $ext-X.so` symlink into two regular files; restore the symlink.
+        if (preg_match('/-release\s+(\S+)/', $extra_ldflags, $m)) {
+            $name = $package->getExtensionName();
+            $unversioned = BUILD_MODULES_PATH . "/{$name}.so";
+            $versioned = BUILD_MODULES_PATH . "/{$name}-{$m[1]}.so";
+            if (file_exists($versioned) && file_exists($unversioned) && !is_link($unversioned)) {
+                unlink($unversioned);
+                symlink(basename($versioned), $unversioned);
+            }
+        }
     }
 
     public function patchSharedLibAdd(): void
     {
-        $config = (new SPCConfigUtil())->getExtensionConfig($this);
+        $config = new SPCConfigUtil()->getExtensionConfig($this);
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $lstdcpp = str_contains($sharedLibs, '-l:libstdc++.a')
             ? '-l:libstdc++.a'
@@ -353,7 +367,7 @@ class PhpExtensionPackage extends Package
         $current = trim($m[2]);
         $merged = clean_spaces("{$current} {$staticLibs} {$lstdcpp}");
         $merged = deduplicate_flags($merged);
-        \StaticPHP\Util\FileSystem::replaceFileRegex(
+        FileSystem::replaceFileRegex(
             $makefile,
             '/^(.*_SHARED_LIBADD\s*=.*)$/m',
             $prefix . $merged
@@ -389,8 +403,10 @@ class PhpExtensionPackage extends Package
         $this->runStage([$this, 'configureForUnix'], ['env' => $env]);
         $this->runStage([$this, 'makeForUnix'], ['env' => $env]);
 
-        // process *.so file
-        $soFile = BUILD_MODULES_PATH . '/' . $this->getExtensionName() . '.so';
+        // libtool's -release X gives $name-X.so as the real file
+        $soFile = BUILD_MODULES_PATH . '/' . $this->getExtensionName()
+            . (preg_match('/-release\s+(\S+)/', (string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $m) ? "-{$m[1]}" : '')
+            . '.so';
         if (!file_exists($soFile)) {
             throw new ValidationException("Extension {$this->getExtensionName()} build failed: {$soFile} not found", validation_module: "Extension {$this->getExtensionName()} build");
         }

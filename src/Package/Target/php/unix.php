@@ -138,7 +138,7 @@ trait unix
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd($package->getSourceDir())->setEnv([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => "-I{$package->getIncludeDir()}",
-            'LDFLAGS' => "-L{$package->getLibDir()} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
+            'LDFLAGS' => "-L{$package->getLibDir()}",
             'LIBS' => $vars['EXTRA_LIBS'] ?? '',
         ])->exec("{$cmd} {$args} {$static_extension_str}"), $package->getSourceDir());
     }
@@ -220,6 +220,7 @@ trait unix
     #[Stage]
     public function makeCliForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
+        $start = microtime(true);
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make cli'));
         $concurrency = $builder->concurrency;
         $vars = $this->makeVars($installer);
@@ -230,11 +231,13 @@ trait unix
 
         $builder->deployBinary("{$package->getSourceDir()}/sapi/cli/php", BUILD_BIN_PATH . '/php');
         $package->setOutput('Binary path for cli SAPI', BUILD_BIN_PATH . '/php');
+        InteractiveTerm::success('Built SAPI: ' . ConsoleColor::green('php-cli'), true, $start);
     }
 
     #[Stage]
     public function makeCgiForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
+        $start = microtime(true);
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make cgi'));
         $concurrency = $builder->concurrency;
         $vars = $this->makeVars($installer);
@@ -245,11 +248,13 @@ trait unix
 
         $builder->deployBinary("{$package->getSourceDir()}/sapi/cgi/php-cgi", BUILD_BIN_PATH . '/php-cgi');
         $package->setOutput('Binary path for cgi SAPI', BUILD_BIN_PATH . '/php-cgi');
+        InteractiveTerm::success('Built SAPI: ' . ConsoleColor::green('php-cgi'), true, $start);
     }
 
     #[Stage]
     public function makeFpmForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
+        $start = microtime(true);
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make fpm'));
         $concurrency = $builder->concurrency;
         $vars = $this->makeVars($installer);
@@ -260,12 +265,14 @@ trait unix
 
         $builder->deployBinary("{$package->getSourceDir()}/sapi/fpm/php-fpm", BUILD_BIN_PATH . '/php-fpm');
         $package->setOutput('Binary path for fpm SAPI', BUILD_BIN_PATH . '/php-fpm');
+        InteractiveTerm::success('Built SAPI: ' . ConsoleColor::green('php-fpm'), true, $start);
     }
 
     #[Stage]
     #[PatchDescription('Patch phar extension for micro SAPI to support compressed phar')]
     public function makeMicroForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
+        $start = microtime(true);
         $phar_patched = false;
         try {
             if ($installer->isPackageResolved('ext-phar')) {
@@ -298,6 +305,7 @@ trait unix
                 file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
             }
             $package->setOutput('Binary path for micro SAPI', $dst);
+            InteractiveTerm::success('Built SAPI: ' . ConsoleColor::green('php-micro'), true, $start);
         } finally {
             if ($phar_patched) {
                 SourcePatcher::unpatchMicroPhar();
@@ -308,6 +316,7 @@ trait unix
     #[Stage]
     public function makeEmbedForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
+        $start = microtime(true);
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make embed'));
         $shared_exts = array_filter(
             $installer->getResolvedPackages(),
@@ -321,22 +330,43 @@ trait unix
         $root = BUILD_ROOT_PATH;
         $sed_prefix = SystemTarget::getTargetOS() === 'Darwin' ? 'sed -i ""' : 'sed -i';
 
+        $vars = $this->makeVars($installer);
+        $makeArgs = $this->makeVarsToArgs($vars);
         shell()->cd($package->getSourceDir())
-            ->setEnv($this->makeVars($installer))
+            ->setEnv($vars)
             ->exec("{$sed_prefix} \"s|^EXTENSION_DIR = .*|EXTENSION_DIR = /" . basename(BUILD_MODULES_PATH) . '|" Makefile')
-            ->exec("make -j{$builder->concurrency} INSTALL_ROOT={$root} install-sapi {$install_modules} install-build install-headers install-programs");
+            ->exec("make -j{$builder->concurrency} {$makeArgs} INSTALL_ROOT={$root} install-sapi {$install_modules} install-build install-headers install-programs");
+
+        // install-modules deref'd libtool's `$ext.so → $ext-X.so` symlink for each built-with-php ext; restore them.
+        $release = null;
+        if (preg_match('/-release\s+(\S+)/', (string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'), $m)) {
+            $release = $m[1];
+            foreach ($shared_exts as $ext) {
+                $name = $ext->getExtensionName();
+                $u = BUILD_MODULES_PATH . "/{$name}.so";
+                $v = BUILD_MODULES_PATH . "/{$name}-{$release}.so";
+                if (file_exists($v) && file_exists($u) && !is_link($u)) {
+                    unlink($u);
+                    symlink(basename($v), $u);
+                }
+            }
+        }
 
         // ------------- SPC_CMD_VAR_PHP_EMBED_TYPE=shared -------------
 
-        // process libphp.so for shared embed
+        // INSTALL_IT for embed copies through libtool's symlink, leaving only unversioned libphp.{so,dylib} — rename and symlink back so shared exts can `-lphp`. (static libphp.a is never versioned, even with -release.)
         $suffix = SystemTarget::getTargetOS() === 'Darwin' ? 'dylib' : 'so';
         $libphp_so = "{$package->getLibDir()}/libphp.{$suffix}";
         if (file_exists($libphp_so)) {
-            // rename libphp.so if -release is set
-            if (SystemTarget::getTargetOS() === 'Linux') {
-                $this->processLibphpSoFile($libphp_so, $installer);
+            if ($release !== null) {
+                $versioned = "{$package->getLibDir()}/libphp-{$release}.{$suffix}";
+                if (file_exists($versioned)) {
+                    @unlink($versioned);
+                }
+                rename($libphp_so, $versioned);
+                symlink(basename($versioned), $libphp_so);
+                $libphp_so = $versioned;
             }
-            // deploy
             $builder->deployBinary($libphp_so, $libphp_so, false);
             $package->setOutput('Library path for embed SAPI', $libphp_so);
         }
@@ -345,12 +375,20 @@ trait unix
         $increment_files = $diff->getChangedFiles();
         $files = [];
         foreach ($increment_files as $increment_file) {
+            if (is_link($increment_file) || !file_exists($increment_file)) {
+                continue;
+            }
             $builder->deployBinary($increment_file, $increment_file, false);
             $files[] = basename($increment_file);
         }
         if (!empty($files)) {
             $package->setOutput('Built shared extensions', implode(', ', $files));
         }
+
+        // phpize needs prefix patched whether libphp is .a or .so
+        $package->runStage([$this, 'patchUnixEmbedScripts']);
+
+        InteractiveTerm::success('Built SAPI: ' . ConsoleColor::green('php-embed'), true, $start);
 
         // ------------- SPC_CMD_VAR_PHP_EMBED_TYPE=static -------------
 
@@ -362,9 +400,6 @@ trait unix
         $libphp_a = "{$package->getLibDir()}/libphp.a";
         shell()->exec("{$ar} -t {$libphp_a} | grep '\\.a$' | xargs -n1 {$ar} d {$libphp_a}");
         UnixUtil::exportDynamicSymbols($libphp_a);
-
-        // deploy embed php scripts
-        $package->runStage([$this, 'patchUnixEmbedScripts']);
     }
 
     #[Stage]
@@ -397,8 +432,15 @@ trait unix
         try {
             logger()->debug('Building shared extensions...');
             foreach ($shared_extensions as $extension) {
-                InteractiveTerm::setMessage('Building shared PHP extension: ' . ConsoleColor::yellow($extension->getName()));
-                $extension->buildShared();
+                $ext_start = microtime(true);
+                InteractiveTerm::setMessage('Building shared extension: ' . ConsoleColor::yellow($extension->getName()));
+                try {
+                    $extension->buildShared();
+                } catch (\Throwable $e) {
+                    InteractiveTerm::error('Building shared extension failed: ' . ConsoleColor::red($extension->getName()));
+                    throw $e;
+                }
+                InteractiveTerm::success('Built shared extension: ' . ConsoleColor::green($extension->getName()), true, $ext_start);
             }
         } finally {
             // restore php-config
@@ -683,77 +725,6 @@ trait unix
     }
 
     /**
-     * Rename libphp.so to libphp-<release>.so if -release is set in LDFLAGS.
-     */
-    private function processLibphpSoFile(string $libphpSo, PackageInstaller $installer): void
-    {
-        $ldflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') ?: '';
-        $libDir = BUILD_LIB_PATH;
-        $modulesDir = BUILD_MODULES_PATH;
-        $realLibName = 'libphp.so';
-        $cwd = getcwd();
-
-        if (preg_match('/-release\s+(\S+)/', $ldflags, $matches)) {
-            $release = $matches[1];
-            $realLibName = "libphp-{$release}.so";
-            $libphpRelease = "{$libDir}/{$realLibName}";
-            if (!file_exists($libphpRelease) && file_exists($libphpSo)) {
-                rename($libphpSo, $libphpRelease);
-            }
-            if (file_exists($libphpRelease)) {
-                chdir($libDir);
-                if (file_exists($libphpSo)) {
-                    unlink($libphpSo);
-                }
-                symlink($realLibName, 'libphp.so');
-                shell()->exec(sprintf(
-                    'patchelf --set-soname %s %s',
-                    escapeshellarg($realLibName),
-                    escapeshellarg($libphpRelease)
-                ));
-            }
-            if (is_dir($modulesDir)) {
-                chdir($modulesDir);
-                foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $ext) {
-                    if (!$ext->isBuildShared()) {
-                        continue;
-                    }
-                    $name = $ext->getName();
-                    $versioned = "{$name}-{$release}.so";
-                    $unversioned = "{$name}.so";
-                    $src = "{$modulesDir}/{$versioned}";
-                    $dst = "{$modulesDir}/{$unversioned}";
-                    if (is_file($src)) {
-                        rename($src, $dst);
-                        shell()->exec(sprintf(
-                            'patchelf --set-soname %s %s',
-                            escapeshellarg($unversioned),
-                            escapeshellarg($dst)
-                        ));
-                    }
-                }
-            }
-            chdir($cwd);
-        }
-
-        $target = "{$libDir}/{$realLibName}";
-        if (file_exists($target)) {
-            [, $output] = shell()->execWithResult('readelf -d ' . escapeshellarg($target));
-            $output = implode("\n", $output);
-            if (preg_match('/SONAME.*\[(.+)]/', $output, $sonameMatch)) {
-                $currentSoname = $sonameMatch[1];
-                if ($currentSoname !== basename($target)) {
-                    shell()->exec(sprintf(
-                        'patchelf --set-soname %s %s',
-                        escapeshellarg(basename($target)),
-                        escapeshellarg($target)
-                    ));
-                }
-            }
-        }
-    }
-
-    /**
      * Make environment variables for php make.
      * This will call SPCConfigUtil to generate proper LDFLAGS and LIBS for static linking.
      */
@@ -762,16 +733,28 @@ trait unix
         $config = new SPCConfigUtil(['libs_only_deps' => true])->config($installer->getAvailableResolvedPackageNames());
         $static = ApplicationContext::get(ToolchainInterface::class)->isStatic() ? '-all-static' : '';
         $pie = SystemTarget::getTargetOS() === 'Linux' ? '-pie' : '';
+        $lib = BUILD_LIB_PATH;
 
         // Append SPC_EXTRA_LIBS to libs for dynamic linking support (e.g., X11)
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         $libs = trim($config['libs'] . ' ' . $extra_libs);
 
+        // libtool input (libphp.la). `make EXTRA_LDFLAGS=…` cmdline overrides fully replace the Makefile value, so re-include $config['ldflags'] for -L paths.
+        $extra_ldflags = clean_spaces($config['ldflags'] . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'));
+        if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared'
+            && !str_contains($extra_ldflags, '-avoid-version')
+            && !preg_match('/-release\s+\S+/', $extra_ldflags)) {
+            $extra_ldflags = trim($extra_ldflags . ' -avoid-version -module');
+        }
+
+        $extra_ldflags_program_env = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM') ?: '';
+        $extra_ldflags_program = clean_spaces("-L{$lib} {$static} {$pie} {$extra_ldflags_program_env}");
+
         return array_filter([
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_CXXFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS'),
-            'EXTRA_LDFLAGS_PROGRAM' => deduplicate_flags(getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') . " {$config['ldflags']} {$static} {$pie}"),
-            'EXTRA_LDFLAGS' => $config['ldflags'],
+            'EXTRA_LDFLAGS' => $extra_ldflags,
+            'EXTRA_LDFLAGS_PROGRAM' => $extra_ldflags_program,
             'EXTRA_LIBS' => $libs,
         ]);
     }

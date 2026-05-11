@@ -88,10 +88,13 @@ trait frankenphp
             $libs .= ' -lgcov';
         }
 
+        $extraLdProgram = clean_spaces((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'));
         $env = [
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => clean_spaces($cflags),
-            'CGO_LDFLAGS' => "{$package->getLibExtraLdFlags()} {$staticFlags} {$config['ldflags']} {$libs}",
+            'CGO_LDFLAGS' => clean_spaces("{$package->getLibExtraLdFlags()} {$staticFlags} {$config['ldflags']} {$libs} {$extraLdProgram}"),
+            // cgo strips flags not on its safe allowlist; widen it
+            'CGO_LDFLAGS_ALLOW' => '-Wl,-z,.*|-Wl,--.*|-flto.*|-fprofile-.*',
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
                 '-X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\' ' .
