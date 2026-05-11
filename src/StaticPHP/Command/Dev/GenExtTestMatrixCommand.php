@@ -63,6 +63,14 @@ class GenExtTestMatrixCommand extends BaseCommand
     ];
 
     /**
+     * Extensions that are emitted as isolated standalone entries.
+     */
+    private const array STANDALONE_ISOLATED = [
+        'swow' => '',
+        'swoole' => 'swoole-hook-',
+    ];
+
+    /**
      * Maximum number of orphan extensions per matrix entry.
      */
     private const int ORPHAN_BATCH_SIZE = 15;
@@ -177,13 +185,34 @@ class GenExtTestMatrixCommand extends BaseCommand
             $groups = [];
             $orphans = [];
             $standalone_set = array_fill_keys(self::STANDALONE, true);
+            $standalone_isolated = self::STANDALONE_ISOLATED;
 
             foreach (array_merge($roots, $non_roots) as $ext) {
                 if (isset($covered[$ext])) {
                     continue;
                 }
-                $chain = $this->dfsCollect($ext, $ext_deps, $pool_set, $covered);
                 $display = $this->displayName($ext);
+
+                if (array_key_exists($display, $standalone_isolated)) {
+                    // Isolated standalone: mark only this ext + its hook virtuals as covered
+                    $covered[$ext] = true;
+                    $hook_prefix = $standalone_isolated[$display];
+                    $group_names = [$display];
+                    if ($hook_prefix !== '') {
+                        foreach ($os_virtual as $vpkg => $_) {
+                            $vdisplay = $this->displayName($vpkg);
+                            if (str_starts_with($vdisplay, $hook_prefix) && !isset($covered[$vpkg])) {
+                                $covered[$vpkg] = true;
+                                $group_names[] = $vdisplay;
+                            }
+                        }
+                        sort($group_names);
+                    }
+                    $groups[] = implode(',', $group_names);
+                    continue;
+                }
+
+                $chain = $this->dfsCollect($ext, $ext_deps, $pool_set, $covered);
                 if (isset($standalone_set[$display])) {
                     // Always emit standalone extensions as their own single entry
                     $groups[] = $display;
