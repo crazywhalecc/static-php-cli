@@ -8,7 +8,6 @@ bzip2:
       type: filelist
       url: 'https://sourceware.org/pub/bzip2/'
       regex: '/href="(?<file>bzip2-(?<version>[^"]+)\.tar\.gz)"/'
-    binary: hosted
     metadata:
       license-files: ['@/bzip2.txt']
       license: bzip2-1.0.6

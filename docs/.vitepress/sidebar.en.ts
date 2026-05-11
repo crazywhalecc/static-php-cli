@@ -8,6 +8,7 @@ export default {
         { text: 'First Build', link: '/en/guide/first-build' },
         { text: 'PHP SAPI Reference', link: '/en/guide/sapi-reference' },
         { text: 'CLI Reference', link: '/en/guide/cli-reference' },
+        { text: 'Migrating from v2', link: '/en/guide/migrate-from-v2' },
       ],
     },
     {

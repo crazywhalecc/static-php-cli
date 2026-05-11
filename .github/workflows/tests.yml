@@ -1,9 +1,9 @@
-name: Tests
+name: v3 Tests
 
 on:
   pull_request:
-    branches: [ "main", "v3" ]
-    types: [ opened, synchronize, reopened ]
+    branches: [ "v3" ]
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
     paths:
       - 'src/**'
       - 'config/**'
@@ -14,6 +14,10 @@ on:
       - '.php-cs-fixer.php'
 
 permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -103,114 +107,171 @@ jobs:
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: "Run PHPUnit Tests"
-        run: SPC_LIBC=glibc vendor/bin/phpunit tests/ --no-coverage
+        run: vendor/bin/phpunit tests/ --no-coverage
 
-  define-matrix:
-    if: false # TODO: enable when refactoring workflows
-    name: "Define Matrix"
+  check-gate:
+    name: "Check: need-test label"
     runs-on: ubuntu-latest
     outputs:
-      php: ${{ steps.gendef.outputs.php }}
-      os: ${{ steps.gendef.outputs.os }}
+      enabled: ${{ steps.gate.outputs.enabled }}
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@v4
-
-      - name: "Setup PHP"
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.4
-          extensions: curl, openssl, mbstring
-
-      - name: Define
-        id: gendef
+      - name: Check label
+        id: gate
         run: |
-          PHP_VERSIONS=$(php src/globals/test-extensions.php php)
-          OS_VERSIONS=$(php src/globals/test-extensions.php os)
-          echo 'php='"$PHP_VERSIONS" >> "$GITHUB_OUTPUT"
-          echo 'os='"$OS_VERSIONS" >> "$GITHUB_OUTPUT"
+          LABELS='${{ toJSON(github.event.pull_request.labels.*.name) }}'
+          if echo "$LABELS" | grep -q '"need-test"'; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
 
-
-  build:
-    if: false
-    name: "Build PHP Test (PHP ${{ matrix.php }} ${{ matrix.os }})"
-    runs-on: ${{ matrix.os }}
-    needs: [define-matrix, php-cs-fixer, phpstan, phpunit]
-    timeout-minutes: 120
-    strategy:
-      matrix:
-        php: ${{ fromJSON(needs.define-matrix.outputs.php) }}
-        os: ${{ fromJSON(needs.define-matrix.outputs.os) }}
-      fail-fast: false
+  test-bot:
+    name: "Test Bot: analyze PR"
+    needs: check-gate
+    if: needs.check-gate.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    outputs:
+      need_test:             ${{ steps.bot.outputs.need_test }}
+      gen_matrix_args:       ${{ steps.bot.outputs.gen_matrix_args }}
+      gen_matrix_args_tier2: ${{ steps.bot.outputs.gen_matrix_args_tier2 }}
+      php_versions:          ${{ steps.bot.outputs.php_versions }}
+      tier2:                 ${{ steps.bot.outputs.tier2 }}
     steps:
-      - name: "Update runner packages"
-        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
-        run: sudo apt-get update && sudo apt-get install -y ca-certificates
+      - uses: actions/checkout@v4
 
-      - name: "Checkout"
-        uses: actions/checkout@v4
-
-      - name: "Setup PHP"
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
-          tools: pecl, composer
+          php-version: '8.4'
           extensions: curl, openssl, mbstring
           ini-values: memory_limit=-1
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-dev
+
+      - name: Run dev:test-bot
+        id: bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BOT_JSON=$(php -d opcache.enable_cli=0 bin/spc dev:test-bot \
+            --pr=${{ github.event.pull_request.number }} \
+            --repo=${{ github.repository }} 2>/dev/null)
+
+          echo "need_test=$(echo "$BOT_JSON" | jq -r '.need_test')"                     >> "$GITHUB_OUTPUT"
+          echo "gen_matrix_args=$(echo "$BOT_JSON" | jq -r '.gen_matrix_args')"           >> "$GITHUB_OUTPUT"
+          echo "gen_matrix_args_tier2=$(echo "$BOT_JSON" | jq -r '.gen_matrix_args_tier2')" >> "$GITHUB_OUTPUT"
+          echo "php_versions=$(echo "$BOT_JSON" | jq -c '.php_versions')"                 >> "$GITHUB_OUTPUT"
+          echo "tier2=$(echo "$BOT_JSON" | jq -r '.tier2')"                               >> "$GITHUB_OUTPUT"
+
+          COMMENT_BODY=$(echo "$BOT_JSON" | jq -r '.comment_body')
+          MARKER="<!-- spc-test-bot -->"
+
+          # Find existing bot comment id
+          EXISTING_ID=$(gh api \
+            repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            --jq "[.[] | select(.body | startswith(\"$MARKER\")) | .id] | first // empty")
+
+          if [ -n "$EXISTING_ID" ]; then
+            gh api --method PATCH \
+              repos/${{ github.repository }}/issues/comments/"$EXISTING_ID" \
+              -f body="$COMMENT_BODY"
+          else
+            gh pr comment ${{ github.event.pull_request.number }} \
+              --repo ${{ github.repository }} \
+              --body "$COMMENT_BODY"
+          fi
+
+  gen-matrix:
+    name: "Generate test matrix"
+    needs: test-bot
+    if: needs.test-bot.outputs.need_test == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-dev
+
+      - name: Build matrix
+        id: build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEN_MATRIX_ARGS:       ${{ needs.test-bot.outputs.gen_matrix_args }}
+          GEN_MATRIX_ARGS_TIER2: ${{ needs.test-bot.outputs.gen_matrix_args_tier2 }}
+          PHP_VERSIONS:          ${{ needs.test-bot.outputs.php_versions }}
+          TIER2:                 ${{ needs.test-bot.outputs.tier2 }}
+        run: |
+          # Tier1 matrix
+          MATRIX1=$(bin/spc dev:gen-ext-test-matrix $GEN_MATRIX_ARGS 2>/dev/null)
+
+          # Merge Tier2 if requested
+          if [ "$TIER2" = "true" ] && [ -n "$GEN_MATRIX_ARGS_TIER2" ]; then
+            MATRIX2=$(bin/spc dev:gen-ext-test-matrix $GEN_MATRIX_ARGS_TIER2 2>/dev/null)
+            COMBINED=$(jq -n --argjson m1 "$MATRIX1" --argjson m2 "$MATRIX2" '$m1 + $m2')
+          else
+            COMBINED=$MATRIX1
+          fi
+
+          # Expand PHP versions: cartesian product of entries × php_versions
+          FINAL=$(echo "$COMBINED" | jq --argjson versions "$PHP_VERSIONS" \
+            '[.[] | . as $entry | $versions[] | $entry + {"php-version": .}]')
+
+          echo "matrix=$(echo "$FINAL" | jq -c '{"combo": .}')" >> "$GITHUB_OUTPUT"
+
+  ext-test:
+    name: "Ext test: ${{ matrix.combo.extension }} (PHP ${{ matrix.combo.php-version }} · ${{ matrix.combo.os }}-${{ matrix.combo.arch }})"
+    needs: gen-matrix
+    runs-on: ${{ matrix.combo.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.gen-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: curl, openssl, mbstring
+          ini-values: memory_limit=-1
+          tools: composer
         env:
           phpts: nts
 
-      - name: "Cache composer packages"
-        id: composer-cache
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
+      - name: Install dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-dev
 
-      # Cache downloaded source
-      - id: cache-download
-        uses: actions/cache@v4
-        with:
-          path: downloads
-          key: php-dependencies-${{ matrix.os }}
-
-      - name: "Install Dependencies"
-        run: composer update -vvv --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-plugins
-
-      - name: "Run Build Tests (doctor)"
-        run: php src/globals/test-extensions.php doctor_cmd ${{ matrix.os }} ${{ matrix.php }}
-
-      - name: "Prepare UPX for Windows"
-        if: ${{ startsWith(matrix.os, 'windows-') }}
+      - name: Build
+        env:
+          SPC_USE_SUDO: "yes"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
-          echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $env:GITHUB_ENV
+          ./bin/spc doctor --auto-fix
+          ${{ matrix.combo.build-args }} --dl-with-php=${{ matrix.combo.php-version }}
 
-      - name: "Prepare UPX for Linux"
-        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
-        run: |
-          php src/globals/test-extensions.php install_upx_cmd ${{ matrix.os }} ${{ matrix.php }}
-          echo "UPX_CMD=$(php src/globals/test-extensions.php upx)" >> $GITHUB_ENV
-
-      - name: "Run Build Tests (download)"
-        run: php src/globals/test-extensions.php download_cmd ${{ matrix.os }} ${{ matrix.php }}
-
-      - name: "Run Build Tests (build)"
-        run: php src/globals/test-extensions.php build_cmd ${{ matrix.os }} ${{ matrix.php }}
-
-      - name: "Run Build Tests (build - embed for non-windows)"
-        if: ${{ !startsWith(matrix.os, 'windows-') }}
-        run: php src/globals/test-extensions.php build_embed_cmd ${{ matrix.os }} ${{ matrix.php }}
-
-      - name: "Upload logs"
-        if: ${{ always() && hashFiles('log/**') != '' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: build-logs-${{ matrix.os }}-${{ matrix.php }}
-          path: log
-
-#      - name: Setup tmate session
+#      - name: Setup upterm session
 #        if: ${{ failure() }}
-#        uses: mxschmitt/action-tmate@v3
+#        uses: owenthereal/action-upterm@v1
+
+      - name: Upload logs
+        if: always() && hashFiles('log/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.combo.os }}-${{ matrix.combo.arch }}-${{ matrix.combo.extension }}-php${{ matrix.combo.php-version }}
+          path: log

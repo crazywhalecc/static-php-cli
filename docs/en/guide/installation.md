@@ -27,18 +27,23 @@ Pick the installation method that fits your use case:
 
 > Fun fact: `spc` itself is a static PHP binary built with StaticPHP. We use StaticPHP to build StaticPHP's own build tool.
 
-```shell
-# Linux x86_64
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-linux-x86_64 -o spc
-# Linux arm64
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-linux-aarch64 -o spc
-# macOS x86_64 (Intel)
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-macos-x86_64 -o spc
-# macOS arm64 (Apple Silicon)
-curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-macos-aarch64 -o spc
-# Windows x86_64 (PowerShell)
-curl.exe -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-windows-x86_64.exe -o spc.exe
+::: code-group
+```shell [Linux x86_64]
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-linux-x86_64 -o spc
 ```
+```shell [Linux arm64]
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-linux-aarch64 -o spc
+```
+```shell [macOS x86_64]
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-macos-x86_64 -o spc
+```
+```shell [macOS arm64]
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-macos-aarch64 -o spc
+```
+```powershell [Windows x86_64]
+curl.exe -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.exe -o spc.exe
+```
+:::
 
 On Linux and macOS, mark the binary as executable before running it:
 

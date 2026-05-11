@@ -230,7 +230,7 @@ class UnixCMakeExecutor extends Executor
 
         // EXE linker flags: base system libs + framework flags for target packages
         $exeLinkerFlags = SystemTarget::getRuntimeLibs();
-        if ($this->package instanceof TargetPackage) {
+        if ($this->package instanceof TargetPackage && SystemTarget::getTargetOS() === 'Darwin') {
             $resolvedNames = array_keys($this->installer->getResolvedPackages());
             $resolvedNames[] = $this->package->getName();
             $fwFlags = new SPCConfigUtil()->getFrameworksString($resolvedNames);

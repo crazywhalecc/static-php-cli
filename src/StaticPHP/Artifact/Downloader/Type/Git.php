@@ -20,7 +20,7 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
 
         // direct branch clone
         if (isset($config['rev'])) {
-            default_shell()->executeGitClone($config['url'], $config['rev'], $path, $shallow, $config['submodules'] ?? null);
+            default_shell()->executeGitClone($config['url'], $config['rev'], $path, $shallow, $config['submodules'] ?? null, $downloader->getRetry());
             $shell = PHP_OS_FAMILY === 'Windows' ? cmd(false) : shell(false);
             $hash_result = $shell->execWithResult(SPC_GIT_EXEC . ' -C ' . escapeshellarg($path) . ' rev-parse --short HEAD');
             $hash = ($hash_result[0] === 0 && !empty($hash_result[1])) ? trim($hash_result[1][0]) : '';
@@ -66,7 +66,7 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
             $version = array_key_first($matched_version_branch);
             $branch = $matched_version_branch[$version];
             logger()->info("Matched version {$version} from branch {$branch} for {$name}");
-            default_shell()->executeGitClone($config['url'], $branch, $path, $shallow, $config['submodules'] ?? null);
+            default_shell()->executeGitClone($config['url'], $branch, $path, $shallow, $config['submodules'] ?? null, $downloader->getRetry());
             return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
         }
         throw new DownloaderException("No matching branch found for regex {$config['regex']} (checked {$matched_count} branches).");

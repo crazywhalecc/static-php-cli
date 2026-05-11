@@ -24,7 +24,7 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
 
     public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
     {
-        $phpver = $downloader->getOption('with-php', '8.4');
+        $phpver = $downloader->getOption('with-php', '8.5');
         // Handle 'git' version to clone from php-src repository
         if ($phpver === 'git') {
             $this->sha256 = null;
@@ -74,7 +74,7 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
 
     public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
     {
-        $phpver = $downloader->getOption('with-php', '8.4');
+        $phpver = $downloader->getOption('with-php', '8.5');
         if ($phpver === 'git') {
             // git version: delegate to Git checkUpdate with master branch
             return (new Git())->checkUpdate($name, ['url' => 'https://github.com/php/php-src.git', 'rev' => 'master'], $old_version, $downloader);
@@ -90,7 +90,7 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
 
     protected function fetchPhpReleaseInfo(string $name, array $config, ArtifactDownloader $downloader): array
     {
-        $phpver = $downloader->getOption('with-php', '8.4');
+        $phpver = $downloader->getOption('with-php', '8.5');
         // Handle 'git' version to clone from php-src repository
         if ($phpver === 'git') {
             // cannot fetch release info for git version, return empty info to skip validation

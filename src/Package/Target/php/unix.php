@@ -20,8 +20,10 @@ use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
@@ -93,7 +95,8 @@ trait unix
         // disable undefined behavior sanitizer when opcache JIT is enabled (Linux only)
         if (SystemTarget::getTargetOS() === 'Linux' && !$package->getBuildOption('disable-opcache-jit', false)) {
             if ($version_id >= 80500 || $installer->isPackageResolved('ext-opcache')) {
-                f_putenv('SPC_COMPILER_EXTRA=-fno-sanitize=undefined');
+                $compiler_extra = getenv('SPC_COMPILER_EXTRA') ?: '';
+                GlobalEnvManager::putenv('SPC_COMPILER_EXTRA=' . trim($compiler_extra . ' -fno-sanitize=undefined'));
             }
         }
         // PHP JSON extension is built-in since PHP 8.0
@@ -165,14 +168,20 @@ trait unix
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
     #[PatchDescription('Patch Makefile to fix //lib path for Linux builds')]
-    public function tryPatchMakefileUnix(): void
+    #[PatchDescription('Patch BUILD_CC to use system cc instead of zig-cc (prevents minilua crash)')]
+    public function tryPatchMakefileUnix(TargetPackage $package, ToolchainInterface $toolchain): void
     {
         if (SystemTarget::getTargetOS() !== 'Linux') {
             return;
         }
 
         // replace //lib with /lib in Makefile
-        shell()->cd(SOURCE_PATH . '/php-src')->exec('sed -i "s|//lib|/lib|g" Makefile');
+        shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
+
+        if ($toolchain instanceof ZigToolchain) {
+            $makefile = "{$package->getSourceDir()}/Makefile";
+            FileSystem::replaceFileRegex($makefile, '/^BUILD_CC\s*=\s*zig-cc\s*$/m', 'BUILD_CC = cc');
+        }
     }
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
@@ -266,43 +275,32 @@ trait unix
     #[PatchDescription('Patch phar extension for micro SAPI to support compressed phar')]
     public function makeMicroForUnix(TargetPackage $package, PackageInstaller $installer, PackageBuilder $builder): void
     {
-        $phar_patched = false;
-        try {
-            if ($installer->isPackageResolved('ext-phar')) {
-                $phar_patched = true;
-                SourcePatcher::patchMicroPhar(self::getPHPVersionID());
-            }
-            InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
-            // apply --with-micro-fake-cli option
-            $vars = $this->makeVars($installer);
-            $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
-            $makeArgs = $this->makeVarsToArgs($vars);
-            // build
-            shell()->cd($package->getSourceDir())
-                ->setEnv($vars)
-                ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
+        InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('make micro'));
+        // apply --with-micro-fake-cli option
+        $vars = $this->makeVars($installer);
+        $vars['EXTRA_CFLAGS'] .= $package->getBuildOption('with-micro-fake-cli', false) ? ' -DPHP_MICRO_FAKE_CLI' : '';
+        $makeArgs = $this->makeVarsToArgs($vars);
+        // build
+        shell()->cd($package->getSourceDir())
+            ->setEnv($vars)
+            ->exec("make -j{$builder->concurrency} {$makeArgs} micro");
 
-            $dst = BUILD_BIN_PATH . '/micro.sfx';
-            $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', $dst);
-            // patch after UPX-ed micro.sfx (Linux only)
-            if (SystemTarget::getTargetOS() === 'Linux' && $builder->getOption('with-upx-pack')) {
-                // cut binary with readelf to remove UPX extra segment
-                [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \\$1, \\$2, \\$3, \\$4, \\$6, \\$7}'");
-                $out[1] = explode(' ', $out[1]);
-                $offset = $out[1][0];
-                if ($ret !== 0 || !str_starts_with($offset, '0x')) {
-                    throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
-                }
-                $offset = hexdec($offset);
-                // remove upx extra wastes
-                file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
+        $dst = BUILD_BIN_PATH . '/micro.sfx';
+        $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', $dst);
+        // patch after UPX-ed micro.sfx (Linux only)
+        if (SystemTarget::getTargetOS() === 'Linux' && $builder->getOption('with-upx-pack')) {
+            // cut binary with readelf to remove UPX extra segment
+            [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \\$1, \\$2, \\$3, \\$4, \\$6, \\$7}'");
+            $out[1] = explode(' ', $out[1]);
+            $offset = $out[1][0];
+            if ($ret !== 0 || !str_starts_with($offset, '0x')) {
+                throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
             }
-            $package->setOutput('Binary path for micro SAPI', $dst);
-        } finally {
-            if ($phar_patched) {
-                SourcePatcher::unpatchMicroPhar();
-            }
+            $offset = hexdec($offset);
+            // remove upx extra wastes
+            file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
         }
+        $package->setOutput('Binary path for micro SAPI', $dst);
     }
 
     #[Stage]
