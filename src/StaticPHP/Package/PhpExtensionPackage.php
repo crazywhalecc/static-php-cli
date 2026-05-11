@@ -306,7 +306,7 @@ class PhpExtensionPackage extends Package
         shell()->cd($package->getSourceDir())
             ->setEnv($env)
             ->exec(
-                './configure ' . $this->getPhpConfigureArg(SystemTarget::getCurrentPlatformString(), true) .
+                './configure ' . $this->getPhpConfigureArg(SystemTarget::getTargetOS(), true) .
                 ' --with-php-config=' . BUILD_BIN_PATH . '/php-config ' .
                 "--enable-shared --disable-static {$phpvars}"
             );

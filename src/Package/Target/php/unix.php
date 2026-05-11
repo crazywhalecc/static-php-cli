@@ -352,14 +352,13 @@ trait unix
 
         // ------------- SPC_CMD_VAR_PHP_EMBED_TYPE=static -------------
 
-        // process libphp.a for static embed
-        if (!file_exists("{$package->getLibDir()}/libphp.a")) {
-            return;
+        // process libphp.a for static embed (only when present)
+        if (file_exists("{$package->getLibDir()}/libphp.a")) {
+            $ar = getenv('AR') ?: 'ar';
+            $libphp_a = "{$package->getLibDir()}/libphp.a";
+            shell()->exec("{$ar} -t {$libphp_a} | grep '\\.a$' | xargs -n1 {$ar} d {$libphp_a}");
+            UnixUtil::exportDynamicSymbols($libphp_a);
         }
-        $ar = getenv('AR') ?: 'ar';
-        $libphp_a = "{$package->getLibDir()}/libphp.a";
-        shell()->exec("{$ar} -t {$libphp_a} | grep '\\.a$' | xargs -n1 {$ar} d {$libphp_a}");
-        UnixUtil::exportDynamicSymbols($libphp_a);
 
         // deploy embed php scripts
         $package->runStage([$this, 'patchUnixEmbedScripts']);
@@ -508,7 +507,8 @@ trait unix
         if (file_exists(BUILD_BIN_PATH . '/php-config')) {
             logger()->debug('Patching php-config prefix and libs order');
             $php_config_str = FileSystem::readFile(BUILD_BIN_PATH . '/php-config');
-            $php_config_str = str_replace('prefix=""', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
+            // anchor to start-of-line so we don't also match `program_prefix=""`
+            $php_config_str = preg_replace('/^prefix=""/m', 'prefix="' . BUILD_ROOT_PATH . '"', $php_config_str);
             // move mimalloc to the beginning of libs
             $php_config_str = preg_replace('/(libs=")(.*?)\s*(' . preg_quote(BUILD_LIB_PATH, '/') . '\/mimalloc\.o)\s*(.*?)"/', '$1$3 $2 $4"', $php_config_str);
             // move lstdc++ to the end of libs
