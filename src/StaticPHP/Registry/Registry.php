@@ -89,17 +89,14 @@ class Registry
         self::$current_registry_name = $registry_name;
 
         try {
-            // resolve autoload manually — path-repo installs have no vendor/, FileSystem::fullpath would throw
+            // Load composer autoload if specified (for external registries with their own dependencies)
             if (isset($data['autoload']) && is_string($data['autoload'])) {
-                $base = dirname($registry_file);
-                $autoload_path = FileSystem::isRelativePath($data['autoload'])
-                    ? rtrim($base, '/') . DIRECTORY_SEPARATOR . $data['autoload']
-                    : $data['autoload'];
+                $autoload_path = FileSystem::fullpath($data['autoload'], dirname($registry_file));
                 if (file_exists($autoload_path)) {
                     logger()->debug("Loading external autoload from: {$autoload_path}");
                     require_once $autoload_path;
                 } else {
-                    logger()->warning("Registry autoload not present, relying on consumer autoloader: {$autoload_path}");
+                    logger()->warning("Autoload file not found: {$autoload_path}");
                 }
             }
 
