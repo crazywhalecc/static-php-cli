@@ -19,6 +19,7 @@ class GoXcaddyCheck
         if (!ApplicationContext::has('craft')) {
             return false;
         }
+        /** @var null|array $craft */
         $craft = ApplicationContext::get('craft');
         return in_array('frankenphp', $craft['sapi'] ?? [], true);
     }
