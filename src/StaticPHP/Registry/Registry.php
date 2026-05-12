@@ -101,7 +101,7 @@ class Registry
                 } elseif (str_contains(rtrim(FileSystem::convertPath($base), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR)) {
                     logger()->debug("Registry autoload not present, relying on consumer autoloader: {$autoload_path}");
                 } else {
-                    throw new FileSystemException("Path does not exist: {$autoload_path}");
+                    throw new RegistryException("Path does not exist: {$autoload_path}");
                 }
             }
 
