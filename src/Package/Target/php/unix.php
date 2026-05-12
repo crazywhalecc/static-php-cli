@@ -20,7 +20,6 @@ use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
-use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
@@ -168,8 +167,7 @@ trait unix
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
     #[PatchDescription('Patch Makefile to fix //lib path for Linux builds')]
-    #[PatchDescription('Patch BUILD_CC to use system cc instead of zig-cc (prevents minilua crash)')]
-    public function tryPatchMakefileUnix(TargetPackage $package, ToolchainInterface $toolchain): void
+    public function tryPatchMakefileUnix(TargetPackage $package): void
     {
         if (SystemTarget::getTargetOS() !== 'Linux') {
             return;
@@ -177,11 +175,6 @@ trait unix
 
         // replace //lib with /lib in Makefile
         shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
-
-        if ($toolchain instanceof ZigToolchain) {
-            $makefile = "{$package->getSourceDir()}/Makefile";
-            FileSystem::replaceFileRegex($makefile, '/^BUILD_CC\s*=\s*zig-cc\s*$/m', 'BUILD_CC = cc');
-        }
     }
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
