@@ -344,7 +344,7 @@ class PackageInstaller
         if ($this->isBuildPackage($package)) {
             return $package->isInstalled();
         }
-        if ($package->getArtifact() !== null && $package->getArtifact()->hasPlatformBinary()) {
+        if ($package->getArtifact() !== null && $package->getArtifact()->shouldUseBinary()) {
             $artifact = $package->getArtifact();
             return $artifact->isBinaryExtracted();
         }
