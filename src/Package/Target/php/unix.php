@@ -167,7 +167,8 @@ trait unix
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
     #[PatchDescription('Patch Makefile to fix //lib path for Linux builds')]
-    public function tryPatchMakefileUnix(TargetPackage $package): void
+    #[PatchDescription('Under CI: patch BUILD_CC to system cc — zig-cc-built minilua segfaults there for reasons we cannot reproduce locally')]
+    public function tryPatchMakefileUnix(TargetPackage $package, ToolchainInterface $toolchain): void
     {
         if (SystemTarget::getTargetOS() !== 'Linux') {
             return;
@@ -175,6 +176,12 @@ trait unix
 
         // replace //lib with /lib in Makefile
         shell()->cd($package->getSourceDir())->exec('sed -i "s|//lib|/lib|g" Makefile');
+
+        // CI escape hatch: in CI, zig-cc-built minilua segfaults
+        if ($toolchain instanceof ZigToolchain && getenv('CI')) {
+            $makefile = "{$package->getSourceDir()}/Makefile";
+            FileSystem::replaceFileRegex($makefile, '/^BUILD_CC\s*=\s*zig-cc\s*$/m', 'BUILD_CC = cc');
+        }
     }
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
