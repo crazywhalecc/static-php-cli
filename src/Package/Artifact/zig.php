@@ -62,7 +62,7 @@ class zig
         if ($file_hash !== $sha256) {
             throw new DownloaderException("Hash mismatch for downloaded Zig binary. Expected {$sha256}, got {$file_hash}");
         }
-        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $latest_version], extract: PKG_ROOT_PATH . '/zig', verified: true, version: $latest_version);
+        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $latest_version], extract: '{pkg_root_path}/zig', verified: true, version: $latest_version);
     }
 
     #[CustomBinaryCheckUpdate('zig', [

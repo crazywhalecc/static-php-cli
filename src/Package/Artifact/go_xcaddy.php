@@ -25,7 +25,6 @@ class go_xcaddy
     ])]
     public function downBinary(ArtifactDownloader $downloader): DownloadResult
     {
-        $pkgroot = PKG_ROOT_PATH;
         $name = SystemTarget::getCurrentPlatformString();
         $arch = match (explode('-', $name)[1]) {
             'x86_64' => 'amd64',
@@ -64,7 +63,7 @@ class go_xcaddy
         if ($file_hash !== $hash) {
             throw new DownloaderException("Hash mismatch for downloaded go-xcaddy binary. Expected {$hash}, got {$file_hash}");
         }
-        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $version], extract: "{$pkgroot}/go-xcaddy", verified: true, version: $version);
+        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $version], extract: '{pkg_root_path}/go-xcaddy', verified: true, version: $version);
     }
 
     #[CustomBinaryCheckUpdate('go-xcaddy', [
