@@ -98,8 +98,10 @@ class Registry
                 if (file_exists($autoload_path)) {
                     logger()->debug("Loading external autoload from: {$autoload_path}");
                     require_once $autoload_path;
+                } elseif (str_contains(rtrim(FileSystem::convertPath($base), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR)) {
+                    logger()->debug("Registry autoload not present, relying on consumer autoloader: {$autoload_path}");
                 } else {
-                    logger()->warning("Registry autoload not present, relying on consumer autoloader: {$autoload_path}");
+                    throw new FileSystemException("Path does not exist: {$autoload_path}");
                 }
             }
 
