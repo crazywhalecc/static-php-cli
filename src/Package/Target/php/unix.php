@@ -20,8 +20,11 @@ use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
+use StaticPHP\Toolchain\ToolchainManager;
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
@@ -90,6 +93,11 @@ trait unix
         $args = [];
         $version_id = self::getPHPVersionID();
 
+        // disable undefined behavior sanitizer for zig, trips up on lua minijit and opcache-jit
+        if (SystemTarget::getTargetOS() === 'Linux' && ToolchainManager::getToolchainClass() === ZigToolchain::class) {
+            $compiler_extra = getenv('SPC_COMPILER_EXTRA') ?: '';
+            GlobalEnvManager::putenv('SPC_COMPILER_EXTRA=' . trim($compiler_extra . ' -fno-sanitize=undefined'));
+        }
         // PHP JSON extension is built-in since PHP 8.0
         if ($version_id < 80000) {
             $args[] = '--enable-json';
