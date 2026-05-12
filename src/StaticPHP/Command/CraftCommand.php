@@ -44,6 +44,9 @@ class CraftCommand extends BaseCommand
         // apply env
         array_walk($craft['extra-env'], fn ($v, $k) => f_putenv("{$k}={$v}"));
 
+        // stash craft for doctor checks that depend on what's being built (e.g. frankenphp → go-xcaddy)
+        ApplicationContext::set('craft', $craft);
+
         // run doctor
         if ($craft['craft-options']['doctor']) {
             $doctor = new Doctor($this->output, FIX_POLICY_AUTOFIX);

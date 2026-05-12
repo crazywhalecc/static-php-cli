@@ -26,7 +26,7 @@ class ZigCheck
     public function checkZig(): CheckResult
     {
         if (new PackageInstaller()->addInstallPackage('zig')->isPackageInstalled('zig')) {
-            return CheckResult::ok();
+            return CheckResult::ok(PKG_ROOT_PATH . '/zig/zig');
         }
         return CheckResult::fail('zig is not installed', 'install-zig');
     }
