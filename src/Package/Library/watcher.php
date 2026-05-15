@@ -20,9 +20,8 @@ class watcher extends LibraryPackage
         if (stripos($cflags, '-fpic') === false) {
             $cflags .= ' -fPIC';
         }
-        $ldflags = $this->getLibExtraLdFlags() ? ' ' . $this->getLibExtraLdFlags() : '';
         shell()->cd("{$this->getSourceDir()}/watcher-c")
-            ->exec(getenv('CXX') . " -c -o libwatcher-c.o ./src/watcher-c.cpp -I ./include -I ../include -std=c++17 -Wall -Wextra {$cflags}{$ldflags}")
+            ->exec(getenv('CXX') . " -c -o libwatcher-c.o ./src/watcher-c.cpp -I ./include -I ../include -std=c++17 -Wall -Wextra {$cflags}")
             ->exec(getenv('AR') . ' rcs libwatcher-c.a libwatcher-c.o');
 
         copy("{$this->getSourceDir()}/watcher-c/libwatcher-c.a", "{$this->getLibDir()}/libwatcher-c.a");
