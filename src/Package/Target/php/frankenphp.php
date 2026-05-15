@@ -107,6 +107,7 @@ trait frankenphp
         InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('building with xcaddy'));
         shell()->cd(BUILD_LIB_PATH)
             ->setEnv($env)
+            ->exec('go clean -cache') // fix stale include evaluation
             ->exec("xcaddy build --output frankenphp {$xcaddy_modules}");
 
         $builder->deployBinary(BUILD_LIB_PATH . '/frankenphp', BUILD_BIN_PATH . '/frankenphp');
