@@ -698,7 +698,7 @@ class PackageInstaller
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-frankenphp')) {
                 $frankenphp = PackageLoader::getPackage('frankenphp');
                 $this->install_packages[$frankenphp->getName()] = $frankenphp;
-                $this->build_packages[$package->getName()] = $package;
+                $this->build_packages[$frankenphp->getName()] = $frankenphp;
                 $added = true;
             }
             $this->build_packages[$package->getName()] = $package;
