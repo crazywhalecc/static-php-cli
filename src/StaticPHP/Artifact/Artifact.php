@@ -285,15 +285,19 @@ class Artifact
      * Get source extraction directory.
      *
      * Rules:
-     * 1. If extract is not specified: SOURCE_PATH/{artifact_name}
-     * 2. If extract is relative path: SOURCE_PATH/{value}
-     * 3. If extract is absolute path: {value}
-     * 4. If extract is array (dict): handled by extractor (selective extraction)
+     * 1. If cache_type is 'local': use the absolute dirname recorded at download time (no symlink/copy).
+     * 2. If extract is not specified: SOURCE_PATH/{artifact_name}
+     * 3. If extract is relative path: SOURCE_PATH/{value}
+     * 4. If extract is absolute path: {value}
+     * 5. If extract is array (dict): handled by extractor (selective extraction)
      */
     public function getSourceDir(): string
     {
         // Prefer cache extract path, fall back to config
         $cache_info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo($this->name);
+        if (($cache_info['cache_type'] ?? null) === 'local' && isset($cache_info['dirname'])) {
+            return FileSystem::convertPath($cache_info['dirname']);
+        }
         $extract = is_string($cache_info['extract'] ?? null)
             ? $cache_info['extract']
             : ($this->config['source']['extract'] ?? null);
