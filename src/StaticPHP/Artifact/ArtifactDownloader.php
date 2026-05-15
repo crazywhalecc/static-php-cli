@@ -731,6 +731,16 @@ class ArtifactDownloader
         $binary_downloaded = $artifact->isBinaryDownloaded(compare_hash: true);
         $source_downloaded = $artifact->isSourceDownloaded(compare_hash: true);
 
+        if ($source_downloaded && $artifact->getName() === 'php-src' && ($requested = $this->getOption('with-php'))) {
+            $info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo('php-src');
+            $cv = $info['version'] ?? null;
+            $ct = $info['cache_type'] ?? null;
+            $matches = $requested === 'git' ? $ct === 'git' : ($cv !== null && $ct !== 'git' && ($cv === $requested || str_starts_with($cv, $requested . '.')));
+            if (!$matches) {
+                $source_downloaded = false;
+            }
+        }
+
         $item_source = ['display' => 'source', 'lock' => 'source', 'config' => $artifact->getDownloadConfig('source')];
         $item_source_mirror = ['display' => 'source (mirror)', 'lock' => 'source', 'config' => $artifact->getDownloadConfig('source-mirror')];
 

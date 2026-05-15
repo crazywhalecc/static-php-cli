@@ -60,7 +60,7 @@ trait unix
         }
 
         if (self::getPHPVersionID() >= 80300 && self::getPHPVersionID() < 80400) {
-            SourcePatcher::patchFile('spc_fix_avx512_cache_before_80400.patch', $this->getSourceDir());
+            SourcePatcher::patchFile('spc_fix_avx512_cache_before_80400.patch', SOURCE_PATH . '/php-src');
         }
     }
 
