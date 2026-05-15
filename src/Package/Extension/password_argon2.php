@@ -27,7 +27,7 @@ class password_argon2 extends PhpExtensionPackage
     #[CustomPhpConfigureArg('Darwin')]
     public function getConfigureArg(PackageInstaller $installer, PackageBuilder $builder): string
     {
-        if ($installer->getLibraryPackage('openssl') !== null) {
+        if ($installer->getPhpExtensionPackage('openssl')?->isBuildStatic() || $this->isBuildShared()) {
             if (php::getPHPVersionID() >= 80500 || (php::getPHPVersionID() >= 80400 && !$builder->getOption('enable-zts'))) {
                 return '--without-password-argon2'; // use --with-openssl-argon2 in openssl extension instead
             }
