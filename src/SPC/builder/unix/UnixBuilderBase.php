@@ -463,9 +463,10 @@ abstract class UnixBuilderBase extends BuilderBase
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$nobrotli}{$nowatcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ], ...GoXcaddy::getEnvironment()];
+        $pgo = file_exists("{$frankenphpSourceDir}/caddy/frankenphp/default.pgo") ? "--pgo {$frankenphpSourceDir}/caddy/frankenphp/default.pgo " : '';
         shell()->cd(BUILD_BIN_PATH)
             ->setEnv($env)
-            ->exec("xcaddy build --output frankenphp {$xcaddyModules}");
+            ->exec("xcaddy build --output frankenphp {$pgo}{$xcaddyModules}");
 
         $this->deploySAPIBinary(BUILD_TARGET_FRANKENPHP);
     }
