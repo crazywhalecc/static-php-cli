@@ -26,7 +26,7 @@ class password_argon2 extends Extension
 
     public function getConfigureArg(bool $shared = false): string
     {
-        if ($this->builder->getLib('openssl') !== null) {
+        if ($this->builder->getExt('openssl')?->isBuildStatic() || $this->isBuildShared()) {
             if ($this->builder->getPHPVersionID() >= 80500 || ($this->builder->getPHPVersionID() >= 80400 && !$this->builder->getOption('enable-zts'))) {
                 return '--without-password-argon2'; // use --with-openssl-argon2 in openssl extension instead
             }
