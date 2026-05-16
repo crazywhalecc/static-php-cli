@@ -108,7 +108,7 @@ class go_xcaddy
             'GOROOT' => "{$target_path}",
             'GOBIN' => "{$target_path}/bin",
             'GOPATH' => "{$target_path}/go",
-        ])->exec('CGO_ENABLED=0 go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest');
+        ])->exec('CGO_ENABLED=0 go install github.com/caddyserver/xcaddy/cmd/xcaddy@master');
         GlobalEnvManager::addPathIfNotExists("{$target_path}/bin");
     }
 }

@@ -104,11 +104,12 @@ trait frankenphp
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$no_brotli}{$no_watcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
+        $pgo = file_exists("{$source_dir}/caddy/frankenphp/default.pgo") ? "--pgo {$source_dir}/caddy/frankenphp/default.pgo " : '';
         InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('building with xcaddy'));
         shell()->cd(BUILD_LIB_PATH)
             ->setEnv($env)
             ->exec('go clean -cache') // fix stale include evaluation
-            ->exec("xcaddy build --output frankenphp {$xcaddy_modules}");
+            ->exec("xcaddy build --output frankenphp {$pgo}{$xcaddy_modules}");
 
         $builder->deployBinary(BUILD_LIB_PATH . '/frankenphp', BUILD_BIN_PATH . '/frankenphp');
         $package->setOutput('Binary path for FrankenPHP SAPI', BUILD_BIN_PATH . '/frankenphp');
