@@ -128,6 +128,10 @@ trait unix
         $args[] = $installer->isPackageResolved('php-cgi') ? '--enable-cgi' : '--disable-cgi';
         $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
         $args[] = $installer->isPackageResolved('php-embed') ? "--enable-embed={$embed_type}" : '--disable-embed';
+        // Cross-compile: pass --host so configure picks the correct fiber asm file and host_cpu logic
+        if ($host_triple = SystemTarget::getAutoconfHostTriple()) {
+            $args[] = "--host={$host_triple}";
+        }
         $args[] = getenv('SPC_EXTRA_PHP_VARS') ?: null;
         $args = implode(' ', array_filter($args));
 

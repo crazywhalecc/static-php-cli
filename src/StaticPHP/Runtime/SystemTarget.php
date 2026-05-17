@@ -127,4 +127,35 @@ class SystemTarget
     {
         return in_array(self::getTargetOS(), ['Linux', 'Darwin', 'BSD']);
     }
+
+    /**
+     * Returns a GNU host triple for autoconf --host= when SPC_TARGET names an
+     * architecture different from the build host (true cross-compile).
+     * Returns null for same-arch builds.
+     * Strips libc version suffix (-gnu.2.17 → -gnu) and trailing flags (e.g. ' -dynamic').
+     */
+    public static function getAutoconfHostTriple(): ?string
+    {
+        $target = (string) getenv('SPC_TARGET');
+        if ($target === '' || str_contains($target, 'native')) {
+            return null;
+        }
+        $cleaned = preg_split('/\s+/', trim((string) preg_replace('/(-gnu|-musl)\.[\d.]+/', '$1', $target)))[0];
+        if ($cleaned === '') {
+            return null;
+        }
+        // Only emit --host for true cross-arch builds; same-arch (incl. cross-libc) lets autoconf detect.
+        $target_arch_token = explode('-', $cleaned)[0];
+        $arch_aliases = [
+            'x86_64' => ['x86_64', 'amd64'],
+            'aarch64' => ['aarch64', 'arm64'],
+            'arm' => ['arm', 'armv6', 'armv7', 'armhf', 'armel'],
+            'i386' => ['i386', 'i486', 'i586', 'i686'],
+        ];
+        $host_arch = GNU_ARCH;
+        if (array_any($arch_aliases, fn ($aliases) => in_array($target_arch_token, $aliases, true) && in_array($host_arch, $aliases, true))) {
+            return null;
+        }
+        return $cleaned;
+    }
 }

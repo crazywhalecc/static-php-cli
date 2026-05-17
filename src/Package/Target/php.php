@@ -270,12 +270,14 @@ class php extends TargetPackage
             }
         }
         // linux does not support loading shared libraries when target is pure static
-        $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
-        if (SystemTarget::getTargetOS() === 'Linux' && ApplicationContext::get(ToolchainInterface::class)->isStatic() && $embed_type === 'shared') {
-            throw new WrongUsageException(
-                'Linux does not support loading shared libraries when linking libc statically. ' .
-                'Change SPC_CMD_VAR_PHP_EMBED_TYPE to static.'
-            );
+        if ($package->getName() === 'php-embed') {
+            $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+            if (SystemTarget::getTargetOS() === 'Linux' && ApplicationContext::get(ToolchainInterface::class)->isStatic() && $embed_type === 'shared') {
+                throw new WrongUsageException(
+                    'Linux does not support loading shared libraries when linking libc statically. ' .
+                    'Change SPC_CMD_VAR_PHP_EMBED_TYPE to static.'
+                );
+            }
         }
     }
 

@@ -15,6 +15,7 @@ use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\System\LinuxUtil;
+use StaticPHP\Util\System\UnixUtil;
 
 class PackageBuilder
 {
@@ -178,14 +179,15 @@ class PackageBuilder
         if (SystemTarget::getTargetOS() === 'Darwin') {
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
+            $objcopy = LinuxUtil::findCommand('llvm-objcopy') ?: 'objcopy';
             if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
                 shell()
                     ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+                    ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
             } else {
                 shell()
-                    ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+                    ->exec("{$objcopy} --only-keep-debug {$binary_path} {$debug_file}")
+                    ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
             }
         } else {
             logger()->debug('extractDebugInfo is only supported on Linux and macOS');
@@ -199,9 +201,10 @@ class PackageBuilder
      */
     public function stripBinary(string $binary_path): void
     {
+        $strip = UnixUtil::findCommand('llvm-strip') ?: 'strip';
         shell()->exec(match (SystemTarget::getTargetOS()) {
-            'Darwin' => "strip -S {$binary_path}",
-            'Linux' => "strip --strip-unneeded {$binary_path}",
+            'Darwin' => "{$strip} -S {$binary_path}",
+            'Linux' => "{$strip} --strip-unneeded {$binary_path}",
             'Windows' => 'echo "Skip strip on Windows"', // Windows strip is not available for now
             default => throw new SPCInternalException('stripBinary is only supported on Linux and macOS'),
         });
