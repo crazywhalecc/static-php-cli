@@ -1,0 +1,4 @@
+clang-runtime-bits:
+  type: target
+  artifact:
+    binary: custom

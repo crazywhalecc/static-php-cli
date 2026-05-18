@@ -39,4 +39,34 @@ class ZigCheck
         $installer->run(true);
         return $installer->isPackageInstalled('zig');
     }
+
+    /** @noinspection PhpUnused */
+    #[CheckItem('if clang runtime bits are built', limit_os: 'Linux', level: 799)]
+    public function checkClangRuntimeBits(): ?CheckResult
+    {
+        // Skip if zig is not installed yet (zig check runs at level 800)
+        if (!new PackageInstaller()->addInstallPackage('zig')->isPackageInstalled('zig')) {
+            return null;
+        }
+        $libDir = PKG_ROOT_PATH . '/zig/lib';
+        if (file_exists("{$libDir}/libclang_rt.profile.a")
+            && file_exists("{$libDir}/clang_rt.crtbegin.o")
+            && file_exists("{$libDir}/clang_rt.crtend.o")
+        ) {
+            return CheckResult::ok("{$libDir}/libclang_rt.profile.a");
+        }
+        return CheckResult::fail('clang runtime bits are not built', 'build-clang-runtime-bits');
+    }
+
+    #[FixItem('build-clang-runtime-bits')]
+    public function fixClangRuntimeBits(): bool
+    {
+        $installer = new PackageInstaller(interactive: false);
+        $installer->addInstallPackage('clang-runtime-bits');
+        $installer->run(true);
+        $libDir = PKG_ROOT_PATH . '/zig/lib';
+        return file_exists("{$libDir}/libclang_rt.profile.a")
+            && file_exists("{$libDir}/clang_rt.crtbegin.o")
+            && file_exists("{$libDir}/clang_rt.crtend.o");
+    }
 }
