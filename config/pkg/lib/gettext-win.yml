@@ -4,6 +4,6 @@ gettext-win:
     source:
       type: git
       url: 'https://github.com/winlibs/gettext.git'
-      rev: master
+      rev: 0.18
   static-libs@windows:
     - libintl_a.lib
