@@ -10,11 +10,14 @@ use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
+use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\BuildFailureException;
 use StaticPHP\Exception\DownloaderException;
+use StaticPHP\Package\PackageBuilder;
 
 class llvm_tools
 {
-    public const TOOLS = ['llvm-objcopy', 'llvm-strip', 'llvm-profdata'];
+    public const array TOOLS = ['llvm-objcopy', 'llvm-strip', 'llvm-profdata'];
 
     #[CustomBinary('llvm-tools', [
         'linux-x86_64',
@@ -30,7 +33,7 @@ class llvm_tools
         $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-{$llvmVersion}/{$tarball}";
         $tarballPath = DOWNLOAD_PATH . '/' . $tarball;
         default_shell()->executeCurlDownload($url, $tarballPath, retries: $downloader->getRetry());
-        return DownloadResult::archive($tarball, ['url' => $url, 'version' => $llvmVersion], extract: '{pkg_root_path}/llvm-tools-src', verified: false, version: $llvmVersion);
+        return DownloadResult::archive($tarball, ['url' => $url, 'version' => $llvmVersion], extract: '{source_path}/llvm-tools', verified: false, version: $llvmVersion);
     }
 
     #[CustomBinaryCheckUpdate('llvm-tools', [
@@ -61,32 +64,23 @@ class llvm_tools
         $this->buildForHost($target_path);
     }
 
-    public function buildForHost(?string $sourceRoot = null): bool
+    public function buildForHost(?string $sourceRoot = null): void
     {
-        $sourceRoot ??= PKG_ROOT_PATH . '/llvm-tools-src';
+        $sourceRoot ??= SOURCE_PATH . '/llvm-tools';
         $binDir = PKG_ROOT_PATH . '/llvm-tools/bin';
         if ($this->allBuilt($binDir)) {
-            return true;
+            return;
         }
         $llvmDir = "{$sourceRoot}/llvm";
         if (!is_dir($llvmDir)) {
-            logger()->error("[llvm-tools] expected llvm/ subdir at {$llvmDir} (extraction layout changed?)");
-            return false;
+            throw new BuildFailureException("llvm-tools: missing source at {$llvmDir} (extraction layout changed?)");
         }
-        $cmake = trim((string) shell_exec('command -v cmake 2>/dev/null'));
-        if ($cmake === '') {
-            logger()->error('[llvm-tools] cmake not found on PATH; install cmake first.');
-            return false;
-        }
-        $generator = trim((string) shell_exec('command -v ninja 2>/dev/null')) !== '' ? 'Ninja' : 'Unix Makefiles';
-        $cc = PKG_ROOT_PATH . '/zig/zig-cc';
-        $cxx = PKG_ROOT_PATH . '/zig/zig-c++';
         $buildDir = "{$sourceRoot}/build";
         $installDir = PKG_ROOT_PATH . '/llvm-tools';
         f_mkdir($buildDir, recursive: true);
+        f_mkdir($binDir, recursive: true);
 
-        $cmakeArgs = [
-            '-G', $generator,
+        $cmakeArgs = implode(' ', array_map('escapeshellarg', [
             '-S', $llvmDir,
             '-B', $buildDir,
             '-DCMAKE_BUILD_TYPE=Release',
@@ -105,56 +99,26 @@ class llvm_tools
             '-DLLVM_BUILD_LLVM_DYLIB=OFF',
             '-DLLVM_LINK_LLVM_DYLIB=OFF',
             '-DBUILD_SHARED_LIBS=OFF',
-            '-DCMAKE_C_COMPILER=' . $cc,
-            '-DCMAKE_CXX_COMPILER=' . $cxx,
+            '-DCMAKE_C_COMPILER=' . PKG_ROOT_PATH . '/zig/zig-cc',
+            '-DCMAKE_CXX_COMPILER=' . PKG_ROOT_PATH . '/zig/zig-c++',
             '-DCMAKE_INSTALL_PREFIX=' . $installDir,
-        ];
+        ]));
+        $jobs = ApplicationContext::get(PackageBuilder::class)->concurrency;
+        $targetArgs = implode(' ', array_map(fn ($t) => '--target ' . escapeshellarg($t), self::TOOLS));
 
-        $savedTarget = getenv('SPC_TARGET');
-        f_putenv('SPC_TARGET=' . GNU_ARCH . '-linux-musl');
-        try {
-            $cmd = escapeshellarg($cmake) . ' ' . implode(' ', array_map('escapeshellarg', $cmakeArgs)) . ' 2>&1';
-            logger()->info("Configuring llvm-tools (generator: {$generator}, target: " . getenv('SPC_TARGET') . ')');
-            exec($cmd, $out, $rc);
-            if ($rc !== 0) {
-                logger()->error('[llvm-tools] cmake configure failed: ' . implode("\n", $out));
-                return false;
-            }
-            $jobs = (int) (getenv('SPC_CONCURRENCY') ?: CPU_COUNT);
-            if ($jobs < 1) {
-                $jobs = 1;
-            }
-            $targetArgs = '';
-            foreach (self::TOOLS as $t) {
-                $targetArgs .= ' --target ' . escapeshellarg($t);
-            }
-            $buildCmd = 'cmake --build ' . escapeshellarg($buildDir) . $targetArgs
-                . ($generator === 'Ninja' ? " -j{$jobs}" : " -- -j{$jobs}");
-            logger()->info('Building llvm-tools (' . implode(', ', self::TOOLS) . ')');
-            exec($buildCmd . ' 2>&1', $out2, $rc2);
-            if ($rc2 !== 0) {
-                logger()->error('[llvm-tools] build failed: ' . implode("\n", array_slice($out2, -40)));
-                return false;
-            }
-        } finally {
-            f_putenv('SPC_TARGET=' . ($savedTarget === false ? '' : $savedTarget));
-        }
-        f_mkdir($binDir, recursive: true);
+        shell()
+            ->setEnv(['SPC_TARGET' => GNU_ARCH . '-linux-musl'])
+            ->exec('cmake ' . $cmakeArgs)
+            ->exec('cmake --build ' . escapeshellarg($buildDir) . ' ' . $targetArgs . " -j {$jobs}");
+
         foreach (self::TOOLS as $t) {
             $built = "{$buildDir}/bin/{$t}";
-            $dst = "{$binDir}/{$t}";
             if (!is_file($built)) {
-                logger()->error("[llvm-tools] expected output {$built} not found");
-                return false;
+                throw new BuildFailureException("llvm-tools: missing build output {$built}");
             }
-            if (!copy($built, $dst)) {
-                logger()->error("[llvm-tools] failed to copy {$built} → {$dst}");
-                return false;
-            }
-            chmod($dst, 0755);
-            logger()->info("[llvm-tools] installed {$dst} (" . filesize($dst) . ' bytes)');
+            copy($built, "{$binDir}/{$t}");
+            chmod("{$binDir}/{$t}", 0755);
         }
-        return true;
     }
 
     public function allBuilt(string $binDir): bool
@@ -171,10 +135,13 @@ class llvm_tools
     private function detectLlvmVersion(): ?string
     {
         $zig = PKG_ROOT_PATH . '/zig/zig';
-        $verLine = trim((string) shell_exec(escapeshellarg($zig) . ' cc --version 2>/dev/null'));
-        if (preg_match('/clang version (\d+\.\d+\.\d+)/', $verLine, $m)) {
-            return $m[1];
+        if (!is_file($zig)) {
+            return null;
         }
-        return null;
+        [$rc, $out] = shell()->execWithResult(escapeshellarg($zig) . ' cc --version', false);
+        if ($rc !== 0) {
+            return null;
+        }
+        return preg_match('/clang version (\d+\.\d+\.\d+)/', implode("\n", $out), $m) ? $m[1] : null;
     }
 }

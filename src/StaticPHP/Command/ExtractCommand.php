@@ -10,6 +10,7 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\DependencyResolver;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -34,6 +35,7 @@ class ExtractCommand extends BaseCommand
 
     public function handle(): int
     {
+        GlobalEnvManager::afterInit();
         $cache = ApplicationContext::get(ArtifactCache::class);
         $extractor = new ArtifactExtractor($cache);
         $force_source = (bool) $this->getOption('source-only');
