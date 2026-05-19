@@ -730,6 +730,10 @@
             "libxslt.a",
             "libexslt.a"
         ],
+        "static-libs-windows": [
+            "libxslt.lib",
+            "libexslt.lib"
+        ],
         "lib-depends": [
             "libxml2"
         ]
