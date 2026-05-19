@@ -481,6 +481,15 @@
             "libiconv_a.lib"
         ]
     },
+    "libintl-win": {
+        "source": "libintl-win",
+        "static-libs-windows": [
+            "libintl_a.lib"
+        ],
+        "headers-windows": [
+            "libintl.h"
+        ]
+    },
     "libjpeg": {
         "source": "libjpeg",
         "static-libs-unix": [

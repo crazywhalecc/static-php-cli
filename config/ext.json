@@ -211,13 +211,16 @@
     },
     "gettext": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "builtin",
         "arg-type": "with-path",
+        "arg-type-windows": "with",
         "lib-depends": [
             "gettext"
+        ],
+        "lib-depends-windows": [
+            "libintl-win"
         ]
     },
     "glfw": {
