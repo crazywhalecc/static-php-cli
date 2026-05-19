@@ -237,13 +237,16 @@
     },
     "gmp": {
         "support": {
-            "Windows": "wip",
             "BSD": "wip"
         },
         "type": "builtin",
         "arg-type": "with-path",
+        "arg-type-windows": "with",
         "lib-depends": [
             "gmp"
+        ],
+        "lib-depends-windows": [
+            "mpir-win"
         ]
     },
     "gmssl": {

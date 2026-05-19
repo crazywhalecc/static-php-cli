@@ -910,6 +910,14 @@
             "path": "LICENSE"
         }
     },
+    "mpir-win": {
+        "type": "url",
+        "url": "https://downloads.php.net/~windows/php-sdk/deps/vs17/x64/mpir-3.0.0-1-vs17-x64.zip",
+        "license": {
+            "type": "text",
+            "text": "MPIR is licensed under the GNU Lesser General Public License v3 or later. Full text: https://www.gnu.org/licenses/lgpl-3.0.txt"
+        }
+    },
     "msgpack": {
         "type": "url",
         "url": "https://pecl.php.net/get/msgpack",

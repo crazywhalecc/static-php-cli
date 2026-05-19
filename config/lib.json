@@ -178,9 +178,6 @@
         "static-libs-unix": [
             "libgmp.a"
         ],
-        "static-libs-windows": [
-            "libgmp.lib"
-        ],
         "headers": [
             "gmp.h"
         ]
@@ -785,6 +782,15 @@
         "source": "mimalloc",
         "static-libs-unix": [
             "libmimalloc.a"
+        ]
+    },
+    "mpir-win": {
+        "source": "mpir-win",
+        "static-libs-windows": [
+            "mpir_a.lib"
+        ],
+        "headers-windows": [
+            "mpir/gmp.h"
         ]
     },
     "ncurses": {
