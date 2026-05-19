@@ -15,7 +15,6 @@ use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\System\LinuxUtil;
-use StaticPHP\Util\System\UnixUtil;
 
 class PackageBuilder
 {
@@ -179,7 +178,7 @@ class PackageBuilder
         if (SystemTarget::getTargetOS() === 'Darwin') {
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
-            $objcopy = LinuxUtil::findCommand('llvm-objcopy') ?: 'objcopy';
+            $objcopy = getenv('OBJCOPY');
             if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
                 shell()
                     ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
@@ -201,7 +200,7 @@ class PackageBuilder
      */
     public function stripBinary(string $binary_path): void
     {
-        $strip = UnixUtil::findCommand('llvm-strip') ?: 'strip';
+        $strip = PKG_ROOT_PATH . '/llvm-tools/bin/llvm-strip';
         shell()->exec(match (SystemTarget::getTargetOS()) {
             'Darwin' => "{$strip} -S {$binary_path}",
             'Linux' => "{$strip} --strip-unneeded {$binary_path}",

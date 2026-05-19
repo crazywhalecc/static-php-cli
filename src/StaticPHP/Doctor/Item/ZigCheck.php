@@ -10,6 +10,7 @@ use StaticPHP\Attribute\Doctor\OptionalCheck;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Doctor\CheckResult;
 use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ZigToolchain;
 
@@ -41,30 +42,31 @@ class ZigCheck
     }
 
     /** @noinspection PhpUnused */
-    #[CheckItem('if clang runtime bits are built', limit_os: 'Linux', level: 799)]
-    public function checkClangRuntimeBits(): ?CheckResult
+    #[CheckItem('if llvm compiler-rt bits are built', limit_os: 'Linux', level: 799)]
+    public function checkCompilerRtBits(): ?CheckResult
     {
         // Skip if zig is not installed yet (zig check runs at level 800)
         if (!new PackageInstaller()->addInstallPackage('zig')->isPackageInstalled('zig')) {
             return null;
         }
-        $libDir = PKG_ROOT_PATH . '/zig/lib';
+        $libDir = PKG_ROOT_PATH . '/zig/lib/' . SystemTarget::getCanonicalTriple();
         if (file_exists("{$libDir}/libclang_rt.profile.a")
             && file_exists("{$libDir}/clang_rt.crtbegin.o")
             && file_exists("{$libDir}/clang_rt.crtend.o")
         ) {
             return CheckResult::ok("{$libDir}/libclang_rt.profile.a");
         }
-        return CheckResult::fail('clang runtime bits are not built', 'build-clang-runtime-bits');
+        return CheckResult::fail('llvm compiler-rt bits are not built for ' . SystemTarget::getCanonicalTriple(), 'build-llvm-compiler-rt');
     }
 
-    #[FixItem('build-clang-runtime-bits')]
-    public function fixClangRuntimeBits(): bool
+    #[FixItem('build-llvm-compiler-rt')]
+    public function fixCompilerRtBits(): bool
     {
         $installer = new PackageInstaller(interactive: false);
-        $installer->addInstallPackage('clang-runtime-bits');
+        $installer->addInstallPackage('llvm-compiler-rt');
         $installer->run(true);
-        $libDir = PKG_ROOT_PATH . '/zig/lib';
+        new \Package\Artifact\llvm_compiler_rt()->buildForCurrentTarget();
+        $libDir = PKG_ROOT_PATH . '/zig/lib/' . SystemTarget::getCanonicalTriple();
         return file_exists("{$libDir}/libclang_rt.profile.a")
             && file_exists("{$libDir}/clang_rt.crtbegin.o")
             && file_exists("{$libDir}/clang_rt.crtend.o");

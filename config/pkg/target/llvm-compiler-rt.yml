@@ -1,4 +1,6 @@
-clang-runtime-bits:
+llvm-compiler-rt:
   type: target
   artifact:
     binary: custom
+  depends:
+    - zig

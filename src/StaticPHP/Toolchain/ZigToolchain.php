@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Toolchain;
 
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\UnixToolchainInterface;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\System\LinuxUtil;
@@ -34,7 +35,8 @@ class ZigToolchain implements UnixToolchainInterface
         GlobalEnvManager::putenv("SPC_DEFAULT_CXXFLAGS={$cxxflags}");
         GlobalEnvManager::putenv("SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS={$extraCflags}");
         GlobalEnvManager::putenv('RANLIB=zig-ranlib');
-        GlobalEnvManager::putenv('OBJCOPY=zig-objcopy');
+        GlobalEnvManager::putenv('SPC_COMPILER_RT_DIR=' . PKG_ROOT_PATH . '/zig/lib/' . SystemTarget::getCanonicalTriple());
+        GlobalEnvManager::putenv('OBJCOPY=' . PKG_ROOT_PATH . '/llvm-tools/bin/llvm-objcopy');
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if (!str_contains($extra_libs, '-lunwind')) {
             // Add unwind library if not already present

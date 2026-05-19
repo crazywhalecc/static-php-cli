@@ -221,9 +221,6 @@ final class PgoContext
 
     public function mergeProfiles(): void
     {
-        if (trim((string) shell_exec('command -v llvm-profdata 2>/dev/null')) === '') {
-            throw new WrongUsageException('PGO --phase=use: llvm-profdata not on PATH');
-        }
         foreach ($this->trainableSapis as $sapi) {
             $this->mergeSapi($sapi);
         }
@@ -248,7 +245,8 @@ final class PgoContext
         $out = $this->profDataFile($sapi);
         $inputs = array_merge($raws, $csRaws);
         $argv = implode(' ', array_map('escapeshellarg', $inputs));
-        shell()->exec('llvm-profdata merge --failure-mode=warn -output=' . escapeshellarg($out) . ' ' . $argv);
+        $profdata = PKG_ROOT_PATH . '/llvm-tools/bin/llvm-profdata';
+        shell()->exec(escapeshellarg($profdata) . ' merge --failure-mode=warn -output=' . escapeshellarg($out) . ' ' . $argv);
         if (!is_file($out) || filesize($out) === 0) {
             throw new WrongUsageException("PGO --phase=use: empty merge output for {$sapi}");
         }

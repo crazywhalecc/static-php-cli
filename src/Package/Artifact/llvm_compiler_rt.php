@@ -11,10 +11,11 @@ use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
+use StaticPHP\Runtime\SystemTarget;
 
-class clang_runtime_bits
+class llvm_compiler_rt
 {
-    #[CustomBinary('clang-runtime-bits', [
+    #[CustomBinary('llvm-compiler-rt', [
         'linux-x86_64',
         'linux-aarch64',
     ])]
@@ -26,10 +27,10 @@ class clang_runtime_bits
         $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-{$llvmVersion}/{$tarball}";
         $tarballPath = DOWNLOAD_PATH . '/' . $tarball;
         default_shell()->executeCurlDownload($url, $tarballPath, retries: $downloader->getRetry());
-        return DownloadResult::archive($tarball, ['url' => $url, 'version' => $llvmVersion], extract: '{pkg_root_path}/clang-runtime-bits', verified: false, version: $llvmVersion);
+        return DownloadResult::archive($tarball, ['url' => $url, 'version' => $llvmVersion], extract: '{pkg_root_path}/llvm-compiler-rt', verified: false, version: $llvmVersion);
     }
 
-    #[CustomBinaryCheckUpdate('clang-runtime-bits', [
+    #[CustomBinaryCheckUpdate('llvm-compiler-rt', [
         'linux-x86_64',
         'linux-aarch64',
     ])]
@@ -44,43 +45,61 @@ class clang_runtime_bits
         );
     }
 
-    #[AfterBinaryExtract('clang-runtime-bits', [
+    #[AfterBinaryExtract('llvm-compiler-rt', [
         'linux-x86_64',
         'linux-aarch64',
     ])]
     public function postExtract(string $target_path): void
     {
+        $this->buildForCurrentTarget($target_path);
+    }
+
+    public function buildForCurrentTarget(?string $sourceDir = null): bool
+    {
+        $sourceDir ??= PKG_ROOT_PATH . '/llvm-compiler-rt';
+        $triple = SystemTarget::getCanonicalTriple();
+        $libDir = PKG_ROOT_PATH . '/zig/lib/' . $triple;
+        if ($this->isBuilt($libDir)) {
+            return true;
+        }
+        if (!is_dir($sourceDir)) {
+            logger()->warning("[llvm-compiler-rt] source dir missing at {$sourceDir}; cannot build runtime bits for {$triple}");
+            return false;
+        }
+        $llvmVersion = $this->detectZigLlvmVersion();
+        if ($llvmVersion === null) {
+            logger()->warning('[llvm-compiler-rt] could not detect bundled clang version; skipping runtime bit build (PGO + shared libs without __dso_handle will fail to link)');
+            return false;
+        }
+        logger()->info("Building llvm compiler-rt bits for {$triple} (LLVM {$llvmVersion})");
+
         $zig = PKG_ROOT_PATH . '/zig/zig';
-        $libDir = PKG_ROOT_PATH . '/zig/lib';
+        f_mkdir($libDir, recursive: true);
         $profileLib = "{$libDir}/libclang_rt.profile.a";
         $crtBegin = "{$libDir}/clang_rt.crtbegin.o";
         $crtEnd = "{$libDir}/clang_rt.crtend.o";
-        if (file_exists($profileLib) && file_exists($crtBegin) && file_exists($crtEnd)) {
-            return;
-        }
-
-        $llvmVersion = $this->detectZigLlvmVersion();
-        if ($llvmVersion === null) {
-            logger()->warning('[clang-runtime-bits] could not detect bundled clang version; skipping runtime bit build (PGO + shared libs without __dso_handle will fail to link)');
-            return;
-        }
-        logger()->info("Building clang runtime bits for LLVM {$llvmVersion} (zig's bundled clang)");
-
-        f_mkdir($libDir, recursive: true);
         if (!file_exists($profileLib)) {
-            $this->buildProfileRuntime($zig, $target_path, $profileLib);
+            $this->buildProfileRuntime($zig, $sourceDir, $profileLib, $triple);
         }
         if (!file_exists($crtBegin) || !file_exists($crtEnd)) {
-            $this->buildCrtObjects($zig, $target_path, $crtBegin, $crtEnd);
+            $this->buildCrtObjects($zig, $sourceDir, $crtBegin, $crtEnd, $triple);
         }
+        return $this->isBuilt($libDir);
     }
 
-    private function buildProfileRuntime(string $zig, string $srcRoot, string $libPath): void
+    public function isBuilt(string $libDir): bool
+    {
+        return file_exists("{$libDir}/libclang_rt.profile.a")
+            && file_exists("{$libDir}/clang_rt.crtbegin.o")
+            && file_exists("{$libDir}/clang_rt.crtend.o");
+    }
+
+    private function buildProfileRuntime(string $zig, string $srcRoot, string $libPath, string $triple): void
     {
         $profileSrc = "{$srcRoot}/lib/profile";
         $profileInc = "{$srcRoot}/include";
         if (!is_dir($profileSrc)) {
-            logger()->warning("[clang-runtime-bits] profile src dir missing at {$profileSrc} — PGO will not work");
+            logger()->warning("[llvm-compiler-rt] profile src dir missing at {$profileSrc} — PGO will not work");
             return;
         }
         $sources = array_merge(
@@ -99,9 +118,9 @@ class clang_runtime_bits
             return true;
         });
 
-        $objDir = "{$srcRoot}/obj-profile";
+        $objDir = "{$srcRoot}/obj-profile-{$triple}";
         f_mkdir($objDir, recursive: true);
-        $cflags = '-c -O2 -fPIC -fvisibility=hidden ' .
+        $cflags = "-target {$triple} -c -O2 -fPIC -fvisibility=hidden " .
             '-I' . escapeshellarg($profileInc) . ' ' .
             '-DCOMPILER_RT_HAS_ATOMICS=1 -DCOMPILER_RT_HAS_FCNTL_LCK=1 -DCOMPILER_RT_HAS_UNAME=1';
         $objs = [];
@@ -117,32 +136,32 @@ class clang_runtime_bits
         if (!$this->runZigCmd($arCmd, $libPath, 'zig ar failed')) {
             return;
         }
-        logger()->info('[clang-runtime-bits] libclang_rt.profile.a installed (' . filesize($libPath) . ' bytes)');
+        logger()->info('[llvm-compiler-rt] libclang_rt.profile.a installed (' . filesize($libPath) . ' bytes)');
     }
 
-    private function buildCrtObjects(string $zig, string $srcRoot, string $crtBegin, string $crtEnd): void
+    private function buildCrtObjects(string $zig, string $srcRoot, string $crtBegin, string $crtEnd, string $triple): void
     {
         $beginSrc = "{$srcRoot}/lib/builtins/crtbegin.c";
         $endSrc = "{$srcRoot}/lib/builtins/crtend.c";
         if (!is_file($beginSrc) || !is_file($endSrc)) {
-            logger()->error("[clang-runtime-bits] crtbegin/crtend source missing under {$srcRoot}/lib/builtins — shared libs will lack __dso_handle");
+            logger()->error("[llvm-compiler-rt] crtbegin/crtend source missing under {$srcRoot}/lib/builtins — shared libs will lack __dso_handle");
             return;
         }
-        $cflags = '-c -O2 -fPIC -fvisibility=hidden -DCRT_HAS_INITFINI_ARRAY';
+        $cflags = "-target {$triple} -c -O2 -fPIC -fvisibility=hidden -DCRT_HAS_INITFINI_ARRAY";
         foreach ([[$beginSrc, $crtBegin], [$endSrc, $crtEnd]] as [$src, $dst]) {
             $cmd = escapeshellarg($zig) . ' cc ' . $cflags . ' -o ' . escapeshellarg($dst) . ' ' . escapeshellarg($src) . ' 2>&1';
             if (!$this->runZigCmd($cmd, $dst, "failed to compile {$src}")) {
                 return;
             }
         }
-        logger()->info('[clang-runtime-bits] clang_rt.crtbegin.o + clang_rt.crtend.o installed (' . filesize($crtBegin) . ' + ' . filesize($crtEnd) . ' bytes)');
+        logger()->info('[llvm-compiler-rt] clang_rt.crtbegin.o + clang_rt.crtend.o installed (' . filesize($crtBegin) . ' + ' . filesize($crtEnd) . ' bytes)');
     }
 
     private function runZigCmd(string $cmd, string $dst, string $errPrefix): bool
     {
         exec($cmd, $out, $rc);
         if ($rc !== 0 || !is_file($dst)) {
-            logger()->warning("[clang-runtime-bits] {$errPrefix}: " . implode("\n", $out));
+            logger()->warning("[llvm-compiler-rt] {$errPrefix}: " . implode("\n", $out));
             return false;
         }
         return true;

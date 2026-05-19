@@ -129,6 +129,31 @@ class SystemTarget
     }
 
     /**
+     * Returns the canonical target triple (arch-os-abi) for per-target build
+     * artifacts. Always returns a non-null triple, falling back to a host-derived
+     * triple when SPC_TARGET is unset or names 'native'.
+     * Strips libc version suffix (-gnu.2.17 → -gnu) and trailing flags (' -dynamic').
+     */
+    public static function getCanonicalTriple(): string
+    {
+        $target = (string) getenv('SPC_TARGET');
+        if ($target !== '' && !str_contains($target, 'native')) {
+            $cleaned = (string) preg_replace('/(-gnu|-musl)\.[\d.]+/', '$1', $target);
+            $cleaned = preg_split('/\s+/', trim($cleaned))[0] ?? '';
+            if ($cleaned !== '') {
+                return $cleaned;
+            }
+        }
+        $arch = self::getTargetArch();
+        return match (self::getTargetOS()) {
+            'Linux' => $arch . '-linux-' . (self::getLibc() === 'musl' ? 'musl' : 'gnu'),
+            'Darwin' => $arch . '-macos-none',
+            'Windows' => $arch . '-windows-gnu',
+            default => $arch . '-unknown-unknown',
+        };
+    }
+
+    /**
      * Returns a GNU host triple for autoconf --host= when SPC_TARGET names an
      * architecture different from the build host (true cross-compile).
      * Returns null for same-arch builds.
