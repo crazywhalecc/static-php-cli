@@ -38,7 +38,6 @@ class ClangNativeToolchain implements UnixToolchainInterface
                 default => throw new EnvironmentException(__CLASS__ . ' is not supported on ' . PHP_OS_FAMILY . '.'),
             };
         }
-        GlobalEnvManager::putenv('OBJCOPY=' . PKG_ROOT_PATH . '/llvm-tools/bin/llvm-objcopy');
     }
 
     public function getCompilerInfo(): ?string

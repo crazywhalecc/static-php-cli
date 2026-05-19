@@ -7,13 +7,23 @@ namespace StaticPHP\Doctor\Item;
 use Package\Artifact\llvm_tools;
 use StaticPHP\Attribute\Doctor\CheckItem;
 use StaticPHP\Attribute\Doctor\FixItem;
+use StaticPHP\Attribute\Doctor\OptionalCheck;
+use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Doctor\CheckResult;
 use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Toolchain\Interface\ToolchainInterface;
+use StaticPHP\Toolchain\ZigToolchain;
 
+#[OptionalCheck([self::class, 'optionalCheck'])]
 class LlvmToolsCheck
 {
+    public static function optionalCheck(): bool
+    {
+        return ApplicationContext::get(ToolchainInterface::class) instanceof ZigToolchain;
+    }
+
     /** @noinspection PhpUnused */
-    #[CheckItem('if llvm-tools (objcopy/strip/profdata) are built', limit_os: 'Linux', level: 798)]
+    #[CheckItem('if llvm-tools (objcopy/strip/profdata) are built', level: 798)]
     public function checkLlvmTools(): CheckResult
     {
         $binDir = PKG_ROOT_PATH . '/llvm-tools/bin';
