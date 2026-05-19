@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace StaticPHP\Toolchain;
 
+use Package\Artifact\llvm_compiler_rt;
+use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Package\PackageBuilder;
+use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\UnixToolchainInterface;
 use StaticPHP\Util\GlobalEnvManager;
+use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\System\LinuxUtil;
+use ZM\Logger\ConsoleColor;
 
 class ZigToolchain implements UnixToolchainInterface
 {
+    private static bool $afterInitDone = false;
+
     public function initEnv(): void
     {
         // Set environment variables for zig toolchain
@@ -19,11 +27,15 @@ class ZigToolchain implements UnixToolchainInterface
         GlobalEnvManager::putenv('SPC_DEFAULT_AR=zig-ar');
         GlobalEnvManager::putenv('SPC_DEFAULT_RANLIB=zig-ranlib');
         GlobalEnvManager::putenv('SPC_DEFAULT_LD=zig-ld.lld');
+        GlobalEnvManager::addPathIfNotExists($this->getPath());
     }
 
     public function afterInit(): void
     {
-        GlobalEnvManager::addPathIfNotExists($this->getPath());
+        if (self::$afterInitDone) {
+            return;
+        }
+        self::$afterInitDone = true;
         f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
         $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
         $cxxflags = getenv('SPC_DEFAULT_CXXFLAGS') ?: '';
@@ -52,6 +64,8 @@ class ZigToolchain implements UnixToolchainInterface
         // zig-cc/clang treats strlcpy/strlcat as compiler builtins, so configure link tests pass (HAVE_STRLCPY=1)
         $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
         GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=ac_cv_func_strlcpy=no ac_cv_func_strlcat=no {$extra_vars}");
+
+        $this->ensureCompilerRt();
     }
 
     public function getCompilerInfo(): ?string
@@ -85,6 +99,48 @@ class ZigToolchain implements UnixToolchainInterface
             return true;
         }
         return false;
+    }
+
+    private function ensureCompilerRt(): void
+    {
+        $rt = new llvm_compiler_rt();
+        $triple = SystemTarget::getCanonicalTriple();
+        $libDir = PKG_ROOT_PATH . '/zig/lib/' . $triple;
+        if ($rt->isBuilt($libDir)) {
+            return;
+        }
+        if (!is_dir(SOURCE_PATH . '/llvm-compiler-rt/lib/profile')) {
+            // Source not yet downloaded; install via nested PackageInstaller. The recursion guard
+            // on afterInit prevents the nested run from re-entering this method. Save the outer
+            // installer/builder in the container so executors keep seeing the outer one after.
+            // The PackageInstaller surfaces its own spinner for the install; AfterBinaryExtract
+            // builds for the current triple, so we're done after run().
+            $outerInstaller = ApplicationContext::tryGet(PackageInstaller::class);
+            $outerBuilder = ApplicationContext::tryGet(PackageBuilder::class);
+            try {
+                new PackageInstaller()
+                    ->addInstallPackage('llvm-compiler-rt')
+                    ->run(true);
+            } finally {
+                if ($outerInstaller !== null) {
+                    ApplicationContext::set(PackageInstaller::class, $outerInstaller);
+                }
+                if ($outerBuilder !== null) {
+                    ApplicationContext::set(PackageBuilder::class, $outerBuilder);
+                }
+            }
+            return;
+        }
+        // Source already extracted from a previous run on a different triple; rebuild here with our
+        // own progress spinner since we're outside the PackageInstaller flow.
+        InteractiveTerm::indicateProgress('Building llvm-compiler-rt for ' . ConsoleColor::yellow($triple));
+        try {
+            $rt->buildForTriple();
+        } catch (\Throwable $e) {
+            InteractiveTerm::finish('Build llvm-compiler-rt for ' . ConsoleColor::red($triple) . ' failed', false);
+            throw $e;
+        }
+        InteractiveTerm::finish('Built llvm-compiler-rt for ' . ConsoleColor::green($triple));
     }
 
     private function getPath(): string

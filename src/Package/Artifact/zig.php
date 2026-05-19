@@ -110,26 +110,24 @@ class zig
                 break;
             }
         }
-        if ($all_exist) {
-            return;
+        if (!$all_exist) {
+            $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
+            $script_content = file_get_contents($script_path);
+
+            file_put_contents("{$target_path}/zig-cc", $script_content);
+            chmod("{$target_path}/zig-cc", 0755);
+
+            $script_content = str_replace('zig cc', 'zig c++', $script_content);
+            file_put_contents("{$target_path}/zig-c++", $script_content);
+            file_put_contents("{$target_path}/zig-ar", "#!/usr/bin/env bash\nexec zig ar $@");
+            file_put_contents("{$target_path}/zig-ld.lld", "#!/usr/bin/env bash\nexec zig ld.lld $@");
+            file_put_contents("{$target_path}/zig-ranlib", "#!/usr/bin/env bash\nexec zig ranlib $@");
+            file_put_contents("{$target_path}/zig-objcopy", "#!/usr/bin/env bash\nexec zig objcopy $@");
+            chmod("{$target_path}/zig-c++", 0755);
+            chmod("{$target_path}/zig-ar", 0755);
+            chmod("{$target_path}/zig-ld.lld", 0755);
+            chmod("{$target_path}/zig-ranlib", 0755);
+            chmod("{$target_path}/zig-objcopy", 0755);
         }
-
-        $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
-        $script_content = file_get_contents($script_path);
-
-        file_put_contents("{$target_path}/zig-cc", $script_content);
-        chmod("{$target_path}/zig-cc", 0755);
-
-        $script_content = str_replace('zig cc', 'zig c++', $script_content);
-        file_put_contents("{$target_path}/zig-c++", $script_content);
-        file_put_contents("{$target_path}/zig-ar", "#!/usr/bin/env bash\nexec zig ar $@");
-        file_put_contents("{$target_path}/zig-ld.lld", "#!/usr/bin/env bash\nexec zig ld.lld $@");
-        file_put_contents("{$target_path}/zig-ranlib", "#!/usr/bin/env bash\nexec zig ranlib $@");
-        file_put_contents("{$target_path}/zig-objcopy", "#!/usr/bin/env bash\nexec zig objcopy $@");
-        chmod("{$target_path}/zig-c++", 0755);
-        chmod("{$target_path}/zig-ar", 0755);
-        chmod("{$target_path}/zig-ld.lld", 0755);
-        chmod("{$target_path}/zig-ranlib", 0755);
-        chmod("{$target_path}/zig-objcopy", 0755);
     }
 }
