@@ -33,6 +33,23 @@ ConsoleLogger::$date_format = 'H:i:s';
 ConsoleLogger::$format = '[%date% %level_long%] %body%';
 $ob_logger = new ConsoleLogger(LogLevel::WARNING);
 
+$ob_logger->addLogCallback(function ($level, &$output, &$message, &$context, bool $shouldLog) {
+    global $spc_log_filters;
+    if (!is_array($spc_log_filters)) {
+        $spc_log_filters = [];
+    }
+    // filter message and context
+    $output = str_replace($spc_log_filters, '***', $output);
+    $message = str_replace($spc_log_filters, '***', $message);
+    $context = array_map(function ($item) use ($spc_log_filters) {
+        if (is_string($item)) {
+            return str_replace($spc_log_filters, '***', $item);
+        }
+        return $item;
+    }, $context);
+    return true;
+});
+
 // setup log file
 if (filter_var(getenv('SPC_ENABLE_LOG_FILE'), FILTER_VALIDATE_BOOLEAN)) {
     // init spc log files
