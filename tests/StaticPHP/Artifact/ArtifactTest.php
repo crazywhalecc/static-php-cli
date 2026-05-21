@@ -254,11 +254,16 @@ class ArtifactTest extends TestCase
         ApplicationContext::initialize();
         ApplicationContext::set(ArtifactCache::class, $cache);
 
+        // Use a platform-appropriate absolute path: a Unix-style /tmp/... isn't
+        // absolute on Windows (no drive letter), so the test would otherwise
+        // fall through into the SOURCE_PATH-prefixed branch on Windows.
+        $extract = DIRECTORY_SEPARATOR === '\\' ? 'C:\tmp\my-pkg-extract' : '/tmp/my-pkg-extract';
+
         $artifact = new Artifact('my-pkg', [
-            'source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz', 'extract' => '/tmp/my-pkg-extract'],
+            'source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz', 'extract' => $extract],
         ]);
 
-        $expected = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/tmp/my-pkg-extract');
+        $expected = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $extract);
         $this->assertSame($expected, $artifact->getSourceDir());
     }
 
@@ -703,11 +708,7 @@ class ArtifactTest extends TestCase
             'Windows' => 'windows',
             default => 'linux',
         };
-        $arch = php_uname('m');
-        if ($arch === 'arm64') {
-            $arch = 'aarch64';
-        }
-        return "{$os}-{$arch}";
+        return "{$os}-" . arch2gnu(php_uname('m'));
     }
 
     private function injectArtifactConfig(string $name, array $config): void

@@ -223,8 +223,8 @@ class ArtifactCache
     public function getCacheFullPath(array $cache_info): string
     {
         return match ($cache_info['cache_type']) {
-            'archive', 'file' => DOWNLOAD_PATH . '/' . $cache_info['filename'],
-            'git' => DOWNLOAD_PATH . '/' . $cache_info['dirname'],
+            'archive', 'file' => FileSystem::convertPath(DOWNLOAD_PATH . '/' . $cache_info['filename']),
+            'git' => FileSystem::convertPath(DOWNLOAD_PATH . '/' . $cache_info['dirname']),
             'local' => $cache_info['dirname'], // local dirname is absolute path
             default => throw new SPCInternalException("Unknown cache type: {$cache_info['cache_type']}"),
         };
