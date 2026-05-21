@@ -54,6 +54,7 @@ class WindowsUtil
         }
         $args = [
             '-latest',
+            '-products', '*',
             '-format', 'json',
             '-requires', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
         ];
