@@ -3,7 +3,7 @@ libiconv:
   artifact:
     source:
       type: filelist
-      url: 'https://ftp.gnu.org/gnu/libiconv/'
+      url: 'https://ftpmirror.gnu.org/gnu/libiconv/'
       regex: '/href="(?<file>libiconv-(?<version>[^"]+)\.tar\.gz)"/'
     metadata:
       license-files: [COPYING.LIB]
