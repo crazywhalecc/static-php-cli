@@ -454,6 +454,7 @@
     },
     "libheif": {
         "source": "libheif",
+        "cpp-library": true,
         "static-libs-unix": [
             "libheif.a"
         ],
