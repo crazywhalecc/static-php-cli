@@ -16,8 +16,9 @@ trait GitHubTokenSetupTrait
         // GITHUB_TOKEN support
         if (($token = getenv('GITHUB_TOKEN')) !== false && ($user = getenv('GITHUB_USER')) !== false) {
             logger()->debug("Using 'GITHUB_TOKEN' with user {$user} for authentication");
-            spc_add_log_filter([$user, $token]);
-            return ['Authorization: Basic ' . base64_encode("{$user}:{$token}")];
+            $encoded = base64_encode("{$user}:{$token}");
+            spc_add_log_filter([$user, $token, $encoded]);
+            return ["Authorization: Basic {$encoded}"];
         }
         if (($token = getenv('GITHUB_TOKEN')) !== false) {
             logger()->debug("Using 'GITHUB_TOKEN' for authentication");
