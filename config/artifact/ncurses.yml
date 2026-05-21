@@ -4,5 +4,5 @@ ncurses:
       - COPYING
   source:
     type: filelist
-    url: 'https://ftp.gnu.org/pub/gnu/ncurses/'
+    url: 'https://ftpmirror.gnu.org/gnu/ncurses/'
     regex: '/href="(?<file>ncurses-(?<version>[^"]+)\.tar\.gz)"/'

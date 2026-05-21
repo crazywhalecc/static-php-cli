@@ -3,7 +3,7 @@ gettext:
   artifact:
     source:
       type: filelist
-      url: 'https://ftp.gnu.org/pub/gnu/gettext/'
+      url: 'https://ftpmirror.gnu.org/gnu/gettext/'
       regex: '/href="(?<file>gettext-(?<version>[^"]+)\.tar\.xz)"/'
     metadata:
       license-files: [gettext-runtime/intl/COPYING.LIB]
