@@ -3,7 +3,7 @@ libunistring:
   artifact:
     source:
       type: filelist
-      url: 'https://ftp.gnu.org/gnu/libunistring/'
+      url: 'https://ftpmirror.gnu.org/gnu/libunistring/'
       regex: '/href="(?<file>libunistring-(?<version>[^"]+)\.tar\.gz)"/'
     metadata:
       license-files: [COPYING.LIB]

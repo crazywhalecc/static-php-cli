@@ -331,7 +331,7 @@ class Artifact
     public function getSourceRoot(): string
     {
         if (isset($this->config['metadata']['source-root'])) {
-            return $this->getSourceDir() . '/' . ltrim($this->config['metadata']['source-root'], '/');
+            return FileSystem::convertPath($this->getSourceDir() . '/' . ltrim($this->config['metadata']['source-root'], '/'));
         }
         return $this->getSourceDir();
     }
