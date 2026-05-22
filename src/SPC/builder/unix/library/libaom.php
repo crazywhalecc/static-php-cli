@@ -21,7 +21,7 @@ trait libaom
         }
         $targetCpu = SPCTarget::getTargetArch();
         if (str_starts_with($targetCpu, 'aarch')) {
-            $targetCpu = str_replace($targetCpu, 'aarch', 'arm');
+            $targetCpu = str_replace('aarch', 'arm', $targetCpu);
         }
         if (!SystemUtil::findCommand('nasm') && !SystemUtil::findCommand('yasm')) {
             $targetCpu = 'generic';
