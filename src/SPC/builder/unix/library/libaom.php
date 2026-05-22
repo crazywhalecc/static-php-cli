@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SPC\builder\unix\library;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\executor\UnixCMakeExecutor;
@@ -21,6 +22,9 @@ trait libaom
         $targetCpu = SPCTarget::getTargetArch();
         if (str_starts_with($targetCpu, 'aarch')) {
             $targetCpu = str_replace($targetCpu, 'aarch', 'arm');
+        }
+        if (!SystemUtil::findCommand('nasm') && !SystemUtil::findCommand('yasm')) {
+            $targetCpu = 'generic';
         }
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")
