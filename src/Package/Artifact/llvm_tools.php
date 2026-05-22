@@ -7,6 +7,7 @@ namespace Package\Artifact;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
+use StaticPHP\Artifact\Downloader\Type\GitHubTokenSetupTrait;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
@@ -17,6 +18,8 @@ use StaticPHP\Package\PackageBuilder;
 
 class llvm_tools
 {
+    use GitHubTokenSetupTrait;
+
     public const array TOOLS = ['llvm-objcopy', 'llvm-strip', 'llvm-profdata'];
 
     #[CustomBinary('llvm-tools', [
@@ -32,7 +35,7 @@ class llvm_tools
         $tarball = "llvm-project-{$llvmVersion}.src.tar.xz";
         $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-{$llvmVersion}/{$tarball}";
         $tarballPath = DOWNLOAD_PATH . '/' . $tarball;
-        default_shell()->executeCurlDownload($url, $tarballPath, retries: $downloader->getRetry());
+        default_shell()->executeCurlDownload($url, $tarballPath, headers: $this->getGitHubTokenHeaders(), retries: $downloader->getRetry());
         return DownloadResult::archive($tarball, ['url' => $url, 'version' => $llvmVersion], extract: '{source_path}/llvm-tools', verified: false, version: $llvmVersion);
     }
 

@@ -27,11 +27,17 @@ class Artifact
     /** @var null|callable Bind custom source fetcher callback */
     protected mixed $custom_source_callback = null;
 
+    /** @var null|string Display label describing where the custom source callback came from */
+    protected ?string $custom_source_callback_origin = null;
+
     /** @var null|callable Bind custom source check-update callback */
     protected mixed $custom_source_check_update_callback = null;
 
     /** @var array<string, callable> Bind custom binary fetcher callbacks */
     protected mixed $custom_binary_callbacks = [];
+
+    /** @var array<string, string> Display label per platform describing where the custom binary callback came from */
+    protected array $custom_binary_callback_origins = [];
 
     /** @var array<string, callable> Bind custom binary check-update callbacks */
     protected array $custom_binary_check_update_callbacks = [];
@@ -411,15 +417,23 @@ class Artifact
 
     /**
      * Set custom source fetcher callback.
+     *
+     * @param string $origin Short label shown in progress output (e.g. 'package downloader', 'custom url')
      */
-    public function setCustomSourceCallback(callable $callback): void
+    public function setCustomSourceCallback(callable $callback, string $origin = 'package downloader'): void
     {
         $this->custom_source_callback = $callback;
+        $this->custom_source_callback_origin = $origin;
     }
 
     public function getCustomSourceCallback(): ?callable
     {
         return $this->custom_source_callback ?? null;
+    }
+
+    public function getCustomSourceCallbackOrigin(): ?string
+    {
+        return $this->custom_source_callback_origin;
     }
 
     /**
@@ -456,11 +470,19 @@ class Artifact
      *
      * @param string   $target_os Target OS platform string (e.g. linux-x86_64)
      * @param callable $callback  Custom binary fetcher callback
+     * @param string   $origin    Short label shown in progress output (e.g. 'package downloader')
      */
-    public function setCustomBinaryCallback(string $target_os, callable $callback): void
+    public function setCustomBinaryCallback(string $target_os, callable $callback, string $origin = 'package downloader'): void
     {
         ConfigValidator::validatePlatformString($target_os);
         $this->custom_binary_callbacks[$target_os] = $callback;
+        $this->custom_binary_callback_origins[$target_os] = $origin;
+    }
+
+    public function getCustomBinaryCallbackOrigin(): ?string
+    {
+        $current_platform = SystemTarget::getCurrentPlatformString();
+        return $this->custom_binary_callback_origins[$current_platform] ?? null;
     }
 
     /**

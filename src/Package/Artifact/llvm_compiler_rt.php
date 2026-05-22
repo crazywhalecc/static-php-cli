@@ -7,6 +7,7 @@ namespace Package\Artifact;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
+use StaticPHP\Artifact\Downloader\Type\GitHubTokenSetupTrait;
 use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
@@ -21,6 +22,8 @@ use StaticPHP\Runtime\SystemTarget;
  */
 class llvm_compiler_rt
 {
+    use GitHubTokenSetupTrait;
+
     #[CustomBinary('llvm-compiler-rt', [
         'linux-x86_64',
         'linux-aarch64',
@@ -34,7 +37,7 @@ class llvm_compiler_rt
         $tarball = "compiler-rt-{$llvmVersion}.src.tar.xz";
         $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-{$llvmVersion}/{$tarball}";
         $tarballPath = DOWNLOAD_PATH . '/' . $tarball;
-        default_shell()->executeCurlDownload($url, $tarballPath, retries: $downloader->getRetry());
+        default_shell()->executeCurlDownload($url, $tarballPath, headers: $this->getGitHubTokenHeaders(), retries: $downloader->getRetry());
         return DownloadResult::archive($tarball, ['url' => $url, 'version' => $llvmVersion], extract: '{source_path}/llvm-compiler-rt', verified: false, version: $llvmVersion);
     }
 
