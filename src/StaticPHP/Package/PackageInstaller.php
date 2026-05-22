@@ -155,6 +155,7 @@ class PackageInstaller
         }
 
         $this->reconcilePhpSrcVersion();
+        $this->emitPreInstallEvents();
 
         if ($this->interactive && !$disable_delay_msg) {
             // show install or build options in terminal with beautiful output
@@ -359,6 +360,15 @@ class PackageInstaller
             return $package->isInstalled();
         }
         return false;
+    }
+
+    public function emitPreInstallEvents(): void
+    {
+        foreach ($this->packages as $package) {
+            if ($package->hasStage('preInstall')) {
+                $package->runStage('preInstall');
+            }
+        }
     }
 
     public function emitPostInstallEvents(): void
