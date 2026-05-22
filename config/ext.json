@@ -43,6 +43,19 @@
     "calendar": {
         "type": "builtin"
     },
+    "clickhouse": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-clickhouse",
+        "arg-type": "custom",
+        "cpp-extension": true,
+        "lib-suggests": [
+            "openssl"
+        ]
+    },
     "com_dotnet": {
         "support": {
             "BSD": "no",
@@ -159,6 +172,30 @@
     },
     "exif": {
         "type": "builtin"
+    },
+    "fastchart": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-fastchart",
+        "lib-depends": [
+            "freetype"
+        ],
+        "lib-suggests": [
+            "libpng",
+            "libjpeg",
+            "libwebp"
+        ]
+    },
+    "fastjson": {
+        "support": {
+            "Windows": "wip",
+            "BSD": "wip"
+        },
+        "type": "external",
+        "source": "ext-fastjson"
     },
     "ffi": {
         "support": {

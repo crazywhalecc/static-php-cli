@@ -133,6 +133,16 @@
             "path": "LICENSE"
         }
     },
+    "ext-clickhouse": {
+        "type": "ghtagtar",
+        "repo": "iliaal/php_clickhouse",
+        "match": "tarball/refs/tags/\\d",
+        "path": "php-src/ext/clickhouse",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
     "ext-ds": {
         "type": "url",
         "url": "https://pecl.php.net/get/ds",
@@ -157,6 +167,24 @@
         "url": "https://pecl.php.net/get/excimer",
         "path": "php-src/ext/excimer",
         "filename": "excimer.tgz",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-fastchart": {
+        "type": "ghtagtar",
+        "repo": "iliaal/fastchart",
+        "path": "php-src/ext/fastchart",
+        "license": {
+            "type": "file",
+            "path": "LICENSE"
+        }
+    },
+    "ext-fastjson": {
+        "type": "ghtagtar",
+        "repo": "iliaal/fastjson",
+        "path": "php-src/ext/fastjson",
         "license": {
             "type": "file",
             "path": "LICENSE"
