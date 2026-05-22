@@ -36,7 +36,16 @@ class ZigToolchain implements UnixToolchainInterface
             return;
         }
         self::$afterInitDone = true;
-        f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
+        // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
+        if (function_exists('posix_setrlimit') && function_exists('posix_getrlimit')) {
+            $limits = posix_getrlimit();
+            $hard = (int) ($limits['hardopenfiles'] ?? 2048);
+            $soft = (int) ($limits['softopenfiles'] ?? 1024);
+            $target = min(max($soft, 2048), $hard > 0 ? $hard : 2048);
+            if ($target > $soft) {
+                posix_setrlimit(POSIX_RLIMIT_NOFILE, $target, $hard);
+            }
+        }
         $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
         $cxxflags = getenv('SPC_DEFAULT_CXXFLAGS') ?: '';
         $extraCflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
