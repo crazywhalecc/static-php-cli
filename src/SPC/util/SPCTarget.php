@@ -127,4 +127,19 @@ class SPCTarget
             default => PHP_OS_FAMILY,
         };
     }
+
+    /**
+     * Returns the target OS arch, e.g. x86_64, aarch64, arm, x86.
+     */
+    public static function getTargetArch(): string
+    {
+        $target = (string) getenv('SPC_TARGET');
+        return match (true) {
+            str_starts_with($target, 'aarch64') => 'aarch64',
+            str_starts_with($target, 'arm-') => 'arm',
+            str_starts_with($target, 'x86_64-') => 'x86_64',
+            str_starts_with($target, 'x86-') => 'x86',
+            default => GNU_ARCH,
+        };
+    }
 }

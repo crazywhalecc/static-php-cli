@@ -7,6 +7,7 @@ namespace SPC\builder\unix\library;
 use SPC\toolchain\ToolchainManager;
 use SPC\toolchain\ZigToolchain;
 use SPC\util\executor\UnixCMakeExecutor;
+use SPC\util\SPCTarget;
 
 trait libaom
 {
@@ -17,9 +18,16 @@ trait libaom
             $new = trim($extra . ' -D_GNU_SOURCE');
             f_putenv("SPC_COMPILER_EXTRA={$new}");
         }
+        $targetCpu = SPCTarget::getTargetArch();
+        if (str_starts_with($targetCpu, 'aarch')) {
+            $targetCpu = str_replace($targetCpu, 'aarch', 'arm');
+        }
         UnixCMakeExecutor::create($this)
             ->setBuildDir("{$this->source_dir}/builddir")
-            ->addConfigureArgs('-DAOM_TARGET_CPU=generic')
+            ->addConfigureArgs(
+                "-DAOM_TARGET_CPU={$targetCpu}",
+                '-DCONFIG_RUNTIME_CPU_DETECT=1'
+            )
             ->build();
         f_putenv("SPC_COMPILER_EXTRA={$extra}");
         $this->patchPkgconfPrefix(['aom.pc']);
