@@ -43,7 +43,6 @@ class ZigToolchain implements UnixToolchainInterface
     public function afterInit(): void
     {
         GlobalEnvManager::addPathIfNotExists($this->getPath());
-        f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
         $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
         $cxxflags = getenv('SPC_DEFAULT_CXXFLAGS') ?: '';
         $extraCflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
