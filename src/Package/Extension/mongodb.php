@@ -16,6 +16,14 @@ use StaticPHP\Util\FileSystem;
 #[Extension('mongodb')]
 class mongodb extends PhpExtensionPackage
 {
+    #[BeforeStage('php', [php::class, 'configureForUnix'], 'ext-mongodb')]
+    #[PatchDescription('Export PHP_VERSION_ID so mongo-php-driver >= 2.3.3 skips its php-config lookup (in-tree builds have no php-config).')]
+    public function exportPhpVersionIdForUnix(): void
+    {
+        $id = php::getPHPVersionID();
+        f_putenv("PHP_VERSION_ID={$id}");
+    }
+
     #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-mongodb')]
     #[PatchDescription('Add /utf-8 flag to CFLAGS_MONGODB for Windows build to fix compilation error on non-English Windows.')]
     public function patchBeforeBuild(): void
