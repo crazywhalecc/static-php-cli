@@ -123,6 +123,24 @@ class GlobalEnvManager
         }
     }
 
+    /** Re-substitute env.ini's CC=${SPC_DEFAULT_CC} bindings after a toolchain swap. */
+    public static function reapplyOsIni(): void
+    {
+        $ini = self::readIniFile();
+        $os_ini = match (PHP_OS_FAMILY) {
+            'Windows' => $ini['windows'] ?? [],
+            'Darwin' => $ini['macos'] ?? [],
+            'Linux' => $ini['linux'] ?? [],
+            'BSD' => $ini['freebsd'] ?? [],
+            default => [],
+        };
+        foreach (['CC', 'CXX', 'AR', 'RANLIB', 'LD'] as $k) {
+            if (isset($os_ini[$k])) {
+                self::putenv("{$k}={$os_ini[$k]}");
+            }
+        }
+    }
+
     /**
      * Initialize the toolchain after the environment variables are set.
      * The toolchain or environment availability check is done here.

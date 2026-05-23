@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace StaticPHP\Toolchain;
 
 use Package\Artifact\llvm_compiler_rt;
+use Package\Artifact\zig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
@@ -56,7 +57,7 @@ class ZigToolchain implements UnixToolchainInterface
         GlobalEnvManager::putenv("SPC_DEFAULT_CXXFLAGS={$cxxflags}");
         GlobalEnvManager::putenv("SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS={$extraCflags}");
         GlobalEnvManager::putenv('RANLIB=zig-ranlib');
-        GlobalEnvManager::putenv('SPC_COMPILER_RT_DIR=' . PKG_ROOT_PATH . '/zig/lib/' . SystemTarget::getCanonicalTriple());
+        GlobalEnvManager::putenv('SPC_COMPILER_RT_DIR=' . zig::path() . '/lib/' . SystemTarget::getCanonicalTriple());
         GlobalEnvManager::putenv('OBJCOPY=' . PKG_ROOT_PATH . '/llvm-tools/bin/llvm-objcopy');
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if (!str_contains($extra_libs, '-lunwind')) {
@@ -112,9 +113,12 @@ class ZigToolchain implements UnixToolchainInterface
 
     private function ensureCompilerRt(): void
     {
+        if (!zig::isInstalled()) {
+            return;
+        }
         $rt = new llvm_compiler_rt();
         $triple = SystemTarget::getCanonicalTriple();
-        $libDir = PKG_ROOT_PATH . '/zig/lib/' . $triple;
+        $libDir = zig::path() . '/lib/' . $triple;
         if ($rt->isBuilt($libDir)) {
             return;
         }
@@ -154,6 +158,6 @@ class ZigToolchain implements UnixToolchainInterface
 
     private function getPath(): string
     {
-        return PKG_ROOT_PATH . '/zig';
+        return zig::path();
     }
 }

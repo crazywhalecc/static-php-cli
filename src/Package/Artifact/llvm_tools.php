@@ -102,8 +102,8 @@ class llvm_tools
             '-DLLVM_BUILD_LLVM_DYLIB=OFF',
             '-DLLVM_LINK_LLVM_DYLIB=OFF',
             '-DBUILD_SHARED_LIBS=OFF',
-            '-DCMAKE_C_COMPILER=' . PKG_ROOT_PATH . '/zig/zig-cc',
-            '-DCMAKE_CXX_COMPILER=' . PKG_ROOT_PATH . '/zig/zig-c++',
+            '-DCMAKE_C_COMPILER=' . zig::binary('zig-cc'),
+            '-DCMAKE_CXX_COMPILER=' . zig::binary('zig-c++'),
             '-DCMAKE_INSTALL_PREFIX=' . $installDir,
         ]));
         $jobs = ApplicationContext::get(PackageBuilder::class)->concurrency;
@@ -137,11 +137,10 @@ class llvm_tools
 
     private function detectLlvmVersion(): ?string
     {
-        $zig = PKG_ROOT_PATH . '/zig/zig';
-        if (!is_file($zig)) {
+        if (!zig::isInstalled()) {
             return null;
         }
-        [$rc, $out] = shell()->execWithResult(escapeshellarg($zig) . ' cc --version', false);
+        [$rc, $out] = shell()->execWithResult(escapeshellarg(zig::binary()) . ' cc --version', false);
         if ($rc !== 0) {
             return null;
         }

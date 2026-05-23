@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Runtime;
 
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\System\LinuxUtil;
 
 /**
@@ -16,7 +17,7 @@ class SystemTarget
      */
     public static function getLibc(): ?string
     {
-        if ($target = getenv('SPC_TARGET')) {
+        if ($target = self::target()) {
             if (str_contains($target, '-gnu')) {
                 return 'glibc';
             }
@@ -57,7 +58,7 @@ class SystemTarget
     public static function getLibcVersion(): ?string
     {
         if (PHP_OS_FAMILY === 'Linux') {
-            $target = (string) getenv('SPC_TARGET');
+            $target = self::target();
             if (str_contains($target, '-gnu.2.')) {
                 return preg_match('/-gnu\.(2\.\d+)/', $target, $matches) ? $matches[1] : null;
             }
@@ -75,7 +76,7 @@ class SystemTarget
      */
     public static function getTargetOS(): string
     {
-        $target = (string) getenv('SPC_TARGET');
+        $target = self::target();
         return match (true) {
             str_contains($target, '-linux') => 'Linux',
             str_contains($target, '-macos') => 'Darwin',
@@ -91,7 +92,7 @@ class SystemTarget
      */
     public static function getTargetArch(): string
     {
-        $target = (string) getenv('SPC_TARGET');
+        $target = self::target();
         return match (true) {
             str_contains($target, 'x86_64') || str_contains($target, 'amd64') => 'x86_64',
             str_contains($target, 'aarch64') || str_contains($target, 'arm64') => 'aarch64',
@@ -136,7 +137,7 @@ class SystemTarget
      */
     public static function getCanonicalTriple(): string
     {
-        $target = (string) getenv('SPC_TARGET');
+        $target = self::target();
         if ($target !== '' && !str_contains($target, 'native')) {
             $cleaned = (string) preg_replace('/(-gnu|-musl)\.[\d.]+/', '$1', $target);
             $cleaned = preg_split('/\s+/', trim($cleaned))[0] ?? '';
@@ -161,7 +162,7 @@ class SystemTarget
      */
     public static function getAutoconfHostTriple(): ?string
     {
-        $target = (string) getenv('SPC_TARGET');
+        $target = self::target();
         if ($target === '' || str_contains($target, 'native')) {
             return null;
         }
@@ -182,5 +183,15 @@ class SystemTarget
             return null;
         }
         return $cleaned;
+    }
+
+    /** native toolchains ignore SPC_TARGET */
+    private static function target(): string
+    {
+        $tc = (string) getenv('SPC_TOOLCHAIN');
+        if ($tc !== '' && $tc !== ZigToolchain::class) {
+            return '';
+        }
+        return (string) getenv('SPC_TARGET');
     }
 }

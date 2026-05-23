@@ -73,7 +73,7 @@ class llvm_compiler_rt
     {
         $sourceDir ??= SOURCE_PATH . '/llvm-compiler-rt';
         $triple ??= SystemTarget::getCanonicalTriple();
-        $libDir = PKG_ROOT_PATH . '/zig/lib/' . $triple;
+        $libDir = zig::path() . '/lib/' . $triple;
         if ($this->isBuilt($libDir)) {
             return;
         }
@@ -101,7 +101,10 @@ class llvm_compiler_rt
 
     private function detectZigLlvmVersion(): ?string
     {
-        [$rc, $out] = shell()->execWithResult('zig cc --version', false);
+        if (!zig::isInstalled()) {
+            return null;
+        }
+        [$rc, $out] = shell()->execWithResult(escapeshellarg(zig::binary()) . ' cc --version', false);
         if ($rc !== 0) {
             return null;
         }
