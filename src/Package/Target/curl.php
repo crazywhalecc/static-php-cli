@@ -93,6 +93,9 @@ class curl
         if (str_contains(FileSystem::readFile($pc_path), '-lgssapi_krb5')) {
             FileSystem::replaceFileRegex($pc_path, '/-lcom_err$/m', '-lcom_err -lkrb5support');
         }
+        // FindThreads can put '-lpthread' into INTERFACE_LINK_LIBRARIES; curl's pc generator
+        // prepends '-l' to each entry, producing '-l-lpthread'. Strip the extra '-l'.
+        FileSystem::replaceFileRegex($pc_path, '/-l(-l\S+)/', '$1');
         shell()->cd("{$lib->getLibDir()}/cmake/CURL/")
             ->exec("sed -ie 's|\"/lib/libcurl.a\"|\"{$lib->getLibDir()}/libcurl.a\"|g' CURLTargets-release.cmake");
 

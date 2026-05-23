@@ -53,6 +53,10 @@ class libaom extends LibraryPackage
             ->addConfigureArgs(
                 "-DAOM_TARGET_CPU={$targetCpu}",
                 '-DCONFIG_RUNTIME_CPU_DETECT=1',
+                '-DENABLE_EXAMPLES=OFF',
+                '-DENABLE_TESTS=OFF',
+                '-DENABLE_TOOLS=OFF',
+                '-DENABLE_DOCS=OFF',
             )
             ->build();
         f_putenv("SPC_COMPILER_EXTRA={$extra}");

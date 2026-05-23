@@ -24,6 +24,17 @@ class libheif
                 'list(APPEND REQUIRES_PRIVATE "libbrotlidec")' . "\n" . '        list(APPEND REQUIRES_PRIVATE "libbrotlienc")'
             );
         }
+        // libheif 1.22+ ships a C-incompatible header: `struct heif_bad_pixel`
+        $heif_properties = $lib->getSourceDir() . '/libheif/api/libheif/heif_properties.h';
+        if (file_exists($heif_properties)
+            && str_contains(file_get_contents($heif_properties), 'struct heif_bad_pixel { uint32_t row; uint32_t column; };')
+        ) {
+            FileSystem::replaceFileStr(
+                $heif_properties,
+                'struct heif_bad_pixel { uint32_t row; uint32_t column; };',
+                'typedef struct heif_bad_pixel { uint32_t row; uint32_t column; } heif_bad_pixel;'
+            );
+        }
     }
 
     #[BuildFor('Darwin')]

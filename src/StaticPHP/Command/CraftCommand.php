@@ -10,8 +10,10 @@ use StaticPHP\Exception\ValidationException;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Toolchain\ToolchainManager;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\Pgo\PgoContext;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -43,6 +45,10 @@ class CraftCommand extends BaseCommand
 
         // apply env
         array_walk($craft['extra-env'], fn ($v, $k) => f_putenv("{$k}={$v}"));
+
+        // re-substitute env.ini's CC=${SPC_DEFAULT_CC} bindings.
+        ToolchainManager::initToolchain();
+        GlobalEnvManager::reapplyOsIni();
 
         // stash craft for doctor checks that depend on what's being built (e.g. frankenphp → go-xcaddy)
         ApplicationContext::set('craft', $craft);
