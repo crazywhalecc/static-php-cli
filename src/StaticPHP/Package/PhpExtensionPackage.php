@@ -286,7 +286,7 @@ class PhpExtensionPackage extends Package
         }
         return [
             'CFLAGS' => $config['cflags'],
-            'CXXFLAGS' => $config['cflags'],
+            'CXXFLAGS' => $config['cxxflags'],
             'LDFLAGS' => $ldflags,
             'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
