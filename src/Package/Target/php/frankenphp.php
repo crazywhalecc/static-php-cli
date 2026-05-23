@@ -73,11 +73,10 @@ trait frankenphp
             $staticFlags = '';
         }
 
-        $resolved = array_keys($installer->getResolvedPackages());
-        // remove self from deps
-        $resolved = array_filter($resolved, fn ($pkg_name) => $pkg_name !== $package->getName());
+        $resolved = $installer->getAvailableResolvedPackageNames();
+        $resolved = array_values(array_filter($resolved, fn ($pkg_name) => $pkg_name !== $package->getName()));
         $config = new SPCConfigUtil()->config($resolved);
-        $cflags = "-I{$package->getSourceDir()} {$package->getLibExtraCFlags()} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . " -DFRANKENPHP_VERSION={$frankenphp_version}";
+        $cflags = "{$package->getLibExtraCFlags()} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . " -DFRANKENPHP_VERSION={$frankenphp_version}";
         $libs = $config['libs'];
 
         // Go's gcc driver doesn't automatically link against -lgcov or -lrt. Ugly, but necessary fix.
