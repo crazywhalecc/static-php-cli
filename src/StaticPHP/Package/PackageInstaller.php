@@ -304,11 +304,9 @@ class PackageInstaller
     }
 
     /**
-     * Get resolved package names filtered to only packages whose build artifacts are available.
-     * This excludes library packages that haven't been built/installed yet, which naturally
-     * prevents SPCConfigUtil from checking static-lib files of libraries that come after
-     * the current target in the build order (e.g. 'watcher' for frankenphp isn't built
-     * when 'php' is being compiled).
+     * Get resolved package names whose build artifacts contribute to the PHP main link.
+     * Excludes libraries not yet built (so SPCConfigUtil doesn't probe their .a files) and
+     * shared-only extensions (they link separately into their own .so).
      *
      * @return string[] Available resolved package names
      */
@@ -318,10 +316,10 @@ class PackageInstaller
             array_keys($this->packages),
             function (string $name): bool {
                 $pkg = $this->packages[$name] ?? null;
-                // Exclude library packages whose build artifacts don't exist yet.
-                // Extensions and targets are not filtered — extensions are compiled into PHP
-                // and don't have standalone build artifacts.
                 if ($pkg instanceof LibraryPackage && $pkg->getType() === 'library' && !$pkg->isInstalled()) {
+                    return false;
+                }
+                if ($pkg instanceof PhpExtensionPackage && $pkg->isBuildShared() && !$pkg->isBuildStatic()) {
                     return false;
                 }
                 return true;

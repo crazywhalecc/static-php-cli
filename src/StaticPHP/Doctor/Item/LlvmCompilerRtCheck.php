@@ -28,7 +28,7 @@ class LlvmCompilerRtCheck
     #[CheckItem('if llvm-compiler-rt is built for current target', level: 799)]
     public function checkLlvmCompilerRt(): CheckResult
     {
-        $libDir = zig::dir() . '/lib/' . SystemTarget::getCanonicalTriple();
+        $libDir = zig::path() . '/lib/' . SystemTarget::getCanonicalTriple();
         if (new llvm_compiler_rt()->isBuilt($libDir)) {
             return CheckResult::ok($libDir);
         }
@@ -42,7 +42,7 @@ class LlvmCompilerRtCheck
         $installer->addInstallPackage('llvm-compiler-rt');
         $installer->run(true);
         new llvm_compiler_rt()->buildForTriple();
-        $libDir = zig::dir() . '/lib/' . SystemTarget::getCanonicalTriple();
+        $libDir = zig::path() . '/lib/' . SystemTarget::getCanonicalTriple();
         return new llvm_compiler_rt()->isBuilt($libDir);
     }
 }
