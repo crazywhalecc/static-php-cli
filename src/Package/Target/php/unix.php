@@ -543,8 +543,8 @@ trait unix
             $package->runStage([$this, 'configureForUnix']);
             $package->runStage([$this, 'makeForUnix']);
         }
-
-        $package->runStage([$this, 'unixBuildSharedExt']);
+        // shared extensions build in php's postInstall (php.php) so they run AFTER
+        // frankenphp's main-loop build — frankenphp links libphp only, not the .so exts.
     }
 
     /**
@@ -656,7 +656,7 @@ trait unix
         copy(ROOT_DIR . '/src/globals/common-tests/embed.c', $sample_file_path . '/embed.c');
         copy(ROOT_DIR . '/src/globals/common-tests/embed.php', $sample_file_path . '/embed.php');
 
-        $config = new SPCConfigUtil()->config($installer->getAvailableResolvedPackageNames());
+        $config = new SPCConfigUtil()->config(['php']);
         $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
         if ($toolchain->isStatic()) {
             $lens .= ' -static';
@@ -743,7 +743,7 @@ trait unix
      */
     private function makeVars(PackageInstaller $installer): array
     {
-        $config = new SPCConfigUtil(['libs_only_deps' => true])->config($installer->getAvailableResolvedPackageNames());
+        $config = new SPCConfigUtil(['libs_only_deps' => true])->config(['php']);
         $static = ApplicationContext::get(ToolchainInterface::class)->isStatic() ? '-all-static' : '';
         $pie = SystemTarget::getTargetOS() === 'Linux' ? '-pie' : '';
         $lib = BUILD_LIB_PATH;

@@ -10,6 +10,7 @@ use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 
 class SPCConfigUtil
@@ -34,15 +35,39 @@ class SPCConfigUtil
         $this->absolute_libs = $options['absolute_libs'] ?? false;
     }
 
-    public function config(array $packages = [], bool $include_suggests = false): array
+    public function config(array $packages = []): array
     {
-        // if have php, make php as all extension's dependency
-        $dep_override = $this->no_php
-            ? []
-            : ['php' => array_filter($packages, fn ($y) => str_starts_with($y, 'ext-'))];
-        return $this->configWithResolvedPackages(
-            DependencyResolver::resolve($packages, $dep_override, $include_suggests)
-        );
+        // Walk depends+suggests within the resolved set; reaching `php` fans out to its
+        // effective link closure (resolved static exts + virtual-target SAPIs).
+        $installer = ApplicationContext::get(PackageInstaller::class);
+        $resolved_set = array_flip(array_keys($installer->getResolvedPackages()));
+
+        $php_extras = [];
+        if (!$this->no_php) {
+            foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $ext) {
+                if ($ext->isBuildStatic()) {
+                    $php_extras[] = $ext->getName();
+                }
+            }
+            foreach ($installer->getResolvedPackages(TargetPackage::class) as $target) {
+                if ($target->isVirtualTarget()) {
+                    $php_extras[] = $target->getName();
+                }
+            }
+        }
+
+        $sorted = [];
+        $visited = [];
+        foreach ($packages as $pkg) {
+            self::visitConfigDeps(
+                is_string($pkg) ? $pkg : $pkg->getName(),
+                $resolved_set,
+                $php_extras,
+                $visited,
+                $sorted,
+            );
+        }
+        return $this->configWithResolvedPackages($sorted);
     }
 
     /**
@@ -249,6 +274,32 @@ class SPCConfigUtil
             }
         }
         return implode(' ', $list);
+    }
+
+    private static function visitConfigDeps(
+        string $name,
+        array $resolved_set,
+        array $php_extras,
+        array &$visited,
+        array &$sorted,
+    ): void {
+        if (isset($visited[$name]) || !isset($resolved_set[$name])) {
+            return;
+        }
+        $visited[$name] = true;
+
+        $deps = array_merge(
+            PackageConfig::get($name, 'depends', []),
+            PackageConfig::get($name, 'suggests', []),
+        );
+        if ($name === 'php') {
+            $deps = array_merge($deps, $php_extras);
+        }
+
+        foreach ($deps as $dep) {
+            self::visitConfigDeps($dep, $resolved_set, $php_extras, $visited, $sorted);
+        }
+        $sorted[] = $name;
     }
 
     /**

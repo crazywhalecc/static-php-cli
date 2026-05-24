@@ -73,9 +73,7 @@ trait frankenphp
             $staticFlags = '';
         }
 
-        $resolved = $installer->getAvailableResolvedPackageNames();
-        $resolved = array_values(array_filter($resolved, fn ($pkg_name) => $pkg_name !== $package->getName()));
-        $config = new SPCConfigUtil()->config($resolved);
+        $config = new SPCConfigUtil()->config(['frankenphp']);
         $cflags = "{$package->getLibExtraCFlags()} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . " -DFRANKENPHP_VERSION={$frankenphp_version}";
         $libs = $config['libs'];
 

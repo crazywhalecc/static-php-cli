@@ -44,7 +44,7 @@ class SPCConfigCommand extends BaseCommand
             'absolute_libs' => (bool) $this->getOption('absolute-libs'),
         ]);
         $packages = array_merge(array_map(fn ($x) => "ext-{$x}", $extensions), $libraries);
-        $config = $util->config($packages, $include_suggests);
+        $config = $util->config($packages);
 
         $this->output->writeln(match (true) {
             $this->getOption('includes') => $config['cflags'],
