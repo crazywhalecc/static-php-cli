@@ -256,10 +256,30 @@ function clean_spaces(string $string): string
  */
 function deduplicate_flags(string $flags): string
 {
-    $tokens = preg_split('/\s+/', trim($flags));
+    // Flags that take their value as a separate token.
+    static $paired = [
+        '-Xclang', '-Xpreprocessor', '-Xlinker', '-Xassembler',
+        '-framework', '-arch', '-target',
+        '-include', '-imacros', '-isystem', '-isysroot', '-iquote', '-idirafter',
+        '-MT', '-MF', '-MQ',
+    ];
+
+    $tokens = preg_split('/\s+/', trim($flags)) ?: [];
+
+    // Group paired flag+value into a single atom before dedup.
+    $atoms = [];
+    $n = count($tokens);
+    for ($i = 0; $i < $n; ++$i) {
+        if (in_array($tokens[$i], $paired, true) && $i + 1 < $n) {
+            $atoms[] = $tokens[$i] . ' ' . $tokens[$i + 1];
+            ++$i;
+        } else {
+            $atoms[] = $tokens[$i];
+        }
+    }
 
     // Reverse, unique, reverse back - keeps last occurrence of duplicates
-    $deduplicated = array_reverse(array_unique(array_reverse($tokens)));
+    $deduplicated = array_reverse(array_unique(array_reverse($atoms)));
 
     return implode(' ', $deduplicated);
 }
