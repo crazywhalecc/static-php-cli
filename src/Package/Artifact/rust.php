@@ -16,6 +16,23 @@ use StaticPHP\Util\System\LinuxUtil;
 
 class rust
 {
+    /** Install prefix the rust tarball's install.sh writes into. */
+    public static function path(): string
+    {
+        return PKG_ROOT_PATH . '/rust';
+    }
+
+    /** Path to a binary inside the rust install dir (cargo, rustc, rustup, …). */
+    public static function binary(string $name = 'cargo'): string
+    {
+        return self::path() . '/bin/' . $name;
+    }
+
+    public static function isInstalled(): bool
+    {
+        return is_file(self::binary());
+    }
+
     #[CustomBinary('rust', [
         'linux-x86_64',
         'linux-aarch64',

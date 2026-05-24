@@ -17,6 +17,23 @@ use StaticPHP\Util\System\LinuxUtil;
 
 class go_xcaddy
 {
+    /** GOROOT for the bundled Go toolchain used to build xcaddy. */
+    public static function path(): string
+    {
+        return PKG_ROOT_PATH . '/go-xcaddy';
+    }
+
+    /** Path to a binary inside go-xcaddy's bin/ (xcaddy, go, …). */
+    public static function binary(string $name = 'xcaddy'): string
+    {
+        return self::path() . '/bin/' . $name;
+    }
+
+    public static function isInstalled(): bool
+    {
+        return is_file(self::binary());
+    }
+
     #[CustomBinary('go-xcaddy', [
         'linux-x86_64',
         'linux-aarch64',

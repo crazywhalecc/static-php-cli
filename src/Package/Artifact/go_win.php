@@ -15,6 +15,23 @@ use StaticPHP\Util\GlobalEnvManager;
 
 class go_win
 {
+    /** GOROOT for the Windows Go toolchain. */
+    public static function path(): string
+    {
+        return PKG_ROOT_PATH . '/go-win';
+    }
+
+    /** Path to a binary inside go-win's bin/ (go.exe, gofmt.exe, …). */
+    public static function binary(string $name = 'go.exe'): string
+    {
+        return self::path() . '/bin/' . $name;
+    }
+
+    public static function isInstalled(): bool
+    {
+        return is_file(self::binary());
+    }
+
     #[CustomBinary('go-win', [
         'windows-x86_64',
     ])]
