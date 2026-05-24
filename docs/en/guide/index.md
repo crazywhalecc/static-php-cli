@@ -47,7 +47,7 @@ Build your CLI with [symfony/console](https://symfony.com/doc/current/components
 
 ## Community
 
-Join our [Discord server](https://discord.gg/nrSRbpMJ) to ask questions, share your builds, and connect with other StaticPHP users.
+Join our [Discord server](https://discord.gg/xf6Rd4pEAk) to ask questions, share your builds, and connect with other StaticPHP users.
 
 ## Next steps
 

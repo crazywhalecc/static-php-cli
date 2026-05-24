@@ -5,7 +5,7 @@
 [![Releases](https://img.shields.io/packagist/v/crazywhalecc/static-php-cli?include_prereleases&label=Release&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/crazywhalecc/static-php-cli/tests.yml?branch=main&label=Build%20Test&style=flat-square)](https://github.com/crazywhalecc/static-php-cli/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/crazywhalecc/static-php-cli/blob/main/LICENSE)
-[![Discord](https://img.shields.io/discord/nrSRbpMJ?label=Discord&logo=discord&style=flat-square)](https://discord.gg/nrSRbpMJ)
+[![Discord](https://img.shields.io/discord/nrSRbpMJ?label=Discord&logo=discord&style=flat-square)](https://discord.gg/xf6Rd4pEAk)
 
 **StaticPHP** 是一个强大的工具，用于构建可移植的可执行文件，包括 PHP、扩展等。
 
