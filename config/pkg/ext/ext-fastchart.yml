@@ -1,0 +1,20 @@
+ext-fastchart:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: iliaal/fastchart
+      extract: php-src/ext/fastchart
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+  depends:
+    - freetype
+  suggests:
+    - libpng
+    - libjpeg
+    - libwebp
+  php-extension:
+    os:
+      - Linux
+      - Darwin
