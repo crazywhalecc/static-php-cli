@@ -72,6 +72,10 @@ class opcache extends PhpExtensionPackage
         ) {
             $opcache_jit = ' --disable-opcache-jit';
         }
-        return '--enable-opcache' . ($shared ? '=shared' : '') . $opcache_jit;
+        // PHP 8.5+ has opcache built-in
+        if ($phpVersionID < 80500) {
+            return '--enable-opcache' . ($shared ? '=shared' : '') . $opcache_jit;
+        }
+        return trim($opcache_jit);
     }
 }
