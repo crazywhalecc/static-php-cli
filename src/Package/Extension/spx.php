@@ -6,14 +6,27 @@ namespace Package\Extension;
 
 use Package\Target\php;
 use StaticPHP\Attribute\Package\BeforeStage;
+use StaticPHP\Attribute\Package\CustomPhpConfigureArg;
 use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\PatchDescription;
+use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Util\FileSystem;
 
 #[Extension('spx')]
 class spx extends PhpExtensionPackage
 {
+    #[CustomPhpConfigureArg('Linux')]
+    #[CustomPhpConfigureArg('Darwin')]
+    public function getUnixConfigureArg(bool $shared, PackageInstaller $installer): string
+    {
+        $arg = '--enable-SPX' . ($shared ? '=shared' : '');
+        if ($installer->getLibraryPackage('zlib') !== null) {
+            $arg .= ' --with-zlib-dir=' . BUILD_ROOT_PATH;
+        }
+        return $arg;
+    }
+
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-spx')]
     #[PatchDescription('Fix spx extension compile error when building as static')]
     public function patchBeforeBuildconf(): bool
