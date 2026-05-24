@@ -55,7 +55,7 @@ StaticPHP 支持将 FrankenPHP 连同所需扩展一起静态编译，
 
 ## 社区
 
-加入我们的 [Discord 服务器](https://discord.gg/nrSRbpMJ)，提问、分享构建成果，与其他 StaticPHP 用户交流。
+加入我们的 [Discord 服务器](https://discord.gg/xf6Rd4pEAk)，提问、分享构建成果，与其他 StaticPHP 用户交流。
 
 ## 接下来
 

@@ -77,5 +77,9 @@ if (filter_var(getenv('SPC_ENABLE_LOG_FILE'), FILTER_VALIDATE_BOOLEAN)) {
 
 // load core registry
 Registry::loadRegistry(ROOT_DIR . '/spc.registry.yml');
+// in vendor mode, auto-load the local working directory registry if it exists
+if (spc_mode(SPC_MODE_VENDOR) && file_exists(WORKING_DIR . '/spc.registry.yml')) {
+    Registry::loadRegistry(WORKING_DIR . '/spc.registry.yml');
+}
 // load registries from environment variable SPC_REGISTRIES
 Registry::loadFromEnvOrOption();
