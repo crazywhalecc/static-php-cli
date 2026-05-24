@@ -42,6 +42,9 @@ class imagemagick
             ->addConfigureArgs(
                 '--disable-openmp',
                 '--without-x',
+                // implicit --with-gcc-arch
+                // bleeds host cpu features into built binaries
+                '--without-gcc-arch',
             );
 
         // special: linux-static target needs `-static`
