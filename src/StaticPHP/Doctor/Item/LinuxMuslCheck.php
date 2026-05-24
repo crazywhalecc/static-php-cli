@@ -73,13 +73,20 @@ class LinuxMuslCheck
             $prefix = 'sudo ';
             logger()->warning('Current user is not root, using sudo for running command');
         }
+        $sysEnv = ['CC' => 'gcc', 'CXX' => 'g++', 'AR' => 'ar', 'LD' => 'ld', 'RANLIB' => 'ranlib'];
+        $envFlags = '';
+        foreach ($sysEnv as $k => $v) {
+            $envFlags .= "{$k}={$v} ";
+        }
+        $envFlags = rtrim($envFlags);
         $shell = shell()->cd(SOURCE_PATH . '/musl-wrapper')
-            ->exec('CC=gcc CXX=g++ AR=ar LD=ld ./configure --disable-gcc-wrapper')
-            ->exec('CC=gcc CXX=g++ AR=ar LD=ld make -j');
+            ->setEnv($sysEnv)
+            ->exec('./configure --disable-gcc-wrapper')
+            ->exec('make -j');
         if ($prefix !== '') {
-            f_passthru('cd ' . SOURCE_PATH . "/musl-wrapper && CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
+            f_passthru('cd ' . SOURCE_PATH . "/musl-wrapper && {$envFlags} {$prefix}make install");
         } else {
-            $shell->exec("CC=gcc CXX=g++ AR=ar LD=ld {$prefix}make install");
+            $shell->exec("{$prefix}make install");
         }
         return true;
     }
