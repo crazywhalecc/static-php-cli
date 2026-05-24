@@ -244,6 +244,7 @@ class FileSystem
      */
     public static function getClassesPsr4(string $dir, string $base_namespace, mixed $rule = null, bool|string $return_path_value = false, bool $auto_require = false): array
     {
+        $base_namespace = rtrim($base_namespace, '\\');
         $classes = [];
         $files = FileSystem::scanDirFiles($dir, true, true);
         if ($files === false) {
