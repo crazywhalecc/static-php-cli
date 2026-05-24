@@ -368,6 +368,7 @@ class php extends TargetPackage
             return;
         }
         if (SystemTarget::isUnix()) {
+            $package->runStage([$this, 'unixBuildSharedExt']);
             if ($installer->interactive) {
                 InteractiveTerm::indicateProgress('Running PHP smoke tests');
             }
