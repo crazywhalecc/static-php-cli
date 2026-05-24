@@ -15,6 +15,23 @@ use StaticPHP\Runtime\SystemTarget;
 
 class zig
 {
+    /** Directory zig extracts into. */
+    public static function path(): string
+    {
+        return PKG_ROOT_PATH . '/zig';
+    }
+
+    /** Path to a binary inside the zig install dir (zig, zig-cc, zig-c++, zig-ar, …). */
+    public static function binary(string $name = 'zig'): string
+    {
+        return self::path() . '/' . $name;
+    }
+
+    public static function isInstalled(): bool
+    {
+        return is_file(self::binary());
+    }
+
     #[CustomBinary('zig', [
         'linux-x86_64',
         'linux-aarch64',

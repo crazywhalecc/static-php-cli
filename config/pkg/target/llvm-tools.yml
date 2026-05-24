@@ -1,0 +1,6 @@
+llvm-tools:
+  type: target
+  artifact:
+    binary: custom
+  depends:
+    - zig
