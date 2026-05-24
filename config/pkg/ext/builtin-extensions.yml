@@ -186,6 +186,7 @@ ext-password-argon2:
   type: php-extension
   depends:
     - libargon2
+  suggests:
     - ext-openssl
   php-extension:
     os:
