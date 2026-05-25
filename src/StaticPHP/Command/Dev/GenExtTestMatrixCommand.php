@@ -60,6 +60,7 @@ class GenExtTestMatrixCommand extends BaseCommand
         'glfw',
         'imagick',
         'intl',
+        'mongodb',
     ];
 
     /**
