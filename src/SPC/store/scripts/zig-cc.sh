@@ -27,12 +27,14 @@ while [[ $# -gt 0 ]]; do
         -march=*|-mcpu=*)
             OPT_NAME="${1%%=*}"
             OPT_VALUE="${1#*=}"
-            # Skip armv8- flags entirely as Zig doesn't support them
-            if [[ "$OPT_VALUE" == armv8-* ]]; then
-                shift
-                continue
+            # zig rejects -march=armv8-a but accepts -mcpu=generic+v8a; rewrite
+            # armv<X>[.<Y>]-a[+feat] -> generic+v<X>[_<Y>]a[+feat] so it goes through.
+            if [[ "$OPT_VALUE" =~ ^armv([89])(\.([0-9]+))?-a(\+.*)?$ ]]; then
+                arch_feat="v${BASH_REMATCH[1]}"
+                [[ -n "${BASH_REMATCH[3]}" ]] && arch_feat="${arch_feat}_${BASH_REMATCH[3]}"
+                OPT_VALUE="generic+${arch_feat}a${BASH_REMATCH[4]}"
             fi
-            # replace -march=x86-64 with -march=x86_64
+            # zig uses snake_case in CPU/feature names (x86-64 -> x86_64).
             OPT_VALUE="${OPT_VALUE//-/_}"
             PARSED_ARGS+=("${OPT_NAME}=${OPT_VALUE}")
             shift
