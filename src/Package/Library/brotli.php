@@ -27,7 +27,10 @@ class brotli
     {
         UnixCMakeExecutor::create($lib)
             ->setBuildDir($lib->getSourceDir() . '/build-dir')
-            ->addConfigureArgs("-DSHARE_INSTALL_PREFIX={$lib->getBuildRootPath()}")
+            ->addConfigureArgs(
+                "-DSHARE_INSTALL_PREFIX={$lib->getBuildRootPath()}",
+                '-DBROTLI_DISABLE_TESTS=ON',
+            )
             ->build();
 
         // Patch pkg-config files

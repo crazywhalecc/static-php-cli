@@ -24,6 +24,7 @@ class nghttp3
                 '-DBUILD_SHARED_LIBS=OFF',
                 '-DENABLE_STATIC_CRT=ON',
                 '-DENABLE_LIB_ONLY=ON',
+                '-DBUILD_TESTING=OFF',
             )
             ->build();
     }

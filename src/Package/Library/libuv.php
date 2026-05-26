@@ -13,12 +13,18 @@ use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 #[Library('libuv')]
 class libuv
 {
+    private const array DISABLE_ARGS = [
+        '-DLIBUV_BUILD_SHARED=OFF',
+        '-DLIBUV_BUILD_TESTS=OFF',
+        '-DLIBUV_BUILD_BENCH=OFF',
+    ];
+
     #[BuildFor('Darwin')]
     #[BuildFor('Linux')]
     public function buildUnix(LibraryPackage $lib): void
     {
         UnixCMakeExecutor::create($lib)
-            ->addConfigureArgs('-DLIBUV_BUILD_SHARED=OFF')
+            ->addConfigureArgs(...self::DISABLE_ARGS)
             ->build();
         // patch pkgconfig
         $lib->patchPkgconfPrefix(['libuv-static.pc']);
@@ -28,7 +34,7 @@ class libuv
     public function buildWindows(LibraryPackage $lib): void
     {
         WindowsCMakeExecutor::create($lib)
-            ->addConfigureArgs('-DLIBUV_BUILD_SHARED=OFF')
+            ->addConfigureArgs(...self::DISABLE_ARGS)
             ->build();
     }
 }

@@ -22,6 +22,11 @@ class xz
             ->configure(
                 '--disable-scripts',
                 '--disable-doc',
+                '--disable-xz',
+                '--disable-xzdec',
+                '--disable-lzmadec',
+                '--disable-lzmainfo',
+                '--disable-lzma-links',
                 '--with-libiconv',
                 '--bindir=/tmp/xz', // xz binary will corrupt `tar` command, that's really strange.
             )
