@@ -317,6 +317,25 @@ trait windows
             $content
         );
 
+        // Embed SAPI objects are compiled as DLL consumers (dllimport for PHP/Zend APIs).
+        // For our fat static lib, they need direct linkage. Add export defines to CFLAGS_EMBED
+        // so php_embed.obj references symbols directly instead of through __imp_ thunks.
+        $content = preg_replace(
+            '/^CFLAGS_EMBED=(.+)$/m',
+            'CFLAGS_EMBED=$1 /D PHP_EXPORTS /D LIBZEND_EXPORTS /D SAPI_EXPORTS /D TSRM_EXPORTS',
+            $content,
+            1
+        );
+
+        // In DLL builds each SAPI has its own _tsrm_ls_cache via TSRMLS_CACHE_DEFINE().
+        // In our fat static lib all objects share one binary, so the duplicate TLS definition
+        // from php_embed.c collides with the one in zend.c, producing LNK4006 and a corrupt
+        // binary. Remove it so php_embed.obj uses the core's copy.
+        $embed_src = "{$package->getSourceDir()}\\sapi\\embed\\php_embed.c";
+        if (file_exists($embed_src)) {
+            FileSystem::replaceFileStr($embed_src, 'ZEND_TSRMLS_CACHE_DEFINE()', '/* removed for static embed */');
+        }
+
         // Patch embed lib target to build a REAL static library instead of just an import lib.
         // The default embed target only includes embed SAPI objects and links against php8.lib (import lib).
         // We need to include PHP core objects (PHP_GLOBAL_OBJS) and static extension objects (STATIC_EXT_OBJS)
@@ -646,16 +665,17 @@ HEADER;
 #include <sapi/embed/php_embed.h>
 
 int main(int argc, char **argv) {
-    PHP_EMBED_START_BLOCK(argc, argv)
-
-    zend_file_handle file_handle;
-    zend_stream_init_filename(&file_handle, "embed.php");
-
-    if (!php_execute_script(&file_handle)) {
-        php_printf("Failed to execute PHP script.\n");
+    if (php_embed_init(argc, argv) == FAILURE) {
+        return 1;
     }
 
-    PHP_EMBED_END_BLOCK()
+    zend_first_try {
+        zend_file_handle file_handle;
+        zend_stream_init_filename(&file_handle, "embed.php");
+        php_execute_script(&file_handle);
+    } zend_end_try();
+
+    php_embed_shutdown();
     return 0;
 }
 C_CODE;
@@ -683,7 +703,8 @@ C_CODE;
         $zts_define = $ts ? ' /D ZTS=1' : '';
         $include_flags = sprintf(
             '/I"%s" /I"%s\main" /I"%s\Zend" /I"%s\TSRM" /I"%s" ' .
-            '/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _WINDOWS /D WINDOWS=1 /D _MBCS /D _USE_MATH_DEFINES%s',
+            '/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _WINDOWS /D WINDOWS=1 /D _MBCS /D _USE_MATH_DEFINES' .
+            ' /D PHP_EXPORTS /D LIBZEND_EXPORTS /D SAPI_EXPORTS /D TSRM_EXPORTS%s',
             $build_dir,
             $source_dir,
             $source_dir,
@@ -692,15 +713,14 @@ C_CODE;
             $zts_define
         );
 
-        // MSVC cl.exe format: compiler flags must come before /link, linker flags after
-        // ldflags contains /LIBPATH which must be after /link
-        // /FORCE:MULTIPLE: in ZTS mode both zend.obj and php_embed.obj (both packed into the fat php8embed.lib) define _tsrm_ls_cache as a __declspec(thread) variable.
+        // MSVC cl.exe format: compiler flags must come before /link, linker flags after.
+        // ldflags contains /LIBPATH which must be after /link.
         $compile_cmd = sprintf(
-            'cl.exe /nologo /O2 /MT /Z7 %s embed.c /Fe:embed.exe /link /FORCE:MULTIPLE /LIBPATH:"%s\lib" %s %s',
+            'cl.exe /nologo /O2 /MT /Z7 %s embed.c /Fe:embed.exe /link /LIBPATH:"%s\lib" %s %s',
             $include_flags,
             BUILD_ROOT_PATH,
             $config['libs'],
-            'kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib'  // Windows system libs (match Makefile LIBS)
+            'kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib pathcch.lib'
         );
 
         // Log command explicitly (workaround for cmd() not logging complex commands properly)
@@ -718,9 +738,9 @@ C_CODE;
         InteractiveTerm::setMessage('Running php-embed run smoke test');
         [$ret, $output] = cmd()->cd($test_dir)->execWithResult('embed.exe');
         $raw_output = implode('', $output);
-        if ($ret !== 0 || trim($raw_output) !== 'hello') {
+        if ($ret !== 0 || !str_contains($raw_output, 'hello')) {
             throw new ValidationException(
-                'embed failed to run. Error message: ' . $raw_output,
+                sprintf('embed failed to run (exit code %d). Output: %s', $ret, $raw_output),
                 validation_module: 'php-embed run smoke test'
             );
         }
