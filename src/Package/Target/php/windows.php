@@ -226,6 +226,21 @@ trait windows
         $this->deployWindowsBinary($builder, $package, 'php-cgi');
     }
 
+    #[BeforeStage('php', [self::class, 'makeForWindows'])]
+    #[PatchDescription('Define LEXBOR_STATIC for static builds (PHP 8.5+ uri extension)')]
+    public function patchLexborStaticDefine(TargetPackage $package): void
+    {
+        if ($this->getPHPVersionID() < 80500) {
+            return;
+        }
+        $makefile_path = "{$package->getSourceDir()}\\Makefile";
+        $content = FileSystem::readFile($makefile_path);
+        // ext/uri references lexbor headers which default to __declspec(dllimport) on Windows.
+        // LEXBOR_STATIC makes LXB_API expand to nothing, required for static linking.
+        $content = preg_replace('/^CFLAGS_URI=(.+)$/m', 'CFLAGS_URI=$1 /D LEXBOR_STATIC', $content, 1);
+        FileSystem::writeFile($makefile_path, $content);
+    }
+
     #[Stage]
     public function makeForWindows(TargetPackage $package, PackageInstaller $installer): void
     {
