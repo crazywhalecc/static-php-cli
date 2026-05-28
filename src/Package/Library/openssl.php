@@ -24,13 +24,8 @@ class openssl
     {
         if (SystemTarget::getTargetOS() === 'Windows') {
             global $argv;
-            $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl-' . arch2gnu(php_uname('m')) . '-win\perl\bin\perl.exe';
-            $perl_path_doctor = PKG_ROOT_PATH . '\strawberry-perl\perl\bin\perl.exe';
-            $perl = match (true) {
-                file_exists($perl_path_native) => $perl_path_native,
-                file_exists($perl_path_doctor) => $perl_path_doctor,
-                default => WindowsUtil::findCommand('perl.exe'),
-            };
+            $perl_path = PKG_ROOT_PATH . '\strawberry-perl\perl\bin\perl.exe';
+            $perl = file_exists($perl_path) ? $perl_path : WindowsUtil::findCommand('perl.exe');
             if ($perl === null) {
                 throw new EnvironmentException(
                     'You need to install perl first!',
