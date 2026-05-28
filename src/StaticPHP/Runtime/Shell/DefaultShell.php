@@ -202,14 +202,57 @@ class DefaultShell extends Shell
         };
 
         $extname = FileSystem::extname($archive_path);
-        $tar = SystemTarget::isUnix() ? 'tar' : '"C:\Windows\system32\tar.exe"';
 
         match ($extname) {
             'tar' => $this->executeTarExtract($archive_path, $target_path, 'none'),
-            'gz', 'tgz', 'xz', 'txz', 'bz2' => $run("{$_7z} x -so {$archive_arg} | {$tar} -f - -x -C {$target_arg} --strip-components 1"),
+            'gz', 'tgz', 'xz', 'txz', 'bz2' => $this->extract7zWithStripComponents($archive_path, $target_path, $_7z),
             default => $run("{$_7z} x {$archive_arg} -o{$target_arg} -y{$mute}"),
         };
 
         return true;
+    }
+
+    /**
+     * Extract a compressed tar archive using only 7za, with strip-components
+     * handled in PHP.
+     *
+     * Windows tar.exe cannot create symlinks without Developer Mode or admin
+     * privileges. 7za silently skips symlinks, avoiding that failure.
+     */
+    private function extract7zWithStripComponents(string $archive_path, string $target_path, string $_7z, int $strip = 1): void
+    {
+        $temp_dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'spc_' . bin2hex(random_bytes(8));
+        FileSystem::createDir($temp_dir);
+        $archive_arg = escapeshellarg(FileSystem::convertPath($archive_path));
+        $temp_arg = escapeshellarg($temp_dir);
+
+        $cmd = "{$_7z} x {$archive_arg} -o{$temp_arg} -y";
+        $this->logCommandInfo($cmd);
+        logger()->debug("[7Z EXTRACT] {$cmd}");
+        $this->passthru($cmd, $this->console_putput);
+
+        $inner_tar = glob($temp_dir . DIRECTORY_SEPARATOR . '*.tar');
+        if ($inner_tar !== []) {
+            $tar_arg = escapeshellarg($inner_tar[0]);
+            $cmd = "{$_7z} x {$tar_arg} -o{$temp_arg} -y";
+            logger()->debug("[7Z EXTRACT TAR] {$cmd}");
+            $this->passthru($cmd, $this->console_putput);
+            @unlink($inner_tar[0]);
+        }
+
+        if ($strip > 0) {
+            $entries = array_diff(scandir($temp_dir), ['.', '..']);
+            if (count($entries) === 1) {
+                $inner = $temp_dir . DIRECTORY_SEPARATOR . reset($entries);
+                if (is_dir($inner)) {
+                    FileSystem::copyDir($inner, $target_path);
+                    FileSystem::removeDir($temp_dir);
+                    return;
+                }
+            }
+        }
+
+        FileSystem::copyDir($temp_dir, $target_path);
+        FileSystem::removeDir($temp_dir);
     }
 }
