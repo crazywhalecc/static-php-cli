@@ -9,6 +9,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 
 #[Library('libpng')]
@@ -24,7 +25,7 @@ class libpng
         ];
 
         // Enable architecture-specific optimizations
-        match (getenv('SPC_ARCH')) {
+        match (SystemTarget::getTargetArch()) {
             'x86_64' => $args[] = '--enable-intel-sse',
             'aarch64' => $args[] = '--enable-arm-neon',
             default => null,

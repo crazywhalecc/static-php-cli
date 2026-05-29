@@ -72,7 +72,6 @@ putenv('PKG_ROOT_PATH=' . PKG_ROOT_PATH);
 putenv('SOURCE_PATH=' . SOURCE_PATH);
 putenv('DOWNLOAD_PATH=' . DOWNLOAD_PATH);
 putenv('CPU_COUNT=' . CPU_COUNT);
-putenv('SPC_ARCH=' . php_uname('m'));
 putenv('GNU_ARCH=' . GNU_ARCH);
 putenv('MAC_ARCH=' . MAC_ARCH);
 

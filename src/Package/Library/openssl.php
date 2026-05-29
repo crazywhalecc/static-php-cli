@@ -76,7 +76,7 @@ class openssl
     public function buildForDarwin(LibraryPackage $pkg): void
     {
         $zlib_libs = $pkg->getInstaller()->getLibraryPackage('zlib')->getStaticLibFiles();
-        $arch = getenv('SPC_ARCH');
+        $arch = SystemTarget::getTargetArch();
 
         shell()->cd($pkg->getSourceDir())->initializeEnv($pkg)
             ->exec(
@@ -95,12 +95,7 @@ class openssl
     #[BuildFor('Linux')]
     public function build(LibraryPackage $lib): void
     {
-        $arch = getenv('SPC_ARCH');
-
-        $env = "CC='" . getenv('CC') . ' -idirafter ' . BUILD_INCLUDE_PATH .
-            ' -idirafter /usr/include/ ' .
-            ' -idirafter /usr/include/' . getenv('SPC_ARCH') . '-linux-gnu/ ' .
-            "' ";
+        $arch = SystemTarget::getTargetArch();
 
         $ex_lib = trim($lib->getInstaller()->getLibraryPackage('zlib')->getStaticLibFiles()) . ' -ldl -pthread';
         $zlib_extra =
@@ -119,7 +114,7 @@ class openssl
 
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
             ->exec(
-                "{$env} ./Configure no-shared zlib " .
+                './Configure no-shared zlib ' .
                 "--prefix={$lib->getBuildRootPath()} " .
                 "--libdir={$lib->getLibDir()} " .
                 "--openssldir={$openssl_dir} " .
