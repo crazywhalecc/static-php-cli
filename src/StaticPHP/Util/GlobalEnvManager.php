@@ -134,10 +134,10 @@ class GlobalEnvManager
         }
         // test bison
         if (PHP_OS_FAMILY === 'Darwin') {
-            if ($bison = MacOSUtil::findCommand('bison', ['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin'])) {
+            if ($bison = MacOSUtil::findCommand('bison', ['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin', '/opt/local/bin/bison'])) {
                 self::putenv("BISON={$bison}");
             }
-            if ($yacc = MacOSUtil::findCommand('yacc', ['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin'])) {
+            if ($yacc = MacOSUtil::findCommand('yacc', ['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin', '/opt/local/bin/yacc'])) {
                 self::putenv("YACC={$yacc}");
             }
         }
