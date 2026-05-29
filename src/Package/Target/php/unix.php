@@ -42,6 +42,15 @@ trait unix
         // php-src patches from micro (reads SPC_MICRO_PATCHES env var)
         SourcePatcher::patchPhpSrc();
 
+        $microFileinfo = "{$package->getSourceDir()}/sapi/micro/php_micro_fileinfo.c";
+        if (is_file($microFileinfo) && !str_contains((string) file_get_contents($microFileinfo), 'Elf32_Shdr')) {
+            FileSystem::replaceFileStr(
+                $microFileinfo,
+                'typedef Elf32_Ehdr Elf_Ehdr;',
+                'typedef Elf32_Ehdr Elf_Ehdr; typedef Elf32_Shdr Elf_Shdr;',
+            );
+        }
+
         // patch configure.ac for musl and musl-toolchain
         $musl = SystemTarget::getTargetOS() === 'Linux' && SystemTarget::getLibc() === 'musl';
         FileSystem::backupFile(SOURCE_PATH . '/php-src/configure.ac');
