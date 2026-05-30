@@ -336,7 +336,7 @@ class php extends TargetPackage
             logger()->info("Adding hardcoded INI [{$source_name} = {$ini_value}]");
         }
         if (!empty($custom_ini)) {
-            ApplicationContext::invoke([SourcePatcher::class, 'patchHardcodedINI'], [$package->getSourceDir(), $custom_ini]);
+            ApplicationContext::invoke([SourcePatcher::class, 'patchHardcodedINI'], ['php_source_dir' => $package->getSourceDir(), 'ini' => $custom_ini]);
         }
 
         // Patch StaticPHP version
