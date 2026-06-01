@@ -48,11 +48,8 @@ class MacOSToolCheck
     #[CheckItem('if macports has installed', limit_os: 'Darwin', level: 998)]
     public function checkPorts(): ?CheckResult
     {
-        if (($path = MacOSUtil::findCommand('port')) === null) {
+        if (MacOSUtil::findCommand('port') === null) {
             return CheckResult::fail('MacPorts is not installed', 'port');
-        }
-        if ($path !== '/opt/local/bin/port' && getenv('GNU_ARCH') === 'aarch64') {
-            return CheckResult::fail('Current macports (/opt/local/bin/port) is not installed for M1 Mac, please re-install macports!');
         }
         return CheckResult::ok();
     }
@@ -127,6 +124,11 @@ class MacOSToolCheck
     #[FixItem('brew')]
     public function fixBrew(): bool
     {
+        $hasMacports = $this->checkPorts();
+        if ($hasMacports->isOK()) {
+            return true; // Nothing to fix - will use macports instead
+        }
+
         shell(true)->exec('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"');
         return true;
     }
