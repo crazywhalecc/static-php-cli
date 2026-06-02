@@ -552,8 +552,10 @@ trait unix
             $package->runStage([$this, 'configureForUnix']);
             $package->runStage([$this, 'makeForUnix']);
         }
-        // shared extensions build in php's postInstall (php.php) so they run AFTER
-        // frankenphp's main-loop build — frankenphp links libphp only, not the .so exts.
+
+        // shared extensions build before frankenphp so their undefined references are
+        // collected into libphp's exported dynamic-symbol list.
+        $package->runStage([$this, 'unixBuildSharedExt']);
     }
 
     /**
