@@ -38,6 +38,9 @@ jobs:
           - name: "windows-x64"
             os: "ubuntu-latest"
             filename: "spc-windows-x64.exe"
+    permissions:
+      id-token: write
+      attestations: write
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v5"
@@ -104,6 +107,12 @@ jobs:
               ./spc dev:info php
             fi
           fi
+
+      - name: "Generate build provenance attestation"
+        if: github.event_name != 'pull_request'
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: "${{ github.workspace }}/${{ matrix.operating-system.name == 'windows-x64' && 'spc.exe' || 'spc' }}"
 
       - name: "Copy file"
         run: |
