@@ -15,6 +15,7 @@ class ClangBrewToolchain extends ClangNativeToolchain
         GlobalEnvManager::putenv("SPC_DEFAULT_CC={$homebrew_prefix}/opt/llvm/bin/clang");
         GlobalEnvManager::putenv("SPC_DEFAULT_CXX={$homebrew_prefix}/opt/llvm/bin/clang++");
         GlobalEnvManager::putenv("SPC_DEFAULT_AR={$homebrew_prefix}/opt/llvm/bin/llvm-ar");
+        GlobalEnvManager::putenv("SPC_DEFAULT_RANLIB={$homebrew_prefix}/opt/llvm/bin/llvm-ranlib");
         GlobalEnvManager::putenv('SPC_DEFAULT_LD=ld');
         GlobalEnvManager::addPathIfNotExists("{$homebrew_prefix}/opt/llvm/bin");
     }

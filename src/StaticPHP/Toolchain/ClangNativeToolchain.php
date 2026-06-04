@@ -21,6 +21,7 @@ class ClangNativeToolchain implements UnixToolchainInterface
         GlobalEnvManager::putenv('SPC_DEFAULT_CC=clang');
         GlobalEnvManager::putenv('SPC_DEFAULT_CXX=clang++');
         GlobalEnvManager::putenv('SPC_DEFAULT_AR=ar');
+        GlobalEnvManager::putenv('SPC_DEFAULT_RANLIB=ranlib');
         GlobalEnvManager::putenv('SPC_DEFAULT_LD=ld');
     }
 

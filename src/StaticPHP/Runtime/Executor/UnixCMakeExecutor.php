@@ -302,9 +302,12 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES "{$include}")
 set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES "{$include}")
 CMAKE;
-        // Whoops, linux may need CMAKE_AR sometimes
+        // pin AR/RANLIB so cmake uses zig-ar/zig-ranlib instead of system /usr/bin/ranlib (zig archives need it)
         if (PHP_OS_FAMILY === 'Linux') {
-            $toolchain .= "\nSET(CMAKE_AR \"ar\")";
+            $ar = getenv('SPC_DEFAULT_AR') ?: getenv('AR') ?: 'ar';
+            $ranlib = getenv('SPC_DEFAULT_RANLIB') ?: (getenv('RANLIB') ?: 'ranlib');
+            $toolchain .= "\nSET(CMAKE_AR \"{$ar}\")";
+            $toolchain .= "\nSET(CMAKE_RANLIB \"{$ranlib}\")";
         }
         FileSystem::writeFile(SOURCE_PATH . '/toolchain.cmake', $toolchain);
         return $created = realpath(SOURCE_PATH . '/toolchain.cmake');
