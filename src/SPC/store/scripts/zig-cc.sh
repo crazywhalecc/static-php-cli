@@ -67,6 +67,9 @@ fi
 if [[ $IS_LINK -eq 1 && $NEED_CRT -eq 1 && -f "$SCRIPT_DIR/lib/clang_rt.crtbegin.o" && -f "$SCRIPT_DIR/lib/clang_rt.crtend.o" ]]; then
     PARSED_ARGS+=("$SCRIPT_DIR/lib/clang_rt.crtbegin.o" "$SCRIPT_DIR/lib/clang_rt.crtend.o")
 fi
+if [[ $IS_LINK -eq 1 && -f "$SCRIPT_DIR/lib/libclang_rt.cpu_model.a" ]]; then
+    PARSED_ARGS+=("$SCRIPT_DIR/lib/libclang_rt.cpu_model.a")
+fi
 
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""
 

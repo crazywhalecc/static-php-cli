@@ -157,7 +157,8 @@ class Zig extends CustomPackage
         $profileLib = "{$libDir}/libclang_rt.profile.a";
         $crtBegin = "{$libDir}/clang_rt.crtbegin.o";
         $crtEnd = "{$libDir}/clang_rt.crtend.o";
-        if (file_exists($profileLib) && file_exists($crtBegin) && file_exists($crtEnd)) {
+        $cpuModelLib = "{$libDir}/libclang_rt.cpu_model.a";
+        if (file_exists($profileLib) && file_exists($crtBegin) && file_exists($crtEnd) && file_exists($cpuModelLib)) {
             return;
         }
 
@@ -182,7 +183,47 @@ class Zig extends CustomPackage
         if (!file_exists($crtBegin) || !file_exists($crtEnd)) {
             $this->buildCrtObjects($zig, $srcRoot, $crtBegin, $crtEnd);
         }
+        if (!file_exists($cpuModelLib)) {
+            $this->buildCpuModelBuiltins($zig, $srcRoot, $cpuModelLib);
+        }
         FileSystem::removeDir($srcRoot);
+    }
+
+    private function buildCpuModelBuiltins(string $zig, string $srcRoot, string $libPath): void
+    {
+        $builtins = "{$srcRoot}/lib/builtins";
+        $arch = php_uname('m');
+        $cpuModelDir = "{$builtins}/cpu_model";
+        if (is_dir($cpuModelDir)) {
+            $src = match (true) {
+                in_array($arch, ['x86_64', 'amd64', 'i386', 'i686', 'x86'], true) => "{$cpuModelDir}/x86.c",
+                in_array($arch, ['aarch64', 'arm64'], true) => "{$cpuModelDir}/aarch64.c",
+                str_starts_with($arch, 'riscv') => "{$cpuModelDir}/riscv.c",
+                default => null,
+            };
+            $includes = '-I' . escapeshellarg($builtins) . ' -I' . escapeshellarg($cpuModelDir);
+        } else {
+            $src = "{$builtins}/cpu_model.c";
+            $includes = '-I' . escapeshellarg($builtins);
+        }
+        if ($src === null || !is_file($src)) {
+            logger()->warning("[zig] cpu_model source not found for arch {$arch} under {$builtins} — __builtin_cpu_supports/__cpu_model will be unresolved");
+            return;
+        }
+
+        $objDir = "{$srcRoot}/obj-cpu-model";
+        f_mkdir($objDir, recursive: true);
+        $obj = "{$objDir}/cpu_model.o";
+        $cflags = '-c -O2 -fPIC ' . $includes;
+        $cmd = escapeshellarg($zig) . ' cc ' . $cflags . ' -o ' . escapeshellarg($obj) . ' ' . escapeshellarg($src) . ' 2>&1';
+        if (!$this->runZigCmd($cmd, $obj, "failed to compile {$src}")) {
+            return;
+        }
+        $arCmd = escapeshellarg($zig) . ' ar rcs ' . escapeshellarg($libPath) . ' ' . escapeshellarg($obj) . ' 2>&1';
+        if (!$this->runZigCmd($arCmd, $libPath, 'zig ar failed for cpu_model')) {
+            return;
+        }
+        logger()->info('[zig] libclang_rt.cpu_model.a installed (' . filesize($libPath) . ' bytes)');
     }
 
     private function fetchCompilerRtSource(string $llvmVersion): ?string
