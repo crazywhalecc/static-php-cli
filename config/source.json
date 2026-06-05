@@ -421,9 +421,9 @@
         }
     },
     "gmssl": {
-        "type": "ghtar",
-        "repo": "guanzhi/GmSSL",
-        "provide-pre-built": true,
+        "type": "git",
+        "url": "https://github.com/guanzhi/GmSSL.git",
+        "rev": "master",
         "license": {
             "type": "file",
             "path": "LICENSE"
