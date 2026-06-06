@@ -20,8 +20,8 @@ class unixodbc extends LibraryPackage
     {
         $sysconf_selector = match ($os = SystemTarget::getTargetOS()) {
             'Darwin' => match (SystemTarget::getTargetArch()) {
-                'x86_64' => '/usr/local/etc',
-                'aarch64' => '/opt/homebrew/etc',
+                'x86_64' => is_dir('/usr/local/etc') ? '/usr/local/etc' : '/opt/local/etc',
+                'aarch64' => is_dir('/opt/homebrew/etc') ? '/opt/homebrew/etc' : '/opt/local/etc',
                 default => throw new WrongUsageException('Unsupported architecture: ' . GNU_ARCH),
             },
             'Linux' => '/etc',
