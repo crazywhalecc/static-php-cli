@@ -109,8 +109,7 @@
             "krb5"
         ],
         "lib-suggests-windows": [
-            "brotli",
-            "zstd"
+            "brotli"
         ],
         "frameworks": [
             "CoreFoundation",
@@ -143,9 +142,7 @@
             "zlib"
         ],
         "lib-suggests": [
-            "libpng",
-            "bzip2",
-            "brotli"
+            "libpng"
         ]
     },
     "gettext": {
@@ -355,12 +352,18 @@
         "static-libs-unix": [
             "libaom.a"
         ],
+        "static-libs-windows": [
+            "aom.lib"
+        ],
         "cpp-library": true
     },
     "libargon2": {
         "source": "libargon2",
         "static-libs-unix": [
             "libargon2.a"
+        ],
+        "lib-suggests": [
+            "libsodium"
         ]
     },
     "libavif": {
@@ -370,6 +373,15 @@
         ],
         "static-libs-windows": [
             "avif.lib"
+        ],
+        "lib-depends": [
+            "libaom"
+        ],
+        "lib-suggests": [
+            "libwebp",
+            "libjpeg",
+            "libxml2",
+            "libpng"
         ]
     },
     "libcares": {
@@ -481,7 +493,7 @@
         "static-libs-windows": [
             "libjpeg_a.lib"
         ],
-        "lib-suggests-windows": [
+        "lib-depends": [
             "zlib"
         ]
     },
@@ -514,6 +526,18 @@
         "headers": [
             "maxminddb.h",
             "maxminddb_config.h"
+        ]
+    },
+    "libmpdec": {
+        "source": "libmpdec",
+        "static-libs-unix": [
+            "libmpdec.a"
+        ],
+        "static-libs-windows": [
+            "libmpdec_a.lib"
+        ],
+        "headers": [
+            "mpdecimal.h"
         ]
     },
     "libmemcached": {
@@ -750,7 +774,6 @@
             "xz"
         ],
         "lib-suggests-windows": [
-            "zstd",
             "openssl"
         ]
     },
@@ -850,6 +873,9 @@
     },
     "openssl": {
         "source": "openssl",
+        "pkg-configs": [
+            "openssl"
+        ],
         "static-libs-unix": [
             "libssl.a",
             "libcrypto.a"
@@ -962,6 +988,11 @@
     },
     "unixodbc": {
         "source": "unixodbc",
+        "pkg-configs": [
+            "odbc",
+            "odbccr",
+            "odbcinst"
+        ],
         "static-libs-unix": [
             "libodbc.a",
             "libodbccr.a",
@@ -979,6 +1010,9 @@
         ],
         "headers": [
             "wtr/watcher-c.h"
+        ],
+        "frameworks": [
+            "CoreServices"
         ]
     },
     "xz": {
@@ -1003,6 +1037,9 @@
     },
     "zlib": {
         "source": "zlib",
+        "pkg-configs": [
+            "zlib"
+        ],
         "static-libs-unix": [
             "libz.a"
         ],
@@ -1016,6 +1053,9 @@
     },
     "zstd": {
         "source": "zstd",
+        "pkg-configs": [
+            "libzstd"
+        ],
         "static-libs-unix": [
             "libzstd.a"
         ],

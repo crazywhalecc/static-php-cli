@@ -5,11 +5,22 @@ declare(strict_types=1);
 namespace SPC\builder\extension;
 
 use SPC\builder\Extension;
+use SPC\store\FileSystem;
 use SPC\util\CustomExt;
 
 #[CustomExt('mongodb')]
 class mongodb extends Extension
 {
+    public function patchBeforeBuildconf(): bool
+    {
+        FileSystem::replaceFileRegex(
+            SOURCE_PATH . '/php-src/ext/mongodb/config.m4',
+            '/^(\s+)(src\/libmongoc\/)/m',
+            '$1${ac_config_dir}/$2'
+        );
+        return true;
+    }
+
     public function getUnixConfigureArg(bool $shared = false): string
     {
         $arg = ' --enable-mongodb' . ($shared ? '=shared' : '') . ' ';

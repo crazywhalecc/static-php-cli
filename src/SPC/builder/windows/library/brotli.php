@@ -6,13 +6,12 @@ namespace SPC\builder\windows\library;
 
 use SPC\store\FileSystem;
 
-class libjpeg extends WindowsLibraryBase
+class brotli extends WindowsLibraryBase
 {
-    public const NAME = 'libjpeg';
+    public const NAME = 'brotli';
 
     protected function build(): void
     {
-        $zlib = $this->builder->getLib('zlib') ? 'ON' : 'OFF';
         // reset cmake
         FileSystem::resetDir($this->source_dir . '\build');
 
@@ -24,19 +23,14 @@ class libjpeg extends WindowsLibraryBase
                 '-A x64 ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->builder->cmake_toolchain_file} " .
                 '-DCMAKE_BUILD_TYPE=Release ' .
-                '-DENABLE_SHARED=OFF ' .
-                '-DENABLE_STATIC=ON ' .
-                '-DBUILD_TESTING=OFF ' .
-                '-DWITH_JAVA=OFF ' .
-                '-DWITH_SIMD=OFF ' .
-                '-DWITH_CRT_DLL=OFF ' .
-                "-DENABLE_ZLIB_COMPRESSION={$zlib} " .
+                '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DBROTLI_BUILD_TOOLS=OFF ' .
+                '-DBROTLI_BUNDLED_MODE=OFF ' .
                 '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '
             )
             ->execWithWrapper(
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
-        copy(BUILD_LIB_PATH . '\jpeg-static.lib', BUILD_LIB_PATH . '\libjpeg_a.lib');
     }
 }

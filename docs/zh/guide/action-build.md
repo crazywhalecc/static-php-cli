@@ -14,7 +14,9 @@ Action 构建指的是直接使用 GitHub Action 进行编译。
 1. Fork 本项目。
 2. 进入项目的 Actions，选择 CI 开头的 Workflow（根据你需要的操作系统选择）。
 3. 选择 `Run workflow`，填入你要编译的 PHP 版本、目标类型、扩展列表。（扩展列表使用英文逗号分割，例如 `bcmath,curl,mbstring`）
-4. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
+4. 如果需要共享扩展（例如 `xdebug`），请设置 `shared-extensions`（使用英文逗号分割，例如 `xdebug`）。
+5. 如果需要 FrankenPHP，请启用 `build-frankenphp`，同时也需要启用 `enable-zts`。
+6. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
 
 如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
 

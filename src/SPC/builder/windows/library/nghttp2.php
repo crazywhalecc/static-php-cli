@@ -29,11 +29,16 @@ class nghttp2 extends WindowsLibraryBase
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DENABLE_STATIC_CRT=ON ' .
                 '-DENABLE_LIB_ONLY=ON ' .
-                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' '
+                '-DCMAKE_INSTALL_PREFIX=' . BUILD_ROOT_PATH . ' ' .
+                '-DENABLE_STATIC_CRT=ON ' .
+                '-DENABLE_DOC=OFF ' .
+                '-DBUILD_TESTING=OFF '
             )
             ->execWithWrapper(
                 $this->builder->makeSimpleWrapper('cmake'),
                 "--build build --config Release --target install -j{$this->builder->concurrency}"
             );
+
+        FileSystem::replaceFileStr(BUILD_INCLUDE_PATH . '\nghttp2\nghttp2.h', '#ifdef NGHTTP2_STATICLIB', '#if 1');
     }
 }

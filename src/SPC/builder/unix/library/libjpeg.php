@@ -14,6 +14,10 @@ trait libjpeg
             ->addConfigureArgs(
                 '-DENABLE_STATIC=ON',
                 '-DENABLE_SHARED=OFF',
+                '-DWITH_SYSTEM_ZLIB=ON',
+                '-DWITH_TOOLS=OFF',
+                '-DWITH_TESTS=OFF',
+                '-DWITH_SIMD=OFF',
             )
             ->build();
         // patch pkgconfig

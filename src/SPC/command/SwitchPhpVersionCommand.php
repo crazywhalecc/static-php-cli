@@ -20,9 +20,9 @@ class SwitchPhpVersionCommand extends BaseCommand
         $this->addArgument(
             'php-major-version',
             InputArgument::REQUIRED,
-            'PHP major version (supported: 7.4, 8.0, 8.1, 8.2, 8.3, 8.4)',
+            'PHP major version (supported: 7.4, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5)',
             null,
-            fn () => ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+            fn () => ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
         );
         $this->no_motd = true;
 
@@ -32,7 +32,7 @@ class SwitchPhpVersionCommand extends BaseCommand
     public function handle(): int
     {
         $php_ver = $this->input->getArgument('php-major-version');
-        if (!in_array($php_ver, ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4'])) {
+        if (!in_array($php_ver, ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'])) {
             // match x.y.z
             preg_match('/^\d+\.\d+\.\d+$/', $php_ver, $matches);
             if (!$matches) {

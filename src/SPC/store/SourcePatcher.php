@@ -22,7 +22,7 @@ class SourcePatcher
         FileSystem::addSourceExtractHook('swoole', [__CLASS__, 'patchSwoole']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchPhpLibxml212']);
         FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchGDWin32']);
-        FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
+        // FileSystem::addSourceExtractHook('php-src', [__CLASS__, 'patchFfiCentos7FixO3strncmp']);
         FileSystem::addSourceExtractHook('sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVWin32']);
         FileSystem::addSourceExtractHook('pdo_sqlsrv', [__CLASS__, 'patchSQLSRVPhp85']);
@@ -95,6 +95,10 @@ class SourcePatcher
         // patch php-src/build/php.m4 PKG_CHECK_MODULES -> PKG_CHECK_MODULES_STATIC
         FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/build/php.m4', 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
 
+        if ($builder->getPHPVersionID() >= 80300 && $builder->getPHPVersionID() < 80400) {
+            self::patchFile('spc_fix_avx512_cache_before_80400.patch', SOURCE_PATH . '/php-src');
+        }
+
         if ($builder->getOption('enable-micro-win32')) {
             self::patchMicroWin32();
         } else {
@@ -123,6 +127,15 @@ class SourcePatcher
         // patch capstone
         if (is_unix()) {
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/configure', '/have_capstone="yes"/', 'have_capstone="no"');
+        }
+
+        // PHP 8.2 and below: bcmath libbcmath uses K&R style C function
+        if (is_unix() && $builder->getPHPVersionID() < 80300) {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/configure',
+                "for ac_arg in '' -std=gnu23",
+                "for ac_arg in '' -std=gnu17",
+            );
         }
 
         if (file_exists(SOURCE_PATH . '/php-src/configure.ac.bak')) {
@@ -634,7 +647,13 @@ class SourcePatcher
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gd/libgd/gdft.c', '#ifndef MSWIN32', '#ifndef _WIN32');
             }
             // custom config.w32, because official config.w32 is hard-coded many things
-            $origin = $ver_id >= 80100 ? file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_81.w32') : file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_80.w32');
+            if ($ver_id >= 80500) {
+                $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_85.w32');
+            } elseif ($ver_id >= 80100) {
+                $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_81.w32');
+            } else {
+                $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_80.w32');
+            }
             file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32.bak', file_get_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32'));
             return file_put_contents(SOURCE_PATH . '/php-src/ext/gd/config.w32', $origin) !== false;
         }

@@ -10,9 +10,10 @@ trait libwebp
 {
     protected function build(): void
     {
-        $code = 'int main() { return _mm256_cvtsi256_si32(_mm256_setzero_si256()); }';
+        $code = '#include <immintrin.h>
+int main() { return _mm256_cvtsi256_si32(_mm256_setzero_si256()); }';
         $cc = getenv('CC') ?: 'gcc';
-        [$ret] = shell()->execWithResult("echo '{$code}' | {$cc} -x c -mavx2 -o /dev/null - 2>&1");
+        [$ret] = shell()->execWithResult("printf '%s' '{$code}' | {$cc} -x c -mavx2 -o /dev/null - 2>&1");
         $disableAvx2 = $ret !== 0 && GNU_ARCH === 'x86_64' && PHP_OS_FAMILY === 'Linux';
 
         UnixCMakeExecutor::create($this)

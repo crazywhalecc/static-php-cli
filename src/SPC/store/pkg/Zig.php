@@ -72,8 +72,11 @@ class Zig extends CustomPackage
 
         $latest_version = null;
         foreach ($index_json as $version => $data) {
-            $latest_version = $version;
-            break;
+            // Skip the master branch, get the latest stable release
+            if ($version !== 'master') {
+                $latest_version = $version;
+                break;
+            }
         }
 
         if (!$latest_version) {

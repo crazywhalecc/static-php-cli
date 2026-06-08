@@ -6,18 +6,12 @@ namespace SPC\builder\unix\library;
 
 use SPC\util\executor\UnixAutoconfExecutor;
 
-trait gmp
+trait libmpdec
 {
     protected function build(): void
     {
         UnixAutoconfExecutor::create($this)
-            ->appendEnv([
-                'CFLAGS' => '-std=c17',
-            ])
-            ->configure(
-                '--enable-fat'
-            )
+            ->configure('--disable-cxx --disable-shared --enable-static')
             ->make();
-        $this->patchPkgconfPrefix(['gmp.pc']);
     }
 }

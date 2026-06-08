@@ -30,8 +30,8 @@ class GoXcaddy extends CustomPackage
     public function fetch(string $name, bool $force = false, ?array $config = null): void
     {
         $pkgroot = PKG_ROOT_PATH;
-        $go_exec = "{$pkgroot}/{$name}/bin/go";
-        $xcaddy_exec = "{$pkgroot}/{$name}/bin/xcaddy";
+        $go_exec = "{$pkgroot}/go-xcaddy/bin/go";
+        $xcaddy_exec = "{$pkgroot}/go-xcaddy/bin/xcaddy";
         if ($force) {
             FileSystem::removeDir("{$pkgroot}/{$name}");
         }
@@ -85,7 +85,7 @@ class GoXcaddy extends CustomPackage
                 'GOBIN' => "{$pkgroot}/go-xcaddy/bin",
                 'GOPATH' => "{$pkgroot}/go",
             ])
-            ->exec('CC=cc go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest');
+            ->exec('CGO_ENABLED=0 go install github.com/caddyserver/xcaddy/cmd/xcaddy@master');
     }
 
     public static function getEnvironment(): array
