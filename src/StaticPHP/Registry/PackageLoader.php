@@ -367,15 +367,18 @@ class PackageLoader
 
     public static function getBeforeStageCallbacks(string $package_name, string $stage): iterable
     {
-        // match condition
+        // match condition; '*' is a wildcard that fires for every package's stage
         $installer = ApplicationContext::get(PackageInstaller::class);
-        $stages = self::$before_stages[$package_name][$stage] ?? [];
+        $stages = array_merge(
+            self::$before_stages[$package_name][$stage] ?? [],
+            $package_name === '*' ? [] : (self::$before_stages['*'][$stage] ?? []),
+        );
         foreach ($stages as [$callback, $only_when_package_resolved, $conditionals]) {
             if ($only_when_package_resolved !== null && !$installer->isPackageResolved($only_when_package_resolved)) {
                 continue;
             }
             foreach ($conditionals as $class) {
-                if (!ApplicationContext::has($class)) {
+                if (ApplicationContext::tryGet($class) === null) {
                     continue 2;
                 }
             }
@@ -385,16 +388,19 @@ class PackageLoader
 
     public static function getAfterStageCallbacks(string $package_name, string $stage): array
     {
-        // match condition
+        // match condition; '*' is a wildcard that fires for every package's stage
         $installer = ApplicationContext::get(PackageInstaller::class);
-        $stages = self::$after_stages[$package_name][$stage] ?? [];
+        $stages = array_merge(
+            self::$after_stages[$package_name][$stage] ?? [],
+            $package_name === '*' ? [] : (self::$after_stages['*'][$stage] ?? []),
+        );
         $result = [];
         foreach ($stages as [$callback, $only_when_package_resolved, $conditionals]) {
             if ($only_when_package_resolved !== null && !$installer->isPackageResolved($only_when_package_resolved)) {
                 continue;
             }
             foreach ($conditionals as $class) {
-                if (!ApplicationContext::has($class)) {
+                if (ApplicationContext::tryGet($class) === null) {
                     continue 2;
                 }
             }
@@ -425,6 +431,20 @@ class PackageLoader
     {
         foreach (['BeforeStage' => self::$before_stages, 'AfterStage' => self::$after_stages] as $event_name => $ev_all) {
             foreach ($ev_all as $package_name => $stages) {
+                // wildcard hooks fire for every package's stage; nothing to validate against
+                if ($package_name === '*') {
+                    foreach ($stages as $stage_name => $before_events) {
+                        foreach ($before_events as [$event_callable, $only_when_package_resolved, $conditionals]) {
+                            if ($only_when_package_resolved !== null && !self::hasPackage($only_when_package_resolved)) {
+                                throw new RegistryException("{$event_name} event for wildcard [*] stage [{$stage_name}] has unknown only_when_package_resolved package [{$only_when_package_resolved}].");
+                            }
+                            if (!is_callable($event_callable)) {
+                                throw new RegistryException("{$event_name} event for wildcard [*] stage [{$stage_name}] has invalid callable.");
+                            }
+                        }
+                    }
+                    continue;
+                }
                 // check package exists
                 if (!self::hasPackage($package_name)) {
                     throw new RegistryException(

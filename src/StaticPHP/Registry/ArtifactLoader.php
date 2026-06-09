@@ -36,6 +36,13 @@ class ArtifactLoader
     public static function getArtifactInstance(string $artifact_name): ?Artifact
     {
         self::initArtifactInstances();
+        if (!isset(self::$artifacts[$artifact_name])) {
+            // Artifact may have been registered after initArtifactInstances() ran (e.g., from a vendor registry)
+            $config = ArtifactConfig::get($artifact_name);
+            if ($config !== null) {
+                self::$artifacts[$artifact_name] = new Artifact($artifact_name, $config);
+            }
+        }
         return self::$artifacts[$artifact_name] ?? null;
     }
 

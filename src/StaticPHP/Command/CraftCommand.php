@@ -9,7 +9,12 @@ use StaticPHP\Doctor\Doctor;
 use StaticPHP\Exception\ValidationException;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Toolchain\ToolchainManager;
+use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
+use StaticPHP\Util\Pgo\PgoContext;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -21,6 +26,8 @@ class CraftCommand extends BaseCommand
     public function configure(): void
     {
         $this->addArgument('craft', null, 'Path to craft.yml file', WORKING_DIR . '/craft.yml');
+        $this->addOption('libs-only', null, null, 'Build only the libraries needed by the configured extensions (skip PHP and SAPI build).');
+        PgoContext::registerOptions($this);
     }
 
     public function handle(): int
@@ -38,6 +45,13 @@ class CraftCommand extends BaseCommand
 
         // apply env
         array_walk($craft['extra-env'], fn ($v, $k) => f_putenv("{$k}={$v}"));
+
+        // re-substitute env.ini's CC=${SPC_DEFAULT_CC} bindings.
+        ToolchainManager::initToolchain();
+        GlobalEnvManager::reapplyOsIni();
+
+        // stash craft for doctor checks that depend on what's being built (e.g. frankenphp → go-xcaddy)
+        ApplicationContext::set('craft', $craft);
 
         // run doctor
         if ($craft['craft-options']['doctor']) {
@@ -83,21 +97,65 @@ class CraftCommand extends BaseCommand
             FileSystem::resetDir(SOURCE_PATH);
         }
 
+        $pgo = $this->getOption('libs-only') ? null : PgoContext::tryFromInput($this->input, $craft['sapi'], $build_options);
+
         $starttime = microtime(true);
         // run installer
         $installer = new PackageInstaller($build_options);
         ApplicationContext::get(PackageBuilder::class)->setArgument('extensions', implode(',', $craft['extensions']));
-        $installer->addBuildPackage('php');
+
+        if ($this->getOption('libs-only')) {
+            $with_suggests = (bool) ($craft['build-options']['with-suggests'] ?? false);
+            $libs = $this->resolveLibsForExtensions($craft, $with_suggests);
+            if ($libs === []) {
+                $this->output->writeln('<comment>No libraries needed for the configured extensions; nothing to do.</comment>');
+                return static::SUCCESS;
+            }
+            foreach ($libs as $lib) {
+                $installer->addBuildPackage($lib);
+            }
+        } else {
+            $installer->addBuildPackage('php');
+        }
         $installer->run(true);
 
         $usedtime = round(microtime(true) - $starttime, 1);
+        $tag = $pgo !== null ? " (PGO {$pgo->mode})" : '';
         $this->output->writeln("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        $this->output->writeln("<info>✔ BUILD SUCCESSFUL ({$usedtime} s)</info>");
+        $this->output->writeln("<info>✔ BUILD SUCCESSFUL{$tag} ({$usedtime} s)</info>");
         $this->output->writeln("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+
+        if ($pgo !== null && $pgo->isInstrument()) {
+            $this->output->writeln("<comment>Next: exercise the instrumented binary, then re-run craft with --pgo to consume {$pgo->profileRoot}.</comment>");
+        }
 
         $installer->printBuildPackageOutputs();
 
         return static::SUCCESS;
+    }
+
+    /** @return list<string> library package names transitively required by the configured extensions */
+    private function resolveLibsForExtensions(array $craft, bool $include_suggests): array
+    {
+        $exts = array_merge($craft['extensions'], $craft['shared-extensions'] ?? []);
+        $ext_pkgs = array_map(fn ($x) => "ext-{$x}", $exts);
+        $extra = $craft['packages'] ?? [];
+
+        $resolved = DependencyResolver::resolve(
+            array_merge($ext_pkgs, $extra),
+            include_suggests: $include_suggests,
+        );
+
+        $libs = [];
+        foreach ($resolved as $pkg_name) {
+            if (str_starts_with($pkg_name, 'ext-') || !PackageLoader::hasPackage($pkg_name)) {
+                continue;
+            }
+            if (PackageLoader::getPackage($pkg_name)->getType() === 'library') {
+                $libs[] = $pkg_name;
+            }
+        }
+        return $libs;
     }
 
     /**

@@ -317,7 +317,10 @@ class ArtifactDownloader
             if (!is_dir(DOWNLOAD_PATH)) {
                 FileSystem::createDir(DOWNLOAD_PATH);
             }
-            logger()->info('Downloading' . implode(', ', array_map(fn ($x) => " '{$x->getName()}'", $this->artifacts)) . " with concurrency {$this->parallel} ...");
+            $pending = array_values(array_filter($this->artifacts, fn ($a) => $this->generateQueue($a) !== []));
+            if ($pending !== []) {
+                logger()->info('Downloading' . implode(', ', array_map(fn ($x) => " '{$x->getName()}'", $pending)) . " with concurrency {$this->parallel} ...");
+            }
             // Download artifacts parallelly
             if ($this->parallel > 1) {
                 $this->downloadWithConcurrency();
@@ -551,8 +554,8 @@ class ArtifactDownloader
                 $instance = null;
                 $call = $this->downloaders[$item['config']['type']] ?? null;
                 $type_display_name = match (true) {
-                    $item['lock'] === 'source' && ($callback = $artifact->getCustomSourceCallback()) !== null => 'user defined source downloader',
-                    $item['lock'] === 'binary' && ($callback = $artifact->getCustomBinaryCallback()) !== null => 'user defined binary downloader',
+                    $item['lock'] === 'source' && $artifact->getCustomSourceCallback() !== null => $artifact->getCustomSourceCallbackOrigin() ?? 'source package downloader',
+                    $item['lock'] === 'binary' && $artifact->getCustomBinaryCallback() !== null => $artifact->getCustomBinaryCallbackOrigin() ?? 'binary package downloader',
                     default => SPC_DOWNLOAD_TYPE_DISPLAY_NAME[$item['config']['type']] ?? $item['config']['type'],
                 };
                 $try_h = $try ? 'Try downloading' : 'Downloading';
@@ -731,6 +734,16 @@ class ArtifactDownloader
         $binary_downloaded = $artifact->isBinaryDownloaded(compare_hash: true);
         $source_downloaded = $artifact->isSourceDownloaded(compare_hash: true);
 
+        if ($source_downloaded && $artifact->getName() === 'php-src' && ($requested = $this->getOption('with-php'))) {
+            $info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo('php-src');
+            $cv = $info['version'] ?? null;
+            $ct = $info['cache_type'] ?? null;
+            $matches = $requested === 'git' ? $ct === 'git' : ($cv !== null && $ct !== 'git' && ($cv === $requested || str_starts_with($cv, $requested . '.')));
+            if (!$matches) {
+                $source_downloaded = false;
+            }
+        }
+
         $item_source = ['display' => 'source', 'lock' => 'source', 'config' => $artifact->getDownloadConfig('source')];
         $item_source_mirror = ['display' => 'source (mirror)', 'lock' => 'source', 'config' => $artifact->getDownloadConfig('source-mirror')];
 
@@ -825,21 +838,21 @@ class ArtifactDownloader
             if (isset($this->artifacts[$artifact_name])) {
                 $this->artifacts[$artifact_name]->setCustomSourceCallback(function (ArtifactDownloader $downloader) use ($artifact_name, $custom_url) {
                     return (new Url())->download($artifact_name, ['url' => $custom_url], $downloader);
-                });
+                }, 'custom url');
             }
         }
         foreach ($this->custom_gits as $artifact_name => [$branch, $git_url]) {
             if (isset($this->artifacts[$artifact_name])) {
                 $this->artifacts[$artifact_name]->setCustomSourceCallback(function (ArtifactDownloader $downloader) use ($artifact_name, $branch, $git_url) {
                     return (new Git())->download($artifact_name, ['rev' => $branch, 'url' => $git_url], $downloader);
-                });
+                }, 'custom git');
             }
         }
         foreach ($this->custom_locals as $artifact_name => $local_path) {
             if (isset($this->artifacts[$artifact_name])) {
                 $this->artifacts[$artifact_name]->setCustomSourceCallback(function (ArtifactDownloader $downloader) use ($artifact_name, $local_path) {
                     return (new LocalDir())->download($artifact_name, ['dirname' => $local_path], $downloader);
-                });
+                }, 'custom local dir');
             }
         }
     }

@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace StaticPHP\Util;
 
 use StaticPHP\Config\PackageConfig;
+use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 
 class SPCConfigUtil
@@ -32,123 +35,82 @@ class SPCConfigUtil
         $this->absolute_libs = $options['absolute_libs'] ?? false;
     }
 
-    public function config(array $packages = [], bool $include_suggests = false): array
+    public function config(array $packages = []): array
     {
-        // if have php, make php as all extension's dependency
+        // Walk depends+suggests within the resolved set; reaching `php` fans out to its
+        // effective link closure (resolved static exts + virtual-target SAPIs).
+        $installer = ApplicationContext::get(PackageInstaller::class);
+        $resolved_set = array_flip(array_keys($installer->getResolvedPackages()));
+
+        $php_extras = [];
         if (!$this->no_php) {
-            $dep_override = ['php' => array_filter($packages, fn ($y) => str_starts_with($y, 'ext-'))];
-        } else {
-            $dep_override = [];
-        }
-        $resolved = DependencyResolver::resolve($packages, $dep_override, $include_suggests);
-
-        $ldflags = $this->getLdflagsString();
-        $cflags = $this->getIncludesString($resolved);
-        $libs = $this->getLibsString($resolved, !$this->absolute_libs);
-
-        // additional OS-specific libraries (e.g. macOS -lresolv)
-        // embed
-        if ($extra_libs = SystemTarget::getRuntimeLibs()) {
-            $libs .= " {$extra_libs}";
-        }
-
-        $extra_env = getenv('SPC_EXTRA_LIBS');
-        if (is_string($extra_env) && !empty($extra_env)) {
-            $libs .= " {$extra_env}";
-        }
-        // package frameworks
-        if (SystemTarget::getTargetOS() === 'Darwin') {
-            $libs .= " {$this->getFrameworksString($resolved)}";
-        }
-        // C++
-        if ($this->hasCpp($resolved)) {
-            $target_os = SystemTarget::getTargetOS();
-            if ($target_os === 'Darwin') {
-                $libcpp = '-lc++';
-                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
-            } elseif ($target_os !== 'Windows') {
-                // Linux and other Unix-like systems use libstdc++
-                $libcpp = '-lstdc++';
-                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $ext) {
+                if ($ext->isBuildStatic()) {
+                    $php_extras[] = $ext->getName();
+                }
             }
-            // Windows (MSVC): C++ runtime is linked automatically, no explicit lib needed
-        }
-
-        if ($this->libs_only_deps) {
-            // mimalloc must come first
-            if (in_array('mimalloc', $resolved) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
-                $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
-            }
-            return [
-                'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-                'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
-                'libs' => clean_spaces(getenv('LIBS') . ' ' . $libs),
-            ];
-        }
-
-        // embed
-        if (!$this->no_php) {
-            if (SystemTarget::getTargetOS() === 'Windows') {
-                // Windows: use php8embed.lib directly (either full path or short name)
-                $major = intdiv(PHP_VERSION_ID, 10000);
-                $php_lib = $this->absolute_libs ? BUILD_LIB_PATH . "\\php{$major}embed.lib" : "php{$major}embed.lib";
-                // Windows system libs required by PHP
-                // Use same system libs as PHP Makefile: LIBS=kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib
-                $libs = "{$php_lib} {$libs} kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib";
-            } else {
-                $libs = "-lphp {$libs} -lc";
+            foreach ($installer->getResolvedPackages(TargetPackage::class) as $target) {
+                if ($target->isVirtualTarget()) {
+                    $php_extras[] = $target->getName();
+                }
             }
         }
 
-        $allLibs = getenv('LIBS') . ' ' . $libs;
-
-        // mimalloc must come first
-        if (in_array('mimalloc', $resolved) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
-            $allLibs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $allLibs);
+        $sorted = [];
+        $visited = [];
+        foreach ($packages as $pkg) {
+            self::visitConfigDeps(
+                is_string($pkg) ? $pkg : $pkg->getName(),
+                $resolved_set,
+                $php_extras,
+                $visited,
+                $sorted,
+            );
         }
-
-        return [
-            'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-            'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
-            'libs' => clean_spaces($allLibs),
-        ];
+        return $this->configWithResolvedPackages($sorted);
     }
 
     /**
      * [Helper function]
      * Get configuration for a specific extension(s) dependencies.
      *
+     * Uses the installer's resolved package set as the source of truth — only libraries that
+     * are actually enabled in this build appear in the result. The resolved set already
+     * reflects the user's `--with-suggests` choice.
+     *
      * @param array|PhpExtensionPackage $extension_packages Extension instance or list
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function getExtensionConfig(array|PhpExtensionPackage $extension_packages, bool $include_suggests = false): array
+    public function getExtensionConfig(array|PhpExtensionPackage $extension_packages): array
     {
         if (!is_array($extension_packages)) {
             $extension_packages = [$extension_packages];
         }
-        return $this->config(
-            packages: array_map(fn ($y) => $y->getName(), $extension_packages),
-            include_suggests: $include_suggests,
-        );
+        $names = array_map(fn ($y) => $y->getName(), $extension_packages);
+        return $this->configWithResolvedPackages($this->collectEnabledLinkPackages($names));
     }
 
     /**
      * [Helper function]
      * Get configuration for a specific library(s) dependencies.
      *
-     * @param array|LibraryPackage $lib              Library instance or list
-     * @param bool                 $include_suggests Whether to include suggested libraries
+     * Like {@see getExtensionConfig()}, draws from the resolved package set so we never
+     * link against a library that wasn't built.
+     *
+     * @param array|LibraryPackage $lib Library instance or list
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function getLibraryConfig(array|LibraryPackage $lib, bool $include_suggests = false): array
+    public function getLibraryConfig(array|LibraryPackage $lib): array
     {
         if (!is_array($lib)) {
             $lib = [$lib];
@@ -157,39 +119,37 @@ class SPCConfigUtil
         $this->no_php = true;
         $save_libs_only_deps = $this->libs_only_deps;
         $this->libs_only_deps = true;
-        $ret = $this->config(
-            packages: array_map(fn ($y) => $y->getName(), $lib),
-            include_suggests: $include_suggests,
-        );
+        $names = array_map(fn ($y) => $y->getName(), $lib);
+        $ret = $this->configWithResolvedPackages($this->collectEnabledLinkPackages($names));
         $this->no_php = $save_no_php;
         $this->libs_only_deps = $save_libs_only_deps;
         return $ret;
     }
 
     /**
-     * Get build configuration for a package and its sub-dependencies within a resolved set.
+     * Get build configuration for a package's sub-dependencies within a resolved set.
      *
-     * This is useful when you need to statically link something against a specific
-     * library and all its transitive dependencies. It properly handles optional
-     * dependencies by only including those that were actually resolved.
+     * Walks both depends and suggests edges — the resolved set is the filter, so anything
+     * reachable but unbuilt is naturally excluded. No `include_suggests` knob is needed.
      *
      * @param string   $package_name      The package to get config for
      * @param string[] $resolved_packages The full resolved package list
-     * @param bool     $include_suggests  Whether to include resolved suggests
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function getPackageDepsConfig(string $package_name, array $resolved_packages, bool $include_suggests = false): array
+    public function getPackageDepsConfig(string $package_name, array $resolved_packages): array
     {
         // Get sub-dependencies within the resolved set
-        $sub_deps = DependencyResolver::getSubDependencies($package_name, $resolved_packages, $include_suggests);
+        $sub_deps = DependencyResolver::getSubDependencies($package_name, $resolved_packages, include_suggests: true);
 
         if (empty($sub_deps)) {
             return [
                 'cflags' => '',
+                'cxxflags' => '',
                 'ldflags' => '',
                 'libs' => '',
             ];
@@ -210,11 +170,12 @@ class SPCConfigUtil
     }
 
     /**
-     * Get configuration using already-resolved packages (skip dependency resolution).
+     * Build cflags/cxxflags/ldflags/libs for an already-resolved package set (skip dependency resolution).
      *
-     * @param string[] $resolved_packages Already resolved package names in build order
+     * @param string[] $resolved_packages Resolved package names in build order
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
@@ -222,8 +183,13 @@ class SPCConfigUtil
     public function configWithResolvedPackages(array $resolved_packages): array
     {
         $ldflags = $this->getLdflagsString();
-        $cflags = $this->getIncludesString($resolved_packages);
+        $includes = $this->getIncludesString($resolved_packages);
         $libs = $this->getLibsString($resolved_packages, !$this->absolute_libs);
+
+        // includes (-I…) are language-agnostic — same source for cflags/cxxflags, swap only the env names
+        $cflags = deduplicate_flags(clean_spaces((getenv('SPC_DEFAULT_CFLAGS') ?: '') . ' ' . getenv('CFLAGS') . ' ' . $includes));
+        $cxxflags = deduplicate_flags(clean_spaces((getenv('SPC_DEFAULT_CXXFLAGS') ?: '') . ' ' . getenv('CXXFLAGS') . ' ' . $includes));
+        $ldflags = deduplicate_flags(clean_spaces((getenv('SPC_DEFAULT_LDFLAGS') ?: '') . ' ' . getenv('LDFLAGS') . ' ' . $ldflags));
 
         // additional OS-specific libraries (e.g. macOS -lresolv)
         if ($extra_libs = SystemTarget::getRuntimeLibs()) {
@@ -260,15 +226,25 @@ class SPCConfigUtil
                 $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
             }
             return [
-                'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-                'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+                'cflags' => $cflags,
+                'cxxflags' => $cxxflags,
+                'ldflags' => $ldflags,
                 'libs' => clean_spaces(getenv('LIBS') . ' ' . $libs),
             ];
         }
 
         // embed
         if (!$this->no_php) {
-            $libs = "-lphp {$libs} -lc";
+            if (SystemTarget::getTargetOS() === 'Windows') {
+                // Windows: use php8embed.lib directly (either full path or short name)
+                $major = intdiv(PHP_VERSION_ID, 10000);
+                $php_lib = $this->absolute_libs ? BUILD_LIB_PATH . "\\php{$major}embed.lib" : "php{$major}embed.lib";
+                // Windows system libs required by PHP
+                // Use same system libs as PHP Makefile: LIBS=kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib
+                $libs = "{$php_lib} {$libs} kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib";
+            } else {
+                $libs = "-lphp {$libs} -lc";
+            }
         }
 
         $allLibs = getenv('LIBS') . ' ' . $libs;
@@ -279,8 +255,9 @@ class SPCConfigUtil
         }
 
         return [
-            'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-            'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+            'cflags' => $cflags,
+            'cxxflags' => $cxxflags,
+            'ldflags' => $ldflags,
             'libs' => clean_spaces($allLibs),
         ];
     }
@@ -297,6 +274,50 @@ class SPCConfigUtil
             }
         }
         return implode(' ', $list);
+    }
+
+    private static function visitConfigDeps(
+        string $name,
+        array $resolved_set,
+        array $php_extras,
+        array &$visited,
+        array &$sorted,
+    ): void {
+        if (isset($visited[$name]) || !isset($resolved_set[$name])) {
+            return;
+        }
+        $visited[$name] = true;
+
+        $deps = array_merge(
+            PackageConfig::get($name, 'depends', []),
+            PackageConfig::get($name, 'suggests', []),
+        );
+        if ($name === 'php') {
+            $deps = array_merge($deps, $php_extras);
+        }
+
+        foreach ($deps as $dep) {
+            self::visitConfigDeps($dep, $resolved_set, $php_extras, $visited, $sorted);
+        }
+        $sorted[] = $name;
+    }
+
+    /**
+     * For each input package name, gather its transitive deps within the installer's resolved
+     * set (walking depends + suggests edges), plus the package itself, deduped and in build order.
+     *
+     * @param  string[] $package_names Input package names
+     * @return string[] Resolved packages to link against
+     */
+    private function collectEnabledLinkPackages(array $package_names): array
+    {
+        $resolved = array_keys(ApplicationContext::get(PackageInstaller::class)->getResolvedPackages());
+        $out = [];
+        foreach ($package_names as $name) {
+            $sub = DependencyResolver::getSubDependencies($name, $resolved, include_suggests: true);
+            $out = [...$out, ...$sub, $name];
+        }
+        return array_values(array_unique($out));
     }
 
     private function hasCpp(array $packages): bool

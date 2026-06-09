@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Runtime;
 
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\System\LinuxUtil;
 
 /**
@@ -16,7 +17,7 @@ class SystemTarget
      */
     public static function getLibc(): ?string
     {
-        if ($target = getenv('SPC_TARGET')) {
+        if ($target = self::target()) {
             if (str_contains($target, '-gnu')) {
                 return 'glibc';
             }
@@ -57,7 +58,7 @@ class SystemTarget
     public static function getLibcVersion(): ?string
     {
         if (PHP_OS_FAMILY === 'Linux') {
-            $target = (string) getenv('SPC_TARGET');
+            $target = self::target();
             if (str_contains($target, '-gnu.2.')) {
                 return preg_match('/-gnu\.(2\.\d+)/', $target, $matches) ? $matches[1] : null;
             }
@@ -75,7 +76,7 @@ class SystemTarget
      */
     public static function getTargetOS(): string
     {
-        $target = (string) getenv('SPC_TARGET');
+        $target = self::target();
         return match (true) {
             str_contains($target, '-linux') => 'Linux',
             str_contains($target, '-macos') => 'Darwin',
@@ -91,7 +92,7 @@ class SystemTarget
      */
     public static function getTargetArch(): string
     {
-        $target = (string) getenv('SPC_TARGET');
+        $target = self::target();
         return match (true) {
             str_contains($target, 'x86_64') || str_contains($target, 'amd64') => 'x86_64',
             str_contains($target, 'aarch64') || str_contains($target, 'arm64') => 'aarch64',
@@ -126,5 +127,71 @@ class SystemTarget
     public static function isUnix(): bool
     {
         return in_array(self::getTargetOS(), ['Linux', 'Darwin', 'BSD']);
+    }
+
+    /**
+     * Returns the canonical target triple (arch-os-abi) for per-target build
+     * artifacts. Always returns a non-null triple, falling back to a host-derived
+     * triple when SPC_TARGET is unset or names 'native'.
+     * Strips libc version suffix (-gnu.2.17 → -gnu) and trailing flags (' -dynamic').
+     */
+    public static function getCanonicalTriple(): string
+    {
+        $target = self::target();
+        if ($target !== '' && !str_contains($target, 'native')) {
+            $cleaned = (string) preg_replace('/(-gnu|-musl)\.[\d.]+/', '$1', $target);
+            $cleaned = preg_split('/\s+/', trim($cleaned))[0] ?? '';
+            if ($cleaned !== '') {
+                return $cleaned;
+            }
+        }
+        $arch = self::getTargetArch();
+        return match (self::getTargetOS()) {
+            'Linux' => $arch . '-linux-' . (self::getLibc() === 'musl' ? 'musl' : 'gnu'),
+            'Darwin' => $arch . '-macos-none',
+            'Windows' => $arch . '-windows-gnu',
+            default => $arch . '-unknown-unknown',
+        };
+    }
+
+    /**
+     * Returns a GNU host triple for autoconf --host= when SPC_TARGET names an
+     * architecture different from the build host (true cross-compile).
+     * Returns null for same-arch builds.
+     * Strips libc version suffix (-gnu.2.17 → -gnu) and trailing flags (e.g. ' -dynamic').
+     */
+    public static function getAutoconfHostTriple(): ?string
+    {
+        $target = self::target();
+        if ($target === '' || str_contains($target, 'native')) {
+            return null;
+        }
+        $cleaned = preg_split('/\s+/', trim((string) preg_replace('/(-gnu|-musl)\.[\d.]+/', '$1', $target)))[0];
+        if ($cleaned === '') {
+            return null;
+        }
+        // Only emit --host for true cross-arch builds; same-arch (incl. cross-libc) lets autoconf detect.
+        $target_arch_token = explode('-', $cleaned)[0];
+        $arch_aliases = [
+            'x86_64' => ['x86_64', 'amd64'],
+            'aarch64' => ['aarch64', 'arm64'],
+            'arm' => ['arm', 'armv6', 'armv7', 'armhf', 'armel'],
+            'i386' => ['i386', 'i486', 'i586', 'i686'],
+        ];
+        $host_arch = GNU_ARCH;
+        if (array_any($arch_aliases, fn ($aliases) => in_array($target_arch_token, $aliases, true) && in_array($host_arch, $aliases, true))) {
+            return null;
+        }
+        return $cleaned;
+    }
+
+    /** native toolchains ignore SPC_TARGET */
+    private static function target(): string
+    {
+        $tc = (string) getenv('SPC_TOOLCHAIN');
+        if ($tc !== '' && $tc !== ZigToolchain::class) {
+            return '';
+        }
+        return (string) getenv('SPC_TARGET');
     }
 }

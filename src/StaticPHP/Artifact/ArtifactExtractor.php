@@ -136,6 +136,12 @@ class ArtifactExtractor
             throw new WrongUsageException("Artifact source [{$name}] not downloaded, please download it first!");
         }
 
+        // Local (--custom-local): source lives in place at $cache_info['dirname'].
+        if (($cache_info['cache_type'] ?? null) === 'local') {
+            $artifact->emitAfterSourceExtract($artifact->getSourceDir());
+            return SPC_STATUS_ALREADY_EXTRACTED;
+        }
+
         $source_file = $this->cache->getCacheFullPath($cache_info);
         $target_path = $artifact->getSourceDir();
 
@@ -171,8 +177,12 @@ class ArtifactExtractor
             return SPC_STATUS_ALREADY_EXTRACTED;
         }
 
-        // Remove old directory if hash mismatch
-        if (is_dir($target_path)) {
+        // Remove old directory if hash mismatch.
+        // Guard: a symlink at $target_path (left over from older local-source handling) must be
+        // unlinked directly — never recurse into the link target, that would wipe the user's tree.
+        if (is_link($target_path)) {
+            @unlink($target_path);
+        } elseif (is_dir($target_path)) {
             logger()->notice("Source [{$name}] hash mismatch, re-extracting...");
             FileSystem::removeDir($target_path);
         }

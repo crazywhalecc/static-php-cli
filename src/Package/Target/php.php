@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Package\Target;
 
 use Package\Target\php\frankenphp;
+use Package\Target\php\pgo;
 use Package\Target\php\unix;
 use Package\Target\php\windows;
 use StaticPHP\Artifact\ArtifactCache;
@@ -48,6 +49,7 @@ class php extends TargetPackage
     use unix;
     use windows;
     use frankenphp;
+    use pgo;
 
     /** @var string[] Supported major PHP versions */
     public const array SUPPORTED_MAJOR_VERSIONS = ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
@@ -268,12 +270,14 @@ class php extends TargetPackage
             }
         }
         // linux does not support loading shared libraries when target is pure static
-        $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
-        if (SystemTarget::getTargetOS() === 'Linux' && ApplicationContext::get(ToolchainInterface::class)->isStatic() && $embed_type === 'shared') {
-            throw new WrongUsageException(
-                'Linux does not support loading shared libraries when linking libc statically. ' .
-                'Change SPC_CMD_VAR_PHP_EMBED_TYPE to static.'
-            );
+        if ($package->getName() === 'php-embed') {
+            $embed_type = getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') ?: 'static';
+            if (SystemTarget::getTargetOS() === 'Linux' && ApplicationContext::get(ToolchainInterface::class)->isStatic() && $embed_type === 'shared') {
+                throw new WrongUsageException(
+                    'Linux does not support loading shared libraries when linking libc statically. ' .
+                    'Change SPC_CMD_VAR_PHP_EMBED_TYPE to static.'
+                );
+            }
         }
     }
 
@@ -332,7 +336,7 @@ class php extends TargetPackage
             logger()->info("Adding hardcoded INI [{$source_name} = {$ini_value}]");
         }
         if (!empty($custom_ini)) {
-            ApplicationContext::invoke([SourcePatcher::class, 'patchHardcodedINI'], [$package->getSourceDir(), $custom_ini]);
+            ApplicationContext::invoke([SourcePatcher::class, 'patchHardcodedINI'], ['php_source_dir' => $package->getSourceDir(), 'ini' => $custom_ini]);
         }
 
         // Patch StaticPHP version

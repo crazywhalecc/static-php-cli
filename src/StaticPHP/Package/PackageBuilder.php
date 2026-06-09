@@ -11,6 +11,8 @@ use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Toolchain\Interface\ToolchainInterface;
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
@@ -178,14 +180,15 @@ class PackageBuilder
         if (SystemTarget::getTargetOS() === 'Darwin') {
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
+            $objcopy = getenv('OBJCOPY') ?: 'objcopy';
             if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
                 shell()
                     ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+                    ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
             } else {
                 shell()
-                    ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+                    ->exec("{$objcopy} --only-keep-debug {$binary_path} {$debug_file}")
+                    ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
             }
         } else {
             logger()->debug('extractDebugInfo is only supported on Linux and macOS');
@@ -199,9 +202,12 @@ class PackageBuilder
      */
     public function stripBinary(string $binary_path): void
     {
+        $strip = ApplicationContext::tryGet(ToolchainInterface::class) instanceof ZigToolchain
+            ? PKG_ROOT_PATH . '/llvm-tools/bin/llvm-strip'
+            : 'strip';
         shell()->exec(match (SystemTarget::getTargetOS()) {
-            'Darwin' => "strip -S {$binary_path}",
-            'Linux' => "strip --strip-unneeded {$binary_path}",
+            'Darwin' => "{$strip} -S {$binary_path}",
+            'Linux' => "{$strip} --strip-unneeded {$binary_path}",
             'Windows' => 'echo "Skip strip on Windows"', // Windows strip is not available for now
             default => throw new SPCInternalException('stripBinary is only supported on Linux and macOS'),
         });

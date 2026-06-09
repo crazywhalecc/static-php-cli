@@ -27,7 +27,20 @@ class unixodbc extends LibraryPackage
             'Linux' => '/etc',
             default => throw new WrongUsageException("Unsupported OS: {$os}"),
         };
-        UnixAutoconfExecutor::create($this)
+
+        // unixodbc bundles libltdl; libltdl is incompatible with -flto
+        // (https://bugs.gentoo.org/532672).
+        $stripLto = static fn (string $s): string => clean_spaces((string) preg_replace('/(^|\s)-flto(=\S+)?(?=\s|$)/', ' ', $s));
+        $cflags = $stripLto((string) getenv('SPC_DEFAULT_CFLAGS'));
+        $cxxflags = $stripLto((string) getenv('SPC_DEFAULT_CXXFLAGS'));
+        $ldflags = $stripLto((string) getenv('SPC_DEFAULT_LDFLAGS'));
+
+        $make = UnixAutoconfExecutor::create($this)
+            ->setEnv([
+                'CFLAGS' => $cflags,
+                'CXXFLAGS' => $cxxflags,
+                'LDFLAGS' => $ldflags,
+            ])
             ->configure(
                 '--disable-debug',
                 '--disable-dependency-tracking',
@@ -35,8 +48,15 @@ class unixodbc extends LibraryPackage
                 '--with-included-ltdl',
                 "--sysconfdir={$sysconf_selector}",
                 '--enable-gui=no',
-            )
-            ->make();
+            );
+
+        // The exe/ subdirectory builds odbcinst/iusql/etc, turn it into a no-op
+        file_put_contents(
+            "{$this->getSourceDir()}/exe/Makefile",
+            ".PHONY: all install clean check distclean install-strip\nall install clean check distclean install-strip:\n\t@true\n",
+        );
+
+        $make->make();
         $this->patchPkgconfPrefix(['odbc.pc', 'odbccr.pc', 'odbcinst.pc']);
         $this->patchLaDependencyPrefix();
     }

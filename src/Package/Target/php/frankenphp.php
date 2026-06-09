@@ -73,10 +73,7 @@ trait frankenphp
             $staticFlags = '';
         }
 
-        $resolved = array_keys($installer->getResolvedPackages());
-        // remove self from deps
-        $resolved = array_filter($resolved, fn ($pkg_name) => $pkg_name !== $package->getName());
-        $config = new SPCConfigUtil()->config($resolved);
+        $config = new SPCConfigUtil()->config(['frankenphp']);
         $cflags = "{$package->getLibExtraCFlags()} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . " -DFRANKENPHP_VERSION={$frankenphp_version}";
         $libs = $config['libs'];
 
@@ -88,10 +85,13 @@ trait frankenphp
             $libs .= ' -lgcov';
         }
 
+        $extraLdProgram = clean_spaces((string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_PROGRAM'));
         $env = [
             'CGO_ENABLED' => '1',
             'CGO_CFLAGS' => clean_spaces($cflags),
-            'CGO_LDFLAGS' => "{$package->getLibExtraLdFlags()} {$staticFlags} {$config['ldflags']} {$libs}",
+            'CGO_LDFLAGS' => clean_spaces("{$package->getLibExtraLdFlags()} {$staticFlags} {$config['ldflags']} {$libs} {$extraLdProgram}"),
+            // cgo strips flags not on its safe allowlist; widen it
+            'CGO_LDFLAGS_ALLOW' => '-Wl,-z,.*|-Wl,--.*|-flto.*|-fprofile-.*',
             'XCADDY_GO_BUILD_FLAGS' => '-buildmode=pie ' .
                 '-ldflags \"-linkmode=external ' . $extLdFlags . ' ' .
                 '-X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\' ' .
@@ -101,10 +101,12 @@ trait frankenphp
                 "-tags={$muslTags}nobadger,nomysql,nopgx{$no_brotli}{$no_watcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
+        $pgo = file_exists("{$source_dir}/caddy/frankenphp/default.pgo") ? "--pgo {$source_dir}/caddy/frankenphp/default.pgo " : '';
         InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('building with xcaddy'));
         shell()->cd(BUILD_LIB_PATH)
             ->setEnv($env)
-            ->exec("xcaddy build --output frankenphp {$xcaddy_modules}");
+            ->exec('go clean -cache') // fix stale include evaluation
+            ->exec("xcaddy build --output frankenphp {$pgo}{$xcaddy_modules}");
 
         $builder->deployBinary(BUILD_LIB_PATH . '/frankenphp', BUILD_BIN_PATH . '/frankenphp');
         $package->setOutput('Binary path for FrankenPHP SAPI', BUILD_BIN_PATH . '/frankenphp');

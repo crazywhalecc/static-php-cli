@@ -76,7 +76,7 @@ class openssl
     public function buildForDarwin(LibraryPackage $pkg): void
     {
         $zlib_libs = $pkg->getInstaller()->getLibraryPackage('zlib')->getStaticLibFiles();
-        $arch = getenv('SPC_ARCH');
+        $arch = SystemTarget::getTargetArch();
 
         shell()->cd($pkg->getSourceDir())->initializeEnv($pkg)
             ->exec(
@@ -95,12 +95,7 @@ class openssl
     #[BuildFor('Linux')]
     public function build(LibraryPackage $lib): void
     {
-        $arch = getenv('SPC_ARCH');
-
-        $env = "CC='" . getenv('CC') . ' -idirafter ' . BUILD_INCLUDE_PATH .
-            ' -idirafter /usr/include/ ' .
-            ' -idirafter /usr/include/' . getenv('SPC_ARCH') . '-linux-gnu/ ' .
-            "' ";
+        $arch = SystemTarget::getTargetArch();
 
         $ex_lib = trim($lib->getInstaller()->getLibraryPackage('zlib')->getStaticLibFiles()) . ' -ldl -pthread';
         $zlib_extra =
@@ -111,9 +106,15 @@ class openssl
         $openssl_dir ??= LinuxUtil::getOSRelease()['dist'] === 'redhat' ? '/etc/pki/tls' : '/etc/ssl';
         $ex_lib = trim($ex_lib);
 
+        // anything we want included (PGO -fprofile-*, LTO, custom hardening)
+        // has to be appended on the command line *after* the target name.
+        $userCFlags = trim((string) getenv('SPC_DEFAULT_CFLAGS'));
+        $userLdFlags = trim((string) getenv('SPC_DEFAULT_LDFLAGS'));
+        $userExtra = trim($userCFlags . ' ' . $userLdFlags);
+
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
             ->exec(
-                "{$env} ./Configure no-shared zlib " .
+                './Configure no-shared zlib ' .
                 "--prefix={$lib->getBuildRootPath()} " .
                 "--libdir={$lib->getLibDir()} " .
                 "--openssldir={$openssl_dir} " .
@@ -121,7 +122,8 @@ class openssl
                 'enable-pie ' .
                 'no-legacy ' .
                 'no-tests ' .
-                "linux-{$arch}"
+                "linux-{$arch} " .
+                $userExtra
             )
             ->exec('make clean')
             ->exec("make -j{$lib->getBuilder()->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")

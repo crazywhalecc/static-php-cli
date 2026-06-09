@@ -1,0 +1,15 @@
+--- a/frankenphp.c
++++ b/frankenphp.c
+@@ -1254,6 +1254,12 @@
+
+   go_frankenphp_shutdown_main_thread();
+
++  /* spc-pgo: explicit profile flush so the cgo-instrumented frankenphp
++   * still writes .profraw on Go-runtime exit (which bypasses libc atexit).
++   * Weak symbol → no-op in non-PGO builds. */
++  { extern int __llvm_profile_write_file(void) __attribute__((weak));
++    if (__llvm_profile_write_file) __llvm_profile_write_file(); }
++
+   return NULL;
+ }
+

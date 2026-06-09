@@ -154,6 +154,9 @@ class PackageInstaller
             $this->resolvePackages();
         }
 
+        $this->reconcilePhpSrcVersion();
+        $this->emitPreInstallEvents();
+
         if ($this->interactive && !$disable_delay_msg) {
             // show install or build options in terminal with beautiful output
             $this->printInstallerInfo();
@@ -215,7 +218,7 @@ class PackageInstaller
             if (!$is_to_build && $should_use_binary) {
                 // install binary
                 if ($this->interactive) {
-                    InteractiveTerm::indicateProgress('Installing package: ' . ConsoleColor::yellow($package->getName()));
+                    InteractiveTerm::indicateProgress('Installing ' . $this->kindLabel($package) . ': ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
                     // Start tracking for binary installation
@@ -227,17 +230,17 @@ class PackageInstaller
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
                     if ($this->interactive) {
-                        InteractiveTerm::finish('Installing binary package failed: ' . ConsoleColor::red($package->getName()), false);
+                        InteractiveTerm::finish('Installing ' . $this->kindLabel($package) . ' failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
                     }
                     throw $e;
                 }
                 if ($this->interactive) {
-                    InteractiveTerm::finish('Installed binary package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_INSTALLED ? ' (already installed, skipped)' : ''));
+                    InteractiveTerm::finish('Installed ' . $this->kindLabel($package) . ': ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_INSTALLED ? ' (already installed, skipped)' : ''));
                 }
             } elseif ($is_to_build && $has_build_stage || $has_source && $has_build_stage) {
                 if ($this->interactive) {
-                    InteractiveTerm::indicateProgress('Building package: ' . ConsoleColor::yellow($package->getName()));
+                    InteractiveTerm::indicateProgress('Building ' . $this->kindLabel($package) . ': ' . ConsoleColor::yellow($package->getName()));
                 }
                 try {
                     // Start tracking for build
@@ -260,13 +263,13 @@ class PackageInstaller
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
                     if ($this->interactive) {
-                        InteractiveTerm::finish('Building package failed: ' . ConsoleColor::red($package->getName()), false);
+                        InteractiveTerm::finish('Building ' . $this->kindLabel($package) . ' failed: ' . ConsoleColor::red($package->getName()), false);
                         echo PHP_EOL;
                     }
                     throw $e;
                 }
                 if ($this->interactive) {
-                    InteractiveTerm::finish('Built package: ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
+                    InteractiveTerm::finish('Built ' . $this->kindLabel($package) . ': ' . ConsoleColor::green($package->getName()) . ($status === SPC_STATUS_ALREADY_BUILT ? ' (already built, skipped)' : ''));
                 }
             }
         }
@@ -357,6 +360,15 @@ class PackageInstaller
             return $package->isInstalled();
         }
         return false;
+    }
+
+    public function emitPreInstallEvents(): void
+    {
+        foreach ($this->packages as $package) {
+            if ($package->hasStage('preInstall')) {
+                $package->runStage('preInstall');
+            }
+        }
     }
 
     public function emitPostInstallEvents(): void
@@ -571,6 +583,77 @@ class PackageInstaller
         return null;
     }
 
+    private function reconcilePhpSrcVersion(): void
+    {
+        $src_dir = SOURCE_PATH . '/php-src';
+        $cache = ApplicationContext::get(ArtifactCache::class);
+        $requested = $this->options['dl-with-php'] ?? null;
+        if ($requested !== null && $requested !== '' && $requested !== 'git') {
+            $info = $cache->getSourceInfo('php-src') ?? [];
+            $cv = $info['version'] ?? null;
+            if (($info['cache_type'] ?? null) === 'git' || $cv === null
+                || ($cv !== $requested && !str_starts_with($cv, $requested . '.'))) {
+                $resolved = null;
+                $candidates = glob(DOWNLOAD_PATH . '/php-' . $requested . '.*.tar.xz') ?: [];
+                if ($candidates !== []) {
+                    usort($candidates, 'strnatcmp');
+                    if (preg_match('/^php-([0-9.]+)\.tar\.xz$/', basename(end($candidates)), $vm)) {
+                        $resolved = $vm[1];
+                    }
+                } elseif ($this->download) {
+                    $j = @file_get_contents('https://www.php.net/releases/index.php?json&version=' . urlencode($requested));
+                    $rel = is_string($j) ? json_decode($j, true) : null;
+                    $resolved = is_array($rel) ? ($rel['version'] ?? null) : null;
+                } else {
+                    throw new WrongUsageException("Requested PHP '{$requested}' but no php-{$requested}.*.tar.xz in downloads/; drop --no-download or run 'bin/spc download php-src --with-php={$requested}' first.");
+                }
+                if ($resolved !== null) {
+                    $cf = DOWNLOAD_PATH . '/.cache.json';
+                    $j = json_decode(@file_get_contents($cf) ?: '{}', true) ?: [];
+                    $tarball = DOWNLOAD_PATH . "/php-{$resolved}.tar.xz";
+                    $j['php-src']['source'] = [
+                        'lock_type' => 'source', 'cache_type' => 'archive',
+                        'filename' => "php-{$resolved}.tar.xz",
+                        'extract' => $info['extract'] ?? null,
+                        'hash' => is_file($tarball) ? sha1_file($tarball) : null,
+                        'time' => time(), 'version' => $resolved,
+                        'config' => $info['config'] ?? ['type' => 'php-release', 'domain' => 'https://www.php.net'],
+                        'downloader' => $info['downloader'] ?? \StaticPHP\Artifact\Downloader\Type\PhpRelease::class,
+                    ];
+                    $j['php-src']['binary'] ??= [];
+                    file_put_contents($cf, json_encode($j, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                    ApplicationContext::set(ArtifactCache::class, $cache = new ArtifactCache());
+                }
+            }
+        }
+        if (!is_dir($src_dir) || ($info = $cache->getSourceInfo('php-src')) === null) {
+            return;
+        }
+        if (($info['cache_type'] ?? null) === 'git') {
+            if (!is_dir($src_dir . '/.git')) {
+                FileSystem::removeDir($src_dir);
+            }
+            return;
+        }
+        $vh = $src_dir . '/main/php_version.h';
+        if (is_file($vh)
+            && preg_match('/#define\s+PHP_VERSION\s+"([^"]+)"/', file_get_contents($vh), $m)
+            && $m[1] !== ($info['version'] ?? null)
+        ) {
+            FileSystem::removeDir($src_dir);
+        }
+    }
+
+    private function kindLabel(Package $package): string
+    {
+        return match (true) {
+            $package instanceof PhpExtensionPackage => 'extension',
+            $package instanceof TargetPackage => 'target',
+            $package instanceof LibraryPackage => 'library',
+            default => 'package',
+        };
+    }
+
     /**
      * @param Package[] $packages
      */
@@ -688,7 +771,7 @@ class PackageInstaller
             if ($package->getBuildOption('build-all') || $package->getBuildOption('build-frankenphp')) {
                 $frankenphp = PackageLoader::getPackage('frankenphp');
                 $this->install_packages[$frankenphp->getName()] = $frankenphp;
-                $this->build_packages[$package->getName()] = $package;
+                $this->build_packages[$frankenphp->getName()] = $frankenphp;
                 $added = true;
             }
             $this->build_packages[$package->getName()] = $package;

@@ -15,6 +15,23 @@ use StaticPHP\Runtime\SystemTarget;
 
 class zig
 {
+    /** Directory zig extracts into. */
+    public static function path(): string
+    {
+        return PKG_ROOT_PATH . '/zig';
+    }
+
+    /** Path to a binary inside the zig install dir (zig, zig-cc, zig-c++, zig-ar, …). */
+    public static function binary(string $name = 'zig'): string
+    {
+        return self::path() . '/' . $name;
+    }
+
+    public static function isInstalled(): bool
+    {
+        return is_file(self::binary());
+    }
+
     #[CustomBinary('zig', [
         'linux-x86_64',
         'linux-aarch64',
@@ -61,7 +78,7 @@ class zig
         if ($file_hash !== $sha256) {
             throw new DownloaderException("Hash mismatch for downloaded Zig binary. Expected {$sha256}, got {$file_hash}");
         }
-        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $latest_version], extract: PKG_ROOT_PATH . '/zig', verified: true, version: $latest_version);
+        return DownloadResult::archive(basename($path), ['url' => $url, 'version' => $latest_version], extract: '{pkg_root_path}/zig', verified: true, version: $latest_version);
     }
 
     #[CustomBinaryCheckUpdate('zig', [
@@ -110,26 +127,24 @@ class zig
                 break;
             }
         }
-        if ($all_exist) {
-            return;
+        if (!$all_exist) {
+            $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
+            $script_content = file_get_contents($script_path);
+
+            file_put_contents("{$target_path}/zig-cc", $script_content);
+            chmod("{$target_path}/zig-cc", 0755);
+
+            $script_content = str_replace('zig cc', 'zig c++', $script_content);
+            file_put_contents("{$target_path}/zig-c++", $script_content);
+            file_put_contents("{$target_path}/zig-ar", "#!/usr/bin/env bash\nexec zig ar $@");
+            file_put_contents("{$target_path}/zig-ld.lld", "#!/usr/bin/env bash\nexec zig ld.lld $@");
+            file_put_contents("{$target_path}/zig-ranlib", "#!/usr/bin/env bash\nexec zig ranlib $@");
+            file_put_contents("{$target_path}/zig-objcopy", "#!/usr/bin/env bash\nexec zig objcopy $@");
+            chmod("{$target_path}/zig-c++", 0755);
+            chmod("{$target_path}/zig-ar", 0755);
+            chmod("{$target_path}/zig-ld.lld", 0755);
+            chmod("{$target_path}/zig-ranlib", 0755);
+            chmod("{$target_path}/zig-objcopy", 0755);
         }
-
-        $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
-        $script_content = file_get_contents($script_path);
-
-        file_put_contents("{$target_path}/zig-cc", $script_content);
-        chmod("{$target_path}/zig-cc", 0755);
-
-        $script_content = str_replace('zig cc', 'zig c++', $script_content);
-        file_put_contents("{$target_path}/zig-c++", $script_content);
-        file_put_contents("{$target_path}/zig-ar", "#!/usr/bin/env bash\nexec zig ar $@");
-        file_put_contents("{$target_path}/zig-ld.lld", "#!/usr/bin/env bash\nexec zig ld.lld $@");
-        file_put_contents("{$target_path}/zig-ranlib", "#!/usr/bin/env bash\nexec zig ranlib $@");
-        file_put_contents("{$target_path}/zig-objcopy", "#!/usr/bin/env bash\nexec zig objcopy $@");
-        chmod("{$target_path}/zig-c++", 0755);
-        chmod("{$target_path}/zig-ar", 0755);
-        chmod("{$target_path}/zig-ld.lld", 0755);
-        chmod("{$target_path}/zig-ranlib", 0755);
-        chmod("{$target_path}/zig-objcopy", 0755);
     }
 }

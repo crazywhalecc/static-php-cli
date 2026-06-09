@@ -11,6 +11,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\Shell\UnixShell;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\InteractiveTerm;
 use ZM\Logger\ConsoleColor;
 
@@ -149,13 +150,17 @@ class UnixAutoconfExecutor extends Executor
      */
     private function getDefaultConfigureArgs(): array
     {
-        return [
+        $args = [
             '--disable-shared',
             '--enable-static',
             "--prefix={$this->package->getBuildRootPath()}",
             '--with-pic',
             '--enable-pic',
         ];
+        if ($host_triple = SystemTarget::getAutoconfHostTriple()) {
+            $args[] = "--host={$host_triple}";
+        }
+        return $args;
     }
 
     /**

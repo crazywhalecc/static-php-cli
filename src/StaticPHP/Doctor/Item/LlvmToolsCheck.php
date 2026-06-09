@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Doctor\Item;
 
-use Package\Artifact\zig;
+use Package\Artifact\llvm_tools;
 use StaticPHP\Attribute\Doctor\CheckItem;
 use StaticPHP\Attribute\Doctor\FixItem;
 use StaticPHP\Attribute\Doctor\OptionalCheck;
@@ -15,7 +15,7 @@ use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ZigToolchain;
 
 #[OptionalCheck([self::class, 'optionalCheck'])]
-class ZigCheck
+class LlvmToolsCheck
 {
     public static function optionalCheck(): bool
     {
@@ -23,21 +23,23 @@ class ZigCheck
     }
 
     /** @noinspection PhpUnused */
-    #[CheckItem('if zig is installed', level: 800)]
-    public function checkZig(): CheckResult
+    #[CheckItem('if llvm-tools (objcopy/strip/profdata) are built', level: 798)]
+    public function checkLlvmTools(): CheckResult
     {
-        if (new PackageInstaller()->addInstallPackage('zig')->isPackageInstalled('zig')) {
-            return CheckResult::ok(zig::binary());
+        $binDir = PKG_ROOT_PATH . '/llvm-tools/bin';
+        if (new llvm_tools()->allBuilt($binDir)) {
+            return CheckResult::ok($binDir);
         }
-        return CheckResult::fail('zig is not installed', 'install-zig');
+        return CheckResult::fail('llvm-tools are not built', 'build-llvm-tools');
     }
 
-    #[FixItem('install-zig')]
-    public function installZig(): bool
+    #[FixItem('build-llvm-tools')]
+    public function fixLlvmTools(): bool
     {
         $installer = new PackageInstaller(interactive: false);
-        $installer->addInstallPackage('zig');
+        $installer->addInstallPackage('llvm-tools');
         $installer->run(true);
-        return $installer->isPackageInstalled('zig');
+        new llvm_tools()->buildForHost();
+        return new llvm_tools()->allBuilt(PKG_ROOT_PATH . '/llvm-tools/bin');
     }
 }

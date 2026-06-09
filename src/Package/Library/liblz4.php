@@ -17,10 +17,17 @@ use StaticPHP\Util\FileSystem;
 class liblz4
 {
     #[PatchBeforeBuild]
-    #[PatchDescription('Fix Makefile install target for static liblz4')]
+    #[PatchDescription('Compile lib sources individually so -flto -c with multiple inputs works under zig-cc/clang')]
     public function patchBeforeBuild(LibraryPackage $lib): void
     {
-        FileSystem::replaceFileStr($lib->getSourceDir() . '/programs/Makefile', 'install: lz4', "install: lz4\n\ninstallewfwef: lz4");
+        // `-flto -c` with multiple input files only writes a .o for the
+        // first source — the others are silently dropped, leaving liblz4.a with a
+        // single object. Compile each source individually so all .o files exist.
+        FileSystem::replaceFileStr(
+            $lib->getSourceDir() . '/lib/Makefile',
+            "liblz4.a: \$(SRCFILES)\nifeq (\$(BUILD_STATIC),yes)  # can be disabled on command line\n\t@echo compiling static library\n\t\$(COMPILE.c) \$^\n\t\$(AR) rcs \$@ *.o\nendif",
+            "liblz4.a: \$(SRCFILES:.c=.o)\nifeq (\$(BUILD_STATIC),yes)  # can be disabled on command line\n\t@echo compiling static library\n\t\$(AR) rcs \$@ \$^\nendif"
+        );
     }
 
     #[BuildFor('Windows')]
