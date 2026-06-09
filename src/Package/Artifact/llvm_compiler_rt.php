@@ -19,6 +19,8 @@ use StaticPHP\Runtime\SystemTarget;
  * Builds the compiler-rt bits zig ships without — libclang_rt.profile.a (PGO instrumentation)
  * and clang_rt.crtbegin.o/crtend.o (__dso_handle for shared libs). Target-arch specific:
  * libs land in PKG_ROOT_PATH/zig/lib/{triple}.
+ * Also builds libclang_rt.cpu_model.a (__cpu_model / __cpu_indicator_init, the libgcc-compatible
+ * globals that __builtin_cpu_supports()/__builtin_cpu_init() reference) for arches that have it.
  */
 class llvm_compiler_rt
 {
@@ -90,13 +92,18 @@ class llvm_compiler_rt
         if (!file_exists($crtBegin) || !file_exists($crtEnd)) {
             $this->buildCrtObjects($sourceDir, $crtBegin, $crtEnd, $triple);
         }
+        $cpuModelLib = "{$libDir}/libclang_rt.cpu_model.a";
+        if (self::cpuModelArch($triple) !== null && !file_exists($cpuModelLib)) {
+            $this->buildCpuModelBuiltins($sourceDir, $cpuModelLib, $triple);
+        }
     }
 
     public function isBuilt(string $libDir): bool
     {
         return file_exists("{$libDir}/libclang_rt.profile.a")
             && file_exists("{$libDir}/clang_rt.crtbegin.o")
-            && file_exists("{$libDir}/clang_rt.crtend.o");
+            && file_exists("{$libDir}/clang_rt.crtend.o")
+            && (self::cpuModelArch(basename($libDir)) === null || file_exists("{$libDir}/libclang_rt.cpu_model.a"));
     }
 
     private function detectZigLlvmVersion(): ?string
@@ -143,5 +150,44 @@ class llvm_compiler_rt
         foreach ([[$beginSrc, $crtBegin], [$endSrc, $crtEnd]] as [$src, $dst]) {
             shell()->exec("zig cc {$cflags} -o " . escapeshellarg($dst) . ' ' . escapeshellarg($src));
         }
+    }
+
+    /**
+     * Build libclang_rt.cpu_model.a, provides
+     * the globals that __builtin_cpu_supports() reference.
+     */
+    private function buildCpuModelBuiltins(string $srcRoot, string $libPath, string $triple): void
+    {
+        $builtins = "{$srcRoot}/lib/builtins";
+        $family = self::cpuModelArch($triple);
+        $cpuModelDir = "{$builtins}/cpu_model";
+        if (is_dir($cpuModelDir)) {
+            $src = "{$cpuModelDir}/{$family}.c";
+            $includes = '-I' . escapeshellarg($builtins) . ' -I' . escapeshellarg($cpuModelDir);
+        } else {
+            $src = "{$builtins}/cpu_model.c";
+            $includes = '-I' . escapeshellarg($builtins);
+        }
+        if (!is_file($src)) {
+            throw new BuildFailureException("llvm-compiler-rt: cpu_model source not found for {$triple} under {$builtins}");
+        }
+
+        $objDir = "{$srcRoot}/obj-cpu-model-{$triple}";
+        f_mkdir($objDir, recursive: true);
+        $obj = "{$objDir}/cpu_model.o";
+        $cflags = "-target {$triple} -c -O2 -fPIC {$includes}";
+        shell()->exec('zig cc ' . $cflags . ' -o ' . escapeshellarg($obj) . ' ' . escapeshellarg($src));
+        shell()->exec('zig ar rcs ' . escapeshellarg($libPath) . ' ' . escapeshellarg($obj));
+    }
+
+    private static function cpuModelArch(string $triple): ?string
+    {
+        $arch = explode('-', $triple)[0];
+        return match (true) {
+            in_array($arch, ['x86_64', 'amd64', 'i386', 'i686', 'x86'], true) => 'x86',
+            in_array($arch, ['aarch64', 'arm64'], true) => 'aarch64',
+            str_starts_with($arch, 'riscv') => 'riscv',
+            default => null,
+        };
     }
 }
