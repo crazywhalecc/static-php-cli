@@ -62,13 +62,13 @@ for _a in "${PARSED_ARGS[@]}"; do
 done
 [[ "$SPC_COMPILER_EXTRA" == *-fprofile-generate* || "$SPC_COMPILER_EXTRA" == *-fcs-profile-generate* ]] && NEED_PROFILE_RT=1
 if [[ $IS_LINK -eq 1 && $NEED_PROFILE_RT -eq 1 && -f "$SCRIPT_DIR/lib/libclang_rt.profile.a" ]]; then
-    PARSED_ARGS+=("$SCRIPT_DIR/lib/libclang_rt.profile.a" "-Wl,-u,__llvm_profile_runtime")
+    PARSED_ARGS+=("-x" "none" "$SCRIPT_DIR/lib/libclang_rt.profile.a" "-Wl,-u,__llvm_profile_runtime")
 fi
 if [[ $IS_LINK -eq 1 && $NEED_CRT -eq 1 && -f "$SCRIPT_DIR/lib/clang_rt.crtbegin.o" && -f "$SCRIPT_DIR/lib/clang_rt.crtend.o" ]]; then
-    PARSED_ARGS+=("$SCRIPT_DIR/lib/clang_rt.crtbegin.o" "$SCRIPT_DIR/lib/clang_rt.crtend.o")
+    PARSED_ARGS+=("-x" "none" "$SCRIPT_DIR/lib/clang_rt.crtbegin.o" "$SCRIPT_DIR/lib/clang_rt.crtend.o")
 fi
 if [[ $IS_LINK -eq 1 && -f "$SCRIPT_DIR/lib/libclang_rt.cpu_model.a" ]]; then
-    PARSED_ARGS+=("$SCRIPT_DIR/lib/libclang_rt.cpu_model.a")
+    PARSED_ARGS+=("-x" "none" "$SCRIPT_DIR/lib/libclang_rt.cpu_model.a")
 fi
 
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""
