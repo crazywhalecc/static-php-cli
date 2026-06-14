@@ -30,7 +30,11 @@ trait libaom
             ->setBuildDir("{$this->source_dir}/builddir")
             ->addConfigureArgs(
                 "-DAOM_TARGET_CPU={$targetCpu}",
-                '-DCONFIG_RUNTIME_CPU_DETECT=1'
+                '-DCONFIG_RUNTIME_CPU_DETECT=1',
+                '-DENABLE_EXAMPLES=0',
+                '-DENABLE_TOOLS=0',
+                '-DENABLE_TESTS=0',
+                '-DENABLE_DOCS=0'
             )
             ->build();
         f_putenv("SPC_COMPILER_EXTRA={$extra}");
