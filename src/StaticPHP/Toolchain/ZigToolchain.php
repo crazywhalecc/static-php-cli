@@ -16,6 +16,7 @@ class ZigToolchain implements UnixToolchainInterface
         GlobalEnvManager::putenv('SPC_DEFAULT_CC=zig-cc');
         GlobalEnvManager::putenv('SPC_DEFAULT_CXX=zig-c++');
         GlobalEnvManager::putenv('SPC_DEFAULT_AR=zig-ar');
+        GlobalEnvManager::putenv('SPC_DEFAULT_RANLIB=zig-ranlib');
         GlobalEnvManager::putenv('SPC_DEFAULT_LD=zig-ld.lld');
 
         // Generate additional objects needed for zig toolchain

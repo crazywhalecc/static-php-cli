@@ -41,6 +41,7 @@ class ToolchainManager
             'Windows' => MSVCToolchain::class,
             'Darwin' => match (getenv('SPC_USE_LLVM') ?: 'system') {
                 'brew' => ClangBrewToolchain::class,
+                'port' => ClangPortsToolchain::class,
                 default => ClangNativeToolchain::class,
             },
             default => throw new WrongUsageException('Unsupported OS family: ' . PHP_OS_FAMILY),
