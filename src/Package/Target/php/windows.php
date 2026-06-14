@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Package\Target\php;
 
+use Package\Target\php;
 use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Stage;
@@ -108,7 +109,10 @@ trait windows
             throw new PatchException('Windows Makefile patching for php.exe target', 'Cannot patch windows CLI Makefile, Makefile does not contain "$(BUILD_DIR)\php.exe:" line');
         }
         $lines[$line_num] = '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest';
-        $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        // /FORCE:MULTIPLE: extensions may bundle their own static copies of common libraries (e.g.
+        // imagick's ImageMagick ships its own zlib/png/jpeg, duplicating gd's); let the first
+        // definition win instead of failing with LNK2005. /ignore:4006 silences the resulting noise.
+        $lines[$line_num + 1] = "\t" . '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286 /FORCE:MULTIPLE /ignore:4006';
         FileSystem::writeFile("{$package->getSourceDir()}\\Makefile", implode("\r\n", $lines));
     }
 
@@ -512,6 +516,7 @@ HEADER;
             $vc_matches = ['unknown', 'unknown'];
         } else {
             $vc_matches = match ($vc['major_version']) {
+                '18', // VS 2026 shares the VS2022 (v143) runtime conventions, so it reports as VS17.
                 '17' => ['VS17', 'Visual C++ 2022'],
                 '16' => ['VS16', 'Visual C++ 2019'],
                 default => ['unknown', 'unknown'],
@@ -695,12 +700,18 @@ C_CODE;
         // MSVC cl.exe format: compiler flags must come before /link, linker flags after
         // ldflags contains /LIBPATH which must be after /link
         // /FORCE:MULTIPLE: in ZTS mode both zend.obj and php_embed.obj (both packed into the fat php8embed.lib) define _tsrm_ls_cache as a __declspec(thread) variable.
+        // /INCLUDE: php8embed.lib's ext/uri (uri_parser_whatwg.obj) references lexbor lxb_url_*/
+        // lxb_unicode_idna_* via __declspec(dllimport); their definitions live in url.obj/idna.obj
+        // but are only pulled in if the plain symbol is referenced. Force-include one symbol from
+        // each so the objects are linked and the __imp_ refs auto-import. (FrankenPHP needs the same.)
+        // System libs add pathcch (PathCchCanonicalizeEx), secur32 (curl Schannel InitSecurityInterface),
+        // crypt32/gdi32 (OpenSSL + Schannel) on top of the Makefile LIBS set.
         $compile_cmd = sprintf(
-            'cl.exe /nologo /O2 /MT /Z7 %s embed.c /Fe:embed.exe /link /FORCE:MULTIPLE /LIBPATH:"%s\lib" %s %s',
+            'cl.exe /nologo /O2 /MT /Z7 %s embed.c /Fe:embed.exe /link /FORCE:MULTIPLE /INCLUDE:lxb_url_parse /INCLUDE:lxb_unicode_idna_init /LIBPATH:"%s\lib" %s %s',
             $include_flags,
             BUILD_ROOT_PATH,
             $config['libs'],
-            'kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib'  // Windows system libs (match Makefile LIBS)
+            'kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib pathcch.lib secur32.lib crypt32.lib gdi32.lib'  // Windows system libs (match Makefile LIBS) + curl/openssl deps
         );
 
         // Log command explicitly (workaround for cmd() not logging complex commands properly)
@@ -714,9 +725,11 @@ C_CODE;
             );
         }
 
-        // Run the embed test
+        // Run the embed test. Use a ".\" prefix: cmd.exe does not resolve a bare "embed.exe" from
+        // the current directory, while the cwd must remain $test_dir so the script's relative
+        // "embed.php" is found.
         InteractiveTerm::setMessage('Running php-embed run smoke test');
-        [$ret, $output] = cmd()->cd($test_dir)->execWithResult('embed.exe');
+        [$ret, $output] = cmd()->cd($test_dir)->execWithResult('.\embed.exe');
         $raw_output = implode('', $output);
         if ($ret !== 0 || trim($raw_output) !== 'hello') {
             throw new ValidationException(

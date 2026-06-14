@@ -137,12 +137,40 @@ function spc_add_log_filter(array|string $filter): void
 
 function spc_write_log(mixed $stream, string $data): false|int
 {
+    // Defensive: a log stream may be false/null when its file could not be opened
+    // (e.g. transient sharing violations on Windows). Never let logging crash the run.
+    if (!is_resource($stream)) {
+        return false;
+    }
     // get filter
     global $spc_log_filters;
     if (is_array($spc_log_filters)) {
         $data = str_replace($spc_log_filters, '***', $data);
     }
     return fwrite($stream, $data);
+}
+
+/**
+ * Return a single, process-wide shared append handle for the given log file.
+ *
+ * The handle is opened lazily once and reused for the lifetime of the process. This is
+ * important on Windows: every time a log file is opened with fopen() its handle is inherited
+ * by child processes spawned via proc_open() (curl, git, tar, ...). While such a child is
+ * alive it keeps the file open, and any *additional* open of the same file fails with a
+ * sharing violation ("The process cannot access the file because it is being used by another
+ * process."). During parallel downloads many children run at once, so opening a fresh handle
+ * per log line crashes. Keeping exactly one handle per file means there is never a second open
+ * to violate. Returns null when the file cannot be opened.
+ *
+ * @internal
+ */
+function spc_log_stream(string $file): mixed
+{
+    static $streams = [];
+    if (!isset($streams[$file]) || !is_resource($streams[$file])) {
+        $streams[$file] = @fopen($file, 'a') ?: null;
+    }
+    return $streams[$file];
 }
 
 // ------- function f_* part -------

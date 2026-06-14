@@ -114,8 +114,8 @@ abstract class Shell
         if (!$this->enable_log_file) {
             return;
         }
-        // write executed command to log file using spc_write_log
-        $log_file = fopen(SPC_SHELL_LOG, 'a');
+        // write executed command to log file using spc_write_log (shared handle, see spc_log_stream)
+        $log_file = spc_log_stream(SPC_SHELL_LOG);
         spc_write_log($log_file, "\n>>>>>>>>>>>>>>>>>>>>>>>>>> [" . date('Y-m-d H:i:s') . "]\n");
         spc_write_log($log_file, "> Executing command: {$cmd}\n");
         // get the backtrace to find the file and line number
@@ -154,8 +154,8 @@ abstract class Shell
     ): array {
         $file_res = null;
         if ($this->enable_log_file) {
-            // write executed command to the log file using spc_write_log
-            $file_res = fopen(SPC_SHELL_LOG, 'a');
+            // write executed command to the log file using spc_write_log (shared handle, see spc_log_stream)
+            $file_res = spc_log_stream(SPC_SHELL_LOG);
         }
         if ($console_output) {
             $console_res = STDOUT;
@@ -263,9 +263,7 @@ abstract class Shell
             }
             fclose($pipes[1]);
             fclose($pipes[2]);
-            if ($file_res !== null) {
-                fclose($file_res);
-            }
+            // $file_res is a shared, process-wide handle (see spc_log_stream); do not close it here.
             proc_close($process);
         }
     }

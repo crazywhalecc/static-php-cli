@@ -233,10 +233,21 @@ trait frankenphp
         $dep_libs = array_unique($dep_libs);
         $lib_dir = str_replace('\\', '/', BUILD_LIB_PATH);
         $php_embed_lib = "-lphp{$major}embed";
-        $win_sys_libs = '-lkernel32 -lole32 -luser32 -ladvapi32 -lshell32 -lws2_32 -ldnsapi -lpsapi -lbcrypt';
+        // pathcch: PathCchCanonicalizeEx etc. used by frankenphp/caddy path handling.
+        // secur32: InitSecurityInterfaceA (curl Schannel/SSPI). crypt32/gdi32: OpenSSL + Schannel.
+        $win_sys_libs = '-lkernel32 -lole32 -luser32 -ladvapi32 -lshell32 -lws2_32 -ldnsapi -lpsapi -lbcrypt -lpathcch -lsecur32 -lcrypt32 -lgdi32';
         $cgo_ldflags = clean_spaces(implode(' ', array_filter([
             "-L{$lib_dir}",
             $php_embed_lib,
+            // FrankenPHP's cgo code references PHP/lexbor/zend symbols via __declspec(dllimport).
+            // Their definitions live in php{N}embed.lib but are only pulled in if the plain symbol
+            // is referenced, so the __imp_ refs go unresolved. Force-include one symbol from each
+            // defining object (zend_atomic.obj, lexbor url.obj, lexbor idna.obj) to pull them in;
+            // lld then auto-imports the __imp_ refs. (/WHOLEARCHIVE would also drag in libxml2.res,
+            // which collides with Go's own resource object: "more than one resource obj file".)
+            '-Wl,/INCLUDE:zend_atomic_bool_store',
+            '-Wl,/INCLUDE:lxb_url_parse',
+            '-Wl,/INCLUDE:lxb_unicode_idna_init',
             implode(' ', $dep_libs),
             $win_sys_libs,
             '-llibcmt',
