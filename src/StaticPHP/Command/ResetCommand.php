@@ -9,8 +9,7 @@ use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
-
-use function Laravel\Prompts\confirm;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand('reset')]
 class ResetCommand extends BaseCommand
@@ -46,7 +45,8 @@ class ResetCommand extends BaseCommand
 
         // Confirm with user unless --yes is specified
         if (!$this->input->getOption('yes')) {
-            if (!confirm('Are you sure you want to continue?', false)) {
+            $helper = $this->getHelper('question');
+            if (!$helper->ask($this->input, $this->output, new ConfirmationQuestion('Are you sure you want to continue? [y/N] ', false))) {
                 InteractiveTerm::error(message: 'Reset operation cancelled.');
                 return static::SUCCESS;
             }
