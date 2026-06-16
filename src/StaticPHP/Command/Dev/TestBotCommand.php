@@ -154,7 +154,7 @@ class TestBotCommand extends BaseCommand
             'targets' => array_values($targets),
             'gen_matrix_args' => $gen_matrix_args,
             'gen_matrix_args_tier2' => $gen_matrix_args_tier2,
-            'php_versions' => array_values($php_versions),
+            'php_versions' => $php_versions,
             'tier2' => $tier2,
             'comment_body' => $comment_body,
         ];

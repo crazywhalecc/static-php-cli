@@ -17,8 +17,8 @@ class InteractiveTerm
 
     public static function notice(string $message, bool $indent = false): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
-        $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
+        $output = ApplicationContext::get(OutputInterface::class);
         if ($output->isVerbose()) {
             logger()->notice(strip_ansi_colors($message));
         } else {
@@ -29,8 +29,8 @@ class InteractiveTerm
 
     public static function success(string $message, bool $indent = false): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
-        $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
+        $output = ApplicationContext::get(OutputInterface::class);
         if ($output->isVerbose()) {
             logger()->info(strip_ansi_colors($message));
         } else {
@@ -41,8 +41,8 @@ class InteractiveTerm
 
     public static function plain(string $message, string $level = 'info'): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
-        $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
+        $output = ApplicationContext::get(OutputInterface::class);
         if ($output->isVerbose()) {
             match ($level) {
                 'debug' => logger()->debug(strip_ansi_colors($message)),
@@ -59,8 +59,8 @@ class InteractiveTerm
 
     public static function info(string $message): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
-        $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
+        $output = ApplicationContext::get(OutputInterface::class);
         if (!$output->isVerbose()) {
             $output->writeln(($no_ansi ? 'strip_ansi_colors' : 'strval')(ConsoleColor::green('▶ ') . $message));
         }
@@ -69,8 +69,8 @@ class InteractiveTerm
 
     public static function error(string $message, bool $indent = true): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
-        $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
+        $output = ApplicationContext::get(OutputInterface::class);
         if ($output->isVerbose()) {
             logger()->error(strip_ansi_colors($message));
         } else {
@@ -86,16 +86,16 @@ class InteractiveTerm
 
     public static function setMessage(string $message): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
         self::$indicator?->setMessage(($no_ansi ? 'strip_ansi_colors' : 'strval')($message));
         logger()->debug(strip_ansi_colors($message));
     }
 
     public static function finish(string $message, bool $status = true): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
         $message = $no_ansi ? strip_ansi_colors($message) : $message;
-        $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        $output = ApplicationContext::get(OutputInterface::class);
         if ($output->isVerbose()) {
             if ($status) {
                 logger()->info($message);
@@ -116,8 +116,8 @@ class InteractiveTerm
 
     public static function indicateProgress(string $message): void
     {
-        $no_ansi = ApplicationContext::get(InputInterface::class)?->getOption('no-ansi') ?? false;
-        $output = ApplicationContext::get(OutputInterface::class) ?? new ConsoleOutput();
+        $no_ansi = (bool) ApplicationContext::get(InputInterface::class)->getOption('no-ansi');
+        $output = ApplicationContext::get(OutputInterface::class);
         if ($output->isVerbose()) {
             logger()->info(strip_ansi_colors($message));
             return;
