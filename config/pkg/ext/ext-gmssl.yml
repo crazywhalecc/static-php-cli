@@ -10,3 +10,5 @@ ext-gmssl:
       license: PHP-3.01
   depends:
     - gmssl
+  php-extension:
+    arg-type: with-path

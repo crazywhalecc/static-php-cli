@@ -18,7 +18,9 @@ class gmssl
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib): void
     {
-        UnixCMakeExecutor::create($lib)->build();
+        UnixCMakeExecutor::create($lib)
+            ->addConfigureArgs('-DENABLE_SM2_PRIVATE_KEY_EXPORT=ON')
+            ->build();
     }
 
     #[BuildFor('Windows')]
@@ -33,6 +35,7 @@ class gmssl
                 '-G "NMake Makefiles"',
                 '-DWIN32=ON',
                 '-DBUILD_SHARED_LIBS=OFF',
+                '-DENABLE_SM2_PRIVATE_KEY_EXPORT=ON',
                 '-DCMAKE_BUILD_TYPE=Release',
                 '-DCMAKE_C_FLAGS_RELEASE="/MT /O2 /Ob2 /DNDEBUG"',
                 '-DCMAKE_CXX_FLAGS_RELEASE="/MT /O2 /Ob2 /DNDEBUG"',
