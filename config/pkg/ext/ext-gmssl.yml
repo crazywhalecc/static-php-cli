@@ -11,4 +11,4 @@ ext-gmssl:
   depends:
     - gmssl
   php-extension:
-    arg-type@unix: with-path
+    arg-type: with-path
