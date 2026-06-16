@@ -61,6 +61,7 @@ class GenExtTestMatrixCommand extends BaseCommand
         'imagick',
         'intl',
         'mongodb',
+        'gmssl',
     ];
 
     /**
