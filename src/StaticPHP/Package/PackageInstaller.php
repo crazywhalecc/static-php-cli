@@ -75,6 +75,9 @@ class PackageInstaller
         }
         // special check for php target packages
         if (in_array($package->getName(), ['php', 'php-cli', 'php-fpm', 'php-micro', 'php-cgi', 'php-embed', 'frankenphp'], true)) {
+            if (!$package instanceof TargetPackage) {
+                throw new WrongUsageException("Package '{$package->getName()}' is expected to be a TargetPackage.");
+            }
             $this->handlePhpTargetPackage($package);
             return $this;
         }

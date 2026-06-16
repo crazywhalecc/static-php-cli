@@ -79,11 +79,11 @@ class ApplicationContext
     /**
      * Get a service from the container.
      *
-     * @template T
+     * @template T of object
      *
-     * @param class-string<T> $id Service identifier
+     * @param class-string<T>|string $id Service identifier
      *
-     * @return null|T
+     * @return ($id is class-string<T> ? T : mixed)
      */
     public static function get(string $id): mixed
     {
