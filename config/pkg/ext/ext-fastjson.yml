@@ -1,0 +1,14 @@
+ext-fastjson:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: iliaal/fastjson
+      extract: php-src/ext/fastjson
+      prefer-stable: true
+    metadata:
+      license-files: [LICENSE]
+  php-extension:
+    os:
+      - Linux
+      - Darwin
