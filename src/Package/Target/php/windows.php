@@ -512,6 +512,7 @@ HEADER;
             $vc_matches = ['unknown', 'unknown'];
         } else {
             $vc_matches = match ($vc['major_version']) {
+                '18', // VS 2026 shares the VS2022 (v143) runtime conventions, so it reports as VS17.
                 '17' => ['VS17', 'Visual C++ 2022'],
                 '16' => ['VS16', 'Visual C++ 2019'],
                 default => ['unknown', 'unknown'],

@@ -21,6 +21,7 @@ class libiconv_win
     {
         $ver = WindowsUtil::findVisualStudio();
         $vs_ver_dir = match ($ver['major_version']) {
+            '18', // VS 2026 reuses the VS2022 (MSVC17) solution, which msbuild builds via forward compatibility.
             '17' => '\MSVC17',
             '16' => '\MSVC16',
             default => throw new EnvironmentException("Current VS version {$ver['major_version']} is not supported yet!"),
@@ -33,7 +34,9 @@ class libiconv_win
     {
         $vs_ver_dir = ApplicationContext::get('vs_ver_dir');
         cmd()->cd("{$lib->getSourceDir()}{$vs_ver_dir}")
-            ->exec('msbuild libiconv.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64');
+            // WholeProgramOptimization (/GL) emits LTCG objects that frankenphp's lld-link cannot
+            // read ("is not a native COFF file"); disable it so the .lib stays plain COFF.
+            ->exec('msbuild libiconv.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:WholeProgramOptimization=false');
         FileSystem::createDir($lib->getLibDir());
         FileSystem::createDir($lib->getIncludeDir());
         FileSystem::copy("{$lib->getSourceDir()}{$vs_ver_dir}\\x64\\lib\\libiconv.lib", "{$lib->getLibDir()}\\libiconv.lib");
