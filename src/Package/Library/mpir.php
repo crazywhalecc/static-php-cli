@@ -21,6 +21,7 @@ class mpir
     {
         $ver = WindowsUtil::findVisualStudio();
         $vs_ver_dir = match ($ver['major_version']) {
+            '18', // VS 2026 reuses the build.vc17 solution, which msbuild builds via forward compatibility.
             '17' => '\build.vc17',
             '16' => '\build.vc16',
             default => throw new EnvironmentException("Current VS version {$ver['major_version']} is not supported yet!"),

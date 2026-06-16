@@ -42,13 +42,16 @@ class libsodium
     {
         $ver = WindowsUtil::findVisualStudio();
         $vs_ver_dir = match ($ver['major_version']) {
+            '18', // VS 2026 reuses the vs2022 solution, which msbuild builds via forward compatibility.
             '17' => '\vs2022',
             '16' => '\vs2019',
             default => throw new EnvironmentException("Current VS version {$ver['major_version']} is not supported yet!"),
         };
 
         cmd()->cd("{$lib->getSourceDir()}\\builds\\msvc{$vs_ver_dir}")
-            ->exec('msbuild libsodium.sln /t:Rebuild /p:Configuration=StaticRelease /p:Platform=x64 /p:PreprocessorDefinitions="SODIUM_STATIC=1"');
+            // WholeProgramOptimization (/GL) emits LTCG objects that frankenphp's lld-link cannot
+            // read ("is not a native COFF file"); disable it so the .lib stays plain COFF.
+            ->exec('msbuild libsodium.sln /t:Rebuild /p:Configuration=StaticRelease /p:Platform=x64 /p:WholeProgramOptimization=false /p:PreprocessorDefinitions="SODIUM_STATIC=1"');
         FileSystem::createDir($lib->getLibDir());
         FileSystem::createDir($lib->getIncludeDir());
 
