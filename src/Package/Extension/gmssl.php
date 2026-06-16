@@ -15,6 +15,7 @@ use StaticPHP\Util\FileSystem;
 class gmssl extends PhpExtensionPackage
 {
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-gmssl')]
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-gmssl')]
     #[PatchDescription('Fix ext-gmssl v1.1.1 compatibility with GmSSL >= 3.1.0 where SM2_VERIFY_CTX was removed (unified into SM2_SIGN_CTX)')]
     public function patchSm2VerifyCtx(): void
     {
