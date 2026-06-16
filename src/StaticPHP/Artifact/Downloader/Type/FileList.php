@@ -45,7 +45,11 @@ class FileList implements DownloadTypeInterface, CheckUpdateInterface
             throw new DownloaderException("Failed to get {$name} file list from {$config['url']}");
         }
         $versions = [];
-        logger()->debug('Matched ' . count($matches['version']) . " versions for {$name}");
+        $cnt = count($matches['version']);
+        if ($cnt === 0) {
+            throw new DownloaderException("Failed to get {$name} file list from {$config['url']}: no version parsed");
+        }
+        logger()->debug("Matched {$cnt} versions for {$name}");
         foreach ($matches['version'] as $i => $version) {
             $lower = strtolower($version);
             foreach (['alpha', 'beta', 'rc', 'pre', 'nightly', 'snapshot', 'dev'] as $beta) {
