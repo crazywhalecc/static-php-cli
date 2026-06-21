@@ -223,7 +223,7 @@ openssl:
 | `{working_dir}` | 工作目录（项目根目录） |
 | `{download_path}` | 下载缓存目录（`downloads/`） |
 | `{source_path}` | 解压源码目录（`source/`） |
-| `{php_sdk_path}` | Windows PHP SDK 目录 |
+| `{spc_msys2_path}` | MSYS2 根目录（`msys64/`）——仅 Windows |
 
 ## target 包类型
 

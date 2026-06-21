@@ -1,0 +1,8 @@
+msys2-build-essentials:
+  type: target
+  artifact:
+    binary: custom
+  env:
+    SPC_MSYS2_PATH: '{pkg_root_path}/msys2-build-essentials/msys64'
+  path@windows:
+    - '{pkg_root_path}/msys2-build-essentials/msys64/usr/bin'
