@@ -16,7 +16,7 @@ use StaticPHP\Util\GlobalEnvManager;
 class msys2_build_essentials
 {
     // MSYS subsystem packages required for autotools-based builds.
-    private const REQUIRED_PACKAGES = ['make', 'autoconf', 'automake', 'libtool', 'pkgconf', 'perl'];
+    private const REQUIRED_PACKAGES = ['make', 'autoconf', 'automake', 'libtool', 'pkgconf', 'perl', 'bison', 're2c'];
 
     #[CustomBinary('msys2-build-essentials', ['windows-x86_64'])]
     public function downBinary(ArtifactDownloader $downloader): DownloadResult
