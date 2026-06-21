@@ -3,6 +3,10 @@ libiconv:
   artifact:
     source:
       type: filelist
+      url: 'https://ftp.gnu.org/gnu/libiconv/'
+      regex: '/href="(?<file>libiconv-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror:
+      type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/libiconv/'
       regex: '/href="(?<file>libiconv-(?<version>[^"]+)\.tar\.gz)"/'
     metadata:

@@ -3,6 +3,10 @@ libunistring:
   artifact:
     source:
       type: filelist
+      url: 'https://ftp.gnu.org/gnu/libunistring/'
+      regex: '/href="(?<file>libunistring-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror:
+      type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/libunistring/'
       regex: '/href="(?<file>libunistring-(?<version>[^"]+)\.tar\.gz)"/'
     metadata:
