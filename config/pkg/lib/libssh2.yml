@@ -11,6 +11,8 @@ libssh2:
       license: BSD-3-Clause
   depends@unix:
     - openssl
+  depends@windows:
+    - zlib
   headers:
     - libssh2.h
     - libssh2_publickey.h
