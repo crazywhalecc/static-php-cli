@@ -9,7 +9,7 @@ libssh2:
     metadata:
       license-files: [COPYING]
       license: BSD-3-Clause
-  depends:
+  depends@unix:
     - openssl
   headers:
     - libssh2.h
