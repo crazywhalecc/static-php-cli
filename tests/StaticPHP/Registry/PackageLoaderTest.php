@@ -33,25 +33,20 @@ class PackageLoaderTest extends TestCase
         $reflection = new \ReflectionClass(PackageLoader::class);
 
         $property = $reflection->getProperty('packages');
-        $property->setAccessible(true);
         $property->setValue(null, null);
 
         $property = $reflection->getProperty('before_stages');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $property = $reflection->getProperty('after_stages');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $property = $reflection->getProperty('loaded_classes');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         // Reset PackageConfig state
         $configReflection = new \ReflectionClass(PackageConfig::class);
         $configProperty = $configReflection->getProperty('package_configs');
-        $configProperty->setAccessible(true);
         $configProperty->setValue(null, []);
     }
 
@@ -67,25 +62,20 @@ class PackageLoaderTest extends TestCase
         $reflection = new \ReflectionClass(PackageLoader::class);
 
         $property = $reflection->getProperty('packages');
-        $property->setAccessible(true);
         $property->setValue(null, null);
 
         $property = $reflection->getProperty('before_stages');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $property = $reflection->getProperty('after_stages');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $property = $reflection->getProperty('loaded_classes');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         // Reset PackageConfig state
         $configReflection = new \ReflectionClass(PackageConfig::class);
         $configProperty = $configReflection->getProperty('package_configs');
-        $configProperty->setAccessible(true);
         $configProperty->setValue(null, []);
     }
 
@@ -359,7 +349,6 @@ class PackageLoaderTest extends TestCase
         // Manually add a before_stage for non-existent package
         $reflection = new \ReflectionClass(PackageLoader::class);
         $property = $reflection->getProperty('before_stages');
-        $property->setAccessible(true);
         $property->setValue(null, [
             'non-existent-package' => [
                 'stage-name' => [[fn () => null, null]],
@@ -384,7 +373,6 @@ class PackageLoaderTest extends TestCase
         // Manually add a before_stage for non-existent stage
         $reflection = new \ReflectionClass(PackageLoader::class);
         $property = $reflection->getProperty('before_stages');
-        $property->setAccessible(true);
         $property->setValue(null, [
             'test-lib' => [
                 'non-existent-stage' => [[fn () => null, null]],
@@ -408,7 +396,6 @@ class PackageLoaderTest extends TestCase
         // Manually add a before_stage with unknown only_when_package_resolved
         $reflection = new \ReflectionClass(PackageLoader::class);
         $property = $reflection->getProperty('before_stages');
-        $property->setAccessible(true);
         $property->setValue(null, [
             'test-lib' => [
                 'test-stage' => [[fn () => null, 'non-existent-package']],
@@ -435,7 +422,6 @@ class PackageLoaderTest extends TestCase
         // This should NOT throw an exception because the package has no build function for current OS
         $reflection = new \ReflectionClass(PackageLoader::class);
         $property = $reflection->getProperty('before_stages');
-        $property->setAccessible(true);
         $property->setValue(null, [
             'test-lib' => [
                 'build' => [[fn () => null, null]],
@@ -458,7 +444,6 @@ class PackageLoaderTest extends TestCase
 
         $reflection = new \ReflectionClass(PackageLoader::class);
         $property = $reflection->getProperty('before_stages');
-        $property->setAccessible(true);
         $property->setValue(null, [
             'test-package' => [
                 'test-stage' => [
@@ -482,7 +467,6 @@ class PackageLoaderTest extends TestCase
 
         $reflection = new \ReflectionClass(PackageLoader::class);
         $property = $reflection->getProperty('after_stages');
-        $property->setAccessible(true);
         $property->setValue(null, [
             'test-package' => [
                 'test-stage' => [
@@ -570,7 +554,6 @@ class TestPackage1 {
     {
         $reflection = new \ReflectionClass(PackageConfig::class);
         $property = $reflection->getProperty('package_configs');
-        $property->setAccessible(true);
         $configs = $property->getValue();
         $configs[$name] = [
             'type' => $type,

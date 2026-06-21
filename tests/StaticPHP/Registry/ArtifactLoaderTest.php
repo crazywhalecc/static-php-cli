@@ -32,12 +32,10 @@ class ArtifactLoaderTest extends TestCase
         // Reset ArtifactLoader and ArtifactConfig state
         $reflection = new \ReflectionClass(ArtifactLoader::class);
         $property = $reflection->getProperty('artifacts');
-        $property->setAccessible(true);
         $property->setValue(null, null);
 
         $configReflection = new \ReflectionClass(ArtifactConfig::class);
         $configProperty = $configReflection->getProperty('artifact_configs');
-        $configProperty->setAccessible(true);
         $configProperty->setValue(null, []);
     }
 
@@ -52,12 +50,10 @@ class ArtifactLoaderTest extends TestCase
         // Reset ArtifactLoader and ArtifactConfig state
         $reflection = new \ReflectionClass(ArtifactLoader::class);
         $property = $reflection->getProperty('artifacts');
-        $property->setAccessible(true);
         $property->setValue(null, null);
 
         $configReflection = new \ReflectionClass(ArtifactConfig::class);
         $configProperty = $configReflection->getProperty('artifact_configs');
-        $configProperty->setAccessible(true);
         $configProperty->setValue(null, []);
     }
 
@@ -429,7 +425,6 @@ class TestArtifact1 {
     {
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $configs = $property->getValue();
         $configs[$name] = [
             'type' => 'source',

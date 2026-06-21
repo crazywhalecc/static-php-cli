@@ -31,12 +31,10 @@ class ArtifactExtractorTest extends TestCase
 
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $loaderReflection = new \ReflectionClass(ArtifactLoader::class);
         $loaderProperty = $loaderReflection->getProperty('artifacts');
-        $loaderProperty->setAccessible(true);
         $loaderProperty->setValue(null, null);
 
         ApplicationContext::reset();
@@ -51,12 +49,10 @@ class ArtifactExtractorTest extends TestCase
 
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $loaderReflection = new \ReflectionClass(ArtifactLoader::class);
         $loaderProperty = $loaderReflection->getProperty('artifacts');
-        $loaderProperty->setAccessible(true);
         $loaderProperty->setValue(null, null);
 
         ApplicationContext::reset();
@@ -157,7 +153,6 @@ class ArtifactExtractorTest extends TestCase
         // Pre-populate the extracted map for 'my-pkg' via reflection
         $reflection = new \ReflectionClass(ArtifactExtractor::class);
         $extractedProperty = $reflection->getProperty('extracted');
-        $extractedProperty->setAccessible(true);
         $extractedProperty->setValue($extractor, ['my-pkg' => true]);
 
         $result = $extractor->extract($artifact, false);
@@ -181,7 +176,6 @@ class ArtifactExtractorTest extends TestCase
         // Pre-populate the extracted map so we don't need actual downloads
         $reflection = new \ReflectionClass(ArtifactExtractor::class);
         $extractedProperty = $reflection->getProperty('extracted');
-        $extractedProperty->setAccessible(true);
         $extractedProperty->setValue($extractor, ['my-pkg' => true]);
 
         $result = $extractor->extract('my-pkg', false);
@@ -204,7 +198,6 @@ class ArtifactExtractorTest extends TestCase
     {
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $configs = $property->getValue(null) ?? [];
         $configs[$name] = $config;
         $property->setValue(null, $configs);
