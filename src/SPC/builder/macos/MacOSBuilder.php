@@ -96,6 +96,8 @@ class MacOSBuilder extends UnixBuilderBase
             ('--with-config-file-path=' . $this->getOption('with-config-file-path') . ' ') : '';
         $config_file_scan_dir = $this->getOption('with-config-file-scan-dir', false) ?
             ('--with-config-file-scan-dir=' . $this->getOption('with-config-file-scan-dir') . ' ') : '';
+        $sysconfdir = $this->getOption('with-sysconfdir', false) ?
+            ('--sysconfdir=' . $this->getOption('with-sysconfdir') . ' ') : '';
 
         $enableCli = ($build_target & BUILD_TARGET_CLI) === BUILD_TARGET_CLI;
         $enableFpm = ($build_target & BUILD_TARGET_FPM) === BUILD_TARGET_FPM;
@@ -129,6 +131,7 @@ class MacOSBuilder extends UnixBuilderBase
                 ($enableCgi ? '--enable-cgi ' : '--disable-cgi ') .
                 $config_file_path .
                 $config_file_scan_dir .
+                $sysconfdir .
                 $json_74 .
                 $zts .
                 $this->makeStaticExtensionArgs() . ' ' .
