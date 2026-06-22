@@ -25,7 +25,6 @@ class ArtifactConfigTest extends TestCase
         // Reset static state
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue([]);
     }
 
@@ -41,7 +40,6 @@ class ArtifactConfigTest extends TestCase
         // Reset static state
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue([]);
     }
 

@@ -23,12 +23,10 @@ class ArtifactDownloaderTest extends TestCase
         // Reset ArtifactConfig and ArtifactLoader static state
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $loaderReflection = new \ReflectionClass(ArtifactLoader::class);
         $loaderProperty = $loaderReflection->getProperty('artifacts');
-        $loaderProperty->setAccessible(true);
         $loaderProperty->setValue(null, null);
     }
 
@@ -38,12 +36,10 @@ class ArtifactDownloaderTest extends TestCase
 
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $loaderReflection = new \ReflectionClass(ArtifactLoader::class);
         $loaderProperty = $loaderReflection->getProperty('artifacts');
-        $loaderProperty->setAccessible(true);
         $loaderProperty->setValue(null, null);
     }
 
@@ -343,7 +339,6 @@ class ArtifactDownloaderTest extends TestCase
     {
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $configs = $property->getValue(null) ?? [];
         $configs[$name] = $config;
         $property->setValue(null, $configs);
