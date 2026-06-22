@@ -36,6 +36,15 @@ class CraftCommand extends BaseCommand
         // set verbosity
         $this->output->setVerbosity($craft['verbosity']);
 
+        // sync logger level and ApplicationContext debug mode to match the new verbosity
+        $level = match ($this->output->getVerbosity()) {
+            OutputInterface::VERBOSITY_VERBOSE => 'info',
+            OutputInterface::VERBOSITY_VERY_VERBOSE, OutputInterface::VERBOSITY_DEBUG => 'debug',
+            default => 'warning',
+        };
+        logger()->setLevel($level);
+        ApplicationContext::setDebug($this->output->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG);
+
         // apply env
         array_walk($craft['extra-env'], fn ($v, $k) => f_putenv("{$k}={$v}"));
 
