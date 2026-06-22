@@ -96,6 +96,17 @@ trait windows
     }
 
     #[BeforeStage('php', [self::class, 'makeCliForWindows'])]
+    #[PatchDescription('Patch Makefile to ensure buildroot/include comes before extension CFLAGS (fixes zip.h conflict with minizip)')]
+    public function patchMakefileIncludeOrder(TargetPackage $package): void
+    {
+        FileSystem::replaceFileStr(
+            "{$package->getSourceDir()}\\Makefile",
+            '$(CFLAGS_PHP_OBJ) $(CFLAGS)',
+            '$(CFLAGS) $(CFLAGS_PHP_OBJ)'
+        );
+    }
+
+    #[BeforeStage('php', [self::class, 'makeCliForWindows'])]
     #[PatchDescription('Patch Windows Makefile for CLI target')]
     public function patchCLITarget(TargetPackage $package): void
     {
