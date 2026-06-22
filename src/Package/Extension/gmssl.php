@@ -27,6 +27,18 @@ class gmssl extends PhpExtensionPackage
         );
     }
 
+    #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-gmssl')]
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-gmssl')]
+    #[PatchDescription('Fix ext-gmssl v1.1.1: pbkdf2_hmac_sm3_genkey was renamed to sm3_pbkdf2 in GmSSL >= 3.2.0')]
+    public function patchPbkdf2Rename(): void
+    {
+        FileSystem::replaceFileStr(
+            "{$this->getSourceDir()}/gmssl.c",
+            'pbkdf2_hmac_sm3_genkey',
+            'sm3_pbkdf2'
+        );
+    }
+
     #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-gmssl')]
     #[PatchDescription('Add CHECK_LIB to config.w32 for static Windows builds')]
     public function patchBeforeBuildconfWin(): bool
