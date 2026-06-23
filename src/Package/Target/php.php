@@ -255,6 +255,11 @@ class php extends TargetPackage
             $installer->addBuildPackage('php-embed');
         }
 
+        // UPX compression: ensure the upx binary package is installed when requested
+        if ($package->getBuildOption('with-upx-pack')) {
+            $additional_packages[] = 'upx';
+        }
+
         return [...$extensions_pkg, ...$additional_packages];
     }
 

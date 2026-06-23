@@ -3,6 +3,10 @@ readline:
   artifact:
     source:
       type: filelist
+      url: 'https://ftp.gnu.org/gnu/readline/'
+      regex: '/href="(?<file>readline-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror:
+      type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/readline/'
       regex: '/href="(?<file>readline-(?<version>[^"]+)\.tar\.gz)"/'
     metadata:

@@ -253,6 +253,13 @@ class TestBotCommand extends BaseCommand
             $fmt($targets),
         );
 
+        $available_labels = implode(', ', [
+            '`need-test` (gate)',
+            '`test/linux` `test/windows` `test/macos` (platform)',
+            '`test/tier2` (extra arch)',
+            '`test/php-83` `test/php-84` (PHP version)',
+        ]);
+
         // Case 1: need-test absent → invite the author to add it
         if (!$need_test) {
             return implode("\n", [
@@ -261,11 +268,9 @@ class TestBotCommand extends BaseCommand
                 '',
                 $detected,
                 '',
-                'To trigger extension build tests on this PR, add the `need-test` label:',
+                'To trigger extension build tests on this PR, add the `need-test` label.',
                 '',
-                '**Gate**: `need-test`',
-                '**Platform filter** (optional, default all): `test/linux` `test/windows` `test/macos` · `test/tier2`',
-                '**PHP version** (optional, default 8.5): `test/php-83` `test/php-84`',
+                '**Available labels**: ' . $available_labels,
             ]);
         }
 
@@ -307,6 +312,7 @@ class TestBotCommand extends BaseCommand
             '',
             $detected,
             '**Active labels**: ' . $labels_str,
+            '**Available labels**: ' . $available_labels,
             '**Config**: ' . implode(' + ', $platform_parts) . ' | ' . $php_str,
         ]);
     }
