@@ -27,6 +27,7 @@ class ConfigTypeTest extends TestCase
             'php-extension',
             'target',
             'virtual-target',
+            'tool',
         ];
 
         $this->assertEquals($expectedTypes, ConfigType::PACKAGE_TYPES);

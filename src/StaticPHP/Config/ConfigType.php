@@ -19,6 +19,7 @@ enum ConfigType
         'php-extension',
         'target',
         'virtual-target',
+        'tool',
     ];
 
     public static function validateLicenseField(mixed $value): bool
