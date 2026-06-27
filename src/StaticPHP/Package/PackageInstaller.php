@@ -11,6 +11,7 @@ use StaticPHP\Artifact\ArtifactExtractor;
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
@@ -166,6 +167,9 @@ class PackageInstaller
 
         // Early validation: check if packages can be built or installed before downloading
         $this->validatePackagesBeforeBuild();
+
+        // Check that all required tools are installed before proceeding
+        $this->ensureRequiredTools();
 
         // check download
         if ($this->download) {
@@ -575,6 +579,66 @@ class PackageInstaller
     }
 
     /**
+     * Collect all tool packages required by the currently resolved packages.
+     *
+     * Reads the 'tools' field from each resolved package's YAML config.
+     * The field supports platform suffixes (tools@windows, tools@linux, etc.)
+     * resolved automatically by PackageConfig::get().
+     *
+     * Tools are NOT part of the library dependency graph — they are
+     * build-time prerequisites that must be installed before any library
+     * build begins.
+     *
+     * @return string[] Unique tool package names required for this build
+     */
+    public function collectRequiredTools(): array
+    {
+        $tools = [];
+        foreach ($this->packages as $package) {
+            $deps = PackageConfig::get($package->getName(), 'tools', []);
+            foreach ((array) $deps as $tool_name) {
+                $tools[$tool_name] = true;
+            }
+        }
+        return array_keys($tools);
+    }
+
+    /**
+     * Check that all required tools are installed.
+     *
+     * Iterates through tools collected by collectRequiredTools(),
+     * resolves each to a ToolPackage instance, and checks isInstalled().
+     *
+     * @return array{missing: array<string>, installed: array<string>}
+     */
+    public function checkRequiredTools(): array
+    {
+        $missing = [];
+        $installed = [];
+        foreach ($this->collectRequiredTools() as $tool_name) {
+            try {
+                $tool = PackageLoader::getPackage($tool_name);
+            } catch (WrongUsageException) {
+                $missing[] = $tool_name;
+                logger()->warning("Required tool '{$tool_name}' is not registered as a package.");
+                continue;
+            }
+
+            if (!$tool instanceof ToolPackage) {
+                logger()->warning("Package '{$tool_name}' is declared as a tool dependency but is not a ToolPackage (type: {$tool->getType()}).");
+                continue;
+            }
+
+            if ($tool->isInstalled()) {
+                $installed[] = $tool_name;
+            } else {
+                $missing[] = $tool_name;
+            }
+        }
+        return ['missing' => $missing, 'installed' => $installed];
+    }
+
+    /**
      * @param Package[] $packages
      */
     private function dumpLicenseFiles(array $packages): void
@@ -634,6 +698,27 @@ class PackageInstaller
         foreach ($this->packages as $package) {
             $this->injectPackageEnvs($package);
         }
+    }
+
+    /**
+     * Ensure all required tools are installed, throwing if any are missing.
+     *
+     * Called early in the build pipeline (before download/extract).
+     * When tools are missing, lists them with install hints.
+     */
+    private function ensureRequiredTools(): void
+    {
+        $status = $this->checkRequiredTools();
+        if (empty($status['missing'])) {
+            if (!empty($status['installed'])) {
+                logger()->info('Required tools: ' . implode(', ', $status['installed']) . ' — all installed.');
+            }
+            return;
+        }
+
+        $msg = 'Missing required build tools: ' . implode(', ', $status['missing']) . "\n";
+        $msg .= "Run 'bin/spc doctor' to check your environment, or install the missing tools manually.";
+        throw new EnvironmentException($msg);
     }
 
     private function injectPackageEnvs(Package $package): void

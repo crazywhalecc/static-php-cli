@@ -121,6 +121,20 @@ abstract class Package
     }
 
     /**
+     * Get the target directory where this package's artifacts should be placed.
+     *
+     * Libraries install to BUILD_ROOT_PATH (static-libs, headers, pkg-configs).
+     * Tools install to PKG_ROOT_PATH (executables).
+     * Extensions install to php-src/ext/ (shared objects).
+     *
+     * Override in subclasses to change the default.
+     */
+    public function getInstallTarget(): string
+    {
+        return BUILD_ROOT_PATH;
+    }
+
+    /**
      * Add a stage to the package.
      */
     public function addStage(string $name, callable $stage): void

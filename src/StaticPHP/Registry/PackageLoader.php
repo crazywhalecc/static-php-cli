@@ -17,6 +17,7 @@ use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Attribute\Package\ResolveBuild;
 use StaticPHP\Attribute\Package\Stage;
 use StaticPHP\Attribute\Package\Target;
+use StaticPHP\Attribute\Package\Tool;
 use StaticPHP\Attribute\Package\Validate;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
@@ -27,6 +28,7 @@ use StaticPHP\Package\Package;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Package\TargetPackage;
+use StaticPHP\Package\ToolPackage;
 use StaticPHP\Util\FileSystem;
 
 class PackageLoader
@@ -88,6 +90,7 @@ class PackageLoader
                 'target', 'virtual-target' => new TargetPackage($name, $item['type']),
                 'library' => new LibraryPackage($name, $item['type']),
                 'php-extension' => new PhpExtensionPackage($name, $item['type']),
+                'tool' => new ToolPackage($name, $item['type']),
                 default => null,
             };
             if ($pkg !== null) {
@@ -190,7 +193,8 @@ class PackageLoader
             $attribute_instance = $attribute->newInstance();
             if ($attribute_instance instanceof Target === false &&
                 $attribute_instance instanceof Library === false &&
-                $attribute_instance instanceof Extension === false) {
+                $attribute_instance instanceof Extension === false &&
+                $attribute_instance instanceof Tool === false) {
                 // not a package attribute
                 continue;
             }
@@ -216,6 +220,7 @@ class PackageLoader
                 Target::class => ['target', 'virtual-target'],
                 Library::class => ['library'],
                 Extension::class => ['php-extension'],
+                Tool::class => ['tool'],
                 default => null,
             };
             if (!in_array($package_type, $pkg_type_attr, true)) {
