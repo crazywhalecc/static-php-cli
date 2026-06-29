@@ -360,10 +360,9 @@
         }
     },
     "ext-zstd": {
-        "type": "git",
+        "type": "ghtar",
+        "repo": "kjdev/php-ext-zstd",
         "path": "php-src/ext/zstd",
-        "rev": "master",
-        "url": "https://github.com/kjdev/php-ext-zstd",
         "license": {
             "type": "file",
             "path": "LICENSE"
