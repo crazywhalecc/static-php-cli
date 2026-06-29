@@ -138,6 +138,22 @@ class SourcePatcher
             );
         }
 
+        // strip our build-time env vars from phpinfo's "Configure Command" ('|' delimiter: PHP_BUILD_PROVIDER may contain '#')
+        if (is_unix()) {
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/configure',
+                'for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do',
+                'for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX '
+                . 'PKG_CONFIG PKG_CONFIG_PATH EXTENSION_DIR OPENSSL_LIBS '
+                . 'PHP_BUILD_SYSTEM PHP_BUILD_PROVIDER PHP_BUILD_COMPILER PHP_BUILD_ARCH; do',
+            );
+            FileSystem::replaceFileStr(
+                SOURCE_PATH . '/php-src/configure',
+                'clean_configure_args=$(echo $clean_configure_args | $SED -e "s#\'$var=$val\'##")',
+                'clean_configure_args=$(echo $clean_configure_args | $SED -e "s|\'$var=$val\'||")',
+            );
+        }
+
         if (file_exists(SOURCE_PATH . '/php-src/configure.ac.bak')) {
             // restore configure.ac
             FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/configure.ac');
