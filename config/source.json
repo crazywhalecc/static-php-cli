@@ -124,10 +124,9 @@
         }
     },
     "ext-brotli": {
-        "type": "git",
+        "type": "ghtagtar",
+        "repo": "kjdev/php-ext-brotli",
         "path": "php-src/ext/brotli",
-        "rev": "master",
-        "url": "https://github.com/kjdev/php-ext-brotli",
         "license": {
             "type": "file",
             "path": "LICENSE"
