@@ -99,6 +99,25 @@ class ApplicationContext
     }
 
     /**
+     * Resolve $id, returning null if it can't be constructed.
+     * PHP-DI's has() returns true for any autowirable class even when get()
+     * would throw on missing scalar args — for "is this resolvable right now"
+     * semantics use this.
+     *
+     * @template T
+     * @param  class-string<T> $id
+     * @return null|T
+     */
+    public static function tryGet(string $id): mixed
+    {
+        try {
+            return self::getContainer()->get($id);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * Set a service in the container.
      * Use sparingly - prefer configuration-based definitions.
      */
