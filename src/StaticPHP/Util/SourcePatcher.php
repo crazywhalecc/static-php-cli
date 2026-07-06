@@ -52,7 +52,7 @@ class SourcePatcher
         $detect_reverse = !$reverse;
         $cd_cmd = (PHP_OS_FAMILY === 'Windows' ? 'cd /d ' : 'cd ') . escapeshellarg($patch_cwd);
         $detect_cmd = $cd_cmd
-            . ' && patch --dry-run -p1 -s -f'
+            . ' && patch --binary --dry-run -p1 -s -f'
             . ($detect_reverse ? ' -R' : '')
             . ' < ' . escapeshellarg($patch_arg)
             . ' > ' . (PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null') . ' 2>&1';
@@ -65,7 +65,7 @@ class SourcePatcher
 
         // Apply patch
         $apply_cmd = $cd_cmd
-            . ' && patch -p1'
+            . ' && patch --binary -p1'
             . ($reverse ? ' -R' : '')
             . ' < ' . escapeshellarg($patch_arg);
 
