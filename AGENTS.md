@@ -23,6 +23,7 @@ If your agent does not automatically discover skills from `.github/skills`, read
 - `config/pkg/target`: final build target and virtual target YAML.
 - `config/pkg/tool`: helper tool package YAML.
 - `config/artifact`: standalone artifact YAML for shared or complex sources/binaries.
+- `log/`: build and shell execution logs (`spc.output.log`, `spc.shell.log`, and per-package CMake/config logs); controlled by `SPC_LOGS_DIR` and `SPC_ENABLE_LOG_FILE`.
 - `src/StaticPHP`: framework core: registry loading, config validation, dependency resolution, package install/build pipeline, doctor, toolchains, runtime shell/executors, exceptions.
 - `src/Package`: package-specific build logic registered by PHP attributes.
 - `src/globals`: constants, helper functions, patches, smoke tests, bundled license text.

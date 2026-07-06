@@ -21,7 +21,7 @@ Default log directory is `log/`, controlled by `SPC_LOGS_DIR`. The important fil
 - `lib.<pkg>.cmake-error.log`: copied CMake error log.
 - `lib.<pkg>.cmake-output.log`: copied CMake output log.
 
-Logs are created when `SPC_ENABLE_LOG_FILE` is true. Old `*.log` files are cleaned unless the preserve-log env is true. Note the current code checks `SPC_PRESERVE_LOG`, while `config/env.ini` and docs mention `SPC_PRESERVE_LOGS`; verify this mismatch when diagnosing log retention behavior.
+Logs are created when `SPC_ENABLE_LOG_FILE` is true. Old `*.log` files are cleaned unless `SPC_PRESERVE_LOG` is set to a truthy value. The code in `src/bootstrap.php` reads `SPC_PRESERVE_LOG` (no trailing S).
 
 ## Terminal Summary
 
