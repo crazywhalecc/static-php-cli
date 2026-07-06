@@ -48,13 +48,14 @@ class SourcePatcher
         $patch_cwd = FileSystem::convertPath($cwd);
         $patch_arg = $patch_str;
         if (PHP_OS_FAMILY === 'Windows') {
-            $patch_cwd = FileSystem::convertWinPathToMinGW($patch_cwd);
             $patch_arg = FileSystem::convertWinPathToMinGW($patch_arg);
         }
 
         // Detect if patch is already applied (reverse detection)
         $detect_reverse = !$reverse;
-        $detect_cmd = 'patch --dry-run -p1 -s -f -d ' . escapeshellarg($patch_cwd)
+        $cd_cmd = (PHP_OS_FAMILY === 'Windows' ? 'cd /d ' : 'cd ') . escapeshellarg($patch_cwd);
+        $detect_cmd = $cd_cmd
+            . ' && patch --dry-run -p1 -s -f'
             . ' -i ' . escapeshellarg($patch_arg)
             . ($detect_reverse ? ' -R' : '')
             . ' > ' . (PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null') . ' 2>&1';
@@ -66,7 +67,8 @@ class SourcePatcher
         }
 
         // Apply patch
-        $apply_cmd = 'patch -p1 -d ' . escapeshellarg($patch_cwd)
+        $apply_cmd = $cd_cmd
+            . ' && patch -p1'
             . ' -i ' . escapeshellarg($patch_arg)
             . ($reverse ? ' -R' : '');
 
