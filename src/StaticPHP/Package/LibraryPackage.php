@@ -114,60 +114,6 @@ class LibraryPackage extends Package
     }
 
     /**
-     * Get extra CFLAGS for current package.
-     * You need to define the environment variable in the format of {LIBRARY_NAME}_CFLAGS
-     * where {LIBRARY_NAME} is the snake_case name of the library.
-     * For example, for libjpeg, the environment variable should be libjpeg_CFLAGS.
-     */
-    public function getLibExtraCFlags(): string
-    {
-        // get environment variable
-        $env = getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
-        // get default c flags
-        $arch_c_flags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
-        if (!empty(getenv('SPC_DEFAULT_CFLAGS')) && !str_contains($env, $arch_c_flags)) {
-            $env .= ' ' . $arch_c_flags;
-        }
-        return trim($env);
-    }
-
-    /**
-     * Get extra CXXFLAGS for current package.
-     * You need to define the environment variable in the format of {LIBRARY_NAME}_CXXFLAGS
-     * where {LIBRARY_NAME} is the snake_case name of the library.
-     * For example, for libjpeg, the environment variable should be libjpeg_CXXFLAGS.
-     */
-    public function getLibExtraCxxFlags(): string
-    {
-        // get environment variable
-        $env = getenv($this->getSnakeCaseName() . '_CXXFLAGS') ?: '';
-        // get default cxx flags
-        $arch_cxx_flags = getenv('SPC_DEFAULT_CXXFLAGS') ?: '';
-        if (!empty(getenv('SPC_DEFAULT_CXXFLAGS')) && !str_contains($env, $arch_cxx_flags)) {
-            $env .= ' ' . $arch_cxx_flags;
-        }
-        return trim($env);
-    }
-
-    /**
-     * Get extra LDFLAGS for current package.
-     * You need to define the environment variable in the format of {LIBRARY_NAME}_LDFLAGS
-     * where {LIBRARY_NAME} is the snake_case name of the library.
-     * For example, for libjpeg, the environment variable should be libjpeg_LDFLAGS.
-     */
-    public function getLibExtraLdFlags(): string
-    {
-        // get environment variable
-        $env = getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
-        // get default ld flags
-        $arch_ld_flags = getenv('SPC_DEFAULT_LDFLAGS') ?: '';
-        if (!empty(getenv('SPC_DEFAULT_LDFLAGS')) && !str_contains($env, $arch_ld_flags)) {
-            $env .= ' ' . $arch_ld_flags;
-        }
-        return trim($env);
-    }
-
-    /**
      * Patch pkgconfig file prefix, exec_prefix, libdir, includedir for correct build.
      *
      * @param array      $files          File list to patch, if empty, will use pkg-configs from config (e.g. ['zlib.pc', 'openssl.pc'])
@@ -362,17 +308,6 @@ class LibraryPackage extends Package
         $config = new SPCConfigUtil(['libs_only_deps' => true, 'absolute_libs' => true]);
         $res = $config->config([$this->getName()]);
         return $res['libs'];
-    }
-
-    /**
-     * Get extra LIBS for current package.
-     * You need to define the environment variable in the format of {LIBRARY_NAME}_LIBS
-     * where {LIBRARY_NAME} is the snake_case name of the library.
-     * For example, for libjpeg, the environment variable should be libjpeg_LIBS.
-     */
-    public function getLibExtraLibs(): string
-    {
-        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
     }
 
     /**

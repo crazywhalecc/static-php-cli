@@ -6,6 +6,7 @@ namespace StaticPHP\Runtime\Shell;
 
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\ToolPackage;
 use StaticPHP\Runtime\SystemTarget;
 use ZM\Logger\ConsoleColor;
 
@@ -40,9 +41,9 @@ class UnixShell extends Shell
     /**
      * Init the environment variable that common build will be used.
      *
-     * @param LibraryPackage $library Library package
+     * @param LibraryPackage|ToolPackage $library Library or tool package
      */
-    public function initializeEnv(LibraryPackage $library): UnixShell
+    public function initializeEnv(LibraryPackage|ToolPackage $library): UnixShell
     {
         $this->setEnv([
             'CFLAGS' => $library->getLibExtraCFlags(),

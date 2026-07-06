@@ -1,7 +1,13 @@
 upx:
-  type: target
+  type: tool
   artifact:
     binary:
       linux-x86_64: { type: ghrel, repo: upx/upx, match: upx.+-amd64_linux\.tar\.xz, extract: { upx: '{pkg_root_path}/bin/upx' } }
       linux-aarch64: { type: ghrel, repo: upx/upx, match: upx.+-arm64_linux\.tar\.xz, extract: { upx: '{pkg_root_path}/bin/upx' } }
       windows-x86_64: { type: ghrel, repo: upx/upx, match: upx.+-win64\.zip, extract: { upx.exe: '{pkg_root_path}/bin/upx.exe' } }
+  tool:
+    provides:
+      - upx
+    provides@windows:
+      - upx.exe
+    binary-subdir: bin

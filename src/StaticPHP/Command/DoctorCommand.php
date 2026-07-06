@@ -13,7 +13,7 @@ class DoctorCommand extends BaseCommand
 {
     public function configure(): void
     {
-        $this->addOption('auto-fix', null, InputOption::VALUE_OPTIONAL, 'Automatically fix failed items (if possible)', false);
+        $this->addOption('auto-fix', 'y', InputOption::VALUE_OPTIONAL, 'Automatically fix failed items (if possible)', false);
     }
 
     public function handle(): int

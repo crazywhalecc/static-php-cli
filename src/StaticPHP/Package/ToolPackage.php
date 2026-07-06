@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace StaticPHP\Package;
 
 use StaticPHP\Config\PackageConfig;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
-use StaticPHP\Util\GlobalPathTrait;
 
 /**
  * Represents a build-time tool package.
@@ -26,6 +26,11 @@ use StaticPHP\Util\GlobalPathTrait;
  *       provides: [nasm.exe, ndisasm.exe]       # executables this tool installs
  *       binary-subdir: ''                        # subdirectory under install root (default: '')
  *       min-version: '2.16'                      # minimum required version (optional)
+ *
+ * Fields nested under 'tool' support the same '@windows'/'@unix'/'@macos'/'@linux' suffix
+ * overrides as top-level package fields (e.g. 'provides@windows' overrides 'provides' when
+ * building on Windows), useful when a tool provides differently-named binaries per OS
+ * (e.g. upx vs upx.exe).
  *     artifact:
  *       binary:
  *         windows-x86_64:
@@ -36,7 +41,44 @@ use StaticPHP\Util\GlobalPathTrait;
  */
 class ToolPackage extends Package
 {
-    use GlobalPathTrait;
+    /**
+     * Get the build root ('--prefix') for a tool that builds from source.
+     *
+     * Unlike LibraryPackage (which installs into BUILD_ROOT_PATH), tool packages that build
+     * from source (e.g. pkg-config, via UnixAutoconfExecutor/UnixCMakeExecutor) install into
+     * their own install root (PKG_ROOT_PATH by default), consistent with pre-built tool binaries.
+     */
+    public function getBuildRootPath(): string
+    {
+        return $this->getInstallRoot();
+    }
+
+    /**
+     * Tool packages don't produce headers for other packages to consume. Kept self-contained
+     * under the tool's own install root so a from-source build never accidentally picks up
+     * unrelated headers from BUILD_ROOT_PATH.
+     */
+    public function getIncludeDir(): string
+    {
+        return $this->getInstallRoot() . DIRECTORY_SEPARATOR . 'include';
+    }
+
+    /**
+     * Tool packages don't produce libraries for other packages to consume. Kept self-contained
+     * under the tool's own install root (see getIncludeDir()).
+     */
+    public function getLibDir(): string
+    {
+        return $this->getInstallRoot() . DIRECTORY_SEPARATOR . 'lib';
+    }
+
+    /**
+     * Where this tool's own executables live, i.e. {install-root}/{binary-subdir}.
+     */
+    public function getBinDir(): string
+    {
+        return $this->getBinaryDir();
+    }
 
     /**
      * Get the install root directory for this tool.
@@ -50,7 +92,7 @@ class ToolPackage extends Package
         if ($root = getenv($env_var)) {
             return $root;
         }
-        $config_root = $this->getToolConfig()['install-root'] ?? null;
+        $config_root = $this->getToolField('install-root');
         if ($config_root !== null) {
             return FileSystem::replacePathVariable((string) $config_root);
         }
@@ -65,7 +107,7 @@ class ToolPackage extends Package
      */
     public function getBinaryDir(): string
     {
-        $subdir = $this->getToolConfig()['binary-subdir'] ?? '';
+        $subdir = $this->getToolField('binary-subdir') ?? '';
         if ($subdir === '') {
             return $this->getInstallRoot();
         }
@@ -75,14 +117,15 @@ class ToolPackage extends Package
     /**
      * Get the list of executables this tool provides.
      *
-     * Reads from YAML 'tool.provides' field. Each entry is a bare filename
-     * (e.g. 'nasm.exe'), resolved relative to getBinaryDir().
+     * Reads from YAML 'tool.provides' field (with '@windows'/'@unix'/'@macos'/'@linux'
+     * suffix override support). Each entry is a bare filename (e.g. 'nasm.exe'), resolved
+     * relative to getBinaryDir().
      *
      * @return string[] Bare executable names (not full paths)
      */
     public function getProvides(): array
     {
-        return $this->getToolConfig()['provides'] ?? [];
+        return $this->getToolField('provides') ?? [];
     }
 
     /**
@@ -113,13 +156,27 @@ class ToolPackage extends Package
     }
 
     /**
+     * Get the version currently installed on disk, as recorded by ToolVersionRegistry when this
+     * tool's binary was last (re-)installed via PackageInstaller::installBinary().
+     *
+     * Returns null if the tool was never installed through the package installer (e.g. installed
+     * manually, or not installed at all), or if its artifact doesn't expose a version string.
+     * This reflects what's actually on disk, unlike the download cache which only reflects the
+     * last download and may be stale or cleared.
+     */
+    public function getInstalledVersion(): ?string
+    {
+        return ToolVersionRegistry::get($this->name);
+    }
+
+    /**
      * Get the minimum required version for this tool, if specified.
      *
      * Returns null if no version constraint is configured.
      */
     public function getMinVersion(): ?string
     {
-        $version = $this->getToolConfig()['min-version'] ?? null;
+        $version = $this->getToolField('min-version');
         return $version !== null ? (string) $version : null;
     }
 
@@ -147,5 +204,30 @@ class ToolPackage extends Package
             return [];
         }
         return $config['tool'];
+    }
+
+    /**
+     * Get a field from the nested 'tool' config block, honoring the same
+     * '@windows'/'@unix'/'@macos'/'@linux'/'@bsd'/'@freebsd' suffix override priority
+     * that PackageConfig::get() applies to top-level fields. This lets a tool declare a
+     * per-OS override, e.g. 'provides' + 'provides@windows', without needing platform-
+     * specific package config files.
+     */
+    private function getToolField(string $field): mixed
+    {
+        $tool = $this->getToolConfig();
+        $suffixes = match (SystemTarget::getTargetOS()) {
+            'Windows' => ['@windows', ''],
+            'Darwin' => ['@macos', '@unix', ''],
+            'Linux' => ['@linux', '@unix', ''],
+            'BSD' => ['@freebsd', '@bsd', '@unix', ''],
+        };
+        foreach ($suffixes as $suffix) {
+            $key = "{$field}{$suffix}";
+            if (isset($tool[$key])) {
+                return $tool[$key];
+            }
+        }
+        return null;
     }
 }

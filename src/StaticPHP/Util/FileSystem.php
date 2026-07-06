@@ -174,7 +174,7 @@ class FileSystem
     public static function convertWinPathToMinGW(string $path): string
     {
         if (preg_match('/^[A-Za-z]:/', $path)) {
-            $path = '/' . strtolower($path[0]) . '/' . str_replace('\\', '/', substr($path, 2));
+            $path = '/' . strtolower($path[0]) . '/' . str_replace('\\', '/', ltrim(substr($path, 2), '\/'));
         }
         return $path;
     }

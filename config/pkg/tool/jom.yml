@@ -1,7 +1,11 @@
 jom:
-  type: target
+  type: tool
   artifact:
     binary:
       windows-x86_64: { type: url, url: 'https://download.qt.io/official_releases/jom/jom.zip', extract: '{pkg_root_path}/jom' }
   path@windows:
     - '{pkg_root_path}\jom'
+  tool:
+    provides:
+      - jom.exe
+    binary-subdir: jom

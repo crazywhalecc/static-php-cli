@@ -1,5 +1,10 @@
 nasm:
-  type: target
+  type: tool
   artifact:
     binary:
       windows-x86_64: { type: url, url: 'https://dl.static-php.dev/static-php-cli/deps/nasm/nasm-2.16.01-win64.zip', extract: { nasm.exe: '{pkg_root_path}/bin/nasm.exe', ndisasm.exe: '{pkg_root_path}/bin/ndisasm.exe' } }
+  tool:
+    provides:
+      - nasm.exe
+      - ndisasm.exe
+    binary-subdir: bin

@@ -9,6 +9,7 @@ use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Package\ToolPackage;
 use StaticPHP\Runtime\Shell\WindowsCmd;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
@@ -35,7 +36,7 @@ class WindowsCMakeExecutor extends Executor
 
     protected PackageInstaller $installer;
 
-    public function __construct(protected LibraryPackage $package)
+    public function __construct(protected LibraryPackage|ToolPackage $package)
     {
         parent::__construct($this->package);
         $this->builder = ApplicationContext::get(PackageBuilder::class);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Package;
 
+use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCException;
@@ -39,8 +40,8 @@ class PackageBuilder
     public function buildPackage(Package $package, bool $force = false): int
     {
         // init build dirs
-        if (!$package instanceof LibraryPackage) {
-            throw new SPCInternalException('Please, never try to build non-library packages directly.');
+        if (!$package instanceof LibraryPackage && !$package instanceof ToolPackage) {
+            throw new SPCInternalException('Please, never try to build non-library, non-tool packages directly.');
         }
         FileSystem::createDir($package->getBuildRootPath());
         FileSystem::createDir($package->getIncludeDir());
@@ -77,6 +78,14 @@ class PackageBuilder
                 if (($license = PackageConfig::get($package->getName(), 'license')) !== null) {
                     $this->installLicense($package, $license);
                 }
+            }
+
+            // Record the installed version for tool packages built from source, so
+            // `check-update --installed` reflects what's actually on disk (mirrors the
+            // binary-install recording in PackageInstaller::installBinary()).
+            if ($package instanceof ToolPackage) {
+                $source_info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo($package->getName());
+                ToolVersionRegistry::record($package->getName(), $source_info['version'] ?? null);
             }
         } catch (SPCException $e) {
             // Ensure package information is bound if not already

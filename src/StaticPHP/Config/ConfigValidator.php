@@ -24,6 +24,10 @@ class ConfigValidator
         'lang' => ConfigType::STRING,
         'frameworks' => ConfigType::LIST_ARRAY, // @
 
+        // build-time tool dependency declaration (resolved independently of the library
+        // dependency graph, see PackageInstaller::collectRequiredTools())
+        'tools' => ConfigType::LIST_ARRAY, // @
+
         // php-extension type fields
         'php-extension' => ConfigType::ASSOC_ARRAY,
         'zend-extension' => ConfigType::BOOL,
@@ -62,6 +66,9 @@ class ConfigValidator
         'license' => false,
         'lang' => false,
         'frameworks' => false, // @
+
+        // build-time tool dependency declaration
+        'tools' => false, // @
 
         // php-extension type fields
         'php-extension' => false,
