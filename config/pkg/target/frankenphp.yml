@@ -10,10 +10,8 @@ frankenphp:
       license: MIT
   depends:
     - php-embed
-    - go-xcaddy
   depends@windows:
     - php-embed
-    - go-win
     - pthreads4w
   suggests@unix:
     - brotli
@@ -24,3 +22,7 @@ frankenphp:
     - frankenphp
   static-bins@windows:
     - frankenphp.exe
+  tools:
+    - go-xcaddy
+  tools@windows:
+    - go-win

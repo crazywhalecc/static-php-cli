@@ -10,6 +10,7 @@ package:
     - config/pkg/lib/
     - config/pkg/target/
     - config/pkg/ext/
+    - config/pkg/tool/
 artifact:
   config:
     - config/artifact/

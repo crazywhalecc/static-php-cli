@@ -54,8 +54,8 @@ class DumpCapabilitiesCommand extends BaseCommand
     {
         $result = [];
 
-        // library / target / virtual-target
-        foreach (PackageLoader::getPackages(['library', 'target', 'virtual-target']) as $name => $pkg) {
+        // library / target / virtual-target / tool
+        foreach (PackageLoader::getPackages(['library', 'target', 'virtual-target', 'tool']) as $name => $pkg) {
             $installable = [];
             $artifact = $pkg->getArtifact();
             if ($artifact !== null) {
