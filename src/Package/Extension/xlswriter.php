@@ -32,12 +32,15 @@ class xlswriter extends PhpExtensionPackage
     #[PatchDescription('Fix Windows build: apply win32 patch and add UTF-8 BOM to theme.c')]
     public function patchBeforeMakeForWindows(): void
     {
+        $source_dir = $this->getSourceDir();
+        $theme_file = "{$source_dir}/library/libxlsx/src/theme.c";
+
         // fix windows build with openssl extension duplicate symbol bug
-        SourcePatcher::patchFile('spc_fix_xlswriter_win32.patch', $this->getSourceDir());
-        $content = file_get_contents($this->getSourceDir() . '/library/libxlsxwriter/src/theme.c');
+        SourcePatcher::patchFile('spc_fix_xlswriter_win32.patch', $source_dir);
+        $content = file_get_contents($theme_file);
         $bom = pack('CCC', 0xEF, 0xBB, 0xBF);
         if (!str_starts_with($content, $bom)) {
-            file_put_contents($this->getSourceDir() . '/library/libxlsxwriter/src/theme.c', $bom . $content);
+            file_put_contents($theme_file, $bom . $content);
         }
     }
 }
