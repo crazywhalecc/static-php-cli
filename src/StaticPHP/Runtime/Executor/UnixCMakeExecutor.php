@@ -11,6 +11,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\TargetPackage;
+use StaticPHP\Package\ToolPackage;
 use StaticPHP\Runtime\Shell\UnixShell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
@@ -40,7 +41,7 @@ class UnixCMakeExecutor extends Executor
 
     protected PackageInstaller $installer;
 
-    public function __construct(protected LibraryPackage $package, ?PackageInstaller $installer = null)
+    public function __construct(protected LibraryPackage|ToolPackage $package, ?PackageInstaller $installer = null)
     {
         parent::__construct($package);
         if ($installer !== null) {

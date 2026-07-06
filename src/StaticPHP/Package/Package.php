@@ -285,6 +285,71 @@ abstract class Package
     }
 
     /**
+     * Get extra CFLAGS for current package.
+     * You need to define the environment variable in the format of {PACKAGE_NAME}_CFLAGS
+     * where {PACKAGE_NAME} is the snake_case name of the package.
+     * For example, for libjpeg, the environment variable should be libjpeg_CFLAGS.
+     */
+    public function getLibExtraCFlags(): string
+    {
+        // get environment variable
+        $env = getenv($this->getSnakeCaseName() . '_CFLAGS') ?: '';
+        // get default c flags
+        $arch_c_flags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
+        if (!empty(getenv('SPC_DEFAULT_CFLAGS')) && !str_contains($env, $arch_c_flags)) {
+            $env .= ' ' . $arch_c_flags;
+        }
+        return trim($env);
+    }
+
+    /**
+     * Get extra CXXFLAGS for current package.
+     * You need to define the environment variable in the format of {PACKAGE_NAME}_CXXFLAGS
+     * where {PACKAGE_NAME} is the snake_case name of the package.
+     * For example, for libjpeg, the environment variable should be libjpeg_CXXFLAGS.
+     */
+    public function getLibExtraCxxFlags(): string
+    {
+        // get environment variable
+        $env = getenv($this->getSnakeCaseName() . '_CXXFLAGS') ?: '';
+        // get default cxx flags
+        $arch_cxx_flags = getenv('SPC_DEFAULT_CXXFLAGS') ?: '';
+        if (!empty(getenv('SPC_DEFAULT_CXXFLAGS')) && !str_contains($env, $arch_cxx_flags)) {
+            $env .= ' ' . $arch_cxx_flags;
+        }
+        return trim($env);
+    }
+
+    /**
+     * Get extra LDFLAGS for current package.
+     * You need to define the environment variable in the format of {PACKAGE_NAME}_LDFLAGS
+     * where {PACKAGE_NAME} is the snake_case name of the package.
+     * For example, for libjpeg, the environment variable should be libjpeg_LDFLAGS.
+     */
+    public function getLibExtraLdFlags(): string
+    {
+        // get environment variable
+        $env = getenv($this->getSnakeCaseName() . '_LDFLAGS') ?: '';
+        // get default ld flags
+        $arch_ld_flags = getenv('SPC_DEFAULT_LDFLAGS') ?: '';
+        if (!empty(getenv('SPC_DEFAULT_LDFLAGS')) && !str_contains($env, $arch_ld_flags)) {
+            $env .= ' ' . $arch_ld_flags;
+        }
+        return trim($env);
+    }
+
+    /**
+     * Get extra LIBS for current package.
+     * You need to define the environment variable in the format of {PACKAGE_NAME}_LIBS
+     * where {PACKAGE_NAME} is the snake_case name of the package.
+     * For example, for libjpeg, the environment variable should be libjpeg_LIBS.
+     */
+    public function getLibExtraLibs(): string
+    {
+        return getenv($this->getSnakeCaseName() . '_LIBS') ?: '';
+    }
+
+    /**
      * Get the snake_case name of the package.
      */
     protected function getSnakeCaseName(): string
