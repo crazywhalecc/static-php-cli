@@ -177,6 +177,20 @@ class GenExtTestMatrixCommandTest extends TestCase
     }
 
     /**
+     * --for-libs must include extensions that depend on the library through other libraries.
+     */
+    public function testForLibsFilterIncludesTransitiveLibraryDeps(): void
+    {
+        $matrix = $this->runMatrix(['--os' => 'Linux', '--for-libs' => 'libde265']);
+
+        $this->assertNotEmpty($matrix, '--for-libs=libde265 must yield at least one entry');
+        foreach ($matrix as $entry) {
+            $parts = explode(',', $entry['extension']);
+            $this->assertContains('imagick', $parts, "Entry {$entry['extension']} should not appear in --for-libs=libde265 results");
+        }
+    }
+
+    /**
      * --tier2 must produce only Tier2 runners and no Windows entries.
      */
     public function testTier2Flag(): void
@@ -260,12 +274,14 @@ class GenExtTestMatrixCommandTest extends TestCase
      *  - ext-redis           simple orphan
      *  - ext-xml             depends on lib 'libxml2'
      *  - ext-dom             depends on ext-xml (DFS chain)
+     *  - ext-imagick         depends on imagemagick -> libheif -> libde265
      *  - ext-linux-only      restricted to Linux via os: [Linux]
      */
     private static function buildFixture(): array
     {
         // php-extension must be a non-empty assoc array ([] fails is_assoc_array() check).
         $ext = static fn (array $phpExt = ['arg-type' => 'standard'], array $topLevel = []): array => array_merge(['type' => 'php-extension', 'php-extension' => $phpExt], $topLevel);
+        $lib = static fn (array $topLevel = []): array => array_merge(['type' => 'library', 'artifact' => ['source' => 'custom']], $topLevel);
 
         return [
             // Isolated standalones
@@ -283,6 +299,12 @@ class GenExtTestMatrixCommandTest extends TestCase
             // DFS chain: dom depends on xml; xml depends on lib 'libxml2'
             'ext-xml' => $ext(['arg-type' => 'standard'], ['depends' => ['libxml2']]),
             'ext-dom' => $ext(['arg-type' => 'standard'], ['depends' => ['ext-xml']]),
+
+            // Transitive library chain: imagick -> imagemagick -> libheif -> libde265
+            'ext-imagick' => $ext(['arg-type' => 'standard'], ['depends' => ['imagemagick']]),
+            'imagemagick' => $lib(['depends' => ['libheif']]),
+            'libheif' => $lib(['depends' => ['libde265']]),
+            'libde265' => $lib(),
 
             // OS-restricted to Linux only
             'ext-linux-only' => $ext(['os' => ['Linux']]),

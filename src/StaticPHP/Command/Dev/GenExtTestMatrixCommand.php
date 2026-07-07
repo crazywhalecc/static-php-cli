@@ -107,7 +107,12 @@ class GenExtTestMatrixCommand extends BaseCommand
         // Separate into regular and virtual extensions (build-static:false excluded globally)
         $all_regular = [];
         $all_virtual = [];
+        $all_libraries = [];
         foreach ($all as $pkg_name => $config) {
+            if (($config['type'] ?? '') === 'library') {
+                $all_libraries[$pkg_name] = $config;
+                continue;
+            }
             if (($config['type'] ?? '') !== 'php-extension') {
                 continue;
             }
@@ -154,10 +159,7 @@ class GenExtTestMatrixCommand extends BaseCommand
                     $raw,
                     fn ($d) => isset($pool_set[$d]) && $d !== $pkg_name
                 ));
-                $os_lib_deps[$this->displayName($pkg_name)] = array_values(array_filter(
-                    $raw,
-                    fn ($d) => !str_starts_with($d, 'ext-')
-                ));
+                $os_lib_deps[$this->displayName($pkg_name)] = $this->collectLibraryDeps($raw, $all_libraries, $os);
             }
             $all_ext_lib_deps[$os] = $os_lib_deps;
 
@@ -298,6 +300,41 @@ class GenExtTestMatrixCommand extends BaseCommand
     private function displayName(string $pkg_name): string
     {
         return str_starts_with($pkg_name, 'ext-') ? substr($pkg_name, 4) : $pkg_name;
+    }
+
+    /**
+     * Collect direct and transitive library dependencies from a package dependency list.
+     *
+     * @param string[]               $deps
+     * @param array<string, mixed[]> $library_configs
+     * @param array<string, true>    $seen
+     *
+     * @return string[]
+     */
+    private function collectLibraryDeps(array $deps, array $library_configs, string $platform, array $seen = []): array
+    {
+        $collected = [];
+        foreach ($deps as $dep) {
+            if (str_starts_with($dep, 'ext-') || isset($seen[$dep])) {
+                continue;
+            }
+
+            $seen[$dep] = true;
+            $collected[$dep] = $dep;
+
+            if (!isset($library_configs[$dep])) {
+                continue;
+            }
+
+            $child_deps = array_merge(
+                $this->resolvePlatformList($library_configs[$dep], 'depends', $platform),
+                $this->resolvePlatformList($library_configs[$dep], 'suggests', $platform),
+            );
+            foreach ($this->collectLibraryDeps($child_deps, $library_configs, $platform, $seen) as $child_dep) {
+                $collected[$child_dep] = $child_dep;
+            }
+        }
+        return array_values($collected);
     }
 
     /**
