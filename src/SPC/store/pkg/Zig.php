@@ -165,15 +165,14 @@ class Zig extends CustomPackage
         $zig = "{$zig_bin_dir}/zig";
         $verLine = trim((string) shell_exec(escapeshellarg($zig) . ' cc --version 2>/dev/null'));
         if (!preg_match('/clang version (\d+\.\d+\.\d+)/', $verLine, $m)) {
-            logger()->warning('[zig] could not detect bundled clang version; skipping runtime bit build (--pgo + shared libs without __dso_handle)');
-            return;
+            throw new \RuntimeException('[zig] could not detect bundled clang version; cannot build clang runtime bits (--pgo, __dso_handle, __cpu_model)');
         }
         $llvmVersion = $m[1];
         logger()->info("Building clang runtime bits for LLVM {$llvmVersion} (zig's bundled clang)");
 
         $srcRoot = $this->fetchCompilerRtSource($llvmVersion);
         if ($srcRoot === null) {
-            return;
+            throw new \RuntimeException("[zig] failed to fetch compiler-rt {$llvmVersion} sources; cannot build clang runtime bits (--pgo, __dso_handle, __cpu_model)");
         }
 
         f_mkdir($libDir, recursive: true);
@@ -187,6 +186,19 @@ class Zig extends CustomPackage
             $this->buildCpuModelBuiltins($zig, $srcRoot, $cpuModelLib);
         }
         FileSystem::removeDir($srcRoot);
+
+        // A zig install missing any of these degrades silently at build time
+        // (no .profraw with --pgo, no __dso_handle in shared libs, unresolved
+        // __cpu_model for __builtin_cpu_supports — the last one even changes
+        // which code paths PHP's configure picks, making builds
+        // machine-dependent). Fail the install instead.
+        $missing = array_filter(
+            [$profileLib, $crtBegin, $crtEnd, $cpuModelLib],
+            fn ($f) => !file_exists($f)
+        );
+        if ($missing !== []) {
+            throw new \RuntimeException('[zig] failed to build clang runtime bits: missing ' . implode(', ', array_map('basename', $missing)) . ' (see warnings above)');
+        }
     }
 
     private function buildCpuModelBuiltins(string $zig, string $srcRoot, string $libPath): void
