@@ -50,6 +50,7 @@ class simdjson extends PhpExtensionPackage
             if (!str_contains((string) $extra, '-lstdc++')) {
                 f_putenv('SPC_COMPILER_EXTRA=' . clean_spaces($extra . ' -lstdc++'));
             }
+
             $env['CFLAGS'] .= ' -Xclang -target-feature -Xclang +evex512';
             $env['CXXFLAGS'] .= ' -Xclang -target-feature -Xclang +evex512';
         }
