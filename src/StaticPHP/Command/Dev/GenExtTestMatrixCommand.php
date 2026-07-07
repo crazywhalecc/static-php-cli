@@ -248,22 +248,23 @@ class GenExtTestMatrixCommand extends BaseCommand
             }
         }
 
-        if (!empty($filter_extensions)) {
-            $entries = array_values(array_filter($entries, function (array $entry) use ($filter_extensions): bool {
+        if (!empty($filter_extensions) || !empty($filter_libs)) {
+            $entries = array_values(array_filter($entries, function (array $entry) use ($filter_extensions, $filter_libs, $all_ext_lib_deps): bool {
                 $names = explode(',', $entry['extension']);
-                return count(array_intersect($names, $filter_extensions)) > 0;
-            }));
-        }
 
-        if (!empty($filter_libs)) {
-            $entries = array_values(array_filter($entries, function (array $entry) use ($filter_libs, $all_ext_lib_deps): bool {
-                $names = explode(',', $entry['extension']);
-                $lib_deps = $all_ext_lib_deps[$entry['os']] ?? [];
-                foreach ($names as $name) {
-                    if (count(array_intersect($lib_deps[$name] ?? [], $filter_libs)) > 0) {
-                        return true;
+                if (!empty($filter_extensions) && count(array_intersect($names, $filter_extensions)) > 0) {
+                    return true;
+                }
+
+                if (!empty($filter_libs)) {
+                    $lib_deps = $all_ext_lib_deps[$entry['os']] ?? [];
+                    foreach ($names as $name) {
+                        if (count(array_intersect($lib_deps[$name] ?? [], $filter_libs)) > 0) {
+                            return true;
+                        }
                     }
                 }
+
                 return false;
             }));
         }

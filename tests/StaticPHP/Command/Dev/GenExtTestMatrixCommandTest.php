@@ -191,6 +191,17 @@ class GenExtTestMatrixCommandTest extends TestCase
     }
 
     /**
+     * Multiple filters should include entries matching any changed package.
+     */
+    public function testExtensionAndLibraryFiltersAreCombinedAsUnion(): void
+    {
+        $matrix = $this->runMatrix(['--os' => 'Linux', '--for-extensions' => 'simdjson', '--for-libs' => 'libde265']);
+
+        $this->assertNotEmpty($this->findEntriesContaining($matrix, 'simdjson'), 'simdjson entry must be included');
+        $this->assertNotEmpty($this->findEntriesContaining($matrix, 'imagick'), 'imagick entry must be included through libde265');
+    }
+
+    /**
      * --tier2 must produce only Tier2 runners and no Windows entries.
      */
     public function testTier2Flag(): void
@@ -272,6 +283,7 @@ class GenExtTestMatrixCommandTest extends TestCase
      *  - ext-swoole-hook-*   virtual (arg-type: none) — must be bundled with swoole
      *  - ext-curl            simple orphan, depended on by swoole but must NOT be pulled into swoole entry
      *  - ext-redis           simple orphan
+     *  - ext-simdjson        simple orphan used for combined filter tests
      *  - ext-xml             depends on lib 'libxml2'
      *  - ext-dom             depends on ext-xml (DFS chain)
      *  - ext-imagick         depends on imagemagick -> libheif -> libde265
@@ -295,6 +307,7 @@ class GenExtTestMatrixCommandTest extends TestCase
             // Simple orphans
             'ext-curl' => $ext(),
             'ext-redis' => $ext(),
+            'ext-simdjson' => $ext(),
 
             // DFS chain: dom depends on xml; xml depends on lib 'libxml2'
             'ext-xml' => $ext(['arg-type' => 'standard'], ['depends' => ['libxml2']]),
