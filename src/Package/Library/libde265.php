@@ -20,7 +20,7 @@ class libde265 extends LibraryPackage
             ->addConfigureArgs(
                 '-DENABLE_SDL=OFF',
                 '-DENABLE_DECODER=OFF',
-                // '-DENABLE_SIMD=OFF',
+                '-DENABLE_SIMD=OFF',
                 '-DHAVE_NEON=OFF',
             )
             ->build();
