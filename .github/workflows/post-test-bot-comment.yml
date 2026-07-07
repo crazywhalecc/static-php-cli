@@ -1,0 +1,48 @@
+name: Post Test Bot Comment
+
+on:
+  workflow_run:
+    workflows: ["v3 Tests"]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  actions: read
+
+jobs:
+  post-comment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Download bot output
+        id: download
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: bot-output
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post/Update comment
+        if: steps.download.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT_BODY=$(jq -r '.comment_body' bot-output.json)
+          PR_NUMBER=$(jq -r '.pr_number' bot-output.json)
+          MARKER="<!-- spc-test-bot -->"
+
+          # Find existing bot comment id
+          EXISTING_ID=$(gh api \
+            "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
+            --jq "[.[] | select(.body | startswith(\"${MARKER}\")) | .id] | first // empty")
+
+          if [ -n "$EXISTING_ID" ]; then
+            gh api --method PATCH \
+              "repos/${{ github.repository }}/issues/comments/${EXISTING_ID}" \
+              -f body="$COMMENT_BODY"
+          else
+            gh pr comment "$PR_NUMBER" \
+              --repo "${{ github.repository }}" \
+              --body "$COMMENT_BODY"
+          fi
