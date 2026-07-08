@@ -23,6 +23,7 @@ class CheckUpdateCommand extends BaseCommand
         $this->addArgument('artifact', InputArgument::OPTIONAL, 'The name of the artifact(s) to check for updates, comma-separated (default: all downloaded artifacts)');
         $this->addOption('json', null, null, 'Output result in JSON format');
         $this->addOption('bare', null, null, 'Check update without requiring the artifact to be downloaded first (old version will be null)');
+        $this->addOption('installed', null, null, 'Compare against the version actually installed on disk (tool packages only) instead of the download cache; falls back to normal behavior for artifacts with no recorded installed version');
         $this->addOption('parallel', 'p', InputOption::VALUE_REQUIRED, 'Number of parallel update checks (default: 10)', 10);
 
         // --with-php option for checking updates with a specific PHP version context
@@ -45,8 +46,9 @@ class CheckUpdateCommand extends BaseCommand
         try {
             $downloader = new ArtifactDownloader($this->input->getOptions());
             $bare = (bool) $this->getOption('bare');
+            $use_installed = (bool) $this->getOption('installed');
             if ($this->getOption('json')) {
-                $results = $downloader->checkUpdates($artifacts, bare: $bare);
+                $results = $downloader->checkUpdates($artifacts, bare: $bare, use_installed: $use_installed);
                 $outputs = [];
                 foreach ($results as $artifact => $result) {
                     $outputs[$artifact] = [
@@ -59,7 +61,7 @@ class CheckUpdateCommand extends BaseCommand
                 $this->output->writeln(json_encode($outputs, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
                 return static::OK;
             }
-            $downloader->checkUpdates($artifacts, bare: $bare, onResult: function (string $artifact, CheckUpdateResult $result) {
+            $downloader->checkUpdates($artifacts, bare: $bare, use_installed: $use_installed, onResult: function (string $artifact, CheckUpdateResult $result) {
                 if ($result->unsupported) {
                     $this->output->writeln("Artifact <info>{$artifact}</info> does not support update checking, <comment>skipped</comment>");
                 } elseif (!$result->needUpdate) {

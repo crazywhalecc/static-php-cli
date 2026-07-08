@@ -10,6 +10,7 @@ use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Package\ToolPackage;
 use StaticPHP\Runtime\Shell\UnixShell;
 use StaticPHP\Util\InteractiveTerm;
 use ZM\Logger\ConsoleColor;
@@ -22,7 +23,7 @@ class UnixAutoconfExecutor extends Executor
 
     protected PackageInstaller $installer;
 
-    public function __construct(protected LibraryPackage $package, ?PackageInstaller $installer = null)
+    public function __construct(protected LibraryPackage|ToolPackage $package, ?PackageInstaller $installer = null)
     {
         parent::__construct($package);
         if ($installer !== null) {
@@ -117,7 +118,7 @@ class UnixAutoconfExecutor extends Executor
     /**
      * Add configure args.
      */
-    public function addConfigureArgs(...$args): static
+    public function addConfigureArgs(string ...$args): static
     {
         $this->configure_args = [...$this->configure_args, ...$args];
         return $this;
@@ -126,7 +127,7 @@ class UnixAutoconfExecutor extends Executor
     /**
      * Remove some configure args, to bypass the configure option checking for some libs.
      */
-    public function removeConfigureArgs(...$args): static
+    public function removeConfigureArgs(string ...$args): static
     {
         $this->configure_args = array_diff($this->configure_args, $args);
         return $this;

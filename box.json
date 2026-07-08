@@ -10,7 +10,6 @@
         "config",
         "src",
         "vendor/psr",
-        "vendor/laravel/prompts",
         "vendor/symfony",
         "vendor/php-di",
         "vendor/zhamao"

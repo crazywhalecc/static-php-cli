@@ -19,7 +19,12 @@ class sqlite
     #[BuildFor('Linux')]
     public function buildUnix(LibraryPackage $lib): void
     {
-        UnixAutoconfExecutor::create($lib)->configure()->make();
+        UnixAutoconfExecutor::create($lib)
+            ->appendEnv([
+                'CFLAGS' => '-DSQLITE_ENABLE_COLUMN_METADATA=1',
+            ])
+            ->configure()
+            ->make();
         $lib->patchPkgconfPrefix(['sqlite3.pc']);
     }
 

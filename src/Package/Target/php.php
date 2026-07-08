@@ -255,6 +255,13 @@ class php extends TargetPackage
             $installer->addBuildPackage('php-embed');
         }
 
+        // UPX compression: ensure the upx tool package is installed when requested.
+        // upx is a ToolPackage now, so it's installed directly rather than added as a
+        // library dependency (tool packages bypass the DependencyResolver graph).
+        if ($package->getBuildOption('with-upx-pack')) {
+            $installer->addInstallPackage('upx');
+        }
+
         return [...$extensions_pkg, ...$additional_packages];
     }
 

@@ -33,15 +33,20 @@ class MacOSToolCheck
         'glibtoolize',
     ];
 
-    #[CheckItem('if homebrew has installed', limit_os: 'Darwin', level: 998)]
-    public function checkBrew(): ?CheckResult
+    #[CheckItem('if homebrew or macports has installed', limit_os: 'Darwin', level: 998)]
+    public function checkBrewOrPorts(): ?CheckResult
     {
-        if (($path = MacOSUtil::findCommand('brew')) === null) {
-            return CheckResult::fail('Homebrew is not installed', 'brew');
-        }
-        if ($path !== '/opt/homebrew/bin/brew' && getenv('GNU_ARCH') === 'aarch64') {
+        $brewPath = MacOSUtil::findCommand('brew');
+        $portPath = MacOSUtil::findCommand('port');
+
+        if ($brewPath && $brewPath !== '/opt/homebrew/bin/brew' && getenv('GNU_ARCH') === 'aarch64') {
             return CheckResult::fail('Current homebrew (/usr/local/bin/homebrew) is not installed for M1 Mac, please re-install homebrew in /opt/homebrew/ !');
         }
+
+        if ($brewPath === null && $portPath === null) {
+            return CheckResult::fail('Homebrew is not installed', 'brew');
+        }
+
         return CheckResult::ok();
     }
 
@@ -60,8 +65,8 @@ class MacOSToolCheck
         return CheckResult::ok();
     }
 
-    #[CheckItem('if homebrew llvm are installed', limit_os: 'Darwin')]
-    public function checkBrewLLVM(): ?CheckResult
+    #[CheckItem('if homebrew or macports llvm are installed', limit_os: 'Darwin')]
+    public function checkBrewOrPortsLLVM(): ?CheckResult
     {
         if (getenv('SPC_USE_LLVM') === 'brew') {
             $homebrew_prefix = getenv('HOMEBREW_PREFIX') ?: (SystemTarget::getTargetArch() === 'aarch64' ? '/opt/homebrew' : '/usr/local/homebrew');
@@ -71,6 +76,16 @@ class MacOSToolCheck
             }
             return CheckResult::ok($path);
         }
+
+        if (getenv('SPC_USE_LLVM') === 'port') {
+            $macportsPrefix = '/opt/local';
+
+            if (($path = MacOSUtil::findCommand('clang', ["{$macportsPrefix}/bin"])) === null) {
+                return CheckResult::fail('MacPorts llvm is not installed', 'build-tools', ['missing' => ['llvm']]);
+            }
+            return CheckResult::ok($path);
+        }
+
         return null;
     }
 
@@ -91,7 +106,7 @@ class MacOSToolCheck
                 if ($command_path !== []) {
                     return CheckResult::fail("Current {$bison} version is too old: " . $matches[0]);
                 }
-                return $this->checkBisonVersion(['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin']);
+                return $this->checkBisonVersion(['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin', '/opt/local/bin']);
             }
             return CheckResult::ok($matches[0]);
         }
@@ -108,6 +123,9 @@ class MacOSToolCheck
     #[FixItem('build-tools')]
     public function fixBuildTools(array $missing): bool
     {
+        $brewPath = MacOSUtil::findCommand('brew');
+        $portPath = MacOSUtil::findCommand('port');
+
         $replacement = [
             'glibtoolize' => 'libtool',
         ];
@@ -115,7 +133,18 @@ class MacOSToolCheck
             if (isset($replacement[$cmd])) {
                 $cmd = $replacement[$cmd];
             }
-            shell()->exec('brew install --formula ' . escapeshellarg($cmd));
+
+            if ($brewPath !== null) {
+                shell()->exec('brew install --formula ' . escapeshellarg($cmd));
+                continue;
+            }
+
+            if ($portPath !== null) {
+                shell()->exec('port install ' . escapeshellarg($cmd));
+                continue;
+            }
+
+            return false;
         }
         return true;
     }

@@ -32,7 +32,10 @@ use StaticPHP\Command\SPCConfigCommand;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Registry\Registry;
+use StaticPHP\Util\InteractiveTerm;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ConsoleApplication extends Application
 {
@@ -103,5 +106,16 @@ class ConsoleApplication extends Application
     public static function _addAdditionalCommands(array $additional_commands): void
     {
         self::$additional_commands = array_merge(self::$additional_commands, $additional_commands);
+    }
+
+    /**
+     * Hook Symfony's doRun() to inject the real input/output into InteractiveTerm before
+     * any command executes. From this point forward, InteractiveTerm uses the configured
+     * Console (respecting --no-ansi, --verbose, etc.) instead of the lazy STDERR fallback.
+     */
+    public function doRun(InputInterface $input, OutputInterface $output): int
+    {
+        InteractiveTerm::init($input, $output);
+        return parent::doRun($input, $output);
     }
 }

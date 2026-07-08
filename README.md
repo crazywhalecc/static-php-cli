@@ -104,7 +104,7 @@ see <https://static-php.dev>.
 
 ## Direct Download
 
-If you do not want to build yet or just want to test first, you can download example pre-compiled artifacts from [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-bulk.yml) or from a self-hosted server.
+If you do not want to build yet or just want to test first, you can download example pre-compiled artifacts from [Actions](https://github.com/static-php/hosted/actions/workflows/build-php-bulk.yml) or from a self-hosted server.
 
 We offer 2 types of extension sets for each PHP version:
 

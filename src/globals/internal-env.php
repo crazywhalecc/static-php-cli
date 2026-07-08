@@ -3,22 +3,11 @@
 declare(strict_types=1);
 
 // static-php-cli version string
-use Laravel\Prompts\ConfirmPrompt;
-use Laravel\Prompts\Prompt;
-use Laravel\Prompts\TextPrompt;
 use StaticPHP\ConsoleApplication;
-use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\System\LinuxUtil;
 use StaticPHP\Util\System\MacOSUtil;
 use StaticPHP\Util\System\WindowsUtil;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 
 const SPC_VERSION = ConsoleApplication::VERSION;
 // output path for everything, other paths are defined relative to this by default
@@ -75,31 +64,3 @@ putenv('CPU_COUNT=' . CPU_COUNT);
 putenv('SPC_ARCH=' . php_uname('m'));
 putenv('GNU_ARCH=' . GNU_ARCH);
 putenv('MAC_ARCH=' . MAC_ARCH);
-
-// initialize windows prompt fallback for laravel-prompts
-Prompt::fallbackWhen(PHP_OS_FAMILY === 'Windows');
-ConfirmPrompt::fallbackUsing(function (ConfirmPrompt $prompt) {
-    $helper = new QuestionHelper();
-    $case = $prompt->default ? ' [Y/n] ' : ' [y/N] ';
-    $question = new ConfirmationQuestion($prompt->label . $case, $prompt->default);
-    if (ApplicationContext::has(InputInterface::class) && ApplicationContext::has(OutputInterface::class)) {
-        $input = ApplicationContext::get(InputInterface::class);
-        $output = ApplicationContext::get(OutputInterface::class);
-    } else {
-        $input = new ArrayInput([]);
-        $output = new ConsoleOutput();
-    }
-    return $helper->ask($input, $output, $question);
-});
-TextPrompt::fallbackUsing(function (TextPrompt $prompt) {
-    $helper = new QuestionHelper();
-    $question = new Question($prompt->label . ' ', $prompt->default);
-    if (ApplicationContext::has(InputInterface::class) && ApplicationContext::has(OutputInterface::class)) {
-        $input = ApplicationContext::get(InputInterface::class);
-        $output = ApplicationContext::get(OutputInterface::class);
-    } else {
-        $input = new ArrayInput([]);
-        $output = new ConsoleOutput();
-    }
-    return $helper->ask($input, $output, $question);
-});

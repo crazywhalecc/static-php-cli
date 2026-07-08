@@ -1,5 +1,9 @@
 vswhere:
-  type: target
+  type: tool
   artifact:
     binary:
       windows-x86_64: { type: url, url: 'https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe', extract: '{pkg_root_path}/bin/vswhere.exe' }
+  tool:
+    provides:
+      - vswhere.exe
+    binary-subdir: bin

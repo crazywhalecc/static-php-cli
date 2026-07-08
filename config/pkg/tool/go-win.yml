@@ -1,5 +1,5 @@
 go-win:
-  type: target
+  type: tool
   artifact:
     binary: custom
   env:
@@ -8,3 +8,8 @@ go-win:
     GOPATH: '{pkg_root_path}/go-win/go'
   path@windows:
     - '{pkg_root_path}/go-win/bin'
+  tool:
+    provides:
+      - go.exe
+      - gofmt.exe
+    binary-subdir: go-win/bin

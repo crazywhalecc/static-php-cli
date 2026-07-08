@@ -58,7 +58,13 @@ curl -o spc https://dl.static-php.dev/v3/spc-bin/nightly/spc-linux-x86_64
 
 ### Windows 专有：`--with-sdk-binary-dir` 和 `--vs-ver`
 
-这两个选项已不再被命令行接受。请改为设置 `PHP_SDK_PATH` 环境变量，指向你的 PHP SDK binary tools 目录。Visual Studio 版本现在由工具链配置统一管理。
+这两个选项已不再被命令行接受。在 v3 中，`php-sdk-binary-tools` 依赖已被完全移除。v3 现在通过管理自己的 **MSYS2** 环境来支持 Windows 上基于 autotools 的库构建。运行 `spc doctor --install` 即可自动下载并配置 MSYS2。
+
+如需指向自定义 MSYS2 安装目录，请设置 `SPC_MSYS2_PATH` 环境变量，值为 `msys64` 目录路径（例如 `C:\msys64`）。Visual Studio 版本现在由工具链自动检测，无需手动指定版本号。
+
+::: warning 从 v2 迁移
+v2 依赖 `php-sdk-binary-tools`，并在每次构建时需要传入 `--with-sdk-binary-dir` 和 `--vs-ver` 参数。在 v3 中这些选项已被移除。请从所有 CI 脚本中删除这些参数，并使用 `spc doctor --install` 一次性完成 Windows 构建环境的配置。
+:::
 
 ## 已重命名 / 已弃用的选项
 

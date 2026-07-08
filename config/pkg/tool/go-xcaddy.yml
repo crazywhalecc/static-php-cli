@@ -1,5 +1,5 @@
 go-xcaddy:
-  type: target
+  type: tool
   artifact:
     binary: custom
   env:
@@ -8,5 +8,8 @@ go-xcaddy:
     GOPATH: '{pkg_root_path}/go-xcaddy/go'
   path@unix:
     - '{pkg_root_path}/go-xcaddy/bin'
-  static-bins:
-    - xcaddy
+  tool:
+    provides:
+      - go
+      - gofmt
+    binary-subdir: go-xcaddy/bin

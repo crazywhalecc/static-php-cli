@@ -24,8 +24,8 @@ class openssl
     {
         if (SystemTarget::getTargetOS() === 'Windows') {
             global $argv;
-            $perl_path = PKG_ROOT_PATH . '\strawberry-perl\perl\bin\perl.exe';
-            $perl = file_exists($perl_path) ? $perl_path : WindowsUtil::findCommand('perl.exe');
+            $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl\perl\bin\perl.exe';
+            $perl = file_exists($perl_path_native) ? ($perl_path_native) : WindowsUtil::findCommand('perl.exe');
             if ($perl === null) {
                 throw new EnvironmentException(
                     'You need to install perl first!',

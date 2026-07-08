@@ -16,7 +16,7 @@ class PackageConfig
 
     /**
      * Load package configurations from a specified directory.
-     * It will look for files matching the pattern 'pkg.*.json' and 'pkg.json'.
+     * Only processes .json, .yml, and .yaml files (skips .gitkeep etc.).
      */
     public static function loadFromDir(string $dir, string $registry_name): array
     {
@@ -28,6 +28,10 @@ class PackageConfig
         $files = FileSystem::scanDirFiles($dir, false);
         if (is_array($files)) {
             foreach ($files as $file) {
+                $ext = pathinfo($file, PATHINFO_EXTENSION);
+                if (!in_array($ext, ['json', 'yml', 'yaml'], true)) {
+                    continue;
+                }
                 self::loadFromFile($file, $registry_name);
                 $loaded[] = $file;
             }

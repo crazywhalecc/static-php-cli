@@ -26,6 +26,7 @@ use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Exception\ExecutionException;
 use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Package\ToolVersionRegistry;
 use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
@@ -346,12 +347,32 @@ class ArtifactDownloader
         }
     }
 
-    public function checkUpdate(string $artifact_name, bool $prefer_source = false, bool $bare = false): CheckUpdateResult
+    public function checkUpdate(string $artifact_name, bool $prefer_source = false, bool $bare = false, bool $use_installed = false): CheckUpdateResult
     {
         $artifact = ArtifactLoader::getArtifactInstance($artifact_name);
         if ($artifact === null) {
             throw new WrongUsageException("Artifact '{$artifact_name}' not found, please check the name.");
         }
+
+        // --installed: prefer the version actually installed on disk (tool packages only) as the
+        // baseline, instead of the download cache. Falls back to the normal cache/bare logic below
+        // if this artifact has no recorded installed version (not a tool package, or not installed
+        // via the package installer yet).
+        if ($use_installed) {
+            $installed_version = ToolVersionRegistry::get($artifact_name);
+            if ($installed_version !== null) {
+                [$first, $second] = $prefer_source
+                    ? [fn () => $this->probeSourceCheckUpdate($artifact, $artifact_name, $installed_version), fn () => $this->probeBinaryCheckUpdate($artifact, $artifact_name, $installed_version)]
+                    : [fn () => $this->probeBinaryCheckUpdate($artifact, $artifact_name, $installed_version), fn () => $this->probeSourceCheckUpdate($artifact, $artifact_name, $installed_version)];
+                $result = $first() ?? $second();
+                if ($result !== null) {
+                    return $result;
+                }
+                return new CheckUpdateResult(old: $installed_version, new: null, needUpdate: false, unsupported: true);
+            }
+            logger()->warning("Artifact '{$artifact_name}' has no recorded installed version (not a tool package, or not installed yet); falling back to download-cache based check.");
+        }
+
         if ($bare) {
             [$first, $second] = $prefer_source
                 ? [fn () => $this->probeSourceCheckUpdate($artifact, $artifact_name), fn () => $this->probeBinaryCheckUpdate($artifact, $artifact_name)]
@@ -403,16 +424,17 @@ class ArtifactDownloader
      * @param  bool                             $prefer_source  Whether to prefer source over binary
      * @param  bool                             $bare           Check without requiring artifact to be downloaded first
      * @param  null|callable                    $onResult       Called immediately with (string $name, CheckUpdateResult) as each result arrives
+     * @param  bool                             $use_installed  Prefer the installed (on-disk) version over the download cache (tool packages only)
      * @return array<string, CheckUpdateResult> Results keyed by artifact name
      */
-    public function checkUpdates(array $artifact_names, bool $prefer_source = false, bool $bare = false, ?callable $onResult = null): array
+    public function checkUpdates(array $artifact_names, bool $prefer_source = false, bool $bare = false, ?callable $onResult = null, bool $use_installed = false): array
     {
         if ($this->parallel > 1 && count($artifact_names) > 1) {
-            return $this->checkUpdatesWithConcurrency($artifact_names, $prefer_source, $bare, $onResult);
+            return $this->checkUpdatesWithConcurrency($artifact_names, $prefer_source, $bare, $onResult, $use_installed);
         }
         $results = [];
         foreach ($artifact_names as $name) {
-            $result = $this->checkUpdate($name, $prefer_source, $bare);
+            $result = $this->checkUpdate($name, $prefer_source, $bare, $use_installed);
             $results[$name] = $result;
             if ($onResult !== null) {
                 ($onResult)($name, $result);
@@ -436,7 +458,7 @@ class ArtifactDownloader
         return $this->options[$name] ?? $default;
     }
 
-    private function checkUpdatesWithConcurrency(array $artifact_names, bool $prefer_source, bool $bare, ?callable $onResult): array
+    private function checkUpdatesWithConcurrency(array $artifact_names, bool $prefer_source, bool $bare, ?callable $onResult, bool $use_installed = false): array
     {
         $results = [];
         $fiber_pool = [];
@@ -451,8 +473,8 @@ class ArtifactDownloader
                 // fill pool
                 while (count($fiber_pool) < $this->parallel && !empty($remaining)) {
                     $name = array_shift($remaining);
-                    $fiber = new \Fiber(function () use ($name, $prefer_source, $bare) {
-                        return [$name, $this->checkUpdate($name, $prefer_source, $bare)];
+                    $fiber = new \Fiber(function () use ($name, $prefer_source, $bare, $use_installed) {
+                        return [$name, $this->checkUpdate($name, $prefer_source, $bare, $use_installed)];
                     });
                     $fiber->start();
                     $fiber_pool[$name] = $fiber;
@@ -491,12 +513,12 @@ class ArtifactDownloader
         return $results;
     }
 
-    private function probeSourceCheckUpdate(Artifact $artifact, string $artifact_name): ?CheckUpdateResult
+    private function probeSourceCheckUpdate(Artifact $artifact, string $artifact_name, ?string $old_version = null): ?CheckUpdateResult
     {
         if (($callback = $artifact->getCustomSourceCheckUpdateCallback()) !== null) {
             return ApplicationContext::invoke($callback, [
                 ArtifactDownloader::class => $this,
-                'old_version' => null,
+                'old_version' => $old_version,
             ]);
         }
         $config = $artifact->getDownloadConfig('source');
@@ -509,16 +531,16 @@ class ArtifactDownloader
         }
         /** @var CheckUpdateInterface $dl */
         $dl = new $cls();
-        return $dl->checkUpdate($artifact_name, $config, null, $this);
+        return $dl->checkUpdate($artifact_name, $config, $old_version, $this);
     }
 
-    private function probeBinaryCheckUpdate(Artifact $artifact, string $artifact_name): ?CheckUpdateResult
+    private function probeBinaryCheckUpdate(Artifact $artifact, string $artifact_name, ?string $old_version = null): ?CheckUpdateResult
     {
         // custom binary callback takes precedence over config-based binary
         if (($callback = $artifact->getCustomBinaryCheckUpdateCallback()) !== null) {
             return ApplicationContext::invoke($callback, [
                 ArtifactDownloader::class => $this,
-                'old_version' => null,
+                'old_version' => $old_version,
             ]);
         }
         $binary_config = $artifact->getDownloadConfig('binary');
@@ -532,7 +554,7 @@ class ArtifactDownloader
         }
         /** @var CheckUpdateInterface $dl */
         $dl = new $cls();
-        return $dl->checkUpdate($artifact_name, $platform_config, null, $this);
+        return $dl->checkUpdate($artifact_name, $platform_config, $old_version, $this);
     }
 
     private function downloadWithType(Artifact $artifact, int $current, int $total, bool $parallel = false): int

@@ -11,10 +11,13 @@ use StaticPHP\Registry\DoctorLoader;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\InteractiveTerm;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use ZM\Logger\ConsoleColor;
-
-use function Laravel\Prompts\confirm;
 
 readonly class Doctor
 {
@@ -125,9 +128,14 @@ readonly class Doctor
             return false;
         }
         // prompt for fix
-        if ($this->auto_fix === FIX_POLICY_PROMPT && !confirm('Do you want to try to fix this issue now?')) {
-            $this->output?->writeln('<comment>You canceled fix.</comment>');
-            return false;
+        if ($this->auto_fix === FIX_POLICY_PROMPT) {
+            $helper = new QuestionHelper();
+            $input = ApplicationContext::has(InputInterface::class) ? ApplicationContext::get(InputInterface::class) : new ArrayInput([]);
+            $output = ApplicationContext::has(OutputInterface::class) ? ApplicationContext::get(OutputInterface::class) : $this->output ?? new ConsoleOutput();
+            if (!$helper->ask($input, $output, new ConfirmationQuestion('Do you want to try to fix this issue now? [Y/n] ', true))) {
+                $this->output?->writeln('<comment>You canceled fix.</comment>');
+                return false;
+            }
         }
         // perform fix
         InteractiveTerm::indicateProgress("Fixing {$result->getFixItem()} ... ");
