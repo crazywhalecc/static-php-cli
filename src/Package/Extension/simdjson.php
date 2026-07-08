@@ -51,8 +51,8 @@ class simdjson extends PhpExtensionPackage
                 f_putenv('SPC_COMPILER_EXTRA=' . clean_spaces($extra . ' -lstdc++'));
             }
 
-            $env['CFLAGS'] .= ' -Xclang -target-feature -Xclang +evex512';
-            $env['CXXFLAGS'] .= ' -Xclang -target-feature -Xclang +evex512';
+            $env['CFLAGS'] .= ' -fno-sanitize=undefined -Xclang -target-feature -Xclang +evex512';
+            $env['CXXFLAGS'] .= ' -fno-sanitize=undefined -Xclang -target-feature -Xclang +evex512';
         }
         return $env;
     }
@@ -64,8 +64,8 @@ class simdjson extends PhpExtensionPackage
             return;
         }
         $extra_cflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
-        GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . trim($extra_cflags . ' -Xclang -target-feature -Xclang +evex512'));
+        GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS=' . trim($extra_cflags . ' -fno-sanitize=undefined -Xclang -target-feature -Xclang +evex512'));
         $extra_cxxflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS') ?: '';
-        GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS=' . trim($extra_cxxflags . ' -Xclang -target-feature -Xclang +evex512'));
+        GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS=' . trim($extra_cxxflags . ' -fno-sanitize=undefined -Xclang -target-feature -Xclang +evex512'));
     }
 }
