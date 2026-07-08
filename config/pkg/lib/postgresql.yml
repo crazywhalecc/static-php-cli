@@ -18,6 +18,7 @@ postgresql:
     - openssl
     - zlib
   tools@windows:
+    - python-win
     - meson
     - ninja
     - winflexbison

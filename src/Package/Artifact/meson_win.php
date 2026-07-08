@@ -22,8 +22,11 @@ class meson_win
         $dir = dirname($target_path);
         $venv = "{$dir}\\venv";
 
+        // Prefer the python-win tool package (installed alongside via tools@windows),
+        // fall back to whatever Python the machine already has.
+        $candidates = ['"' . PKG_ROOT_PATH . '\python-win\tools\python.exe"', 'python', 'py -3'];
         $python = null;
-        foreach (['python', 'py -3'] as $candidate) {
+        foreach ($candidates as $candidate) {
             [$code] = cmd()->execWithResult("{$candidate} --version", false);
             if ($code === 0) {
                 $python = $candidate;
@@ -31,7 +34,7 @@ class meson_win
             }
         }
         if ($python === null) {
-            throw new EnvironmentException('meson needs Python 3 on PATH. Install it from https://www.python.org or with `winget install Python.Python.3.13`.');
+            throw new EnvironmentException('meson needs Python 3; the python-win tool package did not install and no system Python was found.');
         }
 
         if (is_dir($venv)) {
