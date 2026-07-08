@@ -98,7 +98,8 @@ class postgresql extends LibraryPackage
             . ' -Dextra_lib_dirs=' . escapeshellarg($lib_dir);
 
         // Build only the three frontend static libs (not the server) — keeps it fast and avoids
-        // needing every backend dependency. meson/ninja/win_bison/win_flex/perl come from PATH.
+        // needing every backend dependency. meson/ninja/win_bison/win_flex/perl come from the
+        // tool packages declared in the package config (tools@windows).
         $targets = 'src/interfaces/libpq/libpq.a src/common/libpgcommon.a src/port/libpgport.a';
 
         cmd()->cd($src)

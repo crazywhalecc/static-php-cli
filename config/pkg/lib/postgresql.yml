@@ -17,6 +17,11 @@ postgresql:
   depends@windows:
     - openssl
     - zlib
+  tools@windows:
+    - meson
+    - ninja
+    - winflexbison
+    - strawberry-perl
   suggests@unix:
     - icu
     - libxslt
