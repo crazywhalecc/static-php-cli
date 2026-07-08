@@ -43,14 +43,14 @@ class imagick extends PhpExtensionPackage
             return;
         }
 
-        // The static ImageMagick stack needs several Win32 system libraries (GDI+, WIC, urlmon, ...)
+        // The static ImageMagick stack needs several Win32 system libraries (GDI/GDI+, WIC, urlmon, ...)
         // that aren't already pulled in by the other extensions. (imagick itself builds as plain C:
         // ImageMagick is built with a 32-bit channel mask, see imagemagick.php buildWin, so the
         // MagickCore headers don't require a C++ translation unit.)
         FileSystem::replaceFileStr(
             $config,
             "AC_DEFINE('HAVE_IMAGICK', 1);",
-            'ADD_FLAG("LIBS_IMAGICK", "gdiplus.lib urlmon.lib msimg32.lib oleaut32.lib windowscodecs.lib iphlpapi.lib");' . "\n\t\t" .
+            'ADD_FLAG("LIBS_IMAGICK", "gdi32.lib gdiplus.lib urlmon.lib msimg32.lib oleaut32.lib windowscodecs.lib iphlpapi.lib");' . "\n\t\t" .
             "AC_DEFINE('HAVE_IMAGICK', 1);"
         );
     }
