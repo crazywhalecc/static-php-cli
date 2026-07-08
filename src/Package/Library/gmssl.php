@@ -18,7 +18,9 @@ class gmssl
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib): void
     {
-        UnixCMakeExecutor::create($lib)->build();
+        UnixCMakeExecutor::create($lib)
+            ->addConfigureArgs('-DENABLE_SM2_PRIVATE_KEY_EXPORT=ON')
+            ->build();
     }
 
     #[BuildFor('Windows')]
@@ -33,6 +35,7 @@ class gmssl
                 '-G "NMake Makefiles"',
                 '-DWIN32=ON',
                 '-DBUILD_SHARED_LIBS=OFF',
+                '-DENABLE_SM2_PRIVATE_KEY_EXPORT=ON',
                 '-DCMAKE_BUILD_TYPE=Release',
                 '-DCMAKE_C_FLAGS_RELEASE="/MT /O2 /Ob2 /DNDEBUG"',
                 '-DCMAKE_CXX_FLAGS_RELEASE="/MT /O2 /Ob2 /DNDEBUG"',
@@ -42,13 +45,13 @@ class gmssl
             ->toStep(1)
             ->build();
 
-        // fix cmake_install.cmake install prefix (GmSSL overrides it internally)
-        $installCmake = "{$buildDir}\\cmake_install.cmake";
-        FileSystem::writeFile(
-            $installCmake,
-            'set(CMAKE_INSTALL_PREFIX "' . str_replace('\\', '/', $lib->getBuildRootPath()) . '")' . PHP_EOL . FileSystem::readFile($installCmake)
-        );
+        cmd()->cd($buildDir)->exec('nmake gmssl XCFLAGS=/MT');
 
-        cmd()->cd($buildDir)->exec('nmake install XCFLAGS=/MT');
+        $libPath = "{$lib->getBuildRootPath()}/lib";
+        $incPath = "{$lib->getBuildRootPath()}/include/gmssl";
+        FileSystem::createDir($libPath);
+        FileSystem::createDir($incPath);
+        FileSystem::copy("{$buildDir}\\bin\\gmssl.lib", "{$libPath}/gmssl.lib");
+        FileSystem::copyDir("{$lib->getSourceDir()}\\include\\gmssl", $incPath);
     }
 }

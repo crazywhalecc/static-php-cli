@@ -23,7 +23,7 @@ class InstallPackageCommand extends BaseCommand
             'The package to install (name or path)',
             suggestedValues: function (CompletionInput $input) {
                 $packages = [];
-                foreach (PackageLoader::getPackages(['target', 'virtual-target']) as $name => $_) {
+                foreach (PackageLoader::getPackages(['target', 'virtual-target', 'tool']) as $name => $_) {
                     $packages[] = $name;
                 }
                 $val = $input->getCompletionValue();

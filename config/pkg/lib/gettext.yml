@@ -3,6 +3,10 @@ gettext:
   artifact:
     source:
       type: filelist
+      url: 'https://ftp.gnu.org/gnu/gettext/'
+      regex: '/href="(?<file>gettext-(?<version>[^"]+)\.tar\.xz)"/'
+    source-mirror:
+      type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/gettext/'
       regex: '/href="(?<file>gettext-(?<version>[^"]+)\.tar\.xz)"/'
     metadata:

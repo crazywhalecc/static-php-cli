@@ -40,6 +40,13 @@ trait windows
         InteractiveTerm::setMessage('Building php: ' . ConsoleColor::yellow('./buildconf.bat'));
         cmd()->cd($package->getSourceDir())->exec('.\buildconf.bat');
 
+        // Bypass the phpsdk_version check in configure.js: we use MSVC + msys2 instead of PHP SDK, so phpsdk_version is not available and the check would always fail.
+        FileSystem::replaceFileStr(
+            "{$package->getSourceDir()}\\configure.js",
+            'check_binary_tools_sdk();',
+            '/* check_binary_tools_sdk(); skipped: using MSVC + msys2 without PHP SDK */'
+        );
+
         if ($package->getBuildOption('enable-micro-win32') && $installer->isPackageResolved('php-micro')) {
             SourcePatcher::patchMicroWin32();
         } else {
@@ -87,6 +94,17 @@ trait windows
         $args = implode(' ', $args);
         $static_extension_str = $this->makeStaticExtensionString($installer);
         cmd()->cd($package->getSourceDir())->exec(".\\configure.bat {$args} {$static_extension_str}");
+    }
+
+    #[BeforeStage('php', [self::class, 'makeCliForWindows'])]
+    #[PatchDescription('Patch Makefile to ensure buildroot/include comes before extension CFLAGS (fixes zip.h conflict with minizip)')]
+    public function patchMakefileIncludeOrder(TargetPackage $package): void
+    {
+        FileSystem::replaceFileStr(
+            "{$package->getSourceDir()}\\Makefile",
+            '$(CFLAGS_PHP_OBJ) $(CFLAGS)',
+            '$(CFLAGS) $(CFLAGS_PHP_OBJ)'
+        );
     }
 
     #[BeforeStage('php', [self::class, 'makeCliForWindows'])]

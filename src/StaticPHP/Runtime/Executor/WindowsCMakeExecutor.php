@@ -9,6 +9,7 @@ use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Package\ToolPackage;
 use StaticPHP\Runtime\Shell\WindowsCmd;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
@@ -35,7 +36,7 @@ class WindowsCMakeExecutor extends Executor
 
     protected PackageInstaller $installer;
 
-    public function __construct(protected LibraryPackage $package)
+    public function __construct(protected LibraryPackage|ToolPackage $package)
     {
         parent::__construct($this->package);
         $this->builder = ApplicationContext::get(PackageBuilder::class);
@@ -99,7 +100,7 @@ class WindowsCMakeExecutor extends Executor
     /**
      * Add configure args.
      */
-    public function addConfigureArgs(...$args): static
+    public function addConfigureArgs(string ...$args): static
     {
         $this->configure_args = [...$this->configure_args, ...$args];
         return $this;
@@ -108,7 +109,7 @@ class WindowsCMakeExecutor extends Executor
     /**
      * Remove some configure args, to bypass the configure option checking for some libs.
      */
-    public function removeConfigureArgs(...$args): static
+    public function removeConfigureArgs(string ...$args): static
     {
         $this->ignore_args = [...$this->ignore_args, ...$args];
         return $this;

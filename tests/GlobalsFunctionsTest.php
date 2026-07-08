@@ -21,6 +21,8 @@ class GlobalsFunctionsTest extends TestCase
     protected function tearDown(): void
     {
         $GLOBALS['spc_log_filters'] = null;
+        // Restore logger level to avoid polluting other tests with DEBUG noise
+        logger()->setLevel(LogLevel::ERROR);
     }
 
     public function testAddLogFilterDeduplicates(): void

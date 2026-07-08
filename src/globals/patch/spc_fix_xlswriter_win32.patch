@@ -1,7 +1,7 @@
-diff --git a/library/libxlsxwriter/third_party/md5/md5.c b/library/libxlsxwriter/third_party/md5/md5.c
+diff --git a/library/libxlsx/third_party/md5/md5.c b/library/libxlsx/third_party/md5/md5.c
 index b235e17..ce98e18 100644
---- a/library/libxlsxwriter/third_party/md5/md5.c
-+++ b/library/libxlsxwriter/third_party/md5/md5.c
+--- a/library/libxlsx/third_party/md5/md5.c
++++ b/library/libxlsx/third_party/md5/md5.c
 @@ -35,7 +35,11 @@
   * compile-time configuration.
   */
@@ -15,10 +15,10 @@ index b235e17..ce98e18 100644
  
  #include <string.h>
  
-diff --git a/library/libxlsxwriter/third_party/md5/md5.h b/library/libxlsxwriter/third_party/md5/md5.h
+diff --git a/library/libxlsx/third_party/md5/md5.h b/library/libxlsx/third_party/md5/md5.h
 index 2da44bf..3cb0a98 100644
---- a/library/libxlsxwriter/third_party/md5/md5.h
-+++ b/library/libxlsxwriter/third_party/md5/md5.h
+--- a/library/libxlsx/third_party/md5/md5.h
++++ b/library/libxlsx/third_party/md5/md5.h
 @@ -23,7 +23,7 @@
   * See md5.c for more information.
   */

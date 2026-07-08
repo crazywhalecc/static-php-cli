@@ -614,7 +614,7 @@ class ArtifactExtractor
             '{source_path}' => SOURCE_PATH,
             '{download_path}' => DOWNLOAD_PATH,
             '{working_dir}' => WORKING_DIR,
-            '{php_sdk_path}' => getenv('PHP_SDK_PATH') ?: '',
+            '{spc_msys2_path}' => getenv('SPC_MSYS2_PATH') ?: '',
         ];
         return str_replace(array_keys($replacement), array_values($replacement), $path);
     }

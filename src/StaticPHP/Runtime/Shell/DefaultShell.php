@@ -185,12 +185,14 @@ class DefaultShell extends Shell
      */
     public function execute7zExtract(string $archive_path, string $target_path): bool
     {
-        $sdk_path = getenv('PHP_SDK_PATH');
-        if ($sdk_path === false) {
-            throw new SPCInternalException('PHP_SDK_PATH environment variable is not set');
+        // 7za.exe is installed by the 7za-win target package into PKG_ROOT_PATH\bin,
+        // which is added to PATH by MSVCToolchain::initEnv().
+        $_7z_path = FileSystem::convertPath(PKG_ROOT_PATH . '\bin\7za.exe');
+        if (!file_exists($_7z_path)) {
+            throw new SPCInternalException('7za.exe not found. Please install the 7za-win target package.');
         }
 
-        $_7z = escapeshellarg(FileSystem::convertPath($sdk_path . '/bin/7za.exe'));
+        $_7z = escapeshellarg(FileSystem::convertPath($_7z_path));
         $archive_arg = escapeshellarg(FileSystem::convertPath($archive_path));
         $target_arg = escapeshellarg(FileSystem::convertPath($target_path));
 

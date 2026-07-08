@@ -644,7 +644,7 @@ class Artifact
             '{artifact_name}' => $this->name,
             '{pkg_root_path}' => PKG_ROOT_PATH,
             '{build_root_path}' => BUILD_ROOT_PATH,
-            '{php_sdk_path}' => getenv('PHP_SDK_PATH') ?: WORKING_DIR . '/php-sdk-binary-tools',
+            '{spc_msys2_path}' => getenv('SPC_MSYS2_PATH'),
             '{working_dir}' => WORKING_DIR,
             '{download_path}' => DOWNLOAD_PATH,
             '{source_path}' => SOURCE_PATH,

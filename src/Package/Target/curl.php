@@ -36,13 +36,7 @@ class curl
     public function buildWin(LibraryPackage $lib): void
     {
         $lib_dir = str_replace('\\', '/', $lib->getLibDir());
-        // Pass zstd's import library by absolute path. A bare name ("zstd_static.lib") lands on the
-        // link line unresolved and MSVC looks for it relative to the curl build dir (LNK1181).
         $zstd_lib = "{$lib_dir}/zstd_static.lib";
-        // libssh2 uses the OpenSSL crypto backend, but this curl build links Schannel and never
-        // find_package(OpenSSL), so libcrypto/libssl are absent from the link line and libssh2's
-        // EVP_*/RAND/PEM/ERR symbols go unresolved. Append them (plus the Win32 libs OpenSSL needs,
-        // mirroring openssl.php) to every target. MSVC's linker resolves regardless of order.
         $extra_libs = "{$lib_dir}/libcrypto.lib {$lib_dir}/libssl.lib ws2_32.lib gdi32.lib advapi32.lib crypt32.lib user32.lib";
         WindowsCMakeExecutor::create($lib)
             ->optionalPackage('zstd', ...cmake_boolean_args('CURL_ZSTD'))

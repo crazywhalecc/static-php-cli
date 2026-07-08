@@ -3,6 +3,10 @@ idn2:
   artifact:
     source:
       type: filelist
+      url: 'https://ftp.gnu.org/gnu/libidn/'
+      regex: '/href="(?<file>libidn2-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror:
+      type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/libidn/'
       regex: '/href="(?<file>libidn2-(?<version>[^"]+)\.tar\.gz)"/'
     metadata:

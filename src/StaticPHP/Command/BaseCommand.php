@@ -54,6 +54,10 @@ abstract class BaseCommand extends Command
         }
 
         set_error_handler(static function ($error_no, $error_msg, $error_file, $error_line) {
+            // Respect the @ suppression operator (error_reporting() returns 0 when @ is used)
+            if (error_reporting() === 0) {
+                return true;
+            }
             $tips = [
                 E_WARNING => ['PHP Warning: ', 'warning'],
                 E_NOTICE => ['PHP Notice: ', 'notice'],
