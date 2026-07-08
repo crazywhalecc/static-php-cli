@@ -42,7 +42,7 @@ class openssl
         $perl = ApplicationContext::get('perl');
         $cmd = cmd()->cd($lib->getSourceDir())
             ->exec(
-                quote($perl) . ' Configure zlib VC-WIN64A ' .
+                escapeshellarg($perl) . ' Configure zlib VC-WIN64A ' .
                 'no-shared ' .
                 '--prefix=' . quote($lib->getBuildRootPath()) . ' ' .
                 '--with-zlib-lib=' . quote($lib->getLibDir()) . ' ' .
