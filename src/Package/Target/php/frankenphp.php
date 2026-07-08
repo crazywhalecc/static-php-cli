@@ -273,10 +273,11 @@ trait frankenphp
         // Fix: prepend clang's directory to PATH and use plain executable names instead,
         // which matches FrankenPHP's official CI approach (CC=clang, CXX=clang++).
         $clang_dir = dirname($clang_info['clang']);
+        [$cc, $cxx] = $this->windowsCgoCompilers($package, $clang_info['clang']);
         $env = [
             'CGO_ENABLED' => '1',
-            'CC' => 'clang.exe',
-            'CXX' => 'clang++.exe',
+            'CC' => $cc,
+            'CXX' => $cxx,
             'PATH' => $clang_dir . ';' . getenv('PATH'),
             'CGO_CFLAGS' => clean_spaces($cgo_cflags),
             'CGO_LDFLAGS' => $cgo_ldflags,
@@ -375,6 +376,41 @@ trait frankenphp
                 validation_module: 'FrankenPHP smoke test'
             );
         }
+    }
+
+    /**
+     * Return the [CC, CXX] cgo should use to build FrankenPHP on Windows.
+     *
+     * Go passes the MinGW-only `-mthreads` flag to the C compiler for cgo builds;
+     * Clang >= 20 rejects it for the MSVC target. When it does, wrap Clang with
+     * a tiny .bat that strips the flag before forwarding.
+     *
+     * Workaround for https://github.com/golang/go/issues/80290, remove once Go
+     * stops passing the flag.
+     *
+     * @return array{0: string, 1: string}
+     */
+    protected function windowsCgoCompilers(TargetPackage $package, string $clang): array
+    {
+        $probe = $package->getSourceDir() . '\mthreads-probe.c';
+        file_put_contents($probe, "int main(void){return 0;}\n");
+        [$ret] = cmd()->execWithResult('"' . $clang . '" -mthreads -c ' . escapeshellarg($probe) . ' -o ' . escapeshellarg($probe . '.o'), false);
+        FileSystem::removeFileIfExists($probe);
+        FileSystem::removeFileIfExists($probe . '.o');
+        if ($ret === 0) {
+            return ['clang.exe', 'clang++.exe'];
+        }
+
+        logger()->info('Clang rejects -mthreads; wrapping it to strip the flag (golang/go#80290)');
+        $dir = dirname($clang);
+        $cc = $package->getSourceDir() . '\cc-nothreads.bat';
+        $cxx = $package->getSourceDir() . '\cxx-nothreads.bat';
+        // %*: the whole command line; the substring replace drops the -mthreads token,
+        // preserving quoting of paths that a for-loop would mangle.
+        file_put_contents($cc, "@echo off\r\nset \"a=%*\"\r\nset \"a=%a: -mthreads = %\"\r\n\"{$dir}\\clang.exe\" %a%\r\n");
+        file_put_contents($cxx, "@echo off\r\nset \"a=%*\"\r\nset \"a=%a: -mthreads = %\"\r\n\"{$dir}\\clang++.exe\" %a%\r\n");
+
+        return [$cc, $cxx];
     }
 
     protected function getFrankenPHPVersion(TargetPackage $package): string
