@@ -12,6 +12,7 @@ use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\System\WindowsUtil;
 
 #[Library('imagemagick')]
 class imagemagick
@@ -45,8 +46,16 @@ class imagemagick
 
         // Generate a static, /MT (linkRuntime), x64, Q16-HDRI solution with the configs embedded
         // (zeroConfigurationSupport) and OpenMP off (no vcomp runtime dependency).
+        $ver = WindowsUtil::findVisualStudio();
+        $vs_major = is_array($ver) ? $ver['major_version'] : 'unknown';
+        $vs_arg = match ($vs_major) {
+            '18',
+            '17' => '/VS2022',
+            '16' => '/VS2019',
+            default => throw new EnvironmentException("Current VS version {$vs_major} is not supported yet!"),
+        };
         cmd()->cd("{$work}\\Configure")
-            ->exec('Configure.Release.x64.exe /noWizard /VS2026 /x64 /static /linkRuntime /noOpenMP /zeroConfigurationSupport');
+            ->exec("Configure.Release.x64.exe /noWizard {$vs_arg} /x64 /static /linkRuntime /noOpenMP /zeroConfigurationSupport");
 
         // x64 IM7 defaults to a 64-bit channel mask, whose magick-baseconfig.h #errors unless the
         // consuming translation unit is C++. ext-imagick is plain C, so force a 32-bit channel mask
@@ -58,7 +67,7 @@ class imagemagick
         );
 
         cmd()->cd($work)
-            ->exec('msbuild IM7.Static.x64.sln /m /t:Rebuild /nologo /p:Configuration=Release,Platform=x64');
+            ->exec('msbuild IM7.Static.x64.sln /m /t:Rebuild /nologo /p:Configuration=Release /p:Platform=x64');
 
         $artifacts = "{$work}\\Artifacts\\lib";
         if (!is_dir($artifacts)) {
