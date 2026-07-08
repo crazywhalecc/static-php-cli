@@ -131,7 +131,6 @@ jobs:
     if: needs.check-gate.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
       contents: read
     outputs:
       need_test:             ${{ steps.bot.outputs.need_test }}
@@ -168,23 +167,17 @@ jobs:
           echo "php_versions=$(echo "$BOT_JSON" | jq -c '.php_versions')"                 >> "$GITHUB_OUTPUT"
           echo "tier2=$(echo "$BOT_JSON" | jq -r '.tier2')"                               >> "$GITHUB_OUTPUT"
 
-          COMMENT_BODY=$(echo "$BOT_JSON" | jq -r '.comment_body')
-          MARKER="<!-- spc-test-bot -->"
+          # Save JSON for the comment-posting workflow
+          jq -n --argjson bot "$BOT_JSON" \
+            --arg pr '${{ github.event.pull_request.number }}' \
+            '$bot + {pr_number: $pr}' > bot-output.json
 
-          # Find existing bot comment id
-          EXISTING_ID=$(gh api \
-            repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-            --jq "[.[] | select(.body | startswith(\"$MARKER\")) | .id] | first // empty")
-
-          if [ -n "$EXISTING_ID" ]; then
-            gh api --method PATCH \
-              repos/${{ github.repository }}/issues/comments/"$EXISTING_ID" \
-              -f body="$COMMENT_BODY"
-          else
-            gh pr comment ${{ github.event.pull_request.number }} \
-              --repo ${{ github.repository }} \
-              --body "$COMMENT_BODY"
-          fi
+      - name: Upload bot output
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-output
+          path: bot-output.json
+          retention-days: 1
 
   gen-matrix:
     name: "Generate test matrix"

@@ -20,7 +20,7 @@ class curl
         // which requires secur32.lib for SSL/TLS functions (SslEncryptPackage, etc.).
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if (!str_contains($extra_libs, 'secur32.lib')) {
-            putenv('SPC_EXTRA_LIBS=' . trim($extra_libs . ' secur32.lib'));
+            putenv('SPC_EXTRA_LIBS=' . trim("{$extra_libs} secur32.lib"));
         }
     }
 }
