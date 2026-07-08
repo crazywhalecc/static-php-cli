@@ -22,6 +22,7 @@ class gettext_win
     {
         $ver = WindowsUtil::findVisualStudio();
         $vs_ver_dir = match ($ver['major_version']) {
+            '18', // VS 2026 reuses the VS2022 (MSVC17) solution, which msbuild builds via forward compatibility.
             '17' => '\MSVC17',
             '16' => '\MSVC16',
             default => throw new EnvironmentException("Current VS version {$ver['major_version']} is not supported yet!"),
@@ -44,7 +45,9 @@ class gettext_win
     {
         $vs_ver_dir = ApplicationContext::get('gettext_win_vs_ver_dir');
         cmd()->cd("{$lib->getSourceDir()}{$vs_ver_dir}\\libintl_static")
-            ->exec('msbuild libintl_static.vcxproj /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:WindowsTargetPlatformVersion=10.0');
+            // WholeProgramOptimization (/GL) emits LTCG objects that frankenphp's lld-link cannot
+            // read ("is not a native COFF file"); disable it so the .lib stays plain COFF.
+            ->exec('msbuild libintl_static.vcxproj /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:WindowsTargetPlatformVersion=10.0 /p:WholeProgramOptimization=false');
         FileSystem::createDir($lib->getLibDir());
         FileSystem::createDir($lib->getIncludeDir());
         // libintl_a.lib is the static library output; copy as libintl.lib for linker compatibility

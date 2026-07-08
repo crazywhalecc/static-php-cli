@@ -104,7 +104,7 @@ echo '<?php echo "Hello world!\n";' > a.php
 
 ## 直接下载
 
-如果你暂时不想构建，或只想先测试，可以从 [Actions](https://github.com/static-php/static-php-cli-hosted/actions/workflows/build-php-bulk.yml) 下载示例预编译产物，或从自托管服务器下载。
+如果你暂时不想构建，或只想先测试，可以从 [Actions](https://github.com/static-php/hosted/actions/workflows/build-php-bulk.yml) 下载示例预编译产物，或从自托管服务器下载。
 
 我们为每个 PHP 版本提供 2 种扩展集合：
 

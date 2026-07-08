@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Package\Target;
+namespace Package\Tool;
 
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\InitPackage;
-use StaticPHP\Attribute\Package\Target;
+use StaticPHP\Attribute\Package\Tool;
 use StaticPHP\DI\ApplicationContext;
-use StaticPHP\Package\TargetPackage;
+use StaticPHP\Package\ToolPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 
-#[Target('pkg-config')]
+#[Tool('pkg-config')]
 class pkgconfig
 {
     #[InitPackage]
@@ -23,7 +23,7 @@ class pkgconfig
 
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
-    public function build(TargetPackage $package, ToolchainInterface $toolchain): void
+    public function build(ToolPackage $package, ToolchainInterface $toolchain): void
     {
         UnixAutoconfExecutor::create($package)
             ->appendEnv([

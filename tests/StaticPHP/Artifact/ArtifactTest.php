@@ -29,7 +29,6 @@ class ArtifactTest extends TestCase
         // Reset ArtifactConfig static state
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         // Reset DI container
@@ -45,7 +44,6 @@ class ArtifactTest extends TestCase
 
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         ApplicationContext::reset();
@@ -715,7 +713,6 @@ class ArtifactTest extends TestCase
     {
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
-        $property->setAccessible(true);
         $configs = $property->getValue(null) ?? [];
         $configs[$name] = $config;
         $property->setValue(null, $configs);

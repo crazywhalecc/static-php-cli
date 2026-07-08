@@ -30,6 +30,7 @@ class swoole extends PhpExtensionPackage
         if ($installer->getPhpExtensionPackage('swoole-hook-odbc') && $installer->getPhpExtensionPackage('pdo_odbc')?->isBuildStatic()) {
             throw new WrongUsageException('swoole-hook-odbc provides pdo_odbc, if you enable odbc hook for swoole, you must remove pdo_odbc extension.');
         }
+
         // swoole-hook-pgsql conflicts with pdo_pgsql
         if ($installer->getPhpExtensionPackage('swoole-hook-pgsql') && $installer->getPhpExtensionPackage('pdo_pgsql')?->isBuildStatic()) {
             throw new WrongUsageException('swoole-hook-pgsql provides pdo_pgsql, if you enable pgsql hook for swoole, you must remove pdo_pgsql extension.');

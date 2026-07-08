@@ -174,7 +174,7 @@ class FileSystem
     public static function convertWinPathToMinGW(string $path): string
     {
         if (preg_match('/^[A-Za-z]:/', $path)) {
-            $path = '/' . strtolower($path[0]) . '/' . str_replace('\\', '/', substr($path, 2));
+            $path = '/' . strtolower($path[0]) . '/' . str_replace('\\', '/', ltrim(substr($path, 2), '\/'));
         }
         return $path;
     }
@@ -411,7 +411,7 @@ class FileSystem
         $replacement = [
             '{build_root_path}' => BUILD_ROOT_PATH,
             '{pkg_root_path}' => PKG_ROOT_PATH,
-            '{php_sdk_path}' => getenv('PHP_SDK_PATH') ? getenv('PHP_SDK_PATH') : WORKING_DIR . '/php-sdk-binary-tools',
+            '{spc_msys2_path}' => getenv('SPC_MSYS2_PATH') ?: (PKG_ROOT_PATH . DIRECTORY_SEPARATOR . 'msys2-build-essentials' . DIRECTORY_SEPARATOR . 'msys64'),
             '{working_dir}' => WORKING_DIR,
             '{download_path}' => DOWNLOAD_PATH,
             '{source_path}' => SOURCE_PATH,

@@ -12,10 +12,8 @@
         "php": ">=8.4",
         "ext-mbstring": "*",
         "ext-zlib": "*",
-        "laravel/prompts": "~0.1",
         "php-di/php-di": "^7.1",
         "symfony/console": "^5.4 || ^6 || ^7",
-        "symfony/process": "^7.2",
         "symfony/yaml": "^7.2",
         "zhamao/logger": "^1.1.4"
     },

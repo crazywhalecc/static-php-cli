@@ -18,6 +18,7 @@ class libssh2
     {
         WindowsCMakeExecutor::create($lib)
             ->addConfigureArgs(
+                '-DCRYPTO_BACKEND=WinCNG',
                 '-DENABLE_ZLIB_COMPRESSION=ON',
                 '-DBUILD_TESTING=OFF'
             )

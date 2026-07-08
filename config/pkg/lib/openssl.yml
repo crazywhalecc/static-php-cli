@@ -17,7 +17,6 @@ openssl:
     - zlib
   depends@windows:
     - zlib
-    - jom
   headers:
     - openssl
   static-libs@unix:
@@ -26,3 +25,6 @@ openssl:
   static-libs@windows:
     - libssl.lib
     - libcrypto.lib
+  tools@windows:
+    - jom
+    - strawberry-perl

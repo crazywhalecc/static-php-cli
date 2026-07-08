@@ -26,11 +26,9 @@ class DoctorLoaderTest extends TestCase
         // Reset DoctorLoader state
         $reflection = new \ReflectionClass(DoctorLoader::class);
         $property = $reflection->getProperty('doctor_items');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $property = $reflection->getProperty('fix_items');
-        $property->setAccessible(true);
         $property->setValue(null, []);
     }
 
@@ -45,11 +43,9 @@ class DoctorLoaderTest extends TestCase
         // Reset DoctorLoader state
         $reflection = new \ReflectionClass(DoctorLoader::class);
         $property = $reflection->getProperty('doctor_items');
-        $property->setAccessible(true);
         $property->setValue(null, []);
 
         $property = $reflection->getProperty('fix_items');
-        $property->setAccessible(true);
         $property->setValue(null, []);
     }
 

@@ -54,13 +54,24 @@ class WindowsToolCheck
         return CheckResult::ok();
     }
 
-    #[CheckItem('if php-sdk-binary-tools are downloaded', limit_os: 'Windows', level: 996)]
-    public function checkSDK(): ?CheckResult
+    #[CheckItem('if msys2-build-essentials is installed', limit_os: 'Windows', level: 996)]
+    public function checkMsys2(): ?CheckResult
     {
-        if (!file_exists(getenv('PHP_SDK_PATH') . DIRECTORY_SEPARATOR . 'phpsdk-starter.bat')) {
-            return CheckResult::fail('php-sdk-binary-tools not downloaded', 'install-php-sdk');
+        $marker = PKG_ROOT_PATH . '\msys2-build-essentials\.spc-msys2-initialized';
+        if (!file_exists($marker)) {
+            return CheckResult::fail('msys2-build-essentials not installed', 'install-msys2-build-essentials');
         }
-        return CheckResult::ok(getenv('PHP_SDK_PATH'));
+        return CheckResult::ok(PKG_ROOT_PATH . '\msys2-build-essentials\msys64');
+    }
+
+    #[CheckItem('if 7za.exe is installed', limit_os: 'Windows', level: 999)]
+    public function check7zaWin(): ?CheckResult
+    {
+        $path = FileSystem::convertPath(PKG_ROOT_PATH . '\bin\7za.exe');
+        if (!file_exists($path)) {
+            return CheckResult::fail('7za.exe not found', 'install-7za-win');
+        }
+        return CheckResult::ok($path);
     }
 
     #[CheckItem('if nasm installed', level: 995)]
@@ -112,12 +123,20 @@ class WindowsToolCheck
         return true;
     }
 
-    #[FixItem('install-php-sdk')]
-    public function installSDK(): bool
+    #[FixItem('install-msys2-build-essentials')]
+    public function installMsys2(): bool
     {
-        FileSystem::removeDir(getenv('PHP_SDK_PATH'));
         $installer = new PackageInstaller(interactive: false);
-        $installer->addInstallPackage('php-sdk-binary-tools');
+        $installer->addInstallPackage('msys2-build-essentials');
+        $installer->run(true);
+        return true;
+    }
+
+    #[FixItem('install-7za-win')]
+    public function install7zaWin(): bool
+    {
+        $installer = new PackageInstaller(interactive: false);
+        $installer->addInstallPackage('7za-win');
         $installer->run(true);
         return true;
     }

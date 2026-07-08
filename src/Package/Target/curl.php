@@ -40,7 +40,7 @@ class curl
             ->optionalPackage('brotli', ...cmake_boolean_args('CURL_BROTLI'))
             ->addConfigureArgs(
                 '-DBUILD_CURL_EXE=ON',
-                '-DZSTD_LIBRARY=zstd_static.lib',
+                '-DZSTD_LIBRARY=' . BUILD_LIB_PATH . '/zstd_static.lib',
                 '-DBUILD_TESTING=OFF',
                 '-DBUILD_EXAMPLES=OFF',
                 '-DBUILD_LIBCURL_DOCS=OFF',

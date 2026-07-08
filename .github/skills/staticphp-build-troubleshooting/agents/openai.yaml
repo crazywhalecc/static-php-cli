@@ -1,0 +1,4 @@
+interface:
+  display_name: "StaticPHP Build Troubleshooting"
+  short_description: "Diagnose StaticPHP build and log failures."
+  default_prompt: "Use $staticphp-build-troubleshooting to investigate a StaticPHP build, download, doctor, or log failure."

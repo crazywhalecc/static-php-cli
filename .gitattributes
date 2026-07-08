@@ -1,0 +1,24 @@
+# Force LF line endings for all text files.
+# Prevents git from auto-converting LF -> CRLF on Windows checkouts.
+* text=auto eol=lf
+
+# Explicit binary files — git won't touch line endings for these
+*.phar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.gz binary
+*.tgz binary
+*.txz binary
+*.xz binary
+*.bz2 binary
+*.7z binary
+*.exe binary
+*.dll binary
+*.sfx binary
+*.so binary
+*.a binary
+*.o binary

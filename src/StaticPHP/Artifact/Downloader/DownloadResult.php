@@ -76,9 +76,10 @@ class DownloadResult
         ?string $version = null,
         array $metadata = [],
         ?string $downloader = null,
+        mixed $extract = null,
     ): DownloadResult {
         $cache_type = self::isArchiveFile($filename) ? 'archive' : 'file';
-        return new self($cache_type, config: $config, filename: $filename, verified: $verified, version: $version, metadata: $metadata, downloader: $downloader);
+        return new self($cache_type, config: $config, filename: $filename, extract: $extract, verified: $verified, version: $version, metadata: $metadata, downloader: $downloader);
     }
 
     /**

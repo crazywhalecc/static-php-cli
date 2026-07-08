@@ -229,7 +229,7 @@ The following path placeholders are supported in string values of the `path`, `e
 | `{working_dir}` | Working directory (project root) |
 | `{download_path}` | Download cache directory (`downloads/`) |
 | `{source_path}` | Extracted source directory (`source/`) |
-| `{php_sdk_path}` | Windows PHP SDK directory |
+| `{spc_msys2_path}` | MSYS2 root directory (`msys64/`) — Windows only |
 
 ## target Package Type
 

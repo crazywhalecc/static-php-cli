@@ -1,0 +1,4 @@
+interface:
+  display_name: "StaticPHP Package Maintenance"
+  short_description: "Add, update, and validate StaticPHP v3 package definitions."
+  default_prompt: "Use $staticphp-package-maintenance to add, modify, or review StaticPHP package and artifact definitions."

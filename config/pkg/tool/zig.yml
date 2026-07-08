@@ -1,0 +1,14 @@
+zig:
+  type: tool
+  artifact:
+    binary: custom
+  tool:
+    provides:
+      - zig
+      - zig-cc
+      - zig-c++
+      - zig-ar
+      - zig-ld.lld
+      - zig-ranlib
+      - zig-objcopy
+    binary-subdir: zig

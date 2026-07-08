@@ -1,0 +1,9 @@
+7za-win:
+  type: tool
+  artifact:
+    binary:
+      windows-x86_64: { type: url, url: 'https://dl.static-php.dev/v3/tools/7zip/7za.exe', extract: '{pkg_root_path}/bin/7za.exe' }
+  tool:
+    provides:
+      - 7za.exe
+    binary-subdir: bin

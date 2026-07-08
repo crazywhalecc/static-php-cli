@@ -58,7 +58,13 @@ A single-file hook API for lightweight patches may be provided in a future relea
 
 ### Windows-only: `--with-sdk-binary-dir` and `--vs-ver`
 
-These options are no longer accepted on the command line. Instead, set the `PHP_SDK_PATH` environment variable to point to your PHP SDK binary tools directory. The Visual Studio version is now managed by the toolchain configuration.
+These options are no longer accepted on the command line. In v3, the `php-sdk-binary-tools` dependency has been completely removed. v3 now manages its own **MSYS2** environment to support autotools-based library builds on Windows. Run `spc doctor --install` to download and configure MSYS2 automatically.
+
+If you need to point to a custom MSYS2 installation, set the `SPC_MSYS2_PATH` environment variable to the `msys64` directory (e.g. `C:\msys64`). Visual Studio is now auto-detected by the toolchain — no manual version flag needed.
+
+::: warning Migrating from v2
+v2 relied on `php-sdk-binary-tools` and required `--with-sdk-binary-dir` and `--vs-ver` on every build invocation. In v3 these options are gone. Remove them from all CI scripts and run `spc doctor --install` once to set up the Windows build environment.
+:::
 
 ## Renamed / Deprecated Options
 

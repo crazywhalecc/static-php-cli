@@ -24,7 +24,7 @@ class openssl
     {
         if (SystemTarget::getTargetOS() === 'Windows') {
             global $argv;
-            $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl-' . arch2gnu(php_uname('m')) . '-win\perl\bin\perl.exe';
+            $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl\perl\bin\perl.exe';
             $perl = file_exists($perl_path_native) ? ($perl_path_native) : WindowsUtil::findCommand('perl.exe');
             if ($perl === null) {
                 throw new EnvironmentException(
