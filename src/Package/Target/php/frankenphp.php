@@ -381,9 +381,12 @@ trait frankenphp
     /**
      * Return the [CC, CXX] cgo should use to build FrankenPHP on Windows.
      *
-     * Go passes the MinGW-only `-mthreads` flag to the C compiler for cgo builds
-     * (golang/go#16932); Clang >= 20 rejects it for the MSVC target. When it does,
-     * wrap Clang with a tiny .bat that strips the flag before forwarding.
+     * Go passes the MinGW-only `-mthreads` flag to the C compiler for cgo builds;
+     * Clang >= 20 rejects it for the MSVC target. When it does, wrap Clang with
+     * a tiny .bat that strips the flag before forwarding.
+     *
+     * Workaround for https://github.com/golang/go/issues/80290, remove once Go
+     * stops passing the flag.
      *
      * @return array{0: string, 1: string}
      */
@@ -398,7 +401,7 @@ trait frankenphp
             return ['clang.exe', 'clang++.exe'];
         }
 
-        logger()->info('Clang rejects -mthreads; wrapping it to strip the flag (golang/go#16932)');
+        logger()->info('Clang rejects -mthreads; wrapping it to strip the flag (golang/go#80290)');
         $dir = dirname($clang);
         $cc = $package->getSourceDir() . '\cc-nothreads.bat';
         $cxx = $package->getSourceDir() . '\cxx-nothreads.bat';
