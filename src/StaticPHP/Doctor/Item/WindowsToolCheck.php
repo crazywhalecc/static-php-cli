@@ -12,7 +12,6 @@ use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\ToolchainManager;
 use StaticPHP\Util\FileSystem;
-use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\System\WindowsUtil;
 
 #[OptionalCheck([self::class, 'optional'])]
@@ -74,27 +73,6 @@ class WindowsToolCheck
         return CheckResult::ok($path);
     }
 
-    #[CheckItem('if nasm installed', level: 995)]
-    public function checkNasm(): ?CheckResult
-    {
-        if (($a = WindowsUtil::findCommand('nasm.exe')) === null) {
-            return CheckResult::fail('nasm.exe not found in path.', 'install-nasm');
-        }
-        return CheckResult::ok($a);
-    }
-
-    #[CheckItem('if perl(strawberry) installed', limit_os: 'Windows', level: 994)]
-    public function checkPerl(): ?CheckResult
-    {
-        if (($path = WindowsUtil::findCommand('perl.exe')) === null) {
-            return CheckResult::fail('perl not found in path.', 'install-perl');
-        }
-        if (!str_contains(implode('', cmd()->execWithResult(quote($path) . ' -v', false)[1]), 'MSWin32')) {
-            return CheckResult::fail($path . ' is not built for msvc.', 'install-perl');
-        }
-        return CheckResult::ok($path);
-    }
-
     #[CheckItem('if environment is properly set up', level: 1)]
     public function checkenv(): ?CheckResult
     {
@@ -113,16 +91,6 @@ class WindowsToolCheck
         return CheckResult::ok();
     }
 
-    #[FixItem('install-perl')]
-    public function installPerl(): bool
-    {
-        $installer = new PackageInstaller();
-        $installer->addInstallPackage('strawberry-perl');
-        $installer->run(true);
-        GlobalEnvManager::addPathIfNotExists(PKG_ROOT_PATH . '\strawberry-perl');
-        return true;
-    }
-
     #[FixItem('install-msys2-build-essentials')]
     public function installMsys2(): bool
     {
@@ -137,15 +105,6 @@ class WindowsToolCheck
     {
         $installer = new PackageInstaller(interactive: false);
         $installer->addInstallPackage('7za-win');
-        $installer->run(true);
-        return true;
-    }
-
-    #[FixItem('install-nasm')]
-    public function installNasm(): bool
-    {
-        $installer = new PackageInstaller(interactive: false);
-        $installer->addInstallPackage('nasm');
         $installer->run(true);
         return true;
     }
