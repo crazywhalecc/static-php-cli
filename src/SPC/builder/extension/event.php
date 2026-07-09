@@ -38,7 +38,23 @@ class event extends Extension
         // Prevent event extension compile error on macOS
         if ($this->builder instanceof MacOSBuilder) {
             FileSystem::replaceFileRegex(SOURCE_PATH . '/php-src/main/php_config.h', '/^#define HAVE_OPENPTY 1$/m', '');
-            return true;
+            $patched = true;
+        }
+        return $this->patchLibeventConstPeer() || $patched;
+    }
+
+    public function patchBeforeSharedMake(): bool
+    {
+        $patched = parent::patchBeforeSharedMake();
+        return $this->patchLibeventConstPeer() || $patched;
+    }
+
+    private function patchLibeventConstPeer(): bool
+    {
+        $patched = false;
+        $file = SOURCE_PATH . '/php-src/ext/event/php8/classes/http_connection.c';
+        if (is_file($file) && FileSystem::replaceFileRegex($file, '/^\tchar \*address;$/m', "\tconst char *address;")) {
+            $patched = true;
         }
         return $patched;
     }

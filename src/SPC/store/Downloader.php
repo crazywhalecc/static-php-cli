@@ -175,6 +175,16 @@ class Downloader
             hooks: [[CurlHook::class, 'setupGithubToken']],
             retries: self::getRetryAttempts()
         ), true);
+        if (($source['prefer-stable'] ?? false) === true) {
+            $latest = json_decode(self::curlExec(
+                url: "https://api.github.com/repos/{$source['repo']}/releases/latest",
+                hooks: [[CurlHook::class, 'setupGithubToken']],
+                retries: self::getRetryAttempts()
+            ), true);
+            if (is_array($latest) && isset($latest['assets'])) {
+                array_unshift($data, $latest);
+            }
+        }
         $url = null;
         $filename = null;
         foreach ($data as $release) {
