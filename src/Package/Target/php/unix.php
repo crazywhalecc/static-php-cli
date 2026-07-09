@@ -289,16 +289,7 @@ trait unix
         $builder->deployBinary($package->getSourceDir() . '/sapi/micro/micro.sfx', $dst);
         // patch after UPX-ed micro.sfx (Linux only)
         if (SystemTarget::getTargetOS() === 'Linux' && $builder->getOption('with-upx-pack')) {
-            // cut binary with readelf to remove UPX extra segment
-            [$ret, $out] = shell()->execWithResult("readelf -l {$dst} | awk '/LOAD|GNU_STACK/ {getline; print \\$1, \\$2, \\$3, \\$4, \\$6, \\$7}'");
-            $out[1] = explode(' ', $out[1]);
-            $offset = $out[1][0];
-            if ($ret !== 0 || !str_starts_with($offset, '0x')) {
-                throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
-            }
-            $offset = hexdec($offset);
-            // remove upx extra wastes
-            file_put_contents($dst, substr(file_get_contents($dst), 0, $offset));
+            self::patchMicroUpxPackedBinary($dst);
         }
         $package->setOutput('Binary path for micro SAPI', $dst);
     }
@@ -678,6 +669,43 @@ trait unix
         }
         $php .= "echo '[micro-test-end]';\n";
         return $php;
+    }
+
+    /**
+     * Remove the extra segment appended by UPX when packing phpmicro.
+     */
+    private static function patchMicroUpxPackedBinary(string $binaryPath): void
+    {
+        [$ret, $out] = shell()->execWithResult('readelf -W -l ' . escapeshellarg($binaryPath));
+        if ($ret !== 0) {
+            throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
+        }
+
+        $fileSizes = [];
+        foreach ($out as $index => $line) {
+            $line = trim($line);
+            if (!preg_match('/^(LOAD|GNU_STACK)\s+/', $line)) {
+                continue;
+            }
+
+            $columns = preg_split('/\s+/', $line);
+            if (isset($columns[4]) && preg_match('/^0x[[:xdigit:]]+$/', $columns[4]) === 1) {
+                $fileSizes[] = $columns[4];
+                continue;
+            }
+
+            $next = $out[$index + 1] ?? '';
+            if (preg_match('/^\s*(0x[[:xdigit:]]+)\s+0x[[:xdigit:]]+/', $next, $matches)) {
+                $fileSizes[] = $matches[1];
+            }
+        }
+
+        $offset = $fileSizes[1] ?? null;
+        if ($offset === null) {
+            throw new PatchException('phpmicro UPX patcher', 'Cannot find offset in readelf output');
+        }
+
+        file_put_contents($binaryPath, substr(file_get_contents($binaryPath), 0, intval(hexdec($offset))));
     }
 
     /**
