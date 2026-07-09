@@ -17,12 +17,6 @@ postgresql:
   depends@windows:
     - openssl
     - zlib
-  tools@windows:
-    - python-win
-    - meson
-    - ninja
-    - winflexbison
-    - strawberry-perl
   suggests@unix:
     - icu
     - libxslt
@@ -34,3 +28,9 @@ postgresql:
     - libpq.lib
     - libpgport.lib
     - libpgcommon.lib
+  tools@windows:
+    - python-win
+    - meson
+    - ninja
+    - winflexbison
+    - strawberry-perl
