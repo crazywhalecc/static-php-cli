@@ -56,9 +56,16 @@ class event extends PhpExtensionPackage
     private function patchLibeventConstPeer(string $event_source_dir): bool
     {
         $file = "{$event_source_dir}/php8/classes/http_connection.c";
-        if (is_file($file) && FileSystem::replaceFileRegex($file, '/^\tchar \*address;$/m', "\tconst char *address;")) {
-            return true;
+        if (!is_file($file)) {
+            return false;
         }
-        return false;
+        // libevent >= 2.2 changed evhttp_connection_get_peer()'s
+        // address arg to `const char **`
+        $header = $this->getBuilder()->getBuildRootPath() . '/include/event2/http.h';
+        $isConst = is_file($header)
+            && preg_match('/evhttp_connection_get_peer\s*\([^;]*\bconst\s+char\s*\*\*\s*address/s', file_get_contents($header)) === 1;
+        return (bool) ($isConst
+            ? FileSystem::replaceFileRegex($file, '/^\tchar \*address;$/m', "\tconst char *address;")
+            : FileSystem::replaceFileRegex($file, '/^\tconst char \*address;$/m', "\tchar *address;"));
     }
 }
