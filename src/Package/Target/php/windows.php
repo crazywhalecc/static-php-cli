@@ -175,8 +175,9 @@ trait windows
             }
         }
 
+        $libs_cli = $this->makeLibsResponseFile($package, 'cli', "ws2_32.lib shell32.lib {$extra_libs}");
         cmd()->cd($package->getSourceDir())
-            ->exec("nmake /nologo {$debug_overrides}LIBS_CLI=\"ws2_32.lib shell32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= php.exe");
+            ->exec("nmake /nologo {$debug_overrides}LIBS_CLI=\"{$libs_cli}\" EXTRA_LD_FLAGS_PROGRAM= php.exe");
 
         $this->deployWindowsBinary($builder, $package, 'php-cli');
     }
@@ -245,8 +246,9 @@ trait windows
             }
         }
 
+        $libs_cgi = $this->makeLibsResponseFile($package, 'cgi', "ws2_32.lib kernel32.lib advapi32.lib {$extra_libs}");
         cmd()->cd($package->getSourceDir())
-            ->exec("nmake /nologo {$debug_overrides}LIBS_CGI=\"ws2_32.lib kernel32.lib advapi32.lib {$extra_libs}\" EXTRA_LD_FLAGS_PROGRAM= php-cgi.exe");
+            ->exec("nmake /nologo {$debug_overrides}LIBS_CGI=\"{$libs_cgi}\" EXTRA_LD_FLAGS_PROGRAM= php-cgi.exe");
 
         $this->deployWindowsBinary($builder, $package, 'php-cgi');
     }
@@ -331,8 +333,9 @@ trait windows
 
         $fake_cli = $package->getBuildOption('with-micro-fake-cli', false) ? ' /DPHP_MICRO_FAKE_CLI' : '';
 
+        $libs_micro = $this->makeLibsResponseFile($package, 'micro', "ws2_32.lib shell32.lib {$extra_libs}");
         cmd()->cd($package->getSourceDir())
-            ->exec("nmake /nologo {$debug_overrides}LIBS_MICRO=\"ws2_32.lib shell32.lib {$extra_libs}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" EXTRA_LD_FLAGS_PROGRAM= micro");
+            ->exec("nmake /nologo {$debug_overrides}LIBS_MICRO=\"{$libs_micro}\" CFLAGS_MICRO=\"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1{$fake_cli}\" EXTRA_LD_FLAGS_PROGRAM= micro");
 
         $this->deployWindowsBinary($builder, $package, 'php-micro');
     }
@@ -883,5 +886,18 @@ C_CODE;
         }
 
         $package->setOutput('PHP headers path for embed SAPI', $php_include_dir);
+    }
+
+    /**
+     * Write the collected lib list into a linker response file and return the @file
+     * token for the nmake command line. With big extension stacks (imagick alone pulls
+     * in ~60 static libs) the inline list can push the whole command past cmd.exe's
+     * 8191 character limit; link.exe reads @file without any length limit.
+     */
+    private function makeLibsResponseFile(TargetPackage $package, string $sapi, string $libs): string
+    {
+        $file = "{$package->getSourceDir()}\\spc-libs-{$sapi}.rsp";
+        FileSystem::writeFile($file, $libs);
+        return "@{$file}";
     }
 }
