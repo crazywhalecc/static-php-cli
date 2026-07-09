@@ -35,12 +35,30 @@ class event extends PhpExtensionPackage
 
     #[BeforeStage('php', [php::class, 'makeForUnix'], 'ext-event')]
     #[PatchDescription('Prevent event extension compile error on macOS')]
+    #[PatchDescription('Patch libevent http_connection.c to use a const peer address')]
     public function patchBeforeMake(PackageInstaller $installer): void
     {
+        $php_src = $installer->getTargetPackage('php')->getSourceDir();
         // Prevent event extension compile error on macOS
         if (SystemTarget::getTargetOS() === 'Darwin') {
-            $php_src = $installer->getTargetPackage('php')->getSourceDir();
             FileSystem::replaceFileRegex("{$php_src}/main/php_config.h", '/^#define HAVE_OPENPTY 1$/m', '');
         }
+        $this->patchLibeventConstPeer("{$php_src}/ext/event");
+    }
+
+    #[BeforeStage('ext-event', [PhpExtensionPackage::class, 'makeForUnix'])]
+    #[PatchDescription('Patch libevent http_connection.c to use a const peer address')]
+    public function patchBeforeSharedMake(PhpExtensionPackage $pkg): void
+    {
+        $this->patchLibeventConstPeer($pkg->getSourceDir());
+    }
+
+    private function patchLibeventConstPeer(string $event_source_dir): bool
+    {
+        $file = "{$event_source_dir}/php8/classes/http_connection.c";
+        if (is_file($file) && FileSystem::replaceFileRegex($file, '/^\tchar \*address;$/m', "\tconst char *address;")) {
+            return true;
+        }
+        return false;
     }
 }

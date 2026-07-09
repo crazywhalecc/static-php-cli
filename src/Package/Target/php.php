@@ -143,6 +143,7 @@ class php extends TargetPackage
         $package->addBuildOption('disable-opcache-jit', null, null, 'Disable opcache jit');
         $package->addBuildOption('with-config-file-path', null, InputOption::VALUE_REQUIRED, 'Set the path in which to look for php.ini', PHP_OS_FAMILY === 'Windows' ? null : '/usr/local/etc/php');
         $package->addBuildOption('with-config-file-scan-dir', null, InputOption::VALUE_REQUIRED, 'Set the directory to scan for .ini files after reading php.ini', PHP_OS_FAMILY === 'Windows' ? null : '/usr/local/etc/php/conf.d');
+        $package->addBuildOption('with-sysconfdir', null, InputOption::VALUE_REQUIRED, 'Set the sysconfdir (e.g. /etc/php-zts) used by configure (not available on Windows)');
         $package->addBuildOption('with-hardcoded-ini', 'I', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Patch PHP source code, inject hardcoded INI');
         $package->addBuildOption('enable-zts', null, null, 'Enable thread safe support');
         $package->addBuildOption('no-smoke-test', null, InputOption::VALUE_OPTIONAL, 'Disable smoke test for specific SAPIs, or all if no value provided', false);

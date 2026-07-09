@@ -68,13 +68,13 @@ done
 
 RT_DIR="${SPC_COMPILER_RT_DIR:-}"
 if [[ $IS_LINK -eq 1 && $NEED_PROFILE_RT -eq 1 && -n "$RT_DIR" && -f "$RT_DIR/libclang_rt.profile.a" ]]; then
-    PARSED_ARGS+=("$RT_DIR/libclang_rt.profile.a" "-Wl,-u,__llvm_profile_runtime")
+    PARSED_ARGS+=("-x" "none" "$RT_DIR/libclang_rt.profile.a" "-Wl,-u,__llvm_profile_runtime")
 fi
 if [[ $IS_LINK -eq 1 && $NEED_CRT -eq 1 && -n "$RT_DIR" && -f "$RT_DIR/clang_rt.crtbegin.o" && -f "$RT_DIR/clang_rt.crtend.o" ]]; then
-    PARSED_ARGS+=("$RT_DIR/clang_rt.crtbegin.o" "$RT_DIR/clang_rt.crtend.o")
+    PARSED_ARGS+=("-x" "none" "$RT_DIR/clang_rt.crtbegin.o" "$RT_DIR/clang_rt.crtend.o")
 fi
 if [[ $IS_LINK -eq 1 && -n "$RT_DIR" && -f "$RT_DIR/libclang_rt.cpu_model.a" ]]; then
-    PARSED_ARGS+=("$RT_DIR/libclang_rt.cpu_model.a")
+    PARSED_ARGS+=("-x" "none" "$RT_DIR/libclang_rt.cpu_model.a")
 fi
 
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""

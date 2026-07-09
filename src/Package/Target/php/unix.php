@@ -75,6 +75,7 @@ trait unix
 
     #[BeforeStage('php', [self::class, 'configureForUnix'], 'php')]
     #[PatchDescription('Patch configure to use -std=gnu17 instead of -std=gnu23 for PHP <= 8.2')]
+    #[PatchDescription('Strip build-time env vars from phpinfo\'s "Configure Command"')]
     public function patchBeforeConfigure(TargetPackage $package): void
     {
         if (SystemTarget::isUnix() && self::getPHPVersionID() < 80300) {
@@ -82,6 +83,22 @@ trait unix
                 "{$package->getSourceDir()}/configure",
                 "for ac_arg in '' -std=gnu23",
                 "for ac_arg in '' -std=gnu17",
+            );
+        }
+
+        // strip our build-time env vars from phpinfo's "Configure Command" ('|' delimiter: PHP_BUILD_PROVIDER may contain '#')
+        if (SystemTarget::isUnix()) {
+            FileSystem::replaceFileStr(
+                "{$package->getSourceDir()}/configure",
+                'for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do',
+                'for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX '
+                . 'PKG_CONFIG PKG_CONFIG_PATH EXTENSION_DIR OPENSSL_LIBS '
+                . 'PHP_BUILD_SYSTEM PHP_BUILD_PROVIDER PHP_BUILD_COMPILER PHP_BUILD_ARCH; do',
+            );
+            FileSystem::replaceFileStr(
+                "{$package->getSourceDir()}/configure",
+                'clean_configure_args=$(echo $clean_configure_args | $SED -e "s#\'$var=$val\'##")',
+                'clean_configure_args=$(echo $clean_configure_args | $SED -e "s|\'$var=$val\'||")',
             );
         }
     }
@@ -124,6 +141,9 @@ trait unix
         }
         if ($option = $package->getBuildOption('with-config-file-scan-dir', false)) {
             $args[] = "--with-config-file-scan-dir={$option}";
+        }
+        if ($option = $package->getBuildOption('with-sysconfdir', false)) {
+            $args[] = "--sysconfdir={$option}";
         }
         // perform enable cli options
         $args[] = $installer->isPackageResolved('php-cli') ? '--enable-cli' : '--disable-cli';

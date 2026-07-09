@@ -57,6 +57,16 @@ class GitHubRelease implements DownloadTypeInterface, ValidatorInterface, CheckU
         if (!is_array($data)) {
             throw new DownloaderException("Failed to get GitHub release API info for {$repo} from {$url}");
         }
+        // GitHub's /releases list is ordered by publish date, so a newer-tagged prerelease
+        // (e.g. 2.2.x-alpha) can precede the latest stable (2.1.x-stable). /releases/latest
+        // returns the semantically latest stable release regardless of order; check it first.
+        if ($prefer_stable) {
+            $latest_url = str_replace('{repo}', $repo, self::API_URL) . '/latest';
+            $latest = json_decode(default_shell()->executeCurl($latest_url, headers: $headers, retries: $retries) ?: '', true);
+            if (is_array($latest) && isset($latest['assets'])) {
+                array_unshift($data, $latest);
+            }
+        }
         foreach ($data as $release) {
             if ($prefer_stable && $release['prerelease'] === true) {
                 continue;

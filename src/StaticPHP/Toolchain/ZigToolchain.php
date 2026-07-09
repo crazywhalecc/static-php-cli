@@ -75,6 +75,16 @@ class ZigToolchain implements UnixToolchainInterface
         $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
         GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=ac_cv_func_strlcpy=no ac_cv_func_strlcat=no {$extra_vars}");
 
+        // An __attribute__((ifunc)) in LTO bitcode crashes zig 0.16's lld (LLVM 21)
+        // during thin-link symbol resolution
+        $all_flags = $cflags . ' ' . (getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '') . ' ' . (getenv('SPC_DEFAULT_LD_FLAGS') ?: '');
+        if (str_contains($all_flags, '-flto')) {
+            $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+            if (!str_contains($extra_vars, 'ax_cv_have_func_attribute_ifunc')) {
+                GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS={$extra_vars} ax_cv_have_func_attribute_ifunc=no");
+            }
+        }
+
         $this->ensureCompilerRt();
     }
 
