@@ -201,7 +201,10 @@ trait windows
             throw new PatchException('Windows Makefile patching for php-cgi.exe target', 'Cannot patch windows CGI Makefile, Makefile does not contain "$(BUILD_DIR)\php-cgi.exe:" line');
         }
         $lines[$line_num] = '$(BUILD_DIR)\php-cgi.exe: $(DEPS_CGI) $(CGI_GLOBAL_OBJS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php-cgi.exe.res $(BUILD_DIR)\php-cgi.exe.manifest';
-        $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286';
+        // /FORCE:MULTIPLE /ignore:4006: same reason as the php.exe target above. Without it the
+        // CGI link fails with LNK2005 (e.g. imagick's MagickCore defines gettimeofday, which
+        // php's time.obj also defines).
+        $lines[$line_num + 1] = "\t" . '@"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CGI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CGI) $(BUILD_DIR)\php-cgi.exe.res /out:$(BUILD_DIR)\php-cgi.exe $(LDFLAGS) $(LDFLAGS_CGI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286 /FORCE:MULTIPLE /ignore:4006';
         FileSystem::writeFile("{$package->getSourceDir()}\\Makefile", implode("\r\n", $lines));
 
         // Patch cgi-static, comment ZEND_TSRMLS_CACHE_DEFINE()
@@ -266,6 +269,19 @@ trait windows
         if ($installer->isPackageResolved('php-embed')) {
             $package->runStage([$this, 'makeEmbedForWindows']);
         }
+    }
+
+    #[BeforeStage('php', [self::class, 'makeMicroForWindows'])]
+    #[PatchDescription('Add /FORCE:MULTIPLE to the micro.sfx link, matching the CLI and CGI targets')]
+    public function patchMicroTarget(TargetPackage $package): void
+    {
+        $makefile = "{$package->getSourceDir()}\\Makefile";
+        if (str_contains(FileSystem::readFile($makefile), 'LDFLAGS_MICRO=/FORCE:MULTIPLE')) {
+            return;
+        }
+        // Same reason as the php.exe and php-cgi.exe targets: extension-bundled libs duplicate
+        // symbols from php's own objects and the link fails with LNK2005.
+        FileSystem::replaceFileStr($makefile, "\r\nLDFLAGS_MICRO=", "\r\nLDFLAGS_MICRO=/FORCE:MULTIPLE /ignore:4006 ");
     }
 
     #[Stage]

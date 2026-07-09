@@ -28,3 +28,9 @@ postgresql:
     - libpq.lib
     - libpgport.lib
     - libpgcommon.lib
+  tools@windows:
+    - python-win
+    - meson
+    - ninja
+    - winflexbison
+    - strawberry-perl
