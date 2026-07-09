@@ -10,6 +10,7 @@ use SPC\store\CurlHook;
 use SPC\store\Downloader;
 use SPC\store\FileSystem;
 use SPC\store\LockFile;
+use SPC\util\SPCTarget;
 
 class Zig extends CustomPackage
 {
@@ -175,15 +176,17 @@ class Zig extends CustomPackage
             throw new \RuntimeException("[zig] failed to fetch compiler-rt {$llvmVersion} sources; cannot build clang runtime bits (--pgo, __dso_handle, __cpu_model)");
         }
 
+        $targetFlag = $this->baselineZigTarget();
+
         f_mkdir($libDir, recursive: true);
         if (!file_exists($profileLib)) {
-            $this->buildProfileRuntime($zig, $srcRoot, $profileLib);
+            $this->buildProfileRuntime($zig, $srcRoot, $profileLib, $targetFlag);
         }
         if (!file_exists($crtBegin) || !file_exists($crtEnd)) {
-            $this->buildCrtObjects($zig, $srcRoot, $crtBegin, $crtEnd);
+            $this->buildCrtObjects($zig, $srcRoot, $crtBegin, $crtEnd, $targetFlag);
         }
         if (!file_exists($cpuModelLib)) {
-            $this->buildCpuModelBuiltins($zig, $srcRoot, $cpuModelLib);
+            $this->buildCpuModelBuiltins($zig, $srcRoot, $cpuModelLib, $targetFlag);
         }
         FileSystem::removeDir($srcRoot);
 
@@ -201,7 +204,17 @@ class Zig extends CustomPackage
         }
     }
 
-    private function buildCpuModelBuiltins(string $zig, string $srcRoot, string $libPath): void
+    /**
+     * A concrete `-target {arch}-linux-{abi}` for the clang runtime bits.
+     */
+    private function baselineZigTarget(): string
+    {
+        $arch = SPCTarget::getTargetArch();
+        $abi = SPCTarget::getLibc() === 'musl' ? 'musl' : 'gnu';
+        return "-target {$arch}-linux-{$abi}";
+    }
+
+    private function buildCpuModelBuiltins(string $zig, string $srcRoot, string $libPath, string $targetFlag): void
     {
         $builtins = "{$srcRoot}/lib/builtins";
         $arch = php_uname('m');
@@ -226,7 +239,7 @@ class Zig extends CustomPackage
         $objDir = "{$srcRoot}/obj-cpu-model";
         f_mkdir($objDir, recursive: true);
         $obj = "{$objDir}/cpu_model.o";
-        $cflags = '-c -O2 -fPIC ' . $includes;
+        $cflags = $targetFlag . ' -c -O2 -fPIC ' . $includes;
         $cmd = escapeshellarg($zig) . ' cc ' . $cflags . ' -o ' . escapeshellarg($obj) . ' ' . escapeshellarg($src) . ' 2>&1';
         if (!$this->runZigCmd($cmd, $obj, "failed to compile {$src}")) {
             return;
@@ -259,7 +272,7 @@ class Zig extends CustomPackage
         return $srcRoot;
     }
 
-    private function buildProfileRuntime(string $zig, string $srcRoot, string $libPath): void
+    private function buildProfileRuntime(string $zig, string $srcRoot, string $libPath, string $targetFlag): void
     {
         $profileSrc = "{$srcRoot}/lib/profile";
         $profileInc = "{$srcRoot}/include";
@@ -283,7 +296,7 @@ class Zig extends CustomPackage
 
         $objDir = "{$srcRoot}/obj-profile";
         f_mkdir($objDir, recursive: true);
-        $cflags = '-c -O2 -fPIC -fvisibility=hidden ' .
+        $cflags = $targetFlag . ' -c -O2 -fPIC -fvisibility=hidden ' .
             '-I' . escapeshellarg($profileInc) . ' ' .
             '-DCOMPILER_RT_HAS_ATOMICS=1 -DCOMPILER_RT_HAS_FCNTL_LCK=1 -DCOMPILER_RT_HAS_UNAME=1';
         $objs = [];
@@ -302,7 +315,7 @@ class Zig extends CustomPackage
         logger()->info('[zig] libclang_rt.profile.a installed (' . filesize($libPath) . ' bytes)');
     }
 
-    private function buildCrtObjects(string $zig, string $srcRoot, string $crtBegin, string $crtEnd): void
+    private function buildCrtObjects(string $zig, string $srcRoot, string $crtBegin, string $crtEnd, string $targetFlag): void
     {
         $beginSrc = "{$srcRoot}/lib/builtins/crtbegin.c";
         $endSrc = "{$srcRoot}/lib/builtins/crtend.c";
@@ -310,7 +323,7 @@ class Zig extends CustomPackage
             logger()->error("[zig] crtbegin/crtend source missing under {$srcRoot}/lib/builtins — shared libs will lack __dso_handle");
             return;
         }
-        $cflags = '-c -O2 -fPIC -fvisibility=hidden -DCRT_HAS_INITFINI_ARRAY';
+        $cflags = $targetFlag . ' -c -O2 -fPIC -fvisibility=hidden -DCRT_HAS_INITFINI_ARRAY';
         foreach ([[$beginSrc, $crtBegin], [$endSrc, $crtEnd]] as [$src, $dst]) {
             $cmd = escapeshellarg($zig) . ' cc ' . $cflags . ' -o ' . escapeshellarg($dst) . ' ' . escapeshellarg($src) . ' 2>&1';
             if (!$this->runZigCmd($cmd, $dst, "failed to compile {$src}")) {
