@@ -25,13 +25,13 @@ class imagemagick
      * msbuild. The resulting CORE_RL_*.lib static libraries + MagickWand/MagickCore headers are
      * installed into the build root for ext-imagick to link.
      *
-     * A short working directory is used (VisualMagick's tree is deeply nested and otherwise exceeds
-     * MAX_PATH); override with SPC_IMAGEMAGICK_BUILD_DIR.
+     * The VisualMagick tree lives under source/ so bin/spc reset cleans it up like everything
+     * else; override the location with SPC_IMAGEMAGICK_BUILD_DIR.
      */
     #[BuildFor('Windows')]
     public function buildWin(LibraryPackage $lib): void
     {
-        $work = getenv('SPC_IMAGEMAGICK_BUILD_DIR') ?: 'C:\im';
+        $work = getenv('SPC_IMAGEMAGICK_BUILD_DIR') ?: SOURCE_PATH . '\imagemagick-win';
         $configure_release = '2026.05.30.2033';
         $configure_url = "https://github.com/ImageMagick/Configure/releases/download/{$configure_release}/Configure.Release.x64.exe";
 
