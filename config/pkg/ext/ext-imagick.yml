@@ -13,4 +13,5 @@ ext-imagick:
     os:
       - Linux
       - Darwin
+      - Windows
     arg-type: custom

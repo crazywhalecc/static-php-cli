@@ -228,6 +228,27 @@ class ArtifactExtractor
         $mode = $extract_config['mode'];
 
         if ($mode === 'selective') {
+            // Check if all destination files already exist before extracting
+            $all_files_exist = true;
+            foreach ($extract_config['files'] as $src_pattern => $dst_path) {
+                $resolved = $this->replacePathVariables($dst_path);
+                // For glob patterns, check if at least the parent directory exists
+                if (str_contains($src_pattern, '*')) {
+                    $parent = dirname($resolved);
+                    if (!is_dir($parent)) {
+                        $all_files_exist = false;
+                        break;
+                    }
+                } elseif (!file_exists($resolved) && !is_dir($resolved)) {
+                    $all_files_exist = false;
+                    break;
+                }
+            }
+            if ($all_files_exist) {
+                logger()->debug("Binary [{$name}] already extracted (selective), skip.");
+                return SPC_STATUS_ALREADY_EXTRACTED;
+            }
+
             $this->doSelectiveExtract($name, $cache_info, $extract_config['files']);
             $artifact->emitAfterBinaryExtract($target_path, $platform);
             logger()->debug("Emitted after-binary-extract hooks for [{$name}]");
@@ -251,8 +272,14 @@ class ArtifactExtractor
         logger()->debug("Emitted after-binary-extract hooks for [{$name}]");
 
         /* @phpstan-ignore-next-line */
-        if ($hash !== null && $cache_info['cache_type'] !== 'file') {
-            FileSystem::writeFile("{$target_path}/.spc-hash", $hash);
+        if ($hash !== null) {
+            // Directory targets: store hash inside the directory
+            if (is_dir($target_path)) {
+                FileSystem::writeFile("{$target_path}/.spc-hash", $hash);
+            } elseif (is_file($target_path)) {
+                // File targets: store hash as a sidecar file (e.g., meson .whl)
+                FileSystem::writeFile("{$target_path}.spc-hash", $hash);
+            }
         }
         return SPC_STATUS_EXTRACTED;
     }
@@ -332,9 +359,24 @@ class ArtifactExtractor
 
     /**
      * Check if artifact is already extracted with correct hash.
+     *
+     * Handles both directory targets (hash stored in $path/.spc-hash) and
+     * file targets (hash stored in $path.spc-hash sidecar).
      */
     protected function isAlreadyExtracted(string $path, ?string $expected_hash): bool
     {
+        // File targets: check sidecar hash file (e.g., meson .whl)
+        if (is_file($path)) {
+            if ($expected_hash === null) {
+                return false;
+            }
+            $hash_file = "{$path}.spc-hash";
+            if (!file_exists($hash_file)) {
+                return false;
+            }
+            return FileSystem::readFile($hash_file) === $expected_hash;
+        }
+
         if (!is_dir($path)) {
             return false;
         }

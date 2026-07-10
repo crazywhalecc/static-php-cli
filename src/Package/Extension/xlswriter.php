@@ -11,6 +11,7 @@ use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SourcePatcher;
 
 #[Extension('xlswriter')]
@@ -26,6 +27,17 @@ class xlswriter extends PhpExtensionPackage
             $arg .= ' --with-openssl=' . $installer->getLibraryPackage('openssl')->getBuildRootPath();
         }
         return $arg;
+    }
+
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-xlswriter')]
+    #[PatchDescription('Define XML_STATIC so bundled Expat uses plain symbols instead of __declspec(dllimport) in static builds')]
+    public function patchConfigForStaticExpat(): void
+    {
+        FileSystem::replaceFileStr(
+            "{$this->getSourceDir()}/config.w32",
+            "' /D USE_SYSTEM_MINIZIP",
+            "' /D XML_STATIC /D USE_SYSTEM_MINIZIP"
+        );
     }
 
     #[BeforeStage('php', [php::class, 'makeForWindows'], 'ext-xlswriter')]

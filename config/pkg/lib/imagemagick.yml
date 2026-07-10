@@ -16,13 +16,59 @@ imagemagick:
     - libtiff
     - libheif
     - bzip2
+  depends@windows:
+    - zlib
   suggests:
     - zstd
     - xz
     - libzip
     - libxml2
+  headers@windows:
+    - imagemagick/MagickWand/MagickWand.h
   lang: cpp
   pkg-configs:
     - Magick++-7.Q16HDRI
     - MagickCore-7.Q16HDRI
     - MagickWand-7.Q16HDRI
+  static-libs@windows:
+    - CORE_RL_MagickWand_.lib
+    - CORE_RL_MagickCore_.lib
+    - CORE_RL_coders_.lib
+    - CORE_RL_filters_.lib
+    - CORE_RL_aom_.lib
+    - CORE_RL_brotli_.lib
+    - CORE_RL_bzip2_.lib
+    - CORE_RL_cairo_.lib
+    - CORE_RL_croco_.lib
+    - CORE_RL_de265_.lib
+    - CORE_RL_exr_.lib
+    - CORE_RL_ffi_.lib
+    - CORE_RL_freetype_.lib
+    - CORE_RL_fribidi_.lib
+    - CORE_RL_gdk-pixbuf_.lib
+    - CORE_RL_glib_.lib
+    - CORE_RL_harfbuzz_.lib
+    - CORE_RL_heif_.lib
+    - CORE_RL_highway_.lib
+    - CORE_RL_imath_.lib
+    - CORE_RL_jpeg-turbo-12_.lib
+    - CORE_RL_jpeg-turbo-16_.lib
+    - CORE_RL_jpeg-turbo_.lib
+    - CORE_RL_jpeg-xl_.lib
+    - CORE_RL_lcms_.lib
+    - CORE_RL_lqr_.lib
+    - CORE_RL_lzma_.lib
+    - CORE_RL_openh264_.lib
+    - CORE_RL_openjpeg_.lib
+    - CORE_RL_openjph_.lib
+    - CORE_RL_pango_.lib
+    - CORE_RL_pixman_.lib
+    - CORE_RL_png_.lib
+    - CORE_RL_raqm_.lib
+    - CORE_RL_raw_.lib
+    - CORE_RL_rsvg_.lib
+    - CORE_RL_tiff_.lib
+    - CORE_RL_webp_.lib
+    - CORE_RL_xml_.lib
+    - CORE_RL_zip_.lib
+    - CORE_RL_zlib_.lib

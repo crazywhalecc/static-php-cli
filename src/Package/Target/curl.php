@@ -35,12 +35,16 @@ class curl
     #[BuildFor('Windows')]
     public function buildWin(LibraryPackage $lib): void
     {
+        $lib_dir = str_replace('\\', '/', $lib->getLibDir());
+        $zstd_lib = "{$lib_dir}/zstd_static.lib";
+        $extra_libs = "{$lib_dir}/libcrypto.lib {$lib_dir}/libssl.lib ws2_32.lib gdi32.lib advapi32.lib crypt32.lib user32.lib";
         WindowsCMakeExecutor::create($lib)
             ->optionalPackage('zstd', ...cmake_boolean_args('CURL_ZSTD'))
             ->optionalPackage('brotli', ...cmake_boolean_args('CURL_BROTLI'))
             ->addConfigureArgs(
                 '-DBUILD_CURL_EXE=ON',
-                '-DZSTD_LIBRARY=' . BUILD_LIB_PATH . '/zstd_static.lib',
+                '-DCMAKE_C_STANDARD_LIBRARIES=' . escapeshellarg($extra_libs),
+                '-DZSTD_LIBRARY=' . escapeshellarg($zstd_lib),
                 '-DBUILD_TESTING=OFF',
                 '-DBUILD_EXAMPLES=OFF',
                 '-DUSE_LIBIDN2=OFF',

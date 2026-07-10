@@ -1,0 +1,11 @@
+meson:
+  type: tool
+  artifact:
+    binary:
+      windows-x86_64: { type: url, url: 'https://github.com/mesonbuild/meson/releases/download/1.11.1/meson-1.11.1-py3-none-any.whl', extract: '{pkg_root_path}/meson/meson-1.11.1-py3-none-any.whl' }
+  path@windows:
+    - '{pkg_root_path}\meson'
+  tool:
+    provides:
+      - meson.bat
+    binary-subdir: meson

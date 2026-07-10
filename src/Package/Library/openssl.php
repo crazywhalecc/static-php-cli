@@ -6,40 +6,21 @@ namespace Package\Library;
 
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
-use StaticPHP\Attribute\Package\Validate;
-use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
-use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Package\ToolPackage;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\System\LinuxUtil;
-use StaticPHP\Util\System\WindowsUtil;
 
 #[Library('openssl')]
 class openssl
 {
-    #[Validate]
-    public function validate(): void
-    {
-        if (SystemTarget::getTargetOS() === 'Windows') {
-            global $argv;
-            $perl_path_native = PKG_ROOT_PATH . '\strawberry-perl\perl\bin\perl.exe';
-            $perl = file_exists($perl_path_native) ? ($perl_path_native) : WindowsUtil::findCommand('perl.exe');
-            if ($perl === null) {
-                throw new EnvironmentException(
-                    'You need to install perl first!',
-                    "Please run \"{$argv[0]} doctor\" to fix the environment.",
-                );
-            }
-            ApplicationContext::set('perl', $perl);
-        }
-    }
-
     #[BuildFor('Windows')]
     public function buildWin(LibraryPackage $lib, PackageBuilder $builder): void
     {
-        $perl = ApplicationContext::get('perl');
+        $perl = $this->resolveWindowsPerl();
         $cmd = cmd()->cd($lib->getSourceDir())
             ->exec(
                 escapeshellarg($perl) . ' Configure zlib VC-WIN64A ' .
@@ -144,5 +125,23 @@ class openssl
         }
         FileSystem::replaceFileRegex("{$pkg->getLibDir()}/pkgconfig/libcrypto.pc", '/Libs.private:.*/m', 'Requires.private: zlib');
         FileSystem::replaceFileRegex("{$pkg->getLibDir()}/cmake/OpenSSL/OpenSSLConfig.cmake", '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m', 'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}/libz.a")');
+    }
+
+    private function resolveWindowsPerl(): string
+    {
+        global $argv;
+
+        $tool = PackageLoader::getPackage('strawberry-perl');
+        if ($tool instanceof ToolPackage) {
+            $perl = $tool->getBinary('perl.exe');
+            if (file_exists($perl)) {
+                return $perl;
+            }
+        }
+
+        throw new EnvironmentException(
+            'OpenSSL requires strawberry-perl, but it is not installed.',
+            "Please run \"{$argv[0]} install-pkg strawberry-perl\" or retry the build with downloads enabled.",
+        );
     }
 }

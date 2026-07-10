@@ -322,7 +322,16 @@ class FileSystem
             }
             $sub_file = self::convertPath($dir . '/' . $v);
             if (is_link($sub_file) || is_file($sub_file)) {
-                if (!unlink($sub_file)) {
+                if (!@unlink($sub_file)) {
+                    $last_error = error_get_last();
+                    logger()->debug("unlink failed for '{$sub_file}': " . ($last_error['message'] ?? 'unknown error') . ', attempting chmod + unlink');
+
+                    // Go module cache files are often read-only; make writable and retry
+                    if (@chmod($sub_file, 0666) && @unlink($sub_file)) {
+                        continue;
+                    }
+
+                    // Shell fallback: del /f /q forces deletion of read-only files on Windows
                     $cmd = PHP_OS_FAMILY === 'Windows' ? 'del /f /q' : 'rm -f';
                     f_exec("{$cmd} " . escapeshellarg($sub_file), $out, $ret);
                     if ($ret !== 0) {

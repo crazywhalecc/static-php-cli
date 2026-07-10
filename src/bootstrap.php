@@ -66,11 +66,10 @@ if (filter_var(getenv('SPC_ENABLE_LOG_FILE'), FILTER_VALIDATE_BOOLEAN)) {
         }
     }
 
-    $log_file_fd = fopen(SPC_OUTPUT_LOG, 'a');
-    $ob_logger->addLogCallback(function ($level, $output) use ($log_file_fd) {
-        if ($log_file_fd) {
-            spc_write_log($log_file_fd, strip_ansi_colors($output) . "\n");
-        }
+    // Use a single shared handle (see spc_log_stream) so the file is opened exactly once;
+    // on Windows a second concurrent open fails while child processes hold an inherited handle.
+    $ob_logger->addLogCallback(function ($level, $output) {
+        spc_write_log(spc_log_stream(SPC_OUTPUT_LOG), strip_ansi_colors($output) . "\n");
         return true;
     });
 }

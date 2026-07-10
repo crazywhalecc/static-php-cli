@@ -5,7 +5,7 @@ go-win:
   env:
     GOROOT: '{pkg_root_path}/go-win'
     GOBIN: '{pkg_root_path}/go-win/bin'
-    GOPATH: '{pkg_root_path}/go-win/go'
+    GOPATH: '{pkg_root_path}/go-win/gopath'
   path@windows:
     - '{pkg_root_path}/go-win/bin'
   tool:
