@@ -118,6 +118,19 @@ class TargetPackage extends LibraryPackage
     }
 
     /**
+     * Get target-specific structured data for the build manifest.
+     *
+     * Target implementations may override this method to expose build facts that
+     * cannot be represented by the generic resolved package list.
+     *
+     * @return array<string, mixed>
+     */
+    public function getBuildManifestData(PackageInstaller $installer): array
+    {
+        return [];
+    }
+
+    /**
      * Gets all build options for the target package.
      *
      * @internal
