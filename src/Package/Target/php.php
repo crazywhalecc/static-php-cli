@@ -328,6 +328,49 @@ class php extends TargetPackage
         return $info;
     }
 
+    public function getBuildManifestData(PackageInstaller $installer): array
+    {
+        if ($this->getName() !== 'php') {
+            return [];
+        }
+
+        $all_extensions = [];
+        $static_extensions = [];
+        $shared_extensions = [];
+        foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $extension) {
+            $extension_name = $extension->getExtensionName();
+            if ($extension->isBuildStatic() || $extension->isBuildShared()) {
+                $all_extensions[] = $extension_name;
+            }
+            if ($extension->isBuildStatic()) {
+                $static_extensions[] = $extension_name;
+            }
+            if ($extension->isBuildShared()) {
+                $shared_extensions[] = $extension_name;
+            }
+        }
+
+        $sapis = array_values(array_filter([
+            $installer->isPackageResolved('php-cli') ? 'cli' : null,
+            $installer->isPackageResolved('php-fpm') ? 'fpm' : null,
+            $installer->isPackageResolved('php-micro') ? 'micro' : null,
+            $installer->isPackageResolved('php-cgi') ? 'cgi' : null,
+            $installer->isPackageResolved('php-embed') ? 'embed' : null,
+            $installer->isPackageResolved('frankenphp') ? 'frankenphp' : null,
+        ]));
+
+        return [
+            'version' => static::getPHPVersion(return_null_if_failed: true),
+            'thread-safety' => $this->getBuildOption('enable-zts', false) ? 'zts' : 'nts',
+            'sapis' => $sapis,
+            'extensions' => [
+                'all' => $all_extensions,
+                'static' => $static_extensions,
+                'shared' => $shared_extensions,
+            ],
+        ];
+    }
+
     #[BeforeStage('php', 'build')]
     public function beforeBuild(PackageBuilder $builder, Package $package): void
     {

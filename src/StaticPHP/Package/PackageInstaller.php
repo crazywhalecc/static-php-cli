@@ -15,6 +15,7 @@ use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\BuildManifestDumper;
 use StaticPHP\Util\BuildRootTracker;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\DirDiff;
@@ -282,6 +283,11 @@ class PackageInstaller
         // pipeline above (they were merged into $this->packages in resolvePackages()). This only
         // throws if a tool genuinely failed to become available (e.g. no artifact for this platform).
         $this->ensureRequiredTools();
+
+        // Pure install operations must not overwrite the manifest of an existing build.
+        if ($this->build_packages !== []) {
+            new BuildManifestDumper()->dump($this->packages, $this->build_packages, $this->install_packages, $this);
+        }
     }
 
     public function isBuildPackage(Package|string $package): bool
