@@ -2,8 +2,9 @@ gmssl:
   type: library
   artifact:
     source:
-      type: ghtar
-      repo: guanzhi/GmSSL
+      type: git
+      url: 'https://github.com/guanzhi/GmSSL.git'
+      rev: master
     metadata:
       license-files: [LICENSE]
       license: Apache-2.0
