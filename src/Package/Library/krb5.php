@@ -27,7 +27,7 @@ class krb5
 
         $resolved = array_keys($installer->getResolvedPackages());
         $spc = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true]);
-        $config = $spc->getPackageDepsConfig($lib->getName(), $resolved);
+        $config = $spc->getPackageDepsConfig($lib->getName(), $resolved, include_suggests: true);
         $extraEnv = [
             'CFLAGS' => '-fcommon',
             'LIBS' => $config['libs'],
