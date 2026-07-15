@@ -58,7 +58,11 @@ class openssl
     public function buildForDarwin(LibraryPackage $pkg): void
     {
         $zlib_libs = $pkg->getInstaller()->getLibraryPackage('zlib')->getStaticLibFiles();
-        $arch = SystemTarget::getTargetArch();
+        $targetArch = SystemTarget::getTargetArch();
+        $arch = match ($targetArch) {
+            'aarch64' => 'arm64',
+            default => $targetArch,
+        };
 
         shell()->cd($pkg->getSourceDir())->initializeEnv($pkg)
             ->exec(
