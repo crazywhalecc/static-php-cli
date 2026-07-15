@@ -13,6 +13,7 @@ use StaticPHP\Attribute\Doctor\OptionalCheck;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Doctor\CheckResult;
 use StaticPHP\Runtime\Shell\Shell;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\MuslToolchain;
 use StaticPHP\Toolchain\ZigToolchain;
@@ -27,7 +28,14 @@ class LinuxMuslCheck
     public static function optionalCheck(): bool
     {
         $toolchain = ApplicationContext::get(ToolchainInterface::class);
-        return $toolchain instanceof MuslToolchain || $toolchain instanceof ZigToolchain && !LinuxUtil::isMuslDist() && !str_contains(getenv('SPC_TARGET') ?: '', 'gnu');
+        return PHP_OS_FAMILY === 'Linux' && (
+            $toolchain instanceof MuslToolchain || (
+                $toolchain instanceof ZigToolchain
+                && !LinuxUtil::isMuslDist()
+                && SystemTarget::getLibc() === 'musl'
+                && !$toolchain->isStatic()
+            )
+        );
     }
 
     /** @noinspection PhpUnused */
