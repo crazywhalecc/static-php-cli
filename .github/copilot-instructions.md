@@ -10,6 +10,7 @@ Use the repository skills when the task matches them:
 
 - `.github/skills/staticphp-package-maintenance`: add, modify, review, or validate package, artifact, extension, library, target, or tool definitions.
 - `.github/skills/staticphp-build-troubleshooting`: diagnose build, download, doctor, shell, terminal, CI, smoke-test, or log failures.
+- `.github/skills/staticphp-documentation-sync`: synchronize bilingual documentation (`docs/en/` and `docs/zh/`) when features, commands, configuration, APIs, or behavior change.
 
 ## Quick Reference
 
