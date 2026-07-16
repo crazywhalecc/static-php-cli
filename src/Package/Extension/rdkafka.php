@@ -49,7 +49,8 @@ class rdkafka extends PhpExtensionPackage
     #[CustomPhpConfigureArg('Linux')]
     public function getUnixConfigureArg(bool $shared, PackageBuilder $builder): string
     {
-        $pkgconf_libs = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])->getExtensionConfig($this);
+        $pkgconf_libs = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])
+            ->configForResolvedBuild([$this->getName()], $this->getInstaller());
         return '--with-rdkafka=' . ($shared ? 'shared,' : '') . $builder->getBuildRootPath() . " RDKAFKA_LIBS=\"{$pkgconf_libs['libs']}\"";
     }
 }

@@ -129,7 +129,7 @@ class postgresql extends LibraryPackage
     public function buildUnix(PackageInstaller $installer, PackageBuilder $builder): void
     {
         $spc_config = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true]);
-        $config = $spc_config->getPackageDepsConfig('postgresql', array_keys($installer->getResolvedPackages()), include_suggests: $builder->getOption('with-suggests', false));
+        $config = $spc_config->getPackageDepsConfig('postgresql', array_keys($installer->getResolvedPackages()));
 
         $env_vars = [
             'CFLAGS' => $config['cflags'] . ' -std=c17',

@@ -274,13 +274,13 @@ class PhpExtensionPackage extends Package
             $compiler_extra = trim($compiler_extra . ' -lcompiler_rt');
             GlobalEnvManager::putenv("SPC_COMPILER_EXTRA={$compiler_extra}");
         }
-        $config = (new SPCConfigUtil())->getExtensionConfig($this);
+        $config = (new SPCConfigUtil())->configForResolvedBuild([$this->getName()], $this->getInstaller());
         [$staticLibs, $sharedLibs] = $this->splitLibsIntoStaticAndShared($config['libs']);
         $preStatic = PHP_OS_FAMILY === 'Darwin' ? '' : '-Wl,--start-group ';
         $postStatic = PHP_OS_FAMILY === 'Darwin' ? '' : ' -Wl,--end-group ';
         return [
             'CFLAGS' => $config['cflags'],
-            'CXXFLAGS' => $config['cflags'],
+            'CXXFLAGS' => $config['cxxflags'],
             'LDFLAGS' => $config['ldflags'],
             'LIBS' => clean_spaces("{$preStatic} {$staticLibs} {$postStatic} {$sharedLibs}"),
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,

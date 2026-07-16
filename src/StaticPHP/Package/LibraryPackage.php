@@ -305,8 +305,8 @@ class LibraryPackage extends Package
      */
     public function getStaticLibFiles(): string
     {
-        $config = new SPCConfigUtil(['libs_only_deps' => true, 'absolute_libs' => true]);
-        $res = $config->config([$this->getName()]);
+        $config = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true, 'absolute_libs' => true]);
+        $res = $config->configForResolvedBuild([$this->getName()], $this->getInstaller());
         return $res['libs'];
     }
 

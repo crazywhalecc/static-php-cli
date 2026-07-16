@@ -7,7 +7,10 @@ namespace StaticPHP\Util;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Package\Package;
+use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 
 class SPCConfigUtil
@@ -32,95 +35,72 @@ class SPCConfigUtil
         $this->absolute_libs = $options['absolute_libs'] ?? false;
     }
 
+    /**
+     * Resolve a standalone package request and generate its configuration.
+     *
+     * This is the entry point for spc-config and callers that do not already have
+     * a PackageInstaller resolution result.
+     *
+     * @param  array<Package|string>                                                  $packages
+     * @return array{cflags: string, cxxflags: string, ldflags: string, libs: string}
+     */
     public function config(array $packages = [], bool $include_suggests = false): array
     {
         // if have php, make php as all extension's dependency
+        $package_names = array_map(fn ($package) => is_string($package) ? $package : $package->getName(), $packages);
+        $dep_override = $this->no_php
+            ? []
+            : ['php' => array_values(array_filter($package_names, fn ($name) => str_starts_with($name, 'ext-')))];
+
+        return $this->configWithResolvedPackages(
+            DependencyResolver::resolve($packages, $dep_override, $include_suggests)
+        );
+    }
+
+    /**
+     * Build configuration for roots within the installer's resolved package graph.
+     *
+     * The installer decides whether suggested packages are enabled. This method always
+     * walks depends and suggests, then filters every edge through that resolved set.
+     *
+     * @param  string[]                                                               $package_names Root package names whose link closure is required
+     * @return array{cflags: string, cxxflags: string, ldflags: string, libs: string}
+     */
+    public function configForResolvedBuild(array $package_names, PackageInstaller $installer): array
+    {
+        $dependency_overrides = [];
         if (!$this->no_php) {
-            $dep_override = ['php' => array_filter($packages, fn ($y) => str_starts_with($y, 'ext-'))];
-        } else {
-            $dep_override = [];
-        }
-        $resolved = DependencyResolver::resolve($packages, $dep_override, $include_suggests);
-
-        $ldflags = $this->getLdflagsString();
-        $cflags = $this->getIncludesString($resolved);
-        $libs = $this->getLibsString($resolved, !$this->absolute_libs);
-
-        // additional OS-specific libraries (e.g. macOS -lresolv)
-        // embed
-        if ($extra_libs = SystemTarget::getRuntimeLibs()) {
-            $libs .= " {$extra_libs}";
-        }
-
-        $extra_env = getenv('SPC_EXTRA_LIBS');
-        if (is_string($extra_env) && !empty($extra_env)) {
-            $libs .= " {$extra_env}";
-        }
-        // package frameworks
-        if (SystemTarget::getTargetOS() === 'Darwin') {
-            $libs .= " {$this->getFrameworksString($resolved)}";
-        }
-        // C++
-        if ($this->hasCpp($resolved)) {
-            $target_os = SystemTarget::getTargetOS();
-            if ($target_os === 'Darwin') {
-                $libcpp = '-lc++';
-                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
-            } elseif ($target_os !== 'Windows') {
-                // Linux and other Unix-like systems use libstdc++
-                $libcpp = '-lstdc++';
-                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
+            $php_link_packages = [];
+            foreach ($installer->getResolvedPackages(PhpExtensionPackage::class) as $extension) {
+                if ($extension->isBuildStatic()) {
+                    $php_link_packages[] = $extension->getName();
+                }
             }
-            // Windows (MSVC): C++ runtime is linked automatically, no explicit lib needed
-        }
-
-        if ($this->libs_only_deps) {
-            // mimalloc must come first
-            if (in_array('mimalloc', $resolved) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
-                $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
+            foreach ($installer->getResolvedPackages(TargetPackage::class) as $target) {
+                if ($target->isVirtualTarget()) {
+                    $php_link_packages[] = $target->getName();
+                }
             }
-            return [
-                'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-                'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
-                'libs' => clean_spaces(getenv('LIBS') . ' ' . $libs),
-            ];
+            $dependency_overrides['php'] = $php_link_packages;
         }
 
-        // embed
-        if (!$this->no_php) {
-            if (SystemTarget::getTargetOS() === 'Windows') {
-                // Windows: use php8embed.lib directly (either full path or short name)
-                $major = intdiv(PHP_VERSION_ID, 10000);
-                $php_lib = $this->absolute_libs ? BUILD_LIB_PATH . "\\php{$major}embed.lib" : "php{$major}embed.lib";
-                // Windows system libs required by PHP
-                // Use same system libs as PHP Makefile: LIBS=kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib
-                $libs = "{$php_lib} {$libs} kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib";
-            } else {
-                $libs = "-lphp {$libs} -lc";
-            }
-        }
-
-        $allLibs = getenv('LIBS') . ' ' . $libs;
-
-        // mimalloc must come first
-        if (in_array('mimalloc', $resolved) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
-            $allLibs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $allLibs);
-        }
-
-        return [
-            'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-            'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
-            'libs' => clean_spaces($allLibs),
-        ];
+        return $this->configWithResolvedPackages(
+            DependencyResolver::getResolvedPackageClosure(
+                $package_names,
+                array_keys($installer->getResolvedPackages()),
+                $dependency_overrides,
+            )
+        );
     }
 
     /**
      * [Helper function]
      * Get configuration for a specific extension(s) dependencies.
      *
-     * @param array|PhpExtensionPackage $extension_packages Extension instance or list
+     * @param PhpExtensionPackage|PhpExtensionPackage[] $extension_packages Extension instance or list
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
@@ -131,7 +111,7 @@ class SPCConfigUtil
             $extension_packages = [$extension_packages];
         }
         return $this->config(
-            packages: array_map(fn ($y) => $y->getName(), $extension_packages),
+            packages: array_map(fn ($extension_package) => $extension_package->getName(), $extension_packages),
             include_suggests: $include_suggests,
         );
     }
@@ -140,30 +120,33 @@ class SPCConfigUtil
      * [Helper function]
      * Get configuration for a specific library(s) dependencies.
      *
-     * @param array|LibraryPackage $lib              Library instance or list
-     * @param bool                 $include_suggests Whether to include suggested libraries
+     * @param LibraryPackage|LibraryPackage[] $library_packages Library instance or list
+     * @param bool                            $include_suggests Whether to include suggested libraries
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function getLibraryConfig(array|LibraryPackage $lib, bool $include_suggests = false): array
+    public function getLibraryConfig(array|LibraryPackage $library_packages, bool $include_suggests = false): array
     {
-        if (!is_array($lib)) {
-            $lib = [$lib];
+        if (!is_array($library_packages)) {
+            $library_packages = [$library_packages];
         }
         $save_no_php = $this->no_php;
         $this->no_php = true;
         $save_libs_only_deps = $this->libs_only_deps;
         $this->libs_only_deps = true;
-        $ret = $this->config(
-            packages: array_map(fn ($y) => $y->getName(), $lib),
-            include_suggests: $include_suggests,
-        );
-        $this->no_php = $save_no_php;
-        $this->libs_only_deps = $save_libs_only_deps;
-        return $ret;
+        try {
+            return $this->config(
+                packages: array_map(fn ($library_package) => $library_package->getName(), $library_packages),
+                include_suggests: $include_suggests,
+            );
+        } finally {
+            $this->no_php = $save_no_php;
+            $this->libs_only_deps = $save_libs_only_deps;
+        }
     }
 
     /**
@@ -173,23 +156,25 @@ class SPCConfigUtil
      * library and all its transitive dependencies. It properly handles optional
      * dependencies by only including those that were actually resolved.
      *
-     * @param string   $package_name      The package to get config for
-     * @param string[] $resolved_packages The full resolved package list
-     * @param bool     $include_suggests  Whether to include resolved suggests
+     * @param string   $package_name           The package to get config for
+     * @param string[] $resolved_package_names The full resolved package name list
+     * @param bool     $include_suggests       Whether to include resolved suggests
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function getPackageDepsConfig(string $package_name, array $resolved_packages, bool $include_suggests = false): array
+    public function getPackageDepsConfig(string $package_name, array $resolved_package_names, bool $include_suggests = true): array
     {
         // Get sub-dependencies within the resolved set
-        $sub_deps = DependencyResolver::getSubDependencies($package_name, $resolved_packages, $include_suggests);
+        $sub_deps = DependencyResolver::getSubDependencies($package_name, $resolved_package_names, $include_suggests);
 
         if (empty($sub_deps)) {
             return [
                 'cflags' => '',
+                'cxxflags' => '',
                 'ldflags' => '',
                 'libs' => '',
             ];
@@ -201,29 +186,36 @@ class SPCConfigUtil
         $this->no_php = true;
         $this->libs_only_deps = true;
 
-        $ret = $this->configWithResolvedPackages($sub_deps);
-
-        $this->no_php = $save_no_php;
-        $this->libs_only_deps = $save_libs_only_deps;
-
-        return $ret;
+        try {
+            return $this->configWithResolvedPackages($sub_deps);
+        } finally {
+            $this->no_php = $save_no_php;
+            $this->libs_only_deps = $save_libs_only_deps;
+        }
     }
 
     /**
-     * Get configuration using already-resolved packages (skip dependency resolution).
+     * Generate configuration from an exact, dependency-ordered package list.
      *
-     * @param string[] $resolved_packages Already resolved package names in build order
+     * This low-level method does not resolve dependencies or filter packages.
+     *
+     * @param string[] $resolved_package_names Already resolved package names in build order
      * @return array{
      *     cflags: string,
+     *     cxxflags: string,
      *     ldflags: string,
      *     libs: string
      * }
      */
-    public function configWithResolvedPackages(array $resolved_packages): array
+    public function configWithResolvedPackages(array $resolved_package_names): array
     {
         $ldflags = $this->getLdflagsString();
-        $cflags = $this->getIncludesString($resolved_packages);
-        $libs = $this->getLibsString($resolved_packages, !$this->absolute_libs);
+        $includes = $this->getIncludesString($resolved_package_names);
+        $libs = $this->getLibsString($resolved_package_names, !$this->absolute_libs);
+
+        $cflags = deduplicate_flags(clean_spaces((getenv('SPC_DEFAULT_CFLAGS') ?: '') . ' ' . getenv('CFLAGS') . ' ' . $includes));
+        $cxxflags = deduplicate_flags(clean_spaces((getenv('SPC_DEFAULT_CXXFLAGS') ?: '') . ' ' . getenv('CXXFLAGS') . ' ' . $includes));
+        $ldflags = deduplicate_flags(clean_spaces((getenv('SPC_DEFAULT_LDFLAGS') ?: '') . ' ' . getenv('LDFLAGS') . ' ' . $ldflags));
 
         // additional OS-specific libraries (e.g. macOS -lresolv)
         if ($extra_libs = SystemTarget::getRuntimeLibs()) {
@@ -237,11 +229,11 @@ class SPCConfigUtil
 
         // package frameworks
         if (SystemTarget::getTargetOS() === 'Darwin') {
-            $libs .= " {$this->getFrameworksString($resolved_packages)}";
+            $libs .= " {$this->getFrameworksString($resolved_package_names)}";
         }
 
         // C++
-        if ($this->hasCpp($resolved_packages)) {
+        if ($this->hasCpp($resolved_package_names)) {
             $target_os = SystemTarget::getTargetOS();
             if ($target_os === 'Darwin') {
                 $libcpp = '-lc++';
@@ -256,40 +248,49 @@ class SPCConfigUtil
 
         if ($this->libs_only_deps) {
             // mimalloc must come first
-            if (in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+            if (in_array('mimalloc', $resolved_package_names) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
                 $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
             }
             return [
-                'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-                'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+                'cflags' => $cflags,
+                'cxxflags' => $cxxflags,
+                'ldflags' => $ldflags,
                 'libs' => clean_spaces(getenv('LIBS') . ' ' . $libs),
             ];
         }
 
         // embed
         if (!$this->no_php) {
-            $libs = "-lphp {$libs} -lc";
+            if (SystemTarget::getTargetOS() === 'Windows') {
+                $major = intdiv(PHP_VERSION_ID, 10000);
+                $php_lib = $this->absolute_libs ? BUILD_LIB_PATH . "\\php{$major}embed.lib" : "php{$major}embed.lib";
+                $libs = "{$php_lib} {$libs} kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib dnsapi.lib psapi.lib bcrypt.lib";
+            } else {
+                $libs = "-lphp {$libs} -lc";
+            }
         }
 
         $allLibs = getenv('LIBS') . ' ' . $libs;
 
         // mimalloc must come first
-        if (in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+        if (in_array('mimalloc', $resolved_package_names) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
             $allLibs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $allLibs);
         }
 
         return [
-            'cflags' => clean_spaces(getenv('CFLAGS') . ' ' . $cflags),
-            'ldflags' => clean_spaces(getenv('LDFLAGS') . ' ' . $ldflags),
+            'cflags' => $cflags,
+            'cxxflags' => $cxxflags,
+            'ldflags' => $ldflags,
             'libs' => clean_spaces($allLibs),
         ];
     }
 
-    public function getFrameworksString(array $extensions): string
+    /** @param string[] $package_names */
+    public function getFrameworksString(array $package_names): string
     {
         $list = [];
-        foreach ($extensions as $extension) {
-            foreach (PackageConfig::get($extension, 'frameworks', []) as $fw) {
+        foreach ($package_names as $package_name) {
+            foreach (PackageConfig::get($package_name, 'frameworks', []) as $fw) {
                 $ks = '-framework ' . $fw;
                 if (!in_array($ks, $list)) {
                     $list[] = $ks;
@@ -299,10 +300,11 @@ class SPCConfigUtil
         return implode(' ', $list);
     }
 
-    private function hasCpp(array $packages): bool
+    /** @param string[] $package_names */
+    private function hasCpp(array $package_names): bool
     {
-        foreach ($packages as $package) {
-            $lang = PackageConfig::get($package, 'lang', 'c');
+        foreach ($package_names as $package_name) {
+            $lang = PackageConfig::get($package_name, 'lang', 'c');
             if ($lang === 'cpp') {
                 return true;
             }
@@ -310,7 +312,8 @@ class SPCConfigUtil
         return false;
     }
 
-    private function getIncludesString(array $packages): string
+    /** @param string[] $package_names */
+    private function getIncludesString(array $package_names): string
     {
         $base = BUILD_INCLUDE_PATH;
 
@@ -347,8 +350,8 @@ class SPCConfigUtil
 
         // parse pkg-configs (only for Unix)
         if (SystemTarget::isUnix()) {
-            foreach ($packages as $package) {
-                $pc = PackageConfig::get($package, 'pkg-configs', []);
+            foreach ($package_names as $package_name) {
+                $pc = PackageConfig::get($package_name, 'pkg-configs', []);
                 $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
                 $search_paths = array_filter(explode(':', $pkg_config_path));
                 foreach ($pc as $file) {
@@ -360,7 +363,7 @@ class SPCConfigUtil
                         }
                     }
                     if (!$found) {
-                        throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$package}] does not exist. Please build it first.");
+                        throw new WrongUsageException("pkg-config file '{$file}.pc' for lib [{$package_name}] does not exist. Please build it first.");
                     }
                 }
                 $pc_cflags = implode(' ', $pc);
@@ -386,16 +389,17 @@ class SPCConfigUtil
         return '-L' . BUILD_LIB_PATH;
     }
 
-    private function getLibsString(array $packages, bool $use_short_libs = true): string
+    /** @param string[] $package_names */
+    private function getLibsString(array $package_names, bool $use_short_libs = true): string
     {
         $lib_names = [];
         $frameworks = [];
 
-        foreach ($packages as $package) {
+        foreach ($package_names as $package_name) {
             // parse pkg-configs only for unix systems
             if (SystemTarget::isUnix()) {
                 // add pkg-configs libs
-                $pkg_configs = PackageConfig::get($package, 'pkg-configs', []);
+                $pkg_configs = PackageConfig::get($package_name, 'pkg-configs', []);
                 $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
                 $search_paths = array_filter(explode(':', $pkg_config_path));
                 foreach ($pkg_configs as $pkg_config) {
@@ -407,7 +411,7 @@ class SPCConfigUtil
                         }
                     }
                     if (!$found) {
-                        throw new WrongUsageException("pkg-config file '{$pkg_config}.pc' for lib [{$package}] does not exist. Please build it first.");
+                        throw new WrongUsageException("pkg-config file '{$pkg_config}.pc' for lib [{$package_name}] does not exist. Please build it first.");
                     }
                 }
                 $pkg_configs = implode(' ', $pkg_configs);
@@ -418,12 +422,12 @@ class SPCConfigUtil
                 }
             }
             // convert all static-libs to short names
-            $libs = array_reverse(PackageConfig::get($package, 'static-libs', []));
+            $libs = array_reverse(PackageConfig::get($package_name, 'static-libs', []));
             foreach ($libs as $lib) {
                 if (FileSystem::isRelativePath($lib)) {
                     // check file existence
                     if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
-                        throw new WrongUsageException("Library file '{$lib}' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
+                        throw new WrongUsageException("Library file '{$lib}' for lib [{$package_name}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
                     }
                     $lib_names[] = $this->getShortLibName($lib);
                 } else {
@@ -432,7 +436,7 @@ class SPCConfigUtil
             }
             // add frameworks for macOS
             if (SystemTarget::getTargetOS() === 'Darwin') {
-                $frameworks = array_merge($frameworks, PackageConfig::get($package, 'frameworks', []));
+                $frameworks = array_merge($frameworks, PackageConfig::get($package_name, 'frameworks', []));
             }
         }
 
@@ -451,7 +455,7 @@ class SPCConfigUtil
             }
         }
 
-        if (in_array('imap', $packages) && SystemTarget::getTargetOS() === 'Linux' && SystemTarget::getLibc() === 'glibc') {
+        if (in_array('imap', $package_names) && SystemTarget::getTargetOS() === 'Linux' && SystemTarget::getLibc() === 'glibc') {
             if (file_exists(BUILD_LIB_PATH . '/libcrypt.a')) {
                 $lib_names[] = '-lcrypt';
             }
