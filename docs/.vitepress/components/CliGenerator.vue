@@ -45,7 +45,7 @@
         <label :for="'build_' + item">{{ item }}</label>
       </div>
     </div>
-    <div v-if="selectedSystem === 'windows' && (checkedTargets.includes('fpm') || checkedTargets.includes('embed') || checkedTargets.includes('frankenphp'))" class="warning custom-block">
+    <div v-if="selectedSystem === 'windows' && checkedTargets.includes('fpm')" class="warning custom-block">
       <p class="custom-block-title">WARNING</p>
       <p>{{ I18N[lang].windowsSAPIUnavailable }}</p>
     </div>
@@ -157,7 +157,7 @@
         <div class="warning custom-block">
           <p class="custom-block-title">WARNING</p>
           <p>{{ I18N[lang].windowsDownSPCWarning }}</p>
-          <a href="https://dl.static-php.dev/v3/spc-bin/latest/spc-windows-x86_64.exe" target="_blank">https://dl.static-php.dev/v3/spc-bin/latest/spc-windows-x86_64.exe</a>
+          <a href="https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.exe" target="_blank">https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.exe</a>
         </div>
       </div>
     </div>
@@ -278,7 +278,7 @@ const spcCommand = computed(() => {
 const spcDownloadCommand = computed(() => {
   const os = selectedSystem.value === 'macos' ? 'macos' : 'linux';
   const arch = selectedArch.value;
-  return `curl -#fSL https://dl.static-php.dev/v3/spc-bin/latest/spc-${os}-${arch} -o spc && chmod +x spc`;
+  return `curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-${os}-${arch} -o spc && chmod +x spc`;
 });
 
 const doctorCommandString = computed(() => `${spcCommand.value} doctor --auto-fix`);
@@ -425,7 +425,7 @@ const I18N: Record<string, Record<string, string>> = {
     downloadPhpVersion: '下载 PHP 版本',
     downloadSPCBinaryCommand: '下载 spc 二进制命令',
     selectedSystem: '选择操作系统',
-    windowsSAPIUnavailable: 'Windows 目前不支持 fpm、embed、frankenphp 构建！',
+    windowsSAPIUnavailable: 'Windows 目前不支持 fpm 构建！',
     useUPX: '是否开启 UPX 压缩（减小二进制体积）',
     windowsDownSPCWarning: 'Windows 下请手动下载 spc.exe 二进制文件！',
     usePreBuilt: '如果可能，使用预编译的依赖库（减少编译时间）',
@@ -459,7 +459,7 @@ const I18N: Record<string, Record<string, string>> = {
     downloadPhpVersion: 'PHP version',
     downloadSPCBinaryCommand: 'Download spc binary',
     selectedSystem: 'Select OS',
-    windowsSAPIUnavailable: 'Windows does not support fpm, embed and frankenphp build!',
+    windowsSAPIUnavailable: 'Windows does not support fpm build!',
     useUPX: 'Enable UPX compression (reduce binary size)',
     windowsDownSPCWarning: 'Please download the spc.exe binary manually on Windows!',
     usePreBuilt: 'Use pre-built dependencies where available (reduce compile time)',
