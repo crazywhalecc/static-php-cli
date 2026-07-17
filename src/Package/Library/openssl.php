@@ -92,6 +92,12 @@ class openssl
         $openssl_dir ??= LinuxUtil::getOSRelease()['dist'] === 'redhat' ? '/etc/pki/tls' : '/etc/ssl';
         $ex_lib = trim($ex_lib);
 
+        // anything we want included (PGO -fprofile-*, LTO, custom hardening)
+        // has to be appended on the command line *after* the target name.
+        $userCFlags = trim((string) getenv('SPC_DEFAULT_CFLAGS'));
+        $userLdFlags = trim((string) getenv('SPC_DEFAULT_LDFLAGS'));
+        $userExtra = trim($userCFlags . ' ' . $userLdFlags);
+
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
             ->exec(
                 "{$env} ./Configure no-shared zlib " .
@@ -102,7 +108,8 @@ class openssl
                 'enable-pie ' .
                 'no-legacy ' .
                 'no-tests ' .
-                "linux-{$arch}"
+                "linux-{$arch} " .
+                $userExtra
             )
             ->exec('make clean')
             ->exec("make -j{$lib->getBuilder()->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")

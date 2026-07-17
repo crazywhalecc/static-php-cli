@@ -116,6 +116,9 @@ class imagemagick
                 // implicit --with-gcc-arch
                 // bleeds host cpu features into built binaries
                 '--without-gcc-arch',
+                '--disable-docs',
+                '--without-utilities',
+                '--disable-dpc',
             );
 
         // special: linux-static target needs `-static`

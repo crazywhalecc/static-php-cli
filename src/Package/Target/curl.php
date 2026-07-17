@@ -47,6 +47,8 @@ class curl
                 '-DZSTD_LIBRARY=' . escapeshellarg($zstd_lib),
                 '-DBUILD_TESTING=OFF',
                 '-DBUILD_EXAMPLES=OFF',
+                '-DBUILD_LIBCURL_DOCS=OFF',
+                '-DENABLE_CURL_MANUAL=OFF',
                 '-DUSE_LIBIDN2=OFF',
                 '-DCURL_USE_LIBPSL=OFF',
                 '-DUSE_WINDOWS_SSPI=ON',
@@ -85,6 +87,9 @@ class curl
             ->addConfigureArgs(
                 '-DBUILD_CURL_EXE=ON',
                 '-DBUILD_LIBCURL_DOCS=OFF',
+                '-DBUILD_TESTING=OFF',
+                '-DBUILD_EXAMPLES=OFF',
+                '-DENABLE_CURL_MANUAL=OFF',
                 '-DOPENSSL_ROOT_DIR=' . BUILD_ROOT_PATH,
             )
             ->build();

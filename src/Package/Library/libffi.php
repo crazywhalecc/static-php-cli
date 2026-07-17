@@ -16,7 +16,7 @@ class libffi extends LibraryPackage
     public function buildLinux(): void
     {
         UnixAutoconfExecutor::create($this)
-            ->configure()->make();
+            ->configure('--disable-docs')->make();
 
         if (is_file("{$this->getBuildRootPath()}/lib64/libffi.a")) {
             copy("{$this->getBuildRootPath()}/lib64/libffi.a", "{$this->getBuildRootPath()}/lib/libffi.a");
@@ -33,6 +33,7 @@ class libffi extends LibraryPackage
             ->configure(
                 "--host={$arch}-apple-darwin",
                 "--target={$arch}-apple-darwin",
+                '--disable-docs',
             )
             ->make();
         $this->patchPkgconfPrefix(['libffi.pc']);
