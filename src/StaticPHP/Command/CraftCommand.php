@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Command;
 
+use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Doctor\Doctor;
 use StaticPHP\Exception\ValidationException;
@@ -134,15 +135,28 @@ class CraftCommand extends BaseCommand
         return static::SUCCESS;
     }
 
-    /** @return list<string> library package names transitively required by the configured extensions */
+    /** @return list<string> library package names transitively required by the configured extensions and SAPIs */
     private function resolveLibsForExtensions(array $craft, bool $include_suggests): array
     {
         $exts = array_merge($craft['extensions'], $craft['shared-extensions'] ?? []);
         $ext_pkgs = array_map(fn ($x) => "ext-{$x}", $exts);
         $extra = $craft['packages'] ?? [];
 
+        // SAPI targets contribute their own lib deps/suggests (frankenphp → brotli/watcher,
+        // php-fpm → libacl); resolve them too so the buildroot contains everything the
+        // full build will need. Sapi names map to packages either directly or as php-<name>.
+        $sapi_pkgs = [];
+        foreach ($craft['sapi'] ?? [] as $sapi) {
+            foreach ([$sapi, "php-{$sapi}"] as $candidate) {
+                if (PackageLoader::hasPackage($candidate)) {
+                    $sapi_pkgs[] = $candidate;
+                    break;
+                }
+            }
+        }
+
         $resolved = DependencyResolver::resolve(
-            array_merge($ext_pkgs, $extra),
+            array_merge($ext_pkgs, $extra, $sapi_pkgs),
             include_suggests: $include_suggests,
         );
 
@@ -151,7 +165,11 @@ class CraftCommand extends BaseCommand
             if (str_starts_with($pkg_name, 'ext-') || !PackageLoader::hasPackage($pkg_name)) {
                 continue;
             }
-            if (PackageLoader::getPackage($pkg_name)->getType() === 'library') {
+            $type = PackageLoader::getPackage($pkg_name)->getType();
+            // Pure libraries, plus library-producing targets (curl ships libcurl.a): both
+            // must land in the buildroot, or the full build rebuilds them on every run.
+            if ($type === 'library'
+                || ($type === 'target' && PackageConfig::get($pkg_name, 'static-libs', []) !== [])) {
                 $libs[] = $pkg_name;
             }
         }
