@@ -146,6 +146,10 @@ You can sponsor me or my project from [GitHub Sponsor](https://github.com/crazyw
 
 <a href="https://nativephp.com/"><img src="/docs/public/images/nativephp-logo.svg" width="300" alt="NativePHP Logo" /></a>
 
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="96" />
+
+**[JetBrains](https://github.com/JetBrains)** provides core contributors with <a href="https://www.jetbrains.com/community/opensource">OSS Development Licenses</a>
+
 ## Open-Source License
 
 This project itself is licensed under MIT.
