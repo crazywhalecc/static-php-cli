@@ -173,6 +173,9 @@ class SourcePatcher
      */
     public static function patchMicroPhar(int $version_id): void
     {
+        if (file_exists(SOURCE_PATH . '/php-src/ext/phar/phar.c.bak')) {
+            return;
+        }
         FileSystem::backupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/ext/phar/phar.c',
@@ -198,6 +201,12 @@ class SourcePatcher
 
     public static function unpatchMicroPhar(): void
     {
+        // Tolerate a missing .bak: both drivers call this, and the first restore
+        // consumes the backup. Without this guard the second call throws
+        // "Cannot find bak file". No .bak means the source is already pristine.
+        if (!file_exists(SOURCE_PATH . '/php-src/ext/phar/phar.c.bak')) {
+            return;
+        }
         FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
     }
 

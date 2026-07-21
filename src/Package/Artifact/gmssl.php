@@ -17,4 +17,11 @@ class gmssl
         FileSystem::replaceFileStr($target_path . '/src/hex.c', 'unsigned char *OPENSSL_hexstr2buf(const char *str, size_t *len)', 'unsigned char *GMSSL_hexstr2buf(const char *str, size_t *len)');
         FileSystem::replaceFileStr($target_path . '/src/hex.c', 'OPENSSL_hexchar2int', 'GMSSL_hexchar2int');
     }
+
+    #[AfterSourceExtract('ext-gmssl')]
+    #[PatchDescription('Rename pbkdf2_hmac_sm3_genkey() to sm3_pbkdf2() (renamed upstream in GmSSL 3.2+; identical signature)')]
+    public function patchExt(string $target_path): void
+    {
+        FileSystem::replaceFileStr($target_path . '/gmssl.c', 'pbkdf2_hmac_sm3_genkey(', 'sm3_pbkdf2(');
+    }
 }

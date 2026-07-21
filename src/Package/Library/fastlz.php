@@ -18,9 +18,11 @@ class fastlz
     {
         $cc = getenv('CC') ?: 'cc';
         $ar = getenv('AR') ?: 'ar';
+        $extra = trim((string) getenv('SPC_DEFAULT_CFLAGS'));
+        $extra = $extra !== '' ? $extra . ' -fPIC' : '-O3 -fPIC';
 
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
-            ->exec("{$cc} -c -O3 -fPIC fastlz.c -o fastlz.o")
+            ->exec("{$cc} -c {$extra} fastlz.c -o fastlz.o")
             ->exec("{$ar} rcs libfastlz.a fastlz.o");
 
         // Copy header file

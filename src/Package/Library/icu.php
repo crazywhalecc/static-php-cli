@@ -24,9 +24,12 @@ class icu
     #[BuildFor('Linux')]
     public function buildLinux(LibraryPackage $lib, ToolchainInterface $toolchain, PackageBuilder $builder): void
     {
+        // runConfigureICU bakes CXXFLAGS/LDFLAGS, apply user flags too
+        $userCxxFlags = trim((string) getenv('SPC_DEFAULT_CXXFLAGS'));
+        $userLdFlags = trim((string) getenv('SPC_DEFAULT_LDFLAGS'));
         $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1 -DPIC -fPIC"';
-        $cxxflags = 'CXXFLAGS="-std=c++17 -DPIC -fPIC -fno-ident"';
-        $ldflags = $toolchain->isStatic() ? 'LDFLAGS="-static"' : '';
+        $cxxflags = "CXXFLAGS=\"-std=c++17 -DPIC -fPIC -fno-ident {$userCxxFlags}\"";
+        $ldflags = $toolchain->isStatic() ? "LDFLAGS=\"-static {$userLdFlags}\"" : "LDFLAGS=\"{$userLdFlags}\"";
         shell()->cd($lib->getSourceDir() . '/source')->initializeEnv($lib)
             ->exec(
                 "{$cppflags} {$cxxflags} {$ldflags} " .
