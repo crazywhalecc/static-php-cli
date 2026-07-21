@@ -2,8 +2,8 @@ ext-parallel:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: parallel
+      type: pie
+      repo: pecl/parallel
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

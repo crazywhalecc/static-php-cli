@@ -2,8 +2,8 @@ ext-inotify:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: inotify
+      type: pie
+      repo: arnaud-lb/inotify
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

@@ -4,7 +4,6 @@ ext-mysqlnd_ed25519:
     source:
       type: pie
       repo: mariadb/mysqlnd_ed25519
-      extract: php-src/ext/mysqlnd_ed25519
     metadata:
       license-files: [LICENSE]
       license: BSD-3-Clause
