@@ -4,7 +4,6 @@ ext-amqp:
     source:
       type: pie
       repo: php-amqp/php-amqp
-      extract: php-src/ext/amqp
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

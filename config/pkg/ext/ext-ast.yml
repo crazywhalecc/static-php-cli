@@ -4,7 +4,6 @@ ext-ast:
     source:
       type: pie
       repo: nikic/php-ast
-      extract: php-src/ext/ast
     metadata:
       license-files: [LICENSE]
       license: BSD-3-Clause
