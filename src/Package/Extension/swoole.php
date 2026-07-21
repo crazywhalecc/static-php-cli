@@ -63,24 +63,20 @@ class swoole extends PhpExtensionPackage
     }
 
     #[BeforeStage('php', [php::class, 'makeForUnix'], 'ext-swoole')]
-    #[PatchDescription('Make swoole inert under non-CLI SAPIs (frankenphp/fpm/cgi): its per-request hooks run on worker threads where SWOOLE_G(cli) is garbage, so gate them on the SAPI name instead')]
+    #[PatchDescription('Initialise SWOOLE_G(cli) to false in the module globals ctor (upstream bug: it is left uninitialised, so under a threaded SAPI like frankenphp its garbage value passes the CLI-only guard in RINIT and segfaults on the first request)')]
     public function patchBeforeMake3(): void
     {
-        // Under a threaded web SAPI such as frankenphp, swoole's per-thread module globals
-        // are not initialised, so SWOOLE_G(cli) reads a stale/garbage value and RINIT proceeds
-        // into swoole_set_task_tmpdir(), which dereferences an uninitialised thread buffer and
-        // segfaults on the first request. sapi_module.name is a stable global and is always
-        // correct, so gate the request hooks on it — keeping swoole active only for genuine
-        // CLI-style SAPIs (the same set swoole itself uses to set SWOOLE_G(cli)).
-        $file = $this->getSourceDir() . '/ext-src/php_swoole.cc';
-        $guard = "    if (!SWOOLE_G(cli) || (strcmp(\"cli\", sapi_module.name) != 0 && strcmp(\"phpdbg\", sapi_module.name) != 0 && strcmp(\"embed\", sapi_module.name) != 0 && strcmp(\"micro\", sapi_module.name) != 0)) {\n        return SUCCESS;\n    }";
-        foreach (['PHP_SWOOLE_RINIT_BEGIN', 'PHP_SWOOLE_RSHUTDOWN_BEGIN'] as $marker) {
-            FileSystem::replaceFileStr(
-                $file,
-                "    if (!SWOOLE_G(cli)) {\n        return SUCCESS;\n    }\n\n    SWOOLE_G(req_status) = {$marker};",
-                "{$guard}\n\n    SWOOLE_G(req_status) = {$marker};",
-            );
-        }
+        // php_swoole_init_globals() sets every other global explicitly but never assigns
+        // `cli`, relying on zero-initialisation. That holds for CLI/embed but not for
+        // frankenphp's per-thread ZTS globals, where `cli` reads garbage-nonzero. Since
+        // sapi_module.name is always "frankenphp" there, the `cli = true` conditional never
+        // fires — so the fix is simply to default `cli` to false at the source of the gate.
+        // Reported upstream; drop this patch once swoole ships the initialiser.
+        FileSystem::replaceFileStr(
+            $this->getSourceDir() . '/ext-src/php_swoole.cc',
+            "    swoole_globals->leak_detection = false;\n\n    if (strcmp(\"cli\", sapi_module.name) == 0",
+            "    swoole_globals->leak_detection = false;\n    swoole_globals->cli = false;\n\n    if (strcmp(\"cli\", sapi_module.name) == 0",
+        );
     }
 
     #[CustomPhpConfigureArg('Darwin')]
