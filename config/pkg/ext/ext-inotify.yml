@@ -4,7 +4,6 @@ ext-inotify:
     source:
       type: pie
       repo: arnaud-lb/inotify
-      extract: php-src/ext/inotify
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

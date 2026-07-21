@@ -4,7 +4,6 @@ ext-memcached:
     source:
       type: pie
       repo: php-memcached/php-memcached
-      extract: php-src/ext/memcached
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

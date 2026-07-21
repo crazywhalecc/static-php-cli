@@ -4,7 +4,6 @@ ext-grpc:
     source:
       type: pie
       repo: grpc/grpc-php-ext
-      extract: php-src/ext/grpc
     metadata:
       license-files: [LICENSE]
       license: Apache-2.0

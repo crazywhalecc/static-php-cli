@@ -4,7 +4,6 @@ ext-msgpack:
     source:
       type: pie
       repo: msgpack/msgpack-php
-      extract: php-src/ext/msgpack
     metadata:
       license-files: [LICENSE]
       license: BSD-3-Clause

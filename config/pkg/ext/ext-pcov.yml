@@ -4,7 +4,6 @@ ext-pcov:
     source:
       type: pie
       repo: pecl/pcov
-      extract: php-src/ext/pcov
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

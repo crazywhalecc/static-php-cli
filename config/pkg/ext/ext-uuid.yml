@@ -4,7 +4,6 @@ ext-uuid:
     source:
       type: pie
       repo: pecl/uuid
-      extract: php-src/ext/uuid
     metadata:
       license-files: [LICENSE]
       license: LGPL-2.1-only

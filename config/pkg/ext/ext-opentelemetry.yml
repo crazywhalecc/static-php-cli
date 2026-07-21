@@ -4,7 +4,6 @@ ext-opentelemetry:
     source:
       type: pie
       repo: open-telemetry/ext-opentelemetry
-      extract: php-src/ext/opentelemetry
     metadata:
       license-files: [LICENSE]
       license: Apache-2.0

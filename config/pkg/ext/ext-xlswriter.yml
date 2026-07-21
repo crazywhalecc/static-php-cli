@@ -4,7 +4,6 @@ ext-xlswriter:
     source:
       type: pie
       repo: viest/xlswriter
-      extract: php-src/ext/xlswriter
     metadata:
       license-files: [LICENSE]
       license: BSD-2-Clause

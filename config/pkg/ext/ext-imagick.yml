@@ -4,7 +4,6 @@ ext-imagick:
     source:
       type: pie
       repo: imagick/imagick
-      extract: php-src/ext/imagick
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01
