@@ -708,7 +708,7 @@ C_CODE;
 
         // Get build configuration using spc-config
         $util = new \StaticPHP\Util\SPCConfigUtil();
-        $config = $util->config(array_map(fn ($x) => $x->getName(), $installer->getResolvedPackages()));
+        $config = $util->configForResolvedBuild(['php'], $installer);
 
         // Build the embed test executable using cl.exe
         // Note: MSVCToolchain already initialized the VC environment, no need for vcvarsall

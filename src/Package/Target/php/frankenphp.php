@@ -122,10 +122,7 @@ trait frankenphp
             $staticFlags = '';
         }
 
-        $resolved = array_keys($installer->getResolvedPackages());
-        // remove self from deps
-        $resolved = array_filter($resolved, fn ($pkg_name) => $pkg_name !== $package->getName());
-        $config = new SPCConfigUtil()->config($resolved);
+        $config = new SPCConfigUtil()->configForResolvedBuild([$package->getName()], $installer);
         $cflags = "{$package->getLibExtraCFlags()} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . " -DFRANKENPHP_VERSION={$frankenphp_version}";
         $libs = $config['libs'];
 

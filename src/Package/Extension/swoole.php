@@ -93,7 +93,8 @@ class swoole extends PhpExtensionPackage
         $arg .= $installer->getPhpExtensionPackage('swoole-hook-mysql') ? ' --enable-mysqlnd' : ' --disable-mysqlnd';
         $arg .= $installer->getPhpExtensionPackage('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
         if ($installer->getPhpExtensionPackage('swoole-hook-odbc')) {
-            $config = new SPCConfigUtil()->getLibraryConfig($installer->getLibraryPackage('unixodbc'));
+            $config = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])
+                ->configForResolvedBuild(['unixodbc'], $installer);
             $arg .= " --with-swoole-odbc=unixODBC,{$builder->getBuildRootPath()} SWOOLE_ODBC_LIBS=\"{$config['libs']}\"";
         }
 

@@ -590,7 +590,7 @@ trait unix
         copy(ROOT_DIR . '/src/globals/common-tests/embed.c', $sample_file_path . '/embed.c');
         copy(ROOT_DIR . '/src/globals/common-tests/embed.php', $sample_file_path . '/embed.php');
 
-        $config = new SPCConfigUtil()->config($installer->getAvailableResolvedPackageNames());
+        $config = new SPCConfigUtil()->configForResolvedBuild(['php'], $installer);
         $lens = "{$config['cflags']} {$config['ldflags']} {$config['libs']}";
         if ($toolchain->isStatic()) {
             $lens .= ' -static';
@@ -785,7 +785,7 @@ trait unix
      */
     private function makeVars(PackageInstaller $installer): array
     {
-        $config = new SPCConfigUtil(['libs_only_deps' => true])->config($installer->getAvailableResolvedPackageNames());
+        $config = new SPCConfigUtil(['libs_only_deps' => true])->configForResolvedBuild(['php'], $installer);
         $static = ApplicationContext::get(ToolchainInterface::class)->isStatic() ? '-all-static' : '';
         $pie = SystemTarget::getTargetOS() === 'Linux' ? '-pie' : '';
 
