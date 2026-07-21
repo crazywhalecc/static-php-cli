@@ -2,8 +2,8 @@ ext-xlswriter:
   type: php-extension
   artifact:
     source:
-      type: pie
-      repo: viest/xlswriter
+      type: pecl
+      name: xlswriter
     metadata:
       license-files: [LICENSE]
       license: BSD-2-Clause

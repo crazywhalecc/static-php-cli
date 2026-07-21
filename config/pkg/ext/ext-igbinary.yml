@@ -2,10 +2,8 @@ ext-igbinary:
   type: php-extension
   artifact:
     source:
-      type: ghtagtar
-      repo: igbinary/igbinary
-      match: tags/\d+(\.\d+)+$
-      extract: php-src/ext/igbinary
+      type: pecl
+      name: igbinary
     metadata:
       license-files: [COPYING]
       license: BSD-3-Clause
