@@ -2,8 +2,9 @@ ext-gearman:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: gearman
+      type: ghtar
+      repo: php/pecl-networking-gearman
+      extract: php-src/ext/gearman
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

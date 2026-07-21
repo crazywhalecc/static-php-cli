@@ -2,8 +2,9 @@ ext-ev:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: ev
+      type: pie
+      repo: osmanov/pecl-ev
+      extract: php-src/ext/ev
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

@@ -56,7 +56,23 @@ class PIE implements DownloadTypeInterface, CheckUpdateInterface
         if (!isset($data['packages'][$config['repo']]) || !is_array($data['packages'][$config['repo']])) {
             throw new DownloaderException("failed to find {$name} repo info from packagist");
         }
-        $first = $data['packages'][$config['repo']][0] ?? [];
+        // p2 metadata is minified: each entry only carries fields changed vs the previous one, '__unset' removes a field
+        $releases = [];
+        $current = [];
+        foreach ($data['packages'][$config['repo']] as $release) {
+            $current = array_merge($current, $release);
+            $current = array_filter($current, static fn ($v) => $v !== '__unset');
+            $releases[] = $current;
+        }
+        // packagist lists newest first including RC/beta/alpha — pick the newest stable release
+        $first = null;
+        foreach ($releases as $release) {
+            if (!preg_match('/[._-]?(?:alpha|a|beta|b|rc)[._-]?\d*$/i', $release['version'] ?? '')) {
+                $first = $release;
+                break;
+            }
+        }
+        $first ??= $releases[0] ?? [];
         if (!isset($first['php-ext'])) {
             throw new DownloaderException("failed to find {$name} php-ext info from packagist, maybe not a php extension package");
         }

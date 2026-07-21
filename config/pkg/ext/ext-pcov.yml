@@ -2,8 +2,9 @@ ext-pcov:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: pcov
+      type: pie
+      repo: pecl/pcov
+      extract: php-src/ext/pcov
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

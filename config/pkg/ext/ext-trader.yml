@@ -2,8 +2,9 @@ ext-trader:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: trader
+      type: ghtagtar
+      repo: php/pecl-math-trader
+      extract: php-src/ext/trader
     metadata:
       license-files: [LICENSE]
       license: BSD-2-Clause

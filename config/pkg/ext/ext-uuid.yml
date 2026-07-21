@@ -2,8 +2,9 @@ ext-uuid:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: uuid
+      type: pie
+      repo: pecl/uuid
+      extract: php-src/ext/uuid
     metadata:
       license-files: [LICENSE]
       license: LGPL-2.1-only

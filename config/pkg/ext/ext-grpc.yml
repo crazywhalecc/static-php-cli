@@ -2,8 +2,9 @@ ext-grpc:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: grpc
+      type: pie
+      repo: grpc/grpc-php-ext
+      extract: php-src/ext/grpc
     metadata:
       license-files: [LICENSE]
       license: Apache-2.0
