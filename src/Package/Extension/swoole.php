@@ -62,6 +62,27 @@ class swoole extends PhpExtensionPackage
         }
     }
 
+    #[BeforeStage('php', [php::class, 'makeForUnix'], 'ext-swoole')]
+    #[PatchDescription('Make swoole inert under non-CLI SAPIs (frankenphp/fpm/cgi): its per-request hooks run on worker threads where SWOOLE_G(cli) is garbage, so gate them on the SAPI name instead')]
+    public function patchBeforeMake3(): void
+    {
+        // Under a threaded web SAPI such as frankenphp, swoole's per-thread module globals
+        // are not initialised, so SWOOLE_G(cli) reads a stale/garbage value and RINIT proceeds
+        // into swoole_set_task_tmpdir(), which dereferences an uninitialised thread buffer and
+        // segfaults on the first request. sapi_module.name is a stable global and is always
+        // correct, so gate the request hooks on it — keeping swoole active only for genuine
+        // CLI-style SAPIs (the same set swoole itself uses to set SWOOLE_G(cli)).
+        $file = $this->getSourceDir() . '/ext-src/php_swoole.cc';
+        $guard = "    if (!SWOOLE_G(cli) || (strcmp(\"cli\", sapi_module.name) != 0 && strcmp(\"phpdbg\", sapi_module.name) != 0 && strcmp(\"embed\", sapi_module.name) != 0 && strcmp(\"micro\", sapi_module.name) != 0)) {\n        return SUCCESS;\n    }";
+        foreach (['PHP_SWOOLE_RINIT_BEGIN', 'PHP_SWOOLE_RSHUTDOWN_BEGIN'] as $marker) {
+            FileSystem::replaceFileStr(
+                $file,
+                "    if (!SWOOLE_G(cli)) {\n        return SUCCESS;\n    }\n\n    SWOOLE_G(req_status) = {$marker};",
+                "{$guard}\n\n    SWOOLE_G(req_status) = {$marker};",
+            );
+        }
+    }
+
     #[CustomPhpConfigureArg('Darwin')]
     #[CustomPhpConfigureArg('Linux')]
     public function getUnixConfigureArg(bool $shared, PackageBuilder $builder, PackageInstaller $installer): string
