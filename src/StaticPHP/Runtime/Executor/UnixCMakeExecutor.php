@@ -228,8 +228,15 @@ class UnixCMakeExecutor extends Executor
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
         ];
 
-        // EXE linker flags: base system libs + framework flags for target packages
-        $exeLinkerFlags = SystemTarget::getRuntimeLibs();
+        // EXE linker flags: framework flags for target packages (Darwin). On Linux the
+        // runtime libs (-ldl & co.) are NOT passed here: CMake puts EXE_LINKER_FLAGS before
+        // the objects/archives, where -Wl,--as-needed (Debian gcc default, and our own
+        // LDFLAGS) discards them and breaks try_compile probes linking static archives that
+        // need them (curl's SSL_set_quic_tls_cbs check vs libcrypto.a needing dlopen on
+        // glibc < 2.34). They go into the toolchain file as CMAKE_<LANG>_STANDARD_LIBRARIES
+        // instead, which cmake appends AFTER the objects — correct order, as-needed intact,
+        // and the toolchain file is re-evaluated inside every try_compile.
+        $exeLinkerFlags = SystemTarget::getTargetOS() === 'Linux' ? '' : SystemTarget::getRuntimeLibs();
         if ($this->package instanceof TargetPackage && SystemTarget::getTargetOS() === 'Darwin') {
             $resolvedNames = array_keys($this->installer->getResolvedPackages());
             $resolvedNames[] = $this->package->getName();
@@ -308,6 +315,14 @@ CMAKE;
             $ranlib = getenv('SPC_DEFAULT_RANLIB') ?: (getenv('RANLIB') ?: 'ranlib');
             $toolchain .= "\nSET(CMAKE_AR \"{$ar}\")";
             $toolchain .= "\nSET(CMAKE_RANLIB \"{$ranlib}\")";
+            // Runtime libs as standard libraries: appended after objects/archives on every
+            // link line (incl. try_compile probes), so -Wl,--as-needed keeps the ones that
+            // are actually referenced.
+            $runtimeLibs = SystemTarget::getRuntimeLibs();
+            if ($runtimeLibs !== '') {
+                $toolchain .= "\nset(CMAKE_C_STANDARD_LIBRARIES_INIT \"{$runtimeLibs}\")";
+                $toolchain .= "\nset(CMAKE_CXX_STANDARD_LIBRARIES_INIT \"{$runtimeLibs}\")";
+            }
         }
         FileSystem::writeFile(SOURCE_PATH . '/toolchain.cmake', $toolchain);
         return $created = realpath(SOURCE_PATH . '/toolchain.cmake');
