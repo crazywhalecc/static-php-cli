@@ -2,8 +2,8 @@ ext-amqp:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: amqp
+      type: pie
+      repo: php-amqp/php-amqp
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

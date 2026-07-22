@@ -2,8 +2,8 @@ ext-imagick:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: imagick
+      type: pie
+      repo: imagick/imagick
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01
