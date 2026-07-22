@@ -2,8 +2,8 @@ ext-opentelemetry:
   type: php-extension
   artifact:
     source:
-      type: pie
-      repo: open-telemetry/ext-opentelemetry
+      type: pecl
+      name: opentelemetry
     metadata:
       license-files: [LICENSE]
       license: Apache-2.0
