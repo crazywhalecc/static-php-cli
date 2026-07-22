@@ -4,6 +4,7 @@ ext-xdebug:
     source:
       type: pie
       repo: xdebug/xdebug
+      extract: xdebug
     metadata:
       license-files: [LICENSE]
       license: Xdebug-1.03

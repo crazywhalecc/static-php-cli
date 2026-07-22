@@ -4,6 +4,7 @@ ext-mysqlnd_parsec:
     source:
       type: pie
       repo: mariadb/mysqlnd_parsec
+      extract: mysqlnd_parsec
     metadata:
       license-files: [LICENSE]
       license: BSD-3-Clause
