@@ -4,6 +4,7 @@ ext-zip:
     source:
       type: pie
       repo: pecl/zip
+      extract: ext-zip
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01
