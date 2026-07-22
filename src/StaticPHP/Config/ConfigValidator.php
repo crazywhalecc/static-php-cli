@@ -297,8 +297,8 @@ class ConfigValidator
                 throw new ValidationException("Artifact source object of type '{$type}' must have required field '{$field}'");
             }
         }
-        // check for unknown fields
-        $allowed_fields = array_merge(['type'], $required_fields, $optional_fields);
+        // check for unknown fields ('build-root': optional build subdir, applies to any type)
+        $allowed_fields = array_merge(['type', 'build-root'], $required_fields, $optional_fields);
         self::validateNoInvalidFields('artifact object', $item_name, $data, $allowed_fields);
     }
 

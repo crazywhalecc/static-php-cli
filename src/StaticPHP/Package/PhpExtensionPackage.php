@@ -60,6 +60,19 @@ class PhpExtensionPackage extends Package
         return parent::getSourceDir();
     }
 
+    /**
+     * Directory the extension is actually built in: cd'd into by phpize/configure/make.
+     * Equals getSourceDir() unless the artifact declares source.build-root (e.g. a PIE
+     * package whose config.m4 lives in an ext/ subdir).
+     */
+    public function getSourceRoot(): string
+    {
+        if ($this->getArtifact() === null) {
+            return $this->getSourceDir();
+        }
+        return parent::getSourceRoot();
+    }
+
     public function getExtensionName(): string
     {
         return str_replace('ext-', '', $this->getName());
@@ -299,7 +312,7 @@ class PhpExtensionPackage extends Package
     #[Stage]
     public function phpizeForUnix(array $env, PhpExtensionPackage $package): void
     {
-        shell()->cd($package->getSourceDir())->setEnv($env)->exec(BUILD_BIN_PATH . '/phpize');
+        shell()->cd($package->getSourceRoot())->setEnv($env)->exec(BUILD_BIN_PATH . '/phpize');
     }
 
     /**
@@ -310,7 +323,7 @@ class PhpExtensionPackage extends Package
     {
         $phpvars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
         // CustomPhpConfigureArg keys are OS names ('Linux'/'Darwin'), not platform strings
-        shell()->cd($package->getSourceDir())
+        shell()->cd($package->getSourceRoot())
             ->setEnv($env)
             ->exec(
                 './configure ' . $this->getPhpConfigureArg(SystemTarget::getTargetOS(), true) .
@@ -329,7 +342,7 @@ class PhpExtensionPackage extends Package
         $package->patchSharedLibAdd();
         $extra_ldflags = (string) getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS');
         $makeArgs = $extra_ldflags !== '' ? 'EXTRA_LDFLAGS=' . escapeshellarg($extra_ldflags) : '';
-        shell()->cd($package->getSourceDir())
+        shell()->cd($package->getSourceRoot())
             ->setEnv($env)
             ->exec('make clean')
             ->exec("make -j{$builder->concurrency} {$makeArgs}")
@@ -355,7 +368,7 @@ class PhpExtensionPackage extends Package
             ? '-l:libstdc++.a'
             : (str_contains($sharedLibs, '-lstdc++') ? '-lstdc++' : '');
 
-        $makefile = $this->getSourceDir() . '/Makefile';
+        $makefile = $this->getSourceRoot() . '/Makefile';
         if (!is_file($makefile)) {
             return;
         }
@@ -390,9 +403,9 @@ class PhpExtensionPackage extends Package
             return;
         }
 
-        if (!is_dir($this->getSourceDir())) {
+        if (!is_dir($this->getSourceRoot())) {
             throw new ValidationException(
-                "Extension source directory not found: {$this->getSourceDir()}",
+                "Extension source directory not found: {$this->getSourceRoot()}",
                 validation_module: "Extension {$this->getName()} source"
             );
         }

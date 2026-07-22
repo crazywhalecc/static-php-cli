@@ -251,7 +251,7 @@ abstract class Package
 
     /**
      * Get source build root directory.
-     * It's only worked when 'source-root' is defined in artifact config.
+     * It's only worked when source.build-root is defined in artifact config.
      * Normally it's equal to source dir.
      */
     public function getSourceRoot(): string

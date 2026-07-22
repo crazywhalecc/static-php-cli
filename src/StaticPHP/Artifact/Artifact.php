@@ -331,13 +331,13 @@ class Artifact
 
     /**
      * Get source build root directory.
-     * It's only worked when 'source-root' is defined in artifact config.
+     * It's only used when source.build-root is defined in artifact config.
      * Normally it's equal to source dir.
      */
     public function getSourceRoot(): string
     {
-        if (isset($this->config['metadata']['source-root'])) {
-            return FileSystem::convertPath($this->getSourceDir() . '/' . ltrim($this->config['metadata']['source-root'], '/'));
+        if (isset($this->config['source']['build-root'])) {
+            return FileSystem::convertPath($this->getSourceDir() . '/' . ltrim($this->config['source']['build-root'], '/'));
         }
         return $this->getSourceDir();
     }
