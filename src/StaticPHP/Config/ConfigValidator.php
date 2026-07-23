@@ -101,7 +101,7 @@ class ConfigValidator
         'url' => [['url'], ['filename', 'extract', 'version']],
         'bitbuckettag' => [['repo'], ['extract']],
         'local' => [['dirname'], ['extract']],
-        'pie' => [['repo'], ['extract']],
+        'pie' => [['repo'], ['extract', 'prefer-stable']],
         'pecl' => [['name'], ['extract', 'prefer-stable']],
         'php-release' => [['domain'], ['extract']],
         'custom' => [[], ['func']],

@@ -2,9 +2,9 @@ ext-igbinary:
   type: php-extension
   artifact:
     source:
-      type: ghtagtar
+      type: pie
       repo: igbinary/igbinary
-      match: tags/\d+(\.\d+)+$
+      prefer-stable: false
       extract: php-src/ext/igbinary
     metadata:
       license-files: [COPYING]

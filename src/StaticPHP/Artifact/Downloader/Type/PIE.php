@@ -65,12 +65,15 @@ class PIE implements DownloadTypeInterface, CheckUpdateInterface
             $current = array_filter($current, static fn ($v) => $v !== '__unset');
             $releases[] = $current;
         }
-        // packagist lists newest first including RC/beta/alpha — pick the newest stable release
+        // packagist lists newest first including RC/beta/alpha — pick the newest stable release,
+        // unless prefer-stable is false, then take the newest tagged release even if it's a prerelease
         $first = null;
-        foreach ($releases as $release) {
-            if (!preg_match('/[._-]?(?:alpha|a|beta|b|rc)[._-]?\d*$/i', $release['version'] ?? '')) {
-                $first = $release;
-                break;
+        if ($config['prefer-stable'] ?? true) {
+            foreach ($releases as $release) {
+                if (!preg_match('/[._-]?(?:alpha|a|beta|b|rc)[._-]?\d*$/i', $release['version'] ?? '')) {
+                    $first = $release;
+                    break;
+                }
             }
         }
         $first ??= $releases[0] ?? [];
