@@ -98,7 +98,7 @@ trait frankenphp
                 '-X \'github.com/caddyserver/caddy/v2.CustomBinaryName=frankenphp\' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
                 "v{$frankenphp_version} PHP {$libphp_version} Caddy'\\\" " .
-                "-tags={$muslTags}nobadger,nomysql,nopgx{$no_brotli}{$no_watcher}",
+                "-tags={$muslTags}nobadger,nomysql,nopgx,deprecated_topic,deprecated_claim{$no_brotli}{$no_watcher}",
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         $pgo = file_exists("{$source_dir}/caddy/frankenphp/default.pgo") ? "--pgo {$source_dir}/caddy/frankenphp/default.pgo " : '';
@@ -248,7 +248,7 @@ trait frankenphp
         ])));
 
         // build tags: skip watcher (no inotify/kqueue on Windows)
-        $go_build_tags = 'nobadger,nomysql,nopgx,nowatcher';
+        $go_build_tags = 'nobadger,nomysql,nopgx,nowatcher,deprecated_topic,deprecated_claim';
         if (!$installer->isPackageResolved('brotli')) {
             $go_build_tags .= ',nobrotli';
         }
