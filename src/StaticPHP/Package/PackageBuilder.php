@@ -10,12 +10,14 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Toolchain\ToolchainManager;
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
-use StaticPHP\Util\System\LinuxUtil;
 
 class PackageBuilder
 {
@@ -187,15 +189,10 @@ class PackageBuilder
         if (SystemTarget::getTargetOS() === 'Darwin') {
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
-            if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
-                shell()
-                    ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
-            } else {
-                shell()
-                    ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
-            }
+            $objcopy = $this->getBinUtil('objcopy');
+            shell()
+                ->exec("{$objcopy} --only-keep-debug {$binary_path} {$debug_file}")
+                ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
         } else {
             logger()->debug('extractDebugInfo is only supported on Linux and macOS');
             return '';
@@ -208,12 +205,33 @@ class PackageBuilder
      */
     public function stripBinary(string $binary_path): void
     {
+        $strip = $this->getBinUtil('strip');
         shell()->exec(match (SystemTarget::getTargetOS()) {
-            'Darwin' => "strip -S {$binary_path}",
-            'Linux' => "strip --strip-unneeded {$binary_path}",
+            'Darwin' => "{$strip} -S {$binary_path}",
+            'Linux' => "{$strip} --strip-unneeded {$binary_path}",
             'Windows' => 'echo "Skip strip on Windows"', // Windows strip is not available for now
             default => throw new SPCInternalException('stripBinary is only supported on Linux and macOS'),
         });
+    }
+
+    private function getBinUtil(string $name): string
+    {
+        $env = getenv(strtoupper($name)) ?: '';
+        $is_zig = ToolchainManager::getToolchainClass() === ZigToolchain::class;
+
+        // Honor an explicit override, but don't let Zig's own default wrappers block llvm-tools.
+        if ($env !== '' && !($is_zig && $env === "zig-{$name}")) {
+            return $env;
+        }
+
+        if ($is_zig) {
+            $llvm_tools = PackageLoader::getPackage('llvm-tools');
+            if ($llvm_tools instanceof ToolPackage && $llvm_tools->isInstalled()) {
+                return $llvm_tools->getBinary("llvm-{$name}");
+            }
+        }
+
+        return $env !== '' ? $env : $name;
     }
 
     private function installLicense(Package $package, array $license): void

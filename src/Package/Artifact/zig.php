@@ -11,10 +11,25 @@ use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
+use StaticPHP\Package\ToolPackage;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
 
 class zig
 {
+    public static function getLlvmVersion(): string
+    {
+        $zig = PackageLoader::getPackage('zig');
+        if (!$zig instanceof ToolPackage || !$zig->isInstalled()) {
+            throw new DownloaderException('zig is not installed, run `bin/spc doctor` first');
+        }
+        [$code, $out] = shell()->execWithResult(escapeshellarg($zig->getBinary('zig')) . ' cc --version', false);
+        if ($code !== 0 || !preg_match('/clang version (\d+\.\d+\.\d+)/', implode("\n", $out), $match)) {
+            throw new DownloaderException('Could not determine the clang version shipped by zig');
+        }
+        return $match[1];
+    }
+
     #[CustomBinary('zig', [
         'linux-x86_64',
         'linux-aarch64',
@@ -102,20 +117,19 @@ class zig
     ])]
     public function postExtractZig(string $target_path): void
     {
-        $files = ['zig', 'zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
-        $all_exist = true;
-        foreach ($files as $file) {
-            if (!file_exists("{$target_path}/{$file}")) {
-                $all_exist = false;
-                break;
-            }
-        }
-        if ($all_exist) {
-            return;
-        }
+        self::writeWrappers($target_path);
+    }
 
+    public static function writeWrappers(string $target_path): void
+    {
         $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
         $script_content = file_get_contents($script_path);
+
+        $files = ['zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
+        $current = @file_get_contents("{$target_path}/zig-cc");
+        if ($current === $script_content && array_all($files, fn ($file) => file_exists("{$target_path}/{$file}"))) {
+            return;
+        }
 
         file_put_contents("{$target_path}/zig-cc", $script_content);
         chmod("{$target_path}/zig-cc", 0755);
