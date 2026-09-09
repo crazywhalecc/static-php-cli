@@ -24,4 +24,24 @@ class rar extends PhpExtensionPackage
             FileSystem::replaceFileStr("{$this->getBuildDir()}/config.m4", '-Wall -fvisibility=hidden', '-Wall -Wno-incompatible-function-pointer-types -fvisibility=hidden');
         }
     }
+
+    /**
+     * php-rar 4.3.1+ GitHub release tarballs omit rar.map, but config.m4 probes
+     * and links every build with -Wl,--version-script=$ext_srcdir/rar.map. The
+     * configure probe links an executable, where ld.lld tolerates the missing
+     * file, so configure reports "yes" and the real shared-library link fails
+     * with "cannot find version script". Recreate the file (content matches
+     * upstream master) when missing, before configure on both the shared
+     * phpize path and the static in-tree path.
+     */
+    #[BeforeStage('ext-rar', [self::class, 'configureForUnix'])]
+    #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-rar')]
+    #[PatchDescription('Recreate rar.map omitted from php-rar release tarballs but required by config.m4')]
+    public function patchMissingRarMap(): void
+    {
+        $mapFile = "{$this->getBuildDir()}/rar.map";
+        if (!file_exists($mapFile)) {
+            FileSystem::writeFile($mapFile, "{ global: get_module; local: *; };\n");
+        }
+    }
 }
