@@ -1,0 +1,72 @@
+diff --git a/unrar/rijndael.cpp b/unrar/rijndael.cpp
+--- a/unrar/rijndael.cpp
++++ b/unrar/rijndael.cpp
+@@ -2,6 +2,9 @@
+  * This code is based on Szymon Stefanek public domain AES implementation *
+  **************************************************************************/
+ #include "rar.hpp"
++#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
++#include <cpuid.h>
++#endif
+
+ #ifdef USE_SSE
+ #include <wmmintrin.h>
+@@ -112,7 +115,9 @@
+   else
+     AES_NI=false;
+ #elif defined(__GNUC__)
+-  AES_NI=__builtin_cpu_supports("aes");
++  unsigned CPUInfo[4];
++  __get_cpuid(1, &CPUInfo[0], &CPUInfo[1], &CPUInfo[2], &CPUInfo[3]);
++  AES_NI=(CPUInfo[2] & 0x2000000)!=0;
+ #endif
+
+ #elif defined(USE_NEON_AES)
+diff --git a/unrar/system.cpp b/unrar/system.cpp
+--- a/unrar/system.cpp
++++ b/unrar/system.cpp
+@@ -1,4 +1,7 @@
+ #include "rar.hpp"
++#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
++#include <cpuid.h>
++#endif
+
+ static int SleepTime=0;
+
+@@ -230,16 +233,26 @@
+       return SSE_SSE;
+   }
+ #elif defined(__GNUC__)
+-  if (__builtin_cpu_supports("avx2"))
+-    return SSE_AVX2;
+-  if (__builtin_cpu_supports("sse4.1"))
+-    return SSE_SSE41;
+-  if (__builtin_cpu_supports("ssse3"))
+-    return SSE_SSSE3;
+-  if (__builtin_cpu_supports("sse2"))
+-    return SSE_SSE2;
+-  if (__builtin_cpu_supports("sse"))
+-    return SSE_SSE;
++  unsigned CPUInfo[4];
++  unsigned MaxSupported = __get_cpuid_max(0, &CPUInfo[0]);
++  if (MaxSupported>=7)
++  {
++    __get_cpuid(7, &CPUInfo[0], &CPUInfo[1], &CPUInfo[2], &CPUInfo[3]);
++    if ((CPUInfo[1] & 0x20)!=0)
++      return SSE_AVX2;
++  }
++  if (MaxSupported>=1)
++  {
++    __get_cpuid(1, &CPUInfo[0], &CPUInfo[1], &CPUInfo[2], &CPUInfo[3]);
++    if ((CPUInfo[2] & 0x80000)!=0)
++      return SSE_SSE41;
++    if ((CPUInfo[2] & 0x200)!=0)
++      return SSE_SSSE3;
++    if ((CPUInfo[3] & 0x4000000)!=0)
++      return SSE_SSE2;
++    if ((CPUInfo[3] & 0x2000000)!=0)
++      return SSE_SSE;
++  }
+ #endif
+   return SSE_NONE;
+ }
