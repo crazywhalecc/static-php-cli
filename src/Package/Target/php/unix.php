@@ -143,12 +143,14 @@ trait unix
             $configure_str = str_replace('--with-pic', '--enable-pic', $configure_str);
         }
 
+        $vars = $this->makeVars($installer);
+
         // run ./configure with args
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd($package->getSourceDir())->setEnv([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => "-I{$package->getIncludeDir()}",
             'LDFLAGS' => "-L{$package->getLibDir()} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
-            'LIBS' => SystemTarget::getRuntimeLibs(),
+            'LIBS' => $vars['EXTRA_LIBS'] ?? '',
         ])->exec($configure_str), $package->getSourceDir());
     }
 

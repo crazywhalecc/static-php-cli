@@ -89,6 +89,21 @@ class ToolchainManager
         /* @var ToolchainInterface $toolchain */
         $instance = ApplicationContext::get(ToolchainInterface::class);
         $instance->afterInit();
+
+        // On Linux, pin PHP configure's strlcpy/strlcat detection to "no" for every toolchain:
+        // - zig-cc/clang treats them as compiler builtins, so link tests pass even without libc support;
+        // - configure runs with LIBS containing every built static lib, so polyfill archives
+        //   (libpgport/libpgcommon from postgresql, libedit) advertise them although old glibc (< 2.38)
+        //   and musl don't provide them.
+        // Overriding the autoconf cache vars keeps HAVE_STRLCPY/HAVE_STRLCAT off (PHP then compiles its
+        // bundled main/strlcpy.c/main/strlcat.c) without breaking link-based library checks.
+        if (SystemTarget::getTargetOS() === 'Linux') {
+            $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
+            if (!str_contains($extra_vars, 'ac_cv_func_strlcpy')) {
+                GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=ac_cv_func_strlcpy=no ac_cv_func_strlcat=no {$extra_vars}");
+            }
+        }
+
         if (getenv('PHP_BUILD_COMPILER') === false && ($compiler_info = $instance->getCompilerInfo())) {
             GlobalEnvManager::putenv("PHP_BUILD_COMPILER={$compiler_info}");
         }

@@ -51,8 +51,9 @@ class DownloaderOptions
         $shortI = $prefix ? null : 'i';
 
         return [
-            // php version option
-            new InputOption("{$p}with-php", null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.5)', '8.5'),
+            // php version option (null default: only enforced against the download cache when
+            // explicitly given; PhpRelease falls back to the latest 8.5.x when actually fetching)
+            new InputOption("{$p}with-php", null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.5)'),
 
             // download preference options
             new InputOption("{$p}prefer-source", null, InputOption::VALUE_OPTIONAL, 'Prefer source downloads when both source and binary are available', false),

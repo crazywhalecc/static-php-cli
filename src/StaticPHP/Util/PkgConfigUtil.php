@@ -57,17 +57,22 @@ class PkgConfigUtil
     /**
      * Get CFLAGS from pkg-config
      *
-     * Returns --cflags-only-other output from pkg-config.
+     * Returns full --cflags output (not --cflags-only-other) because:
+     * 1. Libraries like ImageMagick and libxml2 install headers into include
+     *    subdirectories whose -I paths are dropped by --cflags-only-other.
+     * 2. Extensions that can only be linked dynamically (glfw, webview, ...)
+     *    intentionally resolve system .pc files via a user-set PKG_CONFIG_PATH;
+     *    their -I paths are required. pkg-config itself already filters -I/usr/include,
+     *    so only genuinely needed subdirectory includes appear here.
      * The reason we return the string is we cannot use array_unique() on cflags,
      * some cflags may contains spaces.
      *
      * @param  string $pkg_config_str .pc file string, accepts multiple files
-     * @return string CFLAGS string, e.g. "-Wno-implicit-int-float-conversion ..."
+     * @return string CFLAGS string, e.g. "-I/path/to/include -Wno-implicit-int-float-conversion ..."
      */
     public static function getCflags(string $pkg_config_str): string
     {
-        // get other things
-        $result = self::execWithResult("pkg-config --static --cflags-only-other {$pkg_config_str}");
+        $result = self::execWithResult("pkg-config --static --cflags {$pkg_config_str}");
         return trim($result);
     }
 

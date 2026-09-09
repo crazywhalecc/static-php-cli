@@ -8,7 +8,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Exception\DownloaderException;
 
-class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpdateInterface
+class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpdateInterface, CacheMatchInterface
 {
     public const string DEFAULT_PHP_DOMAIN = 'https://www.php.net';
 
@@ -81,6 +81,25 @@ class PhpRelease implements DownloadTypeInterface, ValidatorInterface, CheckUpda
             new: $new_version,
             needUpdate: $old_version === null || $new_version !== $old_version,
         );
+    }
+
+    public function cacheMatches(string $name, array $config, array $lock_entry, ArtifactDownloader $downloader): bool
+    {
+        $requested = $downloader->getOption('with-php');
+        // No explicit version request (option left at its null default): accept whatever
+        // is cached. The '8.5' default only applies when actually fetching, so a sticky
+        // cache is never invalidated by a version the user did not ask about.
+        if ($requested === null || $requested === '' || $requested === false) {
+            return true;
+        }
+        $cached_version = $lock_entry['version'] ?? null;
+        $cache_type = $lock_entry['cache_type'] ?? null;
+        if ($requested === 'git') {
+            return $cache_type === 'git';
+        }
+        return $cached_version !== null
+            && $cache_type !== 'git'
+            && ($cached_version === $requested || str_starts_with($cached_version, $requested . '.'));
     }
 
     /** @return array{version: string, url: string, filename: string, sha256: string} */
