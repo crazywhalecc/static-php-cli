@@ -5,6 +5,7 @@ idn2:
       type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/libidn/'
       regex: '/href="(?<file>libidn2-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror: 'https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/libidn2/libidn2-spc-mirror.tar.gz'
     metadata:
       license-files: [COPYING.LESSERv3]
       license: LGPL-3.0-or-later

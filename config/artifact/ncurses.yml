@@ -6,3 +6,4 @@ ncurses:
     type: filelist
     url: 'https://ftpmirror.gnu.org/gnu/ncurses/'
     regex: '/href="(?<file>ncurses-(?<version>[^"]+)\.tar\.gz)"/'
+  source-mirror: 'https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/ncurses/ncurses-spc-mirror.tar.gz'

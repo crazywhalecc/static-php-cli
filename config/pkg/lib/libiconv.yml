@@ -5,6 +5,7 @@ libiconv:
       type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/libiconv/'
       regex: '/href="(?<file>libiconv-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror: 'https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/libiconv/libiconv-spc-mirror.tar.gz'
     metadata:
       license-files: [COPYING.LIB]
       license: LGPL-2.0-or-later

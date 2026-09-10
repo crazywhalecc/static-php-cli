@@ -41,7 +41,7 @@ class DefaultShell extends Shell
         $header_arg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
         $retry_arg = $retries > 0 ? "--retry {$retries}" : '';
         $compressed_arg = $compressed ? '--compressed' : '';
-        $cmd = SPC_CURL_EXEC . " -sfSL --max-time 3600 {$retry_arg} {$compressed_arg} {$method_arg} {$header_arg} {$url_arg}";
+        $cmd = SPC_CURL_EXEC . " -sfSL --connect-timeout 15 --speed-limit 1 --speed-time 30 --max-time 3600 {$retry_arg} {$compressed_arg} {$method_arg} {$header_arg} {$url_arg}";
 
         $this->logCommandInfo($cmd);
         logger()->debug("[CURL EXECUTE] {$cmd}");
@@ -75,7 +75,7 @@ class DefaultShell extends Shell
         $header_arg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
         $retry_arg = $retries > 0 ? "--retry {$retries}" : '';
         $check = $this->console_putput ? '#' : 's';
-        $cmd = clean_spaces(SPC_CURL_EXEC . " -{$check}fSL --max-time 3600 {$retry_arg} {$header_arg} -o {$path_arg} {$url_arg}");
+        $cmd = clean_spaces(SPC_CURL_EXEC . " -{$check}fSL --connect-timeout 15 --speed-limit 1 --speed-time 30 --max-time 3600 {$retry_arg} {$header_arg} -o {$path_arg} {$url_arg}");
         $this->logCommandInfo($cmd);
         logger()->debug('[CURL DOWNLOAD] ' . $cmd);
         $this->passthru($cmd, $this->console_putput, capture_output: false, throw_on_error: true);

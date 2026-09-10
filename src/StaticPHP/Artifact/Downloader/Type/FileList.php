@@ -40,8 +40,7 @@ class FileList implements DownloadTypeInterface, CheckUpdateInterface
     {
         logger()->debug("Fetching file list from {$config['url']}");
         $page = default_shell()->executeCurl($config['url'], retries: $downloader->getRetry());
-        preg_match_all($config['regex'], $page ?: '', $matches);
-        if (!$matches) {
+        if ($page === false || !preg_match_all($config['regex'], $page, $matches)) {
             throw new DownloaderException("Failed to get {$name} file list from {$config['url']}");
         }
         $versions = [];
@@ -54,6 +53,9 @@ class FileList implements DownloadTypeInterface, CheckUpdateInterface
                 }
             }
             $versions[$version] = $matches['file'][$i];
+        }
+        if ($versions === []) {
+            throw new DownloaderException("No stable {$name} release found in file list from {$config['url']}");
         }
         uksort($versions, 'version_compare');
         $filename = end($versions);

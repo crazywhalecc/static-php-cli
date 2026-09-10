@@ -5,6 +5,7 @@ libunistring:
       type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/libunistring/'
       regex: '/href="(?<file>libunistring-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror: 'https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/libunistring/libunistring-spc-mirror.tar.gz'
     metadata:
       license-files: [COPYING.LIB]
       license: LGPL-3.0-or-later

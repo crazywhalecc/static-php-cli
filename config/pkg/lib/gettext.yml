@@ -5,6 +5,7 @@ gettext:
       type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/gettext/'
       regex: '/href="(?<file>gettext-(?<version>[^"]+)\.tar\.xz)"/'
+    source-mirror: 'https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/gettext/gettext-spc-mirror.tar.xz'
     metadata:
       license-files: [gettext-runtime/intl/COPYING.LIB]
       license: LGPL-2.1-or-later

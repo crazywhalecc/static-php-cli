@@ -6,8 +6,12 @@ namespace Tests\StaticPHP\Artifact;
 
 use PHPUnit\Framework\TestCase;
 use StaticPHP\Artifact\Artifact;
+use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Artifact\ArtifactDownloader;
+use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Config\ArtifactConfig;
+use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Registry\ArtifactLoader;
 
@@ -335,6 +339,61 @@ class ArtifactDownloaderTest extends TestCase
 
         $result = $downloader->setParallel(5);
         $this->assertSame($downloader, $result);
+    }
+
+    /**
+     * @dataProvider failedFileListProvider
+     */
+    public function testFailedFileListFallsBackToSourceMirror(?string $page, bool $no_alt): void
+    {
+        $listing = tempnam(sys_get_temp_dir(), 'spc-filelist-');
+        $this->assertNotFalse($listing);
+        if ($page === null) {
+            // A missing file URL makes curl fail without depending on the network.
+            unlink($listing);
+        } else {
+            file_put_contents($listing, $page);
+        }
+        $artifact = new Artifact('fallback-test', [
+            'source' => [
+                'type' => 'filelist',
+                'url' => 'file://' . $listing,
+                'regex' => '/href="(?<file>libiconv-(?<version>[^"]+)\.tar\.gz)"/',
+            ],
+            'source-mirror' => ['type' => 'local', 'dirname' => __DIR__],
+        ]);
+        $original_cache = ApplicationContext::get(ArtifactCache::class);
+        $cache = $this->createMock(ArtifactCache::class);
+        $cache->expects($no_alt ? $this->never() : $this->once())
+            ->method('lock')
+            ->with($artifact, 'source', $this->callback(fn (DownloadResult $result) => $result->dirname === __DIR__));
+        ApplicationContext::set(ArtifactCache::class, $cache);
+        try {
+            if ($no_alt) {
+                $this->expectException(DownloaderException::class);
+                $this->expectExceptionMessage("Download artifact 'fallback-test' failed");
+            }
+            (new ArtifactDownloader(['source-only' => true, 'no-alt' => $no_alt], false))
+                ->add($artifact)
+                ->download();
+        } finally {
+            ApplicationContext::set(ArtifactCache::class, $original_cache);
+            if (file_exists($listing)) {
+                unlink($listing);
+            }
+        }
+    }
+
+    public static function failedFileListProvider(): iterable
+    {
+        foreach ([false, true] as $no_alt) {
+            $suffix = $no_alt ? ' without mirrors' : ' with mirrors';
+            yield 'request failure' . $suffix => [null, $no_alt];
+            yield 'empty listing' . $suffix => ['', $no_alt];
+            yield 'no matching releases' . $suffix => ['<html>Mirror unavailable</html>', $no_alt];
+            yield 'prereleases only' . $suffix => ['<a href="libiconv-1.20-rc1.tar.gz">release candidate</a>', $no_alt];
+            yield 'archive download failure' . $suffix => ['<a href="libiconv-1.19.tar.gz">release</a>', $no_alt];
+        }
     }
 
     // ==================== Helpers ====================

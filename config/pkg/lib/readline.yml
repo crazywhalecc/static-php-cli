@@ -5,6 +5,7 @@ readline:
       type: filelist
       url: 'https://ftpmirror.gnu.org/gnu/readline/'
       regex: '/href="(?<file>readline-(?<version>[^"]+)\.tar\.gz)"/'
+    source-mirror: 'https://dl.static-php.dev/static-php-cli/deps/spc-download-mirror/readline/readline-spc-mirror.tar.gz'
     metadata:
       license-files: [COPYING]
       license: GPL-3.0-or-later
