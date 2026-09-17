@@ -59,7 +59,7 @@ const fetchContributors = async () => {
     error.value = '';
 
     const response = await fetch(
-      'https://api.github.com/repos/crazywhalecc/static-php-cli/contributors?per_page=24'
+      'https://api.github.com/repos/crazywhalecc/static-php-cli/contributors?per_page=50'
     );
 
     if (!response.ok) {
