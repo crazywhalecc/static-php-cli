@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\StaticPHP\Registry;
 
+use Package\Library\lcms2;
 use PHPUnit\Framework\TestCase;
 use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\Package\Library;
@@ -28,26 +29,8 @@ class PackageLoaderTest extends TestCase
         parent::setUp();
         $this->tempDir = sys_get_temp_dir() . '/package_loader_test_' . uniqid();
         mkdir($this->tempDir, 0755, true);
-
-        // Reset PackageLoader state
-        $reflection = new \ReflectionClass(PackageLoader::class);
-
-        $property = $reflection->getProperty('packages');
-        $property->setValue(null, null);
-
-        $property = $reflection->getProperty('before_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('after_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('loaded_classes');
-        $property->setValue(null, []);
-
-        // Reset PackageConfig state
-        $configReflection = new \ReflectionClass(PackageConfig::class);
-        $configProperty = $configReflection->getProperty('package_configs');
-        $configProperty->setValue(null, []);
+        $this->resetPackageLoaderState();
+        $this->resetPackageConfigState();
     }
 
     protected function tearDown(): void
@@ -58,25 +41,8 @@ class PackageLoaderTest extends TestCase
             $this->removeDirectory($this->tempDir);
         }
 
-        // Reset PackageLoader state
-        $reflection = new \ReflectionClass(PackageLoader::class);
-
-        $property = $reflection->getProperty('packages');
-        $property->setValue(null, null);
-
-        $property = $reflection->getProperty('before_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('after_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('loaded_classes');
-        $property->setValue(null, []);
-
-        // Reset PackageConfig state
-        $configReflection = new \ReflectionClass(PackageConfig::class);
-        $configProperty = $configReflection->getProperty('package_configs');
-        $configProperty->setValue(null, []);
+        $this->resetPackageLoaderState();
+        $this->resetPackageConfigState();
     }
 
     public function testInitPackageInstancesOnlyRunsOnce(): void
@@ -533,6 +499,26 @@ class TestPackage1 {
         $this->assertTrue(PackageLoader::hasPackage('test-lib'));
     }
 
+    public function testLcms2PackageRegistersBuildStageOnUnix(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('lcms2 build stage is only registered for Unix in this test.');
+        }
+
+        try {
+            PackageConfig::loadFromFile(__DIR__ . '/../../../config/pkg/lib/lcms2.yml', 'test');
+            PackageLoader::initPackageInstances();
+            PackageLoader::loadFromClass(lcms2::class);
+
+            $package = PackageLoader::getLibraryPackage('lcms2');
+            $this->assertTrue($package->hasBuildFunctionForCurrentOS());
+            $this->assertTrue($package->hasStage('build'));
+        } finally {
+            $this->resetPackageLoaderState();
+            $this->resetPackageConfigState();
+        }
+    }
+
     private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {
@@ -560,5 +546,19 @@ class TestPackage1 {
             'deps' => [],
         ];
         $property->setValue(null, $configs);
+    }
+
+    private function resetPackageLoaderState(): void
+    {
+        $reflection = new \ReflectionClass(PackageLoader::class);
+        foreach (['packages' => null, 'before_stages' => [], 'after_stages' => [], 'loaded_classes' => []] as $propName => $value) {
+            $reflection->getProperty($propName)->setValue(null, $value);
+        }
+    }
+
+    private function resetPackageConfigState(): void
+    {
+        $configReflection = new \ReflectionClass(PackageConfig::class);
+        $configReflection->getProperty('package_configs')->setValue(null, []);
     }
 }

@@ -1,0 +1,16 @@
+lcms2:
+  type: library
+  artifact:
+    source:
+      type: ghtagtar
+      repo: mm2/Little-CMS
+      match: lcms2\.\d+(\.\d+)?$
+    metadata:
+      license-files: [COPYING]
+      license: MIT
+  headers@unix:
+    - lcms2.h
+  pkg-configs:
+    - lcms2
+  static-libs@unix:
+    - liblcms2.a
