@@ -1,0 +1,1 @@
+import{G as e,K as t,at as n,j as r}from"./chunks/framework.DrNIf5Lg.js";var i=JSON.parse(`{"title":"常见问题","description":"","frontmatter":{},"headers":[],"relativePath":"zh/faq/index.md","filePath":"zh/faq/index.md"}`),a={name:`zh/faq/index.md`};function o(r,i,a,o,s,c){return n(),e(`div`,null,[...i[0]||=[t("",37)]])}var s=r(a,[[`render`,o]]);export{i as __pageData,s as default};

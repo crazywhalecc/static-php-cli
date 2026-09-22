@@ -1,0 +1,86 @@
+import{G as e,K as t,at as n,j as r}from"./chunks/framework.DrNIf5Lg.js";var i=JSON.parse(`{"title":"craft.yml 配置详解","description":"","frontmatter":{"aside":false},"headers":[],"relativePath":"zh/develop/craft-yml.md","filePath":"zh/develop/craft-yml.md"}`),a={name:`zh/develop/craft-yml.md`};function o(r,i,a,o,s,c){return n(),e(`div`,null,[...i[0]||=[t(`<h1 id="craft-yml-配置详解" tabindex="-1">craft.yml 配置详解 <a class="header-anchor" href="#craft-yml-配置详解" aria-label="Permalink to “craft.yml 配置详解”">​</a></h1><div class="language-yaml"><button title="Copy Code" class="copy"></button><span class="lang">yaml</span><pre class="shiki shiki-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;" tabindex="0" dir="ltr"><code><span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># PHP version to build (default: 8.5)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">php-version</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">8.5</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># [REQUIRED] Static PHP extensions to build (list or comma-separated are both accepted)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">extensions</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">bcmath,fileinfo,phar,zlib,sodium,posix,pcntl</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Extra packages to build (list or comma-separated are both accepted)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">packages</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># [REQUIRED] Build SAPIs (list or comma-separated are both accepted)</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Available: cli, micro, fpm, embed, frankenphp, cgi, all</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">sapi</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">cli,micro,fpm</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Show full console output (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">debug</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Before build, remove all old build files and sources (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">clean-build</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Build options (same as \`build:php\` command options, all options are optional)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">build-options</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">:</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Build with all suggested packages (libraries and extensions) as well (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-suggests</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Build extra shared extensions (comma-separated string)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  build-shared</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Build without stripping the binary (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  no-strip</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Disable Opcache JIT (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  disable-opcache-jit</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Enable thread-safe (ZTS) support (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  enable-zts</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Disable smoke test, or for specific SAPIs comma-separated (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  no-smoke-test</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # PHP configuration options (same as --with-config-file-path)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-config-file-path</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # PHP configuration options (same as --with-config-file-scan-dir)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-config-file-scan-dir</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Hardcoded INI options for cli and micro SAPI (e.g. &quot;memory_limit=4G&quot;, list accepted)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-hardcoded-ini</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Pretend micro SAPI as cli SAPI to avoid some frameworks to limit the usage of micro SAPI</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-micro-fake-cli</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Additional patch point injection files (e.g. &quot;path/to/patch.php&quot;, list accepted)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-added-patch</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Ignore micro extension tests (if you are using micro SAPI, default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  without-micro-ext-test</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # UPX pack the binary (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-upx-pack</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Set the micro.exe program icon (only for Windows, default: &quot;&quot;)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-micro-logo</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Set micro SAPI as win32 mode, without this, micro SAPI will be compiled as a console application (only for Windows, default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  enable-micro-win32</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Path to a folder to be embedded in FrankenPHP (frankenphp SAPI only)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-frankenphp-app</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Build options for shared extensions (list or comma-separated are both accepted)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">shared-extensions</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Download options</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">download-options</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">:</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Number of parallel downloads (default: 1)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  parallel</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">1</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Retries count for downloading sources (default: 0)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  retry</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">0</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Prefer source downloads when both source and binary are available (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  prefer-source</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Prefer binary downloads when both source and binary are available (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  prefer-binary</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Only download source artifacts, skip binary artifacts (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  source-only</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Only download binary artifacts, skip source artifacts (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  binary-only</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Ignore download cache for specified packages, comma separated (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  ignore-cache</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Do not use alternative mirror download sources (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  no-alt</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Do not clone shallowly repositories when downloading sources (default: false)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  no-shallow-clone</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Use custom url for specified sources, format: &quot;{source-name}:{url}&quot; (e.g. &quot;php-src:https://example.com/php-8.4.0.tar.gz&quot;)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  custom-url</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Use custom git repo for specified sources, format: &quot;{source-name}:{branch}:{url}&quot; (e.g. &quot;php-src:master:https://github.com/php/php-src.git&quot;)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  custom-git</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Use custom local source path, format: &quot;{source-name}:{path}&quot; (e.g. &quot;php-src:/path/to/php-src&quot;)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  custom-local</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">craft-options</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">:</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  doctor</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">true</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  download</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">true</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;"># Extra environment variables</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">extra-env</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">:</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # e.g. Use github token to avoid rate limit</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  GITHUB_TOKEN</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">your-github-token</span></span></code></pre></div>`,2)]])}var s=r(a,[[`render`,o]]);export{i as __pageData,s as default};
