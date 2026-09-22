@@ -540,13 +540,23 @@ class TestPackage1 {
             $this->markTestSkipped('lcms2 build stage is only registered for Unix in this test.');
         }
 
-        PackageConfig::loadFromFile(__DIR__ . '/../../../config/pkg/lib/lcms2.yml', 'test');
-        PackageLoader::initPackageInstances();
-        PackageLoader::loadFromClass(lcms2::class);
+        try {
+            PackageConfig::loadFromFile(__DIR__ . '/../../../config/pkg/lib/lcms2.yml', 'test');
+            PackageLoader::initPackageInstances();
+            PackageLoader::loadFromClass(lcms2::class);
 
-        $package = PackageLoader::getLibraryPackage('lcms2');
-        $this->assertTrue($package->hasBuildFunctionForCurrentOS());
-        $this->assertTrue($package->hasStage('build'));
+            $package = PackageLoader::getLibraryPackage('lcms2');
+            $this->assertTrue($package->hasBuildFunctionForCurrentOS());
+            $this->assertTrue($package->hasStage('build'));
+        } finally {
+            $loaderReflection = new \ReflectionClass(PackageLoader::class);
+            foreach (['packages' => null, 'before_stages' => [], 'after_stages' => [], 'loaded_classes' => []] as $propName => $value) {
+                $loaderReflection->getProperty($propName)->setValue(null, $value);
+            }
+
+            $configReflection = new \ReflectionClass(PackageConfig::class);
+            $configReflection->getProperty('package_configs')->setValue(null, []);
+        }
     }
 
     private function removeDirectory(string $dir): void
