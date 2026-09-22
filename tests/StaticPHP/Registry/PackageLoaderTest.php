@@ -29,26 +29,8 @@ class PackageLoaderTest extends TestCase
         parent::setUp();
         $this->tempDir = sys_get_temp_dir() . '/package_loader_test_' . uniqid();
         mkdir($this->tempDir, 0755, true);
-
-        // Reset PackageLoader state
-        $reflection = new \ReflectionClass(PackageLoader::class);
-
-        $property = $reflection->getProperty('packages');
-        $property->setValue(null, null);
-
-        $property = $reflection->getProperty('before_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('after_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('loaded_classes');
-        $property->setValue(null, []);
-
-        // Reset PackageConfig state
-        $configReflection = new \ReflectionClass(PackageConfig::class);
-        $configProperty = $configReflection->getProperty('package_configs');
-        $configProperty->setValue(null, []);
+        $this->resetPackageLoaderState();
+        $this->resetPackageConfigState();
     }
 
     protected function tearDown(): void
@@ -59,25 +41,8 @@ class PackageLoaderTest extends TestCase
             $this->removeDirectory($this->tempDir);
         }
 
-        // Reset PackageLoader state
-        $reflection = new \ReflectionClass(PackageLoader::class);
-
-        $property = $reflection->getProperty('packages');
-        $property->setValue(null, null);
-
-        $property = $reflection->getProperty('before_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('after_stages');
-        $property->setValue(null, []);
-
-        $property = $reflection->getProperty('loaded_classes');
-        $property->setValue(null, []);
-
-        // Reset PackageConfig state
-        $configReflection = new \ReflectionClass(PackageConfig::class);
-        $configProperty = $configReflection->getProperty('package_configs');
-        $configProperty->setValue(null, []);
+        $this->resetPackageLoaderState();
+        $this->resetPackageConfigState();
     }
 
     public function testInitPackageInstancesOnlyRunsOnce(): void
@@ -549,13 +514,8 @@ class TestPackage1 {
             $this->assertTrue($package->hasBuildFunctionForCurrentOS());
             $this->assertTrue($package->hasStage('build'));
         } finally {
-            $loaderReflection = new \ReflectionClass(PackageLoader::class);
-            foreach (['packages' => null, 'before_stages' => [], 'after_stages' => [], 'loaded_classes' => []] as $propName => $value) {
-                $loaderReflection->getProperty($propName)->setValue(null, $value);
-            }
-
-            $configReflection = new \ReflectionClass(PackageConfig::class);
-            $configReflection->getProperty('package_configs')->setValue(null, []);
+            $this->resetPackageLoaderState();
+            $this->resetPackageConfigState();
         }
     }
 
@@ -586,5 +546,19 @@ class TestPackage1 {
             'deps' => [],
         ];
         $property->setValue(null, $configs);
+    }
+
+    private function resetPackageLoaderState(): void
+    {
+        $reflection = new \ReflectionClass(PackageLoader::class);
+        foreach (['packages' => null, 'before_stages' => [], 'after_stages' => [], 'loaded_classes' => []] as $propName => $value) {
+            $reflection->getProperty($propName)->setValue(null, $value);
+        }
+    }
+
+    private function resetPackageConfigState(): void
+    {
+        $configReflection = new \ReflectionClass(PackageConfig::class);
+        $configReflection->getProperty('package_configs')->setValue(null, []);
     }
 }
