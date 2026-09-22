@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\StaticPHP\Registry;
 
+use Package\Library\lcms2;
 use PHPUnit\Framework\TestCase;
 use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\Package\Library;
@@ -531,6 +532,21 @@ class TestPackage1 {
         PackageLoader::loadFromPsr4Dir($psr4Dir, 'Test\Package', true);
 
         $this->assertTrue(PackageLoader::hasPackage('test-lib'));
+    }
+
+    public function testLcms2PackageRegistersBuildStageOnUnix(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('lcms2 build stage is only registered for Unix in this test.');
+        }
+
+        PackageConfig::loadFromFile(__DIR__ . '/../../../config/pkg/lib/lcms2.yml', 'test');
+        PackageLoader::initPackageInstances();
+        PackageLoader::loadFromClass(lcms2::class);
+
+        $package = PackageLoader::getLibraryPackage('lcms2');
+        $this->assertTrue($package->hasBuildFunctionForCurrentOS());
+        $this->assertTrue($package->hasStage('build'));
     }
 
     private function removeDirectory(string $dir): void
