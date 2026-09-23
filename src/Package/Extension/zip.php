@@ -38,10 +38,9 @@ class zip extends PhpExtensionPackage
     #[CustomPhpConfigureArg('Linux')]
     public function getUnixConfigureArg(bool $shared): string
     {
-        if ($this->isBundledWithPhpSrc()) {
-            return !$shared ? '--with-zip' : '--with-zip=shared';
-        }
-        return !$shared ? '--enable-zip' : '--enable-zip=shared';
+        $config = file_get_contents(SOURCE_PATH . '/php-src/ext/zip/config.m4');
+        $arg = str_contains($config, 'PHP_ARG_ENABLE([zip]') ? '--enable-zip' : '--with-zip';
+        return $arg . ($shared ? '=shared' : '');
     }
 
     protected function isBundledWithPhpSrc(): bool
