@@ -73,12 +73,14 @@ class imap
                 throw $e;
             }
         }
+        $cClientIncludeDir = "{$lib->getIncludeDir()}/c-client";
+        FileSystem::createDir($cClientIncludeDir);
         try {
             shell()
                 ->exec("cp -rf {$lib->getSourceDir()}/c-client/c-client.a {$lib->getLibDir()}/libc-client.a")
                 ->exec("cp -rf {$lib->getSourceDir()}/c-client/*.c {$lib->getLibDir()}/")
-                ->exec("cp -rf {$lib->getSourceDir()}/c-client/*.h {$lib->getIncludeDir()}/")
-                ->exec("cp -rf {$lib->getSourceDir()}/src/osdep/unix/*.h {$lib->getIncludeDir()}/");
+                ->exec("cp -rf {$lib->getSourceDir()}/c-client/*.h {$cClientIncludeDir}/")
+                ->exec("cp -rf {$lib->getSourceDir()}/src/osdep/unix/*.h {$cClientIncludeDir}/");
         } catch (\Throwable) {
             // last command throws an exception, no idea why since it works
         }
@@ -111,12 +113,14 @@ class imap
                 throw $e;
             }
         }
+        $cClientIncludeDir = "{$lib->getIncludeDir()}/c-client";
+        FileSystem::createDir($cClientIncludeDir);
         try {
             shell()
                 ->exec("cp -rf {$lib->getSourceDir()}/c-client/c-client.a {$lib->getLibDir()}/libc-client.a")
                 ->exec("cp -rf {$lib->getSourceDir()}/c-client/*.c {$lib->getLibDir()}/")
-                ->exec("cp -rf {$lib->getSourceDir()}/c-client/*.h {$lib->getIncludeDir()}/")
-                ->exec("cp -rf {$lib->getSourceDir()}/src/osdep/unix/*.h {$lib->getIncludeDir()}/");
+                ->exec("cp -rf {$lib->getSourceDir()}/c-client/*.h {$cClientIncludeDir}/")
+                ->exec("cp -rf {$lib->getSourceDir()}/src/osdep/unix/*.h {$cClientIncludeDir}/");
         } catch (\Throwable) {
             // last command throws an exception, no idea why since it works
         }
