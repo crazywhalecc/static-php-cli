@@ -143,12 +143,19 @@ trait unix
             $configure_str = str_replace('--with-pic', '--enable-pic', $configure_str);
         }
 
+        // Configure probes need macOS frameworks, but not static libraries that expose polyfills.
+        $libs = SystemTarget::getRuntimeLibs();
+        if (SystemTarget::getTargetOS() === 'Darwin') {
+            $frameworks = new SPCConfigUtil()->getFrameworksString(array_keys($installer->getResolvedPackages()));
+            $libs = trim("{$libs} {$frameworks}");
+        }
+
         // run ./configure with args
         $this->seekPhpSrcLogFileOnException(fn () => shell()->cd($package->getSourceDir())->setEnv([
             'CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'CPPFLAGS' => "-I{$package->getIncludeDir()}",
             'LDFLAGS' => "-L{$package->getLibDir()} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'),
-            'LIBS' => SystemTarget::getRuntimeLibs(),
+            'LIBS' => $libs,
         ])->exec($configure_str), $package->getSourceDir());
     }
 
