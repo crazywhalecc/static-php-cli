@@ -191,6 +191,20 @@ class GenExtTestMatrixCommandTest extends TestCase
     }
 
     /**
+     * --for-libs must include extensions that depend on the library through suggested libraries.
+     */
+    public function testForLibsFilterIncludesTransitiveSuggestedLibraryDeps(): void
+    {
+        $matrix = $this->runMatrix(['--os' => 'Linux', '--for-libs' => 'lcms2']);
+
+        $this->assertNotEmpty($matrix, '--for-libs=lcms2 must yield at least one entry');
+        foreach ($matrix as $entry) {
+            $parts = explode(',', $entry['extension']);
+            $this->assertContains('imagick', $parts, "Entry {$entry['extension']} should not appear in --for-libs=lcms2 results");
+        }
+    }
+
+    /**
      * Multiple filters should include entries matching any changed package.
      */
     public function testExtensionAndLibraryFiltersAreCombinedAsUnion(): void
@@ -313,11 +327,14 @@ class GenExtTestMatrixCommandTest extends TestCase
             'ext-xml' => $ext(['arg-type' => 'standard'], ['depends' => ['libxml2']]),
             'ext-dom' => $ext(['arg-type' => 'standard'], ['depends' => ['ext-xml']]),
 
-            // Transitive library chain: imagick -> imagemagick -> libheif -> libde265
+            // Transitive library chains:
+            // imagick -> imagemagick -> libheif -> libde265
+            // imagick -> imagemagick -> (suggests) lcms2
             'ext-imagick' => $ext(['arg-type' => 'standard'], ['depends' => ['imagemagick']]),
-            'imagemagick' => $lib(['depends' => ['libheif']]),
+            'imagemagick' => $lib(['depends' => ['libheif'], 'suggests' => ['lcms2']]),
             'libheif' => $lib(['depends' => ['libde265']]),
             'libde265' => $lib(),
+            'lcms2' => $lib(),
 
             // OS-restricted to Linux only
             'ext-linux-only' => $ext(['os' => ['Linux']]),
