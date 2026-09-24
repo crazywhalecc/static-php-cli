@@ -23,6 +23,8 @@ imagemagick:
     - xz
     - libzip
     - libxml2
+  suggests@unix:
+    - lcms2
   headers@windows:
     - imagemagick/MagickWand/MagickWand.h
   lang: cpp
