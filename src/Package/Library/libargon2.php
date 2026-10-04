@@ -28,11 +28,14 @@ class libargon2
     #[BuildFor('Linux')]
     public function buildUnix(LibraryPackage $lib, PackageBuilder $builder): void
     {
-        // Upstream defaults to -march=native, which can require the build host's CPU features.
+        // Upstream defaults to -march=native; follow the configured target instead.
+        preg_match_all('/(?:^|\s)-march=([A-Za-z0-9._+-]+)(?=\s|$)/', $lib->getLibExtraCFlags(), $matches);
+        $optTarget = escapeshellarg(array_pop($matches[1]) ?: 'none');
+
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
-            ->exec("make PREFIX='' OPTTARGET=none clean")
-            ->exec("make -j{$builder->concurrency} PREFIX='' OPTTARGET=none")
-            ->exec("make install PREFIX='' OPTTARGET=none DESTDIR={$lib->getBuildRootPath()}");
+            ->exec("make PREFIX='' OPTTARGET={$optTarget} clean")
+            ->exec("make -j{$builder->concurrency} PREFIX='' OPTTARGET={$optTarget}")
+            ->exec("make install PREFIX='' OPTTARGET={$optTarget} DESTDIR={$lib->getBuildRootPath()}");
 
         $lib->patchPkgconfPrefix(['libargon2.pc']);
 
