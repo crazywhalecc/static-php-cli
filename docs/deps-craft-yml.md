@@ -85,4 +85,6 @@ craft-options:
 extra-env:
   # e.g. Use github token to avoid rate limit
   GITHUB_TOKEN: your-github-token
+  # e.g. Route all network operations through a proxy
+  SPC_PROXY: ""
 ```
