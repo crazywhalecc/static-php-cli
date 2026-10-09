@@ -228,6 +228,18 @@ trait unix
     }
 
     #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
+    #[PatchDescription('Keep libphp linker flags out of shared extensions')]
+    public function patchLibphpLdflags(TargetPackage $package): void
+    {
+        // Symbolic binding in shared extensions isolates libxml from PHP's stream callbacks.
+        FileSystem::replaceFileRegex(
+            $package->getSourceDir() . '/Makefile',
+            '/^(\t.*\$\((?:LIBPHP_CFLAGS|MH_BUNDLE_FLAGS)\).*\$\(EXTRA_LDFLAGS\))(?! \$\(EXTRA_LDFLAGS_LIBPHP\))/m',
+            '$1 $(EXTRA_LDFLAGS_LIBPHP)',
+        );
+    }
+
+    #[BeforeStage('php', [self::class, 'makeForUnix'], 'php')]
     #[PatchDescription('Patch info.c to hide configure command in release builds')]
     public function patchInfoCForRelease(): void
     {
@@ -882,7 +894,7 @@ trait unix
         $libs = trim($config['libs'] . ' ' . $extra_libs);
 
         // libtool input (libphp.la). `make EXTRA_LDFLAGS=…` cmdline overrides fully replace the Makefile value, so re-include $config['ldflags'] for -L paths.
-        $extra_ldflags = clean_spaces($config['ldflags'] . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS') . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_LIBPHP'));
+        $extra_ldflags = clean_spaces($config['ldflags'] . ' ' . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS'));
         if (getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared'
             && !str_contains($extra_ldflags, '-avoid-version')
             && !preg_match('/-release\s+\S+/', $extra_ldflags)) {
@@ -896,6 +908,7 @@ trait unix
             'EXTRA_CFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS'),
             'EXTRA_CXXFLAGS' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS'),
             'EXTRA_LDFLAGS' => $extra_ldflags,
+            'EXTRA_LDFLAGS_LIBPHP' => getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS_LIBPHP'),
             'EXTRA_LDFLAGS_PROGRAM' => $extra_ldflags_program,
             'EXTRA_LIBS' => $libs,
         ]);
