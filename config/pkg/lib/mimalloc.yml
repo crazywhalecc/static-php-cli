@@ -4,7 +4,7 @@ mimalloc:
     source:
       type: ghtagtar
       repo: microsoft/mimalloc
-      match: 'v2\.\d\.[^3].*'
+      match: v3\.\d+\.\d+$
       query: '?per_page=100'
     metadata:
       license-files: [LICENSE]
