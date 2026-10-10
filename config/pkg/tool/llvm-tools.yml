@@ -1,0 +1,16 @@
+llvm-tools:
+  type: tool
+  artifact:
+    source:
+      type: custom
+    binary: custom
+    metadata:
+      license-files: [llvm/LICENSE.TXT]
+      license: Apache-2.0-with-LLVM-exception
+  tool:
+    provides:
+      - llvm-objcopy
+      - llvm-strip
+      - llvm-profdata
+    install-root: '{pkg_root_path}/llvm-tools'
+    binary-subdir: bin

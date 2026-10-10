@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace StaticPHP\Toolchain;
 
+use Package\Artifact\zig;
+use Package\Target\llvm_compiler_rt;
+use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Package\ToolPackage;
+use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\UnixToolchainInterface;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\System\LinuxUtil;
 
 class ZigToolchain implements UnixToolchainInterface
 {
+    private static bool $deps_ensured = false;
+
     public function initEnv(): void
     {
         // Set environment variables for zig toolchain
@@ -19,31 +27,16 @@ class ZigToolchain implements UnixToolchainInterface
         GlobalEnvManager::putenv('SPC_DEFAULT_RANLIB=zig-ranlib');
         GlobalEnvManager::putenv('SPC_DEFAULT_LD=zig-ld.lld');
 
-        // Generate additional objects needed for zig toolchain
-        $paths = ['/usr/lib/gcc', '/usr/local/lib/gcc'];
-        $objects = ['crtbeginS.o', 'crtendS.o'];
-        $found = [];
-
-        foreach ($objects as $obj) {
-            $located = null;
-            foreach ($paths as $base) {
-                $output = shell_exec("find {$base} -name {$obj} 2>/dev/null | grep -v '/32/' | head -n 1");
-                $line = trim((string) $output);
-                if ($line !== '') {
-                    $located = $line;
-                    break;
-                }
-            }
-            if ($located) {
-                $found[] = $located;
-            }
-        }
-        GlobalEnvManager::putenv('SPC_EXTRA_RUNTIME_OBJECTS=' . implode(' ', $found));
+        $rt_dir = $this->getPath() . '/lib/' . SystemTarget::getCanonicalTriple();
+        GlobalEnvManager::putenv("SPC_COMPILER_RT_DIR={$rt_dir}");
     }
 
     public function afterInit(): void
     {
         GlobalEnvManager::addPathIfNotExists($this->getPath());
+        if (is_dir($this->getPath())) {
+            zig::writeWrappers($this->getPath());
+        }
         f_passthru('ulimit -n 2048'); // zig opens extra file descriptors, so when a lot of extensions are built statically, 1024 is not enough
         $cflags = getenv('SPC_DEFAULT_CFLAGS') ?: '';
         $cxxflags = getenv('SPC_DEFAULT_CXXFLAGS') ?: '';
@@ -71,6 +64,8 @@ class ZigToolchain implements UnixToolchainInterface
         // zig-cc/clang treats strlcpy/strlcat as compiler builtins, so configure link tests pass (HAVE_STRLCPY=1)
         $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
         GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=ac_cv_func_strlcpy=no ac_cv_func_strlcat=no {$extra_vars}");
+
+        $this->ensureBuildDeps();
     }
 
     public function getCompilerInfo(): ?string
@@ -104,6 +99,25 @@ class ZigToolchain implements UnixToolchainInterface
             return true;
         }
         return false;
+    }
+
+    private function ensureBuildDeps(): void
+    {
+        if (self::$deps_ensured) {
+            return;
+        }
+        self::$deps_ensured = true;
+
+        if (!llvm_compiler_rt::isBuilt()) {
+            logger()->info('Building llvm-compiler-rt for ' . SystemTarget::getCanonicalTriple());
+            new PackageInstaller(interactive: false)->addBuildPackage('llvm-compiler-rt')->run(true);
+        }
+
+        $tools = PackageLoader::getPackage('llvm-tools');
+        if ($tools instanceof ToolPackage && !$tools->isInstalled()) {
+            logger()->info('Installing llvm-tools');
+            new PackageInstaller(['dl-prefer-binary' => true], interactive: false)->addInstallPackage('llvm-tools')->run(true);
+        }
     }
 
     private function getPath(): string

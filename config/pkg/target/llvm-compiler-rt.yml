@@ -1,0 +1,10 @@
+llvm-compiler-rt:
+  type: target
+  artifact:
+    source:
+      type: custom
+    metadata:
+      license-files: [LICENSE.TXT]
+      license: Apache-2.0-with-LLVM-exception
+  tools:
+    - zig
