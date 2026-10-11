@@ -54,7 +54,6 @@ class ConfigValidator
         'provides' => ConfigType::LIST_ARRAY,
         'binary-subdir' => ConfigType::STRING,
         'install-root' => ConfigType::STRING,
-        'min-version' => ConfigType::STRING,
     ];
 
     public const array PACKAGE_FIELDS = [
@@ -114,7 +113,6 @@ class ConfigValidator
         'provides' => true,
         'binary-subdir' => false,
         'install-root' => false,
-        'min-version' => false,
     ];
 
     public const array ARTIFACT_TYPE_FIELDS = [ // [required_fields, optional_fields]
