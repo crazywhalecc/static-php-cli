@@ -7,8 +7,10 @@ namespace Package\Target;
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Target;
 use StaticPHP\Exception\BuildFailureException;
+use StaticPHP\Package\InstallStamp;
 use StaticPHP\Package\TargetPackage;
 use StaticPHP\Package\ToolPackage;
+use StaticPHP\Package\ToolVersionRegistry;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
@@ -31,40 +33,63 @@ class llvm_compiler_rt extends TargetPackage
 {
     private const array SKIP_PLATFORMS = ['PlatformAIX', 'PlatformDarwin', 'PlatformFuchsia', 'PlatformOther', 'PlatformWindows', 'WindowsMMap'];
 
-    public static function outputs(): array
-    {
-        return ['libclang_rt.profile.a', 'libclang_rt.cpu_model.a', 'clang_rt.crtbegin.o', 'clang_rt.crtend.o'];
-    }
+    /** The objects this package installs, relative to getRuntimeDir(). */
+    private const array OUTPUT_FILES = ['libclang_rt.profile.a', 'libclang_rt.cpu_model.a', 'clang_rt.crtbegin.o', 'clang_rt.crtend.o'];
 
-    public static function outputDir(): string
+    /**
+     * @return string[]
+     */
+    public function getInstallFiles(): array
     {
-        return getenv('SPC_COMPILER_RT_DIR')
-            ?: throw new BuildFailureException('llvm-compiler-rt is only built under the zig toolchain (SPC_COMPILER_RT_DIR is unset)');
-    }
-
-    public function isInstalled(): bool
-    {
-        return self::isBuilt();
-    }
-
-    public static function isBuilt(): bool
-    {
-        $dir = getenv('SPC_COMPILER_RT_DIR');
-        return $dir !== false && $dir !== ''
-            && array_all(self::outputs(), fn ($file) => file_exists("{$dir}/{$file}"));
+        return array_map(fn (string $file): string => $this->getRuntimeDir() . '/' . $file, self::OUTPUT_FILES);
     }
 
     #[BuildFor('Linux')]
     public function build(): void
     {
         $source = $this->getSourceRoot();
-        $out = self::outputDir();
+        $out = $this->getRuntimeDir();
         $triple = SystemTarget::getCanonicalTriple();
         FileSystem::createDir($out);
 
         $this->buildProfileRuntime($source, "{$out}/libclang_rt.profile.a", $triple);
         $this->buildCrtObjects($source, "{$out}/clang_rt.crtbegin.o", "{$out}/clang_rt.crtend.o", $triple);
         $this->buildCpuModel($source, "{$out}/libclang_rt.cpu_model.a", $triple);
+        // PackageBuilder records the install stamp (the zig version) once the build succeeded.
+    }
+
+    /**
+     * zig ships exactly one clang and these objects are tied to it, so the installed zig version
+     * is their fingerprint: upgrading zig must rebuild them.
+     *
+     * The version comes from the tool version registry that PackageInstaller writes when the zig
+     * package is installed - no `zig cc --version` subprocess, and no chance of a stale memo. The
+     * stamp lives next to the objects it describes, so both are replaced together.
+     */
+    protected function getInstallStamp(): ?InstallStamp
+    {
+        $version = ToolVersionRegistry::get('zig');
+        if ($version === null) {
+            // isInstalled() runs often (build gate, doctor, dev commands), so this stays at debug
+            // level: without a recorded version the check simply degrades to file existence.
+            logger()->debug('Cannot determine the installed zig version; llvm-compiler-rt is only checked for file existence.');
+            return null;
+        }
+        return new InstallStamp($this->getRuntimeDir() . '/' . self::INSTALL_STAMP_FILENAME, $version);
+    }
+
+    /**
+     * Where the compiler-rt objects live: {pkg_root}/zig/lib/{triple}.
+     *
+     * ZigToolchain::initEnv() exports SPC_COMPILER_RT_DIR for the active triple, so the directory
+     * follows SPC_TARGET; before the toolchain is initialized, fall back to the canonical location.
+     */
+    protected function getRuntimeDir(): string
+    {
+        $dir = getenv('SPC_COMPILER_RT_DIR');
+        return is_string($dir) && $dir !== ''
+            ? $dir
+            : PKG_ROOT_PATH . '/zig/lib/' . SystemTarget::getCanonicalTriple();
     }
 
     private function buildProfileRuntime(string $source, string $lib, string $triple): void
@@ -75,7 +100,10 @@ class llvm_compiler_rt extends TargetPackage
         }
         $sources = array_filter(
             [...glob("{$dir}/*.c") ?: [], ...glob("{$dir}/*.cpp") ?: []],
-            fn ($file) => !array_any(self::SKIP_PLATFORMS, fn ($skip) => str_contains($file, "/{$skip}")),
+            // Skip the platform-specific translation units (InstrProfilingPlatformWindows.c, ...).
+            // Match on the basename: the filenames carry an "InstrProfiling" prefix, so a
+            // path-segment match like "/PlatformWindows" never fires.
+            fn ($file) => !array_any(self::SKIP_PLATFORMS, fn ($skip) => str_contains(basename($file), $skip)),
         );
 
         $obj_dir = "{$source}/obj-profile-{$triple}";

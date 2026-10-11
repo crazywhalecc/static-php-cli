@@ -89,6 +89,10 @@ class PackageBuilder
                 $source_info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo($package->getName());
                 ToolVersionRegistry::record($package->getName(), $source_info['version'] ?? null);
             }
+
+            // Record the fingerprint of the inputs that produced these outputs, so a later run can
+            // tell whether this package is still up to date (a no-op without a declared stamp).
+            $package->writeInstallStamp();
         } catch (SPCException $e) {
             // Ensure package information is bound if not already
             if ($e->getPackageInfo() === null) {
@@ -190,9 +194,21 @@ class PackageBuilder
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
             $objcopy = $this->getBinUtil('objcopy');
-            shell()
-                ->exec("{$objcopy} --only-keep-debug {$binary_path} {$debug_file}")
-                ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
+            try {
+                shell()
+                    ->exec("{$objcopy} --only-keep-debug {$binary_path} {$debug_file}")
+                    ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
+            } catch (SPCException $e) {
+                // A separate debug file is optional. Without the opt-in LLVM binutils the fallback
+                // may not implement --only-keep-debug (zig's objcopy reports it as unimplemented),
+                // so degrade to "no debug file" instead of failing an otherwise good build.
+                logger()->warning("Could not extract debug info from '{$binary_path}' with '{$objcopy}': {$e->getMessage()}");
+                logger()->warning('Continuing without a separate debug file. Install the LLVM binutils with --with-llvm-tools to keep debug information.');
+                if (is_file($debug_file)) {
+                    unlink($debug_file); // a failed --only-keep-debug can leave an empty file behind
+                }
+                return '';
+            }
         } else {
             logger()->debug('extractDebugInfo is only supported on Linux and macOS');
             return '';
@@ -202,16 +218,49 @@ class PackageBuilder
 
     /**
      * Strip unneeded symbols from binary file.
+     *
+     * The LLVM binutils are optional (--with-llvm-tools). Under the zig toolchain the host strip
+     * can choke on zig/LLVM bitcode, and a build must not fail because an optional tool is not
+     * installed: skipping strip only costs binary size.
      */
     public function stripBinary(string $binary_path): void
     {
         $strip = $this->getBinUtil('strip');
-        shell()->exec(match (SystemTarget::getTargetOS()) {
+        $cmd = match (SystemTarget::getTargetOS()) {
             'Darwin' => "{$strip} -S {$binary_path}",
             'Linux' => "{$strip} --strip-unneeded {$binary_path}",
             'Windows' => 'echo "Skip strip on Windows"', // Windows strip is not available for now
             default => throw new SPCInternalException('stripBinary is only supported on Linux and macOS'),
-        });
+        };
+        try {
+            shell()->exec($cmd);
+        } catch (SPCException $e) {
+            if (!$this->shouldAdviseLlvmTools()) {
+                throw $e;
+            }
+            logger()->warning("Failed to strip '{$binary_path}' with '{$strip}': {$e->getMessage()}");
+            logger()->warning('Continuing without strip (this only affects binary size). Install the LLVM binutils with --with-llvm-tools if it keeps happening.');
+        }
+    }
+
+    /**
+     * True when the LLVM binutils would help but are not installed: the zig toolchain is active
+     * and the optional llvm-tools package is missing.
+     *
+     * Guarded because a custom registry does not have to ship `llvm-tools`; in that case there is
+     * nothing to advise and the original strip error has to surface unchanged.
+     */
+    private function shouldAdviseLlvmTools(): bool
+    {
+        if (ToolchainManager::getToolchainClass() !== ZigToolchain::class) {
+            return false;
+        }
+        try {
+            $llvm_tools = PackageLoader::getPackage('llvm-tools');
+        } catch (WrongUsageException) {
+            return false;
+        }
+        return !($llvm_tools instanceof ToolPackage && $llvm_tools->isInstalled());
     }
 
     private function getBinUtil(string $name): string
@@ -219,8 +268,16 @@ class PackageBuilder
         $env = getenv(strtoupper($name)) ?: '';
         $is_zig = ToolchainManager::getToolchainClass() === ZigToolchain::class;
 
-        // Honor an explicit override, but don't let Zig's own default wrappers block llvm-tools.
-        if ($env !== '' && !($is_zig && $env === "zig-{$name}")) {
+        // Zig ships zig-<tool> wrappers for its own binutils, but they only implement a subset of
+        // the options (zig-objcopy reports --only-keep-debug as unimplemented). Treat them as
+        // absent so these post-processing steps use llvm-tools when installed and the host
+        // binutils otherwise, which is what make the LLVM binutils genuinely optional.
+        if ($is_zig && $env === "zig-{$name}") {
+            $env = '';
+        }
+
+        // Honor an explicit override.
+        if ($env !== '') {
             return $env;
         }
 
@@ -229,9 +286,11 @@ class PackageBuilder
             if ($llvm_tools instanceof ToolPackage && $llvm_tools->isInstalled()) {
                 return $llvm_tools->getBinary("llvm-{$name}");
             }
+            // llvm-tools is optional: make it visible which binutil the build actually uses.
+            logger()->debug("llvm-tools is not installed; falling back to the host '{$name}' (enable the LLVM binutils with --with-llvm-tools).");
         }
 
-        return $env !== '' ? $env : $name;
+        return $name;
     }
 
     private function installLicense(Package $package, array $license): void

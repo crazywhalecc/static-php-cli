@@ -30,38 +30,33 @@ class LibraryPackage extends Package
      */
     private array $customPostinstallActions = [];
 
-    public function isInstalled(): bool
+    /**
+     * Everything the package configuration promises to downstream consumers: static libraries,
+     * headers, pkg-config files and any executables it ships.
+     *
+     * @return string[]
+     */
+    public function getInstallFiles(): array
     {
+        $files = [];
         foreach (PackageConfig::get($this->getName(), 'static-libs', []) as $lib) {
-            $path = FileSystem::isRelativePath($lib) ? "{$this->getLibDir()}/{$lib}" : $lib;
-            if (!file_exists($path)) {
-                return false;
-            }
+            $files[] = FileSystem::isRelativePath($lib) ? "{$this->getLibDir()}/{$lib}" : $lib;
         }
         foreach (PackageConfig::get($this->getName(), 'headers', []) as $header) {
-            $path = FileSystem::isRelativePath($header) ? "{$this->getIncludeDir()}/{$header}" : $header;
-            if (!file_exists($path)) {
-                return false;
-            }
+            $files[] = FileSystem::isRelativePath($header) ? "{$this->getIncludeDir()}/{$header}" : $header;
         }
         if (SystemTarget::getTargetOS() !== 'Windows') {
             foreach (PackageConfig::get($this->getName(), 'pkg-configs', []) as $pc) {
                 if (!str_ends_with($pc, '.pc')) {
                     $pc .= '.pc';
                 }
-                if (!file_exists("{$this->getLibDir()}/pkgconfig/{$pc}")) {
-                    return false;
-                }
+                $files[] = "{$this->getLibDir()}/pkgconfig/{$pc}";
             }
         }
-
         foreach (PackageConfig::get($this->getName(), 'static-bins', []) as $bin) {
-            $path = FileSystem::isRelativePath($bin) ? "{$this->getBinDir()}/{$bin}" : $bin;
-            if (!file_exists($path)) {
-                return false;
-            }
+            $files[] = FileSystem::isRelativePath($bin) ? "{$this->getBinDir()}/{$bin}" : $bin;
         }
-        return true;
+        return $files;
     }
 
     /**

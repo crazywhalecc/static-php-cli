@@ -25,7 +25,6 @@ use StaticPHP\Util\FileSystem;
  *     tool:
  *       provides: [nasm.exe, ndisasm.exe]       # executables this tool installs
  *       binary-subdir: ''                        # subdirectory under install root (default: '')
- *       min-version: '2.16'                      # minimum required version (optional)
  *
  * Fields nested under 'tool' support the same '@windows'/'@unix'/'@macos'/'@linux' suffix
  * overrides as top-level package fields (e.g. 'provides@windows' overrides 'provides' when
@@ -148,11 +147,13 @@ class ToolPackage extends Package
     }
 
     /**
-     * Check whether this tool is installed (all provided binaries exist on disk).
+     * All executables this tool provides.
+     *
+     * @return string[]
      */
-    public function isInstalled(): bool
+    public function getInstallFiles(): array
     {
-        return array_all($this->getProvides(), fn ($binary) => file_exists($this->getBinary($binary)));
+        return array_map(fn (string $binary): string => $this->getBinary($binary), $this->getProvides());
     }
 
     /**
@@ -174,11 +175,6 @@ class ToolPackage extends Package
      *
      * Returns null if no version constraint is configured.
      */
-    public function getMinVersion(): ?string
-    {
-        $version = $this->getToolField('min-version');
-        return $version !== null ? (string) $version : null;
-    }
 
     /**
      * Tools install to PKG_ROOT_PATH (or the configured install-root),

@@ -11,10 +11,14 @@ use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Util\FileSystem;
 
 abstract class Package
 {
     use PackageCallbacksTrait;
+
+    /** Suggested file name for a package's install stamp (see getInstallStamp()). */
+    protected const string INSTALL_STAMP_FILENAME = '.spc-install-stamp';
 
     /**
      * @var array<string, callable> $stages Defined stages for the package
@@ -114,10 +118,57 @@ abstract class Package
         }
     }
 
-    public function isInstalled(): bool
+    /**
+     * Files that must exist for this package to count as installed.
+     *
+     * Subclasses declare their outputs here instead of overriding isInstalled(), so the
+     * "outputs exist and are still up to date" rule lives in exactly one place.
+     *
+     * @return string[]
+     */
+    public function getInstallFiles(): array
     {
-        // By default, assume package is not installed.
-        return false;
+        return [];
+    }
+
+    /**
+     * True when every declared output exists and, for packages that declare a stamp, the stamp
+     * recorded when they were produced still matches the current one.
+     *
+     * This is the single gate for "can this package be reused as-is": PackageBuilder consults it
+     * before building an install package, and PackageInstaller::isPackageInstalled() reports it.
+     * Packages without declared outputs are never considered installed.
+     */
+    final public function isInstalled(): bool
+    {
+        $files = $this->getInstallFiles();
+        $stamp = $this->getInstallStamp();
+        $this->assertStampIsUsable($files, $stamp);
+
+        if ($files === [] || !array_all($files, static fn (string $file): bool => file_exists($file))) {
+            return false;
+        }
+
+        if ($stamp === null) {
+            return true;
+        }
+        return is_file($stamp->file) && trim((string) file_get_contents($stamp->file)) === $stamp->value;
+    }
+
+    /**
+     * Record the stamp of the files that were just installed. Called by PackageBuilder after a
+     * successful build; a no-op for packages that do not declare a stamp.
+     */
+    public function writeInstallStamp(): void
+    {
+        $stamp = $this->getInstallStamp();
+        if ($stamp === null) {
+            return;
+        }
+        $this->assertStampIsUsable($this->getInstallFiles(), $stamp);
+
+        FileSystem::createDir(dirname($stamp->file));
+        FileSystem::writeFile($stamp->file, $stamp->value);
     }
 
     /**
@@ -349,11 +400,50 @@ abstract class Package
     }
 
     /**
+     * Fingerprint of the inputs that produced the installed files (source version, tool version,
+     * build options, ...), together with the file it is recorded in. Returning null opts out of
+     * freshness tracking, which keeps the behaviour of packages that only care about file
+     * existence.
+     *
+     * Bundling both keeps the contract in one declaration: a stamp cannot be declared without
+     * saying where it lives. There is deliberately no default location - only the package knows
+     * where its outputs are, and they are not necessarily below getInstallTarget()
+     * (llvm-compiler-rt installs into {pkg_root}/zig/lib/{triple}) - so the file belongs next to
+     * the outputs it describes and is created and removed together with them.
+     *
+     * A package that declares a stamp must also declare its installed files: a stamp alone cannot
+     * tell whether the outputs are still there.
+     */
+    protected function getInstallStamp(): ?InstallStamp
+    {
+        return null;
+    }
+
+    /**
      * Get the snake_case name of the package.
      */
     protected function getSnakeCaseName(): string
     {
         return str_replace('-', '_', $this->name);
+    }
+
+    /**
+     * Reject a stamp that cannot be verified later: without declared outputs there is nothing to
+     * check the fingerprint against, so the package would rebuild on every single run.
+     *
+     * @param string[] $installed_files
+     */
+    private function assertStampIsUsable(array $installed_files, ?InstallStamp $stamp): void
+    {
+        if ($stamp === null || $installed_files !== []) {
+            return;
+        }
+        throw new SPCInternalException(sprintf(
+            '%s declares an install stamp (getInstallStamp()) but no installed files; declare '
+            . 'getInstallFiles() as well, otherwise the stamp cannot tell whether the outputs '
+            . 'are still present.',
+            static::class
+        ));
     }
 
     private function emitBeforeStage(string $stage, array $stageContext): void
