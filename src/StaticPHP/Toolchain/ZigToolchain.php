@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace StaticPHP\Toolchain;
 
 use Package\Artifact\zig;
-use Package\Target\llvm_compiler_rt;
-use StaticPHP\Package\PackageInstaller;
+use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Package\ToolPackage;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Toolchain\Interface\PackageRequirementsInterface;
 use StaticPHP\Toolchain\Interface\UnixToolchainInterface;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\System\LinuxUtil;
 
-class ZigToolchain implements UnixToolchainInterface
+class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterface
 {
-    private static bool $deps_ensured = false;
+    /** Memoised clang version of the zig binary; resolved at most once per run. */
+    private ?string $compiler_version = null;
+
+    private bool $compiler_version_resolved = false;
 
     public function initEnv(): void
     {
@@ -64,8 +67,36 @@ class ZigToolchain implements UnixToolchainInterface
         // zig-cc/clang treats strlcpy/strlcat as compiler builtins, so configure link tests pass (HAVE_STRLCPY=1)
         $extra_vars = getenv('SPC_EXTRA_PHP_VARS') ?: '';
         GlobalEnvManager::putenv("SPC_EXTRA_PHP_VARS=ac_cv_func_strlcpy=no ac_cv_func_strlcat=no {$extra_vars}");
+    }
 
-        $this->ensureBuildDeps();
+    /**
+     * Version of the C compiler zig drives, i.e. the clang it bundles (for example "22.1.8").
+     *
+     * Deliberately not the zig release version: getCompilerInfo() reports that one ("zig 0.17.0")
+     * and the two numbers are unrelated. Toolchain-specific artifacts key on this value because it
+     * describes the compiler whose runtime and bitcode they have to match.
+     */
+    public function getCompilerVersion(): ?string
+    {
+        if ($this->compiler_version_resolved) {
+            return $this->compiler_version;
+        }
+        $this->compiler_version_resolved = true;
+
+        try {
+            $zig = PackageLoader::getPackage('zig');
+        } catch (WrongUsageException) {
+            return null;
+        }
+        if (!$zig instanceof ToolPackage || !$zig->isInstalled()) {
+            return null;
+        }
+
+        [$code, $out] = shell()->execWithResult(escapeshellarg($zig->getBinary('zig')) . ' cc --version', false);
+        if ($code === 0 && preg_match('/clang version (\d+\.\d+\.\d+)/', implode("\n", $out), $match)) {
+            $this->compiler_version = $match[1];
+        }
+        return $this->compiler_version;
     }
 
     public function getCompilerInfo(): ?string
@@ -101,23 +132,52 @@ class ZigToolchain implements UnixToolchainInterface
         return false;
     }
 
-    private function ensureBuildDeps(): void
+    /**
+     * The packages the zig toolchain needs: zig itself, plus the compiler runtime zig does not ship.
+     *
+     * Declaring them here instead of in a doctor check keeps them in sync with the toolchain:
+     * they join the normal install pipeline, their isInstalled() decides skip vs rebuild, and
+     * llvm-compiler-rt is scoped to the canonical triple of the current target.
+     *
+     * @return string[]
+     */
+    public function getRequiredPackages(): array
     {
-        if (self::$deps_ensured) {
-            return;
-        }
-        self::$deps_ensured = true;
+        // zig is a plain tool package with a hosted binary, so it can always be resolved: the
+        // pipeline downloads every artifact before it installs anything, which means declaring it
+        // here installs zig on a machine that never ran `spc doctor`.
+        $packages = ['zig'];
 
-        if (!llvm_compiler_rt::isBuilt()) {
-            logger()->info('Building llvm-compiler-rt for ' . SystemTarget::getCanonicalTriple());
-            new PackageInstaller(interactive: false)->addBuildPackage('llvm-compiler-rt')->run(true);
+        // compiler-rt is versioned against the clang bundled with zig and its source downloader runs
+        // `zig cc --version`, so it can only be resolved once zig is on disk. On a fresh machine the
+        // build that installs zig therefore defers compiler-rt to the next one; PackageInstaller
+        // reports that final state once per run, after the install loop.
+        if ($this->checkRequirements() !== []) {
+            return $packages;
         }
+        try {
+            $package = PackageLoader::getPackage('llvm-compiler-rt');
+        } catch (WrongUsageException) {
+            return $packages; // custom registry without this target
+        }
+        // Only where the target really has a build step (currently Linux hosts).
+        return $package->hasBuildFunctionForCurrentOS() ? [...$packages, 'llvm-compiler-rt'] : $packages;
+    }
 
-        $tools = PackageLoader::getPackage('llvm-tools');
-        if ($tools instanceof ToolPackage && !$tools->isInstalled()) {
-            logger()->info('Installing llvm-tools');
-            new PackageInstaller(['dl-prefer-binary' => true], interactive: false)->addInstallPackage('llvm-tools')->run(true);
+    /**
+     * @return string[] Unmet prerequisites, empty when the toolchain is ready to go
+     */
+    public function checkRequirements(): array
+    {
+        try {
+            $zig = PackageLoader::getPackage('zig');
+        } catch (WrongUsageException) {
+            return ['the `zig` tool package'];
         }
+        if (!$zig instanceof ToolPackage || !$zig->isInstalled()) {
+            return ['the `zig` tool package'];
+        }
+        return [];
     }
 
     private function getPath(): string

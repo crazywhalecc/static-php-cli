@@ -11,25 +11,11 @@ use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
-use StaticPHP\Package\ToolPackage;
-use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Runtime\SystemTarget;
 
 class zig
 {
-    public static function getLlvmVersion(): string
-    {
-        $zig = PackageLoader::getPackage('zig');
-        if (!$zig instanceof ToolPackage || !$zig->isInstalled()) {
-            throw new DownloaderException('zig is not installed, run `bin/spc doctor` first');
-        }
-        [$code, $out] = shell()->execWithResult(escapeshellarg($zig->getBinary('zig')) . ' cc --version', false);
-        if ($code !== 0 || !preg_match('/clang version (\d+\.\d+\.\d+)/', implode("\n", $out), $match)) {
-            throw new DownloaderException('Could not determine the clang version shipped by zig');
-        }
-        return $match[1];
-    }
-
     #[CustomBinary('zig', [
         'linux-x86_64',
         'linux-aarch64',
@@ -123,10 +109,19 @@ class zig
     public static function writeWrappers(string $target_path): void
     {
         $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
-        $script_content = file_get_contents($script_path);
+        // Guarded: an unreadable template used to write empty wrapper scripts, which only fails much
+        // later with an unrelated-looking error during configure.
+        $script_content = is_file($script_path) ? file_get_contents($script_path) : false;
+        if ($script_content === false) {
+            throw new SPCInternalException("Missing zig wrapper template at {$script_path}");
+        }
 
         $files = ['zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
-        $current = @file_get_contents("{$target_path}/zig-cc");
+        // Nothing to do when the wrapper matches the current template and the whole set is present.
+        // Checked with is_file() instead of a silenced read: SPC's error handler logs PHP warnings
+        // even when they carry the @ operator, so a normal first-time install printed a warning
+        // about the very wrapper it was about to create.
+        $current = is_file("{$target_path}/zig-cc") ? file_get_contents("{$target_path}/zig-cc") : false;
         if ($current === $script_content && array_all($files, fn ($file) => file_exists("{$target_path}/{$file}"))) {
             return;
         }

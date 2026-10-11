@@ -54,9 +54,14 @@ class MSVCToolchain implements ToolchainInterface
         }
     }
 
+    public function getCompilerVersion(): ?string
+    {
+        return getenv('VisualStudioVersion') ?: null;
+    }
+
     public function getCompilerInfo(): ?string
     {
-        if ($vcver = getenv('VisualStudioVersion')) {
+        if ($vcver = $this->getCompilerVersion()) {
             return "Visual Studio {$vcver}";
         }
         return null;
