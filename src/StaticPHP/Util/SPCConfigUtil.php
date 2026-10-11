@@ -81,6 +81,10 @@ class SPCConfigUtil
                     $php_link_packages[] = $target->getName();
                 }
             }
+            // nothing depends on the allocator, so link it into every binary embedding PHP
+            if (isset($installer->getResolvedPackages()['mimalloc'])) {
+                $php_link_packages[] = 'mimalloc';
+            }
             $dependency_overrides['php'] = $php_link_packages;
         }
 
