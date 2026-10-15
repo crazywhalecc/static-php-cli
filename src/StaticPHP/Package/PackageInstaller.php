@@ -218,7 +218,12 @@ class PackageInstaller
                 'source-only' => implode(',', array_map(fn ($x) => $x->getName(), $this->build_packages)),
             ];
             if ($binary_only_packages !== []) {
-                $dl_opts['binary-only'] = implode(',', array_map(fn ($x) => $x->getName(), $binary_only_packages));
+                // Merged rather than replaced: a caller's global binary-only (the doctor's pkg-config
+                // fix) has to stay global when the toolchain adds a binary-only package such as zig.
+                $dl_opts['binary-only'] = DownloaderOptions::addToList(
+                    $dl_opts['binary-only'] ?? false,
+                    array_map(fn ($x) => $x->getName(), $binary_only_packages)
+                );
             }
             $downloader = new ArtifactDownloader($dl_opts, $this->interactive);
             $downloader->addArtifacts($this->getArtifacts())->download();
@@ -722,6 +727,11 @@ class PackageInstaller
             $this->collectToolchainPackages(),
             static fn (string $package): bool => !in_array($package, $pkgs, true)
         ));
+        // They are fetched pre-built where a binary is published (llvm-tools): building them from
+        // source is only the fallback, unless the user explicitly asked for source-only downloads.
+        if ($toolchain_packages !== []) {
+            $this->preferBinary(...$toolchain_packages);
+        }
         $pkgs = [...$toolchain_packages, ...$pkgs];
 
         // resolve dependencies string

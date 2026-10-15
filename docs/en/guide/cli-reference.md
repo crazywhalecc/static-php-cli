@@ -96,7 +96,6 @@ These flags apply only to the combined `build:php` target. To build a specific S
 |--------------------------------------|-------|--------------------------------------------------------------------------------------------------------|
 | `--no-strip`                         |       | Keep debug symbols; do not strip the binary                                                            |
 | `--with-upx-pack`                    |       | Compress the output binary with UPX (install first with `spc install-pkg upx`; Linux and Windows only) |
-| `--with-llvm-tools`                  |       | Use LLVM binutils (`llvm-objcopy`/`llvm-strip`/`llvm-profdata`) instead of the host ones (Zig toolchain, Linux only) |
 | `--disable-opcache-jit`              |       | Disable OPcache JIT                                                                                    |
 | `--with-config-file-path=<path>`     |       | Directory where PHP looks for `php.ini` (default: `/usr/local/etc/php`)                                |
 | `--with-config-file-scan-dir=<path>` |       | Directory PHP scans for additional `.ini` files (default: `/usr/local/etc/php/conf.d`)                 |

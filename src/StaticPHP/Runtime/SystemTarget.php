@@ -139,6 +139,26 @@ class SystemTarget
     }
 
     /**
+     * Whether the target runs on a different OS or CPU architecture than the host (a cross build).
+     *
+     * The architecture comes from the canonical target triple rather than getTargetArch(), so
+     * targets without a dedicated architecture mapping (e.g. arm-linux-musleabihf) count as well.
+     */
+    public static function isCrossCompiling(): bool
+    {
+        if (self::getTargetOS() !== PHP_OS_FAMILY) {
+            return true;
+        }
+        $arch = strtolower(explode('-', self::getCanonicalTriple())[0]);
+        $arch = match ($arch) {
+            'amd64', 'x64' => 'x86_64',
+            'arm64' => 'aarch64',
+            default => $arch,
+        };
+        return $arch !== GNU_ARCH;
+    }
+
+    /**
      * Check if the target OS is a Unix-like system.
      */
     public static function isUnix(): bool

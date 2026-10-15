@@ -7,18 +7,19 @@ namespace Package\Artifact;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
-use StaticPHP\Artifact\Downloader\Type\GitHubRelease;
 use StaticPHP\Artifact\Downloader\Type\GitHubTokenSetupTrait;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomSource;
 use StaticPHP\Attribute\Artifact\CustomSourceCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
-use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\ToolchainManager;
 
 class llvm_tools
 {
     use GitHubTokenSetupTrait;
+
+    /** Pre-built archives: llvm-tools-{host-arch}-linux-musl-{clang-version}.txz plus a .sha256 sidecar. */
+    private const string BINARY_BASE_URL = 'https://dl.static-php.dev/v3/deps/llvm-tools/';
 
     #[CustomSource('llvm-tools')]
     public function downSource(ArtifactDownloader $downloader): DownloadResult
@@ -41,13 +42,25 @@ class llvm_tools
     ])]
     public function downBinary(ArtifactDownloader $downloader): DownloadResult
     {
-        $asset = 'llvm-tools-' . SystemTarget::getTargetArch() . '-linux-musl-' . $this->clangVersion() . '.txz';
-        return new GitHubRelease()->download('llvm-tools', [
-            'type' => 'ghrel',
-            'repo' => 'static-php/hosted',
-            'match' => preg_quote($asset, '|'),
-            'extract' => '{pkg_root_path}/llvm-tools',
-        ], $downloader);
+        // The tools run on the build host, so the host architecture selects the archive, not
+        // SPC_TARGET; they are static musl executables and run on any Linux distribution.
+        $clang = $this->clangVersion();
+        $filename = 'llvm-tools-' . GNU_ARCH . "-linux-musl-{$clang}.txz";
+        $url = self::BINARY_BASE_URL . $filename;
+        $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
+        default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
+
+        // Published next to the archive by the llvm-tools workflow of static-php/hosted.
+        $checksum = default_shell()->executeCurl("{$url}.sha256", retries: $downloader->getRetry());
+        $expected = is_string($checksum) ? strtolower((string) strtok(trim($checksum), " \t")) : '';
+        if (preg_match('/^[0-9a-f]{64}$/', $expected) !== 1) {
+            throw new DownloaderException("Cannot fetch the checksum of {$filename} from {$url}.sha256");
+        }
+        if (($actual = hash_file('sha256', $path)) !== $expected) {
+            unlink($path);
+            throw new DownloaderException("Hash mismatch for downloaded {$filename}. Expected {$expected}, got {$actual}");
+        }
+        return DownloadResult::archive($filename, ['url' => $url], extract: '{pkg_root_path}/llvm-tools', verified: true, version: $clang);
     }
 
     #[CustomSourceCheckUpdate('llvm-tools')]

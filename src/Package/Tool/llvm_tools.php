@@ -78,8 +78,10 @@ class llvm_tools
         $sources = implode(' ', array_map(fn ($unit) => escapeshellarg("{$source}/{$unit}.c"), $units));
         $cc = getenv('CC') ?: 'cc';
         $ar = getenv('AR') ?: 'ar';
+        // HAVE_UNISTD_H is what zlib's configure sets on Unix: without it gz*.c call lseek/read/close
+        // undeclared, which clang >= 16 (zig) rejects as an error.
         shell()->cd($obj_dir)
-            ->exec("{$cc} -c -O2 -fPIC -DHAVE_HIDDEN -I" . escapeshellarg($source) . " {$sources}")
+            ->exec("{$cc} -c -O2 -fPIC -DHAVE_HIDDEN -DHAVE_UNISTD_H -I" . escapeshellarg($source) . " {$sources}")
             ->exec("{$ar} rcs " . escapeshellarg("{$prefix}/lib/libz.a") . ' *.o');
 
         foreach (['zlib.h', 'zconf.h'] as $header) {

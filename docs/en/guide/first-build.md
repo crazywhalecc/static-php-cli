@@ -119,7 +119,6 @@ spc build:php "bcmath,phar,zlib,openssl,curl" --build-cli --build-micro
 | `--no-strip` | Keep debug symbols; do not strip the binary |
 | `-I key=value` | Hard-compile an INI option into PHP |
 | `--with-upx-pack` | Compress output with UPX (run `spc install-pkg upx` first) |
-| `--with-llvm-tools` | Use LLVM binutils for Zig builds on Linux (LTO/PGO/shared output; needs the `llvm-tools` package, whose prebuilt binaries are not published yet) |
 
 Example — baking in a larger memory limit and disabling the `system` function:
 

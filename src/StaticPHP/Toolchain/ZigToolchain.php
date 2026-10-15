@@ -92,8 +92,10 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
             return null;
         }
 
-        [$code, $out] = shell()->execWithResult(escapeshellarg($zig->getBinary('zig')) . ' cc --version', false);
-        if ($code === 0 && preg_match('/clang version (\d+\.\d+\.\d+)/', implode("\n", $out), $match)) {
+        // -dumpversion prints the same version as `cc --version`, which leaves an empty a.o in the
+        // working directory (the user's project) on every run.
+        [$code, $out] = shell()->execWithResult(escapeshellarg($zig->getBinary('zig')) . ' cc -dumpversion', false);
+        if ($code === 0 && preg_match('/^(\d+\.\d+\.\d+)$/', trim(implode("\n", $out)), $match)) {
             $this->compiler_version = $match[1];
         }
         return $this->compiler_version;
@@ -133,7 +135,8 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
     }
 
     /**
-     * The packages the zig toolchain needs: zig itself, plus the compiler runtime zig does not ship.
+     * The packages the zig toolchain needs: zig itself, the compiler runtime zig does not ship and,
+     * for a cross build, the LLVM binutils.
      *
      * Declaring them here instead of in a doctor check keeps them in sync with the toolchain:
      * they join the normal install pipeline, their isInstalled() decides skip vs rebuild, and
@@ -148,20 +151,24 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
         // here installs zig on a machine that never ran `spc doctor`.
         $packages = ['zig'];
 
-        // compiler-rt is versioned against the clang bundled with zig and its source downloader runs
-        // `zig cc --version`, so it can only be resolved once zig is on disk. On a fresh machine the
-        // build that installs zig therefore defers compiler-rt to the next one; PackageInstaller
-        // reports that final state once per run, after the install loop.
+        // compiler-rt and llvm-tools are versioned against the clang bundled with zig, and their
+        // downloaders run zig to find out which one, so they can only be resolved once zig is on
+        // disk. On a fresh machine the build that installs zig therefore defers them to the next
+        // one; PackageInstaller reports that final state once per run, after the install loop.
         if ($this->checkRequirements() !== []) {
             return $packages;
         }
-        try {
-            $package = PackageLoader::getPackage('llvm-compiler-rt');
-        } catch (WrongUsageException) {
-            return $packages; // custom registry without this target
+        // A custom registry does not have to ship either package. compiler-rt is only needed where
+        // the target really has a build step (currently Linux hosts).
+        if (PackageLoader::hasPackage('llvm-compiler-rt') && PackageLoader::getPackage('llvm-compiler-rt')->hasBuildFunctionForCurrentOS()) {
+            $packages[] = 'llvm-compiler-rt';
         }
-        // Only where the target really has a build step (currently Linux hosts).
-        return $package->hasBuildFunctionForCurrentOS() ? [...$packages, 'llvm-compiler-rt'] : $packages;
+        // The host binutils only understand the host architecture, so stripping or splitting debug
+        // info off a cross-built binary needs the LLVM ones; native builds keep using the host tools.
+        if (SystemTarget::isCrossCompiling() && PackageLoader::hasPackage('llvm-tools')) {
+            $packages[] = 'llvm-tools';
+        }
+        return $packages;
     }
 
     /**
