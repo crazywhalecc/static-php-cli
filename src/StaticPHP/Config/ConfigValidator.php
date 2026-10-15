@@ -127,7 +127,7 @@ class ConfigValidator
         'pie' => [['repo'], ['extract', 'prefer-stable']],
         'pecl' => [['name'], ['extract', 'prefer-stable']],
         'php-release' => [['domain'], ['extract']],
-        'custom' => [[], ['func']],
+        'custom' => [[], ['func', 'base-url']],
     ];
 
     /**

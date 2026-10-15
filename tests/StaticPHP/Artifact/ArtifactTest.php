@@ -109,6 +109,32 @@ class ArtifactTest extends TestCase
         $this->assertNull($artifact->getDownloadConfig('non-existent'));
     }
 
+    // ==================== getBinaryDownloadConfig ====================
+
+    public function testGetBinaryDownloadConfigReturnsCurrentPlatformConfig(): void
+    {
+        $platform = $this->getCurrentPlatform();
+        $expected = ['type' => 'custom', 'base-url' => 'https://example.com/deps/'];
+        $artifact = new Artifact('my-pkg', ['binary' => [$platform => $expected]]);
+
+        $this->assertSame($expected, $artifact->getBinaryDownloadConfig());
+    }
+
+    public function testGetBinaryDownloadConfigReturnsNullWhenPlatformMissing(): void
+    {
+        $artifact = new Artifact('my-pkg', ['binary' => ['linux-x86_64' => ['type' => 'custom']]]);
+
+        $this->assertNull($artifact->getBinaryDownloadConfig('definitely-not-a-platform'));
+    }
+
+    public function testGetBinaryDownloadConfigAcceptsExplicitPlatform(): void
+    {
+        $expected = ['type' => 'custom', 'base-url' => 'https://example.com/'];
+        $artifact = new Artifact('my-pkg', ['binary' => ['linux-x86_64' => $expected]]);
+
+        $this->assertSame($expected, $artifact->getBinaryDownloadConfig('linux-x86_64'));
+    }
+
     // ==================== hasSource ====================
 
     public function testHasSourceReturnsTrueWhenConfigHasSource(): void

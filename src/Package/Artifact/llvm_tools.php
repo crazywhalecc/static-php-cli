@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Package\Artifact;
 
+use StaticPHP\Artifact\Artifact;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
 use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
@@ -12,14 +13,12 @@ use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomSource;
 use StaticPHP\Attribute\Artifact\CustomSourceCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\ToolchainManager;
 
 class llvm_tools
 {
     use GitHubTokenSetupTrait;
-
-    /** Pre-built archives: llvm-tools-{host-arch}-linux-musl-{clang-version}.txz plus a .sha256 sidecar. */
-    private const string BINARY_BASE_URL = 'https://dl.static-php.dev/v3/deps/llvm-tools/';
 
     #[CustomSource('llvm-tools')]
     public function downSource(ArtifactDownloader $downloader): DownloadResult
@@ -40,13 +39,18 @@ class llvm_tools
         'linux-x86_64',
         'linux-aarch64',
     ])]
-    public function downBinary(ArtifactDownloader $downloader): DownloadResult
+    public function downBinary(ArtifactDownloader $downloader, Artifact $artifact): DownloadResult
     {
         // The tools run on the build host, so the host architecture selects the archive, not
         // SPC_TARGET; they are static musl executables and run on any Linux distribution.
         $clang = $this->clangVersion();
+        // Pre-built archives: llvm-tools-{host-arch}-linux-musl-{clang-version}.txz plus a .sha256 sidecar.
         $filename = 'llvm-tools-' . GNU_ARCH . "-linux-musl-{$clang}.txz";
-        $url = self::BINARY_BASE_URL . $filename;
+        $base_url = $artifact->getBinaryDownloadConfig()['base-url'] ?? null;
+        if (!is_string($base_url) || $base_url === '') {
+            throw new DownloaderException('llvm-tools: binary config for ' . SystemTarget::getCurrentPlatformString() . ' does not define a base-url');
+        }
+        $url = $base_url . $filename;
         $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
         default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
 

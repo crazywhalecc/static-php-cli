@@ -545,6 +545,12 @@ class ConfigValidatorTest extends TestCase
                 'source' => [
                     'type' => 'custom',
                 ],
+                'binary' => [
+                    'linux-x86_64' => [
+                        'type' => 'custom',
+                        'base-url' => 'https://example.com/deps/',
+                    ],
+                ],
             ],
         ];
 
