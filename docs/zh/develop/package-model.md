@@ -248,7 +248,6 @@ nasm:
   tool:
     provides: [nasm.exe, ndisasm.exe]
     binary-subdir: bin
-    min-version: '2.16'
 ```
 
 嵌套的 `tool` 对象支持：
@@ -258,7 +257,6 @@ nasm:
 | `provides` | 是 | 用于判断工具是否已经安装的可执行文件名 |
 | `binary-subdir` | 否 | `install-root` 下存放可执行文件的目录；默认就是安装根目录 |
 | `install-root` | 否 | 安装根目录；默认为 `PKG_ROOT_PATH`，支持路径占位符 |
-| `min-version` | 否 | 由 `ToolPackage` 暴露的最低版本元数据；installer 当前不会强制校验 |
 
 `tool` 内的字段可以使用 `@windows`、`@unix`、`@linux` 和 `@macos` 后缀。例如，`provides@windows` 可以列出 `.exe` 名称，`provides@unix` 列出 Unix 名称。
 

@@ -96,6 +96,7 @@ spc build:php <extensions> [options]
 |--------------------------------------|------|--------------------------------------------------------|
 | `--no-strip`                         |      | 保留调试符号，不精简二进制                                          |
 | `--with-upx-pack`                    |      | 用 UPX 压缩产物（需先 `spc install-pkg upx`；仅 Linux 和 Windows） |
+| `--with-llvm-tools`                  |      | 使用 LLVM binutils（`llvm-objcopy`/`llvm-strip`/`llvm-profdata`）替代系统工具（仅 Zig 工具链、Linux） |
 | `--disable-opcache-jit`              |      | 禁用 OPcache JIT                                         |
 | `--with-config-file-path=<path>`     |      | PHP 查找 `php.ini` 的目录（默认：`/usr/local/etc/php`）          |
 | `--with-config-file-scan-dir=<path>` |      | PHP 扫描追加 `.ini` 文件的目录（默认：`/usr/local/etc/php/conf.d`）  |

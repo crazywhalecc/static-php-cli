@@ -121,6 +121,7 @@ spc build:php "bcmath,phar,zlib,openssl,curl" --build-cli --build-micro
 | `--no-strip`         | 保留调试符号，不精简二进制                        |
 | `-I key=value`       | 硬编译 INI 选项到 PHP 中                    |
 | `--with-upx-pack`    | 用 UPX 压缩产物（需先 `spc install-pkg upx`） |
+| `--with-llvm-tools`  | Zig + Linux 构建时使用 LLVM binutils（LTO/PGO/共享库产物；依赖 `llvm-tools` 包，其预构建二进制尚未发布） |
 
 硬编译 INI 的例子——预设更大的内存限制，并禁用 `system` 函数：
 

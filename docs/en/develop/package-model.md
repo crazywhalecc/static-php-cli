@@ -257,7 +257,6 @@ nasm:
   tool:
     provides: [nasm.exe, ndisasm.exe]
     binary-subdir: bin
-    min-version: '2.16'
 ```
 
 The nested `tool` object supports:
@@ -267,7 +266,6 @@ The nested `tool` object supports:
 | `provides` | Yes | Executable filenames used to decide whether the tool is installed |
 | `binary-subdir` | No | Directory below `install-root` containing the executables; defaults to the install root |
 | `install-root` | No | Installation root; defaults to `PKG_ROOT_PATH` and supports path placeholders |
-| `min-version` | No | Declared minimum version metadata exposed by `ToolPackage`; the installer does not currently enforce it |
 
 Fields inside `tool` may use `@windows`, `@unix`, `@linux`, and `@macos` suffixes. For example, `provides@windows` can list `.exe` names while `provides@unix` lists Unix names.
 

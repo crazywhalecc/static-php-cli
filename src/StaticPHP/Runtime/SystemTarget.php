@@ -120,6 +120,24 @@ class SystemTarget
         return "{$os}-{$arch}";
     }
 
+    public static function getCanonicalTriple(): string
+    {
+        $target = (string) getenv('SPC_TARGET');
+        if ($target !== '' && !str_contains($target, 'native')) {
+            $cleaned = preg_split('/\s+/', trim((string) preg_replace('/(-gnu|-musl)\.[\d.]+/', '$1', $target)))[0] ?? '';
+            if ($cleaned !== '') {
+                return $cleaned;
+            }
+        }
+        $arch = self::getTargetArch();
+        return match (self::getTargetOS()) {
+            'Linux' => $arch . '-linux-' . (self::getLibc() === 'musl' ? 'musl' : 'gnu'),
+            'Darwin' => $arch . '-macos-none',
+            'Windows' => $arch . '-windows-gnu',
+            default => $arch . '-unknown-unknown',
+        };
+    }
+
     /**
      * Check if the target OS is a Unix-like system.
      */
