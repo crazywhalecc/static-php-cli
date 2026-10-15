@@ -395,6 +395,19 @@ trait unix
         $sed_prefix = SystemTarget::getTargetOS() === 'Darwin' ? 'sed -i ""' : 'sed -i';
 
         $vars = $this->makeVars($installer);
+        $libphp_cflags = trim(getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS_LIBPHP') ?: '');
+        if ($libphp_cflags !== '') {
+            $libphp_vars = $vars;
+            $libphp_vars['EXTRA_CFLAGS'] = clean_spaces(($vars['EXTRA_CFLAGS'] ?? '') . ' ' . $libphp_cflags);
+            $libphp_make_args = $this->makeVarsToArgs($libphp_vars);
+            $libphp_target = SystemTarget::getTargetOS() === 'Darwin' && getenv('SPC_CMD_VAR_PHP_EMBED_TYPE') === 'shared'
+                ? 'libphp.dylib' : 'libphp.la';
+            // Core objects may already have been compiled for an executable SAPI with different flags.
+            shell()->cd($package->getSourceDir())
+                ->exec('make clean')
+                ->setEnv($libphp_vars)
+                ->exec("make -j{$builder->concurrency} {$libphp_make_args} {$libphp_target}");
+        }
         $makeArgs = $this->makeVarsToArgs($vars);
         shell()->cd($package->getSourceDir())
             ->setEnv($vars)
