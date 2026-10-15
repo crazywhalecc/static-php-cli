@@ -195,17 +195,17 @@ class PackageBuilder
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
             $objcopy = $this->getBinUtil('objcopy');
             try {
+                FileSystem::copy($binary_path, $debug_file);
                 shell()
-                    ->exec("{$objcopy} --only-keep-debug {$binary_path} {$debug_file}")
+                    ->exec("{$objcopy} --strip-debug {$binary_path}")
                     ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
             } catch (SPCException $e) {
                 // A separate debug file is optional. Native builds do not require the LLVM binutils,
-                // and the fallback may not implement --only-keep-debug (zig's objcopy reports it as
-                // unimplemented), so degrade to "no debug file" instead of failing an otherwise good build.
+                // so degrade to "no debug file" instead of failing an otherwise good build.
                 logger()->warning("Could not extract debug info from '{$binary_path}' with '{$objcopy}': {$e->getMessage()}");
                 logger()->warning('Continuing without a separate debug file. Install the LLVM binutils (`bin/spc install-pkg llvm-tools`) to keep debug information.');
                 if (is_file($debug_file)) {
-                    unlink($debug_file); // a failed --only-keep-debug can leave an empty file behind
+                    unlink($debug_file); // do not leave a debug file the build did not register
                 }
                 return '';
             }
@@ -271,9 +271,9 @@ class PackageBuilder
         $is_zig = ToolchainManager::getToolchainClass() === ZigToolchain::class;
 
         // Zig ships zig-<tool> wrappers for its own binutils, but they only implement a subset of
-        // the options (zig-objcopy reports --only-keep-debug as unimplemented). Treat them as
-        // absent so these post-processing steps use llvm-tools when installed and the host
-        // binutils otherwise, which is what lets native builds work without the LLVM binutils.
+        // the options. Treat them as absent so these post-processing steps use llvm-tools when
+        // installed and the host binutils otherwise, which is what lets native builds work
+        // without the LLVM binutils.
         if ($is_zig && $env === "zig-{$name}") {
             $env = '';
         }
