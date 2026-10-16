@@ -109,6 +109,7 @@ class ToolchainManager
         /* @var ToolchainInterface $toolchain */
         $instance = ApplicationContext::get(ToolchainInterface::class);
         $instance->afterInit();
+
         if (getenv('PHP_BUILD_COMPILER') === false && ($compiler_info = $instance->getCompilerInfo())) {
             GlobalEnvManager::putenv("PHP_BUILD_COMPILER={$compiler_info}");
         }

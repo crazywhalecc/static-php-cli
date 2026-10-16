@@ -10,7 +10,7 @@ use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Util\FileSystem;
 
 /** git */
-class Git implements DownloadTypeInterface, CheckUpdateInterface
+class Git implements DownloadTypeInterface, CheckUpdateInterface, CacheMatchInterface
 {
     public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
     {
@@ -70,6 +70,19 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
             return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
         }
         throw new DownloaderException("No matching branch found for regex {$config['regex']} (checked {$matched_count} branches).");
+    }
+
+    public function cacheMatches(string $name, array $config, array $lock_entry, ArtifactDownloader $downloader): bool
+    {
+        // The lock hash (rev-parse HEAD) only proves the cached clone is self-consistent;
+        // a changed url/rev/regex in the config must invalidate it.
+        $locked = $lock_entry['config'] ?? [];
+        foreach (['url', 'rev', 'regex'] as $key) {
+            if (($locked[$key] ?? null) !== ($config[$key] ?? null)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
