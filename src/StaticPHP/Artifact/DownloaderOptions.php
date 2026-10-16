@@ -101,4 +101,21 @@ class DownloaderOptions
 
         return $result;
     }
+
+    /**
+     * Add artifact names to a list-valued option such as binary-only without narrowing it: true, or
+     * null (the flag given without a value), already applies to every artifact and stays as it is.
+     *
+     * @param  mixed            $current Current option value (false when the option was not given)
+     * @param  string[]         $names   Artifact names to add
+     * @return null|bool|string The merged option value
+     */
+    public static function addToList(mixed $current, array $names): bool|string|null
+    {
+        if ($current === true || $current === null) {
+            return $current;
+        }
+        $existing = is_string($current) && $current !== '' ? parse_comma_list($current) : [];
+        return implode(',', array_values(array_unique([...$existing, ...array_values($names)])));
+    }
 }

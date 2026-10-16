@@ -195,17 +195,17 @@ class PackageBuilder
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
             $objcopy = $this->getBinUtil('objcopy');
             try {
+                FileSystem::copy($binary_path, $debug_file);
                 shell()
-                    ->exec("{$objcopy} --only-keep-debug {$binary_path} {$debug_file}")
+                    ->exec("{$objcopy} --strip-debug {$binary_path}")
                     ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
             } catch (SPCException $e) {
-                // A separate debug file is optional. Without the opt-in LLVM binutils the fallback
-                // may not implement --only-keep-debug (zig's objcopy reports it as unimplemented),
+                // A separate debug file is optional. Native builds do not require the LLVM binutils,
                 // so degrade to "no debug file" instead of failing an otherwise good build.
                 logger()->warning("Could not extract debug info from '{$binary_path}' with '{$objcopy}': {$e->getMessage()}");
-                logger()->warning('Continuing without a separate debug file. Install the LLVM binutils with --with-llvm-tools to keep debug information.');
+                logger()->warning('Continuing without a separate debug file. Install the LLVM binutils (`bin/spc install-pkg llvm-tools`) to keep debug information.');
                 if (is_file($debug_file)) {
-                    unlink($debug_file); // a failed --only-keep-debug can leave an empty file behind
+                    unlink($debug_file); // do not leave a debug file the build did not register
                 }
                 return '';
             }
@@ -219,9 +219,10 @@ class PackageBuilder
     /**
      * Strip unneeded symbols from binary file.
      *
-     * The LLVM binutils are optional (--with-llvm-tools). Under the zig toolchain the host strip
-     * can choke on zig/LLVM bitcode, and a build must not fail because an optional tool is not
-     * installed: skipping strip only costs binary size.
+     * Under the zig toolchain the LLVM binutils are only required for cross builds (see
+     * ZigToolchain::getRequiredPackages()). Native builds use the host strip, which can choke on
+     * zig/LLVM bitcode, and a build must not fail because of that: skipping strip only costs
+     * binary size.
      */
     public function stripBinary(string $binary_path): void
     {
@@ -239,13 +240,14 @@ class PackageBuilder
                 throw $e;
             }
             logger()->warning("Failed to strip '{$binary_path}' with '{$strip}': {$e->getMessage()}");
-            logger()->warning('Continuing without strip (this only affects binary size). Install the LLVM binutils with --with-llvm-tools if it keeps happening.');
+            logger()->warning('Continuing without strip (this only affects binary size). Install the LLVM binutils (`bin/spc install-pkg llvm-tools`) if it keeps happening.');
         }
     }
 
     /**
      * True when the LLVM binutils would help but are not installed: the zig toolchain is active
-     * and the optional llvm-tools package is missing.
+     * and the llvm-tools package is missing (optional for native builds; a cross build that first
+     * had to install zig only gets it on its next run).
      *
      * Guarded because a custom registry does not have to ship `llvm-tools`; in that case there is
      * nothing to advise and the original strip error has to surface unchanged.
@@ -269,9 +271,9 @@ class PackageBuilder
         $is_zig = ToolchainManager::getToolchainClass() === ZigToolchain::class;
 
         // Zig ships zig-<tool> wrappers for its own binutils, but they only implement a subset of
-        // the options (zig-objcopy reports --only-keep-debug as unimplemented). Treat them as
-        // absent so these post-processing steps use llvm-tools when installed and the host
-        // binutils otherwise, which is what make the LLVM binutils genuinely optional.
+        // the options. Treat them as absent so these post-processing steps use llvm-tools when
+        // installed and the host binutils otherwise, which is what lets native builds work
+        // without the LLVM binutils.
         if ($is_zig && $env === "zig-{$name}") {
             $env = '';
         }
@@ -286,8 +288,8 @@ class PackageBuilder
             if ($llvm_tools instanceof ToolPackage && $llvm_tools->isInstalled()) {
                 return $llvm_tools->getBinary("llvm-{$name}");
             }
-            // llvm-tools is optional: make it visible which binutil the build actually uses.
-            logger()->debug("llvm-tools is not installed; falling back to the host '{$name}' (enable the LLVM binutils with --with-llvm-tools).");
+            // Optional for native builds: make it visible which binutil the build actually uses.
+            logger()->debug("llvm-tools is not installed; falling back to the host '{$name}' (install the LLVM binutils with `bin/spc install-pkg llvm-tools`).");
         }
 
         return $name;

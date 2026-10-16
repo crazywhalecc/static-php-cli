@@ -24,13 +24,11 @@ use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Package\TargetPackage;
-use StaticPHP\Package\ToolPackage;
 use StaticPHP\Registry\ArtifactLoader;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ToolchainManager;
-use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
@@ -139,7 +137,6 @@ class php extends TargetPackage
         $package->addBuildArgument('extensions', InputArgument::REQUIRED, 'Comma-separated list of static extensions to build');
         $package->addBuildOption('no-strip', null, null, 'build without strip, keep symbols to debug');
         $package->addBuildOption('with-upx-pack', null, null, 'Compress / pack binary using UPX tool (linux/windows only)');
-        $package->addBuildOption('with-llvm-tools', null, null, 'Use LLVM binutils (llvm-objcopy/llvm-strip/llvm-profdata) instead of the host ones (zig toolchain, linux only)');
 
         // php configure and extra patch options
         $package->addBuildOption('disable-opcache-jit', null, null, 'Disable opcache jit');
@@ -264,25 +261,6 @@ class php extends TargetPackage
         // library dependency (tool packages bypass the DependencyResolver graph).
         if ($package->getBuildOption('with-upx-pack')) {
             $installer->addInstallPackage('upx');
-        }
-
-        // Zig's bundled binutils only implement a subset of the options these post-processing
-        // steps need (zig-objcopy reports --only-keep-debug as unimplemented), and the host
-        // binutils are used otherwise. The LLVM binutils are the opt-in replacement
-        // (--with-llvm-tools), added through the normal resolve/download pipeline so the outer
-        // download options (--no-download, --dl-prefer-binary, ...) are honoured.
-        // llvm-tools is never required, and llvm-compiler-rt is declared by the toolchain itself.
-        if ($package->getBuildOption('with-llvm-tools')) {
-            if (SystemTarget::getTargetOS() !== 'Linux') {
-                logger()->warning('--with-llvm-tools is only available for Linux targets; ignoring it.');
-            } elseif (ToolchainManager::getToolchainClass() !== ZigToolchain::class) {
-                logger()->warning('--with-llvm-tools requires the zig toolchain; ignoring it.');
-            } elseif (!$this->hasInstalledZigPackage()) {
-                // llvm-tools is versioned against zig's clang, so its downloader needs zig on disk.
-                logger()->warning('--with-llvm-tools needs an installed zig; run `spc doctor` first and re-run the build. Ignoring it for now.');
-            } else {
-                $installer->addInstallPackage('llvm-tools')->preferBinary('llvm-tools');
-            }
         }
 
         return [...$extensions_pkg, ...$additional_packages];
@@ -568,22 +546,5 @@ class php extends TargetPackage
         $str = implode(' ', $arg);
         logger()->debug("Static extension configure args: {$str}");
         return $str;
-    }
-
-    /**
-     * Whether the zig tool package is installed on disk.
-     *
-     * Checked through the registry rather than PackageInstaller::isPackageInstalled(): this runs
-     * inside a #[ResolveBuild] callback, i.e. before the installer has populated its resolved
-     * package list, so asking the installer would re-enter resolvePackages(). A custom registry
-     * does not have to ship a `zig` package either, and the caller only needs to warn in that case.
-     */
-    private function hasInstalledZigPackage(): bool
-    {
-        if (!PackageLoader::hasPackage('zig')) {
-            return false;
-        }
-        $zig = PackageLoader::getPackage('zig');
-        return $zig instanceof ToolPackage && $zig->isInstalled();
     }
 }

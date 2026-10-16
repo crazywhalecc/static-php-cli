@@ -3,7 +3,9 @@ llvm-tools:
   artifact:
     source:
       type: custom
-    binary: custom
+    binary:
+      linux-x86_64: { type: custom, base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/' }
+      linux-aarch64: { type: custom, base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/' }
     metadata:
       license-files: [llvm/LICENSE.TXT]
       license: Apache-2.0-with-LLVM-exception

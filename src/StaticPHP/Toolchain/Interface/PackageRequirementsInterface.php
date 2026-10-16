@@ -11,7 +11,7 @@ namespace StaticPHP\Toolchain\Interface;
  * packages before the dependency graph is resolved, so they follow the normal download, extract,
  * build and install pipeline. That means their own isInstalled() decides whether they are
  * skipped or rebuilt, which is what keeps target-specific artifacts in sync when SPC_TARGET
- * changes between builds.
+ * changes between builds. They prefer a published binary over the source, which stays the fallback.
  *
  * This is deliberately separate from ToolchainInterface so existing toolchains do not need to
  * implement it.
