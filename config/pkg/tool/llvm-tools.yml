@@ -1,0 +1,18 @@
+llvm-tools:
+  type: tool
+  artifact:
+    source:
+      type: custom
+    binary:
+      linux-x86_64: { type: custom, base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/' }
+      linux-aarch64: { type: custom, base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/' }
+    metadata:
+      license-files: [llvm/LICENSE.TXT]
+      license: Apache-2.0-with-LLVM-exception
+  tool:
+    provides:
+      - llvm-objcopy
+      - llvm-strip
+      - llvm-profdata
+    install-root: '{pkg_root_path}/llvm-tools'
+    binary-subdir: bin

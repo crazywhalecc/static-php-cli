@@ -41,6 +41,31 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+IS_LINK=1
+NEED_PROFILE_RT=0 # https://codeberg.org/ziglang/zig/issues/32066
+NEED_CRT=0 # https://codeberg.org/ziglang/zig/issues/32064
+for _arg in "${PARSED_ARGS[@]}"; do
+    case "$_arg" in
+        -c|-S|-E|-M|-MM) IS_LINK=0 ;;
+        -fprofile-generate*|-fprofile-instr-generate*|-fcs-profile-generate*) NEED_PROFILE_RT=1 ;;
+        -shared) NEED_CRT=1 ;;
+    esac
+done
+[[ "$SPC_COMPILER_EXTRA" == *-fprofile-generate* || "$SPC_COMPILER_EXTRA" == *-fprofile-instr-generate* || "$SPC_COMPILER_EXTRA" == *-fcs-profile-generate* ]] && NEED_PROFILE_RT=1
+
+RT_DIR="${SPC_COMPILER_RT_DIR:-}"
+if [[ $IS_LINK -eq 1 && -n "$RT_DIR" ]]; then
+    if [[ $NEED_PROFILE_RT -eq 1 && -f "$RT_DIR/libclang_rt.profile.a" ]]; then
+        PARSED_ARGS+=("-x" "none" "$RT_DIR/libclang_rt.profile.a" "-Wl,-u,__llvm_profile_runtime")
+    fi
+    if [[ $NEED_CRT -eq 1 && -f "$RT_DIR/clang_rt.crtbegin.o" && -f "$RT_DIR/clang_rt.crtend.o" ]]; then
+        PARSED_ARGS+=("-x" "none" "$RT_DIR/clang_rt.crtbegin.o" "$RT_DIR/clang_rt.crtend.o")
+    fi
+    if [[ -f "$RT_DIR/libclang_rt.cpu_model.a" ]]; then
+        PARSED_ARGS+=("-x" "none" "$RT_DIR/libclang_rt.cpu_model.a")
+    fi
+fi
+
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""
 
 if [[ "$SPC_TARGET" =~ \.[0-9]+\.[0-9]+ ]]; then

@@ -64,7 +64,9 @@ Doctor 还会检查：
 - 在 musl 发行版上存在 `linux-headers`。
 - StaticPHP 隔离使用的 `pkg-config` 已安装且可以执行。
 
-Linux 默认使用 `ZigToolchain`。启用 `--auto-fix` 后，缺少 Zig 时 Doctor 可以安装 StaticPHP 的 `zig` 工具 Package。在非 musl 宿主机上构建 musl 目标时，Doctor 还会检查该目标所需的 musl 运行时/wrapper。旧式的 `MuslToolchain` 还要求 `/usr/local/musl` 下存在 musl 交叉工具链。原生 Alpine 构建不需要这些跨宿主机组件。
+Linux 默认使用 `ZigToolchain`。工具链会把 `zig` 工具 Package 声明为自己的依赖，因此即使从未运行过 `spc doctor`，每次构建也会自动安装它（Doctor 同样会在缺失时安装，`--auto-fix` 负责检查其余环境）。它还会声明 `llvm-compiler-rt`，每次构建都会先安装该 target：它提供 Zig 自带 Clang 所缺失的 profile 运行时、`crtbegin`/`crtend` 目标文件和 `libclang_rt.cpu_model.a`。其源码来自发布在 `dl.static-php.dev/v3/deps/compiler-rt/` 下的裁剪版 compiler-rt 归档，以 zig 报告的 clang 版本作为键，因此一次构建只需下载约 140KB，而不是 LLVM 自 22 版起才提供的 150MB+ llvm-project 单体包。该归档是唯一来源：若当前 zig 版本对应的归档尚未发布，构建会直接失败并提示如何发布它。由于 compiler-rt 的源码要按 zig 自带的 clang 版本来解析，尚无 zig 的机器会在第一次构建时装上 zig，并在下一次构建时补上 compiler-rt。这些对象在本地编译（只需几秒），并在 zig 升级或 `SPC_TARGET` 改变目标 triple 时重新构建。在非 musl 宿主机上构建 musl 目标时，Doctor 还会检查该目标所需的 musl 运行时/wrapper。旧式的 `MuslToolchain` 还要求 `/usr/local/musl` 下存在 musl 交叉工具链。原生 Alpine 构建不需要这些跨宿主机组件。
+
+在 `ZigToolchain` 下，`llvm-objcopy`、`llvm-strip` 和 `llvm-profdata` 由 `llvm-tools` 包提供。交叉构建（`SPC_TARGET` 指定的架构或操作系统与宿主机不同）必须使用它，因为系统 binutils 只认识宿主机架构：此时工具链会在 `llvm-compiler-rt` 之外再声明 `llvm-tools`，构建过程会自动安装它。本机构建继续使用系统 binutils（Zig 自带的 `objcopy` 只实现了部分选项），strip 或拆分调试信息失败只会输出警告而不会中断构建；如需在本机构建中也使用 LLVM 工具，可运行 `bin/spc install-pkg llvm-tools`。该包会从 `dl.static-php.dev/v3/deps/llvm-tools/` 下载预构建的静态二进制：按宿主机架构（而非 `SPC_TARGET`）选择，以 zig 报告的 clang 版本作为键，并用发布的 SHA-256 校验值进行校验。若当前 zig 版本对应的归档尚未发布（或校验失败），则回退到从源码构建 LLVM，耗时会长得多。与 compiler-rt 一样，它需要磁盘上已有 zig 才能确定该版本，因此在尚无 zig 的机器上进行交叉构建时，会先安装 zig，并在下一次构建时补上 `llvm-tools`。
 
 ::: tip
 目标字符串和宿主发行版是两个不同概念。glibc 发行版可以通过 Zig 生成 musl 目标，而 `*-gnu.*` 目标仍会动态链接到指定的 glibc ABI。

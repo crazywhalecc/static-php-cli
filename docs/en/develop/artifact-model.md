@@ -454,10 +454,26 @@ artifact:
 
 Delegates download logic entirely to a PHP class under `src/Package/Artifact/`. If `func` is not specified, the class's default download method is called.
 
-- **Optional**: `func` — name of the specific method to invoke in the implementation class
+- **Optional**:
+  - `func` — name of the specific method to invoke in the implementation class
+  - `base-url` — an extra base URL the implementation can read from its artifact config, for example to assemble a download URL around a filename it computes at runtime
 
 ```yaml
 artifact:
   source:
     type: custom
+  binary:
+    linux-x86_64:
+      type: custom
+      base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/'
+```
+
+A custom downloader receives the `Artifact` and reads the option through `getBinaryDownloadConfig()`:
+
+```php
+public function downBinary(ArtifactDownloader $downloader, Artifact $artifact): DownloadResult
+{
+    $base_url = $artifact->getBinaryDownloadConfig()['base-url'];
+    // ... append the filename computed at runtime and download
+}
 ```

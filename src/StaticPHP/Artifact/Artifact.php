@@ -288,6 +288,19 @@ class Artifact
     }
 
     /**
+     * Get the binary download config for a platform, defaulting to the current one.
+     *
+     * Custom binary fetchers receive the Artifact, not their own config entry, so this is how
+     * they read extra options such as a `base-url` used to assemble the download URL.
+     */
+    public function getBinaryDownloadConfig(?string $platform = null): ?array
+    {
+        $platform ??= SystemTarget::getCurrentPlatformString();
+        $config = $this->config['binary'][$platform] ?? null;
+        return is_array($config) ? $config : null;
+    }
+
+    /**
      * Get source extraction directory.
      *
      * Rules:

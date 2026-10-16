@@ -101,6 +101,30 @@ class SPCConfigUtilTest extends TestCase
         $this->assertStringContainsString('/fixtures/libfpm.a', $config['libs']);
     }
 
+    public function testResolvedConfigLinksMimallocIntoPhpOnly(): void
+    {
+        $this->loadConfig([
+            'php' => ['type' => 'target', 'depends' => ['core']],
+            'core' => ['type' => 'library', 'static-libs' => ['/fixtures/libcore.a']],
+            'ext-demo' => ['type' => 'php-extension', 'depends' => ['ext-lib']],
+            'ext-lib' => ['type' => 'library', 'static-libs' => ['/fixtures/libext.a']],
+            'mimalloc' => ['type' => 'library', 'static-libs' => ['/fixtures/libmimalloc.a']],
+        ]);
+        $installer = $this->createInstaller([
+            'core' => 'library',
+            'ext-lib' => 'library',
+            'ext-demo' => 'static-extension',
+            'mimalloc' => 'library',
+            'php' => 'target',
+        ]);
+
+        $php = new SPCConfigUtil(['libs_only_deps' => true])->configForResolvedBuild(['php'], $installer);
+        $extension = new SPCConfigUtil()->configForResolvedBuild(['ext-demo'], $installer);
+
+        $this->assertStringContainsString('/fixtures/libmimalloc.a', $php['libs']);
+        $this->assertStringNotContainsString('/fixtures/libmimalloc.a', $extension['libs']);
+    }
+
     public function testResolvedConfigRejectsRootOutsideResolvedSet(): void
     {
         $this->loadLinkFixture();

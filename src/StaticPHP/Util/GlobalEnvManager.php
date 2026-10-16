@@ -72,6 +72,8 @@ class GlobalEnvManager
             }
         }
 
+        self::applyProxy();
+
         ToolchainManager::initToolchain();
 
         // apply second time
@@ -141,6 +143,32 @@ class GlobalEnvManager
                 self::putenv("YACC={$yacc}");
             }
         }
+    }
+
+    /**
+     * Apply the proxy settings from the environment variable `SPC_PROXY` to the appropriate environment variables for different tools (curl, git, Go toolchain).
+     */
+    private static function applyProxy(): void
+    {
+        $proxy = trim(getenv('SPC_PROXY') ?: '');
+        if ($proxy === '') {
+            return;
+        }
+
+        foreach (['ALL_PROXY', 'all_proxy'] as $name) {
+            self::putenv("{$name}={$proxy}");
+        }
+
+        // apply go proxy
+        $goproxy = preg_replace('#^socks5h://#i', 'socks5://', $proxy);
+        foreach (['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy'] as $name) {
+            self::putenv("{$name}={$goproxy}");
+        }
+
+        spc_add_log_filter($proxy);
+        spc_add_log_filter($goproxy);
+
+        logger()->debug('Detected SPC_PROXY, applied to ALL_PROXY, all_proxy, HTTP_PROXY, HTTPS_PROXY, http_proxy, https_proxy');
     }
 
     private static function readIniFile(): array

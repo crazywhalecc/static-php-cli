@@ -40,15 +40,21 @@ class ClangNativeToolchain implements UnixToolchainInterface
         }
     }
 
-    public function getCompilerInfo(): ?string
+    public function getCompilerVersion(): ?string
     {
         $compiler = getenv('CC') ?: 'clang';
         $version = shell(false)->execWithResult("{$compiler} --version", false);
-        $head = pathinfo($compiler, PATHINFO_BASENAME);
         if ($version[0] === 0 && preg_match('/clang version (\d+\.\d+\.\d+)/', $version[1][0], $match)) {
-            return "{$head} {$match[1]}";
+            return $match[1];
         }
-        return $head;
+        return null;
+    }
+
+    public function getCompilerInfo(): ?string
+    {
+        $head = pathinfo((string) (getenv('CC') ?: 'clang'), PATHINFO_BASENAME);
+        $version = $this->getCompilerVersion();
+        return $version !== null ? "{$head} {$version}" : $head;
     }
 
     public function isStatic(): bool

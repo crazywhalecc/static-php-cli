@@ -10,12 +10,14 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Runtime\Shell\Shell;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Toolchain\ToolchainManager;
+use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
-use StaticPHP\Util\System\LinuxUtil;
 
 class PackageBuilder
 {
@@ -87,6 +89,10 @@ class PackageBuilder
                 $source_info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo($package->getName());
                 ToolVersionRegistry::record($package->getName(), $source_info['version'] ?? null);
             }
+
+            // Record the fingerprint of the inputs that produced these outputs, so a later run can
+            // tell whether this package is still up to date (a no-op without a declared stamp).
+            $package->writeInstallStamp();
         } catch (SPCException $e) {
             // Ensure package information is bound if not already
             if ($e->getPackageInfo() === null) {
@@ -187,14 +193,21 @@ class PackageBuilder
         if (SystemTarget::getTargetOS() === 'Darwin') {
             shell()->exec("dsymutil -f {$binary_path} -o {$debug_file}");
         } elseif (SystemTarget::getTargetOS() === 'Linux') {
-            if ($eu_strip = LinuxUtil::findCommand('eu-strip')) {
+            $objcopy = $this->getBinUtil('objcopy');
+            try {
+                FileSystem::copy($binary_path, $debug_file);
                 shell()
-                    ->exec("{$eu_strip} -f {$debug_file} {$binary_path}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
-            } else {
-                shell()
-                    ->exec("objcopy --only-keep-debug {$binary_path} {$debug_file}")
-                    ->exec("objcopy --add-gnu-debuglink={$debug_file} {$binary_path}");
+                    ->exec("{$objcopy} --strip-debug {$binary_path}")
+                    ->exec("{$objcopy} --add-gnu-debuglink={$debug_file} {$binary_path}");
+            } catch (SPCException $e) {
+                // A separate debug file is optional. Native builds do not require the LLVM binutils,
+                // so degrade to "no debug file" instead of failing an otherwise good build.
+                logger()->warning("Could not extract debug info from '{$binary_path}' with '{$objcopy}': {$e->getMessage()}");
+                logger()->warning('Continuing without a separate debug file. Install the LLVM binutils (`bin/spc install-pkg llvm-tools`) to keep debug information.');
+                if (is_file($debug_file)) {
+                    unlink($debug_file); // do not leave a debug file the build did not register
+                }
+                return '';
             }
         } else {
             logger()->debug('extractDebugInfo is only supported on Linux and macOS');
@@ -205,15 +218,81 @@ class PackageBuilder
 
     /**
      * Strip unneeded symbols from binary file.
+     *
+     * Under the zig toolchain the LLVM binutils are only required for cross builds (see
+     * ZigToolchain::getRequiredPackages()). Native builds use the host strip, which can choke on
+     * zig/LLVM bitcode, and a build must not fail because of that: skipping strip only costs
+     * binary size.
      */
     public function stripBinary(string $binary_path): void
     {
-        shell()->exec(match (SystemTarget::getTargetOS()) {
-            'Darwin' => "strip -S {$binary_path}",
-            'Linux' => "strip --strip-unneeded {$binary_path}",
+        $strip = $this->getBinUtil('strip');
+        $cmd = match (SystemTarget::getTargetOS()) {
+            'Darwin' => "{$strip} -S {$binary_path}",
+            'Linux' => "{$strip} --strip-unneeded {$binary_path}",
             'Windows' => 'echo "Skip strip on Windows"', // Windows strip is not available for now
             default => throw new SPCInternalException('stripBinary is only supported on Linux and macOS'),
-        });
+        };
+        try {
+            shell()->exec($cmd);
+        } catch (SPCException $e) {
+            if (!$this->shouldAdviseLlvmTools()) {
+                throw $e;
+            }
+            logger()->warning("Failed to strip '{$binary_path}' with '{$strip}': {$e->getMessage()}");
+            logger()->warning('Continuing without strip (this only affects binary size). Install the LLVM binutils (`bin/spc install-pkg llvm-tools`) if it keeps happening.');
+        }
+    }
+
+    /**
+     * True when the LLVM binutils would help but are not installed: the zig toolchain is active
+     * and the llvm-tools package is missing (optional for native builds; a cross build that first
+     * had to install zig only gets it on its next run).
+     *
+     * Guarded because a custom registry does not have to ship `llvm-tools`; in that case there is
+     * nothing to advise and the original strip error has to surface unchanged.
+     */
+    private function shouldAdviseLlvmTools(): bool
+    {
+        if (ToolchainManager::getToolchainClass() !== ZigToolchain::class) {
+            return false;
+        }
+        try {
+            $llvm_tools = PackageLoader::getPackage('llvm-tools');
+        } catch (WrongUsageException) {
+            return false;
+        }
+        return !($llvm_tools instanceof ToolPackage && $llvm_tools->isInstalled());
+    }
+
+    private function getBinUtil(string $name): string
+    {
+        $env = getenv(strtoupper($name)) ?: '';
+        $is_zig = ToolchainManager::getToolchainClass() === ZigToolchain::class;
+
+        // Zig ships zig-<tool> wrappers for its own binutils, but they only implement a subset of
+        // the options. Treat them as absent so these post-processing steps use llvm-tools when
+        // installed and the host binutils otherwise, which is what lets native builds work
+        // without the LLVM binutils.
+        if ($is_zig && $env === "zig-{$name}") {
+            $env = '';
+        }
+
+        // Honor an explicit override.
+        if ($env !== '') {
+            return $env;
+        }
+
+        if ($is_zig) {
+            $llvm_tools = PackageLoader::getPackage('llvm-tools');
+            if ($llvm_tools instanceof ToolPackage && $llvm_tools->isInstalled()) {
+                return $llvm_tools->getBinary("llvm-{$name}");
+            }
+            // Optional for native builds: make it visible which binutil the build actually uses.
+            logger()->debug("llvm-tools is not installed; falling back to the host '{$name}' (install the LLVM binutils with `bin/spc install-pkg llvm-tools`).");
+        }
+
+        return $name;
     }
 
     private function installLicense(Package $package, array $license): void

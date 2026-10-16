@@ -450,11 +450,27 @@ artifact:
 
 完全自定义的下载逻辑，由 `src/Package/Artifact/` 目录下对应的 PHP 类实现。如果不指定 `func`，则调用类的默认下载方法。
 
-- **选填**：`func` — 调用实现类中的指定方法名
+- **选填**：
+  - `func` — 调用实现类中的指定方法名
+  - `base-url` — 实现类可从其 artifact 配置中读取的额外基础 URL，例如配合运行时计算出的文件名拼接下载地址
 
 ```yaml
 artifact:
   source:
     type: custom
+  binary:
+    linux-x86_64:
+      type: custom
+      base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/'
+```
+
+自定义下载器会收到 `Artifact`，并通过 `getBinaryDownloadConfig()` 读取该选填项：
+
+```php
+public function downBinary(ArtifactDownloader $downloader, Artifact $artifact): DownloadResult
+{
+    $base_url = $artifact->getBinaryDownloadConfig()['base-url'];
+    // ... 拼接运行时计算出的文件名并下载
+}
 ```
 

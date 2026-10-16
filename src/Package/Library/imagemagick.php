@@ -106,6 +106,7 @@ class imagemagick
             ->optionalPackage('zlib', ...ac_with_args('zlib'))
             ->optionalPackage('xz', ...ac_with_args('lzma'))
             ->optionalPackage('zstd', ...ac_with_args('zstd'))
+            ->optionalPackage('lcms2', ...ac_with_args('lcms'))
             ->optionalPackage('freetype', ...ac_with_args('freetype'))
             ->optionalPackage('bzip2', ...ac_with_args('bzlib'))
             ->optionalPackage('libjxl', ...ac_with_args('jxl'))

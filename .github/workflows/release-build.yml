@@ -21,19 +21,20 @@ jobs:
     name: "Build SPC Binary for ${{ matrix.operating-system.name }}"
     runs-on: ${{ matrix.operating-system.os }}
     strategy:
+      fail-fast: false
       matrix:
         operating-system:
           - name: "linux-x86_64"
             os: "ubuntu-latest"
             filename: "spc-linux-x86_64.tar.gz"
           - name: "macos-x86_64"
-            os: "macos-15-intel"
+            os: "macos-latest"
             filename: "spc-macos-x86_64.tar.gz"
           - name: "linux-aarch64"
             os: "ubuntu-latest"
             filename: "spc-linux-aarch64.tar.gz"
           - name: "macos-aarch64"
-            os: "macos-14"
+            os: "macos-latest"
             filename: "spc-macos-aarch64.tar.gz"
           - name: "windows-x64"
             os: "ubuntu-latest"
