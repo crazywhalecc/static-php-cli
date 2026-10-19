@@ -20,7 +20,7 @@ class gmp
         $make = UnixAutoconfExecutor::create($lib)->appendEnv(['CFLAGS' => '-std=c17']);
         if (SystemTarget::getTargetArch() === 'x86_64' && SystemTarget::getTargetOS() === 'Linux') {
             $libc = SystemTarget::getLibc() === 'glibc' ? 'gnu' : 'musl';
-            $make->addConfigureArgs(["--host=x86_64-pc-linux-{$libc}"]);
+            $make->addConfigureArgs("--host=x86_64-pc-linux-{$libc}");
         }
         $make->configure('--enable-fat')->make();
         $lib->patchPkgconfPrefix(['gmp.pc']);
