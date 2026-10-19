@@ -104,6 +104,7 @@ class SwitchPhpVersionCommand extends BaseCommand
      * Accepts:
      * - Major.Minor format, e.g. 7.4
      * - Full version format, e.g. 8.4.5, 8.3.12, etc.
+     * - Pre-release format, e.g. 8.6.0RC1
      */
     private function isValidPhpVersion(string $version): bool
     {
@@ -112,8 +113,8 @@ class SwitchPhpVersionCommand extends BaseCommand
             return true;
         }
 
-        // Check full version format (e.g., 8.4.5)
-        if (preg_match('/^\d+\.\d+\.\d+$/', $version)) {
+        // Check full version format (e.g., 8.4.5, 8.6.0RC1)
+        if (preg_match('/^\d+\.\d+\.\d+(?:(?:alpha|beta|RC)\d+)?$/', $version)) {
             return true;
         }
 

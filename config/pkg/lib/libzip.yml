@@ -11,6 +11,10 @@ libzip:
       license: BSD-3-Clause
   depends:
     - zlib
+  depends@windows:
+    - zlib
+    - bzip2
+    - xz
   suggests:
     - bzip2
     - xz

@@ -17,8 +17,8 @@ class bzip2
     #[PatchBeforeBuild]
     public function patchBeforeBuild(LibraryPackage $lib): void
     {
-        // Makefile pins -O2 -fPIC; inject SPC_DEFAULT_CFLAGS
-        $extra = deduplicate_flags(trim((string) getenv('SPC_DEFAULT_CFLAGS')) . ' -fPIC -Wall');
+        // Inject SPC_DEFAULT_CFLAGS into the Makefile
+        $extra = deduplicate_flags(trim((string) getenv('SPC_DEFAULT_CFLAGS')) . ' -Wall');
         FileSystem::replaceFileStr($lib->getSourceDir() . '/Makefile', 'CFLAGS=-Wall', "CFLAGS={$extra}");
     }
 

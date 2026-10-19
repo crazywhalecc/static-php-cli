@@ -4,7 +4,6 @@ ext-fastjson:
     source:
       type: ghtar
       repo: iliaal/fastjson
-      extract: php-src/ext/fastjson
       prefer-stable: true
     metadata:
       license-files: [LICENSE]

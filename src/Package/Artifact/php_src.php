@@ -45,7 +45,9 @@ class php_src
                 FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/gd/libgd/gdft.c', '#ifndef MSWIN32', '#ifndef _WIN32');
             }
             // custom config.w32, because official config.w32 is hard-coded many things
-            if ($ver_id >= 80500) {
+            if ($ver_id >= 80600) {
+                $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_86.w32');
+            } elseif ($ver_id >= 80500) {
                 $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_85.w32');
             } elseif ($ver_id >= 80100) {
                 $origin = file_get_contents(ROOT_DIR . '/src/globals/extra/gd_config_81.w32');

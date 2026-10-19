@@ -4,7 +4,6 @@ ext-gmssl:
     source:
       type: ghtar
       repo: gmssl/GmSSL-PHP
-      extract: php-src/ext/gmssl
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

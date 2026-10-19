@@ -33,7 +33,7 @@ class PECL implements DownloadTypeInterface, CheckUpdateInterface
         $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
         logger()->debug("Downloading {$name} from URL: {$url}");
         default_shell()->executeCurlDownload($url, $path, retries: $downloader->getRetry());
-        $extract = $config['extract'] ?? ('php-src/ext/' . $this->getExtractName($name));
+        $extract = $config['extract'] ?? null;
         return DownloadResult::archive($filename, $config, $extract, version: $version, downloader: static::class);
     }
 

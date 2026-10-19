@@ -4,7 +4,6 @@ ext-clickhouse:
     source:
       type: ghtar
       repo: iliaal/php_clickhouse
-      extract: php-src/ext/clickhouse
       prefer-stable: true
     metadata:
       license-files: [LICENSE]

@@ -22,18 +22,4 @@ class pdo_sqlsrv
             FileSystem::replaceFileStr(SOURCE_PATH . '/php-src/ext/pdo_sqlsrv/config.w32', '/sdl', '');
         }
     }
-
-    #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-pdo_sqlsrv')]
-    #[PatchDescription('Fix pdo_sqlsrv directory structure for PHP 8.5+ (source layout changed)')]
-    public function patchDirectoryStructureForPhp85(): void
-    {
-        $source_dir = SOURCE_PATH . '/php-src/ext/pdo_sqlsrv';
-        if (!file_exists($source_dir . '/config.m4') && is_dir($source_dir . '/source/pdo_sqlsrv')) {
-            FileSystem::moveFileOrDir($source_dir . '/LICENSE', $source_dir . '/source/pdo_sqlsrv/LICENSE');
-            FileSystem::moveFileOrDir($source_dir . '/source/shared', $source_dir . '/source/pdo_sqlsrv/shared');
-            FileSystem::moveFileOrDir($source_dir . '/source/pdo_sqlsrv', SOURCE_PATH . '/pdo_sqlsrv');
-            FileSystem::removeDir($source_dir);
-            FileSystem::moveFileOrDir(SOURCE_PATH . '/pdo_sqlsrv', $source_dir);
-        }
-    }
 }

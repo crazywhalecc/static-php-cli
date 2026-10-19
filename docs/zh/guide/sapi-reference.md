@@ -273,5 +273,6 @@ SPC_TARGET=native-native-gnu.2.17 spc build:php "bcmath,openssl" --build-cli
 
 这将使用 Zig 工具链构建出一个准静态二进制，动态链接 glibc 2.17，可运行于大多数现代 GNU/Linux 发行版，无需 Docker，也无需额外的交叉编译工具链。该产物支持 `dl()`、FFI 和运行时加载 `.so` 扩展，但无法运行于 Alpine Linux 等基于 musl 的系统。
 
-**Windows** — Windows 上的 PHP 扩展均以 `.dll` 形式分发，且依赖官方动态构建的 PHP 中附带的 DLL 文件。StaticPHP 构建的静态 PHP 可执行文件不包含这些 DLL，因此 Windows 不支持动态扩展加载，所有扩展必须在构建时静态编译进去。
+默认 musl 静态 target、musl 动态和 glibc 动态构建之间的性能与部署取舍，请参阅[性能](../develop/performance#linux-选择链接方式和-libc)。
 
+**Windows** — Windows 上的 PHP 扩展均以 `.dll` 形式分发，且依赖官方动态构建的 PHP 中附带的 DLL 文件。StaticPHP 构建的静态 PHP 可执行文件不包含这些 DLL，因此 Windows 不支持动态扩展加载，所有扩展必须在构建时静态编译进去。

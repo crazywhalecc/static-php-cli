@@ -21,9 +21,9 @@ class rdkafka extends PhpExtensionPackage
     #[PatchDescription('Patch rdkafka extension config.m4 to support pkg-config and fix library check')]
     public function patchBeforeBuildconf(): bool
     {
-        FileSystem::replaceFileStr("{$this->getSourceDir()}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\n", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm \$RDKAFKA_LIBS\n");
-        FileSystem::replaceFileStr("{$this->getSourceDir()}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\"\n", '-L$RDKAFKA_DIR/$PHP_LIBDIR -lm $RDKAFKA_LIBS"');
-        FileSystem::replaceFileStr("{$this->getSourceDir()}/config.m4", 'PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,', 'AC_CHECK_LIB([$LIBNAME], [$LIBSYMBOL],');
+        FileSystem::replaceFileStr("{$this->getBuildDir()}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\n", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm \$RDKAFKA_LIBS\n");
+        FileSystem::replaceFileStr("{$this->getBuildDir()}/config.m4", "-L\$RDKAFKA_DIR/\$PHP_LIBDIR -lm\"\n", '-L$RDKAFKA_DIR/$PHP_LIBDIR -lm $RDKAFKA_LIBS"');
+        FileSystem::replaceFileStr("{$this->getBuildDir()}/config.m4", 'PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,', 'AC_CHECK_LIB([$LIBNAME], [$LIBSYMBOL],');
         return true;
     }
 
@@ -33,12 +33,12 @@ class rdkafka extends PhpExtensionPackage
     {
         // when compiling rdkafka with inline builds, it shows some errors, I don't know why.
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/rdkafka.c",
+            "{$this->getBuildDir()}/rdkafka.c",
             "#ifdef HAS_RD_KAFKA_TRANSACTIONS\n#include \"kafka_error_exception.h\"\n#endif",
             '#include "kafka_error_exception.h"'
         );
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/kafka_error_exception.h",
+            "{$this->getBuildDir()}/kafka_error_exception.h",
             ['#ifdef HAS_RD_KAFKA_TRANSACTIONS', '#endif'],
             ''
         );
@@ -49,7 +49,8 @@ class rdkafka extends PhpExtensionPackage
     #[CustomPhpConfigureArg('Linux')]
     public function getUnixConfigureArg(bool $shared, PackageBuilder $builder): string
     {
-        $pkgconf_libs = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])->getExtensionConfig($this);
+        $pkgconf_libs = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])
+            ->configForResolvedBuild([$this->getName()], $this->getInstaller());
         return '--with-rdkafka=' . ($shared ? 'shared,' : '') . $builder->getBuildRootPath() . " RDKAFKA_LIBS=\"{$pkgconf_libs['libs']}\"";
     }
 }

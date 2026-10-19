@@ -109,6 +109,32 @@ class ArtifactTest extends TestCase
         $this->assertNull($artifact->getDownloadConfig('non-existent'));
     }
 
+    // ==================== getBinaryDownloadConfig ====================
+
+    public function testGetBinaryDownloadConfigReturnsCurrentPlatformConfig(): void
+    {
+        $platform = $this->getCurrentPlatform();
+        $expected = ['type' => 'custom', 'base-url' => 'https://example.com/deps/'];
+        $artifact = new Artifact('my-pkg', ['binary' => [$platform => $expected]]);
+
+        $this->assertSame($expected, $artifact->getBinaryDownloadConfig());
+    }
+
+    public function testGetBinaryDownloadConfigReturnsNullWhenPlatformMissing(): void
+    {
+        $artifact = new Artifact('my-pkg', ['binary' => ['linux-x86_64' => ['type' => 'custom']]]);
+
+        $this->assertNull($artifact->getBinaryDownloadConfig('definitely-not-a-platform'));
+    }
+
+    public function testGetBinaryDownloadConfigAcceptsExplicitPlatform(): void
+    {
+        $expected = ['type' => 'custom', 'base-url' => 'https://example.com/'];
+        $artifact = new Artifact('my-pkg', ['binary' => ['linux-x86_64' => $expected]]);
+
+        $this->assertSame($expected, $artifact->getBinaryDownloadConfig('linux-x86_64'));
+    }
+
     // ==================== hasSource ====================
 
     public function testHasSourceReturnsTrueWhenConfigHasSource(): void
@@ -278,15 +304,14 @@ class ArtifactTest extends TestCase
         $this->assertSame($artifact->getSourceDir(), $artifact->getSourceRoot());
     }
 
-    public function testGetSourceRootUsesMetadataSourceRoot(): void
+    public function testGetSourceRootUsesSourceRootField(): void
     {
         $cache = $this->makeStubbedArtifactCache([]);
         ApplicationContext::initialize();
         ApplicationContext::set(ArtifactCache::class, $cache);
 
         $artifact = new Artifact('my-pkg', [
-            'source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz'],
-            'metadata' => ['source-root' => 'src'],
+            'source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz', 'source-root' => 'src'],
         ]);
 
         $expected = $artifact->getSourceDir() . DIRECTORY_SEPARATOR . 'src';

@@ -14,6 +14,12 @@ class GenExtTestMatrixCommand extends BaseCommand
 {
     private const string BUILD_TARGETS = '--build-cli --build-cgi --build-micro --with-suggests -vvv';
 
+    private const string FRANKENPHP_BUILD_TARGETS = '--build-cli --build-frankenphp --enable-zts --with-suggests -vvv';
+
+    private const array SUPPORTED_SAPIS = [
+        'frankenphp',
+    ];
+
     private const array OS_RUNNERS = [
         'linux' => ['arch' => 'x86_64', 'runner' => 'ubuntu-latest', 'os_key' => 'Linux'],
         'windows' => ['arch' => 'x86_64', 'runner' => 'windows-2025', 'os_key' => 'Windows'],
@@ -84,6 +90,7 @@ class GenExtTestMatrixCommand extends BaseCommand
         $this->addOption('for-extensions', null, InputOption::VALUE_OPTIONAL, 'Filter by extension display names, comma-separated', '')
             ->addOption('for-libs', null, InputOption::VALUE_OPTIONAL, 'Filter by lib names (depends+suggests), comma-separated', '')
             ->addOption('os', null, InputOption::VALUE_OPTIONAL, 'Filter by OS (Linux/Darwin/Windows), comma-separated', '')
+            ->addOption('sapi', null, InputOption::VALUE_OPTIONAL, 'Add extra SAPI build tests, comma-separated (supported: frankenphp)', '')
             ->addOption('tier2', null, InputOption::VALUE_NONE, 'Use Tier 2 runners (Linux aarch64 + macOS x86_64, no Windows)');
     }
 
@@ -98,7 +105,14 @@ class GenExtTestMatrixCommand extends BaseCommand
         $filter_extensions = $parse_option('for-extensions');
         $filter_libs = $parse_option('for-libs');
         $filter_os_keys = $parse_option('os');
+        $filter_sapis = array_unique($parse_option('sapi'));
         $tier2 = (bool) $this->input->getOption('tier2');
+
+        $unknown_sapis = array_values(array_diff($filter_sapis, self::SUPPORTED_SAPIS));
+        if (!empty($unknown_sapis)) {
+            $this->output->writeln('<error>Unsupported SAPI(s): ' . implode(', ', $unknown_sapis) . '</error>');
+            return static::USER_ERROR;
+        }
 
         $base_runners = $tier2 ? self::OS_RUNNERS_TIER2 : self::OS_RUNNERS;
 
@@ -126,6 +140,67 @@ class GenExtTestMatrixCommand extends BaseCommand
             }
         }
 
+        [$entries, $all_ext_lib_deps] = $this->buildEntriesForRunners(
+            $base_runners,
+            $filter_os_keys,
+            $all_regular,
+            $all_virtual,
+            $all_libraries,
+            self::BUILD_TARGETS,
+            'default',
+        );
+
+        if (in_array('frankenphp', $filter_sapis, true)) {
+            [$frankenphp_entries, $frankenphp_ext_lib_deps] = $this->buildEntriesForRunners(
+                self::OS_RUNNERS,
+                [],
+                $all_regular,
+                $all_virtual,
+                $all_libraries,
+                self::FRANKENPHP_BUILD_TARGETS,
+                'frankenphp',
+            );
+            $entries = array_merge($entries, $frankenphp_entries);
+            $all_ext_lib_deps = array_replace_recursive($all_ext_lib_deps, $frankenphp_ext_lib_deps);
+        }
+
+        if (!empty($filter_extensions) || !empty($filter_libs)) {
+            $entries = array_values(array_filter($entries, function (array $entry) use ($filter_extensions, $filter_libs, $all_ext_lib_deps): bool {
+                $names = explode(',', $entry['extension']);
+
+                if (!empty($filter_extensions) && count(array_intersect($names, $filter_extensions)) > 0) {
+                    return true;
+                }
+
+                if (!empty($filter_libs)) {
+                    $lib_deps = $all_ext_lib_deps[$entry['os']] ?? [];
+                    foreach ($names as $name) {
+                        if (count(array_intersect($lib_deps[$name] ?? [], $filter_libs)) > 0) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }));
+        }
+
+        $this->output->write(json_encode($entries, JSON_UNESCAPED_SLASHES));
+        return static::SUCCESS;
+    }
+
+    /**
+     * @return array{array<int, array<string, string>>, array<string, array<string, string[]>>}
+     */
+    private function buildEntriesForRunners(
+        array $base_runners,
+        array $filter_os_keys,
+        array $all_regular,
+        array $all_virtual,
+        array $all_libraries,
+        string $build_targets,
+        string $sapi,
+    ): array {
         $os_runners = empty($filter_os_keys)
             ? $base_runners
             : array_filter($base_runners, fn ($info) => in_array($info['os_key'], $filter_os_keys, true));
@@ -237,40 +312,18 @@ class GenExtTestMatrixCommand extends BaseCommand
 
             sort($groups);
             foreach ($groups as $group) {
-                $extra = $this->extraBuildFlags($group);
                 $entries[] = [
                     'runner' => $os_info['runner'],
                     'os' => $os,
                     'arch' => $os_info['arch'],
+                    'sapi' => $sapi,
                     'extension' => $group,
-                    'build-args' => './bin/spc build "' . $group . '" ' . self::BUILD_TARGETS . ($extra !== '' ? ' ' . $extra : ''),
+                    'build-args' => './bin/spc build "' . $group . '" ' . $this->buildTargetsWithExtraFlags($build_targets, $group),
                 ];
             }
         }
 
-        if (!empty($filter_extensions) || !empty($filter_libs)) {
-            $entries = array_values(array_filter($entries, function (array $entry) use ($filter_extensions, $filter_libs, $all_ext_lib_deps): bool {
-                $names = explode(',', $entry['extension']);
-
-                if (!empty($filter_extensions) && count(array_intersect($names, $filter_extensions)) > 0) {
-                    return true;
-                }
-
-                if (!empty($filter_libs)) {
-                    $lib_deps = $all_ext_lib_deps[$entry['os']] ?? [];
-                    foreach ($names as $name) {
-                        if (count(array_intersect($lib_deps[$name] ?? [], $filter_libs)) > 0) {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }));
-        }
-
-        $this->output->write(json_encode($entries, JSON_UNESCAPED_SLASHES));
-        return static::SUCCESS;
+        return [$entries, $all_ext_lib_deps];
     }
 
     /**
@@ -393,6 +446,18 @@ class GenExtTestMatrixCommand extends BaseCommand
             if (in_array($ext, $names, true)) {
                 $flags[] = $extra;
             }
+        }
+        return implode(' ', $flags);
+    }
+
+    private function buildTargetsWithExtraFlags(string $build_targets, string $group): string
+    {
+        $flags = explode(' ', $build_targets);
+        foreach (explode(' ', $this->extraBuildFlags($group)) as $extra) {
+            if ($extra === '' || in_array($extra, $flags, true)) {
+                continue;
+            }
+            $flags[] = $extra;
         }
         return implode(' ', $flags);
     }

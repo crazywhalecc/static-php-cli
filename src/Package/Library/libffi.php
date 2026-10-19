@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
+use StaticPHP\Runtime\SystemTarget;
 
 #[Library('libffi')]
 class libffi extends LibraryPackage
@@ -28,7 +29,7 @@ class libffi extends LibraryPackage
     #[BuildFor('Darwin')]
     public function buildDarwin(): void
     {
-        $arch = getenv('SPC_ARCH');
+        $arch = SystemTarget::getTargetArch();
         UnixAutoconfExecutor::create($this)
             ->configure(
                 "--host={$arch}-apple-darwin",

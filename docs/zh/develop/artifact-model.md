@@ -70,7 +70,6 @@ Artifact 包含 `source`、`binary` 和 `metadata` 三个部分。
   metadata: # (optional)
     license: "" # (optional) SPDX
     license-files: ["LICENSE"] # License files from original source dir
-    source-root: "subdir" # (optional) If package source is in subdir, use this to change base
 ```
 
 下面是 `source-object` 的基本格式：
@@ -80,11 +79,34 @@ Artifact 包含 `source`、`binary` 和 `metadata` 三个部分。
   type: "url" # Download type
   # ...: Different type requires differnt keys here, read below
   extract: "path/to/dir" # (optional) Change extract dir, default: `SOURCE_PATH/{artifact-name}`
+  source-root: "src" # (optional) Subdirectory of the extracted source that contains the buildable source root
+```
+
+## 通用字段
+
+除了各类型特有的字段外，所有 source 对象都支持以下可选字段：
+
+### extract
+
+- **类型**：`string`（选填）
+- **说明**：覆盖解压目录，默认为 `SOURCE_PATH/{artifact-name}`。
+
+### source-root
+
+- **类型**：`string`（选填）
+- **说明**：当可构建的源码根目录位于解压目录的子目录中时，使用该字段指定子目录路径。框架在构建时会以 `源码目录 + source-root` 作为工作目录，而非解压后的顶层目录。例如 `config.m4` 位于 `ext/` 子目录中的 PIE 扩展包，或解压后实际源码根在 `src/` 子目录下的 krb5。对于 `php-extension` 类型的包，源码始终解压到默认源码目录；在 PHP 内联构建执行 `buildconf` 之前，php target 会将每个扩展的源码根目录链接到 `php-src/ext/{name}`——Unix 上使用符号链接，Windows 上使用 NTFS junction（失败时回退为普通复制）——以便构建系统能在扩展根目录找到 `config.m4`/`config.w32`，且构建阶段的补丁始终作用于实际被编译的源码树。扩展包类可以使用 `getBuildDir()` 定位该树（shared phpize 构建时等同于 `getSourceRoot()`），而 `getSourceDir()`/`getSourceRoot()` 始终指向 artifact 源码侧。
+
+```yaml
+# krb5 的源码解压后实际根目录在 src/ 子目录下
+source:
+  type: url
+  url: 'https://web.mit.edu/kerberos/dist/krb5/1.22/krb5-1.22.2.tar.gz'
+  source-root: src
 ```
 
 ## Metadata
 
-`metadata` 字段用于声明 Artifact 的附加信息，目前支持以下三个子字段：
+`metadata` 字段用于声明 Artifact 的附加信息，目前支持以下两个子字段：
 
 ### license
 
@@ -121,17 +143,6 @@ metadata:
 # 使用框架内置 License（源码包不含 License 文件时）
 metadata:
   license-files: ['@/bzip2.txt']
-```
-
-### source-root
-
-- **类型**：`string`（选填）
-- **说明**：当 Artifact 解压后，实际的源码根目录位于解压目录的子目录中时，使用该字段指定子目录名。框架在执行构建时会将工作目录切换到该子目录，而非解压后的顶层目录。
-
-```yaml
-# krb5 的源码解压后实际根目录在 src/ 子目录下
-metadata:
-  source-root: src
 ```
 
 ## 下载来源
@@ -355,6 +366,7 @@ artifact:
 - **必填**：`repo` — Packagist 包路径，格式 `vendor/package`
 - **选填**：
   - `extract` — 解压目标目录
+  - `prefer-stable` — 是否跳过预发布版本（默认 `true`）
 
 ```yaml
 # xdebug 从 Packagist 下载
@@ -438,11 +450,27 @@ artifact:
 
 完全自定义的下载逻辑，由 `src/Package/Artifact/` 目录下对应的 PHP 类实现。如果不指定 `func`，则调用类的默认下载方法。
 
-- **选填**：`func` — 调用实现类中的指定方法名
+- **选填**：
+  - `func` — 调用实现类中的指定方法名
+  - `base-url` — 实现类可从其 artifact 配置中读取的额外基础 URL，例如配合运行时计算出的文件名拼接下载地址
 
 ```yaml
 artifact:
   source:
     type: custom
+  binary:
+    linux-x86_64:
+      type: custom
+      base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/'
+```
+
+自定义下载器会收到 `Artifact`，并通过 `getBinaryDownloadConfig()` 读取该选填项：
+
+```php
+public function downBinary(ArtifactDownloader $downloader, Artifact $artifact): DownloadResult
+{
+    $base_url = $artifact->getBinaryDownloadConfig()['base-url'];
+    // ... 拼接运行时计算出的文件名并下载
+}
 ```
 

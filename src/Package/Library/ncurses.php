@@ -65,6 +65,7 @@ class ncurses
             '--without-tests',
             '--without-dlsym',
             '--without-debug',
+            '--disable-stripping',
             '--enable-symlinks',
             "--with-terminfo-dirs={$terminfo_dirs}",
             "--bindir={$package->getBinDir()}",

@@ -74,7 +74,6 @@ Full artifact object format:
   metadata: # (optional)
     license: "" # (optional) SPDX identifier
     license-files: ["LICENSE"] # License files from the source directory
-    source-root: "subdir" # (optional) Use if the actual source root is inside a subdirectory
 ```
 
 The basic format of a `source-object`:
@@ -84,11 +83,34 @@ The basic format of a `source-object`:
   type: "url" # Download type
   # ...: Additional keys depend on the type; see below
   extract: "path/to/dir" # (optional) Override extract path; default: SOURCE_PATH/{artifact-name}
+  source-root: "src" # (optional) Subdirectory of the extracted source that contains the buildable source root
+```
+
+## Common Fields
+
+Besides the type-specific keys, every source object accepts the following optional fields:
+
+### extract
+
+- **Type**: `string` (optional)
+- **Description**: Overrides the extraction directory. Defaults to `SOURCE_PATH/{artifact-name}`.
+
+### source-root
+
+- **Type**: `string` (optional)
+- **Description**: When the buildable source root is located inside a subdirectory of the extracted archive, this field specifies that subdirectory path. The framework will use `source dir + source-root` as the working directory during the build instead of the top-level extraction directory. For example, a PIE package whose `config.m4` lives in an `ext/` subdirectory, or krb5 whose actual source root is in `src/` after extraction. For `php-extension` packages, sources are always extracted to the default source dir; before the in-tree PHP build runs `buildconf`, the php target links each extension's source root into `php-src/ext/{name}` — a symlink on Unix, an NTFS junction on Windows (with a plain copy as fallback) — so the build can find `config.m4`/`config.w32` at the extension root and build-stage patches always hit the tree actually being compiled. Extension package classes can use `getBuildDir()` to locate that tree (it equals `getSourceRoot()` for shared phpize builds), while `getSourceDir()`/`getSourceRoot()` always refer to the artifact source.
+
+```yaml
+# krb5's actual source root is in the src/ subdirectory after extraction
+source:
+  type: url
+  url: 'https://web.mit.edu/kerberos/dist/krb5/1.22/krb5-1.22.2.tar.gz'
+  source-root: src
 ```
 
 ## Metadata
 
-The `metadata` field provides supplementary information about an artifact. It supports three subfields:
+The `metadata` field provides supplementary information about an artifact. It supports two subfields:
 
 ### license
 
@@ -125,17 +147,6 @@ metadata:
 # Use a built-in license file when the source package does not include one
 metadata:
   license-files: ['@/bzip2.txt']
-```
-
-### source-root
-
-- **Type**: `string` (optional)
-- **Description**: When the actual source root is located inside a subdirectory of the extracted archive, this field specifies that subdirectory name. The framework will use this path as the working directory during the build instead of the top-level extraction directory.
-
-```yaml
-# krb5's actual source root is in the src/ subdirectory after extraction
-metadata:
-  source-root: src
 ```
 
 ## Download Types
@@ -359,6 +370,7 @@ Downloads a PHP extension from [Packagist](https://repo.packagist.org) following
 - **Required**: `repo` — Packagist package path in `vendor/package` format
 - **Optional**:
   - `extract` — override extraction directory
+  - `prefer-stable` — skip pre-release versions (default: `true`)
 
 ```yaml
 # xdebug downloaded from Packagist
@@ -442,10 +454,26 @@ artifact:
 
 Delegates download logic entirely to a PHP class under `src/Package/Artifact/`. If `func` is not specified, the class's default download method is called.
 
-- **Optional**: `func` — name of the specific method to invoke in the implementation class
+- **Optional**:
+  - `func` — name of the specific method to invoke in the implementation class
+  - `base-url` — an extra base URL the implementation can read from its artifact config, for example to assemble a download URL around a filename it computes at runtime
 
 ```yaml
 artifact:
   source:
     type: custom
+  binary:
+    linux-x86_64:
+      type: custom
+      base-url: 'https://dl.static-php.dev/v3/deps/llvm-tools/'
+```
+
+A custom downloader receives the `Artifact` and reads the option through `getBinaryDownloadConfig()`:
+
+```php
+public function downBinary(ArtifactDownloader $downloader, Artifact $artifact): DownloadResult
+{
+    $base_url = $artifact->getBinaryDownloadConfig()['base-url'];
+    // ... append the filename computed at runtime and download
+}
 ```

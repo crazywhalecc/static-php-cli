@@ -15,16 +15,6 @@ use StaticPHP\Util\FileSystem;
 #[Extension('glfw')]
 class glfw extends PhpExtensionPackage
 {
-    #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-glfw')]
-    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-glfw')]
-    #[PatchDescription('Patch glfw extension before buildconf')]
-    public function patchBeforeBuildconf(): void
-    {
-        if (!file_exists(SOURCE_PATH . '/php-src/ext/glfw')) {
-            FileSystem::copyDir($this->getSourceDir(), SOURCE_PATH . '/php-src/ext/glfw');
-        }
-    }
-
     #[BeforeStage('php', [php::class, 'configureForUnix'], 'ext-glfw')]
     #[PatchDescription('Patch glfw extension before configure')]
     public function patchBeforeConfigure(): void

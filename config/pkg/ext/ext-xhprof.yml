@@ -2,9 +2,9 @@ ext-xhprof:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: xhprof
-      extract: php-src/ext/xhprof-src
+      type: ghtar
+      repo: longxinH/xhprof
+      source-root: extension
     metadata:
       license-files: [LICENSE]
       license: Apache-2.0

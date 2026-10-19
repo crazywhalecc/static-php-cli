@@ -11,6 +11,7 @@ use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
+use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Runtime\SystemTarget;
 
 class zig
@@ -102,20 +103,28 @@ class zig
     ])]
     public function postExtractZig(string $target_path): void
     {
-        $files = ['zig', 'zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
-        $all_exist = true;
-        foreach ($files as $file) {
-            if (!file_exists("{$target_path}/{$file}")) {
-                $all_exist = false;
-                break;
-            }
-        }
-        if ($all_exist) {
-            return;
+        self::writeWrappers($target_path);
+    }
+
+    public static function writeWrappers(string $target_path): void
+    {
+        $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
+        // Guarded: an unreadable template used to write empty wrapper scripts, which only fails much
+        // later with an unrelated-looking error during configure.
+        $script_content = is_file($script_path) ? file_get_contents($script_path) : false;
+        if ($script_content === false) {
+            throw new SPCInternalException("Missing zig wrapper template at {$script_path}");
         }
 
-        $script_path = ROOT_DIR . '/src/globals/scripts/zig-cc.sh';
-        $script_content = file_get_contents($script_path);
+        $files = ['zig-cc', 'zig-c++', 'zig-ar', 'zig-ld.lld', 'zig-ranlib', 'zig-objcopy'];
+        // Nothing to do when the wrapper matches the current template and the whole set is present.
+        // Checked with is_file() instead of a silenced read: SPC's error handler logs PHP warnings
+        // even when they carry the @ operator, so a normal first-time install printed a warning
+        // about the very wrapper it was about to create.
+        $current = is_file("{$target_path}/zig-cc") ? file_get_contents("{$target_path}/zig-cc") : false;
+        if ($current === $script_content && array_all($files, fn ($file) => file_exists("{$target_path}/{$file}"))) {
+            return;
+        }
 
         file_put_contents("{$target_path}/zig-cc", $script_content);
         chmod("{$target_path}/zig-cc", 0755);

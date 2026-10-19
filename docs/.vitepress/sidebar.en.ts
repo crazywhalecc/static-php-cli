@@ -51,6 +51,7 @@ export default {
         { text: 'Build Lifecycle', link: '/en/develop/build-lifecycle' },
         { text: 'Compilation Tools', link: '/en/develop/system-build-tools' },
         { text: 'Doctor', link: '/en/develop/doctor-module' },
+        { text: 'Performance Engineering', link: '/en/develop/performance' },
         { text: 'PHP Source Modifications', link: '/en/develop/php-src-changes' },
       ],
     },

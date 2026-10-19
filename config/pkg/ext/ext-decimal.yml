@@ -5,7 +5,6 @@ ext-decimal:
       type: ghtagtar
       repo: php-decimal/ext-decimal
       match: 'v2\.\d.*'
-      extract: php-src/ext/decimal
     metadata:
       license-files: [LICENSE]
       license: MIT

@@ -51,8 +51,9 @@ class DownloaderOptions
         $shortI = $prefix ? null : 'i';
 
         return [
-            // php version option
-            new InputOption("{$p}with-php", null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.5)', '8.5'),
+            // php version option (null default: only enforced against the download cache when
+            // explicitly given; PhpRelease falls back to the latest 8.5.x when actually fetching)
+            new InputOption("{$p}with-php", null, InputOption::VALUE_REQUIRED, 'PHP version in major.minor format (default 8.5)'),
 
             // download preference options
             new InputOption("{$p}prefer-source", null, InputOption::VALUE_OPTIONAL, 'Prefer source downloads when both source and binary are available', false),
@@ -100,5 +101,22 @@ class DownloaderOptions
         }
 
         return $result;
+    }
+
+    /**
+     * Add artifact names to a list-valued option such as binary-only without narrowing it: true, or
+     * null (the flag given without a value), already applies to every artifact and stays as it is.
+     *
+     * @param  mixed            $current Current option value (false when the option was not given)
+     * @param  string[]         $names   Artifact names to add
+     * @return null|bool|string The merged option value
+     */
+    public static function addToList(mixed $current, array $names): bool|string|null
+    {
+        if ($current === true || $current === null) {
+            return $current;
+        }
+        $existing = is_string($current) && $current !== '' ? parse_comma_list($current) : [];
+        return implode(',', array_values(array_unique([...$existing, ...array_values($names)])));
     }
 }

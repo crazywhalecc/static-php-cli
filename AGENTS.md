@@ -6,12 +6,13 @@ This file is the shared entry point for coding agents such as Codex, OpenCode, C
 
 ## Skills
 
-Detailed task workflows live in `.github/skills`. Use them when the task matches:
+Detailed task workflows live in `.agents/skills`. Use them when the task matches:
 
-- `.github/skills/staticphp-package-maintenance`: add, modify, review, or validate package, artifact, extension, library, target, or tool definitions.
-- `.github/skills/staticphp-build-troubleshooting`: diagnose build, download, doctor, shell, terminal, CI, smoke-test, or log failures.
+- `.agents/skills/staticphp-package-maintenance`: add, modify, review, or validate package, artifact, extension, library, target, or tool definitions.
+- `.agents/skills/staticphp-build-troubleshooting`: diagnose build, download, doctor, shell, terminal, CI, smoke-test, or log failures.
+- `.agents/skills/staticphp-documentation-sync`: synchronize bilingual documentation (`docs/en/` and `docs/zh/`) when features, commands, configuration, APIs, or behavior change.
 
-If your agent does not automatically discover skills from `.github/skills`, read the matching `SKILL.md` manually before working on that task.
+If your agent does not automatically discover skills from `.agents/skills`, read the matching `SKILL.md` manually before working on that task.
 
 ## Project Map
 

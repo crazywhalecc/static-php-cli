@@ -14,6 +14,29 @@
 
 如果确认地址确实无法正常访问，可以提交 Issue 或 PR 更新地址或下载类型。
 
+## 通过代理下载
+
+如果你的网络需要通过代理才能访问下载源，可以直接设置 `ALL_PROXY`，也可以使用 `SPC_PROXY`：
+
+```shell
+# curl 和 git 本来就会读取 ALL_PROXY
+ALL_PROXY="socks5h://127.0.0.1:1080" spc download --for-extensions="curl,openssl"
+
+# SPC_PROXY 额外覆盖 Go 工具链（FrankenPHP），因为 Go 会忽略 ALL_PROXY
+SPC_PROXY="socks5h://127.0.0.1:1080" spc build:php "curl" --build-cli
+```
+
+`socks5h` 表示由代理端解析域名，通常这是你需要的模式。
+StaticPHP 会把它作为 `ALL_PROXY` 传给 curl 和 git，并作为 `HTTP_PROXY`/`HTTPS_PROXY` 传给 Go
+（把 `socks5h://` 改写为 `socks5://`，这是 Go 唯一支持的 SOCKS 形式）。
+
+如需长期生效，可将其写入 `config/env.ini` 或 `config/env.custom.ini`：
+
+```ini
+[global]
+SPC_PROXY="socks5h://127.0.0.1:1080"
+```
+
 ## Doctor 无法修复某些问题
 
 在绝大部分情况下，doctor 模块都可以对缺失的系统环境进行自动修复和安装，但也存在特殊的环境无法正常使用自动修复功能。

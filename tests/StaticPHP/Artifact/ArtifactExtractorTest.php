@@ -182,6 +182,33 @@ class ArtifactExtractorTest extends TestCase
         $this->assertSame(SPC_STATUS_ALREADY_EXTRACTED, $result);
     }
 
+    public function testExtractLocalSourceUsesLocalDirnameInPlace(): void
+    {
+        ApplicationContext::initialize();
+
+        // A real directory standing in for the user's local source tree.
+        $localDir = $this->tempDir . '/user-local-src';
+        mkdir($localDir, 0755, true);
+        file_put_contents($localDir . '/marker.txt', 'keep me');
+
+        $artifact = new Artifact('local-pkg', ['source' => ['type' => 'local']]);
+
+        $cache = $this->createMock(ArtifactCache::class);
+        $cache->method('getSourceInfo')->willReturn(['cache_type' => 'local', 'dirname' => $localDir]);
+        $cache->method('getBinaryInfo')->willReturn(null);
+        $cache->method('isBinaryDownloaded')->willReturn(false);
+        ApplicationContext::set(ArtifactCache::class, $cache);
+
+        $extractor = new ArtifactExtractor($cache, false);
+        $result = $extractor->extract($artifact, true); // force_source: never pick a binary
+
+        // Local sources are not extracted: the tree lives in place at $cache_info['dirname'].
+        $this->assertSame(SPC_STATUS_ALREADY_EXTRACTED, $result);
+        $this->assertFileExists($localDir . '/marker.txt');
+        $this->assertFalse(is_link($localDir));
+        $this->assertSame(\StaticPHP\Util\FileSystem::convertPath($localDir), $artifact->getSourceDir());
+    }
+
     // ==================== Helpers ====================
 
     /**

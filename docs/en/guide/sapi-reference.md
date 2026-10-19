@@ -273,5 +273,6 @@ If you installed from source, you can also set `SPC_TARGET=native-native-gnu.2.1
 
 This uses the Zig toolchain to produce a partially static binary dynamically linked against glibc 2.17, compatible with most modern GNU/Linux distributions. No Docker and no extra cross-compilation toolchain are required. The resulting binary supports `dl()`, FFI, and loading `.so` extensions at runtime, but cannot run on musl-based systems such as Alpine Linux.
 
-**Windows** — PHP extensions on Windows are distributed as `.dll` files that depend on the DLLs bundled with the official dynamically-built PHP. StaticPHP produces a standalone static executable that does not include those DLLs, so dynamic extension loading is not possible on Windows. All extensions must be compiled in statically at build time.
+For the performance and deployment tradeoffs between the default static-musl target, dynamic musl, and dynamic glibc, see [Performance](../develop/performance#linux-choosing-linkage-and-libc).
 
+**Windows** — PHP extensions on Windows are distributed as `.dll` files that depend on the DLLs bundled with the official dynamically-built PHP. StaticPHP produces a standalone static executable that does not include those DLLs, so dynamic extension loading is not possible on Windows. All extensions must be compiled in statically at build time.

@@ -2,8 +2,8 @@ ext-msgpack:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: msgpack
+      type: pie
+      repo: msgpack/msgpack-php
     metadata:
       license-files: [LICENSE]
       license: BSD-3-Clause

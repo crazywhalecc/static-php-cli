@@ -11,6 +11,7 @@ use StaticPHP\Attribute\Package\Extension;
 use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\SourcePatcher;
 
 #[Extension('xlswriter')]
@@ -28,11 +29,22 @@ class xlswriter extends PhpExtensionPackage
         return $arg;
     }
 
+    #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-xlswriter')]
+    #[PatchDescription('Define XML_STATIC so bundled Expat uses plain symbols instead of __declspec(dllimport) in static builds')]
+    public function patchConfigForStaticExpat(): void
+    {
+        FileSystem::replaceFileStr(
+            "{$this->getBuildDir()}/config.w32",
+            "' /D USE_SYSTEM_MINIZIP",
+            "' /D XML_STATIC /D USE_SYSTEM_MINIZIP"
+        );
+    }
+
     #[BeforeStage('php', [php::class, 'makeForWindows'], 'ext-xlswriter')]
     #[PatchDescription('Fix Windows build: apply win32 patch and add UTF-8 BOM to theme.c')]
     public function patchBeforeMakeForWindows(): void
     {
-        $source_dir = $this->getSourceDir();
+        $source_dir = $this->getBuildDir();
         $theme_file = "{$source_dir}/library/libxlsx/src/theme.c";
 
         // fix windows build with openssl extension duplicate symbol bug

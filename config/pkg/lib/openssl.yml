@@ -27,4 +27,5 @@ openssl:
     - libcrypto.lib
   tools@windows:
     - jom
+    - nasm
     - strawberry-perl

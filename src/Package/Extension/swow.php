@@ -28,18 +28,10 @@ class swow extends PhpExtensionPackage
 
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-swow')]
     #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-swow')]
-    public function patchBeforeBuildconf(PackageInstaller $installer): bool
+    public function patchBeforeBuildconf(): bool
     {
-        $php_src = $installer->getTargetPackage('php')->getSourceDir();
-        if (php::getPHPVersionID() >= 80000 && !is_link("{$php_src}/ext/swow")) {
-            if (PHP_OS_FAMILY === 'Windows') {
-                f_passthru("cd {$php_src}/ext && mklink /D swow swow-src\\ext");
-            } else {
-                f_passthru("cd {$php_src}/ext && ln -s swow-src/ext swow");
-            }
-        }
         // replace AC_DEFUN([SWOW_PKG_CHECK_MODULES] to AC_DEFUN([SWOW_PKG_CHECK_MODULES_STATIC]
-        FileSystem::replaceFileStr($this->getSourceDir() . '/ext/config.m4', 'AC_DEFUN([SWOW_PKG_CHECK_MODULES]', 'AC_DEFUN([SWOW_PKG_CHECK_MODULES_STATIC]');
+        FileSystem::replaceFileStr($this->getBuildDir() . '/config.m4', 'AC_DEFUN([SWOW_PKG_CHECK_MODULES]', 'AC_DEFUN([SWOW_PKG_CHECK_MODULES_STATIC]');
         return true;
     }
 }

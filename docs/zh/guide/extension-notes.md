@@ -104,14 +104,6 @@ bin/spc build gd --with-libs=freetype,libjpeg,libavif,libwebp --build-cli
 
 ## pgsql
 
-~~pgsql ssl 连接与 openssl 3.2.0 不兼容。相关链接：~~
-
-- ~~<https://github.com/Homebrew/homebrew-core/issues/155651>~~
-- ~~<https://github.com/Homebrew/homebrew-core/pull/155699>~~
-- ~~<https://github.com/postgres/postgres/commit/c82207a548db47623a2bfa2447babdaa630302b9>~~
-
-pgsql 16.2 修复了这个 Bug，现在正常工作了。
-
 在 pgsql 使用 SSL 连接时，可能存在 `error:80000002:system library::No such file or directory` 错误，
 解决办法详见 [FAQ](../faq/)。
 
@@ -157,3 +149,6 @@ parallel 扩展只支持 PHP 8.0 及以上版本，并只支持 ZTS 构建（`--
 2. 在 Linux 或 macOS 上使用 `--with-libs="mimalloc"` 进行构建将覆盖默认分配器。
 3. 目前，这还处于实验阶段，但建议在线程环境中使用。
 
+## http
+
+1. 不支持 Windows。

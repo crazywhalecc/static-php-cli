@@ -4,7 +4,6 @@ ext-event:
     source:
       type: url
       url: 'https://bitbucket.org/osmanov/pecl-event/get/3.1.4.tar.gz'
-      extract: php-src/ext/event
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

@@ -173,6 +173,9 @@ class SourcePatcher
      */
     public static function patchMicroPhar(int $version_id): void
     {
+        if (file_exists(SOURCE_PATH . '/php-src/ext/phar/phar.c.bak')) {
+            return;
+        }
         FileSystem::backupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
         FileSystem::replaceFileStr(
             SOURCE_PATH . '/php-src/ext/phar/phar.c',
@@ -198,6 +201,12 @@ class SourcePatcher
 
     public static function unpatchMicroPhar(): void
     {
+        // Tolerate a missing .bak: both drivers call this, and the first restore
+        // consumes the backup. Without this guard the second call throws
+        // "Cannot find bak file". No .bak means the source is already pristine.
+        if (!file_exists(SOURCE_PATH . '/php-src/ext/phar/phar.c.bak')) {
+            return;
+        }
         FileSystem::restoreBackupFile(SOURCE_PATH . '/php-src/ext/phar/phar.c');
     }
 
@@ -254,13 +263,17 @@ class SourcePatcher
         $spc_micro_patches = array_filter($spc_micro_patches, fn ($item) => trim((string) $item) !== '');
         $patch_list = $spc_micro_patches;
         $patches = [];
-        $serial = ['80', '81', '82', '83', '84', '85'];
+        $serial = ['80', '81', '82', '83', '84', '85', '86'];
+        $start = array_search($major_ver, $serial, true);
+        if ($start === false) {
+            $start = count($serial) - 1;
+        }
         foreach ($patch_list as $patchName) {
             if (file_exists("{$patch_dir}/{$patchName}.patch")) {
                 $patches[] = "{$patch_dir}/{$patchName}.patch";
                 continue;
             }
-            for ($i = array_search($major_ver, $serial, true); $i >= 0; --$i) {
+            for ($i = $start; $i >= 0; --$i) {
                 $tryMajMin = $serial[$i];
                 if (!file_exists("{$patch_dir}/{$patchName}_{$tryMajMin}.patch")) {
                     continue;

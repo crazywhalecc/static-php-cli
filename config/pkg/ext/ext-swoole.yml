@@ -4,7 +4,6 @@ ext-swoole:
     source:
       type: ghtar
       repo: swoole/swoole-src
-      extract: php-src/ext/swoole
       prefer-stable: true
     metadata:
       license-files: [LICENSE]

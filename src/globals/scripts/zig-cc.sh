@@ -22,12 +22,14 @@ while [[ $# -gt 0 ]]; do
         -march=*|-mcpu=*)
             OPT_NAME="${1%%=*}"
             OPT_VALUE="${1#*=}"
-            # Skip armv8- flags entirely as Zig doesn't support them
-            if [[ "$OPT_VALUE" == armv8-* ]]; then
-                shift
-                continue
+            # zig rejects -march=armv8-a but accepts -mcpu=generic+v8a; rewrite
+            # armv<X>[.<Y>]-a[+feat] -> generic+v<X>[_<Y>]a[+feat] so it goes through.
+            if [[ "$OPT_VALUE" =~ ^armv([89])(\.([0-9]+))?-a(\+.*)?$ ]]; then
+                arch_feat="v${BASH_REMATCH[1]}"
+                [[ -n "${BASH_REMATCH[3]}" ]] && arch_feat="${arch_feat}_${BASH_REMATCH[3]}"
+                OPT_VALUE="generic+${arch_feat}a${BASH_REMATCH[4]}"
             fi
-            # replace -march=x86-64 with -march=x86_64
+            # zig uses snake_case in CPU/feature names (x86-64 -> x86_64).
             OPT_VALUE="${OPT_VALUE//-/_}"
             PARSED_ARGS+=("${OPT_NAME}=${OPT_VALUE}")
             shift
@@ -38,6 +40,31 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+IS_LINK=1
+NEED_PROFILE_RT=0 # https://codeberg.org/ziglang/zig/issues/32066
+NEED_CRT=0 # https://codeberg.org/ziglang/zig/issues/32064
+for _arg in "${PARSED_ARGS[@]}"; do
+    case "$_arg" in
+        -c|-S|-E|-M|-MM) IS_LINK=0 ;;
+        -fprofile-generate*|-fprofile-instr-generate*|-fcs-profile-generate*) NEED_PROFILE_RT=1 ;;
+        -shared) NEED_CRT=1 ;;
+    esac
+done
+[[ "$SPC_COMPILER_EXTRA" == *-fprofile-generate* || "$SPC_COMPILER_EXTRA" == *-fprofile-instr-generate* || "$SPC_COMPILER_EXTRA" == *-fcs-profile-generate* ]] && NEED_PROFILE_RT=1
+
+RT_DIR="${SPC_COMPILER_RT_DIR:-}"
+if [[ $IS_LINK -eq 1 && -n "$RT_DIR" ]]; then
+    if [[ $NEED_PROFILE_RT -eq 1 && -f "$RT_DIR/libclang_rt.profile.a" ]]; then
+        PARSED_ARGS+=("-x" "none" "$RT_DIR/libclang_rt.profile.a" "-Wl,-u,__llvm_profile_runtime")
+    fi
+    if [[ $NEED_CRT -eq 1 && -f "$RT_DIR/clang_rt.crtbegin.o" && -f "$RT_DIR/clang_rt.crtend.o" ]]; then
+        PARSED_ARGS+=("-x" "none" "$RT_DIR/clang_rt.crtbegin.o" "$RT_DIR/clang_rt.crtend.o")
+    fi
+    if [[ -f "$RT_DIR/libclang_rt.cpu_model.a" ]]; then
+        PARSED_ARGS+=("-x" "none" "$RT_DIR/libclang_rt.cpu_model.a")
+    fi
+fi
 
 [[ -n "$SPC_TARGET" ]] && TARGET="-target $SPC_TARGET" || TARGET=""
 

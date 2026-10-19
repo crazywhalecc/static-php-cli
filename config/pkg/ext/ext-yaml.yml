@@ -5,7 +5,6 @@ ext-yaml:
       type: git
       url: 'https://github.com/php/pecl-file_formats-yaml'
       rev: php7
-      extract: php-src/ext/yaml
     metadata:
       license-files: [LICENSE]
       license: MIT

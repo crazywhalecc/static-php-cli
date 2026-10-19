@@ -18,6 +18,7 @@ StaticPHP 有多种安装方式，选择适合你的场景：
 | 方式 | 适合谁 |
 |---|---|
 | 预编译二进制 | 大多数用户，直接下载开箱即用 |
+| PHAR | 已安装 PHP >= 8.4，偏好单个 `.phar` 文件的用户 |
 | 从源码安装 | 参与开发、或需要修改核心构建逻辑的开发者 |
 | Vendor 模式 | 在已有 PHP 项目中集成 StaticPHP 能力 |
 
@@ -50,6 +51,19 @@ curl.exe -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.e
 ```bash
 chmod +x spc && ./spc --version
 ```
+
+## PHAR
+
+如果你已经安装了 PHP >= 8.4，可以直接使用随每个版本一同发布的 `spc.phar`。它需要 `mbstring,posix,pcntl,iconv,phar,zlib` 扩展。
+
+```bash
+curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc.phar -o spc.phar
+chmod +x spc.phar && ./spc.phar --version
+# 也可以显式通过 PHP 运行
+php spc.phar --version
+```
+
+`spc.phar` 也会作为附件发布到每个 [GitHub Release](https://github.com/crazywhalecc/static-php-cli/releases)。
 
 ## 从源码安装
 

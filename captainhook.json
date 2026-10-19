@@ -20,7 +20,7 @@
                 ]
             },
             {
-                "action": "bin/spc dev:lint-config --check",
+                "action": "php bin/spc dev:lint-config --check",
                 "conditions": [
                     {
                         "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\InDirectory",

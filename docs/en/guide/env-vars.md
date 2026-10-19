@@ -21,6 +21,7 @@ You can read the comments for each parameter in [config/env.ini](https://github.
 Generally, you don't need to modify any of the following environment variables as they are already set to optimal values.
 However, if you have special needs, you can set these environment variables to meet your needs
 (for example, you need to debug PHP performance under different compilation parameters).
+See [Performance](../develop/performance) for the current compiler defaults, propagation rules, and benchmarking cautions before changing optimization flags.
 
 If you want to use custom environment variables, you can use the `export` command in the terminal or set the environment variables directly before the command, for example:
 
@@ -53,4 +54,3 @@ SPC_CONCURRENCY=4
 [linux]
 SPC_DEFAULT_CFLAGS="-O3"
 ```
-

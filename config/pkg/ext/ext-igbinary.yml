@@ -2,8 +2,9 @@ ext-igbinary:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: igbinary
+      type: pie
+      repo: igbinary/igbinary
+      prefer-stable: false
     metadata:
       license-files: [COPYING]
       license: BSD-3-Clause

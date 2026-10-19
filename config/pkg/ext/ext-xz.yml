@@ -5,7 +5,6 @@ ext-xz:
       type: git
       url: 'https://github.com/codemasher/php-ext-xz'
       rev: main
-      extract: php-src/ext/xz
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

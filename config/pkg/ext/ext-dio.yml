@@ -2,8 +2,8 @@ ext-dio:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: dio
+      type: pie
+      repo: pecl/dio
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

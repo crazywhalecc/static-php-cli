@@ -2,9 +2,8 @@ ext-uv:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: uv
-      prefer-stable: false
+      type: ghtagtar
+      repo: amphp/ext-uv
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

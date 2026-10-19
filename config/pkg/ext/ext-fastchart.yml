@@ -4,7 +4,6 @@ ext-fastchart:
     source:
       type: ghtar
       repo: iliaal/fastchart
-      extract: php-src/ext/fastchart
       prefer-stable: true
     metadata:
       license-files: [LICENSE]

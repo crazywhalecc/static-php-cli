@@ -2,8 +2,8 @@ ext-memcached:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: memcached
+      type: pie
+      repo: php-memcached/php-memcached
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

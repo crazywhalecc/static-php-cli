@@ -227,7 +227,7 @@ jobs:
           echo "matrix=$(echo "$FINAL" | jq -c '{"combo": .}')" >> "$GITHUB_OUTPUT"
 
   ext-test:
-    name: "Ext test: ${{ matrix.combo.extension }} (PHP ${{ matrix.combo.php-version }} · ${{ matrix.combo.os }}-${{ matrix.combo.arch }})"
+    name: "Ext test: ${{ matrix.combo.extension }} [${{ matrix.combo.sapi }}] (PHP ${{ matrix.combo.php-version }} - ${{ matrix.combo.os }}-${{ matrix.combo.arch }})"
     needs: gen-matrix
     runs-on: ${{ matrix.combo.runner }}
     timeout-minutes: 120
@@ -266,5 +266,5 @@ jobs:
         if: always() && hashFiles('log/**') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: logs-${{ matrix.combo.os }}-${{ matrix.combo.arch }}-${{ matrix.combo.extension }}-php${{ matrix.combo.php-version }}
+          name: logs-${{ matrix.combo.os }}-${{ matrix.combo.arch }}-${{ matrix.combo.sapi }}-${{ matrix.combo.extension }}-php${{ matrix.combo.php-version }}
           path: log

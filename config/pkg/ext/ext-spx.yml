@@ -4,7 +4,6 @@ ext-spx:
     source:
       type: pie
       repo: noisebynorthwest/php-spx
-      extract: php-src/ext/spx
     metadata:
       license-files: [LICENSE]
       license: GPL-3.0-or-later

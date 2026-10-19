@@ -331,5 +331,4 @@ jobs:
         with:
           name: build-meta-${{ inputs.php-version }}-${{ inputs.os }}
           path: |
-            buildroot/build-extensions.json
-            buildroot/build-libraries.json
+            buildroot/build-manifest.json

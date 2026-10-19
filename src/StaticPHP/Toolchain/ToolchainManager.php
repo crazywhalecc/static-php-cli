@@ -49,6 +49,26 @@ class ToolchainManager
     }
 
     /**
+     * Get the active toolchain instance, or null when it cannot be resolved.
+     *
+     * The single place that knows how to reach the toolchain in the container: initToolchain()
+     * registers it during bootstrap, so a null result means the container was not initialised
+     * (unit tests reset it) rather than a broken environment.
+     */
+    public static function getToolchain(): ?ToolchainInterface
+    {
+        if (!ApplicationContext::has(ToolchainInterface::class)) {
+            return null;
+        }
+        try {
+            return ApplicationContext::get(ToolchainInterface::class);
+        } catch (\Throwable $e) {
+            logger()->debug('Cannot resolve the active toolchain: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Init the toolchain and set it in the container.
      */
     public static function initToolchain(): void
@@ -89,6 +109,7 @@ class ToolchainManager
         /* @var ToolchainInterface $toolchain */
         $instance = ApplicationContext::get(ToolchainInterface::class);
         $instance->afterInit();
+
         if (getenv('PHP_BUILD_COMPILER') === false && ($compiler_info = $instance->getCompilerInfo())) {
             GlobalEnvManager::putenv("PHP_BUILD_COMPILER={$compiler_info}");
         }

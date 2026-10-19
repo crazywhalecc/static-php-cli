@@ -5,7 +5,6 @@ ext-lz4:
       type: git
       url: 'https://github.com/kjdev/php-ext-lz4.git'
       rev: master
-      extract: php-src/ext/lz4
     metadata:
       license-files: [LICENSE]
       license: MIT

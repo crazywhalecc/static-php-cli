@@ -16,6 +16,6 @@ class xz extends PhpExtensionPackage
     #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-xz')]
     public function patchBeforeBuildconf(): void
     {
-        FileSystem::replaceFileStr($this->getSourceDir() . '/config.w32', 'true', 'PHP_XZ_SHARED');
+        FileSystem::replaceFileStr($this->getBuildDir() . '/config.w32', 'true', 'PHP_XZ_SHARED');
     }
 }

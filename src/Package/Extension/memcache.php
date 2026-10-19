@@ -20,12 +20,12 @@ class memcache extends PhpExtensionPackage
         // PHP 8.5 moved php_smart_string*.h from ext/standard/ to Zend/
         foreach (['src/memcache_pool.h', 'src/memcache_pool.c', 'src/memcache_session.c', 'src/memcache_ascii_protocol.c', 'src/memcache_binary_protocol.c'] as $file) {
             FileSystem::replaceFileStr(
-                "{$this->getSourceDir()}/{$file}",
+                "{$this->getBuildDir()}/{$file}",
                 '#include "ext/standard/php_smart_string_public.h"',
                 '#include "Zend/zend_smart_string_public.h"',
             );
             FileSystem::replaceFileStr(
-                "{$this->getSourceDir()}/{$file}",
+                "{$this->getBuildDir()}/{$file}",
                 '#include "ext/standard/php_smart_string.h"',
                 '#include "Zend/zend_smart_string.h"',
             );
@@ -35,18 +35,18 @@ class memcache extends PhpExtensionPackage
             return false;
         }
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config9.m4",
+            "{$this->getBuildDir()}/config9.m4",
             'if test -d $abs_srcdir/src ; then',
             'if test -d $abs_srcdir/main ; then'
         );
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config9.m4",
+            "{$this->getBuildDir()}/config9.m4",
             'export CPPFLAGS="$CPPFLAGS $INCLUDES"',
             'export CPPFLAGS="$CPPFLAGS $INCLUDES -I$abs_srcdir/main"'
         );
         // add for in-tree building
         file_put_contents(
-            "{$this->getSourceDir()}/php_memcache.h",
+            "{$this->getBuildDir()}/php_memcache.h",
             <<<'EOF'
 #ifndef PHP_MEMCACHE_H
 #define PHP_MEMCACHE_H
@@ -68,12 +68,12 @@ EOF
             return false;
         }
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config9.m4",
+            "{$this->getBuildDir()}/config9.m4",
             'if test -d $abs_srcdir/main ; then',
             'if test -d $abs_srcdir/src ; then',
         );
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config9.m4",
+            "{$this->getBuildDir()}/config9.m4",
             'export CPPFLAGS="$CPPFLAGS $INCLUDES -I$abs_srcdir/main"',
             'export CPPFLAGS="$CPPFLAGS $INCLUDES"',
         );

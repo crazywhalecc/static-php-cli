@@ -19,6 +19,30 @@ To fix this, [create](https://github.com/settings/tokens) a personal access toke
 If you confirm that the address is indeed inaccessible,
 you can submit an Issue or PR to update the url or download type.
 
+## Download Through a Proxy
+
+If your network requires a proxy to reach the download sources, you can either set `ALL_PROXY`
+directly, or use `SPC_PROXY`:
+
+```shell
+# curl and git already honour ALL_PROXY by themselves
+ALL_PROXY="socks5h://127.0.0.1:1080" spc download --for-extensions="curl,openssl"
+
+# SPC_PROXY additionally covers the Go toolchain (FrankenPHP), which ignores ALL_PROXY
+SPC_PROXY="socks5h://127.0.0.1:1080" spc build:php "curl" --build-cli
+```
+
+`socks5h` resolves hostnames on the proxy side, which is usually what you want.
+StaticPHP passes the value to curl and git as `ALL_PROXY`, and to Go as `HTTP_PROXY`/`HTTPS_PROXY`
+(rewriting `socks5h://` to `socks5://`, the only SOCKS form Go understands).
+
+To make the setting permanent, add it to `config/env.ini` or `config/env.custom.ini`:
+
+```ini
+[global]
+SPC_PROXY="socks5h://127.0.0.1:1080"
+```
+
 ## Doctor Can't Fix Something
 
 In most cases, the doctor module can automatically repair and install missing system environments,

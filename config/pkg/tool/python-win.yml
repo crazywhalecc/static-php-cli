@@ -1,0 +1,8 @@
+python-win:
+  type: tool
+  artifact:
+    binary: custom
+  tool:
+    provides:
+      - python.exe
+    binary-subdir: python-win/tools

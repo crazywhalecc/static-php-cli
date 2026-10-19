@@ -2,10 +2,8 @@ ext-zstd:
   type: php-extension
   artifact:
     source:
-      type: git
-      url: 'https://github.com/kjdev/php-ext-zstd'
-      rev: master
-      extract: php-src/ext/zstd
+      type: ghtar
+      repo: kjdev/php-ext-zstd
     metadata:
       license-files: [LICENSE]
       license: MIT

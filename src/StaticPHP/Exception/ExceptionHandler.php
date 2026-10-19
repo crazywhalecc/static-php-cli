@@ -111,7 +111,7 @@ class ExceptionHandler
 
     private static function logError($message, int $indent_space = 0, bool $output_log = true, string $color = 'red'): void
     {
-        $spc_log = fopen(SPC_OUTPUT_LOG, 'a');
+        $spc_log = spc_log_stream(SPC_OUTPUT_LOG);
         $msg = explode("\n", (string) $message);
         foreach ($msg as $v) {
             $line = str_pad($v, strlen($v) + $indent_space, ' ', STR_PAD_LEFT);

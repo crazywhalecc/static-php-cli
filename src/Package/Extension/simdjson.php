@@ -25,17 +25,17 @@ class simdjson extends PhpExtensionPackage
         $php = $installer->getTargetPackage('php');
         $php_ver = php::getPHPVersionID();
         FileSystem::replaceFileRegex(
-            "{$this->getSourceDir()}/config.m4",
+            "{$this->getBuildDir()}/config.m4",
             '/php_version=(`.*`)$/m',
             "php_version={$php_ver}"
         );
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config.m4",
+            "{$this->getBuildDir()}/config.m4",
             'if test -z "$PHP_CONFIG"; then',
             'if false; then'
         );
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config.w32",
+            "{$this->getBuildDir()}/config.w32",
             "'yes',",
             'PHP_SIMDJSON_SHARED,'
         );

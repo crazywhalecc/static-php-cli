@@ -21,7 +21,7 @@ class ev extends PhpExtensionPackage
          * to EXTENSION('ev', php_ev_sources, PHP_EV_SHARED, ' /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
          */
         FileSystem::replaceFileLineContainsString(
-            "{$this->getSourceDir()}\\config.w32",
+            "{$this->getBuildDir()}\\config.w32",
             'EXTENSION(\'ev\'',
             "		EXTENSION('ev', php_ev_sources, PHP_EV_SHARED, ' /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');"
         );

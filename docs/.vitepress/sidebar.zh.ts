@@ -51,6 +51,7 @@ export default {
         { text: '构建生命周期', link: '/zh/develop/build-lifecycle' },
         { text: '编译工具', link: '/zh/develop/system-build-tools' },
         { text: 'Doctor 环境检查', link: '/zh/develop/doctor-module' },
+        { text: '性能工程', link: '/zh/develop/performance' },
         { text: '对 PHP 源码的修改', link: '/zh/develop/php-src-changes' },
       ],
     },

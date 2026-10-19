@@ -1,0 +1,9 @@
+ninja:
+  type: tool
+  artifact:
+    binary:
+      windows-x86_64: { type: url, url: 'https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-win.zip', extract: { ninja.exe: '{pkg_root_path}/bin/ninja.exe' } }
+  tool:
+    provides:
+      - ninja.exe
+    binary-subdir: bin

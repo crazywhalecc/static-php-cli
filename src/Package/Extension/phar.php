@@ -33,7 +33,7 @@ class phar
     public function beforeBuildShared(PhpExtensionPackage $pkg): void
     {
         FileSystem::replaceFileStr(
-            "{$pkg->getSourceDir()}/config.m4",
+            "{$pkg->getBuildDir()}/config.m4",
             ['$ext_dir/phar.1', '$ext_dir/phar.phar.1'],
             ['${ext_dir}phar.1', '${ext_dir}phar.phar.1']
         );
@@ -43,7 +43,7 @@ class phar
     public function afterBuildShared(PhpExtensionPackage $pkg): void
     {
         FileSystem::replaceFileStr(
-            "{$pkg->getSourceDir()}/config.m4",
+            "{$pkg->getBuildDir()}/config.m4",
             ['${ext_dir}phar.1', '${ext_dir}phar.phar.1'],
             ['$ext_dir/phar.1', '$ext_dir/phar.phar.1']
         );

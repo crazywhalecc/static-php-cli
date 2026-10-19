@@ -12,10 +12,10 @@ class imagick
 {
     #[AfterSourceExtract('ext-imagick')]
     #[PatchDescription('Patch imagick for PHP 8.4 compatibility (versions < 3.8.0)')]
-    public function patchImagickWith84(): void
+    public function patchImagickWith84(string $target_path): void
     {
         // match imagick version id
-        $file = SOURCE_PATH . '/php-src/ext/imagick/php_imagick.h';
+        $file = $target_path . '/php_imagick.h';
         if (!file_exists($file)) {
             return;
         }
@@ -25,7 +25,7 @@ class imagick
         }
         $extnum = intval($match[1]);
         if ($extnum < 30800) {
-            SourcePatcher::patchFile('imagick_php84_before_30800.patch', SOURCE_PATH . '/php-src/ext/imagick');
+            SourcePatcher::patchFile('imagick_php84_before_30800.patch', $target_path);
         }
     }
 }

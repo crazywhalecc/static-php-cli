@@ -2,8 +2,8 @@ ext-zip:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: zip
+      type: pie
+      repo: pecl/zip
       extract: ext-zip
     metadata:
       license-files: [LICENSE]

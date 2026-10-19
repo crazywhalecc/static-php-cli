@@ -1,0 +1,26 @@
+ext-http:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: m6w6/ext-http
+      match: 'v?[4-9]\.\d+\.\d+$'
+      query: '?per_page=100'
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  depends:
+    - ext-raphf
+    - curl
+    - zlib
+    - brotli
+  suggests:
+    - ext-iconv
+    - icu
+    - idn2
+    - libevent
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    arg-type: custom

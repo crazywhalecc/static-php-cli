@@ -5,7 +5,6 @@ ext-snappy:
       type: git
       url: 'https://github.com/kjdev/php-ext-snappy'
       rev: master
-      extract: php-src/ext/snappy
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

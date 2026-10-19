@@ -25,10 +25,15 @@ class TestBotCommand extends BaseCommand
 
     private const string TIER2_LABEL = 'test/tier2';
 
+    private const array SAPI_LABELS = [
+        'sapi/frankenphp' => 'frankenphp',
+    ];
+
     /** PHP version labels → version string (8.5 is always included as default) */
     private const array PHP_VERSION_LABELS = [
         'test/php-83' => '8.3',
         'test/php-84' => '8.4',
+        'test/php-86' => '8.6',
     ];
 
     private const string DEFAULT_PHP_VERSION = '8.5';
@@ -93,6 +98,12 @@ class TestBotCommand extends BaseCommand
         }
         $tier2 = in_array(self::TIER2_LABEL, $label_names, true);
         $need_test = in_array('need-test', $label_names, true);
+        $sapis = [];
+        foreach (self::SAPI_LABELS as $label => $sapi) {
+            if (in_array($label, $label_names, true)) {
+                $sapis[] = $sapi;
+            }
+        }
 
         // Resolve PHP versions (default always included)
         $php_versions = [self::DEFAULT_PHP_VERSION];
@@ -119,6 +130,9 @@ class TestBotCommand extends BaseCommand
             if (!empty($os_keys)) {
                 $flag_parts[] = '--os=' . implode(',', $os_keys);
             }
+            if (!empty($sapis)) {
+                $flag_parts[] = '--sapi=' . implode(',', $sapis);
+            }
             $gen_matrix_args = implode(' ', $flag_parts);
 
             if ($tier2) {
@@ -128,7 +142,7 @@ class TestBotCommand extends BaseCommand
                     fn ($k) => $k !== 'Windows'
                 ));
                 if (!empty($tier2_os)) {
-                    $tier2_parts = array_values(array_filter($flag_parts, fn ($f) => !str_starts_with($f, '--os=')));
+                    $tier2_parts = array_values(array_filter($flag_parts, fn ($f) => !str_starts_with($f, '--os=') && !str_starts_with($f, '--sapi=')));
                     $tier2_parts[] = '--os=' . implode(',', $tier2_os);
                     $tier2_parts[] = '--tier2';
                     $gen_matrix_args_tier2 = implode(' ', $tier2_parts);
@@ -143,6 +157,7 @@ class TestBotCommand extends BaseCommand
             $label_names,
             $os_keys,
             $tier2,
+            $sapis,
             $php_versions,
             $need_test,
         );
@@ -156,6 +171,7 @@ class TestBotCommand extends BaseCommand
             'gen_matrix_args_tier2' => $gen_matrix_args_tier2,
             'php_versions' => $php_versions,
             'tier2' => $tier2,
+            'sapis' => $sapis,
             'comment_body' => $comment_body,
         ];
 
@@ -239,6 +255,7 @@ class TestBotCommand extends BaseCommand
         array $label_names,
         array $os_keys,
         bool $tier2,
+        array $sapis,
         array $php_versions,
         bool $need_test,
     ): string {
@@ -258,6 +275,7 @@ class TestBotCommand extends BaseCommand
             '`test/linux` `test/windows` `test/macos` (platform)',
             '`test/tier2` (extra arch)',
             '`test/php-83` `test/php-84` (PHP version)',
+            '`sapi/frankenphp` (extra FrankenPHP SAPI build)',
         ]);
 
         // Case 1: need-test absent → invite the author to add it
@@ -303,7 +321,8 @@ class TestBotCommand extends BaseCommand
         }
 
         $php_str = implode(', ', array_map(fn ($v) => "PHP {$v}", $php_versions)) . ' NTS';
-        $active_test_labels = array_values(array_filter($label_names, fn ($l) => str_starts_with($l, 'test/')));
+        $sapi_str = !empty($sapis) ? ' + SAPI: ' . implode(', ', $sapis) . ' (Tier1 Linux/macOS/Windows)' : '';
+        $active_test_labels = array_values(array_filter($label_names, fn ($l) => str_starts_with($l, 'test/') || str_starts_with($l, 'sapi/')));
         $labels_str = !empty($active_test_labels) ? '`' . implode('`, `', $active_test_labels) . '`' : '_none_';
 
         return implode("\n", [
@@ -313,7 +332,7 @@ class TestBotCommand extends BaseCommand
             $detected,
             '**Active labels**: ' . $labels_str,
             '**Available labels**: ' . $available_labels,
-            '**Config**: ' . implode(' + ', $platform_parts) . ' | ' . $php_str,
+            '**Config**: ' . implode(' + ', $platform_parts) . ' | ' . $php_str . $sapi_str,
         ]);
     }
 }

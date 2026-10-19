@@ -17,7 +17,7 @@ class trader extends PhpExtensionPackage
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-trader')]
     public function patchBeforeBuildconf(PackageInstaller $installer): bool
     {
-        FileSystem::replaceFileStr("{$this->getSourceDir()}/config.m4", 'PHP_TA', 'PHP_TRADER');
+        FileSystem::replaceFileStr("{$this->getBuildDir()}/config.m4", 'PHP_TA', 'PHP_TRADER');
         return true;
     }
 }

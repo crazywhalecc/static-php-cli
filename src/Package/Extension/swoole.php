@@ -45,7 +45,7 @@ class swoole extends PhpExtensionPackage
     #[PatchDescription('Fix maximum version check for Swoole 6.2')]
     public function patchBeforeMake(): void
     {
-        FileSystem::replaceFileStr($this->getSourceDir() . '/ext-src/php_swoole_private.h', 'PHP_VERSION_ID > 80500', 'PHP_VERSION_ID >= 80600');
+        FileSystem::replaceFileStr($this->getBuildDir() . '/ext-src/php_swoole_private.h', 'PHP_VERSION_ID > 80500', 'PHP_VERSION_ID >= 80600');
     }
 
     #[BeforeStage('php', [php::class, 'makeForUnix'], 'ext-swoole')]
@@ -56,7 +56,7 @@ class swoole extends PhpExtensionPackage
             // Fix swoole with event extension <util.h> conflict bug
             $util_path = shell()->execWithResult('xcrun --show-sdk-path', false)[1][0] . '/usr/include/util.h';
             FileSystem::replaceFileStr(
-                "{$this->getSourceDir()}/thirdparty/php/standard/proc_open.cc",
+                "{$this->getBuildDir()}/thirdparty/php/standard/proc_open.cc",
                 'include <util.h>',
                 "include \"{$util_path}\"",
             );
@@ -71,9 +71,9 @@ class swoole extends PhpExtensionPackage
         $arg = '--enable-swoole' . ($shared ? '=shared' : '');
 
         // commonly used feature: coroutine-time
-        $arg .= ' --enable-swoole-coro-time --with-pic';
+        $arg .= ' --enable-swoole-coro-time';
 
-        $arg .= $builder->getOption('enable-zts') ? ' --enable-swoole-thread --disable-thread-context' : ' --disable-swoole-thread --enable-thread-context';
+        $arg .= $builder->getOption('enable-zts') ? ' --enable-swoole-thread --disable-thread-context' : ' --disable-swoole-thread --disable-thread-context';
 
         // required features: curl, openssl (but curl hook is buggy for php 8.0)
         $arg .= php::getPHPVersionID() >= 80100 ? ' --enable-swoole-curl' : ' --disable-swoole-curl';
@@ -93,7 +93,8 @@ class swoole extends PhpExtensionPackage
         $arg .= $installer->getPhpExtensionPackage('swoole-hook-mysql') ? ' --enable-mysqlnd' : ' --disable-mysqlnd';
         $arg .= $installer->getPhpExtensionPackage('swoole-hook-sqlite') ? ' --enable-swoole-sqlite' : ' --disable-swoole-sqlite';
         if ($installer->getPhpExtensionPackage('swoole-hook-odbc')) {
-            $config = new SPCConfigUtil()->getLibraryConfig($installer->getLibraryPackage('unixodbc'));
+            $config = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])
+                ->configForResolvedBuild(['unixodbc'], $installer);
             $arg .= " --with-swoole-odbc=unixODBC,{$builder->getBuildRootPath()} SWOOLE_ODBC_LIBS=\"{$config['libs']}\"";
         }
 

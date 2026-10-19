@@ -1,0 +1,12 @@
+winflexbison:
+  type: tool
+  artifact:
+    binary:
+      windows-x86_64: { type: url, url: 'https://github.com/lexxmark/winflexbison/releases/download/v2.5.25/win_flex_bison-2.5.25.zip', extract: '{pkg_root_path}/winflexbison' }
+  path@windows:
+    - '{pkg_root_path}\winflexbison'
+  tool:
+    provides:
+      - win_flex.exe
+      - win_bison.exe
+    binary-subdir: winflexbison

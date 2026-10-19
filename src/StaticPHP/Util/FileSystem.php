@@ -322,7 +322,16 @@ class FileSystem
             }
             $sub_file = self::convertPath($dir . '/' . $v);
             if (is_link($sub_file) || is_file($sub_file)) {
-                if (!unlink($sub_file)) {
+                if (!@unlink($sub_file)) {
+                    $last_error = error_get_last();
+                    logger()->debug("unlink failed for '{$sub_file}': " . ($last_error['message'] ?? 'unknown error') . ', attempting chmod + unlink');
+
+                    // Go module cache files are often read-only; make writable and retry
+                    if (@chmod($sub_file, 0666) && @unlink($sub_file)) {
+                        continue;
+                    }
+
+                    // Shell fallback: del /f /q forces deletion of read-only files on Windows
                     $cmd = PHP_OS_FAMILY === 'Windows' ? 'del /f /q' : 'rm -f';
                     f_exec("{$cmd} " . escapeshellarg($sub_file), $out, $ret);
                     if ($ret !== 0) {
@@ -455,6 +464,102 @@ class FileSystem
         $string = self::convertPath($string);
         if (file_exists($string)) {
             unlink($string);
+        }
+    }
+
+    /**
+     * Whether the path is a link to another location. Besides symlinks this also
+     * detects NTFS directory junctions on Windows, which PHP's is_link() does not
+     * recognize (php-src only flags IO_REPARSE_TAG_SYMLINK as S_IFLNK in lstat),
+     * while readlink() resolves junctions just fine.
+     *
+     * @param string $path Path to check
+     */
+    public static function isLink(string $path): bool
+    {
+        if (is_link($path)) {
+            return true;
+        }
+        return PHP_OS_FAMILY === 'Windows' && @readlink($path) !== false;
+    }
+
+    /**
+     * Remove a link itself without touching its target. On Windows, directory
+     * links (symlinks and junctions) must be removed with rmdir(), whose
+     * underlying RemoveDirectory deletes the link rather than its contents.
+     *
+     * @param string $path Link path to remove
+     */
+    public static function removeLink(string $path): bool
+    {
+        if (PHP_OS_FAMILY === 'Windows' && is_dir($path)) {
+            return rmdir($path);
+        }
+        return unlink($path);
+    }
+
+    /**
+     * Link a directory to another location. On Windows an NTFS junction is
+     * created via mklink /J: unlike symlinks, junctions need no elevated
+     * privileges or developer mode, and they are transparent to all Win32
+     * tooling (configure.js, nmake, buildconf).
+     *
+     * @param  string $target Existing directory the link points to
+     * @param  string $link   Link path to create
+     * @return bool   Whether the link was created
+     */
+    public static function linkDir(string $target, string $link): bool
+    {
+        $target_path = self::convertPath($target);
+        $link_path = self::convertPath($link);
+        if (PHP_OS_FAMILY !== 'Windows') {
+            return symlink($target_path, $link_path);
+        }
+        [$code] = cmd(false)->execWithResult('mklink /J "' . $link_path . '" "' . $target_path . '"', false);
+        return $code === 0 && is_dir($link_path);
+    }
+
+    /**
+     * Replace every symlink under a directory with a regular copy of its target,
+     * dropping links whose target does not exist. Used on Windows after archive
+     * extraction: tools like xcopy fail on (dangling) symlinks, e.g. the
+     * LICENSE-zstd link shipped in the php-ext-zstd tarball.
+     *
+     * @param string $dir Directory to sanitize
+     */
+    public static function sanitizeSymlinks(string $dir): void
+    {
+        $dir = self::convertPath($dir);
+        if (!is_dir($dir)) {
+            return;
+        }
+        $items = scandir($dir);
+        if ($items === false) {
+            return;
+        }
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $path = $dir . DIRECTORY_SEPARATOR . $item;
+            if (is_link($path)) {
+                $target = realpath($path);
+                unlink($path);
+                if ($target === false) {
+                    logger()->debug("Removed dangling symlink: {$path}");
+                    continue;
+                }
+                if (is_dir($target)) {
+                    self::copyDir($target, $path);
+                    self::sanitizeSymlinks($path);
+                } else {
+                    copy($target, $path);
+                }
+                continue;
+            }
+            if (is_dir($path)) {
+                self::sanitizeSymlinks($path);
+            }
         }
     }
 

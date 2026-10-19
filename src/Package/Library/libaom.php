@@ -45,7 +45,14 @@ class libaom extends LibraryPackage
         if (str_starts_with($targetCpu, 'aarch')) {
             $targetCpu = str_replace('aarch', 'arm', $targetCpu);
         }
-        if (!UnixUtil::findCommand('nasm') && !UnixUtil::findCommand('yasm')) {
+        // On ARM, features like crc (used by av1/encoder/arm/hash_arm_crc32.c) are only
+        // enabled when the compiler receives them via -march/-mcpu; zig-cc.sh rewrites
+        // -march=armv8-a+crc to -mcpu=generic+v8a+crc so the flag survives the wrapper.
+        if (
+            in_array($targetCpu, ['x86', 'x86_64'], true)
+            && !UnixUtil::findCommand('nasm')
+            && !UnixUtil::findCommand('yasm')
+        ) {
             $targetCpu = 'generic';
         }
         UnixCMakeExecutor::create($this)

@@ -2,8 +2,8 @@ ext-redis:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: redis
+      type: pie
+      repo: phpredis/phpredis
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

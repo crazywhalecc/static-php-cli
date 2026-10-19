@@ -16,8 +16,8 @@ class dio extends PhpExtensionPackage
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-dio')]
     public function patchBeforeBuildconf(): void
     {
-        if (!file_exists("{$this->getSourceDir()}/php_dio.h")) {
-            FileSystem::writeFile("{$this->getSourceDir()}/php_dio.h", FileSystem::readFile("{$this->getSourceDir()}/src/php_dio.h"));
+        if (!file_exists("{$this->getBuildDir()}/php_dio.h")) {
+            FileSystem::writeFile("{$this->getBuildDir()}/php_dio.h", FileSystem::readFile("{$this->getBuildDir()}/src/php_dio.h"));
         }
     }
 }

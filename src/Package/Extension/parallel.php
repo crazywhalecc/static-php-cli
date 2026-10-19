@@ -29,7 +29,7 @@ class parallel extends PhpExtensionPackage
     #[PatchDescription('Fix parallel m4 hardcoded PHP_VERSION check')]
     public function patchBeforeBuildconf(): bool
     {
-        FileSystem::replaceFileRegex("{$this->getSourceDir()}/config.m4", '/PHP_VERSION=.*/m', '');
+        FileSystem::replaceFileRegex("{$this->getBuildDir()}/config.m4", '/PHP_VERSION=.*/m', '');
         return true;
     }
 }

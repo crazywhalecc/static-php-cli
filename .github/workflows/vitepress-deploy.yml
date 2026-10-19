@@ -27,9 +27,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
 
-      - run: npm install
+      - name: Install documentation dependencies
+        run: yarn install --frozen-lockfile
 
       - name: "Install PHP for official runners"
         uses: shivammathur/setup-php@v2
@@ -57,7 +62,7 @@ jobs:
         run: "composer install --no-interaction --no-progress"
 
       - name: Build
-        run: npm run docs:build
+        run: yarn docs:build
 
       # Deploy to GitHub Pages only when the workflow is triggered by a push to the v3 branch
       - name: Deploy to GitHub Pages

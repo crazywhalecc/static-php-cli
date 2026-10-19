@@ -412,6 +412,39 @@ class DependencyResolverTest extends TestCase
         $this->assertNotContains('c', $subDeps, 'c is not in the resolved set, should be excluded');
     }
 
+    public function testGetResolvedPackageClosureFiltersSuggestsThroughResolvedSet(): void
+    {
+        $this->loadConfig([
+            'a' => ['type' => 'target', 'depends' => ['b'], 'suggests' => ['c']],
+            'b' => ['type' => 'library'],
+            'c' => ['type' => 'library'],
+        ]);
+
+        $withoutSuggested = DependencyResolver::getResolvedPackageClosure(['a'], ['b', 'a']);
+        $withSuggested = DependencyResolver::getResolvedPackageClosure(['a'], ['b', 'c', 'a']);
+
+        $this->assertSame(['b', 'a'], $withoutSuggested);
+        $this->assertSame(['b', 'c', 'a'], $withSuggested);
+    }
+
+    public function testGetResolvedPackageClosureAppliesDependencyOverrides(): void
+    {
+        $this->loadConfig([
+            'php' => ['type' => 'target', 'depends' => ['libxml2']],
+            'libxml2' => ['type' => 'library'],
+            'ext-demo' => ['type' => 'php-extension', 'depends' => ['demo-lib']],
+            'demo-lib' => ['type' => 'library'],
+        ]);
+
+        $closure = DependencyResolver::getResolvedPackageClosure(
+            ['php'],
+            ['libxml2', 'demo-lib', 'ext-demo', 'php'],
+            ['php' => ['ext-demo']],
+        );
+
+        $this->assertSame(['libxml2', 'demo-lib', 'ext-demo', 'php'], $closure);
+    }
+
     // ──────────────────────────────────────────────
     //  Edge cases & defensive
     // ──────────────────────────────────────────────

@@ -146,8 +146,8 @@ class CraftCommand extends BaseCommand
         }
 
         // check php-version
-        if (isset($craft['php-version']) && !preg_match('/^(\d+)(\.\d+)?(\.\d+)?$/', strval($craft['php-version']))) {
-            throw new ValidationException("Craft file '{$craft_file}' has invalid 'php-version' field, it should be in format of '8.0.0'.");
+        if (isset($craft['php-version']) && !preg_match('/^(\d+)(\.\d+)?(\.\d+)?(?:(?:alpha|beta|RC)\d+)?$/', strval($craft['php-version']))) {
+            throw new ValidationException("Craft file '{$craft_file}' has invalid 'php-version' field, it should be in format of '8.0.0' or '8.6.0RC1'.");
         }
 
         // check php extensions field

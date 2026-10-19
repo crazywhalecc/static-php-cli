@@ -2,8 +2,8 @@ ext-yac:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: yac
+      type: ghtagtar
+      repo: laruence/yac
     metadata:
       license-files: [LICENSE]
       license: PHP-3.01

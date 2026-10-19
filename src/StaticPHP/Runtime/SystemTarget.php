@@ -120,6 +120,44 @@ class SystemTarget
         return "{$os}-{$arch}";
     }
 
+    public static function getCanonicalTriple(): string
+    {
+        $target = (string) getenv('SPC_TARGET');
+        if ($target !== '' && !str_contains($target, 'native')) {
+            $cleaned = preg_split('/\s+/', trim((string) preg_replace('/(-gnu|-musl)\.[\d.]+/', '$1', $target)))[0] ?? '';
+            if ($cleaned !== '') {
+                return $cleaned;
+            }
+        }
+        $arch = self::getTargetArch();
+        return match (self::getTargetOS()) {
+            'Linux' => $arch . '-linux-' . (self::getLibc() === 'musl' ? 'musl' : 'gnu'),
+            'Darwin' => $arch . '-macos-none',
+            'Windows' => $arch . '-windows-gnu',
+            default => $arch . '-unknown-unknown',
+        };
+    }
+
+    /**
+     * Whether the target runs on a different OS or CPU architecture than the host (a cross build).
+     *
+     * The architecture comes from the canonical target triple rather than getTargetArch(), so
+     * targets without a dedicated architecture mapping (e.g. arm-linux-musleabihf) count as well.
+     */
+    public static function isCrossCompiling(): bool
+    {
+        if (self::getTargetOS() !== PHP_OS_FAMILY) {
+            return true;
+        }
+        $arch = strtolower(explode('-', self::getCanonicalTriple())[0]);
+        $arch = match ($arch) {
+            'amd64', 'x64' => 'x86_64',
+            'arm64' => 'aarch64',
+            default => $arch,
+        };
+        return $arch !== GNU_ARCH;
+    }
+
     /**
      * Check if the target OS is a Unix-like system.
      */

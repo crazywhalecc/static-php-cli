@@ -17,7 +17,7 @@ class pdo_odbc extends PhpExtensionPackage
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-pdo_odbc')]
     public function patchBeforeBuildconf(): void
     {
-        FileSystem::replaceFileStr("{$this->getSourceDir()}/config.m4", 'PDO_ODBC_LDFLAGS="$pdo_odbc_def_ldflags', 'PDO_ODBC_LDFLAGS="-liconv $pdo_odbc_def_ldflags');
+        FileSystem::replaceFileStr("{$this->getBuildDir()}/config.m4", 'PDO_ODBC_LDFLAGS="$pdo_odbc_def_ldflags', 'PDO_ODBC_LDFLAGS="-liconv $pdo_odbc_def_ldflags');
     }
 
     #[CustomPhpConfigureArg('Linux')]

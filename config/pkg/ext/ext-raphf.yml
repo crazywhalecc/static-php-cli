@@ -1,0 +1,16 @@
+ext-raphf:
+  type: php-extension
+  artifact:
+    source:
+      type: ghtar
+      repo: m6w6/ext-raphf
+      match: 'v?[2-9]\.\d+\.\d+$'
+      query: '?per_page=100'
+    metadata:
+      license-files: [LICENSE]
+      license: BSD-2-Clause
+  php-extension:
+    os:
+      - Linux
+      - Darwin
+    arg-type: enable

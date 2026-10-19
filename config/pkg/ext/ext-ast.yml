@@ -2,8 +2,8 @@ ext-ast:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: ast
+      type: pie
+      repo: nikic/php-ast
     metadata:
       license-files: [LICENSE]
       license: BSD-3-Clause

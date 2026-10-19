@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StaticPHP\Runtime\Shell;
 
+use StaticPHP\Exception\ExecutionException;
 use StaticPHP\Exception\InterruptException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Runtime\SystemTarget;
@@ -153,7 +154,7 @@ class DefaultShell extends Shell
 
         $this->logCommandInfo($cmd);
         logger()->debug("[TAR EXTRACT] {$cmd}");
-        $this->passthru($cmd, $this->console_putput);
+        $this->passthruTolerateSymlinks($cmd);
         return true;
     }
 
@@ -200,7 +201,7 @@ class DefaultShell extends Shell
         $run = function ($cmd) {
             $this->logCommandInfo($cmd);
             logger()->debug("[7Z EXTRACT] {$cmd}");
-            $this->passthru($cmd, $this->console_putput);
+            $this->passthruTolerateSymlinks($cmd);
         };
 
         $extname = FileSystem::extname($archive_path);
@@ -213,5 +214,68 @@ class DefaultShell extends Shell
         };
 
         return true;
+    }
+
+    /**
+     * Run an extraction command, tolerating symbolic links that the host cannot create.
+     *
+     * Windows tar.exe (bsdtar) cannot create the symbolic links some archives ship (e.g. zstd's
+     * tests/cli-tests/bin/unzstd -> zstd), failing each with "Can't create '...': Invalid argument"
+     * and exiting non-zero. Those entries are never needed to build, so on Windows we swallow a
+     * failure whose only errors are such symlink creations and continue. Any other failure still throws.
+     */
+    private function passthruTolerateSymlinks(string $cmd): void
+    {
+        // Symlink creation only fails on a Windows host; elsewhere extraction handles symlinks fine.
+        if (PHP_OS_FAMILY !== 'Windows') {
+            $this->passthru($cmd, $this->console_putput);
+            return;
+        }
+
+        $result = $this->passthru($cmd, $this->console_putput, capture_output: true, throw_on_error: false);
+        if ($result['code'] === 0) {
+            return;
+        }
+        if ($this->isSymlinkOnlyExtractFailure($result['output'])) {
+            logger()->warning('Some symbolic links could not be created during extraction and were skipped (not supported on this Windows host). This is harmless for building.');
+            return;
+        }
+        throw new ExecutionException(
+            cmd: $cmd,
+            message: "Command exited with non-zero code: {$result['code']}",
+            code: $result['code'],
+            cd: $this->cd,
+            env: $this->env,
+        );
+    }
+
+    /**
+     * Decide whether an extraction failure was caused solely by symbolic links that could not be
+     * created on Windows. Returns true only when at least one such error is present and no other
+     * error-looking output is found, so genuine extraction failures still propagate.
+     */
+    private function isSymlinkOnlyExtractFailure(string $output): bool
+    {
+        $saw_symlink_error = false;
+        foreach (preg_split('/\r\n|\r|\n/', $output) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            // bsdtar's trailing summary line; not an error on its own.
+            if (str_contains($line, 'Error exit delayed from previous errors')) {
+                continue;
+            }
+            // The symlink (or other unsupported special file) that Windows refused to create.
+            if (str_contains($line, "Can't create") && str_contains($line, 'Invalid argument')) {
+                $saw_symlink_error = true;
+                continue;
+            }
+            // Any other error-looking line means this was not a clean symlink-only failure.
+            if (preg_match('/\berror\b|cannot|can\'t|failed|denied|no space|not permitted/i', $line)) {
+                return false;
+            }
+        }
+        return $saw_symlink_error;
     }
 }

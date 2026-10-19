@@ -2,12 +2,12 @@
   "scripts": {
     "docs:dev": "node docs/.vitepress/gen-meta.js && vitepress dev docs",
     "docs:gen-meta": "node docs/.vitepress/gen-meta.js",
-    "docs:build": "npm run docs:gen-meta && vitepress build docs",
+    "docs:build": "node docs/.vitepress/gen-meta.js && vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "mermaid": "^11.0.0",
-    "vitepress": "^2.0.0-alpha.5",
+    "vitepress": "2.0.0-alpha.18",
     "vue": "^3.2.47"
   }
 }

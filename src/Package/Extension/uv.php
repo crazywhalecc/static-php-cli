@@ -28,12 +28,12 @@ class uv extends PhpExtensionPackage
     public function patchBeforeBuild(): void
     {
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/php_uv.c",
+            "{$this->getBuildDir()}/php_uv.c",
             '#if !defined(PHP_WIN32) || defined(HAVE_SOCKET)',
             '#if !defined(PHP_WIN32) || (defined(HAVE_SOCKETS) && !defined(COMPILE_DL_SOCKETS))',
         );
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config.w32",
+            "{$this->getBuildDir()}/config.w32",
             'CHECK_LIB("Ws2_32.lib","uv", PHP_UV);',
             "CHECK_LIB(\"Ws2_32.lib\",\"uv\" , PHP_UV);\n\tCHECK_LIB(\"dbghelp.lib\",\"uv\", PHP_UV);",
         );
@@ -45,7 +45,7 @@ class uv extends PhpExtensionPackage
         if (SystemTarget::getTargetOS() !== 'Linux' || SystemTarget::getTargetArch() !== 'aarch64') {
             return false;
         }
-        FileSystem::replaceFileRegex("{$pkg->getSourceDir()}/Makefile", '/^(LDFLAGS =.*)$/m', '$1 -luv -ldl -lrt -pthread');
+        FileSystem::replaceFileRegex("{$pkg->getBuildDir()}/Makefile", '/^(LDFLAGS =.*)$/m', '$1 -luv -ldl -lrt -pthread');
         return true;
     }
 }

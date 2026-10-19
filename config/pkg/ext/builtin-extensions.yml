@@ -226,7 +226,7 @@ ext-pdo_pgsql:
     - ext-pgsql
     - postgresql
   php-extension:
-    arg-type@unix: with-path
+    arg-type@unix: custom
     arg-type@windows: '--with-pdo-pgsql=yes'
 ext-pdo_sqlite:
   type: php-extension

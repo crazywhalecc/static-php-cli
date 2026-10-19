@@ -24,13 +24,13 @@ class grpc extends PhpExtensionPackage
 
         // Fix deprecated PHP API usage in call.c
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/src/php/ext/grpc/call.c",
+            "{$this->getBuildDir()}/src/php/ext/grpc/call.c",
             'zend_exception_get_default(TSRMLS_C),',
             'zend_ce_exception,',
         );
 
         // Fix include path conflict with pdo_sqlsrv: grpc's PHP ext dir is added to the global include path via
-        $grpc_php_dir = "{$this->getSourceDir()}/src/php/ext/grpc";
+        $grpc_php_dir = "{$this->getBuildDir()}/src/php/ext/grpc";
         if (file_exists("{$grpc_php_dir}/version.h")) {
             copy("{$grpc_php_dir}/version.h", "{$grpc_php_dir}/php_grpc_version.h");
             unlink("{$grpc_php_dir}/version.h");
@@ -69,11 +69,11 @@ fi
 M4;
         $replace = get_pack_replace();
         // load grpc c files from src/php/ext/grpc
-        $c_files = glob("{$this->getSourceDir()}/src/php/ext/grpc/*.c");
+        $c_files = glob("{$this->getBuildDir()}/src/php/ext/grpc/*.c");
         $replace['@grpc_c_files@'] = implode(" \\\n    ", array_map(fn ($f) => 'src/php/ext/grpc/' . basename($f), $c_files));
         $config_m4 = str_replace(array_keys($replace), array_values($replace), $config_m4);
-        file_put_contents("{$this->getSourceDir()}/config.m4", $config_m4);
+        file_put_contents("{$this->getBuildDir()}/config.m4", $config_m4);
 
-        copy("{$this->getSourceDir()}/src/php/ext/grpc/php_grpc.h", "{$this->getSourceDir()}/php_grpc.h");
+        copy("{$this->getBuildDir()}/src/php/ext/grpc/php_grpc.h", "{$this->getBuildDir()}/php_grpc.h");
     }
 }

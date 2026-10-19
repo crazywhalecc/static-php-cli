@@ -21,7 +21,7 @@ class gmssl extends PhpExtensionPackage
     {
         // See: https://github.com/crazywhalecc/static-php-cli/issues/1182
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/gmssl.c",
+            "{$this->getBuildDir()}/gmssl.c",
             'SM2_VERIFY_CTX',
             'SM2_SIGN_CTX'
         );
@@ -33,7 +33,7 @@ class gmssl extends PhpExtensionPackage
     public function patchPbkdf2Rename(): void
     {
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/gmssl.c",
+            "{$this->getBuildDir()}/gmssl.c",
             'pbkdf2_hmac_sm3_genkey',
             'sm3_pbkdf2'
         );
@@ -43,7 +43,7 @@ class gmssl extends PhpExtensionPackage
     #[PatchDescription('Add CHECK_LIB to config.w32 for static Windows builds')]
     public function patchBeforeBuildconfWin(): bool
     {
-        $configW32 = "{$this->getSourceDir()}/config.w32";
+        $configW32 = "{$this->getBuildDir()}/config.w32";
         if (str_contains(FileSystem::readFile($configW32), 'CHECK_LIB(')) {
             return false;
         }

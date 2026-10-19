@@ -2,8 +2,8 @@ ext-memcache:
   type: php-extension
   artifact:
     source:
-      type: pecl
-      name: memcache
+      type: ghtar
+      repo: websupport-sk/pecl-memcache
     metadata:
       license-files: [LICENSE]
       license: PHP-3.0

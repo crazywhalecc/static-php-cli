@@ -32,16 +32,16 @@ class spx extends PhpExtensionPackage
     public function patchBeforeBuildconf(): bool
     {
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/config.m4",
+            "{$this->getBuildDir()}/config.m4",
             'CFLAGS="$CFLAGS -Werror -Wall -O3 -pthread -std=gnu90"',
             'CFLAGS="$CFLAGS -pthread"'
         );
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/src/php_spx.h",
+            "{$this->getBuildDir()}/src/php_spx.h",
             "extern zend_module_entry spx_module_entry;\n",
             "extern zend_module_entry spx_module_entry;;\n#define phpext_spx_ptr &spx_module_entry\n"
         );
-        FileSystem::copy("{$this->getSourceDir()}/src/php_spx.h", "{$this->getSourceDir()}/php_spx.h");
+        FileSystem::copy("{$this->getBuildDir()}/src/php_spx.h", "{$this->getBuildDir()}/php_spx.h");
         return true;
     }
 
@@ -50,9 +50,9 @@ class spx extends PhpExtensionPackage
     public function patchBeforeConfigure(): void
     {
         FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/Makefile.frag",
+            "{$this->getBuildDir()}/Makefile.frag",
             '@cp -r assets/web-ui/*',
-            "@cp -r {$this->getSourceDir()}/assets/web-ui/*",
+            "@cp -r {$this->getBuildDir()}/assets/web-ui/*",
         );
     }
 

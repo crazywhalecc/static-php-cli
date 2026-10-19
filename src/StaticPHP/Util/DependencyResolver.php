@@ -137,6 +137,52 @@ class DependencyResolver
     }
 
     /**
+     * Get the link closure for one or more roots within an already-resolved package set.
+     *
+     * Both depends and suggests may be traversed, but only packages present in the
+     * resolved set are returned. Dependency overrides add build-specific graph edges,
+     * such as PHP's resolved static extensions and virtual SAPI targets.
+     *
+     * @param  array<Package|string>   $packages
+     * @param  string[]                $resolved_packages
+     * @param  array<string, string[]> $dependency_overrides
+     * @return string[]                Packages in dependency order, including the roots
+     */
+    public static function getResolvedPackageClosure(
+        array $packages,
+        array $resolved_packages,
+        array $dependency_overrides = [],
+        bool $include_suggests = true,
+    ): array {
+        $resolved_set = array_flip($resolved_packages);
+        $dep_map = [];
+        foreach ($resolved_packages as $package) {
+            $dep_map[$package] = [
+                'depends' => array_merge(
+                    PackageConfig::get($package, 'depends', []),
+                    $dependency_overrides[$package] ?? [],
+                ),
+                'suggests' => PackageConfig::get($package, 'suggests', []),
+            ];
+        }
+
+        $visited = [];
+        $sorted = [];
+        foreach ($packages as $package) {
+            $name = is_string($package) ? $package : $package->getName();
+            if (!PackageConfig::isPackageExists($name)) {
+                throw new WrongUsageException("Package '{$name}' does not exist in config, please check your package name !");
+            }
+            if (!isset($resolved_set[$name])) {
+                throw new WrongUsageException("Package '{$name}' is not part of the resolved package set.");
+            }
+            self::visitSubDeps($name, $dep_map, $resolved_set, $include_suggests, $visited, $sorted);
+        }
+
+        return $sorted;
+    }
+
+    /**
      * Build a reverse dependency map for the resolved packages.
      * For each package that is depended upon, list which packages depend on it.
      *

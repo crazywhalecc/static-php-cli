@@ -21,7 +21,7 @@ class decimal extends PhpExtensionPackage
     public function patchBeforeBuildconf(): void
     {
         FileSystem::replaceFileStr(
-            $this->getSourceDir() . '/php_decimal.c',
+            $this->getBuildDir() . '/php_decimal.c',
             [
                 'zend_module_entry decimal_module_entry',
                 'ZEND_GET_MODULE(decimal)',
@@ -38,7 +38,7 @@ class decimal extends PhpExtensionPackage
     public function patchConfigW32(): void
     {
         FileSystem::replaceFileStr(
-            $this->getSourceDir() . '/config.w32',
+            $this->getBuildDir() . '/config.w32',
             'ARG_WITH("decimal", "for decimal support", "no");',
             'ARG_WITH("decimal", "for decimal support",  "no");' . "\n" .
             'ADD_EXTENSION_DEP("decimal", "json");'

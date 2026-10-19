@@ -2,10 +2,10 @@ ext-swow:
   type: php-extension
   artifact:
     source:
-      extract: php-src/ext/swow-src
       type: ghtar
       repo: swow/swow
       prefer-stable: true
+      source-root: ext
     metadata:
       license: Apache-2.0
       license-files: [LICENSE]
