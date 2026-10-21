@@ -248,6 +248,22 @@ class SourcePatcher
         // $ver = "{$match[1]}.{$match[2]}";
 
         $major_ver = $match[1] . $match[2];
+
+        // Official minimal source backports for the EOL branches, fixing
+        // CVE-2026-109618 and CVE-2026-109619. Patched 8.2+ releases
+        // (8.2.35, 8.3.36, 8.4.27, 8.5.12 and later) already contain the
+        // complete fix, so only 7.4, 8.0 and 8.1 use these backports.
+        $security_backport = match ($major_ver) {
+            '74' => 'php2shell_74.patch',
+            '80' => 'php2shell_80.patch',
+            '81' => 'php2shell_81.patch',
+            default => null,
+        };
+        if ($security_backport !== null) {
+            logger()->info("Patching PHP {$match[1]}.{$match[2]} with security backport {$security_backport}");
+            self::patchFile("php-src-patches/{$security_backport}", $php_package->getSourceDir());
+        }
+
         if ($major_ver === '74') {
             return false;
         }

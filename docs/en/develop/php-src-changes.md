@@ -59,6 +59,8 @@ Patch files live in `src/globals/patch/php-src-patches/`. A name may have an unv
 
 The directory also contains non-default or conditionally selected patches such as `comctl32`, `phar`, and `static_opcache`. A missing compatible patch or a failed `patch -p1` application stops the build with `PatchException`.
 
+For PHP 7.4, 8.0, and 8.1, `patchPhpSrc()` additionally applies the PHP security team's official minimal backports for CVE-2026-109618 and CVE-2026-109619 (`php2shell_74.patch`, `php2shell_80.patch`, and `php2shell_81.patch`). This happens even on PHP 7.4, which otherwise skips the `SPC_MICRO_PATCHES` set. Patched PHP 8.2 and later releases (PHP 8.2.35, 8.3.36, 8.4.27, 8.5.12, and later) already contain the complete upstream fix and are not patched, so request the latest patch release for those branches. The EOL backports are minimal mitigations rather than the full fix shipped in PHP 8.2.35 and later.
+
 ## Common Build-Time Changes
 
 The PHP target applies two changes independently of the platform-specific tables below.
