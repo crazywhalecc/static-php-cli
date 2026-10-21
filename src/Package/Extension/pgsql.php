@@ -42,6 +42,41 @@ class pgsql extends PhpExtensionPackage
         return "--with-pgsql={$builder->getBuildRootPath()}";
     }
 
+    #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-pgsql')]
+    #[PatchDescription('Link the static libpq dependencies in the libpq version check on PHP < 8.4')]
+    public function patchBeforeBuildconfForUnix(TargetPackage $package, PackageInstaller $installer): void
+    {
+        $libs = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])
+            ->configForResolvedBuild(['postgresql'], $installer)['libs'];
+        self::patchLibpqVersionCheck("{$package->getSourceDir()}/ext/pgsql/config.m4", $libs);
+    }
+
+    /**
+     * PHP < 8.4 checks libpq with `AC_CHECK_LIB(pq, PQlibVersion, ...)`, which links only
+     * `-lpq`. PostgreSQL >= 18 keeps libpgcommon/libpgport as separate static archives, and
+     * libpq itself references OpenSSL/zlib/etc., so the check fails on macOS with undefined
+     * symbols unless the full static dependency list is on the link line. Pass the same
+     * libraries as AC_CHECK_LIB's OTHER-LIBRARIES argument.
+     */
+    public static function patchLibpqVersionCheck(string $config, string $libs): void
+    {
+        if (!is_file($config) || php::getPHPVersionID() >= 80400) {
+            return;
+        }
+
+        if (str_contains(FileSystem::readFile($config), '-lpgcommon')) {
+            return;
+        }
+
+        FileSystem::replaceFileUser($config, static function (string $content) use ($libs): string {
+            return preg_replace_callback(
+                '/^([ \t]*AC_CHECK_LIB\(pq, PQlibVersion,.*)\)$/m',
+                static fn (array $match): string => $match[1] . ', [' . $libs . '])',
+                $content
+            );
+        });
+    }
+
     #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-pgsql')]
     #[PatchDescription('Link the Win32 system libraries the static libpq needs')]
     public function patchConfigW32ForWindows(TargetPackage $package): void
