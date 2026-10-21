@@ -155,13 +155,11 @@ You can sponsor me or my project from [GitHub Sponsor](https://github.com/crazyw
 
 **Special thanks to sponsors below**:
 
+<a href="https://www.jetbrains.com/"><img src="/docs/public/images/jetbrains-logo.svg" width="300" alt="JetBrains Logo" /></a>
+
 <a href="https://beyondco.de/"><img src="/docs/public/images/beyondcode-seeklogo.png" width="300" alt="Beyond Code Logo" /></a>
 
-<a href="https://nativephp.com/"><img src="/docs/public/images/nativephp-logo.svg" width="300" alt="NativePHP Logo" /></a>
-
-<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="96" />
-
-**[JetBrains](https://github.com/JetBrains)** provides core contributors with <a href="https://www.jetbrains.com/community/opensource">OSS Development Licenses</a>
+**[JetBrains](https://www.jetbrains.com/)** provides core contributors with <a href="https://www.jetbrains.com/community/opensource">OSS Development Licenses</a>.
 
 ## Open-Source License
 

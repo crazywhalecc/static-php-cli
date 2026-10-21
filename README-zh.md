@@ -155,13 +155,11 @@ echo '<?php echo "Hello world!\n";' > a.php
 
 **特别感谢以下赞助商：**
 
+<a href="https://www.jetbrains.com/"><img src="/docs/public/images/jetbrains-logo.svg" width="300" alt="JetBrains Logo" /></a>
+
 <a href="https://beyondco.de/"><img src="/docs/public/images/beyondcode-seeklogo.png" width="300" alt="Beyond Code Logo" /></a>
 
-<a href="https://nativephp.com/"><img src="/docs/public/images/nativephp-logo.svg" width="300" alt="NativePHP Logo" /></a>
-
-<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="96" />
-
-**[JetBrains](https://github.com/JetBrains)** 为核心贡献者提供 <a href="https://www.jetbrains.com/community/opensource">开源开发许可证</a>
+**[JetBrains](https://www.jetbrains.com/)** 为核心贡献者提供 <a href="https://www.jetbrains.com/community/opensource">开源开发许可证</a>。
 
 ## 开源许可证
 
