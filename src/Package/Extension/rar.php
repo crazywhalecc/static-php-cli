@@ -61,4 +61,26 @@ class rar extends PhpExtensionPackage
     {
         SourcePatcher::patchFile('rar_unrar_get_cpuid.patch', $this->getBuildDir());
     }
+
+    #[BeforeStage('php', [php::class, 'makeForWindows'], 'ext-rar')]
+    #[PatchDescription('Keep the PHP Windows SDK WINVER/_WIN32_WINNT when unrar os.hpp is included')]
+    public function patchUnrarWindowsVersion(): void
+    {
+        $file = $this->getBuildDir() . '/unrar/os.hpp';
+        if (!is_file($file)) {
+            return;
+        }
+
+        // unrar/os.hpp unconditionally changes WINVER/_WIN32_WINNT to Windows XP.
+        // PHP's Windows build already defines them for the modern SDK, and the generated
+        // main/internal_functions.c includes this header before urlmon.h. Mixing SDK
+        // versions in one TU makes urlmon.h fail with C2059 around PARSEACTION, which
+        // breaks every spc-max build. Keep the values the build already selected.
+        FileSystem::replaceFileRegex(
+            $file,
+            '/^#define WINVER _WIN32_WINNT_WINXP\r?\n#define _WIN32_WINNT _WIN32_WINNT_WINXP/m',
+            "#ifndef WINVER\n#define WINVER _WIN32_WINNT_WINXP\n#endif\n"
+            . "#ifndef _WIN32_WINNT\n#define _WIN32_WINNT _WIN32_WINNT_WINXP\n#endif"
+        );
+    }
 }
