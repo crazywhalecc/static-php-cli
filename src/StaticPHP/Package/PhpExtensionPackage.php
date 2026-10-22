@@ -64,20 +64,32 @@ class PhpExtensionPackage extends Package
      * validations must target this path to hit the tree being compiled.
      * For in-tree builds (static, or shared with build-with-php) this is the
      * source present in php-src/ext: a dir bundled with php-src (e.g. zip, or
-     * imap on PHP < 8.5), or the link (Unix) / junction (Windows, copy as
+     * imap on PHP < 8.4), or the link (Unix) / junction (Windows, copy as
      * fallback) placed by the php target's sync step.
      * For shared (phpize) builds this equals getSourceRoot().
      */
     public function getBuildDir(): string
     {
         $path = SOURCE_PATH . '/php-src/ext/' . $this->getExtensionName();
-        if (($this->isBuildStatic() || $this->isBuildWithPhp()) && is_dir($path)) {
+        if (($this->isBuildStatic() || $this->isBuildWithPhp()) && $this->hasConfigureScript($path)) {
             return $path;
         }
         if ($this->getArtifact() === null) {
             return $this->getSourceDir();
         }
         return $this->getSourceRoot();
+    }
+
+    /**
+     * Whether a directory contains a buildable in-tree extension source.
+     *
+     * Some php-src releases keep a leftover directory for an unbundled extension
+     * without its configure script (e.g. ext/imap/tests in PHP 8.4.27 / 8.5.12),
+     * which must not shadow the extension artifact during in-tree builds.
+     */
+    public function hasConfigureScript(string $path): bool
+    {
+        return is_dir($path) && (is_file("{$path}/config.m4") || is_file("{$path}/config.w32"));
     }
 
     /**

@@ -18,6 +18,7 @@ use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Extension('swoole')]
@@ -60,6 +61,85 @@ class swoole extends PhpExtensionPackage
                 'include <util.h>',
                 "include \"{$util_path}\"",
             );
+        }
+    }
+
+    #[BeforeStage('php', [php::class, 'makeForUnix'], 'ext-swoole')]
+    #[PatchDescription('Keep PHP snprintf/vsnprintf macros away from Swoole bundled nlohmann/json')]
+    public function patchBeforeMake3(): void
+    {
+        $file = $this->getBuildDir() . '/ext-src/swoole_admin_server.cc';
+        if (!is_file($file)) {
+            return;
+        }
+
+        $content = FileSystem::readFile($file);
+        if (str_contains($content, 'SPC_SWOOLE_SNPRINTF_UNDEF')) {
+            return;
+        }
+        if (!str_contains($content, '#include "php_swoole_server.h"') || !str_contains($content, '#include "nlohmann/json.hpp"')) {
+            logger()->warning("Swoole snprintf patch skipped: unexpected include layout in {$file}");
+            return;
+        }
+
+        // php.h includes main/snprintf.h, which does `#define snprintf ap_php_snprintf`
+        // (and the same for vsnprintf). Two things break nlohmann/json:
+        //  1. <cstdio> included after the macro is defined turns its `using ::snprintf;`
+        //     into `using ::ap_php_snprintf;`, so std::snprintf is never declared.
+        //  2. nlohmann's `(std::snprintf)` is rewritten to `std::ap_php_snprintf`.
+        // Include <cstdio> before php.h, then undef both macros before including json.
+        FileSystem::replaceFileUser($file, static function (string $source): string {
+            $source = str_replace(
+                '#include "php_swoole_server.h"',
+                "/* SPC_SWOOLE_SNPRINTF_UNDEF: declare std::snprintf before php.h defines the macro. */\n"
+                . "#include <cstdio>\n\n"
+                . '#include "php_swoole_server.h"',
+                $source
+            );
+
+            return str_replace(
+                '#include "nlohmann/json.hpp"',
+                "/* SPC_SWOOLE_SNPRINTF_UNDEF: keep PHP's snprintf macros away from nlohmann/json. */\n"
+                . "#ifdef snprintf\n#undef snprintf\n#endif\n"
+                . "#ifdef vsnprintf\n#undef vsnprintf\n#endif\n"
+                . '#include "nlohmann/json.hpp"',
+                $source
+            );
+        });
+    }
+
+    #[BeforeStage('php', [php::class, 'makeForUnix'], 'ext-swoole')]
+    #[PatchDescription('Fix Swoole 6.2.3 misc.cc using sw_usleep without including swoole_posix.h')]
+    public function patchBeforeMake4(): void
+    {
+        $file = $this->getBuildDir() . '/src/core/misc.cc';
+        if (!is_file($file)) {
+            return;
+        }
+
+        $content = FileSystem::readFile($file);
+        if (!str_contains($content, 'sw_usleep(')) {
+            return;
+        }
+
+        // Swoole 6.2.3 replaced usleep() with sw_usleep() in misc.cc, but sw_usleep is
+        // defined by include/swoole_posix.h, which that translation unit does not include.
+        // Linux happens to pull it in through another header; macOS does not. Upstream
+        // master and 6.2.2 use usleep() here, so restore that portable call.
+        FileSystem::replaceFileRegex($file, '/\bsw_usleep\(([^)]*)\);/', 'usleep($1);');
+    }
+
+    #[BeforeStage('php', [php::class, 'makeForUnix'], 'ext-swoole')]
+    #[PatchDescription('Include libc++ <locale> before PHP headers to avoid the vsnprintf macro clash in swoole.h')]
+    public function patchBeforeMake5(): void
+    {
+        // swoole.h includes libc++ <list>/<locale> from inside the PHP header chain. With
+        // Zig's libc++ on Linux, __locale_dir/support/linux.h uses std::vsnprintf, which
+        // PHP's main/snprintf.h has already rewritten to std::ap_php_vsnprintf.
+        // Parsing <locale> before any PHP header avoids the macro expansion entirely.
+        $cxxflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS') ?: '';
+        if (!str_contains($cxxflags, '-include locale')) {
+            GlobalEnvManager::putenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CXXFLAGS=' . trim("{$cxxflags} -include locale"));
         }
     }
 

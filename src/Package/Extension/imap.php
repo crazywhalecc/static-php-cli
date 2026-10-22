@@ -47,6 +47,21 @@ class imap extends PhpExtensionPackage
             // sometimes imap with openssl does not contain zlib (required by openssl)
             // we need to add it manually
             FileSystem::replaceFileStr("{$this->getBuildDir()}/config.m4", 'TST_LIBS="$DLIBS $IMAP_SHARED_LIBADD"', 'TST_LIBS="$DLIBS $IMAP_SHARED_LIBADD -lz"');
+            if (php::getPHPVersionID() >= 80400) {
+                // The php target passes OPENSSL_LIBS="-lz" for the openssl extension on
+                // PHP 8.4+, so PHP_SETUP_OPENSSL() only adds -lz to IMAP_SHARED_LIBADD
+                // here. Link the SSL libraries explicitly for the c-client link tests.
+                $config_m4 = "{$this->getBuildDir()}/config.m4";
+                if (!str_contains(FileSystem::readFile($config_m4), 'PHP_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)')) {
+                    FileSystem::replaceFileStr(
+                        $config_m4,
+                        "    PHP_SETUP_OPENSSL([IMAP_SHARED_LIBADD],\n      [AC_DEFINE([HAVE_IMAP_SSL], [1], [ ])])",
+                        "    PHP_SETUP_OPENSSL([IMAP_SHARED_LIBADD],\n      [AC_DEFINE([HAVE_IMAP_SSL], [1], [ ])])\n"
+                        . "    PHP_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)\n"
+                        . '    PHP_ADD_LIBRARY(crypto,, IMAP_SHARED_LIBADD)'
+                    );
+                }
+            }
         }
         // c-client is built with PASSWDTYPE=nul so libcrypt is not referenced.
         FileSystem::replaceFileStr(

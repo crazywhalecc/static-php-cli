@@ -410,8 +410,10 @@ class php extends TargetPackage
      *
      * Existing dirs are classified by markers: a link/junction is our own (refreshed
      * when its target differs), a .spc-ext-sync marker is our Windows copy fallback
-     * (refreshed), anything else is bundled with php-src (e.g. zip, or imap on
-     * PHP < 8.5) and left untouched.
+     * (refreshed), a directory with a configure script is bundled with php-src
+     * (e.g. zip, or imap on PHP < 8.4) and left untouched. Directories without a
+     * configure script (e.g. the ext/imap/tests leftover in PHP 8.4.27 / 8.5.12)
+     * are stubs and get replaced by the extension artifact.
      */
     #[BeforeStage('php', 'build')]
     public function syncExtensionSources(PackageInstaller $installer): void
@@ -444,11 +446,12 @@ class php extends TargetPackage
             if (FileSystem::isLink($ext_dir)) {
                 FileSystem::removeLink($ext_dir);
             } elseif (is_dir($ext_dir)) {
-                if (!file_exists("{$ext_dir}/.spc-ext-sync")) {
-                    // bundled with php-src, keep it (used when the extension is built shared only)
+                if (!file_exists("{$ext_dir}/.spc-ext-sync") && $ext->hasConfigureScript($ext_dir)) {
+                    // bundled with php-src, keep it
                     logger()->debug("Extension [{$ext->getName()}] keeps bundled source at {$ext_dir}.");
                     continue;
                 }
+                // stub dir left by php-src for an unbundled extension, or our stale copy
                 FileSystem::removeDir($ext_dir);
             }
             if (PHP_OS_FAMILY === 'Windows') {
