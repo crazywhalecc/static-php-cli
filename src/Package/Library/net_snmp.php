@@ -24,6 +24,20 @@ class net_snmp
         FileSystem::replaceFileStr("{$lib->getSourceDir()}/configure", 'LIBS="-lssl ${OPENSSL_LIBS}"', 'LIBS="-lssl ${OPENSSL_LIBS} -lpthread -ldl"');
     }
 
+    #[PatchBeforeBuild]
+    #[PatchDescription('Silence expected missing OpenSSL legacy provider warning')]
+    public function patchLegacyProviderWarning(LibraryPackage $lib): void
+    {
+        // net-snmp 5.10 logs a warning at library init when the legacy provider is
+        // unavailable. static-php builds OpenSSL with no-legacy, so the provider is
+        // intentionally absent and the warning breaks CLI smoke tests.
+        FileSystem::replaceFileStr(
+            "{$lib->getSourceDir()}/snmplib/scapi.c",
+            "        if (legacy_provider == NULL)\n            snmp_log(LOG_WARNING, \"Failed to load OpenSSL legacy provider\\n\");",
+            '        /* static-php builds OpenSSL with no-legacy: a missing legacy provider is expected */'
+        );
+    }
+
     #[BuildFor('Darwin')]
     #[BuildFor('Linux')]
     public function buildUnix(LibraryPackage $lib): void
