@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Package\Extension;
 
 use Package\Target\php;
+use StaticPHP\Attribute\Package\BeforeStage;
 use StaticPHP\Attribute\Package\CustomPhpConfigureArg;
 use StaticPHP\Attribute\Package\Extension;
+use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\PhpExtensionPackage;
+use StaticPHP\Package\TargetPackage;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Extension('pdo_pgsql')]
@@ -27,5 +30,14 @@ class pdo_pgsql extends PhpExtensionPackage
                 ' PGSQL_LIBS="-L' . $builder->getLibDir() . ' ' . $libs . '"';
         }
         return '--with-pdo-pgsql=' . ($shared ? 'shared,' : '') . $builder->getBuildRootPath();
+    }
+
+    #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-pdo_pgsql')]
+    #[PatchDescription('Link the static libpq dependencies in the libpq version check on PHP < 8.4')]
+    public function patchBeforeBuildconfForUnix(TargetPackage $package, PackageInstaller $installer): void
+    {
+        $libs = new SPCConfigUtil(['no_php' => true, 'libs_only_deps' => true])
+            ->configForResolvedBuild(['postgresql'], $installer)['libs'];
+        pgsql::patchLibpqVersionCheck("{$package->getSourceDir()}/ext/pdo_pgsql/config.m4", $libs);
     }
 }
