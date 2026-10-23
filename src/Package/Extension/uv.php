@@ -35,7 +35,13 @@ class uv extends PhpExtensionPackage
         FileSystem::replaceFileStr(
             "{$this->getBuildDir()}/config.w32",
             'CHECK_LIB("Ws2_32.lib","uv", PHP_UV);',
-            "CHECK_LIB(\"Ws2_32.lib\",\"uv\" , PHP_UV);\n\tCHECK_LIB(\"dbghelp.lib\",\"uv\", PHP_UV);",
+            implode("\n\t", [
+                'CHECK_LIB("Ws2_32.lib","uv" , PHP_UV);',
+                'CHECK_LIB("dbghelp.lib","uv", PHP_UV);',
+                // libuv >= 1.53 calls WaitOnAddress()/WakeByAddressSingle() in win/pipe.c;
+                // php.exe links libuv.lib directly, so the consumer has to pass synchronization.lib.
+                'CHECK_LIB("synchronization.lib","uv", PHP_UV);',
+            ]),
         );
     }
 

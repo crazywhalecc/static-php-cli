@@ -20,6 +20,7 @@ class readline
             ->configure(
                 '--with-curses',
                 '--enable-multibyte=yes',
+                '--disable-install-examples',
             )
             ->make();
         $lib->patchPkgconfPrefix(['readline.pc']);

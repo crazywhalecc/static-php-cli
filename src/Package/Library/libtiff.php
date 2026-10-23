@@ -41,6 +41,9 @@ class libtiff
                 '--disable-libdeflate',
                 '--disable-tools',
                 '--disable-contrib',
+                '--disable-tests',
+                '--disable-docs',
+                '--disable-sphinx',
                 '--disable-cxx',
                 '--without-x',
             )

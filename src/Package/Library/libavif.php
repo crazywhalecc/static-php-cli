@@ -35,7 +35,12 @@ class libavif
             ->optionalPackage('libjpeg', '-DAVIF_JPEG=SYSTEM', '-DAVIF_JPEG=OFF')
             ->optionalPackage('libxml2', '-DAVIF_LIBXML2=SYSTEM', '-DAVIF_LIBXML2=OFF')
             ->optionalPackage('libpng', '-DAVIF_LIBPNG=SYSTEM', '-DAVIF_LIBPNG=OFF')
-            ->addConfigureArgs('-DAVIF_LIBYUV=OFF')
+            ->addConfigureArgs(
+                '-DAVIF_LIBYUV=OFF',
+                '-DAVIF_BUILD_APPS=OFF',
+                '-DAVIF_BUILD_TESTS=OFF',
+                '-DAVIF_GTEST=OFF',
+            )
             ->build();
         // patch pkgconfig
         $lib->patchPkgconfPrefix(['libavif.pc']);
@@ -49,7 +54,7 @@ class libavif
                 '-DAVIF_BUILD_APPS=OFF',
                 '-DAVIF_BUILD_TESTS=OFF',
                 '-DAVIF_LIBYUV=OFF',
-                '-DAVIF_ENABLE_GTEST=OFF',
+                '-DAVIF_GTEST=OFF',
             )
             ->build();
     }
