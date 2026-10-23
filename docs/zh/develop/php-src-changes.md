@@ -59,6 +59,8 @@ GD 和 IMAP 操作修改的是只有在相应扩展存在或参与构建时才�
 
 该目录还包含 `comctl32`、`phar` 和 `static_opcache` 等非默认或按条件选择的补丁。找不到兼容补丁或执行 `patch -p1` 失败时，构建会以 `PatchException` 终止。
 
+对于 PHP 7.4、8.0 和 8.1，`patchPhpSrc()` 还会应用 PHP 安全团队针对 CVE-2026-109618 和 CVE-2026-109619 的官方最小 backport（`php2shell_74.patch`、`php2shell_80.patch` 和 `php2shell_81.patch`）。PHP 7.4 虽然会跳过 `SPC_MICRO_PATCHES` 补丁集，但仍会应用该安全补丁。已修复的 PHP 8.2 及更高版本（PHP 8.2.35、8.3.36、8.4.27、8.5.12 及以后）已包含完整的上游修复，因此不会再打这些补丁；这些分支应获取最新的补丁版本。这些 EOL backport 属于最小缓解措施，并不等同于 PHP 8.2.35 及更高版本中的完整修复。
+
 ## 通用构建期修改
 
 除下方各平台表格中的改动外，PHP target 还会应用两个通用修改。

@@ -30,8 +30,8 @@ import {VPSponsors} from "vitepress/theme";
 import Contributors from '../.vitepress/components/Contributors.vue';
 
 const sponsors = [
+  { name: 'JetBrains', img: '/images/jetbrains-logo.svg', url: 'https://www.jetbrains.com/' },
   { name: 'Beyond Code', img: '/images/beyondcode-seeklogo.png', url: 'https://beyondco.de/' },
-  { name: 'NativePHP', img: '/images/nativephp-logo.svg', url: 'https://nativephp.com/' },
 ];
 </script>
 
