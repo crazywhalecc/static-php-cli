@@ -122,6 +122,8 @@ trait frankenphp
             $staticFlags = '';
         }
 
+        [$extra_build_flags, $extra_ldflags, $extra_tags] = $this->getExtraGoFlags();
+
         $config = new SPCConfigUtil()->configForResolvedBuild([$package->getName()], $installer);
         $cflags = "{$package->getLibExtraCFlags()} {$config['cflags']} " . getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') . " -DFRANKENPHP_VERSION={$frankenphp_version}";
         $libs = $config['libs'];
@@ -143,8 +145,9 @@ trait frankenphp
                 '-X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomBinaryName=frankenphp\' ' .
                 '-X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ' .
-                "v{$frankenphp_version} PHP {$libphp_version} Caddy'\\\" " .
-                "-tags={$muslTags}nobadger,nomysql,nopgx,deprecated_topic,deprecated_claim{$no_brotli}{$no_watcher}",
+                "v{$frankenphp_version} PHP {$libphp_version} Caddy' {$extra_ldflags}\\\" " .
+                "-tags={$muslTags}nobadger,nomysql,nopgx,deprecated_topic,deprecated_claim{$no_brotli}{$no_watcher}{$extra_tags} " .
+                $extra_build_flags,
             'LD_LIBRARY_PATH' => BUILD_LIB_PATH,
         ];
         InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('building with xcaddy'));
@@ -307,12 +310,15 @@ trait frankenphp
         if (!$installer->isPackageResolved('brotli')) {
             $go_build_tags .= ',nobrotli';
         }
+        [$extra_build_flags, $extra_ldflags, $extra_tags] = $this->getExtraGoFlags();
+        $go_build_tags .= $extra_tags;
 
         $go_ldflags =
             '-extldflags=-fuse-ld=lld ' .
             "-X 'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy' " .
             "-X 'github.com/caddyserver/caddy/v2.CustomBinaryName=frankenphp' " .
-            "-X 'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP v{$frankenphp_version} PHP {$libphp_version} Caddy'";
+            "-X 'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP v{$frankenphp_version} PHP {$libphp_version} Caddy' " .
+            $extra_ldflags;
 
         // CGO on Windows tokenizes CC/CXX like a shell command line, splitting on spaces.
         // Paths like "C:\Program Files\..." break because only "C:\Program" is used.
@@ -336,7 +342,7 @@ trait frankenphp
 
         cmd()->cd("{$source_dir}\\caddy\\frankenphp")
             ->setEnv($env)
-            ->exec("go build -v -tags \"{$go_build_tags}\" -ldflags \"{$go_ldflags}\" -o frankenphp.exe .");
+            ->exec("go build -v -tags \"{$go_build_tags}\" -ldflags \"{$go_ldflags}\" {$extra_build_flags} -o frankenphp.exe .");
 
         $builder->deployBinary("{$source_dir}\\caddy\\frankenphp\\frankenphp.exe", BUILD_BIN_PATH . '\frankenphp.exe');
         $package->setOutput('Binary path for FrankenPHP SAPI', BUILD_BIN_PATH . '\frankenphp.exe');
@@ -484,5 +490,22 @@ trait frankenphp
         }
 
         throw new SPCInternalException('Could not find FrankenPHP version in caddy/go.mod');
+    }
+
+    /**
+     * Extra Go flags from env.ini or the environment. Ldflags and tags are merged into
+     * ours because Go keeps only the last -ldflags and -tags.
+     *
+     * @return array{string, string, string} build flags, ldflags, tags (with a leading comma)
+     */
+    private function getExtraGoFlags(): array
+    {
+        $tags = trim((string) getenv('SPC_CMD_VAR_FRANKENPHP_GO_TAGS'), " \t,");
+
+        return [
+            trim((string) getenv('SPC_CMD_VAR_FRANKENPHP_GO_BUILD_FLAGS')),
+            trim((string) getenv('SPC_CMD_VAR_FRANKENPHP_GO_LDFLAGS')),
+            $tags === '' ? '' : ",{$tags}",
+        ];
     }
 }
