@@ -35,6 +35,7 @@ class ldap
             ->optionalPackage('libsodium', '--with-argon2=libsodium', '--enable-argon2=no')
             ->addConfigureArgs(
                 '--disable-slapd',
+                '--disable-debug',
                 '--without-systemd',
                 '--without-cyrus-sasl',
                 'ac_cv_func_pthread_kill_other_threads_np=no'

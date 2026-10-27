@@ -20,6 +20,8 @@ class libpng
     {
         $args = [
             '--enable-hardware-optimizations',
+            '--disable-tests',
+            '--disable-tools',
             "--with-zlib-prefix={$lib->getBuildRootPath()}",
         ];
 

@@ -25,6 +25,7 @@ class libjxl extends LibraryPackage
                 '-DJPEGXL_ENABLE_MANPAGES=OFF',
                 '-DJPEGXL_ENABLE_BENCHMARK=OFF',
                 '-DJPEGXL_ENABLE_PLUGINS=OFF',
+                '-DJPEGXL_ENABLE_DOXYGEN=OFF',
                 '-DJPEGXL_ENABLE_SJPEG=ON',
                 '-DJPEGXL_ENABLE_JNI=OFF',
                 '-DJPEGXL_ENABLE_TRANSCODE_JPEG=ON',

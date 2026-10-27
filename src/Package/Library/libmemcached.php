@@ -12,17 +12,25 @@ use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 #[Library('libmemcached')]
 class libmemcached extends LibraryPackage
 {
+    private const array DISABLE_ARGS = [
+        '-DBUILD_TESTING=OFF',
+        '-DBUILD_DOCS=OFF',
+        '-DENABLE_MEMASLAP=OFF',
+    ];
+
     #[BuildFor('Linux')]
     public function buildLinux(): void
     {
         UnixCMakeExecutor::create($this)
-            ->addConfigureArgs('-DCMAKE_INSTALL_RPATH=""')
+            ->addConfigureArgs('-DCMAKE_INSTALL_RPATH=""', ...self::DISABLE_ARGS)
             ->build();
     }
 
     #[BuildFor('Darwin')]
     public function buildDarwin(): void
     {
-        UnixCMakeExecutor::create($this)->build();
+        UnixCMakeExecutor::create($this)
+            ->addConfigureArgs(...self::DISABLE_ARGS)
+            ->build();
     }
 }

@@ -35,6 +35,7 @@ class unixodbc extends LibraryPackage
                 '--with-included-ltdl',
                 "--sysconfdir={$sysconf_selector}",
                 '--enable-gui=no',
+                '--enable-readline=no',
             )
             ->make();
         $this->patchPkgconfPrefix(['odbc.pc', 'odbccr.pc', 'odbcinst.pc']);

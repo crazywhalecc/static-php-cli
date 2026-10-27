@@ -34,6 +34,7 @@ class libxslt
                 '--without-crypto',
                 '--without-debug',
                 '--without-debugger',
+                '--without-profiler',
                 "--with-libxml-prefix={$lib->getBuildRootPath()}",
             );
         if (getenv('SPC_LD_LIBRARY_PATH') && getenv('SPC_LIBRARY_PATH')) {

@@ -47,6 +47,7 @@ class libheif
                 '-DWITH_EXAMPLES=OFF',
                 '-DWITH_GDK_PIXBUF=OFF',
                 '-DBUILD_TESTING=OFF',
+                '-DBUILD_DOCUMENTATION=OFF',
                 '-DWITH_LIBSHARPYUV=ON', // optional: libwebp
                 '-DENABLE_PLUGIN_LOADING=OFF',
             )

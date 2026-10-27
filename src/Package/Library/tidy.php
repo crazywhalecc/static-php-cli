@@ -22,7 +22,8 @@ class tidy
             ->setBuildDir("{$lib->getSourceDir()}/build-dir")
             ->addConfigureArgs(
                 '-DSUPPORT_CONSOLE_APP=OFF',
-                '-DBUILD_SHARED_LIB=OFF'
+                '-DBUILD_SHARED_LIB=OFF',
+                '-DSUPPORT_LOCALIZATIONS=OFF',
             );
         if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
             $cmake->addConfigureArgs('-DCMAKE_POLICY_VERSION_MINIMUM=3.5');
@@ -38,7 +39,8 @@ class tidy
             ->setBuildDir("{$lib->getSourceDir()}/build-dir")
             ->addConfigureArgs(
                 '-DSUPPORT_CONSOLE_APP=OFF',
-                '-DBUILD_SHARED_LIB=OFF'
+                '-DBUILD_SHARED_LIB=OFF',
+                '-DSUPPORT_LOCALIZATIONS=OFF',
             )->build();
 
         // rename tidy_static.lib to tidy_a.lib

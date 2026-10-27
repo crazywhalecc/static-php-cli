@@ -20,6 +20,18 @@ class qdbm
     {
         $ac = UnixAutoconfExecutor::create($lib)->configure();
         FileSystem::replaceFileRegex($lib->getSourceDir() . '/Makefile', '/MYLIBS = libqdbm.a.*/m', 'MYLIBS = libqdbm.a');
+        // Makefile pins -O3, replace with SPC_DEFAULT_CFLAGS
+        $extra = trim((string) getenv('SPC_DEFAULT_CFLAGS'));
+        if ($extra !== '') {
+            FileSystem::replaceFileRegex($lib->getSourceDir() . '/Makefile', '/^CFLAGS = (.*)$/m', "CFLAGS = $1 {$extra}");
+        }
+        if (SystemTarget::getTargetOS() === 'Darwin') {
+            FileSystem::replaceFileRegex(
+                "{$lib->getSourceDir()}/Makefile",
+                '/^(\tmake MYLIBS="\$\(MYMACLIBS\)" CFLAGS=")[^"]*(")$/m',
+                "$1-Wall -fsigned-char -fno-common -O2 {$extra}$2"
+            );
+        }
         $ac->make(SystemTarget::getTargetOS() === 'Darwin' ? 'mac' : '');
         $lib->patchPkgconfPrefix(['qdbm.pc']);
     }
