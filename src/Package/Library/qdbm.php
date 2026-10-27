@@ -25,6 +25,13 @@ class qdbm
         if ($extra !== '') {
             FileSystem::replaceFileRegex($lib->getSourceDir() . '/Makefile', '/^CFLAGS = (.*)$/m', "CFLAGS = $1 {$extra}");
         }
+        if (SystemTarget::getTargetOS() === 'Darwin') {
+            FileSystem::replaceFileRegex(
+                "{$lib->getSourceDir()}/Makefile",
+                '/^(\tmake MYLIBS="\$\(MYMACLIBS\)" CFLAGS=")[^"]*(")$/m',
+                "$1-Wall -fsigned-char -fno-common -O2 {$extra}$2"
+            );
+        }
         $ac->make(SystemTarget::getTargetOS() === 'Darwin' ? 'mac' : '');
         $lib->patchPkgconfPrefix(['qdbm.pc']);
     }
