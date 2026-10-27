@@ -30,13 +30,20 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
         GlobalEnvManager::putenv('SPC_DEFAULT_RANLIB=zig-ranlib');
         GlobalEnvManager::putenv('SPC_DEFAULT_LD=zig-ld.lld');
 
+        // zig extracts into {pkg_root}/zig (binary and wrappers), not {pkg_root}/bin, so the
+        // directory has to be on PATH wherever CC=zig-cc is resolved. Done here rather than in
+        // afterInit() because `spc doctor` sets SPC_SKIP_TOOLCHAIN_CHECK, which skips afterInit()
+        // yet still builds packages from source (the re2c fix ran cmake with zig-cc and failed
+        // with "is not a full path and was not found in the PATH"). Adding the path when zig is
+        // not installed yet is harmless, and matches the other toolchains (musl, brew clang).
+        GlobalEnvManager::addPathIfNotExists($this->getPath());
+
         $rt_dir = $this->getPath() . '/lib/' . SystemTarget::getCanonicalTriple();
         GlobalEnvManager::putenv("SPC_COMPILER_RT_DIR={$rt_dir}");
     }
 
     public function afterInit(): void
     {
-        GlobalEnvManager::addPathIfNotExists($this->getPath());
         if (is_dir($this->getPath())) {
             zig::writeWrappers($this->getPath());
         }
