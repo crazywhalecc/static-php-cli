@@ -157,7 +157,7 @@
         <div class="warning custom-block">
           <p class="custom-block-title">WARNING</p>
           <p>{{ I18N[lang].windowsDownSPCWarning }}</p>
-          <a href="https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.exe" target="_blank">https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.exe</a>
+          <a href="https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x64.exe" target="_blank">https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x64.exe</a>
         </div>
       </div>
     </div>

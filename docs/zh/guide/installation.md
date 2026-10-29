@@ -41,8 +41,8 @@ curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-macos-x86_64 -o spc
 ```shell [macOS arm64]
 curl -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-macos-aarch64 -o spc
 ```
-```powershell [Windows x86_64]
-curl.exe -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x86_64.exe -o spc.exe
+```powershell [Windows x64]
+curl.exe -#fSL https://dl.static-php.dev/v3/spc-bin/nightly/spc-windows-x64.exe -o spc.exe
 ```
 :::
 
