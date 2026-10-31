@@ -58,8 +58,8 @@ class V2CompatLayer
             $package->addBuildOption('build-micro', null, null, 'Build micro SAPI');
             $package->addBuildOption('build-cli', null, null, 'Build cli SAPI');
             $package->addBuildOption('build-fpm', null, null, 'Build fpm SAPI (not available on Windows)');
-            $package->addBuildOption('build-embed', null, null, 'Build embed SAPI (not available on Windows)');
-            $package->addBuildOption('build-frankenphp', null, null, 'Build FrankenPHP SAPI (not available on Windows)');
+            $package->addBuildOption('build-embed', null, null, 'Build embed SAPI');
+            $package->addBuildOption('build-frankenphp', null, null, 'Build FrankenPHP SAPI');
             $package->addBuildOption('build-cgi', null, null, 'Build cgi SAPI');
             $package->addBuildOption('build-all', null, null, 'Build all SAPI');
         }
