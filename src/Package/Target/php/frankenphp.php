@@ -212,7 +212,7 @@ trait frankenphp
             $appTarPath = "{$frankenphpSourceDir}/app.tar";
             logger()->info("Creating app.tar from {$frankenphpAppPath}");
 
-            shell()->exec('tar -cf ' . escapeshellarg($appTarPath) . ' -C ' . escapeshellarg($frankenphpAppPath) . ' .');
+            default_shell()->executeTarCreate($frankenphpAppPath, $appTarPath);
 
             $checksum = hash_file('md5', $appTarPath);
             file_put_contents($frankenphpSourceDir . '/app_checksum.txt', $checksum);
@@ -230,6 +230,10 @@ trait frankenphp
         if (getenv('GOROOT') === false) {
             throw new EnvironmentException('go-win is not initialized properly. GOROOT is not set.');
         }
+
+        // process --with-frankenphp-app option
+        InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('processing --with-frankenphp-app option'));
+        $package->runStage([$this, 'processFrankenphpApp']);
 
         $clang_info = WindowsUtil::findClang();
         if ($clang_info === false) {

@@ -149,13 +149,30 @@ class DefaultShell extends Shell
         };
 
         $mute = $this->console_putput ? '' : ' 2>/dev/null';
-        $tar = SystemTarget::isUnix() ? 'tar' : '"C:\Windows\system32\tar.exe"';
+        $tar = $this->tarExecutable();
         $cmd = "{$tar} {$compression_flag}xf {$archive_arg} --strip-components {$strip} -C {$target_arg}{$mute}";
 
         $this->logCommandInfo($cmd);
         logger()->debug("[TAR EXTRACT] {$cmd}");
         $this->passthruTolerateSymlinks($cmd);
         return true;
+    }
+
+    /**
+     * Execute a tar command to archive the contents of a directory.
+     *
+     * @param string $source_dir   Directory whose contents are archived
+     * @param string $archive_path Path to the tar file to create
+     */
+    public function executeTarCreate(string $source_dir, string $archive_path): void
+    {
+        $archive_arg = escapeshellarg(FileSystem::convertPath($archive_path));
+        $source_arg = escapeshellarg(FileSystem::convertPath($source_dir));
+        $cmd = "{$this->tarExecutable()} -cf {$archive_arg} -C {$source_arg} .";
+
+        $this->logCommandInfo($cmd);
+        logger()->debug("[TAR CREATE] {$cmd}");
+        $this->passthru($cmd, $this->console_putput);
     }
 
     /**
@@ -205,7 +222,7 @@ class DefaultShell extends Shell
         };
 
         $extname = FileSystem::extname($archive_path);
-        $tar = SystemTarget::isUnix() ? 'tar' : '"C:\Windows\system32\tar.exe"';
+        $tar = $this->tarExecutable();
 
         match ($extname) {
             'tar' => $this->executeTarExtract($archive_path, $target_path, 'none'),
@@ -277,5 +294,14 @@ class DefaultShell extends Shell
             }
         }
         return $saw_symlink_error;
+    }
+
+    /**
+     * On Windows the MSYS2 GNU tar comes first in PATH and reads "C:\..." as a remote host:file,
+     * so use the bsdtar shipped with Windows.
+     */
+    private function tarExecutable(): string
+    {
+        return SystemTarget::isUnix() ? 'tar' : '"C:\Windows\system32\tar.exe"';
     }
 }
