@@ -302,6 +302,6 @@ class DefaultShell extends Shell
      */
     private function tarExecutable(): string
     {
-        return SystemTarget::isUnix() ? 'tar' : '"C:\Windows\system32\tar.exe"';
+        return SystemTarget::isUnix() ? 'tar' : '"C:\Windows\System32\tar.exe"';
     }
 }
