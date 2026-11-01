@@ -11,6 +11,14 @@ HTTP3 support is not enabled by default, compile with `--with-libs="nghttp2,nght
 When using curl to request HTTPS, there may be an `error:80000002:system library::No such file or directory` error.
 For details on the solution, see [FAQ](../faq/).
 
+On Windows, libcurl is built with the Schannel TLS backend by default, and it verifies certificates
+against the Windows certificate store. Schannel ignores `CURLOPT_SSLKEY`, so PEM client certificates
+(mutual TLS) cannot be used with the default build.
+Build with `SPC_CURL_TLS_BACKEND=openssl` to switch libcurl to OpenSSL instead; certificate verification
+then still reads the Windows certificate store (`CURL_CA_NATIVE`), so the binary does not need a bundled
+CA file. This backend requires curl >= 8.19; see [Environment Variables](./env-vars) for how to set it.
+Changing the backend requires rebuilding libcurl: remove `buildroot/lib/libcurl_a.lib` or run `spc reset`.
+
 ## phpmicro
 
 1. Only PHP >= 8.0 is supported.

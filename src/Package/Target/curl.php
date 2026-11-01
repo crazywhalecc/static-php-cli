@@ -38,6 +38,28 @@ class curl
         $lib_dir = str_replace('\\', '/', $lib->getLibDir());
         $zstd_lib = "{$lib_dir}/zstd_static.lib";
         $extra_libs = "{$lib_dir}/libcrypto.lib {$lib_dir}/libssl.lib ws2_32.lib gdi32.lib advapi32.lib crypt32.lib user32.lib";
+        $schannel_backend_args = [
+            '-DCURL_WINDOWS_SSPI=ON',
+            '-DCURL_USE_SCHANNEL=ON',
+            '-DCURL_USE_OPENSSL=OFF',
+        ];
+        $ossl_backend_args = [
+            // Keep Windows SSPI (NTLM/SPNEGO/SMB) for both TLS backends
+            '-DCURL_WINDOWS_SSPI=ON',
+            '-DCURL_USE_SCHANNEL=OFF',
+            '-DCURL_USE_OPENSSL=ON',
+            '-DCURL_CA_NATIVE=ON',
+            '-DCURL_CA_BUNDLE=none',
+            '-DCURL_CA_PATH=none',
+            '-DOPENSSL_ROOT_DIR=' . escapeshellarg(str_replace('\\', '/', BUILD_ROOT_PATH)),
+            '-DOPENSSL_USE_STATIC_LIBS=ON',
+        ];
+        $backend = getenv('SPC_CURL_TLS_BACKEND') ?: 'schannel';
+        $backend_args = $backend === 'openssl' ? $ossl_backend_args : $schannel_backend_args;
+        logger()->info("Building libcurl with TLS backend [{$backend}] (SPC_CURL_TLS_BACKEND)");
+        if (!in_array($backend, ['openssl', 'schannel'])) {
+            logger()->warning("SPC_CURL_TLS_BACKEND can only pass 'schannel' and 'openssl', now fallback to 'schannel'");
+        }
         WindowsCMakeExecutor::create($lib)
             ->optionalPackage('zstd', ...cmake_boolean_args('CURL_ZSTD'))
             ->optionalPackage('brotli', ...cmake_boolean_args('CURL_BROTLI'))
@@ -51,14 +73,12 @@ class curl
                 '-DENABLE_CURL_MANUAL=OFF',
                 '-DUSE_LIBIDN2=OFF',
                 '-DCURL_USE_LIBPSL=OFF',
-                '-DUSE_WINDOWS_SSPI=ON',
-                '-DCURL_USE_SCHANNEL=ON',
-                '-DCURL_USE_OPENSSL=OFF',
                 '-DCURL_ENABLE_SSL=ON',
                 '-DUSE_NGHTTP2=ON',
                 '-DSHARE_LIB_OBJECT=OFF',
                 '-DCURL_USE_LIBSSH2=ON',
                 '-DENABLE_IPV6=ON',
+                ...$backend_args,
             )
             ->build();
         // move libcurl.lib to libcurl_a.lib
