@@ -18,7 +18,7 @@ class curl
     {
         // libcurl on Windows is always built with CURL_WINDOWS_SSPI=ON (NTLM/SPNEGO/SMB),
         // which requires secur32.lib for the SSPI functions. This is independent of the
-        // selected TLS backend (Schannel by default, OpenSSL via SPC_CURL_TLS_BACKEND).
+        // selected TLS backend (OpenSSL by default, Schannel via SPC_CURL_TLS_BACKEND).
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if (!str_contains($extra_libs, 'secur32.lib')) {
             putenv('SPC_EXTRA_LIBS=' . trim("{$extra_libs} secur32.lib"));

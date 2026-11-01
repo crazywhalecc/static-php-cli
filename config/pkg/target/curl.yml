@@ -14,6 +14,7 @@ curl:
     - zlib
   depends@windows:
     - zlib
+    - openssl
     - libssh2
     - nghttp2
     - brotli

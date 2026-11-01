@@ -9,11 +9,10 @@ HTTP3 支持默认未启用，需在编译时添加 `--with-libs="nghttp2,nghttp
 使用 curl 请求 HTTPS 时，可能存在 `error:80000002:system library::No such file or directory` 错误，
 解决办法详见 [FAQ](../faq/)。
 
-Windows 上 libcurl 默认使用 Schannel 作为 TLS 后端，证书校验读取 Windows 证书存储。
-Schannel 会忽略 `CURLOPT_SSLKEY`，因此默认构建无法使用 PEM 格式的客户端证书（双向 TLS）。
-如需使用，可通过 `SPC_CURL_TLS_BACKEND=openssl` 让 libcurl 改用 OpenSSL；
-此时证书校验仍然读取 Windows 证书存储（`CURL_CA_NATIVE`），二进制无需内置 CA 证书文件。
-该后端要求 curl >= 8.19，设置方式见[环境变量](./env-vars)。
+Windows 上 libcurl 默认使用 OpenSSL 作为 TLS 后端，与官方 PHP Windows 构建及 Unix 构建保持一致。
+证书校验读取 Windows 证书存储（`CURL_CA_NATIVE`），二进制无需内置 CA 证书文件，PEM 格式的客户端证书（双向 TLS）可直接使用。
+如需使用 Windows 原生 TLS，可设置 `SPC_CURL_TLS_BACKEND=schannel`：它会遵循 Windows 的 TLS 策略（密码套件、吊销检查），
+并可从 Windows 证书存储读取客户端证书；但它会忽略 `CURLOPT_SSLKEY`，因此无法使用 PEM 格式的客户端证书。
 切换后端后需要重新构建 libcurl：删除 `buildroot/lib/libcurl_a.lib` 或执行 `spc reset`。
 
 ## phpmicro

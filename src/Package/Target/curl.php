@@ -54,11 +54,11 @@ class curl
             '-DOPENSSL_ROOT_DIR=' . escapeshellarg(str_replace('\\', '/', BUILD_ROOT_PATH)),
             '-DOPENSSL_USE_STATIC_LIBS=ON',
         ];
-        $backend = getenv('SPC_CURL_TLS_BACKEND') ?: 'schannel';
-        $backend_args = $backend === 'openssl' ? $ossl_backend_args : $schannel_backend_args;
+        $backend = getenv('SPC_CURL_TLS_BACKEND') ?: 'openssl';
+        $backend_args = $backend === 'schannel' ? $schannel_backend_args : $ossl_backend_args;
         logger()->info("Building libcurl with TLS backend [{$backend}] (SPC_CURL_TLS_BACKEND)");
         if (!in_array($backend, ['openssl', 'schannel'])) {
-            logger()->warning("SPC_CURL_TLS_BACKEND can only pass 'schannel' and 'openssl', now fallback to 'schannel'");
+            logger()->warning("SPC_CURL_TLS_BACKEND can only pass 'schannel' and 'openssl', now fallback to 'openssl'");
         }
         WindowsCMakeExecutor::create($lib)
             ->optionalPackage('zstd', ...cmake_boolean_args('CURL_ZSTD'))
