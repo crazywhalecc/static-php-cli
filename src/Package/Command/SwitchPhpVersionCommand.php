@@ -68,6 +68,11 @@ class SwitchPhpVersionCommand extends BaseCommand
             InteractiveTerm::finish('Removed: ' . $source_dir);
         }
 
+        // Extension sources are extracted to source/ext-* and linked into php-src/ext, so their
+        // build state (objects, dependency files, patched config.m4, phpize leftovers) lives
+        // outside source/php-src and is only valid for the PHP version that produced it.
+        $this->cleanExtensionSources();
+
         // Download new PHP source
         $this->output->writeln("<info>Downloading PHP {$php_ver} source...</info>");
 
@@ -96,6 +101,41 @@ class SwitchPhpVersionCommand extends BaseCommand
         $this->output->writeln("<info>Successfully switched to PHP {$new_version}!</info>");
 
         return static::SUCCESS;
+    }
+
+    /**
+     * Delete every extracted extension source tree under source/ext-*, returning the count.
+     */
+    public static function removeExtensionSources(string $source_path): int
+    {
+        $removed = 0;
+        foreach (glob(FileSystem::convertPath("{$source_path}/ext-*"), GLOB_ONLYDIR) ?: [] as $ext_dir) {
+            if (FileSystem::isLink($ext_dir)) {
+                FileSystem::removeLink($ext_dir);
+            } else {
+                FileSystem::removeDir($ext_dir);
+            }
+            ++$removed;
+        }
+
+        return $removed;
+    }
+
+    /**
+     * Remove the extracted extension source trees (source/ext-*) of the previous PHP version.
+     *
+     * Extension sources are linked into php-src/ext for in-tree builds, so their objects,
+     * dependency files, patched config.m4 and phpize leftovers live outside source/php-src and
+     * would otherwise leak into the next PHP version's build. The original archives stay in
+     * downloads/ and are re-extracted automatically on the next build.
+     */
+    private function cleanExtensionSources(): void
+    {
+        $removed = self::removeExtensionSources(SOURCE_PATH);
+
+        if ($removed > 0) {
+            $this->output->writeln("<info>Removed {$removed} extracted extension source director" . ($removed === 1 ? 'y' : 'ies') . '; they will be re-extracted from the cached archives on the next build.</info>');
+        }
     }
 
     /**

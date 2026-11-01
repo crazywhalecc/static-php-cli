@@ -45,6 +45,9 @@ class PackageInstaller
     /** @var array<string, array<string>> Unresolved target additional dependencies defined in #[ResolveBuild] */
     protected array $target_additional_dependencies = [];
 
+    /** @var bool Whether this run compiles something and therefore needs the toolchain packages */
+    protected bool $toolchain_packages_required = false;
+
     /** @var bool Whether to download missing sources automatically */
     protected bool $download = true;
 
@@ -719,27 +722,37 @@ class PackageInstaller
             $pkgs[] = $package->getName();
         }
 
-        // gather packages declared by the active toolchain (e.g. the compiler runtime zig does
-        // not ship). They are prepended so they are built before the packages that need them, and
-        // they join as regular install packages so the normal pipeline downloads/builds them and
-        // their own isInstalled() decides skip vs rebuild.
-        $toolchain_packages = array_values(array_filter(
-            $this->collectToolchainPackages(),
-            static fn (string $package): bool => !in_array($package, $pkgs, true)
-        ));
-        // They are fetched pre-built where a binary is published (llvm-tools): building them from
-        // source is only the fallback, unless the user explicitly asked for source-only downloads.
-        if ($toolchain_packages !== []) {
-            $this->preferBinary(...$toolchain_packages);
-        }
-        $pkgs = [...$toolchain_packages, ...$pkgs];
-
         // resolve dependencies string
         $resolved_packages = DependencyResolver::resolve(
             $pkgs,
             $this->target_additional_dependencies,
             $this->options['with-suggests'] ?? false
         );
+
+        // gather packages declared by the active toolchain (e.g. the compiler runtime zig does
+        // not ship). They are prepended so they are built before the packages that need them, and
+        // they join as regular install packages so the normal pipeline downloads/builds them and
+        // their own isInstalled() decides skip vs rebuild.
+        $this->toolchain_packages_required = $this->runCompilesSomething($resolved_packages);
+        if ($this->toolchain_packages_required) {
+            $toolchain_packages = array_values(array_filter(
+                $this->collectToolchainPackages(),
+                static fn (string $package): bool => !in_array($package, $pkgs, true)
+            ));
+            // They are fetched pre-built where a binary is published (llvm-tools): building them
+            // from source is only the fallback, unless the user asked for source-only downloads.
+            if ($toolchain_packages !== []) {
+                $this->preferBinary(...$toolchain_packages);
+                $pkgs = [...$toolchain_packages, ...$pkgs];
+                $resolved_packages = DependencyResolver::resolve(
+                    $pkgs,
+                    $this->target_additional_dependencies,
+                    $this->options['with-suggests'] ?? false
+                );
+            }
+        } else {
+            logger()->debug('Nothing is compiled from source in this run, skipping toolchain packages.');
+        }
 
         foreach ($resolved_packages as $pkg_name) {
             $this->packages[$pkg_name] = PackageLoader::getPackage($pkg_name);
@@ -777,6 +790,38 @@ class PackageInstaller
     }
 
     /**
+     * Whether this run builds at least one package from source.
+     *
+     * The toolchain packages supply the compiler and its runtime, so they are only needed when
+     * something is actually compiled. Library and tool packages that are installed from a platform
+     * binary, and tool packages without a build stage (e.g. zig itself), need no compiler.
+     *
+     * @param string[] $resolved_packages Package names resolved for this run
+     */
+    private function runCompilesSomething(array $resolved_packages): bool
+    {
+        return array_any($resolved_packages, fn ($pkg_name) => $this->willCompilePackage(PackageLoader::getPackage($pkg_name)));
+    }
+
+    /**
+     * Whether the build loop compiles this package instead of installing a prebuilt binary.
+     *
+     * Mirrors the branch selection in run(): build packages are fetched as source and always
+     * compiled, and an install package is compiled only when it has a build stage with source but
+     * no platform binary to install. Every platform that publishes a binary installs it here,
+     * because run() only forces source-only downloads for build packages.
+     */
+    private function willCompilePackage(Package $package): bool
+    {
+        if ($this->isBuildPackage($package)) {
+            return true;
+        }
+        return $package->hasStage('build')
+            && $package->hasSource()
+            && !($package->getArtifact()?->hasPlatformBinary() ?? false);
+    }
+
+    /**
      * Report, once per run, any package the active toolchain declared that is still missing.
      *
      * This runs after the build/install loop on purpose: that is the first moment the result of
@@ -786,6 +831,12 @@ class PackageInstaller
      */
     private function warnAboutMissingToolchainPackages(): void
     {
+        // A run that compiled nothing never asked for the toolchain packages, so a missing zig is
+        // not a problem here: warning about it would only tell the user to "build again" after a
+        // plain `install-pkg pkg-config`.
+        if (!$this->toolchain_packages_required) {
+            return;
+        }
         $toolchain = ToolchainManager::getToolchain();
         if (!$toolchain instanceof PackageRequirementsInterface) {
             return;
