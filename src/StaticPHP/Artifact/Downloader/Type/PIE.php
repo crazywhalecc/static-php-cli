@@ -11,7 +11,16 @@ use StaticPHP\Exception\DownloaderException;
 /** pie */
 class PIE implements DownloadTypeInterface, CheckUpdateInterface
 {
+    use GitHubTokenSetupTrait;
+
     public const string PACKAGIST_URL = 'https://repo.packagist.org/p2/';
+
+    /**
+     * Hosts that may receive the GITHUB_TOKEN header.
+     *
+     * @var string[]
+     */
+    private const array GITHUB_HOSTS = ['api.github.com', 'github.com'];
 
     public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
     {
@@ -27,7 +36,7 @@ class PIE implements DownloadTypeInterface, CheckUpdateInterface
         $version = $first['version'] ?? 'unknown';
         $filename = "{$name}-{$version}." . ($dist_type === 'zip' ? 'zip' : 'tar.gz');
         $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;
-        default_shell()->executeCurlDownload($dist_url, $path, retries: $downloader->getRetry());
+        default_shell()->executeCurlDownload($dist_url, $path, headers: $this->githubDistHeaders($dist_url), retries: $downloader->getRetry());
         return DownloadResult::archive($filename, $config, $extract, version: $version, downloader: static::class);
     }
 
@@ -43,6 +52,21 @@ class PIE implements DownloadTypeInterface, CheckUpdateInterface
             new: $new_version,
             needUpdate: $old_version === null || $new_version !== $old_version,
         );
+    }
+
+    /**
+     * Packagist `dist.url` usually points at api.github.com, but any host can appear there,
+     * so the token is only attached when the download URL really belongs to GitHub.
+     *
+     * @return string[]
+     */
+    protected function githubDistHeaders(string $url): array
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        if (!is_string($host) || !in_array(strtolower($host), self::GITHUB_HOSTS, true)) {
+            return [];
+        }
+        return $this->getGitHubTokenHeaders();
     }
 
     protected function fetchPackagistInfo(string $name, array $config, ArtifactDownloader $downloader): array
