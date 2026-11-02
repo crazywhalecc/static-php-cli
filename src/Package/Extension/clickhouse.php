@@ -41,5 +41,15 @@ class clickhouse extends PhpExtensionPackage
                 ''
             );
         }
+
+        // upstream checks libssl with PHP_CHECK_LIBRARY(ssl, SSL_CTX_new) without naming the
+        // libraries libssl.a itself depends on, so the conftest fails with undefined libcrypto
+        // symbols for static builds: configure aborts with "requires libssl, which was not found".
+        // Preload libcrypto/libz into LIBS for that check (it is guarded by --enable-clickhouse-openssl).
+        FileSystem::replaceFileStr(
+            $this->getBuildDir() . '/config.m4',
+            '    PHP_CHECK_LIBRARY(ssl, SSL_CTX_new, [',
+            '    LIBS="$LIBS -lcrypto -lz"' . "\n" . '    PHP_CHECK_LIBRARY(ssl, SSL_CTX_new, ['
+        );
     }
 }

@@ -13,11 +13,11 @@ use StaticPHP\Attribute\PatchDescription;
 class curl
 {
     #[BeforeStage('php', [php::class, 'makeForWindows'], 'ext-curl')]
-    #[PatchDescription('Inject secur32.lib into SPC_EXTRA_LIBS for Schannel SSL support')]
+    #[PatchDescription('Inject secur32.lib into SPC_EXTRA_LIBS for Windows SSPI support')]
     public function addSecur32LibForWindows(): void
     {
-        // curl on Windows uses Schannel (USE_WINDOWS_SSPI=ON, CURL_USE_SCHANNEL=ON),
-        // which requires secur32.lib for SSL/TLS functions (SslEncryptPackage, etc.).
+        // libcurl on Windows is built with CURL_WINDOWS_SSPI=ON (NTLM/SPNEGO/SMB), which
+        // requires secur32.lib for the SSPI functions.
         $extra_libs = getenv('SPC_EXTRA_LIBS') ?: '';
         if (!str_contains($extra_libs, 'secur32.lib')) {
             putenv('SPC_EXTRA_LIBS=' . trim("{$extra_libs} secur32.lib"));

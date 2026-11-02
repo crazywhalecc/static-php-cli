@@ -51,14 +51,19 @@ class curl
                 '-DENABLE_CURL_MANUAL=OFF',
                 '-DUSE_LIBIDN2=OFF',
                 '-DCURL_USE_LIBPSL=OFF',
-                '-DUSE_WINDOWS_SSPI=ON',
-                '-DCURL_USE_SCHANNEL=ON',
-                '-DCURL_USE_OPENSSL=OFF',
                 '-DCURL_ENABLE_SSL=ON',
                 '-DUSE_NGHTTP2=ON',
                 '-DSHARE_LIB_OBJECT=OFF',
                 '-DCURL_USE_LIBSSH2=ON',
                 '-DENABLE_IPV6=ON',
+                '-DCURL_WINDOWS_SSPI=ON',
+                '-DCURL_USE_SCHANNEL=OFF',
+                '-DCURL_USE_OPENSSL=ON',
+                '-DCURL_CA_NATIVE=ON',
+                '-DCURL_CA_BUNDLE=none',
+                '-DCURL_CA_PATH=none',
+                '-DOPENSSL_ROOT_DIR=' . escapeshellarg(str_replace('\\', '/', BUILD_ROOT_PATH)),
+                '-DOPENSSL_USE_STATIC_LIBS=ON',
             )
             ->build();
         // move libcurl.lib to libcurl_a.lib
