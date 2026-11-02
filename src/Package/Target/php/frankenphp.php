@@ -333,6 +333,8 @@ trait frankenphp
             'PATH' => $clang_dir . ';' . getenv('PATH'),
             'CGO_CFLAGS' => clean_spaces($cgo_cflags),
             'CGO_LDFLAGS' => $cgo_ldflags,
+            // caddy-cbrotli finds brotli through #cgo pkg-config.
+            'PKG_CONFIG_PATH' => BUILD_LIB_PATH . '\pkgconfig',
         ];
 
         InteractiveTerm::setMessage('Building frankenphp: ' . ConsoleColor::yellow('embedding Windows metadata'));
