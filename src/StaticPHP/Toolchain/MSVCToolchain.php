@@ -46,6 +46,14 @@ class MSVCToolchain implements ToolchainInterface
                 exec('call "' . $vcvarsall . '" x64 > NUL && set', $output);
                 file_put_contents(DOWNLOAD_PATH . '/.vcenv-cache', implode("\n", $output));
             }
+            // The snapshot captures the whole environment, including the SPC_* values that were
+            // active when it was taken. Replaying those would silently revert configuration the
+            // caller changed for the current run (e.g. SPC_CURL_TLS_BACKEND), so keep the
+            // process' own SPC_* values and only import the Visual Studio environment.
+            $output = array_values(array_filter(
+                $output,
+                static fn (string $line): bool => !str_starts_with(strtoupper($line), 'SPC_')
+            ));
             array_map(fn ($x) => putenv($x), $output);
         }
         $after = count(getenv());
