@@ -157,9 +157,6 @@ abstract class Shell
             // write executed command to the log file using spc_write_log (shared handle, see spc_log_stream)
             $file_res = spc_log_stream(SPC_SHELL_LOG);
         }
-        if ($console_output) {
-            $console_res = STDOUT;
-        }
         $descriptors = [
             0 => ['file', 'php://stdin', 'r'], // stdin
             1 => PHP_OS_FAMILY === 'Windows' ? ['socket'] : ['pipe', 'w'], // stdout
@@ -188,22 +185,38 @@ abstract class Shell
             // fclose($pipes[0]);
             stream_set_blocking($pipes[1], false);
             stream_set_blocking($pipes[2], false);
+            $drain = function ($pipe) use ($console_output, $file_res, $capture_output, &$output_value): void {
+                while (($chunk = fread($pipe, 8192)) !== false && $chunk !== '') {
+                    if ($console_output) {
+                        spc_write_log(STDOUT, $chunk);
+                    }
+                    if ($file_res !== null) {
+                        spc_write_log($file_res, $chunk);
+                    }
+                    if ($capture_output) {
+                        $output_value .= $chunk;
+                    }
+                }
+            };
 
             while (true) {
                 $status = proc_get_status($process);
                 if (!$status['running']) {
-                    foreach ([$pipes[1], $pipes[2]] as $pipe) {
-                        while (($chunk = fread($pipe, 8192)) !== false && $chunk !== '') {
-                            if ($console_output) {
-                                spc_write_log($console_res, $chunk);
-                            }
-                            if ($file_res !== null) {
-                                spc_write_log($file_res, $chunk);
-                            }
-                            if ($capture_output) {
-                                $output_value .= $chunk;
+                    // Exit does not mean all output has arrived: on Windows the last bytes can still be in
+                    // flight on the socket, and a grandchild may still write to the inherited handle.
+                    // Read until EOF, bounded in case a grandchild keeps the handle open.
+                    $open = [$pipes[1], $pipes[2]];
+                    $deadline = microtime(true) + 5;
+                    while ($open !== [] && microtime(true) < $deadline) {
+                        $read = $open;
+                        $write = null;
+                        $except = null;
+                        if (stream_select($read, $write, $except, 0, 100000)) {
+                            foreach ($read as $pipe) {
+                                $drain($pipe);
                             }
                         }
+                        $open = array_filter($open, fn ($pipe) => !feof($pipe));
                     }
                     // check exit code
                     if ($throw_on_error && $status['exitcode'] !== 0) {
@@ -237,17 +250,7 @@ abstract class Shell
 
                 if ($ready > 0) {
                     foreach ($read as $pipe) {
-                        while (($chunk = fread($pipe, 8192)) !== false && $chunk !== '') {
-                            if ($console_output) {
-                                spc_write_log($console_res, $chunk);
-                            }
-                            if ($file_res !== null) {
-                                spc_write_log($file_res, $chunk);
-                            }
-                            if ($capture_output) {
-                                $output_value .= $chunk;
-                            }
-                        }
+                        $drain($pipe);
                     }
                 }
             }
