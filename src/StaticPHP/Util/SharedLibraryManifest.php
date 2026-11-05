@@ -459,7 +459,7 @@ final class SharedLibraryManifest
         }
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(BUILD_ROOT_PATH, \FilesystemIterator::SKIP_DOTS)) as $file) {
             $relative = substr($file->getPathname(), strlen(BUILD_ROOT_PATH) + 1);
-            if (in_array($relative, ['shared-libraries.json', '.shared-library-ownership.json'], true)
+            if (in_array($relative, ['shared-libraries.json', '.shared-library-ownership.json', 'share/info/dir'], true)
                 || str_starts_with($relative, '.shared-library-')) {
                 continue;
             }
