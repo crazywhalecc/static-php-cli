@@ -411,7 +411,7 @@ final class SharedLibraryManifest
             }
         }
         if (!(($source['cache_type'] ?? null) === 'git' && str_starts_with($version, 'dev-'))
-            && preg_match('/^(?:v|[A-Za-z][A-Za-z0-9_.-]*?[-_]v?)?([0-9][A-Za-z0-9.+~_-]*)$/D', $version, $match)) {
+            && preg_match('/^(?:v|[A-Za-z]+|[A-Za-z][A-Za-z0-9_.-]*?[-_]v?)?([0-9][A-Za-z0-9.+~_-]*)$/D', $version, $match)) {
             return $match[1];
         }
         if (($source['cache_type'] ?? null) === 'git') {
@@ -427,6 +427,19 @@ final class SharedLibraryManifest
                 if (ctype_digit($timestamp)) {
                     return '0.0.' . $timestamp;
                 }
+            }
+        }
+        $directory = $package->getSourceDir();
+        $numericVersion = 'v?(\d+(?:\.\d+)*(?:[._-]?(?:alpha|beta|rc|dev)\d*)?)';
+        foreach ([
+            '.tarball-version' => '/^' . $numericVersion . '$/iD',
+            'version.sh' => '/^VERSION_NUMBER=[\"\']?' . $numericVersion . '[\"\']?[ \t]*$/im',
+            'configure' => '/^PACKAGE_VERSION=[\"\']' . $numericVersion . '[\"\'][ \t]*$/im',
+            'VERSION' => '/^\d+:\d+:\d+[ \t]+' . $numericVersion . '[ \t]+\d{8}$/D',
+        ] as $file => $pattern) {
+            if (is_file($directory . '/' . $file)
+                && preg_match($pattern, trim(file_get_contents($directory . '/' . $file)), $match)) {
+                return $match[1];
             }
         }
         throw new WrongUsageException('Cannot determine a reproducible library version: ' . $package->getName());

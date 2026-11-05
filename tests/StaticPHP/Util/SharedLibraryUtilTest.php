@@ -236,6 +236,27 @@ final class SharedLibraryUtilTest extends TestCase
         }
     }
 
+    public function testMirrorVersionsComeFromLiteralUpstreamSourceMetadata(): void
+    {
+        $directory = sys_get_temp_dir() . '/spc-source-version-' . bin2hex(random_bytes(6));
+        mkdir($directory);
+        try {
+            $package = $this->createMock(LibraryPackage::class);
+            $package->method('getSourceDir')->willReturn($directory);
+            $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
+            $method = new \ReflectionMethod($manifest, 'sourceVersion');
+            foreach (['.tarball-version' => ["1.0\n", '1.0'], 'version.sh' => ["VERSION_NUMBER=1.5\nRELEASE_DATE=2026-10-17\n", '1.5'],
+                'configure' => ["PACKAGE_VERSION='3.45.2'\n", '3.45.2'], 'VERSION' => ["5:0:10\t6.6\t20251230\n", '6.6']] as $file => [$contents, $version]) {
+                file_put_contents($directory . '/' . $file, $contents);
+                self::assertSame($version, $method->invoke($manifest, $package, ['cache_type' => 'archive', 'version' => null]));
+                unlink($directory . '/' . $file);
+            }
+            self::assertSame('2.20', $method->invoke($manifest, $package, ['cache_type' => 'archive', 'version' => 'lcms2.20']));
+        } finally {
+            FileSystem::removeDir($directory);
+        }
+    }
+
     public function testUnversionedArchiveFailsRatherThanInventingAVersion(): void
     {
         $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
