@@ -416,7 +416,7 @@ final class SharedLibraryManifest
                 $process->mustRun();
                 $timestamp = trim($process->getOutput());
                 if (ctype_digit($timestamp)) {
-                    return '0.0.0+git' . gmdate('YmdHis', (int) $timestamp) . '.' . substr($source['hash'], 0, 12);
+                    return '0.0.' . $timestamp;
                 }
             }
         }
