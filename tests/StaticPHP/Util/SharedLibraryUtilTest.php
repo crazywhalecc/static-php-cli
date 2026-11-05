@@ -270,6 +270,22 @@ final class SharedLibraryUtilTest extends TestCase
         }
     }
 
+    public function testSharedSnapshotOmitsTheCombinedInfoIndex(): void
+    {
+        $directory = BUILD_ROOT_PATH . '/share/info';
+        FileSystem::createDir($directory);
+        $index = $directory . '/dir';
+        self::assertFileDoesNotExist($index);
+        foreach ([$index, $directory . '/' . $this->name . '.info'] as $file) {
+            file_put_contents($file, 'fixture documentation');
+            $this->files[] = $file;
+        }
+        $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
+        $snapshot = (new \ReflectionMethod($manifest, 'snapshot'))->invoke($manifest);
+        self::assertArrayNotHasKey('share/info/dir', $snapshot);
+        self::assertArrayHasKey('share/info/' . $this->name . '.info', $snapshot);
+    }
+
     public function testUnversionedArchiveFailsRatherThanInventingAVersion(): void
     {
         $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
