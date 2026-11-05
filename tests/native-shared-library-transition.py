@@ -52,6 +52,7 @@ foreach ($names as $short) {
                 . ' ' . escapeshellarg(BUILD_LIB_PATH . '/other.o'));
             StaticPHP\Util\SharedLibraryUtil::linkArchive($package, 'libtransition-other.a');
             unlink(BUILD_LIB_PATH . '/other.o');
+            StaticPHP\Util\FileSystem::removeDir($package->getSourceDir());
             file_put_contents(WORKING_DIR . '/compiled.jsonl', json_encode($short) . "\n", FILE_APPEND);
             return;
         }
@@ -117,10 +118,19 @@ class InstallerTransitionTests(unittest.TestCase):
                 cache['transition-' + short] = {'source': {'cache_type': 'local', 'dirname': str(directory),
                     'hash': hashlib.sha256(body.encode()).hexdigest(), 'version': '1'}}
 
+            (root / 'native-sources/transition-other/configure').write_text("PACKAGE_VERSION='1.2.3'\n")
+            cache['transition-other']['source']['version'] = None
+
             def save_cache():
                 (root / 'downloads/.cache.json').write_text(json.dumps(cache))
 
             def run(action, selected, success=True):
+                if action == 'build' and 'other' in selected.split(','):
+                    source = root / 'native-sources/transition-other'
+                    source.mkdir(parents=True, exist_ok=True)
+                    (source / 'fixture.c').write_text(bodies['other'])
+                    (source / 'LICENSE').write_text('MIT fixture license')
+                    (source / 'configure').write_text("PACKAGE_VERSION='1.2.3'\n")
                 libc = os.environ.get('SPC_LIBC') or ('musl' if Path('/etc/alpine-release').is_file() else 'glibc')
                 environment = dict(os.environ, SPC_LIBC=libc, SPC_TARGET='', SPC_TOOLCHAIN='StaticPHP\\Toolchain\\GccNativeToolchain',
                                    SPC_SKIP_TOOLCHAIN_CHECK='yes', SPC_ENABLE_LOG_FILE='0',
@@ -147,6 +157,9 @@ class InstallerTransitionTests(unittest.TestCase):
 
             save_cache()
             initial = run('build', 'base,consumer,other')
+            self.assertEqual(initial['libraries']['transition-other']['version'], '1.2.3')
+            self.assertFalse((root / 'native-sources/transition-other').exists())
+            self.assertEqual((root / 'buildroot/license/transition-other/0.txt').read_text(), 'MIT fixture license')
             self.assertEqual(initial['libc'], os.environ.get('SPC_LIBC') or ('musl' if Path('/etc/alpine-release').is_file() else 'glibc'))
             self.assertNotIn('pending_rebuilds', initial)
             self.assertIn('gcc-runtime', initial['libraries'])
