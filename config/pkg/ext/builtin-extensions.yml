@@ -51,8 +51,7 @@ ext-ffi:
   depends@windows:
     - libffi-win
   php-extension:
-    arg-type@unix: '--with-ffi=@shared_suffix@ --enable-zend-signals'
-    arg-type@windows: with
+    arg-type: with
 ext-fileinfo:
   type: php-extension
 ext-filter:
