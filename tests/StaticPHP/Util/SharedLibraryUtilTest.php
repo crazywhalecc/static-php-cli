@@ -211,10 +211,12 @@ final class SharedLibraryUtilTest extends TestCase
             $package->method('getSourceDir')->willReturn($directory);
             $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
             $method = new \ReflectionMethod($manifest, 'sourceVersion');
-            $version = $method->invoke($manifest, $package, ['cache_type' => 'git', 'dirname' => $directory,
-                'version' => 'dev-main+abcdef', 'hash' => 'abcdef']);
-            self::assertSame('0.0.1577836800', $version);
-            self::assertMatchesRegularExpression('/^[0-9]+\.[0-9]+\.[0-9]+$/D', $version);
+            foreach (['dev-main+abcdef', 'dev-v1.75.x+9b63ce0', 'dev-1.75+abcdef'] as $snapshot) {
+                $version = $method->invoke($manifest, $package, ['cache_type' => 'git', 'dirname' => $directory,
+                    'version' => $snapshot, 'hash' => 'abcdef']);
+                self::assertSame('0.0.1577836800', $version);
+                self::assertMatchesRegularExpression('/^[0-9]+\.[0-9]+\.[0-9]+$/D', $version);
+            }
         } finally {
             FileSystem::removeDir($directory);
         }

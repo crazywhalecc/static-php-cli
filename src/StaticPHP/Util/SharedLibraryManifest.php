@@ -410,7 +410,8 @@ final class SharedLibraryManifest
                 $version = $match[1];
             }
         }
-        if (preg_match('/^(?:v|[A-Za-z][A-Za-z0-9_.-]*?[-_]v?)?([0-9][A-Za-z0-9.+~_-]*)$/D', $version, $match)) {
+        if (!(($source['cache_type'] ?? null) === 'git' && str_starts_with($version, 'dev-'))
+            && preg_match('/^(?:v|[A-Za-z][A-Za-z0-9_.-]*?[-_]v?)?([0-9][A-Za-z0-9.+~_-]*)$/D', $version, $match)) {
             return $match[1];
         }
         if (($source['cache_type'] ?? null) === 'git') {
