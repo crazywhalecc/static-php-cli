@@ -41,6 +41,9 @@ foreach ($names as $short) {
         $cache = json_decode(file_get_contents(DOWNLOAD_PATH . '/.cache.json'), true, 512, JSON_THROW_ON_ERROR);
         $version = $short === 'base' ? $cache[$name]['source']['version'] : '1';
         $soname = 'libtransition-' . $short . '.so.' . $version;
+        if ($short === 'base' && $version === '3') {
+            symlink('missing-artifact.a', BUILD_LIB_PATH . '/incomplete.a');
+        }
         if ($short === 'other') {
             shell(false)->exec(escapeshellarg(getenv('CXX')) . ' -c -fPIC -g -gdwarf-4 '
                 . escapeshellarg(WORKING_DIR . '/native-sources/' . $name . '/fixture.c')
@@ -118,10 +121,11 @@ class InstallerTransitionTests(unittest.TestCase):
                 (root / 'downloads/.cache.json').write_text(json.dumps(cache))
 
             def run(action, selected, success=True):
-                environment = dict(os.environ, SPC_LIBC='glibc', SPC_TARGET='', SPC_TOOLCHAIN='StaticPHP\\Toolchain\\GccNativeToolchain',
+                libc = os.environ.get('SPC_LIBC') or ('musl' if Path('/etc/alpine-release').is_file() else 'glibc')
+                environment = dict(os.environ, SPC_LIBC=libc, SPC_TARGET='', SPC_TOOLCHAIN='StaticPHP\\Toolchain\\GccNativeToolchain',
                                    SPC_SKIP_TOOLCHAIN_CHECK='yes', SPC_ENABLE_LOG_FILE='0',
-                                   CC='/usr/bin/gcc' if Path('/usr/bin/gcc').is_file() else shutil.which('cc'),
-                                   CXX='/usr/bin/g++' if Path('/usr/bin/g++').is_file() else shutil.which('g++'),
+                                   CC=os.environ.get('CC') or shutil.which('cc'),
+                                   CXX=os.environ.get('CXX') or shutil.which('g++'),
                                    BUILD_ROOT_PATH=str(root / 'buildroot'), SOURCE_PATH=str(root / 'source'),
                                    DOWNLOAD_PATH=str(root / 'downloads'), PKG_ROOT_PATH=str(root / 'pkgroot'))
                 for name in ['BUILD_LIB_PATH', 'BUILD_BIN_PATH', 'BUILD_INCLUDE_PATH']:
@@ -143,6 +147,7 @@ class InstallerTransitionTests(unittest.TestCase):
 
             save_cache()
             initial = run('build', 'base,consumer,other')
+            self.assertEqual(initial['libc'], os.environ.get('SPC_LIBC') or ('musl' if Path('/etc/alpine-release').is_file() else 'glibc'))
             self.assertNotIn('pending_rebuilds', initial)
             self.assertIn('gcc-runtime', initial['libraries'])
             self.assertTrue(initial['libraries']['gcc-runtime']['license_files'])
@@ -176,7 +181,7 @@ class InstallerTransitionTests(unittest.TestCase):
             run('reuse', 'consumer')
             self.assertEqual(compiled(), ['base', 'consumer', 'other', 'base', 'consumer'])
             (root / 'check-other.c').write_text('extern int transition_other(void); int main(void) { return transition_other() == 128 ? 0 : 1; }')
-            compiler = shutil.which('cc')
+            compiler = os.environ.get('CC') or shutil.which('cc')
             subprocess.run([compiler, str(root / 'check-other.c'), '-L' + str(root / 'buildroot/lib'),
                             '-ltransition-other', '-Wl,-rpath-link,' + str(root / 'buildroot/lib'),
                             '-o', str(root / 'check-other')], check=True, capture_output=True)
@@ -186,7 +191,7 @@ class InstallerTransitionTests(unittest.TestCase):
             self.assertIn(str(root / 'buildroot/lib/libstdc++.so.6'), loader)
 
             (root / 'check.c').write_text('extern int transition_consumer(void); int main(void) { return transition_consumer() == 2 ? 0 : 1; }')
-            compiler = '/usr/bin/gcc' if Path('/usr/bin/gcc').is_file() else shutil.which('cc')
+            compiler = os.environ.get('CC') or shutil.which('cc')
             subprocess.run([compiler, str(root / 'check.c'), '-L' + str(root / 'buildroot/lib'),
                             '-ltransition-consumer', '-Wl,-rpath-link,' + str(root / 'buildroot/lib'),
                             '-o', str(root / 'check')], check=True, capture_output=True)
@@ -198,10 +203,24 @@ class InstallerTransitionTests(unittest.TestCase):
             binary.write_bytes(original)
             run('reuse', 'other')
 
+            ownership_path = root / 'buildroot/.shared-library-ownership.json'
+            original_ownership = ownership_path.read_bytes()
+            bad_ownership = json.loads(original_ownership)
+            bad_ownership['libraries']['transition-other']['files'].insert(0, '../unsafe')
+            ownership_path.write_text(json.dumps(bad_ownership))
+            protected_base = signature('lib/libtransition-base.so.2')
+            protected_consumer = signature('lib/libtransition-consumer.so.1')
+            self.assertIn('Unsafe shared SDK path', run('build', 'other', success=False))
+            self.assertEqual(signature('lib/libtransition-base.so.2'), protected_base)
+            self.assertEqual(signature('lib/libtransition-consumer.so.1'), protected_consumer)
+            ownership_path.write_bytes(original_ownership)
+            run('reuse', 'other')
+
             source.write_text('invalid C source;')
             cache['transition-base']['source'].update(version='3', hash=hashlib.sha256(source.read_bytes()).hexdigest())
             save_cache()
-            run('build', 'base', success=False)
+            self.assertIn('Native fixture compile failed', run('build', 'base', success=False))
+            self.assertFalse((root / 'buildroot/lib/incomplete.a').is_symlink())
             failed = json.loads((root / 'buildroot/shared-libraries.json').read_text())
             self.assertNotIn('transition-base', failed['libraries'])
             self.assertIn('transition-consumer', failed['pending_rebuilds'])
