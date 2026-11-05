@@ -47,7 +47,9 @@ class brotli
         );
 
         // Create symlink: libbrotli.a -> libbrotlicommon.a
-        shell()->cd($lib->getLibDir())->exec('ln -sf libbrotlicommon.a libbrotli.a');
+        if (!SharedLibraryUtil::buildsShared($lib)) {
+            shell()->cd($lib->getLibDir())->exec('ln -sf libbrotlicommon.a libbrotli.a');
+        }
 
         // Remove dynamic libraries
         if (!SharedLibraryUtil::buildsShared($lib)) {

@@ -220,6 +220,32 @@ final class SharedLibraryUtilTest extends TestCase
         }
     }
 
+    public function testFixedArchiveVersionsComeFromAnUnambiguousFilename(): void
+    {
+        $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
+        $method = new \ReflectionMethod($manifest, 'sourceVersion');
+        $package = $this->createMock(LibraryPackage::class);
+        foreach (['bzip2-1.0.8.tar.gz' => '1.0.8', 'some-lib-2.0.0-rc3.tar.xz' => '2.0.0-rc3'] as $filename => $version) {
+            self::assertSame($version, $method->invoke(
+                $manifest,
+                $package,
+                ['cache_type' => 'archive', 'filename' => $filename, 'version' => null]
+            ));
+        }
+    }
+
+    public function testUnversionedArchiveFailsRatherThanInventingAVersion(): void
+    {
+        $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
+        $method = new \ReflectionMethod($manifest, 'sourceVersion');
+        $this->expectException(WrongUsageException::class);
+        $method->invoke(
+            $manifest,
+            $this->createMock(LibraryPackage::class),
+            ['cache_type' => 'archive', 'filename' => 'release-latest.tar.gz', 'version' => null]
+        );
+    }
+
     private function file(string $suffix): void
     {
         FileSystem::createDir(BUILD_LIB_PATH);

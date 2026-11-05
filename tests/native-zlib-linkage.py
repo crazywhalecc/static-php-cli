@@ -2,6 +2,7 @@
 """Compile the real zlib recipe, compare static output to a baseline, and run consumers."""
 
 import argparse
+from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -16,6 +17,23 @@ def run(arguments, cwd, environment=None):
     if result.returncode:
         raise RuntimeError(' '.join(map(str, arguments)) + '\n' + result.stdout + result.stderr)
     return result.stdout
+
+
+
+def archive_identity(path):
+    data = bytearray(path.read_bytes())
+    assert data[:8] == b'!<arch>\n'
+    position = 8
+    while position < len(data):
+        header = data[position:position + 60]
+        assert len(header) == 60 and header[-2:] == b'`\n'
+        if header[:16].strip() in (b'/', b'/SYM64/'):
+            # Some binutils builds timestamp the symbol index despite SOURCE_DATE_EPOCH.
+            data[position + 16:position + 28] = b'0'.ljust(12)
+        size = int(header[48:58])
+        position += 60 + size + size % 2
+    assert position == len(data)
+    return hashlib.sha256(data).hexdigest()
 
 
 def build(spc, archive, version, root, shared):
@@ -67,7 +85,7 @@ def build(spc, archive, version, root, shared):
     clean = dict(os.environ)
     clean.pop('LD_LIBRARY_PATH', None)
     run([str(root / 'check')], root, clean)
-    return hashlib.sha256((library / 'libz.a').read_bytes()).hexdigest() if not shared else None
+    return archive_identity(library / 'libz.a') if not shared else None
 
 
 def main():
@@ -76,15 +94,18 @@ def main():
     parser.add_argument('--version', default='1.3.1')
     parser.add_argument('--spc-root', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--baseline-root', type=Path)
+    parser.add_argument('--keep-dir', type=Path)
     args = parser.parse_args()
-    with tempfile.TemporaryDirectory(prefix='spc-native-zlib-') as temporary:
+    temporary_directory = (nullcontext(tempfile.mkdtemp(prefix='spc-native-zlib-', dir=args.keep_dir))
+                           if args.keep_dir else tempfile.TemporaryDirectory(prefix='spc-native-zlib-'))
+    with temporary_directory as temporary:
         root = Path(temporary)
         static_hash = build(args.spc_root.resolve(), args.archive.resolve(), args.version, root / 'static', False)
         build(args.spc_root.resolve(), args.archive.resolve(), args.version, root / 'shared', True)
         if args.baseline_root:
             baseline_hash = build(args.baseline_root.resolve(), args.archive.resolve(), args.version, root / 'baseline', False)
             assert static_hash == baseline_hash, (static_hash, baseline_hash)
-            print('PASS: static libz.a is byte-identical to the baseline')
+            print('PASS: static archive contents match the baseline (symbol-index timestamp normalized)')
         print('PASS: native static and shared consumers run without LD_LIBRARY_PATH')
 
 

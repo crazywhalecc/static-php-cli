@@ -71,7 +71,8 @@ final class SharedLibraryManifest
 
     public function begin(LibraryPackage $package): void
     {
-        $name = $this->building = $package->getName();
+        $name = $package->getName();
+        $this->building = '';
         $this->previous = $this->manifest['libraries'][$name] ?? [];
         $owned = $this->ownership['libraries'][$name] ?? [];
         foreach ($owned['files'] ?? [] as $relative) {
@@ -103,6 +104,7 @@ final class SharedLibraryManifest
         unset($this->manifest['libraries'][$name], $this->ownership['libraries'][$name]);
         $this->save();
         $this->before = $this->snapshot();
+        $this->building = $name;
     }
 
     public function abort(): void
@@ -133,8 +135,8 @@ final class SharedLibraryManifest
             throw new WrongUsageException('Shared library build did not install its declared outputs: ' . $package->getName());
         }
         $source = $this->source($package);
-        if (empty($source['hash']) || empty($source['version'])) {
-            throw new WrongUsageException('Shared library source has no version or hash: ' . $package->getName());
+        if (empty($source['hash'])) {
+            throw new WrongUsageException('Shared library source has no hash: ' . $package->getName());
         }
         $artifact = $package->getArtifact()?->getName();
         $metadata = $artifact === null ? [] : (ArtifactConfig::get($artifact)['metadata'] ?? []);
@@ -401,7 +403,13 @@ final class SharedLibraryManifest
 
     private function sourceVersion(LibraryPackage $package, array $source): string
     {
-        $version = $source['version'];
+        $version = $source['version'] ?? $source['config']['version'] ?? '';
+        if ($version === '' && isset($source['filename'])) {
+            $stem = preg_replace('/\.(?:tar\.(?:gz|bz2|xz|zst)|tgz|tbz2?|txz|zip)$/i', '', basename($source['filename']));
+            if (preg_match('/(?:^|[-_])v?(\d+\.\d+(?:\.\d+)*(?:[._-]?(?:alpha|beta|rc|dev)\d*)?)$/iD', $stem, $match)) {
+                $version = $match[1];
+            }
+        }
         if (preg_match('/^(?:v|[A-Za-z][A-Za-z0-9_.-]*?[-_]v?)?([0-9][A-Za-z0-9.+~_-]*)$/D', $version, $match)) {
             return $match[1];
         }
@@ -441,7 +449,8 @@ final class SharedLibraryManifest
                 continue;
             }
             if ($file->isFile() || $file->isLink()) {
-                $result[$relative] = [$this->digest($file->getPathname()), $file->getInode(), $file->getMTime(), $file->getPerms()];
+                $stat = lstat($file->getPathname());
+                $result[$relative] = [$this->digest($file->getPathname()), $stat['ino'], $stat['mtime'], $stat['mode']];
             }
         }
         ksort($result);

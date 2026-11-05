@@ -51,6 +51,6 @@ python3 tests/native-zlib-linkage.py --archive /path/to/zlib-1.3.1.tar.gz \
 
 The native tests require a C/C++ compiler, `readelf`, `patchelf`, and installed
 Composer dependencies. The zlib test builds both modes and runs consumers with
-`LD_LIBRARY_PATH` unset; supplying a baseline also checks byte-identical static
-archives. These tests do not replace full producer and package validation on EL8
-and Alpine.
+`LD_LIBRARY_PATH` unset; supplying a baseline also compares all static archive
+contents, normalizing only the GNU ar symbol-index timestamp. These tests do not
+replace full producer and package validation on EL8 and Alpine.
