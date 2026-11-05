@@ -46,7 +46,7 @@ class LibraryPackage extends Package
             }
         }
         if (SystemTarget::getTargetOS() !== 'Windows') {
-            foreach (PackageConfig::get($this->getName(), 'pkg-configs', []) as $pc) {
+            foreach (SharedLibraryUtil::pkgConfigFiles($this->getName()) as $pc) {
                 if (!str_ends_with($pc, '.pc')) {
                     $pc .= '.pc';
                 }
@@ -178,7 +178,7 @@ class LibraryPackage extends Package
     public function patchPkgconfPrefix(array $files = [], int $patch_option = PKGCONF_PATCH_ALL, ?array $custom_replace = null): void
     {
         logger()->info("Patching library [{$this->getName()}] pkgconfig");
-        if ($files === [] && ($conf_pc = PackageConfig::get($this->getName(), 'pkg-configs', [])) !== []) {
+        if ($files === [] && ($conf_pc = SharedLibraryUtil::pkgConfigFiles($this->getName())) !== []) {
             $files = array_map(fn ($x) => "{$x}.pc", $conf_pc);
         }
         foreach ($files as $name) {

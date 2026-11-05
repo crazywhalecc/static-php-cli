@@ -99,6 +99,28 @@ final class SharedLibraryUtilTest extends TestCase
         self::assertSame(['lib' . $this->name . '.a'], SharedLibraryUtil::libraryFiles($this->name));
     }
 
+    public function testPkgConfigModuleNamesFollowTheExplicitLinkageMode(): void
+    {
+        $property = new \ReflectionProperty(PackageConfig::class, 'package_configs');
+        $configs = $property->getValue();
+        $configs[$this->name] = ['type' => 'library', 'pkg-configs' => [$this->name . '-static'],
+            'shared-pkg-configs' => [$this->name]];
+        $property->setValue(null, $configs);
+        FileSystem::createDir(BUILD_LIB_PATH . '/pkgconfig');
+        $path = BUILD_LIB_PATH . '/pkgconfig/' . $this->name . '.pc';
+        file_put_contents($path, 'fixture');
+        $this->files[] = $path;
+        $package = new LibraryPackage($this->name, 'library');
+        self::assertSame([$this->name . '-static'], SharedLibraryUtil::pkgConfigFiles($this->name));
+        self::assertFalse($package->isInstalled());
+        new PackageBuilder(['with-shared-libs' => true]);
+        self::assertSame([$this->name], SharedLibraryUtil::pkgConfigFiles($this->name));
+        self::assertTrue($package->isInstalled());
+        new PackageBuilder();
+        self::assertSame([$this->name . '-static'], SharedLibraryUtil::pkgConfigFiles($this->name));
+        self::assertFalse($package->isInstalled());
+    }
+
     public function testAutoconfDefaultKeepsStaticOutputInBothModes(): void
     {
         $executor = (new \ReflectionClass(UnixAutoconfExecutor::class))->newInstanceWithoutConstructor();
@@ -192,10 +214,13 @@ final class SharedLibraryUtilTest extends TestCase
     public function testSharedMetadataDoesNotReplaceStaticMetadata(): void
     {
         $configs = ['fixture' => ['type' => 'library', 'artifact' => 'fixture', 'static-libs' => ['libfixture.a'],
-            'shared-libs@linux' => ['libfixture.so'], 'static-only' => false]];
+            'shared-libs@linux' => ['libfixture.so'], 'static-only' => false,
+            'pkg-configs' => ['fixture-static'], 'shared-pkg-configs' => ['fixture']]];
         \StaticPHP\Config\ConfigValidator::validateAndLintPackages('fixture.yml', $configs);
         self::assertSame(['libfixture.a'], $configs['fixture']['static-libs']);
         self::assertFalse($configs['fixture']['static-only']);
+        self::assertSame(['fixture-static'], $configs['fixture']['pkg-configs']);
+        self::assertSame(['fixture'], $configs['fixture']['shared-pkg-configs']);
     }
 
     public function testGitSnapshotVersionsUseTheCommitTimeAndPortableNumericComponents(): void
