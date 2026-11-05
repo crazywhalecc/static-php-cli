@@ -11,6 +11,7 @@ use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('libxml2')]
 class libxml2
@@ -42,7 +43,7 @@ class libxml2
                 '-DLIBXML2_WITH_ICONV=ON',
                 '-DIconv_IS_BUILT_IN=OFF',
                 '-DLIBXML2_WITH_ZLIB=ON',
-                "-DZLIB_LIBRARY={$lib->getLibDir()}/libz.a",
+                '-DZLIB_LIBRARY=' . $lib->getLibDir() . (SharedLibraryUtil::buildsShared($lib) ? '/libz.so' : '/libz.a'),
                 "-DZLIB_INCLUDE_DIR={$lib->getIncludeDir()}",
                 '-DLIBXML2_WITH_LZMA=ON',
                 '-DLIBXML2_WITH_ICU=OFF', // optional, but discouraged: https://gitlab.gnome.org/GNOME/libxml2/-/blob/master/README.md

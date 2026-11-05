@@ -8,6 +8,7 @@ use StaticPHP\Exception\EnvironmentException;
 use StaticPHP\Exception\WrongUsageException;
 use StaticPHP\Toolchain\Interface\UnixToolchainInterface;
 use StaticPHP\Util\GlobalEnvManager;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\System\LinuxUtil;
 use StaticPHP\Util\System\MacOSUtil;
 
@@ -50,6 +51,6 @@ class GccNativeToolchain implements UnixToolchainInterface
 
     public function isStatic(): bool
     {
-        return PHP_OS_FAMILY === 'Linux' && LinuxUtil::isMuslDist() && !getenv('SPC_MUSL_DYNAMIC');
+        return !SharedLibraryUtil::enabled() && PHP_OS_FAMILY === 'Linux' && LinuxUtil::isMuslDist() && !getenv('SPC_MUSL_DYNAMIC');
     }
 }

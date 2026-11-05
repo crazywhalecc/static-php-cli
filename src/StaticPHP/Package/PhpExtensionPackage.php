@@ -14,6 +14,7 @@ use StaticPHP\Toolchain\ToolchainManager;
 use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\SPCConfigUtil;
 
 /**
@@ -591,6 +592,11 @@ class PhpExtensionPackage extends Package
         $sharedLibString = '';
         $libs = explode(' ', $allLibs);
         foreach ($libs as $lib) {
+            if (SharedLibraryUtil::enabled() && str_starts_with($lib, '-l')
+                && file_exists(BUILD_LIB_PATH . '/lib' . substr($lib, 2) . '.so')) {
+                $sharedLibString .= " {$lib}";
+                continue;
+            }
             $staticLib = BUILD_LIB_PATH . '/lib' . str_replace('-l', '', $lib) . '.a';
             if (str_starts_with($lib, BUILD_LIB_PATH . '/lib') && str_ends_with($lib, '.a')) {
                 $staticLib = $lib;

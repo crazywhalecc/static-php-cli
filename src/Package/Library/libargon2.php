@@ -12,6 +12,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('libargon2')]
 class libargon2
@@ -39,9 +40,11 @@ class libargon2
 
         $lib->patchPkgconfPrefix(['libargon2.pc']);
 
-        foreach (FileSystem::scanDirFiles("{$lib->getBuildRootPath()}/lib/", false, true) as $filename) {
-            if (str_starts_with($filename, 'libargon2') && (str_contains($filename, '.so') || str_ends_with($filename, '.dylib'))) {
-                unlink("{$lib->getBuildRootPath()}/lib/{$filename}");
+        if (!SharedLibraryUtil::buildsShared($lib)) {
+            foreach (FileSystem::scanDirFiles("{$lib->getBuildRootPath()}/lib/", false, true) as $filename) {
+                if (str_starts_with($filename, 'libargon2') && (str_contains($filename, '.so') || str_ends_with($filename, '.dylib'))) {
+                    unlink("{$lib->getBuildRootPath()}/lib/{$filename}");
+                }
             }
         }
 

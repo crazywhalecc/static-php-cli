@@ -10,6 +10,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('zstd')]
 class zstd
@@ -37,7 +38,7 @@ class zstd
             ->setBuildDir("{$lib->getSourceDir()}/build/cmake/build")
             ->addConfigureArgs(
                 '-DZSTD_BUILD_STATIC=ON',
-                '-DZSTD_BUILD_SHARED=OFF',
+                SharedLibraryUtil::buildsShared($lib) ? '-DZSTD_BUILD_SHARED=ON' : '-DZSTD_BUILD_SHARED=OFF',
             )
             ->build();
 

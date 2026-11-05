@@ -17,6 +17,7 @@ use StaticPHP\Package\TargetPackage;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\PkgConfigUtil;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Library('postgresql')]
@@ -39,17 +40,19 @@ class postgresql extends LibraryPackage
     {
         // skip the test on platforms where libpq infrastructure may be provided by statically-linked libraries
         FileSystem::replaceFileStr("{$this->getSourceDir()}/src/interfaces/libpq/Makefile", 'invokes exit\'; exit 1;', 'invokes exit\';');
-        // disable shared libs build
-        FileSystem::replaceFileStr(
-            "{$this->getSourceDir()}/src/Makefile.shlib",
-            [
-                '$(LINK.shared) -o $@ $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK)',
-                '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(pkglibdir)/$(shlib)\'',
-                '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(libdir)/$(shlib)\'',
-                '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(bindir)/$(shlib)\'',
-            ],
-            ''
-        );
+        if (!SharedLibraryUtil::buildsShared($this)) {
+            // disable shared libs build
+            FileSystem::replaceFileStr(
+                "{$this->getSourceDir()}/src/Makefile.shlib",
+                [
+                    '$(LINK.shared) -o $@ $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK)',
+                    '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(pkglibdir)/$(shlib)\'',
+                    '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(libdir)/$(shlib)\'',
+                    '$(INSTALL_SHLIB) $< \'$(DESTDIR)$(bindir)/$(shlib)\'',
+                ],
+                ''
+            );
+        }
         return true;
     }
 
@@ -122,10 +125,12 @@ class postgresql extends LibraryPackage
             ->exec('make -C src/port install')
             ->exec('make -C src/interfaces/libpq install');
 
-        // remove dynamic libs
-        shell()->cd($this->getSourceDir() . '/build')
-            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so*")
-            ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.dylib");
+        if (!SharedLibraryUtil::buildsShared($this)) {
+            // remove dynamic libs
+            shell()->cd($this->getSourceDir() . '/build')
+                ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.so*")
+                ->exec("rm -rf {$this->getBuildRootPath()}/lib/*.dylib");
+        }
 
         FileSystem::replaceFileStr("{$this->getLibDir()}/pkgconfig/libpq.pc", '-lldap', '-lldap -llber');
     }

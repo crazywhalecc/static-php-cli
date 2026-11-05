@@ -15,6 +15,7 @@ use StaticPHP\Util\DependencyResolver;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalPathTrait;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\SPCConfigUtil;
 
 /**
@@ -32,7 +33,7 @@ class LibraryPackage extends Package
 
     public function isInstalled(): bool
     {
-        foreach (PackageConfig::get($this->getName(), 'static-libs', []) as $lib) {
+        foreach (SharedLibraryUtil::libraryFiles($this->getName()) as $lib) {
             $path = FileSystem::isRelativePath($lib) ? "{$this->getLibDir()}/{$lib}" : $lib;
             if (!file_exists($path)) {
                 return false;
@@ -128,7 +129,7 @@ class LibraryPackage extends Package
         if (!empty(getenv('SPC_DEFAULT_CFLAGS')) && !str_contains($env, $arch_c_flags)) {
             $env .= ' ' . $arch_c_flags;
         }
-        return trim($env);
+        return SharedLibraryUtil::enabled() ? SharedLibraryUtil::withoutStaticFlags($env) : trim($env);
     }
 
     /**
@@ -146,7 +147,7 @@ class LibraryPackage extends Package
         if (!empty(getenv('SPC_DEFAULT_CXXFLAGS')) && !str_contains($env, $arch_cxx_flags)) {
             $env .= ' ' . $arch_cxx_flags;
         }
-        return trim($env);
+        return SharedLibraryUtil::enabled() ? SharedLibraryUtil::withoutStaticFlags($env) : trim($env);
     }
 
     /**
@@ -164,7 +165,7 @@ class LibraryPackage extends Package
         if (!empty(getenv('SPC_DEFAULT_LDFLAGS')) && !str_contains($env, $arch_ld_flags)) {
             $env .= ' ' . $arch_ld_flags;
         }
-        return trim($env);
+        return SharedLibraryUtil::enabled() ? SharedLibraryUtil::withoutStaticFlags($env) : trim($env);
     }
 
     /**

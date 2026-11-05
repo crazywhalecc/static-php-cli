@@ -7,6 +7,7 @@ namespace StaticPHP\Command;
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Registry\PackageLoader;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\V2CompatLayer;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -28,6 +29,7 @@ class BuildTargetCommand extends BaseCommand
             new InputOption('with-suggests', ['L', 'E'], null, 'Resolve and install suggested packages as well'),
             new InputOption('with-packages', null, InputOption::VALUE_REQUIRED, 'add additional packages to install/build, comma separated', ''),
             new InputOption('no-download', null, null, 'Skip downloading artifacts (use existing cached files)'),
+            ...SharedLibraryUtil::options(),
             ...V2CompatLayer::getLegacyBuildOptions(),
         ]);
 

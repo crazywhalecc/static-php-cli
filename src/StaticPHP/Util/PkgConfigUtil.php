@@ -67,7 +67,7 @@ class PkgConfigUtil
     public static function getCflags(string $pkg_config_str): string
     {
         // get other things
-        $result = self::execWithResult("pkg-config --static --cflags {$pkg_config_str}");
+        $result = self::execWithResult('pkg-config ' . (SharedLibraryUtil::enabled() ? '' : '--static ') . "--cflags {$pkg_config_str}");
         return trim($result);
     }
 
@@ -83,11 +83,11 @@ class PkgConfigUtil
     public static function getLibsArray(string $pkg_config_str): array
     {
         // Use this instead of shell() to avoid unnecessary outputs
-        $result = self::execWithResult("pkg-config --static --libs-only-l {$pkg_config_str}");
+        $result = self::execWithResult('pkg-config ' . (SharedLibraryUtil::enabled() ? '' : '--static ') . "--libs-only-l {$pkg_config_str}");
         $libs = explode(' ', trim($result));
 
         // get other things
-        $result = self::execWithResult("pkg-config --static --libs-only-other {$pkg_config_str}");
+        $result = self::execWithResult('pkg-config ' . (SharedLibraryUtil::enabled() ? '' : '--static ') . "--libs-only-other {$pkg_config_str}");
         // convert libxxx.a to -L{path} -lxxx
         $exp = explode(' ', trim($result));
         foreach ($exp as $item) {

@@ -222,7 +222,7 @@ class SPCConfigUtil
 
         if ($this->libs_only_deps) {
             // mimalloc must come first
-            if (in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+            if (!SharedLibraryUtil::enabled() && in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
                 $libs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $libs);
             }
             return [
@@ -250,7 +250,7 @@ class SPCConfigUtil
         $allLibs = getenv('LIBS') . ' ' . $libs;
 
         // mimalloc must come first
-        if (in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
+        if (!SharedLibraryUtil::enabled() && in_array('mimalloc', $resolved_packages) && file_exists(BUILD_LIB_PATH . '/libmimalloc.a')) {
             $allLibs = BUILD_LIB_PATH . '/libmimalloc.a ' . str_replace([BUILD_LIB_PATH . '/libmimalloc.a', '-lmimalloc'], ['', ''], $allLibs);
         }
 
@@ -404,7 +404,7 @@ class SPCConfigUtil
         if (SystemTarget::getTargetOS() === 'Windows') {
             return '/LIBPATH:"' . BUILD_LIB_PATH . '"';
         }
-        return '-L' . BUILD_LIB_PATH;
+        return trim('-L' . BUILD_LIB_PATH . ' ' . SharedLibraryUtil::ldflags());
     }
 
     private function getLibsString(array $packages, bool $use_short_libs = true): string
@@ -439,14 +439,15 @@ class SPCConfigUtil
                 }
             }
             // convert all static-libs to short names
-            $libs = array_reverse(PackageConfig::get($package, 'static-libs', []));
+            $libs = array_reverse(SharedLibraryUtil::libraryFiles($package));
             foreach ($libs as $lib) {
                 if (FileSystem::isRelativePath($lib)) {
                     // check file existence
                     if (!file_exists(BUILD_LIB_PATH . "/{$lib}")) {
                         throw new WrongUsageException("Library file '{$lib}' for lib [{$package}] does not exist in '" . BUILD_LIB_PATH . "'. Please build it first.");
                     }
-                    $lib_names[] = $this->getShortLibName($lib);
+                    $lib_names[] = SharedLibraryUtil::enabled() && PackageConfig::get($package, 'static-only', false)
+                        ? BUILD_LIB_PATH . '/' . $lib : $this->getShortLibName($lib);
                 } else {
                     $lib_names[] = $lib;
                 }
@@ -494,6 +495,10 @@ class SPCConfigUtil
             return $lib;
         }
 
+        if (SharedLibraryUtil::enabled() && str_starts_with($lib, 'lib') && str_ends_with($lib, '.so')) {
+            return '-l' . substr($lib, 3, -3);
+        }
+
         // Unix: library files are libxxx.a format
         if (!str_starts_with($lib, 'lib') || !str_ends_with($lib, '.a')) {
             return BUILD_LIB_PATH . '/' . $lib;
@@ -521,6 +526,10 @@ class SPCConfigUtil
             return $lib;
         }
         $libname = substr($lib, 2);
+        $sharedLib = BUILD_LIB_PATH . '/lib' . $libname . '.so';
+        if (SharedLibraryUtil::enabled() && file_exists($sharedLib)) {
+            return $sharedLib;
+        }
         $staticLib = BUILD_LIB_PATH . '/' . "lib{$libname}.a";
         if (file_exists($staticLib)) {
             return $staticLib;

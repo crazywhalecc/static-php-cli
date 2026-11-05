@@ -10,6 +10,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('tidy')]
 class tidy
@@ -22,7 +23,7 @@ class tidy
             ->setBuildDir("{$lib->getSourceDir()}/build-dir")
             ->addConfigureArgs(
                 '-DSUPPORT_CONSOLE_APP=OFF',
-                '-DBUILD_SHARED_LIB=OFF'
+                SharedLibraryUtil::buildsShared($lib) ? '-DBUILD_SHARED_LIB=ON' : '-DBUILD_SHARED_LIB=OFF'
             );
         if (version_compare(get_cmake_version(), '4.0.0', '>=')) {
             $cmake->addConfigureArgs('-DCMAKE_POLICY_VERSION_MINIMUM=3.5');

@@ -12,6 +12,7 @@ use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ZigToolchain;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Library('krb5')]
@@ -49,6 +50,7 @@ class krb5
         }
         $executor = UnixAutoconfExecutor::create($lib)
             ->appendEnv($extraEnv)
+            ->removeConfigureArgs(...(SharedLibraryUtil::buildsShared($lib) ? ['--enable-static', '--enable-pic', '--with-pic'] : []))
             ->optionalPackage('ldap', '--with-ldap', '--without-ldap')
             ->optionalPackage('libedit', '--with-libedit', '--without-libedit')
             ->configure(...$args);

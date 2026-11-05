@@ -10,6 +10,7 @@ use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('jbig')]
 class jbig
@@ -44,5 +45,7 @@ class jbig
             ->exec("cp libjbig/jbig.h {$lib->getIncludeDir()}")
             ->exec("cp libjbig/jbig85.h {$lib->getIncludeDir()}")
             ->exec("cp libjbig/jbig_ar.h {$lib->getIncludeDir()}");
+        SharedLibraryUtil::linkArchive($lib, 'libjbig.a');
+        SharedLibraryUtil::linkArchive($lib, 'libjbig85.a');
     }
 }

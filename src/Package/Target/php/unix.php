@@ -26,6 +26,7 @@ use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
 use StaticPHP\Util\System\UnixUtil;
@@ -62,12 +63,13 @@ trait unix
             );
         }
 
-        // let php m4 tools use static pkg-config
-        FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+        $from = SharedLibraryUtil::enabled() ? 'PKG_CHECK_MODULES_STATIC(' : 'PKG_CHECK_MODULES(';
+        $to = SharedLibraryUtil::enabled() ? 'PKG_CHECK_MODULES(' : 'PKG_CHECK_MODULES_STATIC(';
+        FileSystem::replaceFileStr("{$package->getSourceDir()}/build/php.m4", $from, $to);
 
         // also patch extension config.m4 files (they call PKG_CHECK_MODULES directly, not via php.m4)
         foreach (glob("{$package->getSourceDir()}/ext/*/*.m4") as $m4file) {
-            FileSystem::replaceFileStr($m4file, 'PKG_CHECK_MODULES(', 'PKG_CHECK_MODULES_STATIC(');
+            FileSystem::replaceFileStr($m4file, $from, $to);
         }
 
         if (self::getPHPVersionID() >= 80300 && self::getPHPVersionID() < 80400) {

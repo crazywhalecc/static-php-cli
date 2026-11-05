@@ -10,6 +10,7 @@ use StaticPHP\Attribute\Package\PatchBeforeBuild;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('bzip2')]
 class bzip2
@@ -45,5 +46,6 @@ class bzip2
             ->exec("make -j{$builder->concurrency} {$cc_env} {$env} PREFIX='{$lib->getBuildRootPath()}' libbz2.a")
             ->exec('cp libbz2.a ' . $lib->getLibDir())
             ->exec('cp bzlib.h ' . $lib->getIncludeDir());
+        SharedLibraryUtil::linkArchive($lib, 'libbz2.a');
     }
 }
