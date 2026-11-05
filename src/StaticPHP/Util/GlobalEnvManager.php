@@ -150,6 +150,7 @@ class GlobalEnvManager
         if (!filter_var(getenv('SPC_SKIP_TOOLCHAIN_CHECK'), FILTER_VALIDATE_BOOL)) {
             ToolchainManager::afterInitToolchain();
         }
+        SharedLibraryUtil::configureEnvironment();
         // test bison
         if (PHP_OS_FAMILY === 'Darwin') {
             if ($bison = MacOSUtil::findCommand('bison', ['/opt/homebrew/opt/bison/bin', '/usr/local/opt/bison/bin'])) {

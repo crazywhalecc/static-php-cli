@@ -9,6 +9,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('libmpdec')]
 class libmpdec
@@ -18,7 +19,7 @@ class libmpdec
     public function build(LibraryPackage $lib): void
     {
         UnixAutoconfExecutor::create($lib)
-            ->configure('--disable-cxx --disable-shared --enable-static')
+            ->configure(SharedLibraryUtil::buildsShared($lib) ? '--disable-cxx' : '--disable-cxx --disable-shared --enable-static')
             ->make();
     }
 

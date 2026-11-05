@@ -21,6 +21,7 @@ use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalEnvManager;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\LicenseDumper;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\V2CompatLayer;
 use ZM\Logger\ConsoleColor;
 
@@ -47,11 +48,17 @@ class PackageInstaller
     /** @var null|BuildRootTracker buildroot file tracker for debugging purpose */
     protected ?BuildRootTracker $tracker = null;
 
+    private array $reused_libraries = [];
+
     public function __construct(protected array $options = [], public readonly bool $interactive = true)
     {
         ApplicationContext::set(PackageInstaller::class, $this);
         $builder = new PackageBuilder($options);
         ApplicationContext::set(PackageBuilder::class, $builder);
+
+        if (!empty($options['use-existing-libraries']) && !SharedLibraryUtil::enabled()) {
+            throw new WrongUsageException('--use-existing-libraries requires --with-shared-libs');
+        }
 
         // Check for no-download option
         if (!empty($options['no-download'])) {
@@ -167,6 +174,16 @@ class PackageInstaller
         // Early validation: check if packages can be built or installed before downloading
         $this->validatePackagesBeforeBuild();
 
+        $shared = SharedLibraryUtil::enabled() ? new \StaticPHP\Util\SharedLibraryManifest() : null;
+        foreach ($this->packages as $name => $package) {
+            if ($shared !== null && SharedLibraryUtil::isManaged($package)
+                && (!empty($this->options['use-existing-libraries'])
+                    || (!empty($this->options['reuse-installed-library-dependencies']) && !$this->isBuildPackage($package) && $shared->has($package)))) {
+                $shared->reuse($package);
+                $this->reused_libraries[$name] = true;
+            }
+        }
+
         // check download
         if ($this->download) {
             $downloaderOptions = DownloaderOptions::extractFromConsoleOptions($this->options, 'dl');
@@ -179,9 +196,13 @@ class PackageInstaller
                     && !$p->hasStage('build')
                     && ($p->getArtifact()?->hasPlatformBinary() ?? false)
             );
+            $sourcePackages = $this->build_packages;
+            if ($shared !== null) {
+                $sourcePackages += array_filter($this->packages, SharedLibraryUtil::isManaged(...));
+            }
             $dl_opts = [
                 ...$downloaderOptions,
-                'source-only' => implode(',', array_map(fn ($x) => $x->getName(), $this->build_packages)),
+                'source-only' => implode(',', array_map(fn ($x) => $shared !== null ? ($x->getArtifact()?->getName() ?? $x->getName()) : $x->getName(), $sourcePackages)),
             ];
             if ($binary_only_packages !== []) {
                 $dl_opts['binary-only'] = implode(',', array_map(fn ($x) => $x->getName(), $binary_only_packages));
@@ -211,9 +232,12 @@ class PackageInstaller
         }
         $builder = ApplicationContext::get(PackageBuilder::class);
         foreach ($this->packages as $package) {
+            if (isset($this->reused_libraries[$package->getName()])) {
+                continue;
+            }
             $is_to_build = $this->isBuildPackage($package);
             $has_build_stage = $package instanceof LibraryPackage && $package->hasStage('build');
-            $should_use_binary = $package instanceof LibraryPackage && ($package->getArtifact()?->shouldUseBinary() ?? false);
+            $should_use_binary = !($shared !== null && SharedLibraryUtil::isManaged($package)) && $package instanceof LibraryPackage && ($package->getArtifact()?->shouldUseBinary() ?? false);
             $has_source = $package->hasSource();
             if (!$is_to_build && $should_use_binary) {
                 // install binary
@@ -227,6 +251,7 @@ class PackageInstaller
                     // Stop tracking and record changes
                     $this->tracker?->stopTracking();
                 } catch (\Throwable $e) {
+                    $shared?->abort();
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
                     if ($this->interactive) {
@@ -251,7 +276,14 @@ class PackageInstaller
                         ApplicationContext::set(DirDiff::class, $dirdiff);
                     }
                     /** @var LibraryPackage $package */
-                    $status = $builder->buildPackage($package, $this->isBuildPackage($package));
+                    $managed = $shared !== null && SharedLibraryUtil::isManaged($package);
+                    if ($managed) {
+                        $shared->begin($package);
+                    }
+                    $status = $builder->buildPackage($package, $managed || $this->isBuildPackage($package));
+                    if ($managed) {
+                        $shared->finish($package);
+                    }
 
                     if ($is_to_build && ($this->options['pack-mode'] ?? false) === true) {
                         $package->runStage('packPrebuilt');
@@ -260,6 +292,7 @@ class PackageInstaller
                     // Stop tracking and record changes
                     $this->tracker?->stopTracking();
                 } catch (\Throwable $e) {
+                    $shared?->abort();
                     // Stop tracking on error
                     $this->tracker?->stopTracking();
                     if ($this->interactive) {
@@ -419,6 +452,9 @@ class PackageInstaller
     {
         $artifacts = [];
         foreach ($this->getResolvedPackages() as $package) {
+            if (isset($this->reused_libraries[$package->getName()])) {
+                continue;
+            }
             // Validate package artifacts
             $this->validatePackageArtifact($package);
             if (($artifact = $package->getArtifact()) !== null && !in_array($artifact, $artifacts, true)) {
@@ -427,6 +463,9 @@ class PackageInstaller
         }
         // add target artifacts
         foreach ($this->build_packages as $package) {
+            if (isset($this->reused_libraries[$package->getName()])) {
+                continue;
+            }
             // Validate package artifacts
             $this->validatePackageArtifact($package);
             if (($artifact = $package->getArtifact()) !== null && !in_array($artifact, $artifacts, true)) {
@@ -451,8 +490,12 @@ class PackageInstaller
         $artifacts = [];
         $pkg_artifact_map = [];
         foreach ($packages as $package) {
+            if (isset($this->reused_libraries[$package->getName()])) {
+                continue;
+            }
             $artifact = $package->getArtifact();
-            if ($artifact !== null && !isset($artifacts[$artifact->getName()]) && (!$artifact->shouldUseBinary() || $this->isBuildPackage($package))) {
+            if ($artifact !== null && !isset($artifacts[$artifact->getName()]) && (!$artifact->shouldUseBinary() || $this->isBuildPackage($package)
+                    || (SharedLibraryUtil::enabled() && SharedLibraryUtil::isManaged($package)))) {
                 $pkg_artifact_map[$package->getName()] = $artifact->getName();
                 $artifacts[$artifact->getName()] = $artifact;
             }

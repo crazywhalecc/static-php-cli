@@ -9,6 +9,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('libuuid')]
 class libuuid extends LibraryPackage
@@ -17,8 +18,9 @@ class libuuid extends LibraryPackage
     #[BuildFor('Linux')]
     public function buildUnix(): void
     {
-        UnixCMakeExecutor::create($this)->toStep(2)->build();
+        UnixCMakeExecutor::create($this)->removeConfigureArgs('-DBUILD_SHARED_LIBS=ON')->toStep(2)->build();
         copy($this->getSourceDir() . '/build/libuuid.a', BUILD_LIB_PATH . '/libuuid.a');
+        SharedLibraryUtil::linkArchive($this, 'libuuid.a');
         FileSystem::createDir(BUILD_INCLUDE_PATH . '/uuid');
         copy($this->getSourceDir() . '/uuid.h', BUILD_INCLUDE_PATH . '/uuid/uuid.h');
         $pc = FileSystem::readFile($this->getSourceDir() . '/uuid.pc.in');

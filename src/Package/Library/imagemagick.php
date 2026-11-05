@@ -11,6 +11,7 @@ use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('imagemagick')]
 class imagemagick
@@ -57,10 +58,23 @@ class imagemagick
         $ac->appendEnv([
             'LDFLAGS' => $ldflags,
             'LIBS' => $libs,
-            'PKG_CONFIG' => '$PKG_CONFIG --static',
+            'PKG_CONFIG' => (SharedLibraryUtil::buildsShared($lib) ? '$PKG_CONFIG' : '$PKG_CONFIG --static'),
         ]);
 
-        $ac->configure()->make();
+        $ac->configure();
+        if (SharedLibraryUtil::buildsShared($lib)) {
+            foreach (['MagickCore/magick-baseconfig.h', 'MagickCore/magick-config.h'] as $header) {
+                $path = $lib->getSourceDir() . '/' . $header;
+                if (is_file($path)) {
+                    FileSystem::replaceFileStr(
+                        $path,
+                        [$lib->getBuildRootPath() . '/lib', $lib->getBuildRootPath() . '/share', $lib->getBuildRootPath() . '/etc'],
+                        [SharedLibraryUtil::runtimeDirectory(), '/usr/share/php-zts', '/etc/php-zts']
+                    );
+                }
+            }
+        }
+        $ac->make();
 
         f_putenv("SPC_DEFAULT_LDFLAGS={$original_ldflags}");
 

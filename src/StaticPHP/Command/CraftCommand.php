@@ -28,6 +28,7 @@ class CraftCommand extends BaseCommand
     {
         $this->addArgument('craft', null, 'Path to craft.yml file', WORKING_DIR . '/craft.yml');
         $this->addOption('libs-only', null, null, 'Build only the libraries needed by the configured extensions (skip PHP and SAPI build).');
+        $this->addOption('use-existing-libraries', null, null, 'Require and reuse a verified shared-library SDK');
         PgoContext::registerOptions($this);
     }
 
@@ -68,6 +69,9 @@ class CraftCommand extends BaseCommand
 
         // parse download-options to installer's dl options
         $build_options = $craft['build-options'];
+        if ($this->getOption('use-existing-libraries')) {
+            $build_options['use-existing-libraries'] = true;
+        }
         if (!$craft['craft-options']['download']) {
             $build_options['no-download'] = true;
         }
@@ -102,6 +106,11 @@ class CraftCommand extends BaseCommand
 
         $starttime = microtime(true);
         // run installer
+        $selectiveLibraries = $this->getOption('libs-only') && ($build_options['with-shared-libs'] ?? false)
+            && $craft['extensions'] === [] && $craft['shared-extensions'] === [] && $craft['sapi'] === [] && $craft['packages'] !== [];
+        if ($selectiveLibraries && is_file(BUILD_ROOT_PATH . '/shared-libraries.json')) {
+            $build_options['reuse-installed-library-dependencies'] = true;
+        }
         $installer = new PackageInstaller($build_options);
         ApplicationContext::get(PackageBuilder::class)->setArgument('extensions', implode(',', $craft['extensions']));
 
@@ -111,6 +120,9 @@ class CraftCommand extends BaseCommand
             if ($libs === []) {
                 $this->output->writeln('<comment>No libraries needed for the configured extensions; nothing to do.</comment>');
                 return static::SUCCESS;
+            }
+            if ($selectiveLibraries) {
+                $libs = array_values(array_intersect($libs, $craft['packages']));
             }
             foreach ($libs as $lib) {
                 $installer->addBuildPackage($lib);

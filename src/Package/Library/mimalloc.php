@@ -9,6 +9,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('mimalloc')]
 class mimalloc
@@ -19,7 +20,7 @@ class mimalloc
     {
         $cmake = UnixCMakeExecutor::create($lib)
             ->addConfigureArgs(
-                '-DMI_BUILD_SHARED=OFF',
+                SharedLibraryUtil::buildsShared($lib) ? '-DMI_BUILD_SHARED=ON' : '-DMI_BUILD_SHARED=OFF',
                 '-DMI_BUILD_OBJECT=OFF',
                 '-DMI_INSTALL_TOPLEVEL=ON',
             );

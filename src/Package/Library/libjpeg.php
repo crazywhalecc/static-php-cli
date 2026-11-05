@@ -10,6 +10,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('libjpeg')]
 class libjpeg
@@ -21,7 +22,7 @@ class libjpeg
         UnixCMakeExecutor::create($lib)
             ->addConfigureArgs(
                 '-DENABLE_STATIC=ON',
-                '-DENABLE_SHARED=OFF',
+                SharedLibraryUtil::buildsShared($lib) ? '-DENABLE_SHARED=ON' : '-DENABLE_SHARED=OFF',
                 '-DWITH_SYSTEM_ZLIB=ON',
                 '-DWITH_TOOLS=OFF',
                 '-DWITH_TESTS=OFF',

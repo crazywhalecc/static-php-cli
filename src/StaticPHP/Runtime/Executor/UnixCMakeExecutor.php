@@ -16,6 +16,7 @@ use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
 use StaticPHP\Util\PkgConfigUtil;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\SPCConfigUtil;
 use ZM\Logger\ConsoleColor;
 
@@ -224,7 +225,7 @@ class UnixCMakeExecutor extends Executor
             '-DCMAKE_INSTALL_LIBDIR=lib',
             '-DCMAKE_INSTALL_INCLUDEDIR=include',
             '-DPOSITION_INDEPENDENT_CODE=ON',
-            '-DBUILD_SHARED_LIBS=OFF',
+            SharedLibraryUtil::buildsShared($this->package) ? '-DBUILD_SHARED_LIBS=ON' : '-DBUILD_SHARED_LIBS=OFF',
             "-DCMAKE_TOOLCHAIN_FILE={$this->makeCmakeToolchainFile()}",
         ];
 
@@ -268,10 +269,6 @@ class UnixCMakeExecutor extends Executor
      */
     private function makeCmakeToolchainFile(): string
     {
-        static $created;
-        if (isset($created)) {
-            return $created;
-        }
         $os = PHP_OS_FAMILY;
         $target_arch = arch2gnu(php_uname('m'));
         $cflags = getenv('SPC_DEFAULT_CFLAGS');
@@ -289,6 +286,7 @@ class UnixCMakeExecutor extends Executor
         if ($cxx) {
             $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . $cxx . ')';
         }
+        $pkgConfigArgs = SharedLibraryUtil::enabled() ? '' : '--static';
         $toolchain = <<<CMAKE
 {$ccLine}
 {$cxxLine}
@@ -300,7 +298,7 @@ SET(CMAKE_INSTALL_PREFIX "{$root}")
 SET(CMAKE_INSTALL_LIBDIR "lib")
 
 set(PKG_CONFIG_EXECUTABLE "{$pkgConfigExecutable}" CACHE FILEPATH "pkg-config executable" FORCE)
-set(PKG_CONFIG_ARGN "--static" CACHE STRING "Extra arguments for pkg-config" FORCE)
+set(PKG_CONFIG_ARGN "{$pkgConfigArgs}" CACHE STRING "Extra arguments for pkg-config" FORCE)
 set(ENV{PKG_CONFIG_PATH} "{$root}/lib/pkgconfig")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -325,7 +323,7 @@ CMAKE;
             }
         }
         FileSystem::writeFile(SOURCE_PATH . '/toolchain.cmake', $toolchain);
-        return $created = realpath(SOURCE_PATH . '/toolchain.cmake');
+        return realpath(SOURCE_PATH . '/toolchain.cmake');
     }
 
     /**

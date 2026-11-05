@@ -16,6 +16,7 @@ use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\GlobalPathTrait;
 use StaticPHP\Util\InteractiveTerm;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\System\LinuxUtil;
 
 class PackageBuilder
@@ -33,6 +34,7 @@ class PackageBuilder
      */
     public function __construct(protected array $options = [])
     {
+        SharedLibraryUtil::resetEnvironment();
         ApplicationContext::set(PackageBuilder::class, $this);
 
         $this->concurrency = (int) getenv('SPC_CONCURRENCY') ?: 1;
@@ -141,6 +143,11 @@ class PackageBuilder
         // file exist
         if (!file_exists($dst)) {
             throw new SPCInternalException("Deploy failed. Cannot find file after copy: {$dst}");
+        }
+
+        if (SharedLibraryUtil::enabled() && file_get_contents($dst, false, null, 0, 4) === "\x7fELF") {
+            (new \Symfony\Component\Process\Process([getenv('PATCHELF') ?: 'patchelf', '--set-rpath',
+                SharedLibraryUtil::runtimeDirectory(), $dst]))->mustRun();
         }
 
         if (!$this->getOption('no-strip') && SystemTarget::isUnix()) {

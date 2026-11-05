@@ -13,6 +13,7 @@ use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\DirDiff;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('ncurses')]
 #[Library('ncursesw')]
@@ -55,6 +56,9 @@ class ncurses
             '/lib/terminfo',
             '/usr/share/terminfo',
         ]);
+        if (SharedLibraryUtil::buildsShared($package)) {
+            $terminfo_dirs = '/usr/share/php-zts/terminfo:' . $terminfo_dirs;
+        }
         $ac->configure(
             '--enable-overwrite',
             '--with-curses-h',
@@ -72,7 +76,7 @@ class ncurses
             "--includedir={$package->getIncludeDir()}",
             "--libdir={$package->getLibDir()}",
             "--prefix={$package->getBuildRootPath()}",
-            ...$wide,
+            ...(SharedLibraryUtil::buildsShared($package) ? ['--with-shared', ...$wide] : $wide),
         )
             ->make();
         $new_files = $dirdiff->getIncrementFiles(true);

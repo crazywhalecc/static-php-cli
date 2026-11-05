@@ -12,6 +12,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('net-snmp')]
 class net_snmp
@@ -28,9 +29,8 @@ class net_snmp
     #[BuildFor('Linux')]
     public function buildUnix(LibraryPackage $lib): void
     {
-        // use --static for PKG_CONFIG
         UnixAutoconfExecutor::create($lib)
-            ->setEnv(['PKG_CONFIG' => getenv('PKG_CONFIG') . ' --static'])
+            ->setEnv(['PKG_CONFIG' => getenv('PKG_CONFIG') . (SharedLibraryUtil::buildsShared($lib) ? '' : ' --static')])
             ->configure(
                 '--disable-mibs',
                 '--without-nl',

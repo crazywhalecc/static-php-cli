@@ -10,6 +10,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('zlib')]
 class zlib
@@ -18,7 +19,8 @@ class zlib
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib): void
     {
-        UnixAutoconfExecutor::create($lib)->exec("./configure --static --prefix={$lib->getBuildRootPath()}")->make();
+        $mode = SharedLibraryUtil::buildsShared($lib) ? '--shared' : '--static';
+        UnixAutoconfExecutor::create($lib)->exec("./configure {$mode} --prefix={$lib->getBuildRootPath()}")->make();
 
         // Patch pkg-config file
         $lib->patchPkgconfPrefix(['zlib.pc'], PKGCONF_PATCH_PREFIX);

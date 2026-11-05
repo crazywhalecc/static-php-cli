@@ -14,6 +14,7 @@ use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\GccNativeToolchain;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\System\LinuxUtil;
 
 #[Library('liburing')]
@@ -46,6 +47,7 @@ class liburing extends LibraryPackage
         $make
             ->removeConfigureArgs(
                 '--disable-shared',
+                '--enable-shared',
                 '--enable-static',
                 '--with-pic',
                 '--enable-pic',
@@ -54,7 +56,11 @@ class liburing extends LibraryPackage
                 $use_libc ? '--use-libc' : '',
             )
             ->configure()
-            ->make('library ENABLE_SHARED=0', 'install ENABLE_SHARED=0', with_clean: false);
+            ->make(
+                SharedLibraryUtil::buildsShared($this) ? 'library ENABLE_SHARED=1' : 'library ENABLE_SHARED=0',
+                SharedLibraryUtil::buildsShared($this) ? 'install ENABLE_SHARED=1' : 'install ENABLE_SHARED=0',
+                with_clean: false
+            );
 
         $this->patchPkgconfPrefix();
     }

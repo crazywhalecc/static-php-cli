@@ -39,6 +39,8 @@ class ConfigValidator
         // library and target fields
         'headers' => ConfigType::LIST_ARRAY, // @
         'static-libs' => ConfigType::LIST_ARRAY, // @
+        'shared-libs' => ConfigType::LIST_ARRAY,
+        'static-only' => ConfigType::BOOL,
         'pkg-configs' => ConfigType::LIST_ARRAY,
         'static-bins' => ConfigType::LIST_ARRAY, // @
         'path' => ConfigType::LIST_ARRAY, // @
@@ -62,6 +64,8 @@ class ConfigValidator
         // library and target fields
         'headers' => false, // @
         'static-libs' => false, // @
+        'shared-libs' => false,
+        'static-only' => false,
         'pkg-configs' => false,
         'static-bins' => false, // @
         'path' => false, // @
@@ -74,6 +78,7 @@ class ConfigValidator
         'suggests',
         'headers',
         'static-libs',
+        'shared-libs',
         'static-bins',
         'path',
         'env',

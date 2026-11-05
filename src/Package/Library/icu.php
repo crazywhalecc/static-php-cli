@@ -11,6 +11,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('icu')]
 class icu
@@ -28,6 +29,10 @@ class icu
         $userCxxFlags = trim((string) getenv('SPC_DEFAULT_CXXFLAGS'));
         $userLdFlags = trim((string) getenv('SPC_DEFAULT_LDFLAGS'));
         $cppflags = 'CPPFLAGS="-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1 -DPIC -fPIC"';
+        if (SharedLibraryUtil::buildsShared($lib)) {
+            $cppflags = str_replace('-DU_STATIC_IMPLEMENTATION=1', '', $cppflags);
+            $userLdFlags .= ' ' . SharedLibraryUtil::ldflags();
+        }
         $cxxflags = "CXXFLAGS=\"-std=c++17 -DPIC -fPIC -fno-ident {$userCxxFlags}\"";
         $ldflags = $toolchain->isStatic() ? "LDFLAGS=\"-static {$userLdFlags}\"" : "LDFLAGS=\"{$userLdFlags}\"";
         shell()->cd($lib->getSourceDir() . '/source')->initializeEnv($lib)
@@ -35,8 +40,8 @@ class icu
                 "{$cppflags} {$cxxflags} {$ldflags} " .
                 './runConfigureICU Linux ' .
                 '--enable-static ' .
-                '--disable-shared ' .
-                '--with-data-packaging=static ' .
+                (SharedLibraryUtil::buildsShared($lib) ? '--enable-shared ' : '--disable-shared ') .
+                (SharedLibraryUtil::buildsShared($lib) ? '--with-data-packaging=library ' : '--with-data-packaging=static ') .
                 '--enable-release=yes ' .
                 '--enable-extras=no ' .
                 '--enable-icuio=yes ' .

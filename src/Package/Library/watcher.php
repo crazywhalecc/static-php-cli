@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('watcher')]
 class watcher extends LibraryPackage
@@ -25,6 +26,8 @@ class watcher extends LibraryPackage
             ->exec(getenv('AR') . ' rcs libwatcher-c.a libwatcher-c.o');
 
         copy("{$this->getSourceDir()}/watcher-c/libwatcher-c.a", "{$this->getLibDir()}/libwatcher-c.a");
+
+        SharedLibraryUtil::linkArchive($this, 'libwatcher-c.a');
         FileSystem::createDir("{$this->getIncludeDir()}/wtr");
         copy("{$this->getSourceDir()}/watcher-c/include/wtr/watcher-c.h", "{$this->getIncludeDir()}/wtr/watcher-c.h");
     }

@@ -9,6 +9,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('ngtcp2')]
 class ngtcp2
@@ -43,7 +44,7 @@ class ngtcp2
                 ]),
                 '--with-openssl=no'
             )
-            ->appendEnv(['PKG_CONFIG' => '$PKG_CONFIG --static'])
+            ->appendEnv(['PKG_CONFIG' => (SharedLibraryUtil::buildsShared($lib) ? '$PKG_CONFIG' : '$PKG_CONFIG --static')])
             ->configure('--enable-lib-only')
             ->make();
 

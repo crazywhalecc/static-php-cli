@@ -13,6 +13,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 use StaticPHP\Util\System\LinuxUtil;
 use StaticPHP\Util\System\WindowsUtil;
 
@@ -111,10 +112,14 @@ class openssl
         $userCFlags = trim((string) getenv('SPC_DEFAULT_CFLAGS'));
         $userLdFlags = trim((string) getenv('SPC_DEFAULT_LDFLAGS'));
         $userExtra = trim($userCFlags . ' ' . $userLdFlags);
+        $runtimePaths = SharedLibraryUtil::buildsShared($lib)
+            ? ' MODULESDIR=' . escapeshellarg(SharedLibraryUtil::runtimeDirectory() . '/ossl-modules')
+                . ' ENGINESDIR=' . escapeshellarg(SharedLibraryUtil::runtimeDirectory() . '/engines-3')
+            : '';
 
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
             ->exec(
-                './Configure no-shared zlib ' .
+                (SharedLibraryUtil::buildsShared($lib) ? './Configure shared zlib ' : './Configure no-shared zlib ') .
                 "--prefix={$lib->getBuildRootPath()} " .
                 "--libdir={$lib->getLibDir()} " .
                 "--openssldir={$openssl_dir} " .
@@ -126,7 +131,7 @@ class openssl
                 $userExtra
             )
             ->exec('make clean')
-            ->exec("make -j{$lib->getBuilder()->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"")
+            ->exec("make -j{$lib->getBuilder()->concurrency} CNF_EX_LIBS=\"{$ex_lib}\"{$runtimePaths}")
             ->exec('make install_sw');
         $this->patchPkgConfig($lib);
     }
@@ -145,6 +150,6 @@ class openssl
             FileSystem::writeFile("{$pkg->getLibDir()}/pkgconfig/libcrypto.pc", "prefix={$pkg->getBuildRootPath()}\n{$file}");
         }
         FileSystem::replaceFileRegex("{$pkg->getLibDir()}/pkgconfig/libcrypto.pc", '/Libs.private:.*/m', 'Requires.private: zlib');
-        FileSystem::replaceFileRegex("{$pkg->getLibDir()}/cmake/OpenSSL/OpenSSLConfig.cmake", '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m', 'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}/libz.a")');
+        FileSystem::replaceFileRegex("{$pkg->getLibDir()}/cmake/OpenSSL/OpenSSLConfig.cmake", '/set\(OPENSSL_LIBCRYPTO_DEPENDENCIES .*\)/m', SharedLibraryUtil::enabled() ? 'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}/libz.so")' : 'set(OPENSSL_LIBCRYPTO_DEPENDENCIES "${OPENSSL_LIBRARY_DIR}/libz.a")');
     }
 }

@@ -7,6 +7,7 @@ namespace StaticPHP\Runtime\Shell;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\SystemTarget;
+use StaticPHP\Util\SharedLibraryUtil;
 use ZM\Logger\ConsoleColor;
 
 /**
@@ -47,7 +48,7 @@ class UnixShell extends Shell
         $this->setEnv([
             'CFLAGS' => $library->getLibExtraCFlags(),
             'CXXFLAGS' => $library->getLibExtraCXXFlags(),
-            'LDFLAGS' => $library->getLibExtraLdFlags(),
+            'LDFLAGS' => trim($library->getLibExtraLdFlags() . ' ' . SharedLibraryUtil::ldflags()),
             'LIBS' => $library->getLibExtraLibs() . SystemTarget::getRuntimeLibs(),
         ]);
         return $this;

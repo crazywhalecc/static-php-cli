@@ -10,6 +10,7 @@ use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('libevent')]
 class libevent
@@ -55,7 +56,7 @@ class libevent
     {
         $cmake = UnixCMakeExecutor::create($lib)
             ->addConfigureArgs(
-                '-DEVENT__LIBRARY_TYPE=STATIC',
+                SharedLibraryUtil::buildsShared($lib) ? '-DEVENT__LIBRARY_TYPE=BOTH' : '-DEVENT__LIBRARY_TYPE=STATIC',
                 '-DEVENT__DISABLE_BENCHMARK=ON',
                 '-DEVENT__DISABLE_TESTS=ON',
                 '-DEVENT__DISABLE_SAMPLES=ON',

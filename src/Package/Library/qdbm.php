@@ -10,6 +10,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('qdbm')]
 class qdbm
@@ -19,7 +20,9 @@ class qdbm
     public function buildUnix(LibraryPackage $lib): void
     {
         $ac = UnixAutoconfExecutor::create($lib)->configure();
-        FileSystem::replaceFileRegex($lib->getSourceDir() . '/Makefile', '/MYLIBS = libqdbm.a.*/m', 'MYLIBS = libqdbm.a');
+        if (!SharedLibraryUtil::buildsShared($lib)) {
+            FileSystem::replaceFileRegex($lib->getSourceDir() . '/Makefile', '/MYLIBS = libqdbm.a.*/m', 'MYLIBS = libqdbm.a');
+        }
         // Makefile pins -O3, replace with SPC_DEFAULT_CFLAGS
         $extra = trim((string) getenv('SPC_DEFAULT_CFLAGS'));
         if ($extra !== '') {

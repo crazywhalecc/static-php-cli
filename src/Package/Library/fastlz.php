@@ -8,6 +8,7 @@ use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
 use StaticPHP\Exception\BuildFailureException;
 use StaticPHP\Package\LibraryPackage;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('fastlz')]
 class fastlz
@@ -34,5 +35,6 @@ class fastlz
         if (!copy($lib->getSourceDir() . '/libfastlz.a', $lib->getLibDir() . '/libfastlz.a')) {
             throw new BuildFailureException('Failed to copy libfastlz.a');
         }
+        SharedLibraryUtil::linkArchive($lib, 'libfastlz.a');
     }
 }
