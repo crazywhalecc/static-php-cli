@@ -311,6 +311,39 @@ final class SharedLibraryUtilTest extends TestCase
         self::assertArrayHasKey('share/info/' . $this->name . '.info', $snapshot);
     }
 
+    public function testReorderedElfMetadataKeepsStrictReuseValidation(): void
+    {
+        $finder = new \Symfony\Component\Process\ExecutableFinder();
+        if ($finder->find('cc') === null || $finder->find('readelf') === null) {
+            self::markTestSkipped('Native ELF tools are unavailable.');
+        }
+        FileSystem::createDir(BUILD_LIB_PATH);
+        $relative = 'lib/lib' . $this->name . '.so';
+        $path = BUILD_ROOT_PATH . '/' . $relative;
+        (new \Symfony\Component\Process\Process(['cc', '-shared', '-fPIC', '-x', 'c',
+            '-Wl,-soname,libfixture.so.1', '-Wl,-rpath,/usr/lib/php-zts/lib', '-o', $path, '-']))
+            ->setInput("int shared_fixture(void) { return 42; }\n")->mustRun();
+        $this->files[] = $path;
+        $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
+        $elf = (new \ReflectionMethod($manifest, 'elf'))->invoke($manifest, $path);
+        ksort($elf);
+        $record = ['libraries' => [$this->name => ['source_hash' => 'source', 'elf' => [$relative => $elf], 'depends' => []]]];
+        $property = new \ReflectionProperty($manifest, 'manifest');
+        $property->setValue($manifest, $record);
+        (new \ReflectionProperty($manifest, 'ownership'))->setValue($manifest, ['libraries' => [$this->name => [
+            'source_hash' => 'source', 'files' => [$relative], 'file_hashes' => [$relative => hash_file('sha256', $path)],
+        ]]]);
+        $method = new \ReflectionMethod($manifest, 'verifyRecord');
+        $visited = [];
+        $method->invokeArgs($manifest, [$this->name, &$visited]);
+        self::assertArrayHasKey($this->name, $visited);
+        $record['libraries'][$this->name]['elf'][$relative]['rpath'] = false;
+        $property->setValue($manifest, $record);
+        $visited = [];
+        $this->expectException(WrongUsageException::class);
+        $method->invokeArgs($manifest, [$this->name, &$visited]);
+    }
+
     public function testUnversionedArchiveFailsRatherThanInventingAVersion(): void
     {
         $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
