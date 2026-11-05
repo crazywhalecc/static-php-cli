@@ -10,6 +10,7 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
 use StaticPHP\Runtime\Executor\WindowsCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('xz')]
 class xz
@@ -18,13 +19,16 @@ class xz
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib): void
     {
-        UnixAutoconfExecutor::create($lib)
-            ->configure(
-                '--disable-scripts',
-                '--disable-doc',
-                '--with-libiconv',
-                '--bindir=/tmp/xz', // xz binary will corrupt `tar` command, that's really strange.
-            )
+        $autoconf = UnixAutoconfExecutor::create($lib);
+        if (SharedLibraryUtil::buildsShared($lib)) {
+            $autoconf->removeConfigureArgs('--enable-static')->addConfigureArgs('--disable-static');
+        }
+        $autoconf->configure(
+            '--disable-scripts',
+            '--disable-doc',
+            '--with-libiconv',
+            '--bindir=/tmp/xz', // xz binary will corrupt `tar` command, that's really strange.
+        )
             ->make();
         $lib->patchPkgconfPrefix(['liblzma.pc']);
         $lib->patchLaDependencyPrefix();
