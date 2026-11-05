@@ -411,8 +411,9 @@ final class SharedLibraryManifest
             }
         }
         if (!(($source['cache_type'] ?? null) === 'git' && str_starts_with($version, 'dev-'))
-            && preg_match('/^(?:v|[A-Za-z]+|[A-Za-z][A-Za-z0-9_.-]*?[-_]v?)?([0-9][A-Za-z0-9.+~_-]*)$/D', $version, $match)) {
-            return $match[1];
+            && preg_match('/^(?:[A-Za-z][A-Za-z0-9_.-]*?[-_]v?|v|[A-Za-z]+)?([0-9][A-Za-z0-9.+~_-]*)$/D', $version, $match)) {
+            $version = preg_replace('/[-_.](?:stable|release)$/iD', '', $match[1]);
+            return preg_replace('/(?<=\d)[_-](?=\d)/', '.', $version);
         }
         if (($source['cache_type'] ?? null) === 'git') {
             $directory = $source['dirname'] ?? '';

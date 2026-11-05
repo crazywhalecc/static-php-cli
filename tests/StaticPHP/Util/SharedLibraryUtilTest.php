@@ -236,6 +236,19 @@ final class SharedLibraryUtilTest extends TestCase
         }
     }
 
+    public function testReleaseTagVersionsUsePortableUpstreamNumbers(): void
+    {
+        $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
+        $method = new \ReflectionMethod($manifest, 'sourceVersion');
+        $package = $this->createMock(LibraryPackage::class);
+        foreach (['curl-8_23_0' => '8.23.0', 'VER-2-15-0' => '2.15.0', 'release-77-1' => '77.1',
+            '7.1.2-35' => '7.1.2.35', 'libedit-20260512-3.1' => '20260512.3.1',
+            'release-2.1.13-stable' => '2.1.13', '1.0.22-RELEASE' => '1.0.22',
+            'libssh2-1.11.1' => '1.11.1', 'REL_18_6' => '18.6'] as $tag => $version) {
+            self::assertSame($version, $method->invoke($manifest, $package, ['cache_type' => 'archive', 'version' => $tag]));
+        }
+    }
+
     public function testMirrorVersionsComeFromLiteralUpstreamSourceMetadata(): void
     {
         $directory = sys_get_temp_dir() . '/spc-source-version-' . bin2hex(random_bytes(6));
