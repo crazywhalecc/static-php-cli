@@ -25,6 +25,8 @@ final class SharedLibraryManifest
 
     private string $building = '';
 
+    private array $prepared = [];
+
     public function __construct()
     {
         $this->manifest = $this->read('shared-libraries.json') ?? [
@@ -73,6 +75,8 @@ final class SharedLibraryManifest
     {
         $name = $package->getName();
         $this->building = '';
+        // Build-stage hooks may remove the source tree.
+        $this->prepared = $this->prepareSource($package);
         $this->previous = $this->manifest['libraries'][$name] ?? [];
         $owned = $this->ownership['libraries'][$name] ?? [];
         foreach ($owned['files'] ?? [] as $relative) {
@@ -134,26 +138,14 @@ final class SharedLibraryManifest
         if (!$package->isInstalled()) {
             throw new WrongUsageException('Shared library build did not install its declared outputs: ' . $package->getName());
         }
-        $source = $this->source($package);
-        if (empty($source['hash'])) {
-            throw new WrongUsageException('Shared library source has no hash: ' . $package->getName());
-        }
-        $artifact = $package->getArtifact()?->getName();
-        $metadata = $artifact === null ? [] : (ArtifactConfig::get($artifact)['metadata'] ?? []);
+        $source = $this->prepared['source'];
+        $metadata = $this->prepared['metadata'];
         $licenses = [];
-        foreach ((array) ($metadata['license-files'] ?? []) as $index => $file) {
-            $sourcePath = str_starts_with($file, '@/') ? ROOT_DIR . '/src/globals/licenses/' . substr($file, 2)
-                : (FileSystem::isRelativePath($file) ? $package->getSourceDir() . '/' . $file : $file);
-            if (!is_file($sourcePath)) {
-                throw new WrongUsageException('Missing shared library license: ' . $sourcePath);
-            }
+        foreach ($this->prepared['licenses'] as $index => $contents) {
             $relative = 'license/' . $package->getName() . '/' . $index . '.txt';
             FileSystem::createDir(dirname($this->path($relative)));
-            FileSystem::copy($sourcePath, $this->path($relative));
+            FileSystem::writeFile($this->path($relative), $contents);
             $licenses[] = $relative;
-        }
-        if ($licenses === []) {
-            throw new WrongUsageException('Missing shared library license metadata: ' . $package->getName());
         }
         $after = $this->snapshot();
         $files = [];
@@ -206,7 +198,7 @@ final class SharedLibraryManifest
             PackageConfig::get($package->getName(), 'depends', []),
             PackageConfig::get($package->getName(), 'suggests', [])
         )), fn (string $name): bool => isset($this->manifest['libraries'][$name])));
-        $entry = ['version' => $this->sourceVersion($package, $source), 'source_hash' => $source['hash'],
+        $entry = ['version' => $this->prepared['version'], 'source_hash' => $source['hash'],
             'license' => $metadata['license'] ?? 'Custom', 'license_files' => $licenses,
             'files' => $runtime, 'file_hashes' => array_intersect_key($hashes, array_flip($runtime)),
             'runtime_assets' => (object) $runtimeAssets, 'elf' => $elf, 'depends' => $depends, 'runtime_libdir' => SharedLibraryUtil::runtimeDirectory()];
@@ -399,6 +391,30 @@ final class SharedLibraryManifest
         if (empty($this->manifest['pending_rebuilds'])) {
             unset($this->manifest['pending_rebuilds']);
         }
+    }
+
+    private function prepareSource(LibraryPackage $package): array
+    {
+        $source = $this->source($package);
+        if (empty($source['hash'])) {
+            throw new WrongUsageException('Shared library source has no hash: ' . $package->getName());
+        }
+        $artifact = $package->getArtifact()?->getName();
+        $metadata = $artifact === null ? [] : (ArtifactConfig::get($artifact)['metadata'] ?? []);
+        $licenses = [];
+        foreach ((array) ($metadata['license-files'] ?? []) as $index => $file) {
+            $path = str_starts_with($file, '@/') ? ROOT_DIR . '/src/globals/licenses/' . substr($file, 2)
+                : (FileSystem::isRelativePath($file) ? $package->getSourceDir() . '/' . $file : $file);
+            if (!is_file($path)) {
+                throw new WrongUsageException('Missing shared library license: ' . $path);
+            }
+            $licenses[$index] = FileSystem::readFile($path);
+        }
+        if ($licenses === []) {
+            throw new WrongUsageException('Missing shared library license metadata: ' . $package->getName());
+        }
+        return ['source' => $source, 'metadata' => $metadata, 'licenses' => $licenses,
+            'version' => $this->sourceVersion($package, $source)];
     }
 
     private function sourceVersion(LibraryPackage $package, array $source): string
