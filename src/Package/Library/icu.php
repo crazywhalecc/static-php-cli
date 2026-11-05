@@ -35,6 +35,10 @@ class icu
         }
         $cxxflags = "CXXFLAGS=\"-std=c++17 -DPIC -fPIC -fno-ident {$userCxxFlags}\"";
         $ldflags = $toolchain->isStatic() ? "LDFLAGS=\"-static {$userLdFlags}\"" : "LDFLAGS=\"{$userLdFlags}\"";
+        // Assembly data has no DWARF types for ABI checks.
+        $makeVariables = SharedLibraryUtil::buildsShared($lib)
+            ? ' PKGDATA_OPTS=' . escapeshellarg('--without-assembly -O ' . $lib->getSourceDir() . '/source/data/icupkg.inc')
+            : '';
         shell()->cd($lib->getSourceDir() . '/source')->initializeEnv($lib)
             ->exec(
                 "{$cppflags} {$cxxflags} {$ldflags} " .
@@ -52,8 +56,8 @@ class icu
                 '--prefix=' . $lib->getBuildRootPath()
             )
             ->exec('make clean')
-            ->exec("make -j{$builder->concurrency}")
-            ->exec('make install');
+            ->exec("make -j{$builder->concurrency}{$makeVariables}")
+            ->exec("make install{$makeVariables}");
 
         $lib->patchPkgconfPrefix(patch_option: PKGCONF_PATCH_PREFIX);
         FileSystem::removeDir("{$lib->getLibDir()}/icu");

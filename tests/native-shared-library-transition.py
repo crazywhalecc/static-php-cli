@@ -35,7 +35,7 @@ foreach ($names as $short) {
         'shared-libs' => ['libtransition-' . $short . '.so'],
         'depends' => $short === 'consumer' ? ['transition-base'] : [], 'lang' => $short === 'other' ? 'cpp' : 'c'];
     $artifacts[$name] = ['source' => ['type' => 'local'],
-        'metadata' => ['license' => 'MIT', 'license-files' => ['LICENSE']]];
+        'metadata' => ['license' => 'MIT', 'license-files' => [$short === 'other' ? 'COPYING' : 'LICENSE']]];
     $package = new LibraryPackage($name, 'library');
     $package->addStage('build', function () use ($short, $name, $package): void {
         $cache = json_decode(file_get_contents(DOWNLOAD_PATH . '/.cache.json'), true, 512, JSON_THROW_ON_ERROR);

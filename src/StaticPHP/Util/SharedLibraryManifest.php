@@ -405,6 +405,9 @@ final class SharedLibraryManifest
         foreach ((array) ($metadata['license-files'] ?? []) as $index => $file) {
             $path = str_starts_with($file, '@/') ? ROOT_DIR . '/src/globals/licenses/' . substr($file, 2)
                 : (FileSystem::isRelativePath($file) ? $package->getSourceDir() . '/' . $file : $file);
+            if (!is_file($path) && basename($path) === 'COPYING' && is_file(dirname($path) . '/LICENSE')) {
+                $path = dirname($path) . '/LICENSE';
+            }
             if (!is_file($path)) {
                 throw new WrongUsageException('Missing shared library license: ' . $path);
             }
