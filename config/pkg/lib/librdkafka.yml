@@ -17,3 +17,6 @@ librdkafka:
   pkg-configs:
     - rdkafka++-static
     - rdkafka-static
+  shared-pkg-configs:
+    - rdkafka++
+    - rdkafka

@@ -42,6 +42,7 @@ class ConfigValidator
         'shared-libs' => ConfigType::LIST_ARRAY,
         'static-only' => ConfigType::BOOL,
         'pkg-configs' => ConfigType::LIST_ARRAY,
+        'shared-pkg-configs' => ConfigType::LIST_ARRAY,
         'static-bins' => ConfigType::LIST_ARRAY, // @
         'path' => ConfigType::LIST_ARRAY, // @
         'env' => ConfigType::ASSOC_ARRAY, // @
@@ -67,6 +68,7 @@ class ConfigValidator
         'shared-libs' => false,
         'static-only' => false,
         'pkg-configs' => false,
+        'shared-pkg-configs' => false,
         'static-bins' => false, // @
         'path' => false, // @
         'env' => false, // @
@@ -79,6 +81,7 @@ class ConfigValidator
         'headers',
         'static-libs',
         'shared-libs',
+        'shared-pkg-configs',
         'static-bins',
         'path',
         'env',

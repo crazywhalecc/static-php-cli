@@ -57,6 +57,13 @@ final class SharedLibraryUtil
         ));
     }
 
+    public static function pkgConfigFiles(string $name): array
+    {
+        $static = PackageConfig::get($name, 'pkg-configs', []);
+        return self::enabled() && !PackageConfig::get($name, 'static-only', false)
+            ? PackageConfig::get($name, 'shared-pkg-configs', $static) : $static;
+    }
+
     public static function runtimeDirectory(): string
     {
         $directory = ApplicationContext::tryGet(PackageBuilder::class)?->getOption('with-shared-libdir', '/usr/lib/php-zts/lib');

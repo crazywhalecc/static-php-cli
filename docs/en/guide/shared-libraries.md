@@ -36,7 +36,8 @@ until those consumers are rebuilt. Interrupted or failed builds invalidate their
 entry before another process can reuse it.
 
 Library recipes may declare `shared-libs` when their DSO names differ from their
-archive names. A `static-only: true` library retains explicit archive linkage in
+archive names, or `shared-pkg-configs` when upstream installs different pkg-config
+modules for shared builds. A `static-only: true` library retains explicit archive linkage in
 an otherwise shared build. Static builds continue using `static-libs` regardless
 of whether shared objects are also present.
 

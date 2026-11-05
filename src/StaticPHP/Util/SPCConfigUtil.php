@@ -369,7 +369,7 @@ class SPCConfigUtil
         // parse pkg-configs (only for Unix)
         if (SystemTarget::isUnix()) {
             foreach ($packages as $package) {
-                $pc = PackageConfig::get($package, 'pkg-configs', []);
+                $pc = SharedLibraryUtil::pkgConfigFiles($package);
                 $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
                 $search_paths = array_filter(explode(':', $pkg_config_path));
                 foreach ($pc as $file) {
@@ -416,7 +416,7 @@ class SPCConfigUtil
             // parse pkg-configs only for unix systems
             if (SystemTarget::isUnix()) {
                 // add pkg-configs libs
-                $pkg_configs = PackageConfig::get($package, 'pkg-configs', []);
+                $pkg_configs = SharedLibraryUtil::pkgConfigFiles($package);
                 $pkg_config_path = getenv('PKG_CONFIG_PATH') ?: '';
                 $search_paths = array_filter(explode(':', $pkg_config_path));
                 foreach ($pkg_configs as $pkg_config) {
