@@ -11,6 +11,7 @@ use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Util\FileSystem;
+use StaticPHP\Util\SharedLibraryUtil;
 
 #[Library('librdkafka')]
 class librdkafka extends LibraryPackage
@@ -50,7 +51,7 @@ class librdkafka extends LibraryPackage
             ->optionalPackage('liblz4', ...cmake_boolean_args('ENABLE_LZ4_EXT'))
             ->addConfigureArgs(
                 '-DWITH_SASL=OFF',
-                '-DRDKAFKA_BUILD_STATIC=ON',
+                SharedLibraryUtil::buildsShared($this) ? '-DRDKAFKA_BUILD_STATIC=OFF' : '-DRDKAFKA_BUILD_STATIC=ON',
                 '-DRDKAFKA_BUILD_EXAMPLES=OFF',
                 '-DRDKAFKA_BUILD_TESTS=OFF',
             )
