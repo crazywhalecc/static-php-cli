@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\StaticPHP\Package;
 
 use Package\Extension\zip;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Package\PackageBuilder;
@@ -12,6 +14,8 @@ use StaticPHP\Package\PackageBuilder;
 /** @internal */
 class ZipTest extends TestCase
 {
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testSourceSelectionUsesRequestedPhpVersion(): void
     {
         $zip = new zip('zip');
