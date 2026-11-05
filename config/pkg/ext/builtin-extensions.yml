@@ -52,7 +52,7 @@ ext-ffi:
     - libffi-win
   php-extension:
     arg-type@unix: with
-    arg-type@windows: with
+    arg-type: with
 ext-fileinfo:
   type: php-extension
 ext-filter:
