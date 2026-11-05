@@ -30,6 +30,9 @@ final class SharedLibraryUtilTest extends TestCase
 
     protected function setUp(): void
     {
+        if (\StaticPHP\Runtime\SystemTarget::getTargetOS() !== 'Linux') {
+            self::markTestSkipped('Shared dependency libraries require Linux.');
+        }
         $this->configs = (new \ReflectionProperty(PackageConfig::class, 'package_configs'))->getValue();
         $this->builder = ApplicationContext::get(PackageBuilder::class);
         $this->name = 'spc-shared-fixture-' . bin2hex(random_bytes(5));
@@ -193,6 +196,28 @@ final class SharedLibraryUtilTest extends TestCase
         \StaticPHP\Config\ConfigValidator::validateAndLintPackages('fixture.yml', $configs);
         self::assertSame(['libfixture.a'], $configs['fixture']['static-libs']);
         self::assertFalse($configs['fixture']['static-only']);
+    }
+
+    public function testGitSnapshotVersionsUseTheCommitTimeAndPortableNumericComponents(): void
+    {
+        $directory = sys_get_temp_dir() . '/spc-git-version-' . bin2hex(random_bytes(6));
+        mkdir($directory);
+        try {
+            (new \Symfony\Component\Process\Process(['git', 'init', '--quiet', $directory]))->mustRun();
+            $environment = ['GIT_AUTHOR_DATE' => '1577836800 +0000', 'GIT_COMMITTER_DATE' => '1577836800 +0000'];
+            (new \Symfony\Component\Process\Process(['git', '-C', $directory, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+                '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '--allow-empty', '--quiet', '-m', 'fixture'], null, $environment))->mustRun();
+            $package = $this->createMock(LibraryPackage::class);
+            $package->method('getSourceDir')->willReturn($directory);
+            $manifest = (new \ReflectionClass(\StaticPHP\Util\SharedLibraryManifest::class))->newInstanceWithoutConstructor();
+            $method = new \ReflectionMethod($manifest, 'sourceVersion');
+            $version = $method->invoke($manifest, $package, ['cache_type' => 'git', 'dirname' => $directory,
+                'version' => 'dev-main+abcdef', 'hash' => 'abcdef']);
+            self::assertSame('0.0.1577836800', $version);
+            self::assertMatchesRegularExpression('/^[0-9]+\.[0-9]+\.[0-9]+$/D', $version);
+        } finally {
+            FileSystem::removeDir($directory);
+        }
     }
 
     private function file(string $suffix): void
