@@ -230,7 +230,10 @@ final class SharedLibraryManifest
             }
         }
         foreach ($entry['elf'] ?? [] as $relative => $details) {
-            if ($this->elf($this->path($relative)) !== $details) {
+            $actual = $this->elf($this->path($relative));
+            ksort($actual);
+            ksort($details);
+            if ($actual !== $details) {
                 throw new WrongUsageException('LIBRARY_REUSE stale ELF metadata: ' . $relative);
             }
             foreach ($details['needed'] as $needed) {
