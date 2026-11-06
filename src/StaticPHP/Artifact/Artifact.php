@@ -67,6 +67,11 @@ class Artifact
         return $this->name;
     }
 
+    public function setConfig(array $config): void
+    {
+        $this->config = $config;
+    }
+
     /**
      * Checks if the source of an artifact is already downloaded.
      *

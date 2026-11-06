@@ -73,6 +73,23 @@ class ArtifactLoaderTest extends TestCase
         $this->assertInstanceOf(Artifact::class, $artifact);
     }
 
+    public function testLaterRegistryConfigurationUpdatesExistingArtifactWithoutLosingHooks(): void
+    {
+        $this->createTestArtifactConfig('test-artifact');
+        $artifact = ArtifactLoader::getArtifactInstance('test-artifact');
+        $this->assertNotNull($artifact);
+        $extract = static function (): void {};
+        $artifact->setSourceExtractCallback($extract);
+        $source = ['type' => 'pecl', 'name' => 'rdkafka', 'extract' => 'php-src/ext/rdkafka'];
+        ArtifactConfig::registerInlineArtifact('test-artifact', ['source' => $source], 'consumer');
+
+        $updated = ArtifactLoader::getArtifactInstance('test-artifact');
+
+        $this->assertSame($artifact, $updated);
+        $this->assertSame($source, $updated->getDownloadConfig('source'));
+        $this->assertSame($extract, $updated->getSourceExtractCallback());
+    }
+
     public function testGetArtifactInstanceReturnsNullForNonExistent(): void
     {
         ArtifactLoader::initArtifactInstances();
