@@ -487,7 +487,10 @@ final class SharedLibraryManifest
             }
             if ($file->isFile() || $file->isLink()) {
                 $stat = lstat($file->getPathname());
-                $result[$relative] = [$this->digest($file->getPathname()), $stat['ino'], $stat['mtime'], $stat['mode']];
+                // Alpine ldconfig recreates unchanged SONAME symlinks.
+                $result[$relative] = $file->isLink()
+                    ? [$this->digest($file->getPathname()), $stat['mode']]
+                    : [$this->digest($file->getPathname()), $stat['ino'], $stat['mtime'], $stat['mode']];
             }
         }
         ksort($result);
