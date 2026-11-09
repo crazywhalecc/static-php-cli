@@ -144,9 +144,16 @@ trait unix
         }
 
         // Configure probes need macOS frameworks, but not static libraries that expose polyfills.
+        $config_util = new SPCConfigUtil();
+        $resolved_package_names = array_keys($installer->getResolvedPackages());
         $libs = SystemTarget::getRuntimeLibs();
+        // Extension configure checks link against static C++ libraries (e.g. -lgearman, -lsnappy),
+        // so the probe link lines need the C++ runtime for the same reason the final link does.
+        if ($libcpp = $config_util->getCppRuntimeLib($resolved_package_names)) {
+            $libs = trim("{$libs} {$libcpp}");
+        }
         if (SystemTarget::getTargetOS() === 'Darwin') {
-            $frameworks = new SPCConfigUtil()->getFrameworksString(array_keys($installer->getResolvedPackages()));
+            $frameworks = $config_util->getFrameworksString($resolved_package_names);
             $libs = trim("{$libs} {$frameworks}");
         }
 

@@ -237,17 +237,8 @@ class SPCConfigUtil
         }
 
         // C++
-        if ($this->hasCpp($resolved_package_names)) {
-            $target_os = SystemTarget::getTargetOS();
-            if ($target_os === 'Darwin') {
-                $libcpp = '-lc++';
-                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
-            } elseif ($target_os !== 'Windows') {
-                // Linux and other Unix-like systems use libstdc++
-                $libcpp = '-lstdc++';
-                $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
-            }
-            // Windows (MSVC): C++ runtime is linked automatically, no explicit lib needed
+        if ($libcpp = $this->getCppRuntimeLib($resolved_package_names)) {
+            $libs = str_replace($libcpp, '', $libs) . " {$libcpp}";
         }
 
         if ($this->libs_only_deps) {
@@ -302,6 +293,30 @@ class SPCConfigUtil
             }
         }
         return implode(' ', $list);
+    }
+
+    /**
+     * Get the C++ runtime linker flag for the given resolved packages.
+     *
+     * Static archives of C++ dependencies (e.g. libgearman, libsnappy) keep references to the
+     * C++ runtime, so every link that pulls them needs this flag - including the throwaway
+     * conftests configure runs while probing an extension configure arg.
+     *
+     * @param  string[]    $package_names Resolved package names (build order)
+     * @return null|string Linker flag, or null when no C++ package is resolved
+     */
+    public function getCppRuntimeLib(array $package_names): ?string
+    {
+        if (!$this->hasCpp($package_names)) {
+            return null;
+        }
+        return match (SystemTarget::getTargetOS()) {
+            'Darwin' => '-lc++',
+            // Windows (MSVC): C++ runtime is linked automatically, no explicit lib needed
+            'Windows' => null,
+            // Linux and other Unix-like systems use libstdc++
+            default => '-lstdc++',
+        };
     }
 
     /** @param string[] $package_names */
