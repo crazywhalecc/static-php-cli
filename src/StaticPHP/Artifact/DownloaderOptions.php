@@ -19,6 +19,7 @@ class DownloaderOptions
         'with-php',
         'parallel',
         'retry',
+        'update',
         'prefer-source',
         'prefer-binary',
         'prefer-pre-built',
@@ -63,6 +64,7 @@ class DownloaderOptions
             // download behavior options
             new InputOption("{$p}parallel", $shortP, InputOption::VALUE_REQUIRED, 'Number of parallel downloads (default 1)', '1'),
             new InputOption("{$p}retry", $shortR, InputOption::VALUE_REQUIRED, 'Number of download retries on failure (default 0)', '0'),
+            new InputOption("{$p}update", null, InputOption::VALUE_OPTIONAL, 'Check upstream versions before reuse; optionally select comma-separated artifacts', false),
             new InputOption("{$p}ignore-cache", $shortI, InputOption::VALUE_OPTIONAL, 'Ignore some caches when downloading, comma separated, e.g "php-src,curl,openssl"', false),
             new InputOption("{$p}no-alt", null, null, 'Do not use alternative mirror download artifacts for sources'),
             new InputOption("{$p}no-shallow-clone", null, null, 'Do not clone shallowly repositories when downloading sources'),

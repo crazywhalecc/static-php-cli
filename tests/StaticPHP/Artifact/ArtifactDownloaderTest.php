@@ -9,6 +9,9 @@ use StaticPHP\Artifact\Artifact;
 use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\Downloader\DownloadResult;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateInterface;
+use StaticPHP\Artifact\Downloader\Type\CheckUpdateResult;
+use StaticPHP\Artifact\Downloader\Type\DownloadTypeInterface;
 use StaticPHP\Config\ArtifactConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\DownloaderException;
@@ -396,6 +399,42 @@ class ArtifactDownloaderTest extends TestCase
         }
     }
 
+    /** @dataProvider updateProvider */
+    public function testUpdateReusesOnlyCurrentValidSources(string $old, bool $valid, bool $changed_config, bool $forced, int $downloads, int $checks): void
+    {
+        $config = ['type' => 'update-fixture', 'version' => '2.0'];
+        $artifact = $this->getMockBuilder(Artifact::class)
+            ->setConstructorArgs(['update-fixture', ['source' => $config]])
+            ->onlyMethods(['isSourceDownloaded', 'isBinaryDownloaded'])->getMock();
+        $artifact->method('isSourceDownloaded')->willReturn($valid);
+        $artifact->method('isBinaryDownloaded')->willReturn(false);
+        $original = ApplicationContext::get(ArtifactCache::class);
+        $cache = $this->createMock(ArtifactCache::class);
+        $cache->method('getSourceInfo')->willReturn(['version' => $old, 'config' => $changed_config ? [] : $config]);
+        $cache->expects($this->exactly($downloads))->method('lock');
+        ApplicationContext::set(ArtifactCache::class, $cache);
+        UpdateFixture::$checks = UpdateFixture::$downloads = 0;
+        try {
+            $downloader = new ArtifactDownloader(['update' => true, 'ignore-cache' => $forced, 'source-only' => true], false);
+            $property = new \ReflectionProperty(ArtifactDownloader::class, 'downloaders');
+            $property->setValue($downloader, ['update-fixture' => UpdateFixture::class]);
+            $downloader->add($artifact)->download();
+            $this->assertSame($downloads, UpdateFixture::$downloads);
+            $this->assertSame($checks, UpdateFixture::$checks);
+        } finally {
+            ApplicationContext::set(ArtifactCache::class, $original);
+        }
+    }
+
+    public static function updateProvider(): iterable
+    {
+        yield 'unchanged' => ['2.0', true, false, false, 0, 1];
+        yield 'new release' => ['1.0', true, false, false, 1, 1];
+        yield 'missing or corrupt archive' => ['2.0', false, false, false, 1, 0];
+        yield 'changed download recipe' => ['2.0', true, true, false, 1, 0];
+        yield 'explicit force' => ['2.0', true, false, true, 1, 0];
+    }
+
     // ==================== Helpers ====================
 
     private function injectArtifactConfig(string $name, array $config): void
@@ -406,5 +445,24 @@ class ArtifactDownloaderTest extends TestCase
         $configs = $property->getValue(null) ?? [];
         $configs[$name] = $config;
         $property->setValue(null, $configs);
+    }
+}
+
+class UpdateFixture implements DownloadTypeInterface, CheckUpdateInterface
+{
+    public static int $checks = 0;
+
+    public static int $downloads = 0;
+
+    public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
+    {
+        ++self::$checks;
+        return new CheckUpdateResult($old_version, $config['version'], $old_version !== $config['version']);
+    }
+
+    public function download(string $name, array $config, ArtifactDownloader $downloader): DownloadResult
+    {
+        ++self::$downloads;
+        return DownloadResult::local(__DIR__, $config, version: $config['version']);
     }
 }

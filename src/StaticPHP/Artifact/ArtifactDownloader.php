@@ -88,6 +88,8 @@ class ArtifactDownloader
 
     private array $_before_files;
 
+    private array $update_checks = [];
+
     /**
      * @param array{
      *     parallel?: int,
@@ -304,6 +306,7 @@ class ArtifactDownloader
             });
         }
 
+        $this->update_checks = [];
         $this->applyCustomDownloads();
 
         $count = count($this->artifacts);
@@ -796,6 +799,12 @@ class ArtifactDownloader
             return $queue;
         }
 
+        $update = $this->options['update'] ?? (array_key_exists('update', $this->options) ? true : false);
+        if ($update === true || is_string($update) && in_array($artifact->getName(), parse_comma_list($update), true)) {
+            $source_downloaded = $source_downloaded && $this->cacheIsCurrent($artifact, 'source');
+            $binary_downloaded = $binary_downloaded && $this->cacheIsCurrent($artifact, 'binary');
+        }
+
         // check if already downloaded
         $has_usable_download = false;
         if ($pref === Artifact::FETCH_PREFER_SOURCE) {
@@ -830,6 +839,40 @@ class ArtifactDownloader
         }
 
         return $queue;
+    }
+
+    private function cacheIsCurrent(Artifact $artifact, string $kind): bool
+    {
+        $name = $artifact->getName();
+        $key = $name . ':' . $kind;
+        if (array_key_exists($key, $this->update_checks)) {
+            return $this->update_checks[$key];
+        }
+        $cache = ApplicationContext::get(ArtifactCache::class);
+        $platform = SystemTarget::getCurrentPlatformString();
+        $info = $kind === 'source' ? $cache->getSourceInfo($name) : $cache->getBinaryInfo($name, $platform);
+        $config = $artifact->getDownloadConfig($kind);
+        if ($kind === 'binary') {
+            $config = is_array($config) ? ($config[$platform] ?? null) : null;
+        }
+        if ($info === null || $config !== ($info['config'] ?? null)) {
+            return $this->update_checks[$key] = false;
+        }
+        $callback = $kind === 'source' ? $artifact->getCustomSourceCheckUpdateCallback() : $artifact->getCustomBinaryCheckUpdateCallback();
+        $custom = $kind === 'source' ? $artifact->getCustomSourceCallback() : $artifact->getCustomBinaryCallback();
+        $class = $this->downloaders[$config['type'] ?? ''] ?? null;
+        if ($callback !== null) {
+            $result = ApplicationContext::invoke($callback, [
+                ArtifactDownloader::class => $this,
+                'old_version' => $info['version'] ?? null,
+            ]);
+        } elseif ($custom === null && is_a($class, CheckUpdateInterface::class, true)) {
+            $result = (new $class())->checkUpdate($name, $config, $info['version'] ?? null, $this);
+        } else {
+            // Without an upstream identity, a cached mutable URL cannot establish freshness.
+            return $this->update_checks[$key] = false;
+        }
+        return $this->update_checks[$key] = !$result->unsupported && !$result->needUpdate;
     }
 
     private function applyCustomDownloads(): void
