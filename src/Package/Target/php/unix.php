@@ -118,6 +118,9 @@ trait unix
         if ($option = $package->getBuildOption('with-config-file-scan-dir', false)) {
             $args[] = "--with-config-file-scan-dir={$option}";
         }
+        if ($option = $package->getBuildOption('with-sysconfdir', false)) {
+            $args[] = "--sysconfdir={$option}";
+        }
         // perform enable cli options
         // PHP >= 8.6 links the CLI objects into libphp for do_php_cli()
         $cli = $installer->isPackageResolved('php-cli')

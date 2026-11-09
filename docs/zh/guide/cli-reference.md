@@ -99,6 +99,7 @@ spc build:php <extensions> [options]
 | `--disable-opcache-jit`              |      | 禁用 OPcache JIT                                         |
 | `--with-config-file-path=<path>`     |      | PHP 查找 `php.ini` 的目录（默认：`/usr/local/etc/php`）          |
 | `--with-config-file-scan-dir=<path>` |      | PHP 扫描追加 `.ini` 文件的目录（默认：`/usr/local/etc/php/conf.d`）  |
+| `--with-sysconfdir=<path>`           |      | 传给 PHP `configure` 的 `sysconfdir`（仅 Unix，例如 `/etc/php-zts`） |
 | `--with-hardcoded-ini=<k=v>`         | `-I` | 编译时将 INI 配置硬编码进二进制（可重复使用）                              |
 | `--enable-zts`                       |      | 启用线程安全（ZTS）模式                                          |
 | `--no-smoke-test`                    |      | 跳过构建后的冒烟测试                                             |

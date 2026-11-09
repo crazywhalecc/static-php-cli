@@ -99,6 +99,7 @@ These flags apply only to the combined `build:php` target. To build a specific S
 | `--disable-opcache-jit`              |       | Disable OPcache JIT                                                                                    |
 | `--with-config-file-path=<path>`     |       | Directory where PHP looks for `php.ini` (default: `/usr/local/etc/php`)                                |
 | `--with-config-file-scan-dir=<path>` |       | Directory PHP scans for additional `.ini` files (default: `/usr/local/etc/php/conf.d`)                 |
+| `--with-sysconfdir=<path>`           |       | Set the `sysconfdir` passed to PHP's `configure` (Unix only, e.g. `/etc/php-zts`)                      |
 | `--with-hardcoded-ini=<k=v>`         | `-I`  | Bake an INI setting into the binary at compile time (repeatable)                                       |
 | `--enable-zts`                       |       | Enable thread-safe (ZTS) mode                                                                          |
 | `--no-smoke-test`                    |       | Skip the post-build smoke tests                                                                        |
