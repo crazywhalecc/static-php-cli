@@ -6,6 +6,8 @@ namespace Package\Library;
 
 use StaticPHP\Attribute\Package\BuildFor;
 use StaticPHP\Attribute\Package\Library;
+use StaticPHP\Attribute\Package\PatchBeforeBuild;
+use StaticPHP\Attribute\PatchDescription;
 use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Runtime\Executor\UnixAutoconfExecutor;
@@ -13,11 +15,19 @@ use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Toolchain\ZigToolchain;
 use StaticPHP\Util\SharedLibraryUtil;
+use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\SPCConfigUtil;
 
 #[Library('krb5')]
 class krb5
 {
+    #[PatchBeforeBuild]
+    #[PatchDescription('Support OpenSSL 4 accessors in Kerberos 1.22')]
+    public function patchBeforeBuild(LibraryPackage $lib): bool
+    {
+        return SourcePatcher::patchFile('krb5-openssl4.patch', $lib->getSourceDir());
+    }
+
     #[BuildFor('Linux')]
     #[BuildFor('Darwin')]
     public function build(LibraryPackage $lib, PackageInstaller $installer, ToolchainInterface $toolchain): void
