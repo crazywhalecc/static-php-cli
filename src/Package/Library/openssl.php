@@ -114,8 +114,10 @@ class openssl
         $userExtra = trim($userCFlags . ' ' . $userLdFlags);
         $runtimePaths = SharedLibraryUtil::buildsShared($lib)
             ? ' MODULESDIR=' . escapeshellarg(SharedLibraryUtil::runtimeDirectory() . '/ossl-modules')
-                . ' ENGINESDIR=' . escapeshellarg(SharedLibraryUtil::runtimeDirectory() . '/engines-3')
             : '';
+        if ($runtimePaths !== '' && is_dir($lib->getSourceDir() . '/engines')) {
+            $runtimePaths .= ' ENGINESDIR=' . escapeshellarg(SharedLibraryUtil::runtimeDirectory() . '/engines-3');
+        }
 
         shell()->cd($lib->getSourceDir())->initializeEnv($lib)
             ->exec(
