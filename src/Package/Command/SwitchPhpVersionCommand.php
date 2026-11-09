@@ -10,6 +10,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Command\BaseCommand;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\ExecutionException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
@@ -65,6 +66,16 @@ class SwitchPhpVersionCommand extends BaseCommand
             $this->output->writeln('<info>Removing extracted PHP source directory...</info>');
             InteractiveTerm::indicateProgress('Removing: ' . $source_dir);
             FileSystem::removeDir($source_dir);
+            if (file_exists($source_dir)) {
+                InteractiveTerm::finish('Failed: ' . $source_dir, false);
+                throw new ExecutionException(
+                    "Failed to remove the extracted PHP source directory: {$source_dir}\n" .
+                    'The PHP version switch was aborted: continuing would build the new PHP on top of ' .
+                    'stale sources and object files from the previous version (wrong headers/ABI, ' .
+                    'undefined symbols at link time).' . "\n" .
+                    'Remove the directory manually (on Windows: rmdir /s /q "' . FileSystem::convertPath($source_dir) . '") and retry.',
+                );
+            }
             InteractiveTerm::finish('Removed: ' . $source_dir);
         }
 
@@ -105,15 +116,25 @@ class SwitchPhpVersionCommand extends BaseCommand
 
     /**
      * Delete every extracted extension source tree under source/ext-*, returning the count.
+     *
+     * @throws ExecutionException When an extracted tree cannot be removed completely
      */
     public static function removeExtensionSources(string $source_path): int
     {
         $removed = 0;
         foreach (glob(FileSystem::convertPath("{$source_path}/ext-*"), GLOB_ONLYDIR) ?: [] as $ext_dir) {
             if (FileSystem::isLink($ext_dir)) {
-                FileSystem::removeLink($ext_dir);
+                $ok = FileSystem::removeLink($ext_dir);
             } else {
-                FileSystem::removeDir($ext_dir);
+                $ok = FileSystem::removeDir($ext_dir);
+            }
+            if (!$ok || file_exists($ext_dir) || FileSystem::isLink($ext_dir)) {
+                throw new ExecutionException(
+                    "Failed to remove extracted extension source directory: {$ext_dir}\n" .
+                    'Its build state (objects, generated headers, patched sources) is only valid for the ' .
+                    'PHP version that produced it and would leak into the next build.' . "\n" .
+                    'Remove it manually (on Windows: rmdir /s /q "' . FileSystem::convertPath($ext_dir) . '") and retry.',
+                );
             }
             ++$removed;
         }
