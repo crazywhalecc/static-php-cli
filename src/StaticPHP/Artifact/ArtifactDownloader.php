@@ -855,7 +855,7 @@ class ArtifactDownloader
         if ($kind === 'binary') {
             $config = is_array($config) ? ($config[$platform] ?? null) : null;
         }
-        if ($info === null || $config !== ($info['config'] ?? null)) {
+        if ($info === null || $config != ($info['config'] ?? null)) {
             return $this->update_checks[$key] = false;
         }
         $callback = $kind === 'source' ? $artifact->getCustomSourceCheckUpdateCallback() : $artifact->getCustomBinaryCheckUpdateCallback();

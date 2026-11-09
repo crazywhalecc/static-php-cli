@@ -400,7 +400,7 @@ class ArtifactDownloaderTest extends TestCase
     }
 
     /** @dataProvider updateProvider */
-    public function testUpdateReusesOnlyCurrentValidSources(string $old, bool $valid, bool $changed_config, bool $forced, int $downloads, int $checks): void
+    public function testUpdateReusesOnlyCurrentValidSources(string $old, bool $valid, bool $changed_config, bool $forced, int $downloads, int $checks, bool $reordered = false): void
     {
         $config = ['type' => 'update-fixture', 'version' => '2.0'];
         $artifact = $this->getMockBuilder(Artifact::class)
@@ -410,7 +410,8 @@ class ArtifactDownloaderTest extends TestCase
         $artifact->method('isBinaryDownloaded')->willReturn(false);
         $original = ApplicationContext::get(ArtifactCache::class);
         $cache = $this->createMock(ArtifactCache::class);
-        $cache->method('getSourceInfo')->willReturn(['version' => $old, 'config' => $changed_config ? [] : $config]);
+        $cached_config = $reordered ? array_reverse($config, true) : $config;
+        $cache->method('getSourceInfo')->willReturn(['version' => $old, 'config' => $changed_config ? [] : $cached_config]);
         $cache->expects($this->exactly($downloads))->method('lock');
         ApplicationContext::set(ArtifactCache::class, $cache);
         UpdateFixture::$checks = UpdateFixture::$downloads = 0;
@@ -429,6 +430,7 @@ class ArtifactDownloaderTest extends TestCase
     public static function updateProvider(): iterable
     {
         yield 'unchanged' => ['2.0', true, false, false, 0, 1];
+        yield 'reordered JSON object' => ['2.0', true, false, false, 0, 1, true];
         yield 'new release' => ['1.0', true, false, false, 1, 1];
         yield 'missing or corrupt archive' => ['2.0', false, false, false, 1, 0];
         yield 'changed download recipe' => ['2.0', true, true, false, 1, 0];
