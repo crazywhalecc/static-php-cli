@@ -250,13 +250,21 @@ jobs:
       - name: Install dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-dev
 
+      # Keep doctor in its own step: on Windows the default pwsh shell does not stop
+      # a `run: |` block when a native command exits non-zero, so a failed doctor
+      # (e.g. an auto-fix download error) used to be swallowed and the build kept
+      # running until it failed on a confusing environment check.
+      - name: Doctor
+        env:
+          SPC_USE_SUDO: "yes"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./bin/spc doctor --auto-fix
+
       - name: Build
         env:
           SPC_USE_SUDO: "yes"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./bin/spc doctor --auto-fix
-          ${{ matrix.combo.build-args }} --dl-with-php=${{ matrix.combo.php-version }}
+        run: ${{ matrix.combo.build-args }} --dl-with-php=${{ matrix.combo.php-version }}
 
 #      - name: Setup upterm session
 #        if: ${{ failure() }}
