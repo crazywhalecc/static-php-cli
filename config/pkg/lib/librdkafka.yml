@@ -4,6 +4,11 @@ librdkafka:
     source:
       type: ghtar
       repo: confluentinc/librdkafka
+    source-mirror:
+      type: url
+      url: 'https://github.com/confluentinc/librdkafka/archive/refs/tags/v2.16.0.tar.gz'
+      filename: librdkafka-2.16.0.tar.gz
+      version: 2.16.0
     metadata:
       license-files: [LICENSE]
       license: BSD-2-Clause

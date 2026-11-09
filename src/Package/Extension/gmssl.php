@@ -16,10 +16,14 @@ class gmssl extends PhpExtensionPackage
 {
     #[BeforeStage('php', [php::class, 'buildconfForUnix'], 'ext-gmssl')]
     #[BeforeStage('php', [php::class, 'buildconfForWindows'], 'ext-gmssl')]
-    #[PatchDescription('Fix ext-gmssl v1.1.1 compatibility with GmSSL >= 3.1.0 where SM2_VERIFY_CTX was removed (unified into SM2_SIGN_CTX)')]
+    #[PatchDescription('Fix ext-gmssl compatibility with GmSSL versions where SM2_VERIFY_CTX was removed (unified into SM2_SIGN_CTX)')]
     public function patchSm2VerifyCtx(): void
     {
         // See: https://github.com/crazywhalecc/static-php-cli/issues/1182
+        $header = BUILD_INCLUDE_PATH . '/gmssl/sm2.h';
+        if (file_exists($header) && str_contains(FileSystem::readFile($header), 'SM2_VERIFY_CTX')) {
+            return;
+        }
         FileSystem::replaceFileStr(
             "{$this->getBuildDir()}/gmssl.c",
             'SM2_VERIFY_CTX',

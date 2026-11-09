@@ -33,7 +33,7 @@ class openssl
         $openssl_dir = php::getPHPVersionID() >= 80400 ? '' : ' --with-openssl-dir=' . BUILD_ROOT_PATH;
         $args = '--with-openssl=' . ($shared ? 'shared,' : '') . BUILD_ROOT_PATH . $openssl_dir;
         if (php::getPHPVersionID() >= 80500 || (php::getPHPVersionID() >= 80400 && !$builder->getOption('enable-zts'))) {
-            $args .= ' --with-openssl-argon2 OPENSSL_LIBS="-lz"';
+            $args .= ' --with-openssl-argon2 OPENSSL_LIBS="-lssl -lcrypto -lz"';
         }
         return $args;
     }
