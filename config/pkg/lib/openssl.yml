@@ -4,7 +4,7 @@ openssl:
     source:
       type: ghrel
       repo: openssl/openssl
-      match: openssl-4\.\d+\.\d+\.tar\.gz
+      match: ^openssl-4\.\d+\.\d+\.tar\.gz$
       prefer-stable: true
     source-mirror:
       type: filelist
