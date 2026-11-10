@@ -79,6 +79,19 @@ class GenExtTestMatrixCommand extends BaseCommand
     ];
 
     /**
+     * Extensions that cannot be built in ZTS (thread-safe) mode and are therefore dropped from
+     * SAPI entries that force `--enable-zts` (currently frankenphp).
+     *
+     * Keep this in sync with the `#[Validate]` guards of the extension package classes, e.g.
+     * `src/Package/Extension/imap.php` throws "not thread safe" for ZTS builds. Emitting such an
+     * extension for a ZTS entry only produces a guaranteed, deterministic job failure.
+     * Use display names (without ext- prefix).
+     */
+    private const array ZTS_EXCLUDE = [
+        'imap',
+    ];
+
+    /**
      * Maximum number of orphan extensions per matrix entry.
      */
     private const int ORPHAN_BATCH_SIZE = 15;
@@ -154,7 +167,7 @@ class GenExtTestMatrixCommand extends BaseCommand
             [$frankenphp_entries, $frankenphp_ext_lib_deps] = $this->buildEntriesForRunners(
                 self::OS_RUNNERS,
                 [],
-                $all_regular,
+                $this->withoutZTSIncompatible($all_regular),
                 $all_virtual,
                 $all_libraries,
                 self::FRANKENPHP_BUILD_TARGETS,
@@ -460,6 +473,23 @@ class GenExtTestMatrixCommand extends BaseCommand
             $flags[] = $extra;
         }
         return implode(' ', $flags);
+    }
+
+    /**
+     * Drop extensions that refuse ZTS builds from a package set used for `--enable-zts` entries.
+     *
+     * @param  array<string, array> $extensions Regular php-extension configs keyed by package name
+     * @return array<string, array> The same set without the ZTS-incompatible extensions
+     */
+    private function withoutZTSIncompatible(array $extensions): array
+    {
+        $exclude = array_fill_keys(array_map(static fn (string $name): string => 'ext-' . $name, self::ZTS_EXCLUDE), true);
+
+        return array_filter(
+            $extensions,
+            static fn (string $pkg_name): bool => !isset($exclude[$pkg_name]),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**
