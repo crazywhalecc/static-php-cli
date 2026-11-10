@@ -35,7 +35,7 @@ spc download [artifacts] [options]
 | `--source-only` |      | 仅下载源码制品                            |
 | `--binary-only` |      | 仅下载二进制制品                           |
 | `--parallel=<n>` | `-P` | 并行下载数（默认 `1`）                      |
-| `--retry=<n>` | `-R` | 失败重试次数（默认 `0`）                     |
+| `--retry=<n>` | `-R` | 失败重试次数（默认 `3`）                     |
 | `--ignore-cache=<list>` | `-i` | 强制重新下载指定制品                         |
 | `--no-alt` |      | 不使用镜像站                             |
 | `--no-shallow-clone` |      | 不使用浅层克隆                            |

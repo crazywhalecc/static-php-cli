@@ -62,6 +62,10 @@ class PhpUnixConfigureTest extends TestCase
             $installer->method('getResolvedPackages')->willReturnCallback(static function () use (&$resolved): array {
                 return $resolved;
             });
+            $installer->method('isPackageResolved')->willReturnCallback(static function (string $name) use (&$resolved): bool {
+                return $name === 'gettext' && isset($resolved['gettext']);
+            });
+            $installer->method('getLibraryPackage')->willReturnCallback(fn (string $name): ?LibraryPackage => $name === 'libiconv' ? $this->createMock(LibraryPackage::class) : null);
             $php = new class {
                 use unix;
 
@@ -81,7 +85,13 @@ class PhpUnixConfigureTest extends TestCase
                 $php->configureForUnix($package, $installer);
                 $expected = SystemTarget::getRuntimeLibs();
                 if (str_contains($target, '-macos')) {
+                    // libintl.a is built against our GNU libiconv, so the gettext configure probe
+                    // needs those static libs (macOS libc has no gettext to fall back to).
                     $expected .= ' -framework Kerberos -framework CoreFoundation';
+                    $resolved_names = array_keys($resolved);
+                    if (in_array('gettext', $resolved_names, true)) {
+                        $expected .= ' -liconv -lcharset';
+                    }
                 }
                 $this->assertSame($expected, file_get_contents($output), $target);
             }

@@ -56,6 +56,14 @@ class ArtifactDownloader
         'hosted' => HostedPackageBin::class,
     ];
 
+    /**
+     * Default download retry count when no retry option is supplied.
+     *
+     * Downloads are idempotent and transient failures are common (a single HTTP 5xx from a
+     * release mirror used to abort a whole build/CI job), so retry a few times by default.
+     */
+    public const int DEFAULT_RETRY = 3;
+
     /** @var array<string, class-string<DownloadTypeInterface>> */
     protected array $downloaders = [];
 
@@ -115,8 +123,8 @@ class ArtifactDownloader
     {
         // Allow setting concurrency via options
         $this->parallel = max(1, (int) ($options['parallel'] ?? 1));
-        // Allow setting retry via options
-        $this->retry = max(0, (int) ($options['retry'] ?? 0));
+        // Allow setting retry via options (falls back to DEFAULT_RETRY)
+        $this->retry = max(0, (int) ($options['retry'] ?? self::DEFAULT_RETRY));
         // Prefer source (default)
         if (array_key_exists('prefer-source', $options)) {
             if (is_string($options['prefer-source'])) {

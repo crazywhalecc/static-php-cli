@@ -56,8 +56,8 @@ shared-extensions: [ ]
 download-options:
   # Number of parallel downloads (default: 1)
   parallel: 1
-  # Retries count for downloading sources (default: 0)
-  retry: 0
+  # Retries count for downloading sources (default: 3)
+  retry: 3
   # Prefer source downloads when both source and binary are available (default: false)
   prefer-source: false
   # Prefer binary downloads when both source and binary are available (default: false)
