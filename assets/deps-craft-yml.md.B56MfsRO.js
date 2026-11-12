@@ -29,6 +29,8 @@ import{G as e,K as t,at as n,j as r}from"./chunks/framework.DrNIf5Lg.js";var i=J
 <span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-config-file-path</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
 <span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # PHP configuration options (same as --with-config-file-scan-dir)</span></span>
 <span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-config-file-scan-dir</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # PHP configuration options (same as --with-sysconfdir, only on Unix)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-sysconfdir</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;&quot;</span></span>
 <span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Hardcoded INI options for cli and micro SAPI (e.g. &quot;memory_limit=4G&quot;, list accepted)</span></span>
 <span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  with-hardcoded-ini</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [ ]</span></span>
 <span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Pretend micro SAPI as cli SAPI to avoid some frameworks to limit the usage of micro SAPI</span></span>
@@ -53,8 +55,8 @@ import{G as e,K as t,at as n,j as r}from"./chunks/framework.DrNIf5Lg.js";var i=J
 <span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">download-options</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">:</span></span>
 <span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Number of parallel downloads (default: 1)</span></span>
 <span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  parallel</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">1</span></span>
-<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Retries count for downloading sources (default: 0)</span></span>
-<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  retry</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">0</span></span>
+<span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Retries count for downloading sources (default: 3)</span></span>
+<span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  retry</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">3</span></span>
 <span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Prefer source downloads when both source and binary are available (default: false)</span></span>
 <span class="line"><span style="--shiki-light:#11782a;--shiki-dark:#85E89D;">  prefer-source</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">false</span></span>
 <span class="line"><span style="--shiki-light:#62687b;--shiki-dark:#818e99;">  # Prefer binary downloads when both source and binary are available (default: false)</span></span>
