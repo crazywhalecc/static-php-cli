@@ -10,7 +10,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Command\BaseCommand;
 use StaticPHP\DI\ApplicationContext;
-use StaticPHP\Exception\ExecutionException;
+use StaticPHP\Exception\FileSystemException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
@@ -72,7 +72,7 @@ class SwitchPhpVersionCommand extends BaseCommand
             FileSystem::removeDir($source_dir);
             if (file_exists($source_dir)) {
                 InteractiveTerm::finish('Failed: ' . $source_dir, false);
-                throw new ExecutionException(
+                throw new FileSystemException(
                     "Failed to remove the extracted PHP source directory: {$source_dir}\n" .
                     'The PHP version switch was aborted: continuing would build the new PHP on top of ' .
                     'stale sources and object files from the previous version (wrong headers/ABI, ' .
@@ -124,9 +124,9 @@ class SwitchPhpVersionCommand extends BaseCommand
      * Targets are the source/ext-* directories plus any extra source roots passed in (usually the
      * ones linked into php-src/ext, see collectLinkedExtensionSources()).
      *
-     * @param  string[]           $extra_source_dirs Additional source roots to remove
-     * @return int                Number of removed source trees
-     * @throws ExecutionException When an extracted tree cannot be removed completely
+     * @param  string[]            $extra_source_dirs Additional source roots to remove
+     * @return int                 Number of removed source trees
+     * @throws FileSystemException When an extracted tree cannot be removed completely
      */
     public static function removeExtensionSources(string $source_path, array $extra_source_dirs = []): int
     {
@@ -140,21 +140,36 @@ class SwitchPhpVersionCommand extends BaseCommand
             }
         }
 
+        // A linked source root can be nested inside an extracted tree: artifacts declaring
+        // "source-root: ext" (e.g. ext-opentelemetry, ext-swow) link source/<artifact>/ext while the
+        // glob above also collects the parent source/<artifact>. Removing the parent already removes
+        // the child, so process short paths first and skip anything below a tree we just removed.
+        $paths = array_keys($targets);
+        usort($paths, static fn (string $a, string $b): int => strlen($a) <=> strlen($b));
+        $removed_roots = [];
+
         $removed = 0;
-        foreach (array_keys($targets) as $ext_dir) {
+        foreach ($paths as $ext_dir) {
+            $normalized = rtrim(FileSystem::convertPath($ext_dir), '/\\');
+            foreach ($removed_roots as $removed_root) {
+                if (str_starts_with($normalized . DIRECTORY_SEPARATOR, $removed_root . DIRECTORY_SEPARATOR)) {
+                    continue 2;
+                }
+            }
             if (FileSystem::isLink($ext_dir)) {
                 $ok = FileSystem::removeLink($ext_dir);
             } else {
                 $ok = FileSystem::removeDir($ext_dir);
             }
             if (!$ok || file_exists($ext_dir) || FileSystem::isLink($ext_dir)) {
-                throw new ExecutionException(
+                throw new FileSystemException(
                     "Failed to remove extracted extension source directory: {$ext_dir}\n" .
                     'Its build state (objects, generated headers, patched sources) is only valid for the ' .
                     'PHP version that produced it and would leak into the next build.' . "\n" .
                     'Remove it manually (on Windows: rmdir /s /q "' . FileSystem::convertPath($ext_dir) . '") and retry.',
                 );
             }
+            $removed_roots[] = $normalized;
             ++$removed;
         }
 
