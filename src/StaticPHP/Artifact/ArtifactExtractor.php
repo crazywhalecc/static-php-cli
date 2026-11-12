@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace StaticPHP\Artifact;
 
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\ExecutionException;
 use StaticPHP\Exception\FileSystemException;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
@@ -182,10 +183,10 @@ class ArtifactExtractor
         // Remove old directory if hash mismatch
         if (FileSystem::isLink($target_path)) {
             logger()->debug("Source [{$name}] is linked to a local directory, relinking...");
-            FileSystem::removeLink($target_path);
+            $this->assertSourceDirClean($name, $target_path, FileSystem::removeLink($target_path));
         } elseif (is_dir($target_path)) {
             logger()->notice("Source [{$name}] hash mismatch, re-extracting...");
-            FileSystem::removeDir($target_path);
+            $this->assertSourceDirClean($name, $target_path, FileSystem::removeDir($target_path));
         }
 
         logger()->info("Extracting source [{$name}] to {$target_path}...");
@@ -372,6 +373,28 @@ class ArtifactExtractor
                 FileSystem::removeDir($temp_path);
             }
         }
+    }
+
+    /**
+     * Fail loudly when the stale source tree could not be removed before extraction.
+     *
+     * Extracting over a partially removed tree silently mixes the old version's sources and
+     * build artifacts with the new one (e.g. object files built against a previous PHP
+     * version's headers being linked into the new build).
+     *
+     * @throws ExecutionException When the old directory is still there
+     */
+    protected function assertSourceDirClean(string $name, string $target_path, bool $removed): void
+    {
+        if ($removed && !file_exists($target_path) && !FileSystem::isLink($target_path)) {
+            return;
+        }
+        $hint = PHP_OS_FAMILY === 'Windows' ? ' (Windows: rmdir /s /q "' . FileSystem::convertPath($target_path) . '")' : '';
+        throw new ExecutionException(
+            "Failed to remove stale source directory for artifact [{$name}]: {$target_path}\n" .
+            'Refusing to extract on top of it, because old build artifacts would leak into the new source tree.' . "\n" .
+            'Remove it manually and retry.' . $hint,
+        );
     }
 
     /**

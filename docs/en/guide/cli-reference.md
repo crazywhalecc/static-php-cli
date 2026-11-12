@@ -35,7 +35,7 @@ spc download [artifacts] [options]
 | `--source-only`                 |       | Only download source artifacts                        |
 | `--binary-only`                 |       | Only download binary artifacts                        |
 | `--parallel=<n>`                | `-P`  | Number of parallel downloads (default: `1`)           |
-| `--retry=<n>`                   | `-R`  | Number of retries on failure (default: `0`)           |
+| `--retry=<n>`                   | `-R`  | Number of retries on failure (default: `3`)           |
 | `--ignore-cache=<list>`         | `-i`  | Force re-download the specified artifacts             |
 | `--no-alt`                      |       | Do not use alternative mirror URLs                    |
 | `--no-shallow-clone`            |       | Do not clone git repositories shallowly               |
@@ -99,6 +99,7 @@ These flags apply only to the combined `build:php` target. To build a specific S
 | `--disable-opcache-jit`              |       | Disable OPcache JIT                                                                                    |
 | `--with-config-file-path=<path>`     |       | Directory where PHP looks for `php.ini` (default: `/usr/local/etc/php`)                                |
 | `--with-config-file-scan-dir=<path>` |       | Directory PHP scans for additional `.ini` files (default: `/usr/local/etc/php/conf.d`)                 |
+| `--with-sysconfdir=<path>`           |       | Set the `sysconfdir` passed to PHP's `configure` (Unix only, e.g. `/etc/php-zts`)                      |
 | `--with-hardcoded-ini=<k=v>`         | `-I`  | Bake an INI setting into the binary at compile time (repeatable)                                       |
 | `--enable-zts`                       |       | Enable thread-safe (ZTS) mode                                                                          |
 | `--no-smoke-test`                    |       | Skip the post-build smoke tests                                                                        |

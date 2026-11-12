@@ -10,6 +10,7 @@ use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
 use StaticPHP\Command\BaseCommand;
 use StaticPHP\DI\ApplicationContext;
+use StaticPHP\Exception\FileSystemException;
 use StaticPHP\Registry\PackageLoader;
 use StaticPHP\Util\FileSystem;
 use StaticPHP\Util\InteractiveTerm;
@@ -59,19 +60,33 @@ class SwitchPhpVersionCommand extends BaseCommand
             $cache->removeSource('php-src', delete_file: true);
         }
 
+        // Collect the extension source trees linked into source/php-src/ext before php-src is
+        // removed: their build state is only valid for the PHP version that produced it.
+        $linked_extension_sources = self::collectLinkedExtensionSources(SOURCE_PATH);
+
         // Remove extracted source directory if exists and --keep-source not set
         $source_dir = SOURCE_PATH . '/php-src';
         if (!$this->getOption('keep-source') && is_dir($source_dir)) {
             $this->output->writeln('<info>Removing extracted PHP source directory...</info>');
             InteractiveTerm::indicateProgress('Removing: ' . $source_dir);
             FileSystem::removeDir($source_dir);
+            if (file_exists($source_dir)) {
+                InteractiveTerm::finish('Failed: ' . $source_dir, false);
+                throw new FileSystemException(
+                    "Failed to remove the extracted PHP source directory: {$source_dir}\n" .
+                    'The PHP version switch was aborted: continuing would build the new PHP on top of ' .
+                    'stale sources and object files from the previous version (wrong headers/ABI, ' .
+                    'undefined symbols at link time).' . "\n" .
+                    'Remove the directory manually (on Windows: rmdir /s /q "' . FileSystem::convertPath($source_dir) . '") and retry.',
+                );
+            }
             InteractiveTerm::finish('Removed: ' . $source_dir);
         }
 
-        // Extension sources are extracted to source/ext-* and linked into php-src/ext, so their
-        // build state (objects, dependency files, patched config.m4, phpize leftovers) lives
-        // outside source/php-src and is only valid for the PHP version that produced it.
-        $this->cleanExtensionSources();
+        // Extension sources are extracted to source/ and linked into php-src/ext, so their build
+        // state (objects, dependency files, patched config.m4, phpize leftovers) lives outside
+        // source/php-src and is only valid for the PHP version that produced it.
+        $this->cleanExtensionSources($linked_extension_sources);
 
         // Download new PHP source
         $this->output->writeln("<info>Downloading PHP {$php_ver} source...</info>");
@@ -104,17 +119,57 @@ class SwitchPhpVersionCommand extends BaseCommand
     }
 
     /**
-     * Delete every extracted extension source tree under source/ext-*, returning the count.
+     * Delete the extracted extension source trees of the previous PHP version, returning the count.
+     *
+     * Targets are the source/ext-* directories plus any extra source roots passed in (usually the
+     * ones linked into php-src/ext, see collectLinkedExtensionSources()).
+     *
+     * @param  string[]            $extra_source_dirs Additional source roots to remove
+     * @return int                 Number of removed source trees
+     * @throws FileSystemException When an extracted tree cannot be removed completely
      */
-    public static function removeExtensionSources(string $source_path): int
+    public static function removeExtensionSources(string $source_path, array $extra_source_dirs = []): int
     {
-        $removed = 0;
+        $targets = [];
         foreach (glob(FileSystem::convertPath("{$source_path}/ext-*"), GLOB_ONLYDIR) ?: [] as $ext_dir) {
-            if (FileSystem::isLink($ext_dir)) {
-                FileSystem::removeLink($ext_dir);
-            } else {
-                FileSystem::removeDir($ext_dir);
+            $targets[$ext_dir] = true;
+        }
+        foreach ($extra_source_dirs as $extra_dir) {
+            if (is_dir($extra_dir) || FileSystem::isLink($extra_dir)) {
+                $targets[FileSystem::convertPath($extra_dir)] = true;
             }
+        }
+
+        // A linked source root can be nested inside an extracted tree: artifacts declaring
+        // "source-root: ext" (e.g. ext-opentelemetry, ext-swow) link source/<artifact>/ext while the
+        // glob above also collects the parent source/<artifact>. Removing the parent already removes
+        // the child, so process short paths first and skip anything below a tree we just removed.
+        $paths = array_keys($targets);
+        usort($paths, static fn (string $a, string $b): int => strlen($a) <=> strlen($b));
+        $removed_roots = [];
+
+        $removed = 0;
+        foreach ($paths as $ext_dir) {
+            $normalized = rtrim(FileSystem::convertPath($ext_dir), '/\\');
+            foreach ($removed_roots as $removed_root) {
+                if (str_starts_with($normalized . DIRECTORY_SEPARATOR, $removed_root . DIRECTORY_SEPARATOR)) {
+                    continue 2;
+                }
+            }
+            if (FileSystem::isLink($ext_dir)) {
+                $ok = FileSystem::removeLink($ext_dir);
+            } else {
+                $ok = FileSystem::removeDir($ext_dir);
+            }
+            if (!$ok || file_exists($ext_dir) || FileSystem::isLink($ext_dir)) {
+                throw new FileSystemException(
+                    "Failed to remove extracted extension source directory: {$ext_dir}\n" .
+                    'Its build state (objects, generated headers, patched sources) is only valid for the ' .
+                    'PHP version that produced it and would leak into the next build.' . "\n" .
+                    'Remove it manually (on Windows: rmdir /s /q "' . FileSystem::convertPath($ext_dir) . '") and retry.',
+                );
+            }
+            $removed_roots[] = $normalized;
             ++$removed;
         }
 
@@ -122,16 +177,58 @@ class SwitchPhpVersionCommand extends BaseCommand
     }
 
     /**
-     * Remove the extracted extension source trees (source/ext-*) of the previous PHP version.
+     * Collect the extracted source trees linked into source/php-src/ext.
+     *
+     * Extension artifacts are extracted under source/ with their artifact name, which is not
+     * necessarily "ext-<extension>" (e.g. the glfw extension uses source/glfw), so cleaning
+     * source/ext-* alone misses them. Their build state (objects, .dep files, patched configure
+     * scripts) is only valid for the PHP version that produced it and must be dropped together
+     * with php-src, otherwise stale dependency files leak into the next version's build.
+     *
+     * Must be called before source/php-src is removed.
+     *
+     * @return string[] Absolute source root paths managed by spc inside source/
+     */
+    public static function collectLinkedExtensionSources(string $source_path): array
+    {
+        $source_real = realpath($source_path);
+        $source_root = rtrim(FileSystem::convertPath($source_real !== false ? $source_real : $source_path), '/\\') . DIRECTORY_SEPARATOR;
+        $php_src_dir = $source_root . 'php-src' . DIRECTORY_SEPARATOR;
+        $found = [];
+
+        foreach (glob($php_src_dir . 'ext' . DIRECTORY_SEPARATOR . '*') ?: [] as $link_dir) {
+            if (!FileSystem::isLink($link_dir)) {
+                continue;
+            }
+            $target = realpath($link_dir);
+            if ($target === false) {
+                continue;
+            }
+            $target = FileSystem::convertPath($target);
+            // Only remove sources spc manages under source/: never a user-provided local tree,
+            // and never something inside php-src itself (removed separately).
+            if (!str_starts_with($target, $source_root) || str_starts_with($target, $php_src_dir)) {
+                continue;
+            }
+            $found[$target] = true;
+        }
+
+        return array_keys($found);
+    }
+
+    /**
+     * Remove the extracted extension source trees of the previous PHP version.
      *
      * Extension sources are linked into php-src/ext for in-tree builds, so their objects,
      * dependency files, patched config.m4 and phpize leftovers live outside source/php-src and
      * would otherwise leak into the next PHP version's build. The original archives stay in
      * downloads/ and are re-extracted automatically on the next build.
+     *
+     * @param string[] $linked_source_dirs Source roots collected before php-src removal
      */
-    private function cleanExtensionSources(): void
+    private function cleanExtensionSources(array $linked_source_dirs = []): void
     {
-        $removed = self::removeExtensionSources(SOURCE_PATH);
+        $removed = self::removeExtensionSources(SOURCE_PATH, $linked_source_dirs);
 
         if ($removed > 0) {
             $this->output->writeln("<info>Removed {$removed} extracted extension source director" . ($removed === 1 ? 'y' : 'ies') . '; they will be re-extracted from the cached archives on the next build.</info>');

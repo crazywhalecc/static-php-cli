@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\StaticPHP\Artifact;
 
 use PHPUnit\Framework\TestCase;
+use StaticPHP\Artifact\ArtifactDownloader;
 use StaticPHP\Artifact\DownloaderOptions;
 
 /**
@@ -34,5 +35,18 @@ class DownloaderOptionsTest extends TestCase
     public function testAddToListIgnoresKeysOfTheNames(): void
     {
         $this->assertSame('zig', DownloaderOptions::addToList(false, ['zig' => 'zig']));
+    }
+
+    public function testRetryOptionDefaultsToTheDownloaderDefault(): void
+    {
+        $retry = null;
+        foreach (DownloaderOptions::getConsoleOptions('dl') as $option) {
+            if ($option->getName() === 'dl-retry') {
+                $retry = $option;
+            }
+        }
+
+        $this->assertNotNull($retry, 'The downloader must expose the --retry option');
+        $this->assertSame((string) ArtifactDownloader::DEFAULT_RETRY, $retry->getDefault());
     }
 }

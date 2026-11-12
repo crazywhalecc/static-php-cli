@@ -30,6 +30,8 @@ build-options:
   with-config-file-path: ""
   # PHP configuration options (same as --with-config-file-scan-dir)
   with-config-file-scan-dir: ""
+  # PHP configuration options (same as --with-sysconfdir, only on Unix)
+  with-sysconfdir: ""
   # Hardcoded INI options for cli and micro SAPI (e.g. "memory_limit=4G", list accepted)
   with-hardcoded-ini: [ ]
   # Pretend micro SAPI as cli SAPI to avoid some frameworks to limit the usage of micro SAPI
@@ -54,8 +56,8 @@ shared-extensions: [ ]
 download-options:
   # Number of parallel downloads (default: 1)
   parallel: 1
-  # Retries count for downloading sources (default: 0)
-  retry: 0
+  # Retries count for downloading sources (default: 3)
+  retry: 3
   # Prefer source downloads when both source and binary are available (default: false)
   prefer-source: false
   # Prefer binary downloads when both source and binary are available (default: false)

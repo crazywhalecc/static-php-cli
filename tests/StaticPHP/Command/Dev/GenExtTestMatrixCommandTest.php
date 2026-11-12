@@ -301,6 +301,7 @@ class GenExtTestMatrixCommandTest extends TestCase
      *  - ext-xml             depends on lib 'libxml2'
      *  - ext-dom             depends on ext-xml (DFS chain)
      *  - ext-imagick         depends on imagemagick -> libheif -> libde265
+     *  - ext-imap            ZTS-incompatible (excluded from frankenphp entries)
      *  - ext-linux-only      restricted to Linux via os: [Linux]
      */
     private static function buildFixture(): array
@@ -338,6 +339,9 @@ class GenExtTestMatrixCommandTest extends TestCase
 
             // OS-restricted to Linux only
             'ext-linux-only' => $ext(['os' => ['Linux']]),
+
+            // ZTS-incompatible extension (dropped from --enable-zts entries)
+            'ext-imap' => $ext(),
         ];
     }
 }

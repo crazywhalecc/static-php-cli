@@ -40,9 +40,9 @@ class DefaultShell extends Shell
             default => "-X {$method}",
         };
         $header_arg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
-        $retry_arg = $retries > 0 ? "--retry {$retries}" : '';
+        $retry_arg = self::curlRetryArgs($retries);
         $compressed_arg = $compressed ? '--compressed' : '';
-        $cmd = SPC_CURL_EXEC . " -sfSL --max-time 3600 {$retry_arg} {$compressed_arg} {$method_arg} {$header_arg} {$url_arg}";
+        $cmd = SPC_CURL_EXEC . " -sfSL --connect-timeout 15 --speed-limit 1 --speed-time 30 --max-time 3600 {$retry_arg} {$compressed_arg} {$method_arg} {$header_arg} {$url_arg}";
 
         $this->logCommandInfo($cmd);
         logger()->debug("[CURL EXECUTE] {$cmd}");
@@ -74,9 +74,9 @@ class DefaultShell extends Shell
         $path_arg = escapeshellarg($path);
 
         $header_arg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
-        $retry_arg = $retries > 0 ? "--retry {$retries}" : '';
+        $retry_arg = self::curlRetryArgs($retries);
         $check = $this->console_putput ? '#' : 's';
-        $cmd = clean_spaces(SPC_CURL_EXEC . " -{$check}fSL --max-time 3600 {$retry_arg} {$header_arg} -o {$path_arg} {$url_arg}");
+        $cmd = clean_spaces(SPC_CURL_EXEC . " -{$check}fSL --connect-timeout 15 --speed-limit 1 --speed-time 30 --max-time 3600 {$retry_arg} {$header_arg} -o {$path_arg} {$url_arg}");
         $this->logCommandInfo($cmd);
         logger()->debug('[CURL DOWNLOAD] ' . $cmd);
         $this->passthru($cmd, $this->console_putput, capture_output: false, throw_on_error: true);
@@ -231,6 +231,22 @@ class DefaultShell extends Shell
         };
 
         return true;
+    }
+
+    /**
+     * Build the cURL retry arguments shared by the request and download helpers.
+     *
+     * `--retry` covers transient failures (HTTP 408/429/500/502/503/504 and timeouts) and
+     * removes the partial output file before retrying; `--retry-connrefused` also retries
+     * when a mirror refuses the connection for a moment. Both are supported by the cURL
+     * versions shipped on the supported platforms (7.52+).
+     */
+    private static function curlRetryArgs(int $retries): string
+    {
+        if ($retries <= 0) {
+            return '';
+        }
+        return "--retry {$retries} --retry-delay 2 --retry-connrefused";
     }
 
     /**

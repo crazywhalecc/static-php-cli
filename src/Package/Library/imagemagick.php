@@ -44,6 +44,8 @@ class imagemagick
         // Use the prebuilt Configure tool (building it from source needs the MFC components).
         default_shell()->executeCurlDownload($configure_url, "{$work}\\Configure\\Configure.Release.x64.exe", retries: 2);
 
+        self::patchCairoWin7MtaUsage($work);
+
         // Generate a static, /MT (linkRuntime), x64, Q16-HDRI solution with the configs embedded
         // (zeroConfigurationSupport) and OpenMP off (no vcomp runtime dependency).
         $ver = WindowsUtil::findVisualStudio();
@@ -56,6 +58,8 @@ class imagemagick
         };
         cmd()->cd("{$work}\\Configure")
             ->exec("Configure.Release.x64.exe /noWizard {$vs_arg} /x64 /static /linkRuntime /noOpenMP /zeroConfigurationSupport");
+
+        self::retargetGeneratedProjectsToWindows10($work);
 
         // x64 IM7 defaults to a 64-bit channel mask, whose magick-baseconfig.h #errors unless the
         // consuming translation unit is C++. ext-imagick is plain C, so force a 32-bit channel mask
@@ -157,5 +161,69 @@ class imagemagick
             );
         }
         $lib->patchLaDependencyPrefix();
+    }
+
+    /**
+     * cairo 1.18.6 (vendored by ImageMagick) uses the Windows 8+ COM MTA usage API in
+     * cairo-win32-system.c, but the VisualMagick projects are generated with
+     * _WIN32_WINNT=0x0601 (Windows 7), where the Windows SDK hides CO_MTA_USAGE_COOKIE and
+     * CoIncrementMTAUsage behind "NTDDI_VERSION >= NTDDI_WIN8", breaking the static build.
+     *
+     * Those functions are resolved dynamically with GetProcAddress, so only the opaque cookie
+     * type declaration is missing: provide the DECLARE_HANDLE-compatible definition for Win7
+     * targets. No-op when the vendored cairo no longer needs it (patch string not found) and when
+     * the projects were retargeted to Windows 10 with retargetGeneratedProjectsToWindows10().
+     */
+    private static function patchCairoWin7MtaUsage(string $work): void
+    {
+        $file = "{$work}\\Dependencies\\Dependencies\\cairo\\src\\win32\\cairo-win32-system.c";
+        if (!is_file($file)) {
+            return;
+        }
+        FileSystem::replaceFileStr(
+            $file,
+            '#include <stdbool.h>',
+            "#include <stdbool.h>\n\n"
+            . "#if !defined(NTDDI_WIN8) || (NTDDI_VERSION < NTDDI_WIN8)\n"
+            . '/* Windows 7 target: mirror DECLARE_HANDLE(CO_MTA_USAGE_COOKIE) from the Win8+ SDK. */' . "\n"
+            . "struct CO_MTA_USAGE_COOKIE__ { int unused; };\n"
+            . "typedef struct CO_MTA_USAGE_COOKIE__ *CO_MTA_USAGE_COOKIE;\n"
+            . '#endif' . "\n",
+        );
+    }
+
+    /**
+     * Retarget the generated VisualMagick projects from the Configure release's Windows 7 default
+     * (_WIN32_WINNT=0x0601) to Windows 10 (_WIN32_WINNT=0x0A00).
+     *
+     * With _WIN32_WINNT >= _WIN32_WINNT_WIN10 the Windows SDK sets NTDDI_VERSION to
+     * WDK_NTDDI_VERSION instead of deriving it from _WIN32_WINNT, which is what un-hides the
+     * DirectWrite RS1/RS3 declarations cairo needs. Configure writes the definition into every
+     * generated *.vcxproj, so patching those keeps the rest of the generation untouched.
+     *
+     * @param string $work VisualMagick work directory (contains ProjectFiles/)
+     */
+    private static function retargetGeneratedProjectsToWindows10(string $work): void
+    {
+        $project_files = FileSystem::scanDirFiles("{$work}/ProjectFiles");
+        if ($project_files === false) {
+            logger()->debug("No VisualMagick ProjectFiles in {$work}; skipping _WIN32_WINNT retarget");
+            return;
+        }
+
+        $win7_define = '_WIN32_WINNT=0x0601';
+        $win10_define = '_WIN32_WINNT=0x0A00';
+        $retargeted = 0;
+        foreach ($project_files as $project) {
+            if (!str_ends_with($project, '.vcxproj')) {
+                continue;
+            }
+            if (!str_contains(FileSystem::readFile($project), $win7_define)) {
+                continue;
+            }
+            FileSystem::replaceFileStr($project, $win7_define, $win10_define);
+            ++$retargeted;
+        }
+        logger()->debug("Retargeted {$retargeted} VisualMagick project(s) to {$win10_define}");
     }
 }
