@@ -2,9 +2,9 @@ libaom:
   type: library
   artifact:
     source:
-      type: git
-      rev: main
-      url: 'https://aomedia.googlesource.com/aom'
+      type: filelist
+      url: 'https://storage.googleapis.com/aom-releases/'
+      regex: '/<Key>(?<file>libaom-(?<version>\d+\.\d+\.\d+)\.tar\.gz)<\/Key>/'
     metadata:
       license-files: [LICENSE]
   lang: cpp
