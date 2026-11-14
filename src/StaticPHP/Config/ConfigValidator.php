@@ -102,7 +102,7 @@ class ConfigValidator
 
     public const array ARTIFACT_TYPE_FIELDS = [ // [required_fields, optional_fields]
         'filelist' => [['url', 'regex'], ['extract']],
-        'git' => [['url'], ['extract', 'submodules', 'rev', 'regex']],
+        'git' => [['url'], ['extract', 'submodules', 'rev', 'regex', 'tag-regex']],
         'ghtagtar' => [['repo'], ['extract', 'prefer-stable', 'match', 'query']],
         'ghtar' => [['repo'], ['extract', 'prefer-stable', 'match', 'query']],
         'ghrel' => [['repo', 'match'], ['extract', 'prefer-stable', 'query']],

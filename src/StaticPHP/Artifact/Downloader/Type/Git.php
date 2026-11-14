@@ -27,11 +27,10 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
             $version = $hash !== '' ? "dev-{$config['rev']}+{$hash}" : "dev-{$config['rev']}";
             return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
         }
-        if (!isset($config['regex'])) {
-            throw new DownloaderException('Either "rev" or "regex" must be specified for git download type.');
+        if (!isset($config['regex']) && !isset($config['tag-regex'])) {
+            throw new DownloaderException('Either "rev", "regex" or "tag-regex" must be specified for git download type.');
         }
 
-        // regex matches branch first, we need to fetch all refs in emptyfirst
         $gitdir = sys_get_temp_dir() . '/' . $name;
         FileSystem::resetDir($gitdir);
         $shell = PHP_OS_FAMILY === 'Windows' ? cmd(false) : shell(false);
@@ -46,10 +45,11 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
         $matched_version_branch = [];
         $matched_count = 0;
 
-        $regex = '/^' . $config['regex'] . '$/';
+        $ref_type = isset($config['tag-regex']) ? 'tags' : 'heads';
+        $regex = '/^' . ($config['tag-regex'] ?? $config['regex']) . '$/';
         foreach ($refs as $ref) {
             $matches = null;
-            if (preg_match('/^[0-9a-f]{40}\s+refs\/heads\/(.+)$/', $ref, $matches)) {
+            if (preg_match('/^[0-9a-f]{40}\s+refs\/' . $ref_type . '\/(.+)$/', $ref, $matches)) {
                 ++$matched_count;
                 $branch = $matches[1];
                 if (preg_match($regex, $branch, $vermatch) && isset($vermatch['version'])) {
@@ -65,11 +65,11 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
             // use the highest version
             $version = array_key_first($matched_version_branch);
             $branch = $matched_version_branch[$version];
-            logger()->info("Matched version {$version} from branch {$branch} for {$name}");
+            logger()->info("Matched version {$version} from {$ref_type} ref {$branch} for {$name}");
             default_shell()->executeGitClone($config['url'], $branch, $path, $shallow, $config['submodules'] ?? null, $downloader->getRetry());
             return DownloadResult::git($name, $config, extract: $config['extract'] ?? null, version: $version, downloader: static::class);
         }
-        throw new DownloaderException("No matching branch found for regex {$config['regex']} (checked {$matched_count} branches).");
+        throw new DownloaderException("No matching {$ref_type} ref found for regex {$regex} (checked {$matched_count} refs).");
     }
 
     public function checkUpdate(string $name, array $config, ?string $old_version, ArtifactDownloader $downloader): CheckUpdateResult
@@ -90,8 +90,8 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
                 needUpdate: $old_hash === null || $new_hash !== $old_hash,
             );
         }
-        if (!isset($config['regex'])) {
-            throw new DownloaderException('Either "rev" or "regex" must be specified for git download type.');
+        if (!isset($config['regex']) && !isset($config['tag-regex'])) {
+            throw new DownloaderException('Either "rev", "regex" or "tag-regex" must be specified for git download type.');
         }
 
         $shell = PHP_OS_FAMILY === 'Windows' ? cmd(false) : shell(false);
@@ -102,10 +102,11 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
         $refs = $result[1];
         $matched_version_branch = [];
 
-        $regex = '/^' . $config['regex'] . '$/';
+        $ref_type = isset($config['tag-regex']) ? 'tags' : 'heads';
+        $regex = '/^' . ($config['tag-regex'] ?? $config['regex']) . '$/';
         foreach ($refs as $ref) {
             $matches = null;
-            if (preg_match('/^[0-9a-f]{40}\s+refs\/heads\/(.+)$/', $ref, $matches)) {
+            if (preg_match('/^[0-9a-f]{40}\s+refs\/' . $ref_type . '\/(.+)$/', $ref, $matches)) {
                 $branch = $matches[1];
                 if (preg_match($regex, $branch, $vermatch) && isset($vermatch['version'])) {
                     $matched_version_branch[$vermatch['version']] = $vermatch[0];
@@ -123,6 +124,6 @@ class Git implements DownloadTypeInterface, CheckUpdateInterface
                 needUpdate: $old_version === null || $version !== $old_version,
             );
         }
-        throw new DownloaderException("No matching branch found for regex {$config['regex']}.");
+        throw new DownloaderException("No matching {$ref_type} ref found for regex {$regex}.");
     }
 }

@@ -3,7 +3,7 @@ grpc:
   artifact:
     source:
       type: git
-      rev: v1.75.x
+      tag-regex: 'v(?<version>\d+\.\d+\.\d+)'
       url: 'https://github.com/grpc/grpc.git'
     metadata:
       license-files: [LICENSE]

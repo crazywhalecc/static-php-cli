@@ -193,16 +193,19 @@ artifact:
 
 ### git
 
-Clones a Git repository as the source. Supports two modes: clone a specific branch/tag/commit (`rev`), or use a regex to match the highest-versioned branch from all remote refs (`regex`).
+Clones a Git repository as the source. Clone a specific branch/tag/commit (`rev`), select the highest-versioned branch (`regex`), or select the highest-versioned release tag (`tag-regex`).
 
 - **Class**: `StaticPHP\Artifact\Downloader\Type\Git`
 - **Capabilities**: Version update checking (`CheckUpdateInterface`)
 - **Required**: `url` — repository URL
-- **Optional** (at least one of `rev` or `regex` is required):
+- **Optional** (at least one of `rev`, `regex` or `tag-regex` is required):
   - `rev` — clone a specific branch, tag, or commit hash
   - `regex` — match remote branch names with a PCRE regex; the highest matching version is selected (must include a named capture group `(?P<version>...)`)
+  - `tag-regex` — match release tags instead of branches; the highest matching version is selected (must include a named capture group `(?<version>...)`). For example, `v(?<version>\d+\.\d+\.\d+)` excludes prereleases and development snapshots while retaining submodule support.
   - `submodules` — whether to fetch git submodules (boolean)
   - `extract` — override the clone target directory
+
+SPC retains the default branches of three release-source forks without tags: `libargon2` carries the libsodium compatibility fix, `libuuid` adds CMake support to libuuid 1.0.3, and `qdbm` contains the imported QDBM 1.8.77 release. Replacing these with unpatched upstream archives would require checking the build recipes and compatibility fixes first.
 
 ```yaml
 # php-glfw cloned from the master branch

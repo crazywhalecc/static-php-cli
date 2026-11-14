@@ -4,7 +4,7 @@ libjxl:
     source:
       type: git
       url: 'https://github.com/libjxl/libjxl'
-      rev: main
+      tag-regex: 'v(?<version>\d+\.\d+\.\d+)'
       submodules: [third_party/highway, third_party/libjpeg-turbo, third_party/sjpeg, third_party/skcms]
     metadata:
       license-files: [LICENSE]

@@ -12,17 +12,15 @@ use StaticPHP\Package\LibraryPackage;
 use StaticPHP\Runtime\Executor\UnixCMakeExecutor;
 use StaticPHP\Toolchain\Interface\ToolchainInterface;
 use StaticPHP\Util\FileSystem;
-use StaticPHP\Util\SourcePatcher;
 use StaticPHP\Util\System\LinuxUtil;
 
 #[Library('grpc')]
 class grpc
 {
     #[PatchBeforeBuild]
-    #[PatchDescription('Fix OpenSSL 4 accessors and re2 pcre.h include order')]
+    #[PatchDescription('Fix re2 pcre.h include order')]
     public function patchBeforeBuild(LibraryPackage $lib): bool
     {
-        SourcePatcher::patchFile('grpc-openssl4.patch', $lib->getSourceDir());
         FileSystem::replaceFileStr(
             "{$lib->getSourceDir()}/third_party/re2/util/pcre.h",
             ["#define UTIL_PCRE_H_\n#include <stdint.h>", '#define UTIL_PCRE_H_'],
