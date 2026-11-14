@@ -325,6 +325,13 @@ CMAKE;
                 $toolchain .= "\nset(CMAKE_CXX_STANDARD_LIBRARIES_INIT \"{$runtimeLibs}\")";
             }
         }
+        // Homebrew on Intel macOS installs into /usr/local, which sits on the compiler's
+        // default search path, so find_* resolves host headers ahead of the ones spc
+        // installed in buildroot and packages end up compiled against them (issue #1289).
+        // Ignoring the prefix keeps cmake's searches inside the buildroot on Darwin.
+        if (PHP_OS_FAMILY === 'Darwin') {
+            $toolchain .= "\nif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.23)\n  set(CMAKE_IGNORE_PREFIX_PATH \"/usr/local\")\nendif()";
+        }
         FileSystem::writeFile(SOURCE_PATH . '/toolchain.cmake', $toolchain);
         return $created = realpath(SOURCE_PATH . '/toolchain.cmake');
     }
