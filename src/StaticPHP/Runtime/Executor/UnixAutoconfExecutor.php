@@ -63,9 +63,15 @@ class UnixAutoconfExecutor extends Executor
      * @param bool         $with_clean     Whether to clean before building
      * @param array        $after_env_vars Environment variables postfix
      */
-    public function make(string $target = '', false|string $with_install = 'install', bool $with_clean = true, array $after_env_vars = [], ?string $dir = null): static
-    {
-        return $this->seekLogFileOnException(function () use ($target, $with_install, $with_clean, $after_env_vars, $dir) {
+    public function make(
+        string $target = '',
+        false|string $with_install = 'install',
+        bool $with_clean = true,
+        array $after_env_vars = [],
+        ?string $dir = null,
+        ?int $concurrency = null
+    ): static {
+        return $this->seekLogFileOnException(function () use ($target, $with_install, $with_clean, $after_env_vars, $dir, $concurrency) {
             $shell = $this->shell;
             if ($dir) {
                 $shell = $shell->cd($dir);
@@ -75,9 +81,9 @@ class UnixAutoconfExecutor extends Executor
                 $shell->exec('make clean');
             }
             $after_env_vars_str = $after_env_vars !== [] ? shell()->setEnv($after_env_vars)->getEnvString() : '';
-            $concurrency = ApplicationContext::get(PackageBuilder::class)->concurrency;
+            $c = $concurrency ?? ApplicationContext::get(PackageBuilder::class)->concurrency;
             InteractiveTerm::setMessage('Building package: ' . ConsoleColor::yellow($this->package->getName()) . ' (make)');
-            $shell->exec("make -j{$concurrency} {$target} {$after_env_vars_str}");
+            $shell->exec("make -j{$c} {$target} {$after_env_vars_str}");
             if ($with_install !== false) {
                 InteractiveTerm::setMessage('Building package: ' . ConsoleColor::yellow($this->package->getName()) . ' (make ' . $with_install . ')');
                 $shell->exec("make {$with_install}");

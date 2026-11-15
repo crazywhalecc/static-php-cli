@@ -23,7 +23,7 @@ class attr
             ->exec('libtoolize --force --copy')
             ->exec('./autogen.sh || autoreconf -if')
             ->configure('--disable-nls')
-            ->make('install-attributes_h install-data install-libattr_h install-libLTLIBRARIES install-pkgincludeHEADERS install-pkgconfDATA', with_install: false);
+            ->make('install-attributes_h install-data install-libattr_h install-libLTLIBRARIES install-pkgincludeHEADERS install-pkgconfDATA', with_install: false, concurrency: 1);
         $lib->patchPkgconfPrefix(['libattr.pc'], PKGCONF_PATCH_PREFIX);
     }
 }
