@@ -36,7 +36,7 @@ class libacl
             ->exec('libtoolize --force --copy')
             ->exec('./autogen.sh || autoreconf -if')
             ->configure('--disable-nls', '--disable-tests')
-            ->make('install-acl_h install-libacl_h install-data install-libLTLIBRARIES install-pkgincludeHEADERS install-sysincludeHEADERS install-pkgconfDATA', with_install: false);
+            ->make('install-acl_h install-libacl_h install-data install-libLTLIBRARIES install-pkgincludeHEADERS install-sysincludeHEADERS install-pkgconfDATA', with_install: false, concurrency: 1);
         $lib->patchPkgconfPrefix(['libacl.pc'], PKGCONF_PATCH_PREFIX);
     }
 }
