@@ -67,6 +67,9 @@ abstract class UnixUtil
         }
         $defined = array_unique($defined);
         sort($defined);
+        if (($os ?? SystemTarget::getTargetOS()) === 'Darwin') {
+            $defined = array_values(array_filter($defined, fn ($x) => str_starts_with($x, '_')));
+        }
         return $defined;
     }
 
