@@ -478,9 +478,11 @@ class PhpExtensionPackage extends Package
      */
     public function getSharedExtensionLoadString(): string
     {
+        // Every extension that ends up as a .so in BUILD_MODULES_PATH: built by phpize, or built with php as shared
+        // (php's `make install-modules`) unless it is also built statically.
         $sharedExts = array_filter(
             $this->getInstaller()->getResolvedPackages(PhpExtensionPackage::class),
-            fn (PhpExtensionPackage $ext) => $ext->isBuildShared() && !$ext->isBuildWithPhp()
+            fn (PhpExtensionPackage $ext) => $ext->isBuildShared() && (!$ext->isBuildWithPhp() || !$ext->isBuildStatic())
         );
 
         if (empty($sharedExts)) {
