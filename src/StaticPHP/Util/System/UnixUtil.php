@@ -32,8 +32,26 @@ abstract class UnixUtil
             throw new ExecutionException($cmd, 'Failed to get defined symbols from ' . $lib_file);
         }
         // parse shell output and filter
+        $defined = self::parseDynamicSymbols($result[1]);
+        // export
+        if (SystemTarget::getTargetOS() === 'Linux') {
+            file_put_contents("{$lib_file}.dynsym", "{\n" . implode("\n", array_map(fn ($x) => "  {$x};", $defined)) . "};\n");
+        } else {
+            file_put_contents("{$lib_file}.dynsym", implode("\n", $defined) . "\n");
+        }
+    }
+
+    /**
+     * Parse dynamic symbols from nm command output lines.
+     *
+     * @param  array<int, string> $lines nm command output lines
+     * @param  null|string        $os    Target OS (default to SystemTarget::getTargetOS())
+     * @return array<int, string> List of symbol names
+     */
+    public static function parseDynamicSymbols(array $lines, ?string $os = null): array
+    {
         $defined = [];
-        foreach ($result[1] as $line) {
+        foreach ($lines as $line) {
             $line = trim($line);
             if ($line === '' || str_ends_with($line, '.o:') || str_ends_with($line, '.o]:')) {
                 continue;
@@ -49,12 +67,10 @@ abstract class UnixUtil
         }
         $defined = array_unique($defined);
         sort($defined);
-        // export
-        if (SystemTarget::getTargetOS() === 'Linux') {
-            file_put_contents("{$lib_file}.dynsym", "{\n" . implode("\n", array_map(fn ($x) => "  {$x};", $defined)) . "};\n");
-        } else {
-            file_put_contents("{$lib_file}.dynsym", implode("\n", $defined) . "\n");
+        if (($os ?? SystemTarget::getTargetOS()) === 'Darwin') {
+            $defined = array_values(array_filter($defined, fn ($x) => str_starts_with($x, '_')));
         }
+        return $defined;
     }
 
     /**
