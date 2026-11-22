@@ -12,7 +12,6 @@ use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
 use StaticPHP\Exception\SPCInternalException;
-use StaticPHP\Runtime\SystemTarget;
 
 class zig
 {
@@ -40,12 +39,12 @@ class zig
         if (!$latest_version) {
             throw new DownloaderException('Could not determine latest Zig version');
         }
-        $zig_arch = SystemTarget::getTargetArch();
-        $zig_os = match (SystemTarget::getTargetOS()) {
+        $zig_arch = GNU_ARCH;
+        $zig_os = match (PHP_OS_FAMILY) {
             'Windows' => 'win',
             'Darwin' => 'macos',
             'Linux' => 'linux',
-            default => throw new DownloaderException('Unsupported OS for Zig: ' . SystemTarget::getTargetOS()),
+            default => throw new DownloaderException('Unsupported OS for Zig: ' . PHP_OS_FAMILY),
         };
         $platform_key = "{$zig_arch}-{$zig_os}";
         if (!isset($index_json[$latest_version][$platform_key])) {
