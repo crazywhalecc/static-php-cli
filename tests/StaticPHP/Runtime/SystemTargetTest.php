@@ -86,6 +86,21 @@ class SystemTargetTest extends TestCase
         $this->assertTrue(SystemTarget::isCrossCompiling());
     }
 
+    public function testHostPlatformStringIgnoresCrossTarget(): void
+    {
+        // A cross target for another architecture must not leak into the host platform string.
+        putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
+        $this->assertTrue(SystemTarget::isCrossCompiling());
+
+        $os = match (PHP_OS_FAMILY) {
+            'Darwin' => 'macos',
+            'Linux' => 'linux',
+            'Windows' => 'windows',
+            default => 'unknown',
+        };
+        $this->assertSame("{$os}-" . GNU_ARCH, SystemTarget::getHostPlatformString());
+    }
+
     private function hostTripleSuffix(): string
     {
         return match (PHP_OS_FAMILY) {

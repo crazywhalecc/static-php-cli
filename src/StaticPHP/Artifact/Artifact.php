@@ -85,14 +85,28 @@ class Artifact
      */
     public function isBinaryDownloaded(?string $target_os = null, bool $compare_hash = false): bool
     {
-        $target_os = $target_os ?? SystemTarget::getCurrentPlatformString();
+        $target_os = $target_os ?? $this->getBinaryPlatform();
         return ApplicationContext::get(ArtifactCache::class)->isBinaryDownloaded($this->name, $target_os, $compare_hash);
+    }
+
+    /**
+     * The platform key used to cache, resolve and extract this artifact's binary.
+     *
+     * Custom binary fetchers ship tools that execute on the build machine (zig, rust, ...),
+     * so their binary cache and callbacks are keyed by the host platform even for cross
+     * builds; a target-keyed entry would let an archive of another architecture be reused
+     * on this host. Config-based binaries vary with the build target and keep the target key.
+     */
+    public function getBinaryPlatform(): string
+    {
+        return $this->custom_binary_callbacks !== []
+            ? SystemTarget::getHostPlatformString()
+            : SystemTarget::getCurrentPlatformString();
     }
 
     public function shouldUseBinary(): bool
     {
-        $platform = SystemTarget::getCurrentPlatformString();
-        return $this->isBinaryDownloaded($platform) && $this->hasPlatformBinary();
+        return $this->isBinaryDownloaded($this->getBinaryPlatform()) && $this->hasPlatformBinary();
     }
 
     /**
@@ -142,7 +156,7 @@ class Artifact
      */
     public function isBinaryExtracted(?string $target_os = null, bool $compare_hash = false): bool
     {
-        $target_os = $target_os ?? SystemTarget::getCurrentPlatformString();
+        $target_os = $target_os ?? $this->getBinaryPlatform();
         // Get cache info first for custom binary support (extract path may be stored in cache)
         $cache_info = ApplicationContext::get(ArtifactCache::class)->getBinaryInfo($this->name, $target_os);
         $extract_config = $this->getBinaryExtractConfig($cache_info ?? []);
@@ -241,12 +255,15 @@ class Artifact
     }
 
     /**
-     * Checks if the artifact has a local binary defined for the current system target.
+     * Checks if the artifact has a binary for the current build: config binaries for the
+     * current target, custom binary callbacks (host-run tools) for the build machine.
      */
     public function hasPlatformBinary(): bool
     {
-        $target = SystemTarget::getCurrentPlatformString();
-        return isset($this->config['binary'][$target]) || isset($this->custom_binary_callbacks[$target]);
+        if (isset($this->config['binary'][SystemTarget::getCurrentPlatformString()])) {
+            return true;
+        }
+        return isset($this->custom_binary_callbacks[SystemTarget::getHostPlatformString()]);
     }
 
     /**
@@ -463,15 +480,14 @@ class Artifact
 
     public function getCustomBinaryCallback(): ?callable
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
-        return $this->custom_binary_callbacks[$current_platform] ?? null;
+        return $this->custom_binary_callbacks[SystemTarget::getHostPlatformString()] ?? null;
     }
 
     public function emitCustomBinary(): void
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
+        $current_platform = SystemTarget::getHostPlatformString();
         if (!isset($this->custom_binary_callbacks[$current_platform])) {
-            throw new SPCInternalException("No custom binary callback defined for artifact '{$this->name}' on target OS '{$current_platform}'.");
+            throw new SPCInternalException("No custom binary callback defined for artifact '{$this->name}' on host platform '{$current_platform}'.");
         }
         $callback = $this->custom_binary_callbacks[$current_platform];
         ApplicationContext::invoke($callback, [Artifact::class => $this]);
@@ -493,8 +509,7 @@ class Artifact
 
     public function getCustomBinaryCallbackOrigin(): ?string
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
-        return $this->custom_binary_callback_origins[$current_platform] ?? null;
+        return $this->custom_binary_callback_origins[SystemTarget::getHostPlatformString()] ?? null;
     }
 
     /**
@@ -511,8 +526,7 @@ class Artifact
 
     public function getCustomBinaryCheckUpdateCallback(): ?callable
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
-        return $this->custom_binary_check_update_callbacks[$current_platform] ?? null;
+        return $this->custom_binary_check_update_callbacks[SystemTarget::getHostPlatformString()] ?? null;
     }
 
     // ==================== Extraction Callbacks ====================

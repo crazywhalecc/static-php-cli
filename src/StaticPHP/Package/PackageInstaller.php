@@ -545,7 +545,7 @@ class PackageInstaller
         // only reflects the last download and may be stale or cleared). Recorded regardless of
         // $status so the registry self-heals if it was deleted separately from the install dir.
         if ($package instanceof ToolPackage) {
-            $cache_info = ApplicationContext::get(ArtifactCache::class)->getBinaryInfo($artifact->getName(), SystemTarget::getCurrentPlatformString());
+            $cache_info = ApplicationContext::get(ArtifactCache::class)->getBinaryInfo($artifact->getName(), $artifact->getBinaryPlatform());
             ToolVersionRegistry::record($artifact->getName(), $cache_info['version'] ?? null);
         }
 

@@ -25,7 +25,9 @@ class go_xcaddy
     ])]
     public function downBinary(ArtifactDownloader $downloader): DownloadResult
     {
-        $name = SystemTarget::getCurrentPlatformString();
+        // xcaddy and the go toolchain run on the build host, so the host platform selects
+        // the archive, not SPC_TARGET
+        $name = SystemTarget::getHostPlatformString();
         $arch = match (explode('-', $name)[1]) {
             'x86_64' => 'amd64',
             'aarch64' => 'arm64',

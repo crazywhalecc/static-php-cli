@@ -403,9 +403,9 @@ class ArtifactDownloader
         }
         $cache = ApplicationContext::get(ArtifactCache::class);
         if ($prefer_source) {
-            $info = $cache->getSourceInfo($artifact_name) ?? $cache->getBinaryInfo($artifact_name, SystemTarget::getCurrentPlatformString());
+            $info = $cache->getSourceInfo($artifact_name) ?? $cache->getBinaryInfo($artifact_name, $artifact->getBinaryPlatform());
         } else {
-            $info = $cache->getBinaryInfo($artifact_name, SystemTarget::getCurrentPlatformString()) ?? $cache->getSourceInfo($artifact_name);
+            $info = $cache->getBinaryInfo($artifact_name, $artifact->getBinaryPlatform()) ?? $cache->getSourceInfo($artifact_name);
         }
         if ($info === null) {
             throw new WrongUsageException("Artifact '{$artifact_name}' is not downloaded yet, cannot check update.");
@@ -634,7 +634,7 @@ class ArtifactDownloader
                     $verified = true;
                 }
                 // process lock
-                ApplicationContext::get(ArtifactCache::class)->lock($artifact, $item['lock'], $lock, SystemTarget::getCurrentPlatformString());
+                ApplicationContext::get(ArtifactCache::class)->lock($artifact, $item['lock'], $lock, $artifact->getBinaryPlatform());
                 if ($parallel === false && $this->interactive) {
                     $ver = $lock->hasVersion() ? (' (' . ConsoleColor::yellow($lock->version) . ')') : '';
                     InteractiveTerm::finish('Downloaded ' . ($verified ? 'and verified ' : '') . 'artifact ' . ConsoleColor::green($artifact->getName()) . $ver . " {$item['display']} .");

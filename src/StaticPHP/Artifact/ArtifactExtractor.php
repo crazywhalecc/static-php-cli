@@ -215,7 +215,7 @@ class ArtifactExtractor
     protected function extractBinary(Artifact $artifact): int
     {
         $name = $artifact->getName();
-        $platform = SystemTarget::getCurrentPlatformString();
+        $platform = $artifact->getBinaryPlatform();
         $cache_info = $this->cache->getBinaryInfo($name, $platform);
 
         if ($cache_info === null) {

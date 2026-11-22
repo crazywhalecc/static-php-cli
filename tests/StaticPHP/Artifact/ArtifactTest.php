@@ -12,6 +12,7 @@ use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\ValidationException;
 use StaticPHP\Exception\WrongUsageException;
+use StaticPHP\Runtime\SystemTarget;
 
 /**
  * @internal
@@ -467,6 +468,48 @@ class ArtifactTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $artifact->setCustomBinaryCheckUpdateCallback('bad-platform', function () {});
+    }
+
+    public function testGetBinaryPlatformAndCallbackStayHostKeyedUnderCrossTarget(): void
+    {
+        // Cross-build for the other architecture on this machine's OS.
+        putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
+        try {
+            $artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            // Without a custom binary fetcher, the binary cache keeps the target platform key.
+            $this->assertSame(SystemTarget::getCurrentPlatformString(), $artifact->getBinaryPlatform());
+
+            // Custom binary fetchers ship host-run tools (zig, rust, ...): their cache key and
+            // callback must resolve under the host platform even while cross-building.
+            $cb = function () {};
+            $artifact->setCustomBinaryCallback($this->getCurrentPlatform(), $cb);
+
+            $this->assertSame($this->getCurrentPlatform(), $artifact->getBinaryPlatform());
+            $this->assertSame($cb, $artifact->getCustomBinaryCallback());
+            $this->assertTrue($artifact->hasPlatformBinary());
+        } finally {
+            putenv('SPC_TARGET');
+        }
+    }
+
+    public function testIsBinaryDownloadedUsesHostPlatformForCustomBinaryToolsUnderCrossTarget(): void
+    {
+        putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
+        try {
+            $host_platform = $this->getCurrentPlatform();
+            $cache = $this->createMock(ArtifactCache::class);
+            $cache->method('isBinaryDownloaded')->with('my-pkg', $host_platform, false)->willReturn(true);
+
+            ApplicationContext::initialize();
+            ApplicationContext::set(ArtifactCache::class, $cache);
+
+            $artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            $artifact->setCustomBinaryCallback($host_platform, function () {});
+
+            $this->assertTrue($artifact->isBinaryDownloaded());
+        } finally {
+            putenv('SPC_TARGET');
+        }
     }
 
     // ==================== Source extract callbacks ====================
