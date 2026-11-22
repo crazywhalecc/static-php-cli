@@ -85,7 +85,6 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
         if ($this->compiler_version_resolved) {
             return $this->compiler_version;
         }
-        $this->compiler_version_resolved = true;
 
         try {
             $zig = PackageLoader::getPackage('zig');
@@ -102,6 +101,7 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
         if ($code === 0 && preg_match('/^(\d+\.\d+\.\d+)$/', trim(implode("\n", $out)), $match)) {
             $this->compiler_version = $match[1];
         }
+        $this->compiler_version_resolved = true;
         return $this->compiler_version;
     }
 
