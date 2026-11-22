@@ -68,6 +68,17 @@ class SystemTargetTest extends TestCase
         $this->assertSame(PHP_OS_FAMILY !== 'Linux', SystemTarget::isCrossCompiling());
     }
 
+    public function testBuildTripleUsesBuildMachinePlatform(): void
+    {
+        $suffix = match (PHP_OS_FAMILY) {
+            'Linux' => '-pc-linux-gnu',
+            'Darwin' => '-apple-darwin',
+            'Windows' => '-w64-mingw32',
+            default => '-unknown-unknown',
+        };
+        $this->assertSame(GNU_ARCH . $suffix, SystemTarget::getBuildTriple());
+    }
+
     public function testOtherOperatingSystemIsCrossCompiling(): void
     {
         $suffix = PHP_OS_FAMILY === 'Linux' ? 'macos' : 'linux-musl';

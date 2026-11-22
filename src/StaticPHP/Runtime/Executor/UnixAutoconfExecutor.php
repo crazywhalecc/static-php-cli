@@ -169,6 +169,7 @@ class UnixAutoconfExecutor extends Executor
             $host = SystemTarget::getTargetOS() === 'Darwin'
                 ? SystemTarget::getTargetArch() . '-apple-darwin'
                 : SystemTarget::getCanonicalTriple();
+            $args[] = '--build=' . SystemTarget::getBuildTriple();
             $args[] = '--host=' . $host;
         }
         return $args;

@@ -138,6 +138,16 @@ class SystemTarget
         };
     }
 
+    public static function getBuildTriple(): string
+    {
+        return match (PHP_OS_FAMILY) {
+            'Linux' => GNU_ARCH . '-pc-linux-gnu',
+            'Darwin' => GNU_ARCH . '-apple-darwin',
+            'Windows' => GNU_ARCH . '-w64-mingw32',
+            default => GNU_ARCH . '-unknown-unknown',
+        };
+    }
+
     /**
      * Whether the target runs on a different OS or CPU architecture than the host (a cross build).
      *
