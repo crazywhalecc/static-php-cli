@@ -53,6 +53,13 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
         $extraCflags = getenv('SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS') ?: '';
         $cflags = trim($cflags . ' -Wno-date-time');
         $cxxflags = trim($cxxflags . ' -Wno-date-time');
+        // zig's musl only exposes the LFS64 typedefs (off64_t, ...) with _LARGEFILE64_SOURCE;
+        // _GNU_SOURCE alone does not cut it (unlike glibc). php-src probes assume they exist.
+        if (str_contains((string) getenv('SPC_TARGET'), '-musl')) {
+            $cflags = trim($cflags . ' -D_LARGEFILE64_SOURCE');
+            $cxxflags = trim($cxxflags . ' -D_LARGEFILE64_SOURCE');
+            $extraCflags = trim($extraCflags . ' -D_LARGEFILE64_SOURCE');
+        }
         $extraCflags = trim($extraCflags . ' -Wno-date-time');
         GlobalEnvManager::putenv("SPC_DEFAULT_CFLAGS={$cflags}");
         GlobalEnvManager::putenv("SPC_DEFAULT_CXXFLAGS={$cxxflags}");
