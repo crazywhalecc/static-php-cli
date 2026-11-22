@@ -123,15 +123,13 @@ class SystemTarget
     /**
      * Get the platform string of the machine running SPC, in the format of {os}-{arch}, e.g. linux-x86_64.
      *
-     * Unlike getCurrentPlatformString(), this is not affected by SPC_TARGET: host-run tools
-     * (zig, rust, xcaddy, ...) download and cache artifacts for the machine they execute on,
-     * so cross builds must never reuse an archive selected for the build target.
+     * Unlike getCurrentPlatformString(), this reports where binaries actually execute and is
+     * affected by neither SPC_TARGET nor EMULATE_PLATFORM: host-run tools (zig, rust, xcaddy,
+     * ...) must download and cache for the real build machine even when a cross build or a
+     * test emulation pretends the platform is something else.
      */
     public static function getHostPlatformString(): string
     {
-        if (getenv('EMULATE_PLATFORM') !== false) {
-            return getenv('EMULATE_PLATFORM');
-        }
         $os = match (PHP_OS_FAMILY) {
             'Darwin' => 'macos',
             'Linux' => 'linux',

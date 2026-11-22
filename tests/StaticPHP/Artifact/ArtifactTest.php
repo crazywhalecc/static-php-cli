@@ -482,9 +482,9 @@ class ArtifactTest extends TestCase
             // Custom binary fetchers ship host-run tools (zig, rust, ...): their cache key and
             // callback must resolve under the host platform even while cross-building.
             $cb = function () {};
-            $artifact->setCustomBinaryCallback($this->getCurrentPlatform(), $cb);
+            $artifact->setCustomBinaryCallback(SystemTarget::getHostPlatformString(), $cb);
 
-            $this->assertSame($this->getCurrentPlatform(), $artifact->getBinaryPlatform());
+            $this->assertSame(SystemTarget::getHostPlatformString(), $artifact->getBinaryPlatform());
             $this->assertSame($cb, $artifact->getCustomBinaryCallback());
             $this->assertTrue($artifact->hasPlatformBinary());
         } finally {
@@ -496,7 +496,7 @@ class ArtifactTest extends TestCase
     {
         putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
         try {
-            $host_platform = $this->getCurrentPlatform();
+            $host_platform = SystemTarget::getHostPlatformString();
             $cache = $this->createMock(ArtifactCache::class);
             $cache->method('isBinaryDownloaded')->with('my-pkg', $host_platform, false)->willReturn(true);
 
