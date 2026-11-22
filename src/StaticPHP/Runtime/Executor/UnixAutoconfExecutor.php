@@ -166,7 +166,10 @@ class UnixAutoconfExecutor extends Executor
         ];
         // Cross builds: tell autoconf it must not execute compiled test programs
         if (SystemTarget::isCrossCompiling()) {
-            $args[] = '--host=' . SystemTarget::getCanonicalTriple();
+            $host = SystemTarget::getTargetOS() === 'Darwin'
+                ? SystemTarget::getTargetArch() . '-apple-darwin'
+                : SystemTarget::getCanonicalTriple();
+            $args[] = '--host=' . $host;
         }
         return $args;
     }
