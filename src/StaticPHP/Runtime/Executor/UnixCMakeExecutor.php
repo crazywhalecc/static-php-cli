@@ -332,6 +332,18 @@ CMAKE;
         if (PHP_OS_FAMILY === 'Darwin') {
             $toolchain .= "\nif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.23)\n  set(CMAKE_IGNORE_PREFIX_PATH \"/usr/local\")\nendif()";
         }
+        // Cross builds: declare the target system so cmake switches to cross mode
+        if (SystemTarget::isCrossCompiling()) {
+            $system_name = SystemTarget::getTargetOS();
+            $processor = strtolower(explode('-', SystemTarget::getCanonicalTriple())[0]);
+            $processor = match ($processor) {
+                'amd64', 'x64' => 'x86_64',
+                'arm64' => 'aarch64',
+                default => $processor,
+            };
+            $toolchain .= "\nSET(CMAKE_SYSTEM_NAME \"{$system_name}\")";
+            $toolchain .= "\nSET(CMAKE_SYSTEM_PROCESSOR \"{$processor}\")";
+        }
         FileSystem::writeFile(SOURCE_PATH . '/toolchain.cmake', $toolchain);
         return $created = realpath(SOURCE_PATH . '/toolchain.cmake');
     }
