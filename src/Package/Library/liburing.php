@@ -49,6 +49,7 @@ class liburing extends LibraryPackage
                 '--enable-static',
                 '--with-pic',
                 '--enable-pic',
+                '--host=' . SystemTarget::getCanonicalTriple(),
             )
             ->addConfigureArgs(
                 $use_libc ? '--use-libc' : '',
