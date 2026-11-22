@@ -26,4 +26,15 @@ class micro
     {
         FileSystem::replaceFileStr("{$package->getSourceDir()}/Makefile", 'install-micro', '');
     }
+
+    #[BeforeStage('php', [php::class, 'makeMicroForUnix'], 'php-micro')]
+    #[PatchDescription('Add Elf_Shdr alias missing from php-micro on 32-bit ELF targets')]
+    public function patchElfShdrBeforeMicroMake(TargetPackage $package): void
+    {
+        FileSystem::replaceFileStr(
+            "{$package->getSourceDir()}/sapi/micro/php_micro_fileinfo.c",
+            'typedef Elf32_Phdr Elf_Phdr;',
+            "typedef Elf32_Phdr Elf_Phdr;\ntypedef Elf32_Shdr Elf_Shdr;"
+        );
+    }
 }
