@@ -5,7 +5,7 @@ llvm-compiler-rt:
       type: custom
       source-root: compiler-rt
     metadata:
-      license-files: [LICENSE.TXT]
+      license-files: [compiler-rt/LICENSE.TXT]
       license: Apache-2.0-with-LLVM-exception
   tools:
     - zig
