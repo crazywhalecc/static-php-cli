@@ -564,6 +564,84 @@ class ArtifactTest extends TestCase
         }
     }
 
+    public function testReferencedArtifactOwnerClaimPrefersToolPackages(): void
+    {
+        PackageConfig::loadFromArray([
+            'claim-lib' => ['type' => 'library', 'artifact' => ['source' => ['type' => 'url', 'url' => 'https://example.com/lib.tar.gz']]],
+            'claim-tool' => [
+                'type' => 'tool',
+                'artifact' => ['source' => ['type' => 'url', 'url' => 'https://example.com/tool.tar.gz']],
+                'tool' => ['provides' => ['claim-tool']],
+            ],
+        ], 'test-registry');
+
+        // First reference claims the artifact.
+        ArtifactConfig::setArtifactOwner('shared-artifact', 'claim-lib');
+        $this->assertSame('claim-lib', ArtifactConfig::getArtifactOwner('shared-artifact'));
+
+        // Later non-tool references do not steal the claim.
+        ArtifactConfig::setArtifactOwner('shared-artifact', 'claim-lib-2');
+        $this->assertSame('claim-lib', ArtifactConfig::getArtifactOwner('shared-artifact'));
+
+        // A tool package takes precedence: its binaries execute on the build host.
+        ArtifactConfig::setArtifactOwner('shared-artifact', 'claim-tool', true);
+        $this->assertSame('claim-tool', ArtifactConfig::getArtifactOwner('shared-artifact'));
+
+        // Another tool reference does not displace an existing tool owner.
+        ArtifactConfig::setArtifactOwner('shared-artifact', 'claim-lib', true);
+        $this->assertSame('claim-tool', ArtifactConfig::getArtifactOwner('shared-artifact'));
+    }
+
+    public function testCustomBinaryCheckUpdateCallbackResolvesByBinaryPlatform(): void
+    {
+        putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
+        try {
+            // Target-keyed artifact: the target's updater resolves, the host's does not.
+            $target_cb = function () {};
+            $artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            $artifact->setCustomBinaryCheckUpdateCallback(SystemTarget::getCurrentPlatformString(), $target_cb);
+            $this->assertSame($target_cb, $artifact->getCustomBinaryCheckUpdateCallback());
+
+            $host_cb = function () {};
+            $host_artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            $host_artifact->setCustomBinaryCheckUpdateCallback(SystemTarget::getHostPlatformString(), $host_cb);
+            $this->assertNull($host_artifact->getCustomBinaryCheckUpdateCallback());
+
+            // Host-run (custom binary fetcher) artifact: the host's updater resolves instead.
+            $tool_artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            $tool_artifact->setCustomBinaryCallback(SystemTarget::getHostPlatformString(), function () {});
+            $tool_artifact->setCustomBinaryCheckUpdateCallback(SystemTarget::getHostPlatformString(), $host_cb);
+            $this->assertSame($host_cb, $tool_artifact->getCustomBinaryCheckUpdateCallback());
+        } finally {
+            putenv('SPC_TARGET');
+        }
+    }
+
+    public function testBinaryExtractCallbackResolvesByBinaryPlatform(): void
+    {
+        putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
+        try {
+            // Target-keyed artifact: the target's extractor applies, the host's does not.
+            $target_cb = function () {};
+            $artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            $artifact->setBinaryExtractCallback($target_cb, [SystemTarget::getCurrentPlatformString()]);
+            $this->assertSame($target_cb, $artifact->getBinaryExtractCallback());
+
+            $host_cb = function () {};
+            $host_artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            $host_artifact->setBinaryExtractCallback($host_cb, [SystemTarget::getHostPlatformString()]);
+            $this->assertNull($host_artifact->getBinaryExtractCallback());
+
+            // Host-run (custom binary fetcher) artifact: the host's extractor applies instead.
+            $tool_artifact = new Artifact('my-pkg', ['source' => ['type' => 'url', 'url' => 'https://example.com/file.tar.gz']]);
+            $tool_artifact->setCustomBinaryCallback(SystemTarget::getHostPlatformString(), function () {});
+            $tool_artifact->setBinaryExtractCallback($host_cb, [SystemTarget::getHostPlatformString()]);
+            $this->assertSame($host_cb, $tool_artifact->getBinaryExtractCallback());
+        } finally {
+            putenv('SPC_TARGET');
+        }
+    }
+
     // ==================== Source extract callbacks ====================
 
     public function testSetAndGetSourceExtractCallback(): void

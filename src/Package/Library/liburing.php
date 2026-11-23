@@ -49,6 +49,9 @@ class liburing extends LibraryPackage
                 '--enable-static',
                 '--with-pic',
                 '--enable-pic',
+                // liburing's hand-written configure exits on any unknown option, and does not
+                // understand the autoconf cross-build triples the executor generates
+                '--build=' . SystemTarget::getBuildTriple(),
                 '--host=' . SystemTarget::getCanonicalTriple(),
             )
             ->addConfigureArgs(

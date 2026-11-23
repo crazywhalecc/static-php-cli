@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace StaticPHP\Package;
 
 use StaticPHP\Artifact\Artifact;
+use StaticPHP\Config\ArtifactConfig;
 use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCException;
@@ -284,6 +285,9 @@ abstract class Package
         }
 
         if (is_string($artifact_field)) {
+            // A referenced (non-inline) artifact has no owner recorded at registration time;
+            // the referencing package claims it so isHostRun() can decide the binary platform.
+            ArtifactConfig::setArtifactOwner($artifact_field, $this->name, $this->type === 'tool');
             return ArtifactLoader::getArtifactInstance($artifact_field);
         }
 

@@ -128,4 +128,31 @@ class ArtifactConfig
     {
         return self::$artifact_owners[$artifact_name] ?? null;
     }
+
+    /**
+     * Record which package owns an artifact referenced by name (`artifact: <name>`),
+     * i.e. one that was not declared inline. The first referencing package claims it.
+     *
+     * If multiple packages reference the same artifact, a tool package always wins the
+     * claim: its binaries run on the build machine, so (see Artifact::isHostRun()) they
+     * must be host-keyed even if a non-tool package claimed it first.
+     *
+     * @param string $artifact_name Artifact name
+     * @param string $owner_package Name of the referencing package
+     * @param bool   $is_tool       Whether the referencing package is of the "tool" type
+     */
+    public static function setArtifactOwner(string $artifact_name, string $owner_package, bool $is_tool = false): void
+    {
+        $existing = self::$artifact_owners[$artifact_name] ?? null;
+        if ($existing === $owner_package) {
+            return;
+        }
+        if ($existing !== null && $is_tool && PackageConfig::get($existing, 'type') !== 'tool') {
+            self::$artifact_owners[$artifact_name] = $owner_package;
+            return;
+        }
+        if ($existing === null) {
+            self::$artifact_owners[$artifact_name] = $owner_package;
+        }
+    }
 }

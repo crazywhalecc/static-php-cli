@@ -539,9 +539,14 @@ class Artifact
         $this->custom_binary_check_update_callbacks[$target_os] = $callback;
     }
 
+    /**
+     * Resolve the custom binary check-update callback for the artifact's binary platform.
+     * Host-run tools resolve under the host platform; everything else is target-keyed,
+     * matching the cache entries the checked-as binary was downloaded under.
+     */
     public function getCustomBinaryCheckUpdateCallback(): ?callable
     {
-        return $this->custom_binary_check_update_callbacks[SystemTarget::getHostPlatformString()] ?? null;
+        return $this->custom_binary_check_update_callbacks[$this->getBinaryPlatform()] ?? null;
     }
 
     // ==================== Extraction Callbacks ====================
@@ -591,9 +596,9 @@ class Artifact
     }
 
     /**
-     * Get the binary extract callback for current platform.
+     * Get the binary extract callback for the artifact's binary platform.
      *
-     * @return null|callable The callback if set and matches current platform, null otherwise
+     * @return null|callable The callback if set and matches the binary platform, null otherwise
      */
     public function getBinaryExtractCallback(): ?callable
     {
@@ -602,10 +607,10 @@ class Artifact
         }
 
         $platforms = $this->binary_extract_callback['platforms'];
-        $current_platform = SystemTarget::getCurrentPlatformString();
+        $platform = $this->getBinaryPlatform();
 
         // Empty platforms array means all platforms
-        if (empty($platforms) || in_array($current_platform, $platforms, true)) {
+        if (empty($platforms) || in_array($platform, $platforms, true)) {
             return $this->binary_extract_callback['callback'];
         }
 

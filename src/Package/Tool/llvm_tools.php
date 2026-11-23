@@ -62,6 +62,10 @@ class llvm_tools
             chmod($package->getBinary($tool), 0755);
             shell()->exec(escapeshellarg("{$build_bin}/llvm-strip") . ' --strip-all ' . escapeshellarg($package->getBinary($tool)));
         }
+
+        // llvm-tools.yml points license-files at the install tree ({pkg_root_path}/llvm-tools/...);
+        // source installs must copy the license there, as the pre-built binary archives do.
+        FileSystem::copy("{$package->getSourceRoot()}/llvm/LICENSE.TXT", $package->getInstallRoot() . '/LICENSE.TXT');
     }
 
     private function buildPrivateZlib(ToolPackage $package): string
