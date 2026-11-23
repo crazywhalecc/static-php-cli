@@ -561,7 +561,7 @@ class ArtifactDownloader
             ]);
         }
         $binary_config = $artifact->getDownloadConfig('binary');
-        $platform_config = is_array($binary_config) ? ($binary_config[SystemTarget::getCurrentPlatformString()] ?? null) : null;
+        $platform_config = is_array($binary_config) ? ($binary_config[$artifact->getBinaryPlatform()] ?? null) : null;
         if (!is_array($platform_config)) {
             return null;
         }
@@ -615,7 +615,7 @@ class ArtifactDownloader
                     $lock = $instance->download($artifact->getName(), $item['config'], $this);
                 } else {
                     if ($item['config']['type'] === 'custom') {
-                        $msg = "Artifact [{$artifact->getName()}] has no valid custom " . SystemTarget::getCurrentPlatformString() . ' download callback defined.';
+                        $msg = "Artifact [{$artifact->getName()}] has no valid custom " . $artifact->getBinaryPlatform() . ' download callback defined.';
                     } else {
                         $msg = "Artifact has invalid download type '{$item['config']['type']}' for {$item['display']}.";
                     }
@@ -796,7 +796,7 @@ class ArtifactDownloader
         $has_custom_binary = $artifact->getCustomBinaryCallback() !== null;
         $item_binary_config = null;
         if (is_array($binary_config)) {
-            $item_binary_config = $binary_config[SystemTarget::getCurrentPlatformString()] ?? null;
+            $item_binary_config = $binary_config[$artifact->getBinaryPlatform()] ?? null;
         } elseif ($has_custom_binary) {
             // For custom binaries, create a dummy config to allow queue generation
             $item_binary_config = ['type' => 'custom'];
@@ -806,7 +806,7 @@ class ArtifactDownloader
         $binary_mirror_config = $artifact->getDownloadConfig('binary-mirror');
         $item_binary_mirror_config = null;
         if (is_array($binary_mirror_config)) {
-            $item_binary_mirror_config = $binary_mirror_config[SystemTarget::getCurrentPlatformString()] ?? null;
+            $item_binary_mirror_config = $binary_mirror_config[$artifact->getBinaryPlatform()] ?? null;
         }
         $item_binary_mirror = ['display' => 'binary (mirror)', 'lock' => 'binary', 'config' => $item_binary_mirror_config];
 
@@ -867,7 +867,7 @@ class ArtifactDownloader
                 throw new ValidationException("Artifact '{$artifact->getName()}' does not provide source download, cannot use --source-only mode.");
             }
             if ($pref === Artifact::FETCH_ONLY_BINARY) {
-                throw new ValidationException("Artifact '{$artifact->getName()}' does not provide binary download for current platform (" . SystemTarget::getCurrentPlatformString() . '), cannot use --binary-only mode.');
+                throw new ValidationException("Artifact '{$artifact->getName()}' does not provide binary download for current platform (" . $artifact->getBinaryPlatform() . '), cannot use --binary-only mode.');
             }
             // prefer modes should also throw error if no download source available
             throw new ValidationException("Validation failed: Artifact '{$artifact->getName()}' does not provide any download source for current platform (" . SystemTarget::getCurrentPlatformString() . ').');

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace StaticPHP\Package;
 
-use StaticPHP\Runtime\SystemTarget;
-
 /**
  * Tracks the version actually installed on disk for tool packages (PKG_ROOT_PATH), separate from
  * the download cache (ArtifactCache). Tools are installed once and reused across many builds, so
@@ -33,16 +31,22 @@ class ToolVersionRegistry
     }
 
     /**
-     * Record the version currently installed for a tool. Called after a tool package's binary
-     * has been (re-)installed, regardless of whether extraction actually ran (keeps the registry
-     * self-healing if it was deleted separately from the installed files).
+     * Record the version currently installed for a tool, or null if never recorded (not a tool
+     * package, not installed yet, or the artifact doesn't expose a version). The platform is the
+     * artifact's binary platform (host platform for tools), since tools execute on the build
+     * machine even during cross builds. Recorded regardless of whether extraction actually ran
+     * (keeps the registry self-healing if it was deleted separately from the installed files).
+     *
+     * @param string      $tool_name Name of the tool package
+     * @param null|string $version   Version currently installed, or null
+     * @param string      $platform  Platform the tool binary is installed for (see Artifact::getBinaryPlatform())
      */
-    public static function record(string $tool_name, ?string $version): void
+    public static function record(string $tool_name, ?string $version, string $platform): void
     {
         self::load();
         self::$data[$tool_name] = [
             'version' => $version,
-            'platform' => SystemTarget::getCurrentPlatformString(),
+            'platform' => $platform,
             'installed_at' => date('c'),
         ];
         self::save();

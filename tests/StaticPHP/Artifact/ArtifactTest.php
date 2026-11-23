@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use StaticPHP\Artifact\Artifact;
 use StaticPHP\Artifact\ArtifactCache;
 use StaticPHP\Config\ArtifactConfig;
+use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\ValidationException;
@@ -31,6 +32,7 @@ class ArtifactTest extends TestCase
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
         $property->setValue(null, []);
+        $reflection->getProperty('artifact_owners')->setValue(null, []);
 
         // Reset DI container
         ApplicationContext::reset();
@@ -46,6 +48,7 @@ class ArtifactTest extends TestCase
         $reflection = new \ReflectionClass(ArtifactConfig::class);
         $property = $reflection->getProperty('artifact_configs');
         $property->setValue(null, []);
+        $reflection->getProperty('artifact_owners')->setValue(null, []);
 
         ApplicationContext::reset();
     }
@@ -507,6 +510,55 @@ class ArtifactTest extends TestCase
             $artifact->setCustomBinaryCallback($host_platform, function () {});
 
             $this->assertTrue($artifact->isBinaryDownloaded());
+        } finally {
+            putenv('SPC_TARGET');
+        }
+    }
+
+    public function testToolOwnedInlineArtifactIsHostRunUnderCrossTarget(): void
+    {
+        PackageConfig::loadFromArray([
+            'host-run-tool-pkg' => [
+                'type' => 'tool',
+                'artifact' => ['binary' => 'custom'],
+                'tool' => ['provides' => ['host-run-tool-pkg']],
+            ],
+        ], 'test-registry');
+        $this->assertSame('host-run-tool-pkg', ArtifactConfig::getArtifactOwner('host-run-tool-pkg'));
+
+        // Cross-build for the other architecture on this machine's OS.
+        putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
+        try {
+            // Tool artifacts are host-run by ownership alone, without any registered
+            // custom-binary callback: the determination must not depend on load order.
+            $artifact = new Artifact('host-run-tool-pkg', ArtifactConfig::get('host-run-tool-pkg'));
+            $this->assertTrue($artifact->isHostRun());
+            $this->assertSame(SystemTarget::getHostPlatformString(), $artifact->getBinaryPlatform());
+            // `binary: custom` is lint-expanded to per-platform entries, including the host one.
+            $this->assertTrue($artifact->hasPlatformBinary());
+        } finally {
+            putenv('SPC_TARGET');
+        }
+    }
+
+    public function testLibraryOwnedInlineArtifactStaysTargetKeyedUnderCrossTarget(): void
+    {
+        // Cross-build for the other architecture on this machine's OS.
+        putenv('SPC_TARGET=' . (GNU_ARCH === 'aarch64' ? 'x86_64-linux-musl' : 'aarch64-linux-musl'));
+        try {
+            $target_platform = SystemTarget::getCurrentPlatformString();
+            PackageConfig::loadFromArray([
+                'cross-lib-pkg' => [
+                    'type' => 'library',
+                    'artifact' => ['binary' => [$target_platform => ['type' => 'url', 'url' => 'https://example.com/lib.tar.gz']]],
+                ],
+            ], 'test-registry');
+
+            $artifact = new Artifact('cross-lib-pkg', ArtifactConfig::get('cross-lib-pkg'));
+            $this->assertFalse($artifact->isHostRun());
+            // Non-tool artifacts stay keyed by the build target: their binaries run there.
+            $this->assertSame($target_platform, $artifact->getBinaryPlatform());
+            $this->assertTrue($artifact->hasPlatformBinary());
         } finally {
             putenv('SPC_TARGET');
         }

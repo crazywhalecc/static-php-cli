@@ -13,7 +13,6 @@ use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomSource;
 use StaticPHP\Attribute\Artifact\CustomSourceCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
-use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Toolchain\ToolchainManager;
 
 class llvm_tools
@@ -48,7 +47,7 @@ class llvm_tools
         $filename = 'llvm-tools-' . GNU_ARCH . "-linux-musl-{$clang}.txz";
         $base_url = $artifact->getBinaryDownloadConfig()['base-url'] ?? null;
         if (!is_string($base_url) || $base_url === '') {
-            throw new DownloaderException('llvm-tools: binary config for ' . SystemTarget::getCurrentPlatformString() . ' does not define a base-url');
+            throw new DownloaderException('llvm-tools: binary config for ' . $artifact->getBinaryPlatform() . ' does not define a base-url');
         }
         $url = $base_url . $filename;
         $path = DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $filename;

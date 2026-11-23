@@ -13,6 +13,9 @@ class ArtifactConfig
 {
     private static array $artifact_configs = [];
 
+    /** @var array<string, string> Maps artifact names to the package that declared them inline */
+    private static array $artifact_owners = [];
+
     public static function loadFromDir(string $dir, string $registry_name): array
     {
         if (!is_dir($dir)) {
@@ -104,10 +107,25 @@ class ArtifactConfig
      * @param array  $config        Artifact configuration
      * @param string $registry_name Registry name
      * @param string $source_info   Source info for debugging
+     * @param string $owner_package Name of the package this artifact belongs to
      */
-    public static function registerInlineArtifact(string $artifact_name, array $config, string $registry_name, string $source_info = 'inline'): void
+    public static function registerInlineArtifact(string $artifact_name, array $config, string $registry_name, string $source_info = 'inline', string $owner_package = ''): void
     {
         self::$artifact_configs[$artifact_name] = $config;
+        if ($owner_package !== '') {
+            self::$artifact_owners[$artifact_name] = $owner_package;
+        }
         Registry::_bindArtifactConfigFile($artifact_name, $registry_name, $source_info);
+    }
+
+    /**
+     * Get the package that declared an artifact inline within its own configuration.
+     *
+     * @param  string      $artifact_name the name of the artifact
+     * @return null|string the owning package name, or null for artifacts declared standalone (config/artifact/)
+     */
+    public static function getArtifactOwner(string $artifact_name): ?string
+    {
+        return self::$artifact_owners[$artifact_name] ?? null;
     }
 }

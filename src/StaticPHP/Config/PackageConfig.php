@@ -79,7 +79,8 @@ class PackageConfig
                     $pkg_name,
                     $config['artifact'],
                     $registry_name,
-                    "inline in {$file}"
+                    "inline in {$file}",
+                    $pkg_name
                 );
             }
         }
@@ -99,7 +100,8 @@ class PackageConfig
                     $pkg_name,
                     $config['artifact'],
                     $registry_name,
-                    'inline in array_input'
+                    'inline in array_input',
+                    $pkg_name
                 );
             }
         }
