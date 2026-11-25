@@ -16,7 +16,7 @@
 
 ## 特性
 
-- :elephant: 支持多个 PHP 版本 - PHP 8.1, 8.2, 8.3, 8.4, 8.5, 8.6（预发布）
+- :elephant: 支持多个 PHP 版本 - PHP 8.1, 8.2, 8.3, 8.4, 8.5, 8.6
 - :handbag: 构建零依赖的单文件 PHP 可执行程序
 - :hamburger: 构建 **[phpmicro](https://github.com/static-php/phpmicro)** 自解压可执行文件（将 PHP 二进制和源码合并为单个文件）
 - :pill: 自动构建环境检查器，支持自动修复
