@@ -16,7 +16,7 @@
 
 ## Features
 
-- :elephant: Support multiple PHP versions - PHP 8.1, 8.2, 8.3, 8.4, 8.5, 8.6 (pre-release)
+- :elephant: Support multiple PHP versions - PHP 8.1, 8.2, 8.3, 8.4, 8.5, 8.6
 - :handbag: Build single-file PHP executable with zero dependencies
 - :hamburger: Build **[phpmicro](https://github.com/static-php/phpmicro)** self-extracting executables (combines PHP binary and source code into one file)
 - :pill: Automatic build environment checker with auto-fix capabilities
