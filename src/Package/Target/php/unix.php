@@ -91,6 +91,14 @@ trait unix
         $cmd = getenv('SPC_CMD_PREFIX_PHP_CONFIGURE');
 
         $args = [];
+        // Cross builds: tell autoconf it must not execute compiled test programs
+        if (SystemTarget::isCrossCompiling()) {
+            $host = SystemTarget::getTargetOS() === 'Darwin'
+                ? SystemTarget::getTargetArch() . '-apple-darwin'
+                : SystemTarget::getCanonicalTriple();
+            $args[] = '--build=' . SystemTarget::getBuildTriple();
+            $args[] = '--host=' . $host;
+        }
         $version_id = self::getPHPVersionID();
 
         // disable undefined behavior sanitizer when opcache JIT is enabled (Linux only)

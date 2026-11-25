@@ -33,7 +33,11 @@ class llvm_compiler_rt extends TargetPackage
 {
     private const array SKIP_PLATFORMS = ['PlatformAIX', 'PlatformDarwin', 'PlatformFuchsia', 'PlatformOther', 'PlatformWindows', 'WindowsMMap'];
 
-    /** The objects this package installs, relative to getRuntimeDir(). */
+    /**
+     * The objects this package installs, relative to getRuntimeDir(). libclang_rt.cpu_model.a
+     * only exists on triples hasCpuModel() accepts; getInstallFiles() must filter it with the
+     * same predicate buildCpuModel() uses, or isInstalled() would never be true there.
+     */
     private const array OUTPUT_FILES = ['libclang_rt.profile.a', 'libclang_rt.cpu_model.a', 'clang_rt.crtbegin.o', 'clang_rt.crtend.o'];
 
     /**
@@ -41,7 +45,14 @@ class llvm_compiler_rt extends TargetPackage
      */
     public function getInstallFiles(): array
     {
-        return array_map(fn (string $file): string => $this->getRuntimeDir() . '/' . $file, self::OUTPUT_FILES);
+        $files = self::OUTPUT_FILES;
+        if (!self::hasCpuModel(SystemTarget::getCanonicalTriple())) {
+            $files = array_values(array_filter(
+                $files,
+                static fn (string $file): bool => $file !== 'libclang_rt.cpu_model.a',
+            ));
+        }
+        return array_map(fn (string $file): string => $this->getRuntimeDir() . '/' . $file, $files);
     }
 
     #[BuildFor('Linux')]
@@ -137,7 +148,7 @@ class llvm_compiler_rt extends TargetPackage
             str_starts_with($arch, 'riscv') => 'riscv',
             default => null,
         };
-        if ($family === null) {
+        if (!self::hasCpuModel($triple)) {
             logger()->debug("llvm-compiler-rt: no cpu_model implementation for {$triple}, skipping");
             return;
         }
@@ -154,6 +165,19 @@ class llvm_compiler_rt extends TargetPackage
         shell()
             ->exec($this->zig('cc') . " -target {$triple} -c -O2 -fPIC {$includes} -o " . escapeshellarg($obj) . ' ' . escapeshellarg($src))
             ->exec($this->zig('ar') . ' rcs ' . escapeshellarg($lib) . ' ' . escapeshellarg($obj));
+    }
+
+    /**
+     * cpu_model has sources for x86, aarch64 and riscv families only: compiler-rt ships no
+     * __cpu_model implementation for other triples (armv7 links against zig's own builtins
+     * instead). getInstallFiles() must not declare libclang_rt.cpu_model.a where this is false,
+     * or isInstalled() - which demands every declared file - could never pass there.
+     */
+    private static function hasCpuModel(string $triple): bool
+    {
+        $arch = explode('-', $triple)[0];
+        return in_array($arch, ['x86_64', 'amd64', 'i386', 'i686', 'x86', 'aarch64', 'arm64'], true)
+            || str_starts_with($arch, 'riscv');
     }
 
     private function zig(string $subcommand): string

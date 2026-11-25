@@ -545,8 +545,8 @@ class PackageInstaller
         // only reflects the last download and may be stale or cleared). Recorded regardless of
         // $status so the registry self-heals if it was deleted separately from the install dir.
         if ($package instanceof ToolPackage) {
-            $cache_info = ApplicationContext::get(ArtifactCache::class)->getBinaryInfo($artifact->getName(), SystemTarget::getCurrentPlatformString());
-            ToolVersionRegistry::record($artifact->getName(), $cache_info['version'] ?? null);
+            $cache_info = ApplicationContext::get(ArtifactCache::class)->getBinaryInfo($artifact->getName(), $artifact->getBinaryPlatform());
+            ToolVersionRegistry::record($artifact->getName(), $cache_info['version'] ?? null, $artifact->getBinaryPlatform());
         }
 
         if ($status === SPC_STATUS_ALREADY_EXTRACTED) {
@@ -701,7 +701,7 @@ class PackageInstaller
     {
         // target, library and tool packages must have at least source or platform binary
         if (in_array($package->getType(), ['library', 'target', 'tool']) && !$package->getArtifact()?->hasSource() && !$package->getArtifact()?->hasPlatformBinary()) {
-            throw new WrongUsageException("Validation failed: Target package '{$package->getName()}' has no source or current platform (" . SystemTarget::getCurrentPlatformString() . ') binary defined.');
+            throw new WrongUsageException("Validation failed: Target package '{$package->getName()}' has no source or binary defined for current platform (" . ($package->getArtifact()?->getBinaryPlatform() ?? SystemTarget::getCurrentPlatformString()) . ').');
         }
     }
 

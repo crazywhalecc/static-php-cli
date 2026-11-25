@@ -87,7 +87,7 @@ class PackageBuilder
             // binary-install recording in PackageInstaller::installBinary()).
             if ($package instanceof ToolPackage) {
                 $source_info = ApplicationContext::get(ArtifactCache::class)->getSourceInfo($package->getName());
-                ToolVersionRegistry::record($package->getName(), $source_info['version'] ?? null);
+                ToolVersionRegistry::record($package->getName(), $source_info['version'] ?? null, $package->getArtifact()?->getBinaryPlatform() ?? SystemTarget::getHostPlatformString());
             }
 
             // Record the fingerprint of the inputs that produced these outputs, so a later run can

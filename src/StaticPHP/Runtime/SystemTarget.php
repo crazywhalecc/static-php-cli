@@ -120,6 +120,25 @@ class SystemTarget
         return "{$os}-{$arch}";
     }
 
+    /**
+     * Get the platform string of the machine running SPC, in the format of {os}-{arch}, e.g. linux-x86_64.
+     *
+     * Unlike getCurrentPlatformString(), this reports where binaries actually execute and is
+     * affected by neither SPC_TARGET nor EMULATE_PLATFORM: host-run tools (zig, rust, xcaddy,
+     * ...) must download and cache for the real build machine even when a cross build or a
+     * test emulation pretends the platform is something else.
+     */
+    public static function getHostPlatformString(): string
+    {
+        $os = match (PHP_OS_FAMILY) {
+            'Darwin' => 'macos',
+            'Linux' => 'linux',
+            'Windows' => 'windows',
+            default => 'unknown',
+        };
+        return "{$os}-" . GNU_ARCH;
+    }
+
     public static function getCanonicalTriple(): string
     {
         $target = (string) getenv('SPC_TARGET');
@@ -135,6 +154,16 @@ class SystemTarget
             'Darwin' => $arch . '-macos-none',
             'Windows' => $arch . '-windows-gnu',
             default => $arch . '-unknown-unknown',
+        };
+    }
+
+    public static function getBuildTriple(): string
+    {
+        return match (PHP_OS_FAMILY) {
+            'Linux' => GNU_ARCH . '-pc-linux-gnu',
+            'Darwin' => GNU_ARCH . '-apple-darwin',
+            'Windows' => GNU_ARCH . '-w64-mingw32',
+            default => GNU_ARCH . '-unknown-unknown',
         };
     }
 

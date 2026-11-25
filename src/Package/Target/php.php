@@ -502,6 +502,13 @@ class php extends TargetPackage
     #[Stage('postInstall')]
     public function postInstall(TargetPackage $package, PackageInstaller $installer): void
     {
+        // Cross builds produce binaries for the target architecture, which cannot execute on
+        // the build host: every smoke test below (cli, cgi, micro, embed, frankenphp) would
+        // fail with an exec-format error after an otherwise successful build.
+        if (SystemTarget::isCrossCompiling()) {
+            logger()->notice('Cross-compiling: skipping post-install smoke tests, target binaries cannot run on the build host.');
+            return;
+        }
         if ($package->getName() === 'frankenphp') {
             if (SystemTarget::getTargetOS() === 'Windows') {
                 $package->runStage([$this, 'smokeTestFrankenphpForWindows']);

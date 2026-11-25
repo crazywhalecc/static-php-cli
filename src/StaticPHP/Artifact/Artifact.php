@@ -6,6 +6,7 @@ namespace StaticPHP\Artifact;
 
 use StaticPHP\Config\ArtifactConfig;
 use StaticPHP\Config\ConfigValidator;
+use StaticPHP\Config\PackageConfig;
 use StaticPHP\DI\ApplicationContext;
 use StaticPHP\Exception\SPCInternalException;
 use StaticPHP\Exception\WrongUsageException;
@@ -85,14 +86,44 @@ class Artifact
      */
     public function isBinaryDownloaded(?string $target_os = null, bool $compare_hash = false): bool
     {
-        $target_os = $target_os ?? SystemTarget::getCurrentPlatformString();
+        $target_os = $target_os ?? $this->getBinaryPlatform();
         return ApplicationContext::get(ArtifactCache::class)->isBinaryDownloaded($this->name, $target_os, $compare_hash);
+    }
+
+    /**
+     * Whether this artifact's binaries execute on the build machine instead of the build target.
+     *
+     * Artifacts owned by a package of type "tool" and artifacts with custom binary fetcher
+     * methods (#[CustomBinary]) ship host-run executables (zig, rust, llvm-tools, ...), so
+     * their binary cache, download config and callbacks are keyed by the host platform even
+     * for cross builds. The owner package is recorded when the inline artifact is registered.
+     */
+    public function isHostRun(): bool
+    {
+        $owner = ArtifactConfig::getArtifactOwner($this->name);
+        if ($owner !== null && PackageConfig::get($owner, 'type') === 'tool') {
+            return true;
+        }
+        return $this->custom_binary_callbacks !== [];
+    }
+
+    /**
+     * The platform key used to cache, resolve and extract this artifact's binary.
+     *
+     * Host-run artifacts (see isHostRun()) are keyed by the host platform even for cross
+     * builds; a target-keyed entry would let an archive of another architecture be reused
+     * on this host. All other binaries vary with the build target and keep the target key.
+     */
+    public function getBinaryPlatform(): string
+    {
+        return $this->isHostRun()
+            ? SystemTarget::getHostPlatformString()
+            : SystemTarget::getCurrentPlatformString();
     }
 
     public function shouldUseBinary(): bool
     {
-        $platform = SystemTarget::getCurrentPlatformString();
-        return $this->isBinaryDownloaded($platform) && $this->hasPlatformBinary();
+        return $this->isBinaryDownloaded($this->getBinaryPlatform()) && $this->hasPlatformBinary();
     }
 
     /**
@@ -142,7 +173,7 @@ class Artifact
      */
     public function isBinaryExtracted(?string $target_os = null, bool $compare_hash = false): bool
     {
-        $target_os = $target_os ?? SystemTarget::getCurrentPlatformString();
+        $target_os = $target_os ?? $this->getBinaryPlatform();
         // Get cache info first for custom binary support (extract path may be stored in cache)
         $cache_info = ApplicationContext::get(ArtifactCache::class)->getBinaryInfo($this->name, $target_os);
         $extract_config = $this->getBinaryExtractConfig($cache_info ?? []);
@@ -241,12 +272,13 @@ class Artifact
     }
 
     /**
-     * Checks if the artifact has a local binary defined for the current system target.
+     * Checks if the artifact has a binary for the current build: config binaries and custom
+     * binary callbacks (host-run tools) are both looked up under the binary platform.
      */
     public function hasPlatformBinary(): bool
     {
-        $target = SystemTarget::getCurrentPlatformString();
-        return isset($this->config['binary'][$target]) || isset($this->custom_binary_callbacks[$target]);
+        $platform = $this->getBinaryPlatform();
+        return isset($this->config['binary'][$platform]) || isset($this->custom_binary_callbacks[$platform]);
     }
 
     /**
@@ -288,14 +320,14 @@ class Artifact
     }
 
     /**
-     * Get the binary download config for a platform, defaulting to the current one.
+     * Get the binary download config for a platform, defaulting to the artifact's binary platform.
      *
      * Custom binary fetchers receive the Artifact, not their own config entry, so this is how
      * they read extra options such as a `base-url` used to assemble the download URL.
      */
     public function getBinaryDownloadConfig(?string $platform = null): ?array
     {
-        $platform ??= SystemTarget::getCurrentPlatformString();
+        $platform ??= $this->getBinaryPlatform();
         $config = $this->config['binary'][$platform] ?? null;
         return is_array($config) ? $config : null;
     }
@@ -376,7 +408,7 @@ class Artifact
             return ['path' => $this->replaceExtractPathVariables($cache_extract), 'mode' => 'standard'];
         }
 
-        $platform = SystemTarget::getCurrentPlatformString();
+        $platform = $this->getBinaryPlatform();
         $binary_config = $this->config['binary'][$platform] ?? null;
 
         if ($binary_config === null) {
@@ -463,15 +495,14 @@ class Artifact
 
     public function getCustomBinaryCallback(): ?callable
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
-        return $this->custom_binary_callbacks[$current_platform] ?? null;
+        return $this->custom_binary_callbacks[SystemTarget::getHostPlatformString()] ?? null;
     }
 
     public function emitCustomBinary(): void
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
+        $current_platform = SystemTarget::getHostPlatformString();
         if (!isset($this->custom_binary_callbacks[$current_platform])) {
-            throw new SPCInternalException("No custom binary callback defined for artifact '{$this->name}' on target OS '{$current_platform}'.");
+            throw new SPCInternalException("No custom binary callback defined for artifact '{$this->name}' on host platform '{$current_platform}'.");
         }
         $callback = $this->custom_binary_callbacks[$current_platform];
         ApplicationContext::invoke($callback, [Artifact::class => $this]);
@@ -493,8 +524,7 @@ class Artifact
 
     public function getCustomBinaryCallbackOrigin(): ?string
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
-        return $this->custom_binary_callback_origins[$current_platform] ?? null;
+        return $this->custom_binary_callback_origins[SystemTarget::getHostPlatformString()] ?? null;
     }
 
     /**
@@ -509,10 +539,14 @@ class Artifact
         $this->custom_binary_check_update_callbacks[$target_os] = $callback;
     }
 
+    /**
+     * Resolve the custom binary check-update callback for the artifact's binary platform.
+     * Host-run tools resolve under the host platform; everything else is target-keyed,
+     * matching the cache entries the checked-as binary was downloaded under.
+     */
     public function getCustomBinaryCheckUpdateCallback(): ?callable
     {
-        $current_platform = SystemTarget::getCurrentPlatformString();
-        return $this->custom_binary_check_update_callbacks[$current_platform] ?? null;
+        return $this->custom_binary_check_update_callbacks[$this->getBinaryPlatform()] ?? null;
     }
 
     // ==================== Extraction Callbacks ====================
@@ -562,9 +596,9 @@ class Artifact
     }
 
     /**
-     * Get the binary extract callback for current platform.
+     * Get the binary extract callback for the artifact's binary platform.
      *
-     * @return null|callable The callback if set and matches current platform, null otherwise
+     * @return null|callable The callback if set and matches the binary platform, null otherwise
      */
     public function getBinaryExtractCallback(): ?callable
     {
@@ -573,10 +607,10 @@ class Artifact
         }
 
         $platforms = $this->binary_extract_callback['platforms'];
-        $current_platform = SystemTarget::getCurrentPlatformString();
+        $platform = $this->getBinaryPlatform();
 
         // Empty platforms array means all platforms
-        if (empty($platforms) || in_array($current_platform, $platforms, true)) {
+        if (empty($platforms) || in_array($platform, $platforms, true)) {
             return $this->binary_extract_callback['callback'];
         }
 

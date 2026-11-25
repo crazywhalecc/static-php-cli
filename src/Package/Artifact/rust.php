@@ -11,7 +11,6 @@ use StaticPHP\Attribute\Artifact\AfterBinaryExtract;
 use StaticPHP\Attribute\Artifact\CustomBinary;
 use StaticPHP\Attribute\Artifact\CustomBinaryCheckUpdate;
 use StaticPHP\Exception\DownloaderException;
-use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\System\LinuxUtil;
 
 class rust
@@ -24,7 +23,8 @@ class rust
     {
         // determine distro first
         $distro = LinuxUtil::isMuslDist() ? 'musl' : 'gnu';
-        $arch = SystemTarget::getTargetArch();
+        // rustup runs on the build host, so the host architecture selects the toolchain, not SPC_TARGET
+        $arch = GNU_ARCH;
 
         // get latest rust version from link
         $toml_config = default_shell()->executeCurl('https://static.rust-lang.org/dist/channel-rust-stable.toml', retries: $downloader->getRetry());

@@ -163,9 +163,12 @@ class LicenseDumper
     {
         $artifact_name = $artifact->getName();
 
-        // replace
+        // License paths may use path templates, e.g. '{pkg_root_path}/...' to point at a license
+        // that ships inside a binary-only artifact's install tree instead of a source checkout.
         if (str_starts_with($license_file_path, '@/')) {
             $license_file_path = str_replace('@/', ROOT_DIR . '/src/globals/licenses/', $license_file_path);
+        } else {
+            $license_file_path = FileSystem::replacePathVariable($license_file_path);
         }
 
         $source_dir = $artifact->getSourceDir();

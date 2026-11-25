@@ -12,6 +12,7 @@ use StaticPHP\Package\PackageBuilder;
 use StaticPHP\Package\PackageInstaller;
 use StaticPHP\Package\ToolPackage;
 use StaticPHP\Runtime\Shell\UnixShell;
+use StaticPHP\Runtime\SystemTarget;
 use StaticPHP\Util\InteractiveTerm;
 use ZM\Logger\ConsoleColor;
 
@@ -156,13 +157,22 @@ class UnixAutoconfExecutor extends Executor
      */
     private function getDefaultConfigureArgs(): array
     {
-        return [
+        $args = [
             '--disable-shared',
             '--enable-static',
             "--prefix={$this->package->getBuildRootPath()}",
             '--with-pic',
             '--enable-pic',
         ];
+        // Cross builds: tell autoconf it must not execute compiled test programs
+        if (SystemTarget::isCrossCompiling()) {
+            $host = SystemTarget::getTargetOS() === 'Darwin'
+                ? SystemTarget::getTargetArch() . '-apple-darwin'
+                : SystemTarget::getCanonicalTriple();
+            $args[] = '--build=' . SystemTarget::getBuildTriple();
+            $args[] = '--host=' . $host;
+        }
+        return $args;
     }
 
     /**
