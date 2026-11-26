@@ -104,7 +104,7 @@ class ZigToolchain implements UnixToolchainInterface, PackageRequirementsInterfa
 
         // -dumpversion prints the same version as `cc --version`, which leaves an empty a.o in the
         // working directory (the user's project) on every run.
-        [$code, $out] = shell()->execWithResult(escapeshellarg($zig->getBinary('zig')) . ' cc -dumpversion', false);
+        [$code, $out] = shell()->execWithResult(escapeshellarg($zig->getBinary('zig')) . ' cc -Wno-gcc-install-dir-libstdcxx -dumpversion', false);
         if ($code === 0 && preg_match('/^(\d+\.\d+\.\d+)$/', trim(implode("\n", $out)), $match)) {
             $this->compiler_version = $match[1];
         }
